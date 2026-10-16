@@ -16,12 +16,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// <summary>
     /// Roslyn analyzer that detects unsafe API usage in MSBuild task implementations.
     /// 
-    /// By default, MSBuildTask0002 and MSBuildTask0003 apply only to MT-scoped code: a type carrying
+    /// By default, MSBuildTask0002, MSBuildTask0003, and MSBuildTask0004 apply only to MT-scoped code: a type carrying
     /// [MSBuildMultiThreadableTask] or [MSBuildMultiThreadableTaskAnalyzed], or a task that declares
     /// IMultiThreadableTask in its own base list. The declared interface signals analyzer migration intent
     /// only -- runtime routing still depends on [MSBuildMultiThreadableTask].
     /// The "msbuild_task_analyzer.run_mt_analyzers_on_all_tasks" option enables these rules for all tasks.
-    ///   (MSBuildTask0001 and MSBuildTask0004 always fire on all tasks regardless)
+    /// MSBuildTask0001 applies to all tasks regardless of this option.
     /// 
     /// Per review feedback from @rainersigwald:
     /// - Console.* promoted to MSBuildTask0001 (always wrong in tasks)
@@ -152,9 +152,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     return;
                 }
 
-                // MSBuildTask0002 (TaskEnvironment) is gated by scope setting
-                if (entry.Category == BannedApiDefinitions.ApiCategory.TaskEnvironment &&
-                    !ShouldReportEnvironmentRules(context, analyzeAsMultiThreadable, analyzeAllTasksByTree))
+                if (entry.Category is BannedApiDefinitions.ApiCategory.TaskEnvironment or BannedApiDefinitions.ApiCategory.PotentialIssue &&
+                    !ShouldReportMtRules(context, analyzeAsMultiThreadable, analyzeAllTasksByTree))
                 {
                     return;
                 }
@@ -191,7 +190,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 var containingType = method.ContainingType;
                 if (containingType is not null &&
                     filePathTypes.Contains(containingType) &&
-                    ShouldReportEnvironmentRules(context, analyzeAsMultiThreadable, analyzeAllTasksByTree) &&
+                    ShouldReportMtRules(context, analyzeAsMultiThreadable, analyzeAllTasksByTree) &&
                     HasUnwrappedPathArgument(arguments, taskEnvironmentType, absolutePathType, iTaskItemType))
                 {
                     string displayName = isConstructor
@@ -207,7 +206,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
         }
 
-        private static bool ShouldReportEnvironmentRules(
+        private static bool ShouldReportMtRules(
             OperationAnalysisContext context,
             bool analyzeAsMultiThreadable,
             ConcurrentDictionary<SyntaxTree, bool> analyzeAllTasksByTree)

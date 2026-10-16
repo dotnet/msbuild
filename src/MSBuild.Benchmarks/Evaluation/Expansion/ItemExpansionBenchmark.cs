@@ -71,11 +71,11 @@ public class ItemExpansionBenchmark
         => _fixture.Expander.ExpandIntoStringAndUnescape(
             QuotedTransform,
             ExpanderOptions.ExpandItems,
-            ElementLocation.EmptyLocation);
+            ElementLocation.Empty);
 
     private string Expand(string expression)
         => _fixture.Expander.ExpandIntoStringLeaveEscaped(
             expression,
             ExpanderOptions.ExpandItems,
-            ElementLocation.EmptyLocation);
+            ElementLocation.Empty);
 }

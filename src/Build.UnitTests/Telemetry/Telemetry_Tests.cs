@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Shared;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
@@ -69,6 +71,237 @@ namespace Microsoft.Build.Engine.UnitTests
             workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsCustom && !k.IsNuget);
             workerNodeTelemetryData.TasksExecutionData.Values
                 .Count(v => v.CumulativeExecutionTime > TimeSpan.Zero || v.ExecutionsCount > 0).ShouldBe(2);
+        }
+
+        [Fact]
+        public void WorkerNodeTelemetryCollection_TracksTargetOutcomes()
+        {
+            WorkerNodeTelemetryData? workerNodeTelemetryData = null;
+            InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeTelemetryData = dt;
+
+            var testProject = """
+                              <Project DefaultTargets="First;Second;Conditional;UpToDate">
+                                <Target Name="First" DependsOnTargets="Shared">
+                                  <Message Text="First"/>
+                                </Target>
+                                <Target Name="Second" DependsOnTargets="Shared">
+                                  <Message Text="Second"/>
+                                </Target>
+                                <Target Name="Shared">
+                                  <Message Text="Shared"/>
+                                </Target>
+                                <Target Name="Conditional" Condition="'$(Never)' == 'true'"/>
+                                <Target Name="UpToDate"
+                                        Inputs="$(MSBuildProjectFullPath)"
+                                        Outputs="$(MSBuildProjectFullPath)"/>
+                              </Project>
+                              """;
+
+            MockLogger logger = new(_output);
+            Helpers.BuildProjectContentUsingBuildManager(
+                testProject,
+                logger,
+                new BuildParameters { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
+
+            workerNodeTelemetryData.ShouldNotBeNull();
+            workerNodeTelemetryData!.ExecutedTargetsCount.ShouldBe(3);
+            workerNodeTelemetryData.SkippedTargetsCount.ShouldBe(3);
+            workerNodeTelemetryData.SkippedDueToUpToDateCount.ShouldBe(1);
+            workerNodeTelemetryData.SkippedDueToConditionCount.ShouldBe(1);
+            workerNodeTelemetryData.SkippedDueToPreviouslyBuiltCount.ShouldBe(1);
+            workerNodeTelemetryData.UpToDateInputOutputTargetsCount.ShouldBe(1);
+            workerNodeTelemetryData.ExecutedInputOutputTargetsCount.ShouldBe(0);
+
+            var conditionalKey = new TaskOrTargetTelemetryKey("Conditional", isCustom: true, isFromNugetCache: false);
+            var upToDateKey = new TaskOrTargetTelemetryKey("UpToDate", isCustom: true, isFromNugetCache: false);
+            workerNodeTelemetryData.TargetsExecutionData[conditionalKey].WasExecuted.ShouldBeFalse();
+            workerNodeTelemetryData.TargetsExecutionData[conditionalKey].SkipReason.ShouldBe(TargetSkipReason.ConditionWasFalse);
+            workerNodeTelemetryData.TargetsExecutionData[upToDateKey].WasExecuted.ShouldBeFalse();
+            workerNodeTelemetryData.TargetsExecutionData[upToDateKey].SkipReason.ShouldBe(TargetSkipReason.OutputsUpToDate);
+        }
+
+        [Fact]
+        public void WorkerNodeTelemetryCollection_TracksRequestHandledFromCache()
+        {
+            WorkerNodeTelemetryData? workerNodeTelemetryData = null;
+            void CaptureTelemetry(WorkerNodeTelemetryData data) => workerNodeTelemetryData = data;
+            InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += CaptureTelemetry;
+
+            try
+            {
+                using TestEnvironment env = TestEnvironment.Create(_output);
+                string projectFile = env.CreateFile(
+                    "test.proj",
+                    """
+                    <Project>
+                      <Target Name="Build"/>
+                    </Project>
+                    """).Path;
+                MockLogger logger = new(_output);
+                var request = new BuildRequestData(
+                    projectFile,
+                    new Dictionary<string, string?>(),
+                    null,
+                    ["Build"],
+                    null);
+
+                using var buildManager = new BuildManager();
+                buildManager.BeginBuild(
+                    new BuildParameters
+                    {
+                        IsTelemetryEnabled = true,
+                        Loggers = [logger],
+                        MaxNodeCount = 1,
+                    });
+
+                buildManager.BuildRequest(request).OverallResult.ShouldBe(BuildResultCode.Success);
+                buildManager.BuildRequest(request).OverallResult.ShouldBe(BuildResultCode.Success);
+                buildManager.EndBuild();
+
+                workerNodeTelemetryData.ShouldNotBeNull();
+                workerNodeTelemetryData!.ExecutedTargetsCount.ShouldBe(1);
+                workerNodeTelemetryData.SkippedTargetsCount.ShouldBe(1);
+                workerNodeTelemetryData.SkippedDueToPreviouslyBuiltCount.ShouldBe(1);
+            }
+            finally
+            {
+                InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted -= CaptureTelemetry;
+            }
+        }
+
+        [Fact]
+        public void WorkerNodeTelemetryCollection_QuestionModeDoesNotCountOutOfDateTargetAsExecuted()
+        {
+            WorkerNodeTelemetryData? workerNodeTelemetryData = null;
+            void CaptureTelemetry(WorkerNodeTelemetryData data) => workerNodeTelemetryData = data;
+            InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += CaptureTelemetry;
+
+            try
+            {
+                using TestEnvironment env = TestEnvironment.Create(_output);
+                var files = env.CreateTestProjectWithFiles(
+                    """
+                    <Project>
+                      <Target Name="Build" Inputs="input.txt" Outputs="output.txt">
+                        <Message Text="Should not run"/>
+                      </Target>
+                    </Project>
+                    """,
+                    ["input.txt", "output.txt"]);
+
+                var input = new FileInfo(files.CreatedFiles[0]);
+                var output = new FileInfo(files.CreatedFiles[1]);
+                DateTime now = DateTime.UtcNow;
+                input.LastWriteTimeUtc = now + TimeSpan.FromSeconds(10);
+                output.LastWriteTimeUtc = now;
+
+                using (var buildSession = new Helpers.BuildManagerSession(
+                    env,
+                    new BuildParameters
+                    {
+                        IsTelemetryEnabled = true,
+                        Question = true,
+                    }))
+                {
+                    buildSession.BuildProjectFile(files.ProjectFile, ["Build"]).OverallResult.ShouldBe(BuildResultCode.Failure);
+                }
+            }
+            finally
+            {
+                InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted -= CaptureTelemetry;
+            }
+
+            workerNodeTelemetryData.ShouldNotBeNull();
+            workerNodeTelemetryData!.ExecutedTargetsCount.ShouldBe(0);
+            workerNodeTelemetryData.ExecutedInputOutputTargetsCount.ShouldBe(0);
+            workerNodeTelemetryData.UpToDateInputOutputTargetsCount.ShouldBe(0);
+        }
+
+        [Fact]
+        public void WorkerNodeTelemetryCollection_TracksNestedMSBuildExecutionsWithoutSharedStatistics()
+        {
+            WorkerNodeTelemetryData? workerNodeTelemetryData = null;
+            InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeTelemetryData = dt;
+
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.CreateFile("grandchild.proj", """
+                                                  <Project>
+                                                    <Target Name="Build">
+                                                      <PropertyGroup>
+                                                        <GrandchildBuilt>true</GrandchildBuilt>
+                                                      </PropertyGroup>
+                                                    </Target>
+                                                  </Project>
+                                                  """);
+            env.CreateFile("child.proj", """
+                                             <Project>
+                                               <Target Name="Build">
+                                                 <MSBuild Projects="grandchild.proj" Targets="Build"/>
+                                               </Target>
+                                             </Project>
+                                             """);
+            TransientTestFile rootProject = env.CreateFile("root.proj", """
+                                                                         <Project>
+                                                                           <Target Name="Build">
+                                                                             <MSBuild Projects="child.proj" Targets="Build"/>
+                                                                           </Target>
+                                                                         </Project>
+                                                                         """);
+
+            MockLogger logger = new(_output);
+            Helpers.BuildProjectFileUsingBuildManager(
+                rootProject.Path,
+                logger,
+                new BuildParameters { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
+
+            workerNodeTelemetryData.ShouldNotBeNull();
+            TaskExecutionStats stats = workerNodeTelemetryData!.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.MSBuild"];
+            stats.ExecutionsCount.ShouldBe(2);
+            stats.CumulativeExecutionTime.ShouldBe(TimeSpan.Zero);
+            stats.TotalMemoryBytes.ShouldBeNull();
+            stats.TaskFactoryName.ShouldBe("IntrinsicTaskFactory");
+        }
+
+        [Fact]
+        public void WorkerNodeTelemetryCollection_TracksIntrinsicTasksWithoutReflection()
+        {
+            bool switchWasSet = AppContext.TryGetSwitch("Microsoft.Build.EnableReflectiveTaskExecution", out bool originalValue);
+            try
+            {
+                AppContext.SetSwitch("Microsoft.Build.EnableReflectiveTaskExecution", false);
+
+                WorkerNodeTelemetryData? workerNodeTelemetryData = null;
+                InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeTelemetryData = dt;
+
+                var testProject = """
+                                  <Project>
+                                    <Target Name="Build">
+                                      <CallTarget Targets="Inner"/>
+                                    </Target>
+                                    <Target Name="Inner">
+                                      <PropertyGroup>
+                                        <InnerBuilt>true</InnerBuilt>
+                                      </PropertyGroup>
+                                    </Target>
+                                  </Project>
+                                  """;
+
+                MockLogger logger = new(_output);
+                Helpers.BuildProjectContentUsingBuildManager(
+                    testProject,
+                    logger,
+                    new BuildParameters { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
+
+                workerNodeTelemetryData.ShouldNotBeNull();
+                TaskExecutionStats stats = workerNodeTelemetryData!.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CallTarget"];
+                stats.ExecutionsCount.ShouldBe(1);
+                stats.CumulativeExecutionTime.ShouldBe(TimeSpan.Zero);
+                stats.TotalMemoryBytes.ShouldBeNull();
+            }
+            finally
+            {
+                AppContext.SetSwitch("Microsoft.Build.EnableReflectiveTaskExecution", !switchWasSet || originalValue);
+            }
         }
 
         [Fact]
@@ -214,6 +447,7 @@ namespace Microsoft.Build.Engine.UnitTests
             activityData.ShouldNotBeNull();
 
             var properties = activityData.GetActivityProperties();
+            properties[BuildInsightsSchemaVersionPropertyName].ShouldBe(CurrentBuildInsightsSchemaVersion);
             properties.ShouldContainKey("Tasks");
 
             var taskDetails = properties["Tasks"] as List<TaskDetailInfo>;
@@ -233,6 +467,52 @@ namespace Microsoft.Build.Engine.UnitTests
             inlineTask.ShouldNotBeNull();
             inlineTask!.FactoryName.ShouldBe("RoslynCodeTaskFactory");
             inlineTask.TaskHostRuntime.ShouldBe("CLR4");
+        }
+
+        [Fact]
+        public void BuildTargetTelemetry_PreservesOrdinaryRestoreRequest()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string projectFile = env.CreateFile(
+                "test.proj",
+                """
+                <Project>
+                  <Target Name="Restore"/>
+                  <Target Name="Pack"/>
+                </Project>
+                """).Path;
+            MockLogger logger = new(_output);
+
+            using (var buildManager = new BuildManager())
+            {
+                buildManager.BeginBuild(
+                    new BuildParameters
+                    {
+                        IsTelemetryEnabled = true,
+                        Loggers = [logger],
+                    });
+
+                buildManager.BuildRequest(
+                    new BuildRequestData(
+                        projectFile,
+                        new Dictionary<string, string?>(),
+                        null,
+                        ["Restore"],
+                        null)).OverallResult.ShouldBe(BuildResultCode.Success);
+
+                buildManager.BuildRequest(
+                    new BuildRequestData(
+                        projectFile,
+                        new Dictionary<string, string?>(),
+                        null,
+                        ["Pack"],
+                        null)).OverallResult.ShouldBe(BuildResultCode.Success);
+
+                buildManager.EndBuild();
+            }
+
+            TelemetryEventArgs telemetry = logger.TelemetryEvents.Where(e => e.EventName == "build").ShouldHaveSingleItem();
+            telemetry.Properties[nameof(BuildTelemetry.BuildTarget)].ShouldBe(MSBuildConstants.RestoreTargetName);
         }
 
 #if NET
@@ -273,8 +553,8 @@ namespace Microsoft.Build.Engine.UnitTests
                     </CreateItem>
                     <Message Text='End'/>
                 </Target>
-                <Target Name='Clean'>
-                    <Message Text='Cleaning...'/>
+                <Target Name='Restore'>
+                    <Message Text='Restoring...'/>
                 </Target>
             </Project>";
 
@@ -298,9 +578,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 // Phase 2: Execute build requests
                 var buildRequestData1 = new BuildRequestData(
                     projectFile,
-                    new Dictionary<string, string?>(),
+                    new Dictionary<string, string?>
+                    {
+                        [MSBuildConstants.MSBuildIsRestoring] = bool.TrueString,
+                    },
                     null,
-                    new[] { "Build" },
+                    new[] { "restore" },
                     null);
 
                 buildManager.BuildRequest(buildRequestData1);
@@ -309,7 +592,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     projectFile,
                     new Dictionary<string, string?>(),
                     null,
-                    new[] { "Clean" },
+                    new[] { "Build" },
                     null);
 
                 buildManager.BuildRequest(buildRequestData2);
@@ -328,7 +611,9 @@ namespace Microsoft.Build.Engine.UnitTests
             tags.ShouldNotBeNull();
 
             tags.ShouldContainKey("VS.MSBuild.BuildTarget");
-            tags["VS.MSBuild.BuildTarget"].ShouldNotBeNullOrEmpty();
+            tags["VS.MSBuild.BuildTarget"].ShouldBe("Build");
+            activity.TagObjects.First(t => t.Key == "VS.MSBuild.TelemetrySchemaVersion").Value.ShouldBe(BuildTelemetry.CurrentSchemaVersion);
+            activity.TagObjects.First(t => t.Key == $"VS.MSBuild.{BuildInsightsSchemaVersionPropertyName}").Value.ShouldBe(CurrentBuildInsightsSchemaVersion);
 
             // Verify task data
             var tasks = activity.TagObjects.FirstOrDefault(to => to.Key == "VS.MSBuild.Tasks");
@@ -340,7 +625,7 @@ namespace Microsoft.Build.Engine.UnitTests
             // Verify Message task execution metrics 
             messageTaskData.ExecutionsCount.ShouldBe(3);
             messageTaskData.TotalMilliseconds.ShouldBeGreaterThan(0);
-            messageTaskData.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
+            messageTaskData.TotalMemoryBytes.ShouldNotBeNull().ShouldBeGreaterThanOrEqualTo(0);
             messageTaskData.IsCustom.ShouldBe(false);
 
             // Verify CreateItem task execution metrics
@@ -348,7 +633,7 @@ namespace Microsoft.Build.Engine.UnitTests
             createItemTaskData.ShouldNotBeNull();
             createItemTaskData.ExecutionsCount.ShouldBe(1);
             createItemTaskData.TotalMilliseconds.ShouldBeGreaterThan(0);
-            createItemTaskData.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
+            createItemTaskData.TotalMemoryBytes.ShouldNotBeNull().ShouldBeGreaterThanOrEqualTo(0);
 
             // Verify TaskFactoryName is populated for built-in tasks
             messageTaskData.FactoryName.ShouldBe("AssemblyTaskFactory");
@@ -371,7 +656,7 @@ namespace Microsoft.Build.Engine.UnitTests
             tasksSummary.Microsoft!.Total!.TotalMilliseconds.ShouldBeGreaterThan(0);
 
             // Allowing 0 for TotalMemoryBytes as it is possible for tasks to allocate no memory in certain scenarios.
-            tasksSummary.Microsoft.Total.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
+            tasksSummary.Microsoft.Total.TotalMemoryBytes.ShouldNotBeNull().ShouldBeGreaterThanOrEqualTo(0);
         }
 #endif
 
@@ -404,7 +689,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 { new TaskOrTargetTelemetryKey("Pack", false, false), TargetExecutionStats.Executed() },
             };
             var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>();
-            var telemetryData = new WorkerNodeTelemetryData(tasksData, targetsData);
+            var telemetryData = new WorkerNodeTelemetryData(
+                tasksData,
+                targetsData,
+                upToDateInputOutputTargetsCount: 0,
+                executedInputOutputTargetsCount: 3,
+                executedTargetsCount: 4);
 
             // Act
             var activityData = telemetryData.AsActivityDataHolder(includeTasksDetails: false, includeTargetDetails: false);
@@ -418,22 +708,33 @@ namespace Microsoft.Build.Engine.UnitTests
             incrementality.TotalTargetsCount.ShouldBe(4);
             incrementality.ExecutedTargetsCount.ShouldBe(4);
             incrementality.SkippedTargetsCount.ShouldBe(0);
+            incrementality.ExecutedInputOutputTargetsCount.ShouldBe(3);
             incrementality.IncrementalityRatio.ShouldBe(0.0);
         }
 
         [Fact]
-        public void BuildIncrementalityInfo_MostTargetsSkipped_ClassifiedAsIncremental()
+        public void BuildIncrementalityInfo_MostInputOutputTargetsUpToDate_ClassifiedAsIncremental()
         {
-            // Arrange: Most targets were skipped (>70%)
+            // Arrange: 3 of 4 target instances with Inputs and Outputs were up to date.
             var targetsData = new Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats>
             {
                 { new TaskOrTargetTelemetryKey("Build", false, false), TargetExecutionStats.Skipped(TargetSkipReason.OutputsUpToDate) },
                 { new TaskOrTargetTelemetryKey("Compile", false, false), TargetExecutionStats.Skipped(TargetSkipReason.OutputsUpToDate) },
                 { new TaskOrTargetTelemetryKey("Link", false, false), TargetExecutionStats.Skipped(TargetSkipReason.ConditionWasFalse) },
                 { new TaskOrTargetTelemetryKey("Pack", false, false), TargetExecutionStats.Executed() }, // Only one executed
+                { new TaskOrTargetTelemetryKey("Reuse", false, false), TargetExecutionStats.Skipped(TargetSkipReason.PreviouslyBuiltSuccessfully) },
             };
             var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>();
-            var telemetryData = new WorkerNodeTelemetryData(tasksData, targetsData);
+            var telemetryData = new WorkerNodeTelemetryData(
+                tasksData,
+                targetsData,
+                upToDateInputOutputTargetsCount: 3,
+                executedInputOutputTargetsCount: 1,
+                executedTargetsCount: 1,
+                skippedTargetsCount: 4,
+                skippedDueToUpToDateCount: 2,
+                skippedDueToConditionCount: 1,
+                skippedDueToPreviouslyBuiltCount: 1);
 
             // Act
             var activityData = telemetryData.AsActivityDataHolder(includeTasksDetails: false, includeTargetDetails: false);
@@ -444,12 +745,14 @@ namespace Microsoft.Build.Engine.UnitTests
             var incrementality = properties["Incrementality"] as BuildInsights.BuildIncrementalityInfo;
             incrementality.ShouldNotBeNull();
             incrementality!.Classification.ShouldBe(BuildInsights.BuildType.Incremental);
-            incrementality.TotalTargetsCount.ShouldBe(4);
+            incrementality.TotalTargetsCount.ShouldBe(5);
             incrementality.ExecutedTargetsCount.ShouldBe(1);
-            incrementality.SkippedTargetsCount.ShouldBe(3);
+            incrementality.SkippedTargetsCount.ShouldBe(4);
             incrementality.SkippedDueToUpToDateCount.ShouldBe(2);
             incrementality.SkippedDueToConditionCount.ShouldBe(1);
-            incrementality.SkippedDueToPreviouslyBuiltCount.ShouldBe(0);
+            incrementality.SkippedDueToPreviouslyBuiltCount.ShouldBe(1);
+            incrementality.UpToDateInputOutputTargetsCount.ShouldBe(3);
+            incrementality.ExecutedInputOutputTargetsCount.ShouldBe(1);
             incrementality.IncrementalityRatio.ShouldBe(0.75);
         }
 
@@ -498,12 +801,14 @@ namespace Microsoft.Build.Engine.UnitTests
             // Add data via the collector API.
             var key = new TaskOrTargetTelemetryKey("TestTarget", isCustom: true, isFromNugetCache: false, isFromMetaProject: false);
             collector.AddTarget(key, wasExecuted: true);
+            collector.AddTargetResult(wasExecuted: true);
 
             // First FinalizeProcessing should emit a telemetry event.
             collector.FinalizeProcessing(loggingContext);
             var telemetryEvents = loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().ToList();
             telemetryEvents.Count.ShouldBe(1);
             telemetryEvents[0].WorkerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(key);
+            telemetryEvents[0].WorkerNodeTelemetryData.ExecutedTargetsCount.ShouldBe(1);
 
             // Second FinalizeProcessing on an empty collector should be a no-op (state was reset).
             collector.FinalizeProcessing(loggingContext);
@@ -512,6 +817,7 @@ namespace Microsoft.Build.Engine.UnitTests
             // Add new data after reset - collector should still work.
             var key2 = new TaskOrTargetTelemetryKey("TestTarget2", isCustom: false, isFromNugetCache: false, isFromMetaProject: false);
             collector.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
+            collector.AddTargetResult(wasExecuted: false, TargetSkipReason.ConditionWasFalse);
 
             // Third FinalizeProcessing should emit only the new data.
             collector.FinalizeProcessing(loggingContext);
@@ -519,6 +825,8 @@ namespace Microsoft.Build.Engine.UnitTests
             allTelemetryEvents.Count.ShouldBe(2);
             allTelemetryEvents[1].WorkerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(key2);
             allTelemetryEvents[1].WorkerNodeTelemetryData.TargetsExecutionData.ShouldNotContainKey(key, "Old data should not appear after reset");
+            allTelemetryEvents[1].WorkerNodeTelemetryData.SkippedTargetsCount.ShouldBe(1);
+            allTelemetryEvents[1].WorkerNodeTelemetryData.SkippedDueToConditionCount.ShouldBe(1);
         }
 
         [Fact]
@@ -537,7 +845,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
         /// <summary>
         /// Standard three-task fixture used by the <c>GetTasksDetailsProperties_*</c> tests:
-        /// Copy (10 executions), Csc (5 executions), and a custom task (3 executions).
+        /// Copy (10 executions), Csc (5 executions), and a custom task (3 executions), plus a registered task that never executed.
         /// </summary>
         private static Dictionary<string, string> BuildThreeTaskFixtureProperties()
         {
@@ -546,6 +854,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Copy", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(500), 10, 2048, "AssemblyTaskFactory", null) },
                 { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Csc", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(3000), 5, 4096, "AssemblyTaskFactory", null) },
                 { new TaskOrTargetTelemetryKey("MyCustomTask", true, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(100), 3, 512, "MyCompany.Factory", null) },
+                { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Exec", false, false), new TaskExecutionStats(TimeSpan.Zero, 0, 0, "AssemblyTaskFactory", null) },
             };
             var data = new WorkerNodeTelemetryData(tasksData, []);
             Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
@@ -560,6 +869,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             properties["TaskCount"].ShouldBe("3");
             properties["TotalTaskCount"].ShouldBe("3");
+            properties[BuildInsightsSchemaVersionPropertyName].ShouldBe(CurrentBuildInsightsSchemaVersion.ToString());
         }
 
         [Fact]
@@ -663,7 +973,11 @@ namespace Microsoft.Build.Engine.UnitTests
             first.GetProperty("Name").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.String);
             first.GetProperty("ExecutionsCount").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Number);
             first.GetProperty("TotalMilliseconds").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Number);
+#if NET
             first.GetProperty("TotalMemoryBytes").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Number);
+#else
+            first.TryGetProperty("TotalMemoryBytes", out _).ShouldBeFalse();
+#endif
             first.GetProperty("IsCustom").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.False);
             first.GetProperty("IsNuget").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.False);
         }
@@ -731,7 +1045,9 @@ namespace Microsoft.Build.Engine.UnitTests
             var task = doc.RootElement[0];
 
             task.GetProperty("ExecutionsCount").GetInt32().ShouldBe(7);
+#if NET
             task.GetProperty("TotalMemoryBytes").GetInt64().ShouldBe(8192);
+#endif
             task.GetProperty("TotalMilliseconds").GetDouble().ShouldBe(123.4);
             task.GetProperty("IsCustom").GetBoolean().ShouldBeFalse();
             task.GetProperty("IsNuget").GetBoolean().ShouldBeTrue();

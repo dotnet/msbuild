@@ -12,6 +12,7 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Eventing;
 
@@ -22,6 +23,9 @@ using System.Security.Principal;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+#if FEATURE_NET35_TASKHOST
+using Microsoft.Build.Utilities;
+#endif
 using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
@@ -1573,8 +1577,8 @@ namespace Microsoft.Build.BackEnd
                 // Kill the child and do a blocking wait.
                 loggingService?.LogWarning(
                     BuildEventContext.Invalid,
-                    null,
-                    BuildEventFileInfo.Empty,
+                    DiagnosticSubcategory.None,
+                    ElementLocation.Empty,
                     "KillingProcessWithPid",
                     _process.Id);
                 CommunicationsUtilities.Trace($"Killing node with pid = {_process.Id}");

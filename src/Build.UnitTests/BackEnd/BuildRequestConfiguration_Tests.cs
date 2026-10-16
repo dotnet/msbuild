@@ -600,7 +600,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             if (referencePath.Contains("$"))
             {
-                referencePath = project.ExpandPropertyValueBestEffortLeaveEscaped(referencePath, ElementLocation.EmptyLocation);
+                referencePath = project.ExpandPropertyValueBestEffortLeaveEscaped(referencePath, ElementLocation.Empty);
             }
 
             configuration.ShouldSkipIsolationConstraintsForReference(referencePath).ShouldBe(expectedOutput);

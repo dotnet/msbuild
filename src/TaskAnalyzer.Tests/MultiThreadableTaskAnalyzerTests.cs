@@ -915,7 +915,7 @@ public class MultiThreadableTaskAnalyzerTests
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
-    public async Task AssemblyLoadFrom_ProducesWarning()
+    public async Task AssemblyLoadFrom_InRegularTask_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Reflection;
@@ -929,11 +929,11 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.PotentialIssue);
+        diags.ShouldBeEmpty();
     }
 
     [Fact]
-    public async Task AssemblyLoad_ByteArray_ProducesWarning()
+    public async Task AssemblyLoad_ByteArray_InRegularTask_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Reflection;
@@ -947,7 +947,141 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.PotentialIssue);
+        diags.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task AssemblyLoadFrom_InMtScopedTask_ProducesWarning()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.Reflection;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    Assembly.LoadFrom("mylib.dll");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldHaveSingleItem().Severity.ShouldBe(DiagnosticSeverity.Warning);
+        diags[0].Id.ShouldBe(DiagnosticIds.PotentialIssue);
+    }
+
+    [Theory]
+    [InlineData("Microsoft.Build.Utilities.Task, IMultiThreadableTask", "", true)]
+    [InlineData("MtBase", "", false)]
+    [InlineData("MtBase", "[MSBuildMultiThreadableTask]", true)]
+    [InlineData("MtBase", "[MSBuildMultiThreadableTaskAnalyzed]", true)]
+    public async Task MSBuildTask0004_UsesExistingMtScope(
+        string baseType, string attribute, bool expectedWarning)
+    {
+        var diags = await GetDiagnosticsAsync($$"""
+            using Microsoft.Build.Framework;
+            public abstract class MtBase : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+            }
+            {{attribute}}
+            public class MyTask : {{baseType}}
+            {
+                {{(baseType == "MtBase" ? "" : "public TaskEnvironment TaskEnvironment { get; set; }")}}
+                public override bool Execute()
+                {
+                    System.Reflection.Assembly.LoadFrom("helper.dll");
+                    return true;
+                }
+            }
+            """);
+
+        diags.Count(d => d.Id == DiagnosticIds.PotentialIssue).ShouldBe(expectedWarning ? 1 : 0);
+        diags.ShouldAllBe(d => d.Severity == DiagnosticSeverity.Warning);
+    }
+
+    [Fact]
+    public async Task MSBuildTask0004_AnalyzedHelperAndContributingBase_ReportDirectlyWithoutDuplicates()
+    {
+        var diags = await GetAllDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTaskAnalyzed]
+            public static class Helper
+            {
+                public static void Run() => System.Reflection.Assembly.LoadFrom("helper.dll");
+            }
+            public abstract class BaseTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    System.Reflection.Assembly.LoadFrom("base.dll");
+                    Helper.Run();
+                    return true;
+                }
+            }
+            [MSBuildMultiThreadableTask]
+            public sealed class MyTask : BaseTask { }
+            """);
+
+        diags.Length.ShouldBe(2);
+        diags.ShouldAllBe(d => d.Id == DiagnosticIds.PotentialIssue && d.Severity == DiagnosticSeverity.Warning);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task MSBuildTask0004_RegularTask_FollowsMigrationOption(bool enabled)
+    {
+        var diags = await GetDiagnosticsWithAllTasksOptionAsync("""
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    System.Reflection.Assembly.LoadFrom("helper.dll");
+                    return true;
+                }
+            }
+            """, enabled);
+
+        diags.Count(d => d.Id == DiagnosticIds.PotentialIssue).ShouldBe(enabled ? 1 : 0);
+        diags.ShouldAllBe(d => d.Severity == DiagnosticSeverity.Warning);
+    }
+
+    [Theory]
+    [InlineData("suggestion", DiagnosticSeverity.Info)]
+    [InlineData("warning", DiagnosticSeverity.Warning)]
+    public async Task MSBuildTask0004_ConfiguredSeverity_OverridesWarningDefault(
+        string configuredSeverity,
+        DiagnosticSeverity expectedSeverity)
+    {
+        var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool Execute()
+                    {
+                        {|#0:System.Reflection.Assembly.LoadFrom("mylib.dll")|};
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", $$"""
+            root = true
+
+            [*.cs]
+            dotnet_diagnostic.MSBuildTask0004.severity = {{configuredSeverity}}
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.PotentialIssue, expectedSeverity).WithLocation(0));
+
+        await test.RunAsync();
     }
 
     // ═══════════════════════════════════════════════════════════════════════

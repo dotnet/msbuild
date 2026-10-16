@@ -45,6 +45,12 @@ namespace Microsoft.Build.Framework.Telemetry
             return this;
         }
 
+        public IActivity SetUserFault()
+        {
+            _ = _activity.SetStatus(ActivityStatusCode.Error);
+            return this;
+        }
+
         public void Dispose()
         {
             if (_disposed)

@@ -85,10 +85,10 @@ It computes `git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}`, find
 | Phase | Trigger | Key Actions |
 |---|---|---|
 | **0: Instantiate** | User-initiated | Validate inputs, create GitHub tracking issue |
-| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), **audit all `vs*` branches for retirement**, `VisualStudio.ChannelName` |
+| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), **audit all `vs*` branches for retirement** |
 | **2: DARC Subscription Updates** | Phase 1 branch exists (`vs*` created) | Retarget `main`-targeting subs + VMR backflow to next channel, retired-branch cleanup (batched PR), Arcade verify |
-| **3: Bump Main** | Phase 2 merged | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, refresh OptProf baseline) |
-| **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Telemetry evidence checks, public API promotion, OptProf bootstrap, VS insertion before Insiders snap |
+| **3: Bump Main** | Phase 2 ingested and verified | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, refresh OptProf baseline) |
+| **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Telemetry evidence checks, package API compatibility review, OptProf bootstrap, VS insertion before Insiders snap |
 | **5: Post-GA** | VS shipped (`VS_SHIP_DATE`) | Resolve the exact shipped version (SDK-coupled? SDK wins over VS `rel/stable`), nuget.org publish, docs, GitHub release, Change Waves Learn sync, retro |
 
 ## DARC Batching
@@ -98,7 +98,10 @@ DARC write commands push to the [maestro-configuration](https://dev.azure.com/dn
 1. Choose a branch name like `release/msbuild-{{THIS_RELEASE_VERSION}}`
 2. Add `--configuration-branch <name> --no-pr` to every write command except the last
 3. Last command: use `--configuration-branch <name>` without `--no-pr` to create the PR
-4. Get the PR reviewed and merged
+4. Review the diff before merging; disable auto-complete if the PR must remain review-only.
+5. After merging, complete [DARC configuration PR verification](../../../documentation/release-checklist.md#darc-configuration-pr-verification) before dependent release steps.
+
+Check existing channels and mappings before writing: the previous release normally pre-created the current release's mapping. Skip satisfied writes rather than constructing a redundant batch.
 
 Read-only commands (`get-default-channels`, `get-subscriptions`, `get-channel`) don't need these flags.
 
@@ -147,7 +150,7 @@ Worked example from 18.11: `vs18.0` pairs with 10.0.1xx (EOL Nov 2028) so it is 
 When asked to execute a specific phase:
 
 1. Read the full phase from `documentation/release-checklist.md`
-2. Verify the trigger condition is met (previous phases completed)
+2. Verify the trigger condition is met (previous phases completed, including ingestion and live verification of prerequisite DARC changes)
 3. Execute steps in order — respect sequential/parallel annotations
 4. For DARC commands: batch writes into one configuration PR per phase
 5. Record all output URLs in the tracking issue's artifact table
@@ -160,16 +163,16 @@ When asked to execute a specific phase:
 | File | Purpose |
 |---|---|
 | [`documentation/release-checklist.md`](../../../documentation/release-checklist.md) | **Operational checklist** — the source of truth |
-| [`documentation/release.md`](../../../documentation/release.md) | Process description: final branding, public API, major version steps |
+| [`documentation/release.md`](../../../documentation/release.md) | Process description: final branding, package API compatibility, major version steps |
 | [`documentation/wiki/ChangeWaves.md`](../../../documentation/wiki/ChangeWaves.md) | Source doc for the Learn page sync — always sync the `vsXX.Y` (Insiders/preview-SDK) copy, not `main` |
 | [MSBuild Change Waves Learn page](https://learn.microsoft.com/visualstudio/msbuild/change-waves) | Public docs target to [`MicrosoftDocs/visualstudio-docs-pr`](https://github.com/MicrosoftDocs/visualstudio-docs-pr) (`docs/msbuild/change-waves.md`) |
 | [`eng/Versions.props`](../../../eng/Versions.props) | `VersionPrefix`, `PackageValidationBaselineVersion`, `BootstrapSdkVersion` |
-| [`azure-pipelines/vs-insertion.yml`](../../../azure-pipelines/vs-insertion.yml) | VS insertion pipeline — `AutoInsertTargetBranch` mappings |
+| [`azure-pipelines/vs-insertion.yml`](../../../azure-pipelines/vs-insertion.yml) | VS insertion pipeline — `TargetBranch` parameter and `InsertTargetBranch` routing |
 | [`azure-pipelines/vs-insertion-experimental.yml`](../../../azure-pipelines/vs-insertion-experimental.yml) | Experimental insertion — `TargetBranch` parameter values |
 | [`scripts/Get-PackageValidationBaseline.ps1`](../../../scripts/Get-PackageValidationBaseline.ps1) | Phase 3.2 — resolves `PackageValidationBaselineVersion` deterministically (merge-base → pipeline 9434 → dotnet-tools feed) |
 | [`scripts/Get-LatestOptProfDrop.ps1`](../../../scripts/Get-LatestOptProfDrop.ps1) | Phase 3.3 — resolves the latest main OptProf drop (MSBuild-OptProf pipeline 17389) to refresh `OptProfBaselineDrop` in `.vsts-dotnet.yml` |
 | [`.vsts-dotnet.yml`](../../../.vsts-dotnet.yml) | Build pipeline entry point — `OptProfBaselineDrop` (hardcoded OptProf seed for new `vs*` branches) |
-| [`azure-pipelines/.vsts-dotnet-build-jobs.yml`](../../../azure-pipelines/.vsts-dotnet-build-jobs.yml) | Build jobs — `VisualStudio.ChannelName` (update each release) |
+| [`azure-pipelines/.vsts-dotnet-build-jobs.yml`](../../../azure-pipelines/.vsts-dotnet-build-jobs.yml) | Build jobs — `VisualStudio.ChannelName` is release-agnostic (`int.main`); no per-release edit |
 
 ## Validation
 

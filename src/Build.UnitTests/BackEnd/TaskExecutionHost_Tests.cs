@@ -33,6 +33,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// The test class for the TaskExecutionHost
     /// </summary>
+    [Collection("TelemetryManagerTests")]
     public class TaskExecutionHost_Tests : ITestTaskHost, IBuildEngine2, IDisposable
     {
         private readonly ITestOutputHelper _output;

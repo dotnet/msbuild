@@ -12,6 +12,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 using Constants = Microsoft.Build.Framework.Constants;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;

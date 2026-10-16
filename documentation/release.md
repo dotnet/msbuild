@@ -30,17 +30,13 @@ The [VS insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?defini
 
 VS handles the progression from `main` → `rel/insiders` → `rel/stable` on its own schedule. MSBuild's responsibility is to have final-branded bits in VS `main` before `INSIDERS_SNAP_DATE`.
 
-The `AutoInsertTargetBranch` mapping in [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml) encodes which MSBuild branch maps to which VS branch.
+In [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml), the `TargetBranch` parameter sets `InsertTargetBranch`. The default `auto` currently resolves to VS `main`; verify the branch-local pipeline when servicing an older release. For a one-off servicing insertion, select `rel/insiders` or `rel/stable` explicitly and select the intended official MSBuild resource build. Changes to automatic routing or OptProf routing require a separate reviewed pipeline change.
 
 ## Public API
 
-As of [#7018](https://github.com/dotnet/msbuild/pull/7018), MSBuild uses a Roslyn analyzer to ensure compatibility with assemblies compiled against older versions of MSBuild. The workflow of the analyzer is:
+MSBuild uses package API compatibility validation against `PackageValidationBaselineVersion` in [`eng/Versions.props`](../eng/Versions.props). Reviewed exceptions are recorded in the projects' `CompatibilitySuppressions.xml` files.
 
-1. The analyzer keeps the `PublicAPI.Unshipped.txt` files updated.
-2. New API surface goes into `PublicAPI.Unshipped.txt`.
-3. At release time, we must manually promote the `Unshipped` public API to `Shipped`.
-
-That is a new step in our release process for each formal release (including patch releases if they change API surface).
+The repository no longer contains `PublicAPI.Unshipped.txt` / `PublicAPI.Shipped.txt` files or a promotion step for them. If the build reports API-compat failures, follow step 3.4 of the [release checklist](./release-checklist.md#phase-3-bump-main--update-pipelines) to regenerate and review suppressions. Do not suppress a new compatibility regression merely to make the build pass.
 
 ## Major version extra update steps
 

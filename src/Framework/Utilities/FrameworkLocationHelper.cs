@@ -14,32 +14,12 @@ using Microsoft.Win32;
 #endif
 
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
 namespace Microsoft.Build.Shared
 {
-    /// <summary>
-    /// Used to specify the targeted bitness of the .NET Framework for some methods of FrameworkLocationHelper
-    /// </summary>
-    internal enum DotNetFrameworkArchitecture
-    {
-        /// <summary>
-        /// Indicates the .NET Framework that is currently being run under.
-        /// </summary>
-        Current = 0,
-
-        /// <summary>
-        /// Indicates the 32-bit .NET Framework
-        /// </summary>
-        Bitness32 = 1,
-
-        /// <summary>
-        /// Indicates the 64-bit .NET Framework
-        /// </summary>
-        Bitness64 = 2,
-    }
-
     /// <summary>
     /// FrameworkLocationHelper provides utility methods for locating .NET Framework and .NET Framework SDK directories and files
     /// </summary>

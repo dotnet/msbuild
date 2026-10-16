@@ -6,9 +6,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -248,20 +250,20 @@ public class BuildCheckCentralContext_Tests
         public void DispatchBuildEvent(BuildEventArgs buildEvent) { }
 
         public void DispatchAsErrorFromText(
-            string? subcategoryResourceName,
+            DiagnosticSubcategory subcategory,
             string? errorCode,
             string? helpKeyword,
-            BuildEventFileInfo file,
+            IElementLocation location,
             string message)
         { }
 
         public void DispatchAsCommentFromText(MessageImportance importance, string message) { }
 
         public void DispatchAsWarningFromText(
-            string? subcategoryResourceName,
-            string? errorCode,
+            DiagnosticSubcategory subcategory,
+            string? warningCode,
             string? helpKeyword,
-            BuildEventFileInfo file,
+            IElementLocation location,
             string message)
         { }
 

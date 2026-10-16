@@ -96,6 +96,8 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // Server is busy / unavailable, fallback to old behavior.
+                // The build runs in this process after all, so this process reports it and needs a telemetry session.
+                MSBuildApp.InitializeTelemetryForInProcessBuild();
                 return MSBuildApp.Execute(commandLineArgs);
             }
 
