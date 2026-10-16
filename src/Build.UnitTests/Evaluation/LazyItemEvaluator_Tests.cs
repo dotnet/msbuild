@@ -228,7 +228,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void MatchedItemArraysPreserveFilteringOrderAndStorage(bool includeMatchingItems)
+    public void MatchedItemProjectionsPreserveFilteringOrderAndReuseStorage(bool includeMatchingItems)
     {
         using ProjectCollection collection = new();
         Project project = CreateProject(
@@ -248,10 +248,15 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
         IItemProvider<ProjectItem> provider = evaluator;
 
-        ImmutableArray<ProjectItem> firstRead = provider.GetItems("Source").ShouldBeOfType<ImmutableArray<ProjectItem>>();
-        ImmutableArray<ProjectItem> capturedRead = provider.GetItems("Captured").ShouldBeOfType<ImmutableArray<ProjectItem>>();
+        ICollection<ProjectItem> firstResult = provider.GetItems("Source");
+        ImmutableArray<ProjectItem> firstRead = firstResult.ShouldBeOfType<ImmutableArray<ProjectItem>>();
+        ICollection<ProjectItem> capturedResult = provider.GetItems("Captured");
+        ImmutableArray<ProjectItem> capturedRead = capturedResult.ShouldBeOfType<ImmutableArray<ProjectItem>>();
         provider.GetItems("Other").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("other.cs");
-        ImmutableArray<ProjectItem> secondRead = provider.GetItems("Source").ShouldBeOfType<ImmutableArray<ProjectItem>>();
+        ICollection<ProjectItem> secondResult = provider.GetItems("Source");
+        secondResult.ShouldBeSameAs(firstResult);
+        provider.GetItems("Captured").ShouldBeSameAs(capturedResult);
+        ImmutableArray<ProjectItem> secondRead = secondResult.ShouldBeOfType<ImmutableArray<ProjectItem>>();
         string[] expectedIncludes = includeMatchingItems ? ["first.cs", "second.cs"] : [];
 
         firstRead.Length.ShouldBe(expectedIncludes.Length);
@@ -262,6 +267,72 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             firstRead[i].EvaluatedInclude.ShouldBe(expectedIncludes[i]);
             capturedRead[i].EvaluatedInclude.ShouldBe(expectedIncludes[i]);
             secondRead[i].EvaluatedInclude.ShouldBe(expectedIncludes[i]);
+        }
+    }
+
+    [Theory]
+    [InlineData("a.cs", "initial")]
+    [InlineData("*", "updated")]
+    public void MatchedItemProjectionsRemainIsolatedAcrossUpdatedPrefixes(string updateSpec, string expectedBMetadata)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs;b.cs">
+                        <Trace>initial</Trace>
+                    </Source>
+                    <Before Include="@(Source)" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Update="{updateSpec}">
+                        <Trace>updated</Trace>
+                    </Source>
+                    <After Include="@(Source)" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        IItemProvider<ProjectItem> provider = evaluator;
+        ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
+        evaluator.ProcessItemGroups([groups[0]], project.Xml.DirectoryPath);
+        ICollection<ProjectItem> originalResult = provider.GetItems("Source");
+        provider.GetItems("Source").ShouldBeSameAs(originalResult);
+
+        evaluator.ProcessItemGroups([groups[1]], project.Xml.DirectoryPath);
+        ICollection<ProjectItem> updatedResult = provider.GetItems("Source");
+        updatedResult.ShouldNotBeSameAs(originalResult);
+        provider.GetItems("Source").ShouldBeSameAs(updatedResult);
+        ProjectItem[] updatedItems = [.. updatedResult];
+        updatedItems.Length.ShouldBe(2);
+        updatedItems[0].EvaluatedInclude.ShouldBe("a.cs");
+        updatedItems[0].GetMetadataValue("Trace").ShouldBe("updated");
+        updatedItems[1].EvaluatedInclude.ShouldBe("b.cs");
+        updatedItems[1].GetMetadataValue("Trace").ShouldBe(expectedBMetadata);
+
+        ICollection<ProjectItem> beforeResult = provider.GetItems("Before");
+        provider.GetItems("Before").ShouldBeSameAs(beforeResult);
+        ProjectItem[] originalItems = [.. originalResult];
+        ProjectItem[] beforeItems = [.. beforeResult];
+        originalItems.Length.ShouldBe(2);
+        beforeItems.Length.ShouldBe(2);
+        for (int i = 0; i < originalItems.Length; i++)
+        {
+            originalItems[i].GetMetadataValue("Trace").ShouldBe("initial");
+            beforeItems[i].EvaluatedInclude.ShouldBe(originalItems[i].EvaluatedInclude);
+            beforeItems[i].GetMetadataValue("Trace").ShouldBe("initial");
+        }
+
+        ICollection<ProjectItem> afterResult = provider.GetItems("After");
+        provider.GetItems("After").ShouldBeSameAs(afterResult);
+        ProjectItem[] afterItems = [.. afterResult];
+        afterItems.Length.ShouldBe(updatedItems.Length);
+        for (int i = 0; i < afterItems.Length; i++)
+        {
+            afterItems[i].EvaluatedInclude.ShouldBe(updatedItems[i].EvaluatedInclude);
+            afterItems[i].GetMetadataValue("Trace").ShouldBe(updatedItems[i].GetMetadataValue("Trace"));
         }
     }
 
@@ -767,7 +838,9 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
 
         for (int read = 0; read < 2; read++)
         {
-            ProjectItem[] items = [.. provider.GetItems(itemType)];
+            ICollection<ProjectItem> result = provider.GetItems(itemType);
+            provider.GetItems(itemType).ShouldBeSameAs(result);
+            ProjectItem[] items = [.. result];
             items.Length.ShouldBe(1);
             items[0].EvaluatedInclude.ShouldBe("a.cs");
             items[0].GetMetadataValue("Trace").ShouldBe("initial");
@@ -873,8 +946,10 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
         for (int phase = 0; phase < groups.Length; phase++)
         {
             evaluator.ProcessItemGroups([groups[phase]], project.Xml.DirectoryPath);
+            ICollection<ProjectItem> result = provider.GetItems(itemType);
+            provider.GetItems(itemType).ShouldBeSameAs(result);
             List<string> includes = [];
-            foreach (ProjectItem item in provider.GetItems(itemType))
+            foreach (ProjectItem item in result)
             {
                 includes.Add(item.EvaluatedInclude);
             }
@@ -885,8 +960,10 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
         }
 
         // The earlier reference needs the unpruned Include, not either nonempty exclusion context.
+        ICollection<ProjectItem> copiedResult = provider.GetItems("CacheEqualityCopy");
+        provider.GetItems("CacheEqualityCopy").ShouldBeSameAs(copiedResult);
         List<string> copiedIncludes = [];
-        foreach (ProjectItem item in provider.GetItems("CacheEqualityCopy"))
+        foreach (ProjectItem item in copiedResult)
         {
             copiedIncludes.Add(item.EvaluatedInclude);
         }

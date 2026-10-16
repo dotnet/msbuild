@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Immutable;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Evaluation;
 
@@ -18,9 +18,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  Gets the condition-true items visible at the captured position.
         /// </summary>
         /// <returns>
-        ///  A non-default array of matching items in evaluation order.
+        ///  The cached read-only collection of matching items in evaluation order.
         /// </returns>
-        public ImmutableArray<I> GetMatchedItems()
+        public ICollection<I> GetMatchedItems()
             => sequence.GetMatchedItems(operationCount);
 
         /// <summary>

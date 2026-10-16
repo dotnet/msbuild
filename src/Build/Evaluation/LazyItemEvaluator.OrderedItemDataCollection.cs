@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -20,6 +21,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// The list of items in the collection. Defines the enumeration order.
         /// </summary>
         private readonly ImmutableList<ItemData> _list;
+
+        private ICollection<I> _matchedItems;
 
         /// <summary>
         ///  Gets the shared empty item collection.
@@ -47,6 +50,36 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         public Builder ToBuilder()
             => new(_list.ToBuilder());
+
+        /// <summary>
+        ///  Gets the condition-true items, caching the projection for subsequent reads of this snapshot.
+        /// </summary>
+        /// <returns>
+        ///  The same read-only collection of matching items in evaluation order on each call.
+        /// </returns>
+        public ICollection<I> GetMatchedItems()
+        {
+            if (_matchedItems is not null)
+            {
+                return _matchedItems;
+            }
+
+            if (Count == 0)
+            {
+                return _matchedItems = ImmutableArray<I>.Empty;
+            }
+
+            using RefArrayBuilder<I> items = new(Count);
+            foreach (ItemData data in this)
+            {
+                if (data.ConditionResult)
+                {
+                    items.Add(data.Item);
+                }
+            }
+
+            return _matchedItems = items.ToImmutable();
+        }
 
         /// <summary>
         ///  Gets an enumerator over the items in insertion order.

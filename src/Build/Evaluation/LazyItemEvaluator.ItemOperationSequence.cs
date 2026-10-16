@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.Build.Collections;
 using Microsoft.CodeAnalysis.Collections;
@@ -40,27 +41,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="operationCount">The number of operations in the requested prefix.</param>
         /// <returns>
-        ///  A non-default array of matching items in evaluation order.
+        ///  The cached read-only collection of matching items in evaluation order.
         /// </returns>
-        public ImmutableArray<I> GetMatchedItems(int operationCount)
-        {
-            OrderedItemDataCollection itemData = GetItemData(operationCount);
-            if (itemData.Count == 0)
-            {
-                return [];
-            }
-
-            using RefArrayBuilder<I> items = new(itemData.Count);
-            foreach (ItemData data in itemData)
-            {
-                if (data.ConditionResult)
-                {
-                    items.Add(data.Item);
-                }
-            }
-
-            return items.ToImmutable();
-        }
+        public ICollection<I> GetMatchedItems(int operationCount)
+            => GetItemData(operationCount).GetMatchedItems();
 
         /// <summary>
         ///  Gets the items produced by a prefix, reusing the result cached at its stopping position.
@@ -184,7 +168,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // The requested prefix may end with a deferred Update batch.
             updateBatch.ApplyTo(items);
 
-            return items.ToImmutable();
+            // GetItemData marks the requested endpoint as referenced, so replay has already cached its snapshot.
+            return _lazyEvaluator.GetCachedItems(_operations[operationCount - 1], s_emptyGlobsToIgnore);
         }
 
         /// <summary>
