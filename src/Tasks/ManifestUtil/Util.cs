@@ -217,7 +217,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = ".NET 4.0 and earlier versions cannot parse SHA-2.")]
         private static void GetFileInfoImpl(string path, string targetFrameWorkVersion, out string hash, out long length)
         {
+            // TODO: Resolved manifest file and dependency paths can remain drive-relative.
+            // Tracked by https://github.com/dotnet/msbuild/issues/13196.
+#pragma warning disable MSBuildTask0005
             FileInfo fi = new FileInfo(path);
+#pragma warning restore MSBuildTask0005
             length = fi.Length;
 
             Stream s = null;
@@ -450,7 +454,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static void WriteFile(string path, string s)
         {
+            // TODO: XML-derived debug filenames can be drive-relative or shared across projects.
+            // Known opt-in VSPLOG risk: https://github.com/dotnet/msbuild/issues/13645.
+#pragma warning disable MSBuildTask0005
             using (StreamWriter w = new StreamWriter(path))
+#pragma warning restore MSBuildTask0005
             {
                 w.Write(s);
             }
@@ -478,7 +486,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 try
                 {
+                    // TODO: The shared writer is unsynchronized; logPath is relative when ApplicationData is empty.
+                    // Known opt-in VSPLOG risk: https://github.com/dotnet/msbuild/issues/13645.
+#pragma warning disable MSBuildTask0005
                     s_logFileWriter = new StreamWriter(Path.Combine(logPath, "Microsoft.Build.Tasks.log"), false);
+#pragma warning restore MSBuildTask0005
                 }
                 catch (UnauthorizedAccessException)
                 {

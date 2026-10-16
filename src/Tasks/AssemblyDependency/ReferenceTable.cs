@@ -3027,7 +3027,11 @@ namespace Microsoft.Build.Tasks
             * */
 
             UInt16 machineType = NativeMethods.IMAGE_FILE_MACHINE_INVALID;
+            // TODO: Drive-relative WinMDImplementationFile metadata can replace the qualified parent path.
+            // Tracked by https://github.com/dotnet/msbuild/issues/13196.
+#pragma warning disable MSBuildTask0005
             using (FileStream implementationStream = new FileStream(dllPath, FileMode.Open, FileAccess.Read))
+#pragma warning restore MSBuildTask0005
             {
                 // Seek to location that contains PE offset.
                 implementationStream.Seek(PEOFFSET, SeekOrigin.Begin);

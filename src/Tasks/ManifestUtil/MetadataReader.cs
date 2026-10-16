@@ -34,7 +34,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             try
             {
+                // TODO: Dependencies may be drive-relative; WindowsBase.dll is read before ResolveFiles roots it.
+#pragma warning disable MSBuildTask0005
                 _assemblyStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Delete | FileShare.Read);
+#pragma warning restore MSBuildTask0005
                 if (_assemblyStream != null)
                 {
                     _peReader = new PEReader(_assemblyStream, PEStreamOptions.LeaveOpen);

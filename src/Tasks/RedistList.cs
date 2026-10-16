@@ -307,7 +307,10 @@ namespace Microsoft.Build.Tasks
 
                     if (FileSystems.Default.DirectoryExists(redistDirectory))
                     {
+                        // RAR supplies resolved framework directories under Wave18_13; other callers use framework installation paths.
+#pragma warning disable MSBuildTask0005
                         results = Directory.GetFiles(redistDirectory, MatchPattern);
+#pragma warning restore MSBuildTask0005
                         s_redistListPathCache.Add(frameworkDirectory, results);
                         return results;
                     }
@@ -701,7 +704,9 @@ namespace Microsoft.Build.Tasks
             try
             {
                 var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+#pragma warning disable MSBuildTask0005 // AssemblyTableInfo validates that Path is fully qualified.
                 FileStream fs = File.OpenRead(path);
+#pragma warning restore MSBuildTask0005
 
                 reader = XmlReader.Create(fs, readerSettings);
 

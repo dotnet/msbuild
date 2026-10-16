@@ -131,7 +131,9 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (ITaskItem sourceItem in SourceFiles.TakeWhile(i => !_cancellationTokenSource.IsCancellationRequested))
                     {
+#pragma warning disable MSBuildTask0003 // TaskEnvironment supplies a fully qualified archive path.
                         FileInfo sourceFile = new FileInfo(TaskEnvironment.GetAbsolutePath(sourceItem.ItemSpec).Value);
+#pragma warning restore MSBuildTask0003
 
                         if (!FileSystems.Default.FileExists(sourceFile.FullName))
                         {
@@ -217,7 +219,9 @@ namespace Microsoft.Build.Tasks
 
             try
             {
+#pragma warning disable MSBuildTask0003 // destinationFolderPath is fully qualified by TaskEnvironment.
                 destinationDirectory = Directory.CreateDirectory(destinationFolderPath);
+#pragma warning restore MSBuildTask0003
 
                 return true;
             }

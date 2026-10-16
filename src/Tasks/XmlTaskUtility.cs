@@ -86,7 +86,9 @@ namespace Microsoft.Build.Tasks
             {
                 // Read only the beginning of the file - DOCTYPE must appear before the root element.
                 // 8KB should be more than enough to find it in any reasonable XML file.
+#pragma warning disable MSBuildTask0005 // XmlPoke and XslTransformation supply TaskEnvironment-resolved paths.
                 using var stream = File.OpenRead(filePath.Value);
+#pragma warning restore MSBuildTask0005
                 using var reader = new StreamReader(stream);
                 var buffer = new char[8192];
                 int charsRead = reader.Read(buffer, 0, buffer.Length);

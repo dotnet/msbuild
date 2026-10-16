@@ -103,7 +103,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         // Read in the file data
                         int fileLength;
                         byte[] fileContent;
+                        // GenerateLauncher has only string resources; this file-resource loop is unreachable.
+#pragma warning disable MSBuildTask0005
                         using (FileStream fs = File.OpenRead(resource.Filename))
+#pragma warning restore MSBuildTask0005
                         {
                             fileLength = (int)fs.Length;
                             fileContent = new byte[fileLength];

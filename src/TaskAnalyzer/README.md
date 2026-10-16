@@ -624,11 +624,26 @@ Add the analyzer package as a private package reference:
 
 ### MSBuild Tasks Build
 
-To enable the analyzer in the MSBuild Tasks project build, pass `/p:BuildAnalyzer=true`:
+The analyzer is referenced unconditionally by `Microsoft.Build.Tasks.csproj`, so it runs on every
+build of that project -- local, repo CI, and VMR product/source builds alike. No switch is needed:
 
 ```
-dotnet build src/Tasks/Microsoft.Build.Tasks.csproj /p:BuildAnalyzer=true
+dotnet build src/Tasks/Microsoft.Build.Tasks.csproj
 ```
+
+`src/Tasks/TaskAnalyzer.globalconfig` explicitly sets
+`msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = false`. MT migration diagnostics
+therefore apply only to MT-scoped code, including its contributing base classes and
+helper call chains. Running the analyzer on every build does not opt unmigrated tasks
+into all-task migration analysis. Rules that apply to all tasks remain active.
+
+Its warnings are not demoted through `WarningsNotAsErrors`, so under `/warnaserror` (which Arcade
+passes in CI) a new finding breaks the build. Suppress a verified safe use at the call site with
+`#pragma warning disable`, and always state in the comment which invariant makes that call safe.
+
+Existing unresolved findings are baselined separately with narrow call-site pragmas and `TODO`
+comments describing the unsafe behavior or unverified safety assumption. These suppressions
+keep builds working; they do not fix the underlying issues or establish that the calls are MT-safe.
 
 ## Example
 

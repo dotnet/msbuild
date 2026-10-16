@@ -215,7 +215,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 var doc = new XmlDocument();
                 var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+#pragma warning disable MSBuildTask0005 // Reference-assembly lookup returns a full path; only the constant RedistList\FrameworkList.xml suffix is appended.
                 FileStream fs = File.OpenRead(redistListFilePath);
+#pragma warning restore MSBuildTask0005
                 using (XmlReader xr = XmlReader.Create(fs, xrSettings))
                 {
                     doc.Load(xr);
