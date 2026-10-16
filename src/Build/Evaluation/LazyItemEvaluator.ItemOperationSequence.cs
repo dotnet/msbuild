@@ -1,8 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
-using Microsoft.Build.Collections;
 using Microsoft.CodeAnalysis.Collections;
 
 namespace Microsoft.Build.Evaluation;
@@ -40,27 +40,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="operationCount">The number of operations through the requested position.</param>
         /// <returns>
-        ///  A non-default array of filtered items in evaluation order.
+        ///  The cached read-only collection of filtered items in evaluation order.
         /// </returns>
-        public ImmutableArray<I> GetFilteredItems(int operationCount)
-        {
-            OrderedItemDataCollection itemData = GetItemData(operationCount);
-            if (itemData.Count == 0)
-            {
-                return [];
-            }
-
-            using RefArrayBuilder<I> items = new(itemData.Count);
-            foreach (ItemData data in itemData)
-            {
-                if (data.ConditionResult)
-                {
-                    items.Add(data.Item);
-                }
-            }
-
-            return items.ToImmutable();
-        }
+        public ICollection<I> GetFilteredItems(int operationCount)
+            => GetItemData(operationCount).GetFilteredItems();
 
         /// <summary>
         ///  Gets the snapshot after the requested number of operations, reusing a cached result when possible.
@@ -184,7 +167,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // The requested position may end with a pending Update batch.
             updateBatch.ApplyTo(items);
 
-            return items.ToImmutable();
+            // GetItemData marks the requested endpoint as referenced, so evaluation has already cached its snapshot.
+            return _lazyEvaluator.GetCachedItems(_operations[operationCount - 1], s_emptyRemoveGlobPatterns);
         }
 
         /// <summary>

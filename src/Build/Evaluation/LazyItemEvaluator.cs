@@ -235,6 +235,9 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
         [NotNullWhen(true)] out OrderedItemDataCollection items)
         => _itemCache.TryGetValue(new ItemCacheKey(operation, laterRemoveGlobPatterns), out items);
 
+    private OrderedItemDataCollection GetCachedItems(ItemOperation operation, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        => _itemCache[new ItemCacheKey(operation, laterRemoveGlobPatterns)];
+
     private void CacheItems(ItemOperation operation, ImmutableHashSet<string> laterRemoveGlobPatterns, OrderedItemDataCollection items)
         => _itemCache[new ItemCacheKey(operation, laterRemoveGlobPatterns)] = items;
 

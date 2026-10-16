@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Immutable;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Evaluation;
 
@@ -18,9 +18,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  Gets the items at the bookmark, filtered by originating Include conditions.
         /// </summary>
         /// <returns>
-        ///  A non-default array of filtered items in evaluation order.
+        ///  The cached read-only collection of filtered items in evaluation order.
         /// </returns>
-        public ImmutableArray<I> GetFilteredItems()
+        public ICollection<I> GetFilteredItems()
             => sequence.GetFilteredItems(operationCount);
 
         /// <summary>
