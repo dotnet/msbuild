@@ -13,6 +13,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Logging;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Logging;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -656,25 +657,31 @@ namespace Microsoft.Build.UnitTests
             MockBuildEventSink eventSource = useRemoteNode ? _remoteNodeEventSource : _centralNodeEventSource;
             eventSource.InvokeMessageRaised(message);
 
-            message.RawArguments.ShouldNotBeNull();
+            message.ArgCount.ShouldBe(1);
+            message[0].ShouldBe("argument");
         }
 
         [Fact]
         public void TerminalLogger_DoesNotMutateRenderedEvents()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Diagnostic;
-            object[] messageArguments = ["argument"];
-            object[] warningArguments = ["argument"];
-            object[] errorArguments = ["argument"];
-            var message = new BuildMessageEventArgs("Message {0}", null, null, MessageImportance.High, DateTime.UtcNow, messageArguments)
+            object[] messageArgs = ["argument"];
+            object[] warningArgs = ["argument"];
+            object[] errorArgs = ["argument"];
+            var message = new BuildMessageEventArgs("Message {0}", null, null, MessageImportance.High, DateTime.UtcNow, messageArgs)
             {
                 BuildEventContext = MakeBuildEventContext(),
             };
-            var warning = new BuildWarningEventArgs("", "TESTWARNING", "", 0, 0, 0, 0, "Warning {0}", "keyword", "sender", DateTime.UtcNow, warningArguments)
+            var messageWithProvider = new BuildMessageEventArgs("Provider message {0} {1}", null, null, MessageImportance.High)
             {
                 BuildEventContext = MakeBuildEventContext(),
             };
-            var error = new BuildErrorEventArgs("", "TESTERROR", "", 0, 0, 0, 0, "Error {0}", "keyword", "sender", DateTime.UtcNow, errorArguments)
+            messageWithProvider.SetArgs(MessageArgs.Create("argument", 42));
+            var warning = new BuildWarningEventArgs("", "TESTWARNING", "", 0, 0, 0, 0, "Warning {0}", "keyword", "sender", DateTime.UtcNow, warningArgs)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+            var error = new BuildErrorEventArgs("", "TESTERROR", "", 0, 0, 0, 0, "Error {0}", "keyword", "sender", DateTime.UtcNow, errorArgs)
             {
                 BuildEventContext = MakeBuildEventContext(),
             };
@@ -682,16 +689,22 @@ namespace Microsoft.Build.UnitTests
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
             {
                 _centralNodeEventSource.InvokeMessageRaised(message);
+                _centralNodeEventSource.InvokeMessageRaised(messageWithProvider);
                 _centralNodeEventSource.InvokeWarningRaised(warning);
                 _centralNodeEventSource.InvokeErrorRaised(error);
 
-                message.RawArguments.ShouldBeSameAs(messageArguments);
-                warning.RawArguments.ShouldBeSameAs(warningArguments);
-                error.RawArguments.ShouldBeSameAs(errorArguments);
+                message.ArgCount.ShouldBe(1);
+                message[0].ShouldBeSameAs(messageArgs[0]);
+                messageWithProvider.ArgCount.ShouldBe(2);
+                warning.ArgCount.ShouldBe(1);
+                warning[0].ShouldBeSameAs(warningArgs[0]);
+                error.ArgCount.ShouldBe(1);
+                error[0].ShouldBeSameAs(errorArgs[0]);
             });
 
             string output = _outputWriter.ToString();
             output.ShouldContain("Message argument");
+            output.ShouldContain("Provider message argument 42");
             output.ShouldContain("Warning argument");
             output.ShouldContain("Error argument");
         }
@@ -723,7 +736,8 @@ namespace Microsoft.Build.UnitTests
             InvokeLoggerCallbacksForTestProject(succeeded: true, () =>
             {
                 _centralNodeEventSource.InvokeMessageRaised(message);
-                message.RawArguments.ShouldBeSameAs(arguments);
+                message.ArgCount.ShouldBe(1);
+                message[0].ShouldBeSameAs(arguments[0]);
             });
         }
 

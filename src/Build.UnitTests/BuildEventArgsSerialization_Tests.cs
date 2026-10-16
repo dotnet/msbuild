@@ -18,6 +18,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
@@ -410,10 +411,10 @@ namespace Microsoft.Build.UnitTests
                 e => e.EndLineNumber.ToString(),
                 e => e.File,
                 e => e.LineNumber.ToString(),
+                e => FormatArgs(e),
                 e => e.Message,
                 e => e.ProjectFile,
-                e => e.Subcategory,
-                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+                e => e.Subcategory);
         }
 
 
@@ -449,13 +450,13 @@ namespace Microsoft.Build.UnitTests
                 e => e.EndLineNumber.ToString(),
                 e => e.File,
                 e => e.LineNumber.ToString(),
+                e => FormatArgs(e),
                 e => e.Message,
                 e => e.ProjectFile,
                 e => e.Subcategory,
                 e => e.ExtendedType,
                 e => TranslationHelpers.ToString(e.ExtendedMetadata),
-                e => e.ExtendedData,
-                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+                e => e.ExtendedData);
         }
 
         [Theory]
@@ -484,10 +485,10 @@ namespace Microsoft.Build.UnitTests
                 e => e.EndLineNumber.ToString(),
                 e => e.File,
                 e => e.LineNumber.ToString(),
+                e => FormatArgs(e),
                 e => e.Message,
                 e => e.ProjectFile,
-                e => e.Subcategory,
-                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+                e => e.Subcategory);
         }
 
         [Theory]
@@ -522,13 +523,13 @@ namespace Microsoft.Build.UnitTests
                 e => e.EndLineNumber.ToString(),
                 e => e.File,
                 e => e.LineNumber.ToString(),
+                e => FormatArgs(e),
                 e => e.Message,
                 e => e.ProjectFile,
                 e => e.Subcategory,
                 e => e.ExtendedType,
                 e => TranslationHelpers.ToString(e.ExtendedMetadata),
-                e => e.ExtendedData,
-                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+                e => e.ExtendedData);
         }
 
         [Theory]
@@ -558,11 +559,36 @@ namespace Microsoft.Build.UnitTests
                 e => e.EndLineNumber.ToString(),
                 e => e.File,
                 e => e.LineNumber.ToString(),
+                e => FormatArgs(e),
                 e => e.Message,
                 e => e.Importance.ToString(),
                 e => e.ProjectFile,
-                e => e.Subcategory,
-                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+                e => e.Subcategory);
+        }
+
+        [Fact]
+        public void RoundtripBuildMessageEventArgsWithMessageArgs()
+        {
+            var args = new BuildMessageEventArgs(
+                "Subcategory",
+                "Code",
+                "File",
+                1,
+                2,
+                3,
+                4,
+                "Message with arguments: '{0}' and '{1}'",
+                "Help",
+                "SenderName",
+                MessageImportance.High,
+                DateTime.Parse("12/12/2015 06:11:56 PM"));
+            args.SetArgs(MessageArgs.Create("argument0", 42));
+
+            Roundtrip(
+                args,
+                e => e.ArgCount.ToString(),
+                e => FormatArgs(e),
+                e => e.Message);
         }
 
         [Theory]
@@ -598,14 +624,14 @@ namespace Microsoft.Build.UnitTests
                 e => e.EndLineNumber.ToString(),
                 e => e.File,
                 e => e.LineNumber.ToString(),
+                e => FormatArgs(e),
                 e => e.Message,
                 e => e.Importance.ToString(),
                 e => e.ProjectFile,
                 e => e.Subcategory,
                 e => e.ExtendedType,
                 e => TranslationHelpers.ToString(e.ExtendedMetadata),
-                e => e.ExtendedData,
-                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+                e => e.ExtendedData);
         }
 
         /// <summary>
@@ -737,6 +763,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.EndLineNumber.ToString(),
                 e => e.File,
                 e => e.LineNumber.ToString(),
+                e => FormatArgs(e),
                 e => e.Message,
                 e => e.Importance.ToString(),
                 e => e.ProjectFile,
@@ -745,8 +772,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.AssemblyName,
                 e => e.AssemblyPath,
                 e => e.MVID.ToString(),
-                e => e.AppDomainDescriptor,
-                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+                e => e.AppDomainDescriptor);
         }
 
         [Fact]
@@ -891,13 +917,13 @@ namespace Microsoft.Build.UnitTests
                 e => e.EndLineNumber.ToString(),
                 e => e.File,
                 e => e.LineNumber.ToString(),
+                e => FormatArgs(e),
                 e => e.Message,
                 e => e.ProjectFile,
                 e => e.Subcategory,
                 e => e.ExtendedType,
                 e => TranslationHelpers.ToString(e.ExtendedMetadata),
-                e => e.ExtendedData,
-                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+                e => e.ExtendedData);
         }
 
         [Fact]
@@ -2212,6 +2238,9 @@ namespace Microsoft.Build.UnitTests
 
             return sb.ToString();
         }
+
+        private static string FormatArgs(LazyFormattedBuildEventArgs eventArgs)
+            => string.Join(", ", Enumerable.Range(0, eventArgs.ArgCount).Select(i => eventArgs[i]));
 
         private void Roundtrip<T>(T args, params Func<T, string>[] fieldsToCompare)
             where T : BuildEventArgs

@@ -11,7 +11,9 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -127,6 +129,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(assemblyResolutionSearch, LoggingEventType.AssemblyResolutionSearchTraceEvent);
             VerifyLoggingPacket(assemblyConflictDependencyDetails, LoggingEventType.AssemblyConflictDependencyDetailsEvent);
             VerifyLoggingPacket(assemblyConflictWarning, LoggingEventType.AssemblyConflictWarningEvent);
+        }
+
+        [Fact]
+        public void MessageArgsRoundtripInLogPacket()
+        {
+            var buildEvent = new BuildMessageEventArgs("Message {0} {1}", null, null, MessageImportance.High);
+            buildEvent.SetArgs(MessageArgs.Create("argument", 42));
+            var packet = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, buildEvent));
+
+            ((ITranslatable)packet).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket deserializedNodePacket =
+                LogMessagePacket.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            LogMessagePacket deserializedPacket = deserializedNodePacket.ShouldBeOfType<LogMessagePacket>();
+            BuildMessageEventArgs deserializedEvent =
+                deserializedPacket.NodeBuildEvent.Value.Value.ShouldBeOfType<BuildMessageEventArgs>();
+
+            deserializedEvent.ArgCount.ShouldBe(2);
+            deserializedEvent[0].ShouldBe("argument");
+            deserializedEvent[1].ShouldBe("42");
+            deserializedEvent.Message.ShouldBe("Message argument 42");
         }
 
         private static BuildEventContext CreateBuildEventContext()

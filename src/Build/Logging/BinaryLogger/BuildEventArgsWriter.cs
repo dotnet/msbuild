@@ -574,7 +574,7 @@ namespace Microsoft.Build.Logging
         private BinaryLogRecordKind Write(BuildErrorEventArgs e)
         {
             WriteBuildEventArgsFields(e);
-            WriteArguments(e.RawArguments);
+            WriteArgs(e);
             WriteDeduplicatedString(e.Subcategory);
             WriteDeduplicatedString(e.Code);
             WriteDeduplicatedString(e.File);
@@ -590,7 +590,7 @@ namespace Microsoft.Build.Logging
         private BinaryLogRecordKind Write(BuildWarningEventArgs e)
         {
             WriteBuildEventArgsFields(e);
-            WriteArguments(e.RawArguments);
+            WriteArgs(e);
             WriteDeduplicatedString(e.Subcategory);
             WriteDeduplicatedString(e.Code);
             WriteDeduplicatedString(e.File);
@@ -970,7 +970,7 @@ namespace Microsoft.Build.Logging
 
             if ((flags & BuildEventArgsFieldFlags.Arguments) != 0)
             {
-                WriteArguments(e.RawArguments);
+                WriteArgs(e);
             }
 
             if ((flags & BuildEventArgsFieldFlags.Importance) != 0)
@@ -979,21 +979,22 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private void WriteArguments(object[] arguments)
+        private void WriteArgs(LazyFormattedBuildEventArgs eventArgs)
         {
-            if (arguments == null || arguments.Length == 0)
+            int count = eventArgs.ArgCount;
+            if (count == 0)
             {
                 return;
             }
 
-            int count = arguments.Length;
             Write(count);
             for (int i = 0; i < count; i++)
             {
-                string argument;
+                object argValue = eventArgs[i];
+                string arg;
                 try
                 {
-                    argument = Convert.ToString(arguments[i], CultureInfo.CurrentCulture);
+                    arg = Convert.ToString(argValue, CultureInfo.CurrentCulture);
                 }
                 catch (Exception ex) when (ex is ArgumentOutOfRangeException or InvalidOperationException)
                 {
@@ -1011,10 +1012,10 @@ namespace Microsoft.Build.Logging
                     // - We can't control the threading behavior of the objects passed to us
                     // - The corruption typically happens before objects reach this method
                     // - Defensive exception handling is more efficient than preemptive locking
-                    argument = $"Exception encountered writing an object of type {arguments[i]?.GetType()?.Name ?? "<null>"}";
+                    arg = $"Exception encountered writing an object of type {argValue?.GetType()?.Name ?? "<null>"}";
                 }
 
-                WriteDeduplicatedString(argument);
+                WriteDeduplicatedString(arg);
             }
         }
 
@@ -1087,7 +1088,7 @@ namespace Microsoft.Build.Logging
 
                 // We're only going to write the arguments for messages,
                 // warnings and errors. Only set the flag for these.
-                if (e is LazyFormattedBuildEventArgs { RawArguments: { Length: > 0 } } and
+                if (e is LazyFormattedBuildEventArgs { ArgCount: > 0 } and
                     (BuildMessageEventArgs or BuildWarningEventArgs or BuildErrorEventArgs))
                 {
                     flags |= BuildEventArgsFieldFlags.Arguments;

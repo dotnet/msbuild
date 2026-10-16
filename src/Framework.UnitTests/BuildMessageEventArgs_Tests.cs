@@ -2,8 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if NETFRAMEWORK
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+#endif
 
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
 using Shouldly;
 using Xunit;
 
@@ -40,15 +45,62 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void FormatMessageWithoutMutationPreservesArguments()
         {
-            object[] arguments = ["argument"];
-            var eventArgs = new BuildMessageEventArgs("Message {0}", null, null, MessageImportance.High, DateTime.Now, arguments);
+            object[] args = ["argument"];
+            var eventArgs = new BuildMessageEventArgs("Message {0}", null, null, MessageImportance.High, DateTime.Now, args);
 
             eventArgs.FormatMessageWithoutMutation().ShouldBe("Message argument");
-            eventArgs.RawArguments.ShouldBeSameAs(arguments);
+            eventArgs.ArgCount.ShouldBe(1);
+            eventArgs[0].ShouldBeSameAs(args[0]);
 
             eventArgs.Message.ShouldBe("Message argument");
-            eventArgs.RawArguments.ShouldBeNull();
+            eventArgs.ArgCount.ShouldBe(0);
         }
+
+        [Fact]
+        public void MessageArgsFormatWithoutMaterializingArray()
+        {
+            var eventArgs = new BuildMessageEventArgs("Message {0} {1}", null, null, MessageImportance.High);
+            eventArgs.SetArgs(MessageArgs.Create("argument", 42));
+
+            eventArgs.ArgCount.ShouldBe(2);
+            eventArgs[0].ShouldBe("argument");
+            eventArgs[1].ShouldBe(42);
+
+            eventArgs.FormatMessageWithoutMutation().ShouldBe("Message argument 42");
+            eventArgs.ArgCount.ShouldBe(2);
+
+            eventArgs.Message.ShouldBe("Message argument 42");
+            eventArgs.ArgCount.ShouldBe(0);
+        }
+
+        [Fact]
+        public void LazyFormattedBuildEventArgsHandlesMessageArgsFormatException()
+        {
+            var eventArgs = new BuildMessageEventArgs("Value {1}", null, null, MessageImportance.High);
+            eventArgs.SetArgs(MessageArgs.Create(42));
+
+            eventArgs.Message.ShouldStartWith("\"Value {1}\"\nSystem.FormatException");
+        }
+
+#if NETFRAMEWORK
+        [Fact]
+        public void MessageArgsMaterializeForFormatterSerialization()
+        {
+            var eventArgs = new BuildMessageEventArgs("Message {0} {1}", null, null, MessageImportance.High);
+            eventArgs.SetArgs(MessageArgs.Create("argument", 42));
+
+            using var stream = new MemoryStream();
+            var formatter = new BinaryFormatter();
+            formatter.Serialize(stream, eventArgs);
+            eventArgs.ArgCount.ShouldBe(2);
+
+            stream.Position = 0;
+            var deserializedEventArgs = (BuildMessageEventArgs)formatter.Deserialize(stream);
+
+            deserializedEventArgs.ArgCount.ShouldBe(2);
+            deserializedEventArgs.Message.ShouldBe("Message argument 42");
+        }
+#endif
 
         /// <summary>
         /// Create a derived class so that we can test the default constructor in order to increase code coverage and
