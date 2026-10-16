@@ -20,7 +20,7 @@ namespace Microsoft.Build.Globbing
     /// )
     ///     </code>
     /// </summary>
-    public class MSBuildGlobWithGaps : IMSBuildGlob
+    public class MSBuildGlobWithGaps : IMSBuildGlob, IContextAwareGlob
     {
         /// <summary>
         ///     The main glob used for globbing operations.
@@ -71,7 +71,12 @@ namespace Microsoft.Build.Globbing
         /// <inheritdoc />
         public bool IsMatch(string stringToMatch)
         {
-            return MainGlob.IsMatch(stringToMatch) && !Gaps.IsMatch(stringToMatch);
+            var context = new GlobMatchContext(stringToMatch);
+            return IsMatch(ref context);
         }
+
+        bool IContextAwareGlob.IsMatch(ref GlobMatchContext context) => IsMatch(ref context);
+
+        private bool IsMatch(ref GlobMatchContext context) => context.IsMatch(MainGlob) && !context.IsMatch(Gaps);
     }
 }
