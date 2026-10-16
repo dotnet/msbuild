@@ -1,0 +1,47 @@
+name: PerfStar MT regression component tests
+
+on:
+  pull_request:
+    paths:
+      - ".github/mt-build-regression/**"
+      - ".github/workflows/mt-build-regression.agent.md"
+      - ".github/workflows/mt-build-regression.agent.lock.yml"
+      - ".github/workflows/mt-build-regression-tests.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Validate PowerShell syntax
+        shell: pwsh
+        run: |
+          $failed = $false
+          Get-ChildItem -LiteralPath .github/mt-build-regression -Recurse -File |
+            Where-Object Extension -in '.ps1', '.psm1' |
+            ForEach-Object {
+              $tokens = $null
+              $errors = $null
+              [void][System.Management.Automation.Language.Parser]::ParseFile(
+                $_.FullName,
+                [ref]$tokens,
+                [ref]$errors)
+              if ($errors.Count -gt 0) {
+                $failed = $true
+                Write-Error "$($_.FullName): $($errors.Message -join '; ')" -ErrorAction Continue
+              }
+            }
+          if ($failed) {
+            throw 'PowerShell syntax validation failed.'
+          }
+
+      - name: Run component tests
+        shell: pwsh
+        run: ./.github/mt-build-regression/tests/run-tests.ps1
