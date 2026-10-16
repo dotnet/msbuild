@@ -91,11 +91,14 @@ namespace Microsoft.Build.Logging
         /// Avoid repeatedly hashing shared string instances without retaining the full string population.
         /// </summary>
         private readonly StringReferenceCacheEntry[] stringReferenceCache = new StringReferenceCacheEntry[StringReferenceCacheSize];
+        private readonly StringSliceSourceCache stringSliceSources = new();
 
         /// <summary>
         /// Hashtable used for deduplicating name-value lists. Same as strings.
         /// </summary>
         private readonly Dictionary<HashKey, int> nameValueListHashes = new Dictionary<HashKey, int>();
+
+        private readonly ItemSequenceCache itemSequences = new();
 
         /// <summary>
         /// Avoid repeatedly enumerating and hashing metadata dictionaries shared across items (because they're copy-on-write and frequently unmodified).
@@ -172,6 +175,15 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Write(BuildEventArgs e, BinaryLogRecordKind? originalRecordKind = null)
         {
+            // A reset must precede the entire event, never a list nested inside it.
+            if (itemSequences.ResetRequired)
+            {
+                using var redirectionScope = RedirectWritesToOriginalWriter();
+                Write(BinaryLogRecordKind.ItemSequence);
+                Write(0);
+                itemSequences.Clear();
+            }
+
             // reset the temp stream (in case last usage forgot to do so).
             this.currentRecordStream.SetLength(0);
             BinaryLogRecordKind eventKind = WriteCore(e);
@@ -1161,6 +1173,7 @@ namespace Microsoft.Build.Logging
                 count = reusableItemsList.Count;
             }
 
+            int sequenceStart = (int)currentRecordStream.Position;
             Write(count);
 
             foreach (var item in items)
@@ -1194,6 +1207,26 @@ namespace Microsoft.Build.Logging
             }
 
             reusableItemsList.Clear();
+
+            if (count >= 2)
+            {
+                int length = (int)currentRecordStream.Position - sequenceStart;
+                var bytes = new ArraySegment<byte>(currentRecordStream.GetBuffer(), sequenceStart, length);
+                if (itemSequences.TryGetOrAdd(bytes, out int id, out bool added))
+                {
+                    if (added)
+                    {
+                        using var redirectionScope = RedirectWritesToOriginalWriter();
+                        Write(BinaryLogRecordKind.ItemSequence);
+                        Write(length);
+                        originalBinaryWriter.Write(bytes.Array, bytes.Offset, bytes.Count);
+                    }
+
+                    currentRecordStream.SetLength(sequenceStart);
+                    currentRecordStream.Position = sequenceStart;
+                    Write(~id);
+                }
+            }
         }
 
         private void WriteProjectItems(IEnumerable items, string projectFile)
@@ -1659,9 +1692,7 @@ namespace Microsoft.Build.Logging
                 recordId = stringRecordId;
                 stringHashes[hash] = stringRecordId;
 
-                WriteStringRecord(text);
-
-                stringRecordId += 1;
+                WriteStringRecord(text, allowSlice: true);
             }
 
             if (referenceCacheIndex >= 0)
@@ -1675,12 +1706,34 @@ namespace Microsoft.Build.Logging
             return (recordId, hash);
         }
 
-        internal void WriteStringRecord(string text)
+        internal void WriteStringRecord(string text, bool allowSlice = false)
         {
             using var redirectionScope = RedirectWritesToOriginalWriter();
 
-            Write(BinaryLogRecordKind.String);
-            binaryWriter.Write(text);
+            const string responsePrefix = "BuildResponseFile = '";
+            int payloadLength = text.Length - responsePrefix.Length - 1;
+            if (allowSlice
+                && payloadLength is >= StringSliceSourceCache.MinimumLength and <= StringSliceSourceCache.MaximumLength
+                && text.StartsWith(responsePrefix, StringComparison.Ordinal)
+                && text[text.Length - 1] == '\''
+                && stringSliceSources.TryFindSuffix(text.AsSpan(responsePrefix.Length, payloadLength), out int sourceId, out int start))
+            {
+                Write(BinaryLogRecordKind.StringSlice);
+                Write(sourceId);
+                Write(start);
+                Write(payloadLength);
+                binaryWriter.Write(responsePrefix);
+                binaryWriter.Write("'");
+            }
+            else
+            {
+                Write(BinaryLogRecordKind.String);
+                binaryWriter.Write(text);
+                stringSliceSources.Add(stringRecordId, text);
+            }
+
+            // Raw replay also calls this method, once per original table entry, without deduplication.
+            stringRecordId++;
         }
 
         private void Write(DateTime timestamp)
