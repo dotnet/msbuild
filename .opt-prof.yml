@@ -98,6 +98,9 @@ stages:
         arguments: -BootstrapperInfoJsonURI '$(Pipeline.Workspace)\ComponentBuildUnderTest\MicroBuildOutputs\BootstrapperInfo.json' -VSBranch '$(VSBootstrapperBranch)' -OutVariableName 'VisualStudio.InstallationUnderTest.BootstrapperURL'
     preDeployAndRunTestsStepList:
     - download: ComponentBuildUnderTest
+      artifact: VSSetup
+      patterns: '**\*.runsettings'
+      displayName: Download OptProf test runsettings
     prePublishOptimizationInputsDropStepList:
     - download: ComponentBuildUnderTest
       artifact: VSSetup
