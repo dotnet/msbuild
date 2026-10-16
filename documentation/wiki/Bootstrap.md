@@ -15,6 +15,21 @@ The SDK is downloaded to the bootstrap folder.
 Fresh MSBuild bits are then copied to this folder.
 The constructed SDK is used for both local end-to-end tests and CI runs.
 
+## Engineering SDK and Bootstrap SDK
+
+The engineering SDK and the bootstrap SDK can use different .NET releases.
+`tools.dotnet` in `global.json` provisions the SDK used by Arcade for the outer build.
+`BootstrapSdkVersion` in `eng/Versions.props` selects the SDK used to test the freshly built MSBuild.
+The product target framework is controlled separately by `LatestDotNetCoreForMSBuild`.
+
+The `sdk.version` in `global.json` is a compatibility floor, with `rollForward` set to `latestMajor`.
+Together with `sdk.paths` set to `["$host$"]`, this lets the engineering host select its newer SDK
+while the isolated bootstrap host selects its own SDK for the self-build.
+
+In a `-stage2` build (`--stage2` on Unix), the second build runs with the bootstrapped MSBuild.
+The build scripts also set Arcade's `TestDotNetRoot` to that bootstrap installation so test apphosts
+run on its runtime rather than rolling forward to the engineering SDK's newer runtime.
+
 ## Potential Cons
 The reliance on downloading the SDK from a remote source requires an internet connection. For the initial build of the repository, this doesn't change as the SDK is always downloaded to the .dotnet folder first. For subsequent runs, the SDK in bootstrap will be downloaded again only **if the requested version was changed**.
 
