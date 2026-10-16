@@ -284,7 +284,10 @@ namespace Microsoft.Build.BackEnd
                     else
                     {
                         // For the full build decision, there are three possible outcomes
-                        _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "BuildTargetCompletely", _targetToAnalyze.Name);
+                        _loggingService.LogComment(
+                            MSBuildResource("BuildTargetCompletely").WithArgs(_targetToAnalyze.Name),
+                            MessageImportance.Low,
+                            _buildEventContext);
                     }
 
                     foreach (DependencyAnalysisLogDetail logDetail in _dependencyAnalysisDetail)
@@ -306,7 +309,10 @@ namespace Microsoft.Build.BackEnd
                     else
                     {
                         // For the partial build decision the are three possible outcomes
-                        _loggingService.LogComment(_buildEventContext, MessageImportance.Normal, "BuildTargetPartially", _targetToAnalyze.Name);
+                        _loggingService.LogComment(
+                            MSBuildResource("BuildTargetPartially").WithArgs(_targetToAnalyze.Name),
+                            MessageImportance.Normal,
+                            _buildEventContext);
                     }
                     foreach (DependencyAnalysisLogDetail logDetail in _dependencyAnalysisDetail)
                     {
@@ -462,11 +468,15 @@ namespace Microsoft.Build.BackEnd
             // if the target did declare inputs, but the specification evaluated to nothing
             if (TargetInputSpecification.Length > 0)
             {
-                _loggingService.LogComment(_buildEventContext, MessageImportance.Normal,
-                    "SkipTargetBecauseNoInputs", TargetToAnalyze.Name);
+                _loggingService.LogComment(
+                    MSBuildResource("SkipTargetBecauseNoInputs").WithArgs(TargetToAnalyze.Name),
+                    MessageImportance.Normal,
+                    _buildEventContext);
                 // detailed reason is low importance to keep log clean
-                _loggingService.LogComment(_buildEventContext, MessageImportance.Low,
-                    "SkipTargetBecauseNoInputsDetail");
+                _loggingService.LogComment(
+                    MSBuildResource("SkipTargetBecauseNoInputsDetail"),
+                    MessageImportance.Low,
+                    _buildEventContext);
 
                 // don't build the target
                 result = DependencyAnalysisResult.SkipNoInputs;
@@ -474,8 +484,14 @@ namespace Microsoft.Build.BackEnd
             else
             {
                 // There were no inputs specified, so build completely
-                _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "BuildTargetCompletely", _targetToAnalyze.Name);
-                _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "BuildTargetCompletelyNoInputsSpecified");
+                _loggingService.LogComment(
+                    MSBuildResource("BuildTargetCompletely").WithArgs(_targetToAnalyze.Name),
+                    MessageImportance.Low,
+                    _buildEventContext);
+                _loggingService.LogComment(
+                    MSBuildResource("BuildTargetCompletelyNoInputsSpecified"),
+                    MessageImportance.Low,
+                    _buildEventContext);
 
                 // otherwise, do a full build
                 result = DependencyAnalysisResult.FullBuild;
@@ -503,11 +519,15 @@ namespace Microsoft.Build.BackEnd
             // otherwise, don't build the target
             else
             {
-                _loggingService.LogComment(_buildEventContext, MessageImportance.Normal,
-                    "SkipTargetBecauseNoOutputs", TargetToAnalyze.Name);
+                _loggingService.LogComment(
+                    MSBuildResource("SkipTargetBecauseNoOutputs").WithArgs(TargetToAnalyze.Name),
+                    MessageImportance.Normal,
+                    _buildEventContext);
                 // detailed reason is low importance to keep log clean
-                _loggingService.LogComment(_buildEventContext, MessageImportance.Low,
-                    "SkipTargetBecauseNoOutputsDetail");
+                _loggingService.LogComment(
+                    MSBuildResource("SkipTargetBecauseNoOutputsDetail"),
+                    MessageImportance.Low,
+                    _buildEventContext);
             }
 
             return result;

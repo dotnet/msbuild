@@ -11,6 +11,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -344,6 +345,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
             foreach (object o in messageArgs)
             {
                 _writer((string)o);
+            }
+        }
+
+        public void LogComment<TArgs>(ResourceMessage<TArgs> message, MessageImportance importance, BuildEventContext context)
+            where TArgs : struct, IMessageArgs
+        {
+            _writer(message.ResourceName);
+
+            TArgs args = message.Args;
+            for (int i = 0; i < args.Count; i++)
+            {
+                _writer(Convert.ToString(args[i]));
             }
         }
 

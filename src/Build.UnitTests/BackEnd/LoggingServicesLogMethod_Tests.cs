@@ -779,17 +779,51 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         [Fact]
+        public void LogCommentWithDeferredArgs()
+        {
+            ProcessBuildEventHelper service =
+                (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+
+            service.LogComment(
+                MSBuildResource("TaskFound").WithArgs("TaskName", "FactoryName"),
+                MessageImportance.Low,
+                s_buildEventContext);
+
+            BuildMessageEventArgs buildEvent = service.ProcessedBuildEvent.ShouldBeOfType<BuildMessageEventArgs>();
+            buildEvent.ArgCount.ShouldBe(2);
+            buildEvent[0].ShouldBe("TaskName");
+            buildEvent[1].ShouldBe("FactoryName");
+            buildEvent.Message.ShouldBe(
+                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TaskFound", "TaskName", "FactoryName"));
+
+            service.ResetProcessedBuildEvent();
+            service.LogComment(MSBuildResource("BuildFinishedSuccess"), MessageImportance.Low, s_buildEventContext);
+
+            buildEvent = service.ProcessedBuildEvent.ShouldBeOfType<BuildMessageEventArgs>();
+            buildEvent.ArgCount.ShouldBe(0);
+            buildEvent.Message.ShouldBe(ResourceUtilities.GetResourceString("BuildFinishedSuccess"));
+        }
+
+        [Fact]
         public void LogCommentFiltersMessagesNoLoggerConsumes()
         {
             ProcessBuildEventHelper service =
                 (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Normal)).ShouldBeTrue();
 
-            service.LogComment(s_buildEventContext, MessageImportance.Low, "BuildFinishedSuccess");
+            service.LogComment(
+                MSBuildResource("TaskFound").WithArgs("TaskName", "FactoryName"),
+                MessageImportance.Low,
+                s_buildEventContext);
             service.ProcessedBuildEvent.ShouldBeNull();
 
-            service.LogComment(s_buildEventContext, MessageImportance.Normal, "BuildFinishedSuccess");
-            service.ProcessedBuildEvent.ShouldBeOfType<BuildMessageEventArgs>().Importance.ShouldBe(MessageImportance.Normal);
+            service.LogComment(
+                MSBuildResource("TaskFound").WithArgs("TaskName", "FactoryName"),
+                MessageImportance.Normal,
+                s_buildEventContext);
+            BuildMessageEventArgs buildEvent = service.ProcessedBuildEvent.ShouldBeOfType<BuildMessageEventArgs>();
+            buildEvent.Importance.ShouldBe(MessageImportance.Normal);
+            buildEvent.ArgCount.ShouldBe(2);
         }
 
         #endregion

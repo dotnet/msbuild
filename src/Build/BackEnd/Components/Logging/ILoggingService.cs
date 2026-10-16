@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -386,6 +387,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="messageResourceName">string within the resource which indicates the format string to use</param>
         /// <param name="messageArgs">string resource arguments</param>
         void LogComment(BuildEventContext buildEventContext, MessageImportance importance, string messageResourceName, params object[] messageArgs);
+
+        /// <summary>
+        ///  Creates a message build event from a resource and deferred args.
+        /// </summary>
+        /// <typeparam name="TArgs">The deferred arg provider type.</typeparam>
+        /// <param name="message">The resource message to log.</param>
+        /// <param name="importance">The importance of the message.</param>
+        /// <param name="context">The context describing where the message originated.</param>
+        void LogComment<TArgs>(ResourceMessage<TArgs> message, MessageImportance importance, BuildEventContext context)
+            where TArgs : struct, IMessageArgs;
 
         /// <summary>
         /// Helper method to create a message build event from a string

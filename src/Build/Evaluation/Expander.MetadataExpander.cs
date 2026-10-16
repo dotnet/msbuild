@@ -215,11 +215,11 @@ internal partial class Expander<P, I>
                         (string.IsNullOrEmpty(itemType) || string.Equals(itemType, itemMetadata.ItemType, StringComparison.Ordinal)))
                     {
                         _loggingContext.LogComment(
+                            MSBuildResource("ItemReferencingSelfInTarget").WithArgs(
+                                itemMetadata.ItemType,
+                                metadataName),
                             MessageImportance.Low,
-                            _elementLocation,
-                            "ItemReferencingSelfInTarget",
-                            itemMetadata.ItemType,
-                            metadataName);
+                            _elementLocation);
                     }
 
                     if (IsTruncationEnabled(_options) && expanded.Length > CharacterLimitPerExpansion)

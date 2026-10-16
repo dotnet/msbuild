@@ -281,16 +281,16 @@ namespace Microsoft.Build.Execution
                 {
                     if (record.TaskFactoryAttributeName.Equals(RegisteredTaskRecord.AssemblyTaskFactory) || record.TaskFactoryAttributeName.Equals(RegisteredTaskRecord.TaskHostFactory))
                     {
-                        targetLoggingContext.LogComment(MessageImportance.Low, "TaskFound", taskName, taskFactory.Name);
+                        targetLoggingContext.LogComment(MSBuildResource("TaskFound").WithArgs(taskName, taskFactory.Name), MessageImportance.Low);
                     }
                     else
                     {
-                        targetLoggingContext.LogComment(MessageImportance.Low, "TaskFoundFromFactory", taskName, taskFactory.Name);
+                        targetLoggingContext.LogComment(MSBuildResource("TaskFoundFromFactory").WithArgs(taskName, taskFactory.Name), MessageImportance.Low);
                     }
 
                     if (taskFactory.TaskFactoryLoadedType.HasSTAThreadAttribute)
                     {
-                        targetLoggingContext.LogComment(MessageImportance.Low, "TaskNeedsSTA", taskName);
+                        targetLoggingContext.LogComment(MSBuildResource("TaskNeedsSTA").WithArgs(taskName), MessageImportance.Low);
                     }
                 }
             }
@@ -524,7 +524,9 @@ namespace Microsoft.Build.Execution
                     // New record's name may be fully qualified. Use it anyway to account for partial matches.
                     List<RegisteredTaskRecord> unqualifiedTaskNameMatches = [newRecord];
                     _overriddenTasks.Add(unqualifiedTaskName, unqualifiedTaskNameMatches);
-                    loggingContext.LogComment(MessageImportance.Low, "OverrideUsingTaskElementCreated", info.TaskName, projectUsingTaskInXml.OverrideLocation);
+                    loggingContext.LogComment(
+                        MSBuildResource("OverrideUsingTaskElementCreated").WithArgs(info.TaskName, projectUsingTaskInXml.OverrideLocation),
+                        MessageImportance.Low);
                 }
             }
 
@@ -1263,7 +1265,9 @@ namespace Microsoft.Build.Execution
                                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CouldNotFindFactory", TaskFactoryAttributeName, taskFactoryLoadInfo.AssemblyLocation);
                                 }
 
-                                targetLoggingContext.LogComment(MessageImportance.Low, "InitializingTaskFactory", TaskFactoryAttributeName, taskFactoryLoadInfo.AssemblyLocation);
+                                targetLoggingContext.LogComment(
+                                    MSBuildResource("InitializingTaskFactory").WithArgs(TaskFactoryAttributeName, taskFactoryLoadInfo.AssemblyLocation),
+                                    MessageImportance.Low);
                             }
                             catch (TargetInvocationException e)
                             {

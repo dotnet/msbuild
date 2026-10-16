@@ -96,9 +96,11 @@ namespace Microsoft.Build.BackEnd
                                 Project.GetProperty(property.Name)?.EvaluatedValue ?? null,
                                 LoggingContext);
 
-                            if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents)
+                            if (LogTaskInputs && LoggingContext.LoggingService.IsMessageEnabled(MessageImportance.Low))
                             {
-                                LoggingContext.LogComment(MessageImportance.Low, "PropertyGroupLogMessage", property.Name, evaluatedValue);
+                                LoggingContext.LogComment(
+                                    MSBuildResource("PropertyGroupLogMessage").WithArgs(property.Name, evaluatedValue),
+                                    MessageImportance.Low);
                             }
 
                             bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(property.Name, evaluatedValue, property.Location, Project.IsImmutable));

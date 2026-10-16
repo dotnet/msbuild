@@ -453,7 +453,10 @@ namespace Microsoft.Build.BackEnd
                     _taskLoggingContext.LoggingService.LogBuildEvent(warningEvent);
 
                     // Log a message explaining why we converted the previous error into a warning.
-                    _taskLoggingContext.LoggingService.LogComment(_taskLoggingContext.BuildEventContext, MessageImportance.Normal, "ErrorConvertedIntoWarning");
+                    _taskLoggingContext.LoggingService.LogComment(
+                        MSBuildResource("ErrorConvertedIntoWarning"),
+                        MessageImportance.Normal,
+                        _taskLoggingContext.BuildEventContext);
                 }
                 else
                 {
@@ -886,8 +889,13 @@ namespace Microsoft.Build.BackEnd
                 Debug.Assert(coresAcquired >= 1);
                 if (LoggingContext.IsValid)
                 {
-                    LoggingContext.LogComment(MessageImportance.Low, "TaskAcquiredCores", _taskLoggingContext.TaskName,
-                        requestedCores, coresAcquired, TotalAcquiredCores);
+                    LoggingContext.LogComment(
+                        MSBuildResource("TaskAcquiredCores").WithArgs(
+                            _taskLoggingContext.TaskName,
+                            requestedCores,
+                            coresAcquired,
+                            TotalAcquiredCores),
+                        MessageImportance.Low);
                 }
                 return coresAcquired;
             }
@@ -926,13 +934,22 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (TotalAcquiredCores == previousTotalAcquiredCores - coresToRelease)
                     {
-                        LoggingContext.LogComment(MessageImportance.Low, "TaskReleasedCores", _taskLoggingContext.TaskName,
-                            coresToRelease, TotalAcquiredCores);
+                        LoggingContext.LogComment(
+                            MSBuildResource("TaskReleasedCores").WithArgs(
+                                _taskLoggingContext.TaskName,
+                                coresToRelease,
+                                TotalAcquiredCores),
+                            MessageImportance.Low);
                     }
                     else
                     {
-                        LoggingContext.LogComment(MessageImportance.Low, "TaskReleasedCoresWarning", _taskLoggingContext.TaskName,
-                            coresToRelease, previousTotalAcquiredCores, TotalAcquiredCores);
+                        LoggingContext.LogComment(
+                            MSBuildResource("TaskReleasedCoresWarning").WithArgs(
+                                _taskLoggingContext.TaskName,
+                                coresToRelease,
+                                previousTotalAcquiredCores,
+                                TotalAcquiredCores),
+                            MessageImportance.Low);
                     }
                 }
             }

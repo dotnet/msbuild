@@ -536,7 +536,11 @@ namespace Microsoft.Build.BackEnd
                 string realTaskAssemblyLocation = TaskInstance.GetType().Assembly.Location;
                 if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) && realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
                 {
-                    _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
+                    _taskLoggingContext.LogComment(
+                        MSBuildResource("TaskAssemblyLocationMismatch").WithArgs(
+                            realTaskAssemblyLocation,
+                            _taskFactoryWrapper.TaskFactoryLoadedType.Path),
+                        MessageImportance.Normal);
                 }
             }
 

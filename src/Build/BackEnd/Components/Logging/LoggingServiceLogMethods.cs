@@ -9,6 +9,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
@@ -43,6 +44,24 @@ namespace Microsoft.Build.BackEnd.Logging
                 Assumed.NotNullOrEmpty(messageResourceName, "Need resource string for comment message.");
 
                 LogCommentFromText(buildEventContext, importance, ResourceUtilities.GetResourceString(messageResourceName), messageArgs);
+            }
+        }
+
+        /// <summary>
+        ///  Logs a comment from a resource while deferring arg formatting.
+        /// </summary>
+        /// <typeparam name="TArgs">The deferred arg provider type.</typeparam>
+        /// <param name="message">The resource message to log.</param>
+        /// <param name="importance">The importance of the message.</param>
+        /// <param name="context">The context describing where the message originated.</param>
+        public void LogComment<TArgs>(ResourceMessage<TArgs> message, MessageImportance importance, BuildEventContext context)
+            where TArgs : struct, IMessageArgs
+        {
+            if (IsMessageEnabled(importance))
+            {
+                BuildMessageEventArgs buildEvent = EventsCreatorHelper.CreateMessageEvent(message, importance, context);
+
+                ProcessLoggingEvent(buildEvent);
             }
         }
 

@@ -355,12 +355,12 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 _taskLoggingContext.LogComment(
-                    MessageImportance.Low,
-                    "ExecutingTaskInTaskHost",
-                    _taskType.Type.Name,
-                    _taskType.Assembly.AssemblyLocation,
-                    _taskHostParameters.Runtime,
-                    _taskHostParameters.Architecture);
+                    MSBuildResource("ExecutingTaskInTaskHost").WithArgs(
+                        _taskType.Type.Name,
+                        _taskType.Assembly.AssemblyLocation,
+                        _taskHostParameters.Runtime,
+                        _taskHostParameters.Architecture),
+                    MessageImportance.Low);
 
                 // set up the node
                 lock (_taskHostLock)
@@ -440,15 +440,18 @@ namespace Microsoft.Build.BackEnd
 
                     if (_connectedToTaskHost)
                     {
-                        _taskLoggingContext.LogComment(
-                            MessageImportance.Low,
-                            "TaskHostDetails",
-                            _taskType.Type.Name,
-                            hostProcessId,
-                            Process.GetCurrentProcess().Id,
-                            wasNewlyCreated,
-                            _allowNodeReuse,
-                            effectiveNodeReuse);
+                        if (_taskLoggingContext.LoggingService.IsMessageEnabled(MessageImportance.Low))
+                        {
+                            _taskLoggingContext.LogComment(
+                                MSBuildResource("TaskHostDetails").WithArgs(
+                                    _taskType.Type.Name,
+                                    hostProcessId,
+                                    Process.GetCurrentProcess().Id,
+                                    wasNewlyCreated,
+                                    _allowNodeReuse,
+                                    effectiveNodeReuse),
+                                MessageImportance.Low);
+                        }
 
                         try
                         {

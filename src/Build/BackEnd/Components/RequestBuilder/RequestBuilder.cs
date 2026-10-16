@@ -1229,10 +1229,11 @@ namespace Microsoft.Build.BackEnd
 
                 if (_requestEntry.RequestConfiguration.Project.UsingDifferentToolsVersionFromProjectFile)
                 {
-                    _projectLoggingContext.LogComment(MessageImportance.Low,
-                        "UsingDifferentToolsVersionFromProjectFile",
-                        _requestEntry.RequestConfiguration.Project.OriginalProjectToolsVersion,
-                        _requestEntry.RequestConfiguration.Project.ToolsVersion);
+                    _projectLoggingContext.LogComment(
+                        MSBuildResource("UsingDifferentToolsVersionFromProjectFile").WithArgs(
+                            _requestEntry.RequestConfiguration.Project.OriginalProjectToolsVersion,
+                            _requestEntry.RequestConfiguration.Project.ToolsVersion),
+                        MessageImportance.Low);
                 }
 
                 _requestEntry.Request.BuildEventContext = _projectLoggingContext.BuildEventContext;

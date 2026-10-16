@@ -1197,7 +1197,13 @@ namespace Microsoft.Build.Evaluation
             ProjectTargetInstance otherTarget = _data.GetTarget(targetName);
             if (otherTarget != null)
             {
-                _evaluationLoggingContext.LogComment(MessageImportance.Low, "OverridingTarget", otherTarget.Name, otherTarget.Location.File, targetName, targetElement.Location.File);
+                _evaluationLoggingContext.LogComment(
+                    MSBuildResource("OverridingTarget").WithArgs(
+                        otherTarget.Name,
+                        otherTarget.Location.File,
+                        targetName,
+                        targetElement.Location.File),
+                    MessageImportance.Low);
             }
 
             if (activeTargets.TryGetValue(targetName, out LinkedListNode<ProjectTargetElement> node))
@@ -1236,7 +1242,14 @@ namespace Microsoft.Build.Evaluation
                 {
                     // This is a message, not a warning, because that enables people to speculatively extend the build of a project
                     // It's low importance as it's addressed to build authors
-                    _evaluationLoggingContext.LogComment(MessageImportance.Low, "TargetDoesNotExistBeforeTargetMessage", unescapedBeforeTarget, targetElement.BeforeTargetsLocation.LocationString);
+                    if (_evaluationLoggingContext.LoggingService.IsMessageEnabled(MessageImportance.Low))
+                    {
+                        _evaluationLoggingContext.LogComment(
+                            MSBuildResource("TargetDoesNotExistBeforeTargetMessage").WithArgs(
+                                unescapedBeforeTarget,
+                                targetElement.BeforeTargetsLocation.LocationString),
+                            MessageImportance.Low);
+                    }
                 }
             }
 
@@ -1259,7 +1272,14 @@ namespace Microsoft.Build.Evaluation
                 {
                     // This is a message, not a warning, because that enables people to speculatively extend the build of a project
                     // It's low importance as it's addressed to build authors
-                    _evaluationLoggingContext.LogComment(MessageImportance.Low, "TargetDoesNotExistAfterTargetMessage", unescapedAfterTarget, targetElement.AfterTargetsLocation.LocationString);
+                    if (_evaluationLoggingContext.LoggingService.IsMessageEnabled(MessageImportance.Low))
+                    {
+                        _evaluationLoggingContext.LogComment(
+                            MSBuildResource("TargetDoesNotExistAfterTargetMessage").WithArgs(
+                                unescapedAfterTarget,
+                                targetElement.AfterTargetsLocation.LocationString),
+                            MessageImportance.Low);
+                    }
                 }
             }
         }
@@ -1450,7 +1470,9 @@ namespace Microsoft.Build.Evaluation
                         ((IDictionary<string, ProjectPropertyInstance>)_data.GlobalPropertiesDictionary).ContainsKey(propertyElement.Name) &&
                         !_data.GlobalPropertiesToTreatAsLocal.Contains(propertyElement.Name))
                 {
-                    _evaluationLoggingContext.LogComment(MessageImportance.Low, "OM_GlobalProperty", propertyElement.Name);
+                    _evaluationLoggingContext.LogComment(
+                        MSBuildResource("OM_GlobalProperty").WithArgs(propertyElement.Name),
+                        MessageImportance.Low);
                     return;
                 }
 
@@ -1728,9 +1750,14 @@ namespace Microsoft.Build.Evaluation
 
             string extensionPropertyRefAsString = fallbackSearchPathMatch.MsBuildPropertyFormat;
 
-            _evaluationLoggingContext.LogComment(MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
-                                        extensionPropertyRefAsString,
-                                        string.Join(";", pathsToSearch));
+            if (_evaluationLoggingContext.LoggingService.IsMessageEnabled(MessageImportance.Low))
+            {
+                _evaluationLoggingContext.LogComment(
+                    MSBuildResource("SearchPathsForMSBuildExtensionsPath").WithArgs(
+                        extensionPropertyRefAsString,
+                        string.Join(";", pathsToSearch)),
+                    MessageImportance.Low);
+            }
 
             bool atleastOneExactFilePathWasLookedAtAndNotFound = false;
 
@@ -1771,7 +1798,9 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 var newExpandedImportPath = importElement.Project.Replace(extensionPropertyRefAsString, extensionPathExpanded, StringComparison.OrdinalIgnoreCase);
-                _evaluationLoggingContext.LogComment(MessageImportance.Low, "TryingExtensionsPath", newExpandedImportPath, extensionPathExpanded);
+                _evaluationLoggingContext.LogComment(
+                    MSBuildResource("TryingExtensionsPath").WithArgs(newExpandedImportPath, extensionPathExpanded),
+                    MessageImportance.Low);
 
                 List<ProjectRootElement> projects;
                 var result = ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, newExpandedImportPath, false, out projects);

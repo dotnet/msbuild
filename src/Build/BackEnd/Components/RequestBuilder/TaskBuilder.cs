@@ -691,11 +691,11 @@ namespace Microsoft.Build.BackEnd
                         // our skip task message needs to be in the context of the target. However any errors should be reported
                         // at the point where the task appears in the project.
                         _targetLoggingContext.LogComment(
-                            MessageImportance.Low,
-                            "TaskSkippedFalseCondition",
-                            _taskNode.Name,
-                            _targetChildInstance.Condition,
-                            expanded);
+                            MSBuildResource("TaskSkippedFalseCondition").WithArgs(
+                                _taskNode.Name,
+                                _targetChildInstance.Condition,
+                                expanded),
+                            MessageImportance.Low);
                     }
                 }
             }
@@ -842,7 +842,9 @@ namespace Microsoft.Build.BackEnd
                             && (_buildRequestEntry.Request.BuildRequestDataFlags & BuildRequestDataFlags.SkipNonexistentTargets) == BuildRequestDataFlags.SkipNonexistentTargets)
                         {
                             msbuildTask.SkipNonexistentTargets = true;
-                            taskLoggingContext.LogComment(MessageImportance.Low, "MSBuildTaskInheritedSkipNonexistentTargets");
+                            taskLoggingContext.LogComment(
+                                MSBuildResource("MSBuildTaskInheritedSkipNonexistentTargets"),
+                                MessageImportance.Low);
                         }
 
                         var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
@@ -973,7 +975,7 @@ namespace Microsoft.Build.BackEnd
                         if (_continueOnError != ContinueOnError.ErrorAndStop)
                         {
                             taskLoggingContext.LogInvalidProjectFileError(ipex);
-                            taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
+                            taskLoggingContext.LogComment(MSBuildResource("ErrorConvertedIntoWarning"), MessageImportance.Normal);
                         }
                         else
                         {
@@ -1011,7 +1013,7 @@ namespace Microsoft.Build.BackEnd
                                 _taskNode.Name);
 
                             // Log a message explaining why we converted the previous error into a warning.
-                            taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
+                            taskLoggingContext.LogComment(MSBuildResource("ErrorConvertedIntoWarning"), MessageImportance.Normal);
                         }
                         else
                         {
@@ -1041,7 +1043,9 @@ namespace Microsoft.Build.BackEnd
                     if (be is IBuildEngine7 be7 && be7.AllowFailureWithoutError)
                     {
                         // If it's allowed to fail without error, log as a message
-                        taskLoggingContext.LogComment(MessageImportance.Normal, "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
+                        taskLoggingContext.LogComment(
+                            MSBuildResource("TaskReturnedFalseButDidNotLogError").WithArgs(_taskNode.Name),
+                            MessageImportance.Normal);
                     }
                     else if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {
@@ -1050,7 +1054,7 @@ namespace Microsoft.Build.BackEnd
                             "TaskReturnedFalseButDidNotLogError",
                             _taskNode.Name);
 
-                        taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
+                        taskLoggingContext.LogComment(MSBuildResource("ErrorConvertedIntoWarning"), MessageImportance.Normal);
                     }
                     else
                     {
@@ -1088,11 +1092,11 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         taskLoggingContext.LogComment(
-                            MessageImportance.Normal,
-                            "TaskContinuedDueToContinueOnError",
-                            "ContinueOnError",
-                            _taskNode.Name,
-                            settingString);
+                            MSBuildResource("TaskContinuedDueToContinueOnError").WithArgs(
+                                "ContinueOnError",
+                                _taskNode.Name,
+                                settingString),
+                            MessageImportance.Normal);
 
                         actionCode = WorkUnitActionCode.Continue;
                     }

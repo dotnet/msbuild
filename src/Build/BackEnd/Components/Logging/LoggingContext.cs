@@ -3,11 +3,13 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Build.BackEnd.Shared;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -131,6 +133,19 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        ///  Creates a message build event from a resource and deferred args.
+        /// </summary>
+        /// <typeparam name="TArgs">The deferred arg provider type.</typeparam>
+        /// <param name="message">The resource message to log.</param>
+        /// <param name="importance">The importance of the message.</param>
+        internal void LogComment<TArgs>(ResourceMessage<TArgs> message, MessageImportance importance)
+            where TArgs : struct, IMessageArgs
+        {
+            CheckValidity();
+            _loggingService.LogComment(message, importance, _eventContext);
+        }
+
+        /// <summary>
         ///  Helper method to create a message build event from a string resource and some parameters
         /// </summary>
         /// <param name="importance">Importance level of the message</param>
@@ -163,6 +178,26 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 BuildEventContext = _eventContext
             });
+        }
+
+        /// <summary>
+        ///  Creates a message build event with a location from a resource and deferred args.
+        /// </summary>
+        /// <typeparam name="TArgs">The deferred arg provider type.</typeparam>
+        /// <param name="message">The resource message to log.</param>
+        /// <param name="importance">The importance of the message.</param>
+        /// <param name="location">The location where the event occurred.</param>
+        internal void LogComment<TArgs>(ResourceMessage<TArgs> message, MessageImportance importance, IElementLocation location)
+            where TArgs : struct, IMessageArgs
+        {
+            CheckValidity();
+
+            if (!_loggingService.IsMessageEnabled(importance))
+            {
+                return;
+            }
+
+            _loggingService.LogBuildEvent(EventsCreatorHelper.CreateMessageEvent(message, importance, location, _eventContext));
         }
 
         /// <summary>
