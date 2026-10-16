@@ -282,6 +282,25 @@ namespace Microsoft.Build.Tasks
         #region Overridden methods
 
         /// <summary>
+        /// Executes the command with the command processor that the Exec task creates itself.
+        /// </summary>
+        /// <returns>True if the command completes successfully; otherwise, false.</returns>
+        public override bool Execute()
+        {
+            bool useCommandProcessor = UseCommandProcessor;
+            UseCommandProcessor = false;
+
+            try
+            {
+                return base.Execute();
+            }
+            finally
+            {
+                UseCommandProcessor = useCommandProcessor;
+            }
+        }
+
+        /// <summary>
         /// Executes cmd.exe and waits for it to complete
         /// </summary>
         /// <remarks>
