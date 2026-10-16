@@ -77,6 +77,16 @@
         <target state="translated">嘗試從路徑 "{0}" 和架構 Moniker "{1}" 產生參考組件路徑時，發生錯誤。{2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRedistFile">
+        <source>There was an error reading the redist list file "{0}". {1}</source>
+        <target state="needs-review-translation">讀取可轉散發套件清單檔 "{0}" 時發生錯誤。{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotCreateChain">
+        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
+        <target state="needs-review-translation">路徑 "{0}" 的架構嘗試將路徑 "{1}" 的架構當做自己的參考組件路徑，但發生錯誤。{2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">用於偵錯記錄檔 "{0}" 的路徑太長。使用 MSBUILDDEBUGPATH 環境變數將它設定為較短的值，或變更您的系統設定以允許長路徑。</target>
@@ -122,7 +132,17 @@
         <target state="translated">路徑: {0} 超過 OS 路徑上限。完整檔案名稱必須少於 {1} 個字元。</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformManifest_MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: 在 "{0}" 找不到平台資訊清單檔案。</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">不支援 .NET Framework 版本 "{0}"。請從列舉 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中指定值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper_UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">不支援 .NET Framework 版本 "{0}"。請從列舉 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中指定值。</target>
         <note />

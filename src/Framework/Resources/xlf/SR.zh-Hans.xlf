@@ -77,6 +77,16 @@
         <target state="translated">尝试从路径“{0}”和框架名字对象“{1}”生成引用程序集路径时出错。{2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRedistFile">
+        <source>There was an error reading the redist list file "{0}". {1}</source>
+        <target state="needs-review-translation">读取可再发行程序包列表文件“{0}”时出错。{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotCreateChain">
+        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
+        <target state="needs-review-translation">路径为“{0}”的框架尝试将路径为“{1}”的框架包含在其引用程序集路径中，但出现了错误。{2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">用于调试日志的路径 "{0}" 太长。使用 MSBUILDDEBUGPATH 环境变量将其设置为较短值，或更改系统配置以允许长路径。</target>
@@ -122,7 +132,17 @@
         <target state="translated">路径: {0} 超过 OS 最大路径限制。完全限定的文件名必须少于 {1} 个字符。</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformManifest_MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: 找不到“{0}”中的平台清单文件。</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">不支持 .NET Framework 版本“{0}”。请指定枚举 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中的某个值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper_UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">不支持 .NET Framework 版本“{0}”。请指定枚举 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中的某个值。</target>
         <note />
