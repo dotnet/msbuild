@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Immutable;
+using Microsoft.Build.Collections;
 using Microsoft.CodeAnalysis.Collections;
 
 namespace Microsoft.Build.Evaluation;
@@ -39,12 +40,18 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="operationCount">The number of operations through the requested position.</param>
         /// <returns>
-        ///  The filtered items in evaluation order.
+        ///  A non-default array of filtered items in evaluation order.
         /// </returns>
-        public ImmutableList<I> GetFilteredItems(int operationCount)
+        public ImmutableArray<I> GetFilteredItems(int operationCount)
         {
-            ImmutableList<I>.Builder items = ImmutableList.CreateBuilder<I>();
-            foreach (ItemData data in GetItemData(operationCount))
+            OrderedItemDataCollection itemData = GetItemData(operationCount);
+            if (itemData.Count == 0)
+            {
+                return [];
+            }
+
+            using RefArrayBuilder<I> items = new(itemData.Count);
+            foreach (ItemData data in itemData)
             {
                 if (data.ConditionResult)
                 {

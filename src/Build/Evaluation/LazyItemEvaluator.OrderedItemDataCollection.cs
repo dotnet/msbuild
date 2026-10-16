@@ -32,6 +32,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         }
 
         /// <summary>
+        ///  Gets the number of items in this snapshot.
+        /// </summary>
+        public int Count => _list.Count;
+
+        /// <summary>
         /// Creates a new mutable collection.
         /// </summary>
         public static Builder CreateBuilder()

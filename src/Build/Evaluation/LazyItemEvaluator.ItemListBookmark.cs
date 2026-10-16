@@ -18,9 +18,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  Gets the items at the bookmark, filtered by originating Include conditions.
         /// </summary>
         /// <returns>
-        ///  The filtered items in evaluation order.
+        ///  A non-default array of filtered items in evaluation order.
         /// </returns>
-        public ImmutableList<I> GetFilteredItems()
+        public ImmutableArray<I> GetFilteredItems()
             => sequence.GetFilteredItems(operationCount);
 
         /// <summary>
