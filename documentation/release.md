@@ -48,7 +48,7 @@ and signing are unchanged: Arcade repacks shipping packages into `Release` and
 | `ReleaseConfigs` and `BlobArtifacts/MergedManifest.xml` | Arcade asset-registry job | BAR build ID, default channels, stability, and merged asset metadata linking source/build to published assets. Keep these for audit and downstream publishing. |
 | VS payload drop (`Upload VSTS Drop`) and `xsd` | MicroBuild drop task and Windows job's 1ES output | VS insertion payload and schema-update script. The drop task's display name is a consumer contract. |
 | OptProf profiling-input drop, `MicroBuildOutputs`, `VSSetup` | Windows job's 1ES outputs, only with OptProf enabled | DartLab consumes bootstrapper information, runsettings, metadata, and profiling inputs. Each hook downloads only its required files, not all official artifacts. |
-| `logs`, post-build logs, and source-build outputs | Windows job and Arcade source-build/post-build jobs | Build/signing/publishing diagnostics and source-build dependency assets; retained. |
+| `logs` (pipeline artifact), post-build logs, and source-build outputs | Windows job and Arcade source-build/post-build jobs | Build/signing/publishing diagnostics and source-build dependency assets; retained. The `logs` name and relative paths are unchanged, and publication runs even on failure. |
 
 ### Validation and compatibility
 
