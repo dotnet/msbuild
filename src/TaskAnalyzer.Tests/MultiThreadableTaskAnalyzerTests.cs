@@ -462,6 +462,160 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
+    public async Task FileStream_InHelperCalledOnlyWithGetAbsolutePath_NoDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    AbsolutePath path = TaskEnvironment.GetAbsolutePath("foo.dll");
+                    ReadAssembly(path);
+                    return true;
+                }
+
+                internal static void ReadAssembly(string path)
+                {
+                    using var stream = new FileStream(path, FileMode.Open);
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task FileStream_InHelperWithUnsafeCall_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    AbsolutePath safePath = TaskEnvironment.GetAbsolutePath("foo.dll");
+                    ReadAssembly(safePath);
+                    ReadAssembly("relative.dll");
+                    return true;
+                }
+
+                private static void ReadAssembly(string path)
+                {
+                    using var stream = new FileStream(path, FileMode.Open);
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task FileStream_InInternalHelperWithUnsafeExternalCall_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    AbsolutePath safePath = TaskEnvironment.GetAbsolutePath("foo.dll");
+                    ReadAssembly(safePath);
+                    return true;
+                }
+
+                internal static void ReadAssembly(string path)
+                {
+                    using var stream = new FileStream(path, FileMode.Open);
+                }
+            }
+
+            public static class Other
+            {
+                public static void ReadRelativePath() => MyTask.ReadAssembly("relative.dll");
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task FileStream_InPrivateHelperWithUnsafeNestedCall_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    AbsolutePath safePath = TaskEnvironment.GetAbsolutePath("foo.dll");
+                    ReadAssembly(safePath);
+                    return true;
+                }
+
+                private static void ReadAssembly(string path)
+                {
+                    using var stream = new FileStream(path, FileMode.Open);
+                }
+
+                private static class Nested
+                {
+                    internal static void ReadRelativePath() => ReadAssembly("relative.dll");
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task FileStream_UnrelatedSameNamedMethod_KeepsDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    AbsolutePath safePath = TaskEnvironment.GetAbsolutePath("foo.dll");
+                    ReadAssembly(safePath);
+                    Other.ReadAssembly();
+                    return true;
+                }
+
+                internal static void ReadAssembly(string path)
+                {
+                    using var stream = new FileStream(path, FileMode.Open);
+                }
+            }
+
+            public static class Other
+            {
+                public static void ReadAssembly()
+                {
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
     public async Task FileDelete_WithNullableAbsolutePathVariable_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
