@@ -1,0 +1,38 @@
+name: Queue PerfStar evaluation
+
+# This workflow has write access in the base repository so it can handle fork PRs.
+# Keep all PR interaction in the GitHub API; never check out or execute PR code.
+# An explicit-SHA PR comment authorizes one commit; a push does not authorize new code.
+on:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] - Fork PRs need base-repository write access; no PR code is checked out or executed.
+    types: [synchronize, closed]
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: perfstar-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
+  queue: max
+
+permissions: {}
+
+jobs:
+  reconcile-perf-branch:
+    if: github.event_name != 'issue_comment' || github.event.issue.pull_request
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out trusted default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Older PR base branches can lack this action; execute only default-branch code.
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Reconcile PerfStar branch
+        uses: ./.github/actions/perfstar
+        with:
+          github-token: ${{ github.token }}
