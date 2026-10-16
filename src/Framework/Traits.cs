@@ -84,6 +84,33 @@ namespace Microsoft.Build.Framework
         public static readonly string? MSBuildNodeHandshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
 
         /// <summary>
+        /// Name of the environment variable that points the node lifecycle journal at a file. Test-only diagnostics;
+        /// see <see cref="NodeLifecycleJournal"/>.
+        /// </summary>
+        public const string NodeJournalEnvVarName = "MSBUILDNODEJOURNAL";
+
+        /// <summary>
+        /// Name of the environment variable that injects deterministic faults at node lifecycle journal points.
+        /// </summary>
+        public const string NodeFaultEnvVarName = "MSBUILDNODEFAULT";
+
+        /// <summary>
+        /// Name of the environment variable that adds seeded random delays at node lifecycle journal points.
+        /// </summary>
+        public const string NodeChaosEnvVarName = "MSBUILDNODECHAOS";
+
+        /// <summary>
+        /// The node lifecycle journal target captured at process start, or <see langword="null"/> when journaling is off.
+        /// </summary>
+        public static readonly string? NodeJournalPath = Environment.GetEnvironmentVariable(NodeJournalEnvVarName);
+
+        /// <summary>
+        /// Whether node lifecycle journaling is on for this process. Read once at startup so that the JIT can fold
+        /// every <c>NodeLifecycleJournal.Record*</c> call to a single never-taken branch when it is off.
+        /// </summary>
+        public static readonly bool NodeJournalEnabled = !string.IsNullOrEmpty(NodeJournalPath);
+
+        /// <summary>
         /// Override property "MSBuildRuntimeType" to "Full", ignoring the actual runtime type of MSBuild.
         /// </summary>
         public readonly bool ForceEvaluateAsFullFramework = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildForceEvaluateAsFullFramework"));
