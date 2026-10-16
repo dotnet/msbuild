@@ -11,10 +11,6 @@ parameters:
   displayName: Enable OptProf data collection for this build
   type: boolean
   default: true
-- name: enableSigningValidation
-  displayName: Enable Signing Validation
-  type: boolean
-  default: true
 - name: signTypeParameter
   displayName: Sign Type
   type: string
@@ -162,7 +158,6 @@ extends:
           enableComponentGovernance: true
           signTypeParameter: ${{ parameters.signTypeParameter }}
           enableOptProf: ${{ parameters.enableOptProf }}
-          enableSigningValidation: ${{ parameters.enableSigningValidation }}
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
@@ -170,4 +165,4 @@ extends:
         enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
-        enableSigningValidation: ${{ parameters.enableSigningValidation }}
+        enableSigningValidation: true

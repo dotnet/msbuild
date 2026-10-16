@@ -59,10 +59,9 @@ ExternalAPIs patterns), not bare filename patterns.
 The Windows job checks that the final package folder is nonempty and invokes
 Arcade's `SigningValidation` task against that folder **before** staging and
 publishing `ReleasePackages`. A failure fails the build job and prevents release
-publication, BAR registration, and downstream publishing. The existing
-`enableSigningValidation` switch controls signature validation here and in the
-post-build check of flat `PackageArtifacts`; the nonempty-payload check
-always runs. Validation logs remain in `logs`.
+publication, BAR registration, and downstream publishing. Official builds cannot
+disable final-package or post-build signing validation. Validation logs remain
+in `logs`.
 The payload check also records each final package's relative path and SHA-256 in
 `logs/ReleasePackages.sha256` before staging; release retrieval can compare the
 downloaded bytes with this build-time inventory.
