@@ -151,6 +151,42 @@
   <data name="SubmissionAlreadyComplete" xml:space="preserve">
     <value>The operation cannot be completed because the submission has already been executed.</value>
   </data>
+  <data name="TaskProgressCompleted" xml:space="preserve">
+    <value>{0} completed: {1}</value>
+    <comment>LOCALIZATION: {0} is the title of a task progress operation, for example "Downloading tools.zip". {1} is the amount of work done, for example "512 of 512 bytes".</comment>
+  </data>
+  <data name="TaskProgressCanceled" xml:space="preserve">
+    <value>{0} canceled: {1}</value>
+    <comment>LOCALIZATION: {0} is the title of a task progress operation, for example "Downloading tools.zip". {1} is the amount of work done, for example "512 of 512 bytes".</comment>
+  </data>
+  <data name="TaskProgressFailed" xml:space="preserve">
+    <value>{0} failed: {1}</value>
+    <comment>LOCALIZATION: {0} is the title of a task progress operation, for example "Downloading tools.zip". {1} is the amount of work done, for example "512 of 512 bytes".</comment>
+  </data>
+  <data name="TaskProgressAbandoned" xml:space="preserve">
+    <value>{0} ended without a reported outcome: {1}</value>
+    <comment>LOCALIZATION: {0} is the title of a task progress operation, for example "Downloading tools.zip". {1} is the amount of work done, for example "512 of 512 bytes".</comment>
+  </data>
+  <data name="TaskProgressBytesOfTotal" xml:space="preserve">
+    <value>{0} of {1} bytes</value>
+    <comment>LOCALIZATION: {0} is the number of bytes processed and {1} is the total number of bytes.</comment>
+  </data>
+  <data name="TaskProgressBytes" xml:space="preserve">
+    <value>{0} bytes</value>
+    <comment>LOCALIZATION: {0} is the number of bytes processed. The total is not known.</comment>
+  </data>
+  <data name="TaskProgressItemsOfTotal" xml:space="preserve">
+    <value>{0} of {1} items</value>
+    <comment>LOCALIZATION: {0} is the number of items processed and {1} is the total number of items.</comment>
+  </data>
+  <data name="TaskProgressItems" xml:space="preserve">
+    <value>{0} items</value>
+    <comment>LOCALIZATION: {0} is the number of items processed. The total is not known.</comment>
+  </data>
+  <data name="TaskProgressOfTotal" xml:space="preserve">
+    <value>{0} of {1}</value>
+    <comment>LOCALIZATION: {0} is the amount of work done and {1} is the total amount of work. The operation did not specify a unit, so no unit name is shown.</comment>
+  </data>
   <data name="ShouldNotDisposeWhenBuildManagerActive" xml:space="preserve">
     <value>Cannot dispose the build manager because it is not idle.</value>
   </data>

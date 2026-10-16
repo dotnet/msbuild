@@ -249,6 +249,13 @@
     <value>MSB3022: Both "{0}" and "{1}" were specified as input parameters in the project file. Please choose one or the other.</value>
     <comment>{StrBegin="MSB3022: "}</comment>
   </data>
+  <data name="Copy.ProgressTitle">
+    <value>Copying files</value>
+  </data>
+  <data name="Copy.ProgressTitleToFolder">
+    <value>Copying files to "{0}"</value>
+    <comment>LOCALIZATION: {0} is a destination folder path.</comment>
+  </data>
   <data name="Copy.FileComment">
     <value>Copying file from "{0}" to "{1}".</value>
     <comment>LOCALIZATION: {0} and {1} are paths.</comment>
@@ -3076,6 +3083,10 @@
   <data name="TarDirectory.Comment">
     <value>Creating tar archive from directory "{0}" to "{1}".</value>
   </data>
+  <data name="TarDirectory.ProgressTitle">
+    <value>Creating archive "{0}"</value>
+    <comment>LOCALIZATION: {0} is the archive file name.</comment>
+  </data>
 
   <!--
         MSB4331 - MSB4340   Task: Untar
@@ -3127,6 +3138,10 @@
   </data>
   <data name="Untar.FileComment">
     <value>Untarring file "{0}" to "{1}".</value>
+  </data>
+  <data name="Untar.ProgressTitle">
+    <value>Extracting "{0}"</value>
+    <comment>LOCALIZATION: {0} is the archive file name.</comment>
   </data>
 
   <!--
