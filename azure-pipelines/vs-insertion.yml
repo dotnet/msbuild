@@ -162,11 +162,11 @@ extends:
             pipeline: 'MSBuild'
             artifactName: 'PackageArtifacts'
             targetPath: '$(Build.ArtifactStagingDirectory)/PackageArtifacts'
-            # Only flat per-build packages are inserted; nested Release/PreRelease copies are not inputs.
+            # V3 container matching includes the artifact name. Only flat packages are insertion inputs.
             itemPattern: |
-              Microsoft.Build.*.nupkg
-              Microsoft.NET.StringTools*.nupkg
-              VS.ExternalAPIs.*.nupkg
+              PackageArtifacts/Microsoft.Build.*.nupkg
+              PackageArtifacts/Microsoft.NET.StringTools*.nupkg
+              PackageArtifacts/VS.ExternalAPIs.*.nupkg
         steps:
         - checkout: none # artifacts + inline scripts only
         - task: Powershell@2

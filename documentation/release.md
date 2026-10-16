@@ -50,6 +50,14 @@ and signing are unchanged: Arcade repacks shipping packages into `Release` and
 | OptProf profiling-input drop, `MicroBuildOutputs`, `VSSetup` | Windows job's 1ES outputs, only with OptProf enabled | DartLab consumes bootstrapper information, runsettings, metadata, and profiling inputs. Each hook downloads only its required files, not all official artifacts. |
 | `logs` (pipeline artifact), post-build logs, and source-build outputs | Windows job and Arcade source-build/post-build jobs | Build/signing/publishing diagnostics and source-build dependency assets; retained. The `logs` name and relative paths are unchanged, and publication runs even on failure. |
 
+V3 container download filters match artifact-prefixed paths, so insertion uses
+`PackageArtifacts/Microsoft.Build.*.nupkg` (and the corresponding StringTools and
+ExternalAPIs patterns), not bare filename patterns. Successful
+[insertion 15713315](https://dev.azure.com/devdiv/DevDiv/_build/results?buildId=15713315),
+logs 65 and 89, shows the artifact-prefixed matching paths and the ten flat
+packages actually pushed. It predates these filters; it confirms the path and
+consumer contract, not successful execution of the changed filter.
+
 ### Validation and compatibility
 
 The Windows job checks that the final package folder is nonempty and invokes
