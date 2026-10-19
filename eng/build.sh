@@ -62,6 +62,43 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+repo_root="$( cd "$scriptroot/.." && pwd )"
+global_json="$repo_root/global.json"
+sdk_stage_state="$repo_root/.build-stage-sdk"
+original_global_json="$sdk_stage_state/global.original.json"
+bootstrap_global_json="$sdk_stage_state/global.bootstrap.json"
+if ! mkdir "$sdk_stage_state"; then
+  echo "A build already owns '$sdk_stage_state', or an earlier build was interrupted. If no build is running, check global.json against the saved files there, restore global.original.json if necessary, and remove that directory before building again." >&2
+  exit 1
+fi
+if ! (set -C; : > "$sdk_stage_state/owner.lock"); then
+  echo "Could not exclusively acquire '$sdk_stage_state/owner.lock'. Another build may have started; leave its state untouched and wait for it to finish." >&2
+  exit 1
+fi
+
+function restore_stage_sdk {
+  local result=$?
+  if [ -f "$bootstrap_global_json" ]; then
+    if cmp -s "$global_json" "$bootstrap_global_json"; then
+      cp "$original_global_json" "$global_json" || exit 1
+    elif ! cmp -s "$global_json" "$original_global_json"; then
+      echo "global.json changed during the self-build. It was not overwritten; the original is saved at '$original_global_json'. Reconcile the files before removing '$sdk_stage_state'." >&2
+      exit 1
+    fi
+    rm "$bootstrap_global_json" || exit 1
+  fi
+  if [ -f "$original_global_json" ]; then
+    rm "$original_global_json" || exit 1
+  fi
+  rm "$sdk_stage_state/owner.lock" || exit 1
+  rmdir "$sdk_stage_state" || exit 1
+  exit "$result"
+}
+trap restore_stage_sdk EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+trap 'exit 129' HUP
+
 build_script="$scriptroot/common/build.sh"
 
 # Arguments common to the stage1 and stage2 builds, including any caller-supplied properties.
@@ -109,7 +146,6 @@ if [ $stage1_exit_code -ne 0 ]; then
   exit $stage1_exit_code
 fi
 
-repo_root="$scriptroot/.."
 artifacts_dir="$repo_root/artifacts"
 stage1_dir="$repo_root/stage1"
 stage1_bin_dir="$stage1_dir/bin"
@@ -130,9 +166,28 @@ if [ -d "$stage1_dir/log" ]; then
   cp -rf "$stage1_dir/log" "$artifacts_dir/" || true
 fi
 
+bootstrap_sdk_version=$(sed -nE 's/.*<BootstrapSdkVersion>([^<]+)<\/BootstrapSdkVersion>.*/\1/p' "$scriptroot/Versions.props")
+if [ -z "$bootstrap_sdk_version" ] ||
+   [ ! -f "$bootstrap_root/core/sdk/$bootstrap_sdk_version/MSBuild.dll" ]; then
+  echo "The required bootstrap SDK could not be found in '$bootstrap_root/core'. Check BootstrapSdkVersion and rebuild stage 1 before running the self-build." >&2
+  exit 1
+fi
+
+# Arcade and the SDK resolver must select the same SDK as the Core bootstrap.
+cp "$global_json" "$original_global_json" || exit 1
+sed -E \
+  -e "/^[[:space:]]*\"sdk\"[[:space:]]*:/,/^[[:space:]]*}/ s/(\"version\"[[:space:]]*:[[:space:]]*\")[^\"]*\"/\1$bootstrap_sdk_version\"/" \
+  -e "s/(\"dotnet\"[[:space:]]*:[[:space:]]*\")[^\"]*\"/\1$bootstrap_sdk_version\"/" \
+  -e 's/("rollForward"[[:space:]]*:[[:space:]]*")[^"]*"/\1disable"/' \
+  "$original_global_json" > "$bootstrap_global_json" || exit 1
+cp "$bootstrap_global_json" "$global_json" || exit 1
+
 build_tool_path="$bootstrap_root/core/dotnet"
 build_tool_command="msbuild"
 export DOTNET_ROOT="$bootstrap_root/core"
+export DOTNET_ROOT_X64="$bootstrap_root/core"
+export DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR="$bootstrap_root/core"
+export PATH="$bootstrap_root/core:$PATH"
 
 # Communicate the bootstrapped build tool to the (out-of-proc) stage 2 build.sh via environment
 # variables so it does not require sourcing tools.sh here. tools.sh's InitializeBuildTool
@@ -155,6 +210,10 @@ export DOTNET_INSTALL_DIR="$bootstrap_root/core"
 
 # Keep test apphosts on the bootstrap runtime even when Arcade provisions a newer SDK.
 export TestDotNetRoot="$bootstrap_root/core/"
+
+"$build_tool_path" msbuild "$scriptroot/ValidateBootstrapSdk.proj" \
+  -target:ValidateBootstrapSdk -nologo -nr:false \
+  "-bl:$artifacts_dir/log/$configuration/ValidateBootstrapSdk-{}.binlog" || exit $?
 
 stage2_build_args=( "${common_build_args[@]}" )
 

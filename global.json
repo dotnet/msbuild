@@ -1,7 +1,7 @@
 {
   "sdk": {
-    "version": "11.0.100-rc.2.26504.105",
-    "rollForward": "latestMajor",
+    "version": "12.0.100-alpha.1.26480.102",
+    "rollForward": "disable",
     "allowPrerelease": true,
     "paths": [
       "$host$"

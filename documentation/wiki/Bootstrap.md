@@ -22,13 +22,29 @@ The engineering SDK and the bootstrap SDK can use different .NET releases.
 `BootstrapSdkVersion` in `eng/Versions.props` selects the SDK used to test the freshly built MSBuild.
 The product target framework is controlled separately by `LatestDotNetCoreForMSBuild`.
 
-The `sdk.version` in `global.json` is a compatibility floor, with `rollForward` set to `latestMajor`.
-Together with `sdk.paths` set to `["$host$"]`, this lets the engineering host select its newer SDK
-while the isolated bootstrap host selects its own SDK for the self-build.
+The checked-in `global.json` pins the engineering SDK exactly, with SDK roll-forward disabled.
+For a `-stage2` build (`--stage2` on Unix), the build scripts temporarily set both `sdk.version`
+and `tools.dotnet` to `BootstrapSdkVersion`, while keeping the same Arcade SDK. This makes both
+Core and .NET Framework self-builds resolve the bootstrap SDK's targets, targeting packs, and
+task-host runtime. An early validation target checks the actual SDK and runtime selection.
 
-In a `-stage2` build (`--stage2` on Unix), the second build runs with the bootstrapped MSBuild.
 The build scripts also set Arcade's `TestDotNetRoot` to that bootstrap installation so test apphosts
 run on its runtime rather than rolling forward to the engineering SDK's newer runtime.
+
+Outside a two-stage build, the repository manifest still selects the engineering SDK. To build a
+repository sample with the Core bootstrap directly, invoke its MSBuild assembly rather than an SDK
+command such as `dotnet build`:
+
+```powershell
+artifacts\bin\bootstrap\core\dotnet.exe exec artifacts\bin\bootstrap\core\sdk\<BootstrapSdkVersion>\MSBuild.dll src\Samples\Dependency\Dependency.csproj -restore
+```
+
+Builds require exclusive use of the checkout. The scripts restore the original `global.json`
+bytes when the build finishes or fails. If a process is forcibly terminated, the next build refuses
+to start while `.build-stage-sdk` remains. After confirming that no build is running, compare
+`global.json` with the saved original and bootstrap manifests in that directory, restore the original
+if needed, and remove the directory. If `global.json` was edited during stage2, the scripts preserve
+those edits and the backup instead of overwriting them.
 
 ## Potential Cons
 The reliance on downloading the SDK from a remote source requires an internet connection. For the initial build of the repository, this doesn't change as the SDK is always downloaded to the .dotnet folder first. For subsequent runs, the SDK in bootstrap will be downloaded again only **if the requested version was changed**.

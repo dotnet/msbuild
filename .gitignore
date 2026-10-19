@@ -18,6 +18,7 @@ artifacts/
 .tools/
 .packages/
 .cts/
+.build-stage-sdk/
 BenchmarkDotNet.Artifacts/
 
 # Local scratch / experimentation output
