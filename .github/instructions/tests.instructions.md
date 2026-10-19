@@ -1,5 +1,5 @@
 ---
-applyTo: "src/*.UnitTests/**/*.cs"
+applyTo: "src/*.Tests/**/*.cs"
 ---
 
 # Testing Instructions
