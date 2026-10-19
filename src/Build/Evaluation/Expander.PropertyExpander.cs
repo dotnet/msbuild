@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
+
 #if !FEATURE_MSIOREDIST
 using System.IO;
 #endif
@@ -63,22 +65,21 @@ internal partial class Expander<P, I>
         }
 
         /// <summary>
-        /// This method takes a string which may contain any number of
-        /// "$(propertyname)" tags in it.  It replaces all those tags with
-        /// the actual property values, and returns a new string.  For example,
-        ///
-        ///     string processedString =
-        ///         propertyBag.ExpandProperties("Value of NoLogo is $(NoLogo).");
-        ///
-        /// This code might produce:
-        ///
-        ///     processedString = "Value of NoLogo is true."
-        ///
-        /// If the sourceString contains an embedded property which doesn't
-        /// have a value, then we replace that tag with an empty string.
-        ///
-        /// This method leaves the result escaped.  Callers may need to unescape on their own as appropriate.
+        ///  Expands property references in an expression and converts the result to a string.
         /// </summary>
+        /// <param name="expression">The expression containing property references of the form <c>$(Name)</c>.</param>
+        /// <param name="properties">The provider used to resolve property values.</param>
+        /// <param name="options">The options controlling property expansion and truncation.</param>
+        /// <param name="elementLocation">The location used for diagnostics and property-read tracking.</param>
+        /// <param name="propertiesUseTracker">The tracker notified when properties are read.</param>
+        /// <param name="fileSystem">The file system used by property functions.</param>
+        /// <returns>
+        ///  The expanded expression as an escaped string. Undefined properties and property functions
+        ///  returning <see langword="null"/> contribute an empty string.
+        /// </returns>
+        /// <remarks>
+        ///  The returned value remains escaped and may require unescaping by the caller.
+        /// </remarks>
         internal static string ExpandPropertiesLeaveEscaped(
             string expression,
             IPropertyProvider<P> properties,
@@ -86,32 +87,49 @@ internal partial class Expander<P, I>
             IElementLocation elementLocation,
             PropertiesUseTracker propertiesUseTracker,
             IFileSystem fileSystem)
-            => PropertyValueConverter.ToString(
-                ExpandPropertiesLeaveTypedAndEscaped(
-                    expression,
-                    properties,
-                    options,
-                    elementLocation,
-                    propertiesUseTracker,
-                    fileSystem));
+        {
+            if (((options & ExpanderOptions.ExpandProperties) == 0) || expression.IsNullOrEmpty())
+            {
+                return expression;
+            }
+
+            Assumed.NotNull(properties, "Cannot expand properties without providing properties");
+
+            // Find and classify the first property reference before constructing the expander.
+            int markerIndex = ExpressionShredder.IndexOfPropertyMarker(expression);
+
+            if (markerIndex == -1 ||
+                !TryGetPropertyInfo(expression, markerIndex, out int bodyLength, out PropertyFlags flags))
+            {
+                return expression;
+            }
+
+            PropertyExpander expander = new(properties, options, elementLocation, propertiesUseTracker, fileSystem);
+
+            object result = markerIndex == 0 && (flags & PropertyFlags.WholeExpression) != 0
+                ? expander.ExpandSingleProperty(expression, flags)
+                : expander.ExpandPropertyValues(expression, markerIndex, bodyLength, flags);
+
+            return PropertyValueConverter.ToString(result);
+        }
 
         /// <summary>
-        /// This method takes a string which may contain any number of
-        /// "$(propertyname)" tags in it.  It replaces all those tags with
-        /// the actual property values, and returns a new string.  For example,
-        ///
-        ///     string processedString =
-        ///         propertyBag.ExpandProperties("Value of NoLogo is $(NoLogo).");
-        ///
-        /// This code might produce:
-        ///
-        ///     processedString = "Value of NoLogo is true."
-        ///
-        /// If the sourceString contains an embedded property which doesn't
-        /// have a value, then we replace that tag with an empty string.
-        ///
-        /// This method leaves the result typed and escaped.  Callers may need to convert to string, and unescape on their own as appropriate.
+        ///  Expands property references while preserving the type of a single whole-expression value.
         /// </summary>
+        /// <param name="expression">The expression containing property references of the form <c>$(Name)</c>.</param>
+        /// <param name="properties">The provider used to resolve property values.</param>
+        /// <param name="options">The options controlling property expansion and truncation.</param>
+        /// <param name="elementLocation">The location used for diagnostics and property-read tracking.</param>
+        /// <param name="propertiesUseTracker">The tracker notified when properties are read.</param>
+        /// <param name="fileSystem">The file system used by property functions.</param>
+        /// <returns>
+        ///  The typed expanded value when <paramref name="expression"/> consists of one property reference;
+        ///  otherwise, the concatenated escaped string. Undefined properties and property functions returning
+        ///  <see langword="null"/> contribute an empty string.
+        /// </returns>
+        /// <remarks>
+        ///  String results remain escaped and may require unescaping by the caller.
+        /// </remarks>
         internal static object ExpandPropertiesLeaveTypedAndEscaped(
             string expression,
             IPropertyProvider<P> properties,
@@ -120,26 +138,200 @@ internal partial class Expander<P, I>
             PropertiesUseTracker propertiesUseTracker,
             IFileSystem fileSystem)
         {
-            if (((options & ExpanderOptions.ExpandProperties) == 0) || String.IsNullOrEmpty(expression))
+            if (((options & ExpanderOptions.ExpandProperties) == 0) || expression.IsNullOrEmpty())
             {
                 return expression;
             }
 
             Assumed.NotNull(properties, "Cannot expand properties without providing properties");
 
-            // If there are no substitutions, then just return the string.
+            // Find and classify the first property reference before constructing the expander.
             int markerIndex = ExpressionShredder.IndexOfPropertyMarker(expression);
             if (markerIndex == -1)
             {
                 return expression;
             }
 
+            if (markerIndex == -1 || !TryGetPropertyInfo(expression, markerIndex, out int bodyLength, out PropertyFlags flags))
+            {
+                return expression;
+            }
+
             PropertyExpander expander = new(properties, options, elementLocation, propertiesUseTracker, fileSystem);
-            return expander.ExpandPropertiesLeaveTypedAndEscaped(expression, markerIndex);
+
+            return markerIndex == 0 && (flags & PropertyFlags.WholeExpression) != 0
+                ? expander.ExpandSingleProperty(expression, flags)
+                : expander.ExpandPropertyValues(expression, markerIndex, bodyLength, flags);
         }
 
-        private object ExpandPropertiesLeaveTypedAndEscaped(string expression, int markerIndex)
+        /// <summary>
+        ///  Describes syntax discovered while scanning a property reference.
+        /// </summary>
+        [Flags]
+        private enum PropertyFlags
         {
+            /// <summary>
+            ///  The property body contains no syntax that requires specialized expansion.
+            /// </summary>
+            None = 0,
+
+            /// <summary>
+            ///  The matching closing parenthesis is the final character in the expression.
+            /// </summary>
+            WholeExpression = 1 << 0,
+
+            /// <summary>
+            ///  The property body contains syntax that may identify a property function.
+            /// </summary>
+            PotentialPropertyFunction = 1 << 1,
+
+            /// <summary>
+            ///  The property body contains syntax that may identify a registry property.
+            /// </summary>
+            PotentialRegistryFunction = 1 << 2,
+
+            /// <summary>
+            ///  The property body may require property-function or registry-property expansion.
+            /// </summary>
+            MaybeComplex = PotentialPropertyFunction | PotentialRegistryFunction
+        }
+
+        /// <summary>
+        ///  Finds the closing parenthesis for a property reference and classifies syntax in its body.
+        /// </summary>
+        /// <param name="expression">The expression containing the property reference.</param>
+        /// <param name="markerIndex">The zero-based index of the <c>$(</c> marker.</param>
+        /// <param name="bodyLength">The length of the property body, excluding <c>$(</c> and <c>)</c>.</param>
+        /// <param name="flags">The syntax discovered while scanning the property reference.</param>
+        /// <returns>
+        ///  <see langword="true"/> if a matching closing parenthesis was found; otherwise,
+        ///  <see langword="false"/>.
+        /// </returns>
+        private static bool TryGetPropertyInfo(string expression, int markerIndex, out int bodyLength, out PropertyFlags flags)
+        {
+            int index = markerIndex + 2;
+            int nestLevel = 1;
+            int length = expression.Length;
+
+            flags = PropertyFlags.None;
+
+            // Scan for the matching closing parenthesis while classifying characters that may
+            // require specialized expansion.
+            while (index < length && nestLevel > 0)
+            {
+                char character = expression[index];
+
+                switch (character)
+                {
+                    case '\'' or '`' or '"':
+                        int quoteIndex = expression.IndexOf(character, index + 1);
+
+                        if (quoteIndex < 0)
+                        {
+                            bodyLength = 0;
+                            flags = 0;
+                            return false;
+                        }
+
+                        index = quoteIndex;
+                        break;
+
+                    case '(':
+                        nestLevel++;
+                        break;
+
+                    case ')':
+                        nestLevel--;
+                        break;
+
+                    case '.' or '[' or '$':
+                        flags |= PropertyFlags.PotentialPropertyFunction;
+                        break;
+
+                    case ':':
+                        flags |= PropertyFlags.PotentialRegistryFunction;
+                        break;
+                }
+
+                index++;
+            }
+
+            if (nestLevel == 0)
+            {
+                if (index == length)
+                {
+                    flags |= PropertyFlags.WholeExpression;
+                }
+
+                // index is one past the closing parenthesis. Exclude the two-character marker and
+                // closing parenthesis from the body length.
+                bodyLength = index - markerIndex - 3;
+                return bodyLength >= 0;
+            }
+
+            bodyLength = 0;
+            return false;
+        }
+
+        /// <summary>
+        ///  Expands a property reference that occupies the entire expression.
+        /// </summary>
+        /// <param name="expression">The complete property-reference expression.</param>
+        /// <param name="flags">The syntax discovered while scanning the property reference.</param>
+        /// <returns>
+        ///  The expanded value, preserving its type when it is not a string.
+        /// </returns>
+        private object ExpandSingleProperty(string expression, PropertyFlags flags)
+        {
+            Debug.Assert((flags & PropertyFlags.WholeExpression) != 0);
+
+            // Compat hack: WebProjects may have an import with a condition like:
+            //       Condition=" '$(Solutions.VSVersion)' == '8.0'"
+            // These would have been '' in prior versions of msbuild but would be treated as a possible string function in current versions.
+            // Be compatible by returning an empty string here.
+            // The property body starts at index 2 only when the "$(" marker starts at index 0.
+            if ((flags & PropertyFlags.PotentialPropertyFunction) != 0 &&
+                expression.Length == SolutionsVsVersionExpression.Length &&
+                string.Equals(expression, SolutionsVsVersionExpression, StringComparison.Ordinal))
+            {
+                return string.Empty;
+            }
+
+            object propertyValue = ExpandProperty(expression, startIndex: 2, length: expression.Length - 3, flags);
+
+            if (propertyValue is null)
+            {
+                return string.Empty;
+            }
+
+            if (_isTruncationEnabled)
+            {
+                string value = propertyValue.ToString();
+                if (value.Length > CharacterLimitPerExpansion)
+                {
+                    propertyValue = TruncateString(value);
+                }
+            }
+
+            return propertyValue is string stringValue
+                ? FileUtilities.MaybeAdjustFilePath(stringValue)
+                : propertyValue;
+        }
+
+        /// <summary>
+        ///  Expands one or more property references embedded in an expression.
+        /// </summary>
+        /// <param name="expression">The expression containing the property references.</param>
+        /// <param name="markerIndex">The zero-based index of the first <c>$(</c> marker.</param>
+        /// <param name="bodyLength">The length of the first property body.</param>
+        /// <param name="flags">The syntax discovered while scanning the first property reference.</param>
+        /// <returns>
+        ///  The concatenated expanded value.
+        /// </returns>
+        private object ExpandPropertyValues(string expression, int markerIndex, int bodyLength, PropertyFlags flags)
+        {
+            Debug.Assert(markerIndex > 0 || markerIndex + bodyLength + 3 < expression.Length);
+
             // We will build our set of results as object components
             // so that we can either maintain the object's type in the event
             // that we have a single component, or convert to a string
@@ -150,8 +342,9 @@ internal partial class Expander<P, I>
             // where we've essentially read up to and copied into the target string.
             int index = 0;
 
-            // Search for "$(" in the expression.  Loop until we don't find it any more.
-            while (markerIndex >= 0)
+            // Expand each well-formed property reference. If a later marker is malformed, preserve
+            // it and the rest of the expression verbatim.
+            do
             {
                 // Append the result with the portion of the expression up to
                 // (but not including) the "$(", and advance the index pointer.
@@ -162,48 +355,7 @@ internal partial class Expander<P, I>
 
                 int startIndex = markerIndex + 2;
 
-                // Following the "$(" we need to locate the matching ')'
-                // Scan for the matching closing bracket, skipping any nested ones
-                // This is a very complete, fast validation of parenthesis matching including for nested
-                // function calls.
-                int closingParenIndex = FindClosingParenthesis(
-                    expression,
-                    startIndex,
-                    out bool isPotentialPropertyFunction,
-                    out bool isPotentialRegistryFunction);
-
-                if (closingParenIndex < 0)
-                {
-                    // If we didn't find the closing parenthesis, that means this
-                    // isn't really a well-formed property. Copy the remainder of the
-                    // expression (starting with the "$(" that we found) into the result, and return.
-                    results.Add(expression.AsMemory(markerIndex));
-                    return results.GetResult();
-                }
-
-                // Expand the property body between the "$(" marker and its matching closing parenthesis.
-                int length = closingParenIndex - startIndex;
-
-                object propertyValue;
-
-                if (length == 0)
-                {
-                    // Compat: $() should return string.Empty
-                    propertyValue = string.Empty;
-                }
-                else if (!isPotentialPropertyFunction && !isPotentialRegistryFunction)
-                {
-                    propertyValue = LookupProperty(expression, startIndex, length);
-                }
-                else
-                {
-                    propertyValue = ExpandProperty(
-                        expression,
-                        startIndex,
-                        length,
-                        isPotentialRegistryFunction,
-                        isPotentialPropertyFunction);
-                }
+                object propertyValue = ExpandProperty(expression, startIndex, bodyLength, flags);
 
                 if (propertyValue != null)
                 {
@@ -219,9 +371,10 @@ internal partial class Expander<P, I>
                     results.Add(propertyValue);
                 }
 
-                index = closingParenIndex + 1;
+                index = startIndex + bodyLength + 1;
                 markerIndex = ExpressionShredder.IndexOfPropertyMarker(expression, index);
             }
+            while (markerIndex >= 0 && TryGetPropertyInfo(expression, markerIndex, out bodyLength, out flags));
 
             // If we couldn't find any more property markers in the expression just copy the remainder into the result.
             if (expression.Length - index > 0)
@@ -233,111 +386,43 @@ internal partial class Expander<P, I>
         }
 
         /// <summary>
-        ///  Finds the closing parenthesis that matches the opening parenthesis immediately
-        ///  preceding <paramref name="index"/>.
+        ///  Expands a property body contained within a segment of an expression.
         /// </summary>
-        /// <param name="expression">The expression to scan.</param>
-        /// <param name="index">The index at which to begin scanning.</param>
-        /// <param name="isPotentialPropertyFunction">
-        ///  Whether the property body might contain a property function.
-        /// </param>
-        /// <param name="isPotentialRegistryFunction">
-        ///  Whether the property body might contain a registry function.
-        /// </param>
+        /// <param name="expression">The expression containing the property body.</param>
+        /// <param name="startIndex">The zero-based start index of the property body.</param>
+        /// <param name="length">The length of the property body.</param>
+        /// <param name="flags">The syntax discovered while scanning the property reference.</param>
         /// <returns>
-        ///  The index of the matching closing parenthesis, or <c>-1</c> if it was not found.
+        ///  The expanded property value.
         /// </returns>
-        private static int FindClosingParenthesis(
-            string expression,
-            int index,
-            out bool isPotentialPropertyFunction,
-            out bool isPotentialRegistryFunction)
+        private object ExpandProperty(string expression, int startIndex, int length, PropertyFlags flags)
         {
-            int nestLevel = 1;
-            int length = expression.Length;
-
-            isPotentialPropertyFunction = false;
-            isPotentialRegistryFunction = false;
-
-            // Scan for our closing ')'
-            while (index < length && nestLevel > 0)
+            if (length == 0)
             {
-                char character = expression[index];
+                return string.Empty;
+            }
 
-                switch (character)
+            if ((flags & PropertyFlags.MaybeComplex) != 0)
+            {
+                // Compat hack: as a special case, $(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory) should return string.Empty
+                // Note that very few properties have this exact length, so this check should be fast.
+                if (length == VstsDbDirectoryProperty.Length &&
+                    string.Equals(expression, startIndex, VstsDbDirectoryProperty, StringComparison.OrdinalIgnoreCase))
                 {
-                    case '\'' or '`' or '"':
-                        int quoteIndex = expression.IndexOf(character, index + 1);
-
-                        if (quoteIndex < 0)
-                        {
-                            return -1;
-                        }
-
-                        index = quoteIndex;
-                        break;
-
-                    case '(':
-                        nestLevel++;
-                        break;
-
-                    case ')':
-                        nestLevel--;
-                        break;
-
-                    case '.' or '[' or '$':
-                        isPotentialPropertyFunction = true;
-                        break;
-
-                    case ':':
-                        isPotentialRegistryFunction = true;
-                        break;
+                    return string.Empty;
                 }
 
-                index++;
-            }
+                if ((flags & PropertyFlags.PotentialRegistryFunction) != 0 &&
+                    TryExpandRegistryValue(expression, startIndex, length, out string registryValue))
+                {
+                    return registryValue;
+                }
 
-            // We will have parsed past the ')', so step back one character.
-            return nestLevel == 0 ? index - 1 : -1;
-        }
-
-        private object ExpandProperty(
-            string expression,
-            int startIndex,
-            int length,
-            bool tryExtractRegistryFunction,
-            bool tryExtractPropertyFunction)
-        {
-            // Compat hack: as a special case, $(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory) should return string.Empty
-            // Note that very few properties have this exact length, so this check should be fast.
-            if (length == VstsDbDirectoryProperty.Length &&
-                string.Equals(expression, startIndex, VstsDbDirectoryProperty, StringComparison.OrdinalIgnoreCase))
-            {
-                return string.Empty;
-            }
-
-            // Compat hack: WebProjects may have an import with a condition like:
-            //       Condition=" '$(Solutions.VSVersion)' == '8.0'"
-            // These would have been '' in prior versions of msbuild but would be treated as a possible string function in current versions.
-            // Be compatible by returning an empty string here.
-            // The property body starts at index 2 only when the "$(" marker starts at index 0.
-            if (startIndex == 2 &&
-                expression.Length == SolutionsVsVersionExpression.Length &&
-                string.Equals(expression, SolutionsVsVersionExpression, StringComparison.Ordinal))
-            {
-                return string.Empty;
-            }
-
-            if (tryExtractRegistryFunction &&
-                TryExpandRegistryValue(expression, startIndex, length, out string registryValue))
-            {
-                return registryValue;
-            }
-
-            if (tryExtractPropertyFunction)
-            {
-                // This is likely to be a function expression
-                return ExpandPropertyBody(expression, startIndex, length, propertyValue: null);
+                if ((flags & PropertyFlags.PotentialPropertyFunction) != 0)
+                {
+                    // This is likely to be a function expression
+                    return ExpandPropertyBody(expression, startIndex, length, propertyValue: null);
+                }
             }
 
             // This is a regular property
