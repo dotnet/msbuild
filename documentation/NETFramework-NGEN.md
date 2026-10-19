@@ -50,17 +50,6 @@ target framework is available, selecting .NET 4.0 defaults instead. This [known 
 can disable long-path support even though MSBuild targets .NET Framework 4.7.2. Keep `Switch.System.IO.UseLegacyPathHandling=false`
 and `Switch.System.IO.BlockLongPaths=false` explicit in the executable configuration files; setting them in `Main` is too late.
 
-To investigate an installed MSBuild without relocating its binaries, run
-`scripts\Test-MSBuildLongPaths.ps1 -MSBuildExe '<VS installation>\MSBuild\Current\Bin\MSBuild.exe'`.
-The default experiment is read-only and compares normal startup with NGEN disabled, recording both I/O switches,
-loaded native images, and the results of `WriteLinesToFile` and `Unzip` at 291 characters.
-
-The optional `-TestFix` experiment prompts before temporarily setting the two overrides, then restores the original
-configuration bytes and modification time and repeats the original run. Close VS and other builds first; editing an
-installed configuration normally requires elevation. A convincing installed-NGEN comparison is failure, success,
-then failure again **with the native image still loaded in all three phases**. Success after native-image rejection
-may only demonstrate JIT fallback. The script does not create or remove native images.
-
 ## SDK resolvers
 
 One class of assemblies loaded by MSBuild by path are SDK resolvers. MSBuild scans the `SdkResolvers` subdirectory to discover
