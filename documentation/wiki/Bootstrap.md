@@ -30,6 +30,9 @@ task-host runtime. An early validation target checks the actual SDK and runtime 
 
 The build scripts also set Arcade's `TestDotNetRoot` to that bootstrap installation so test apphosts
 run on its runtime rather than rolling forward to the engineering SDK's newer runtime.
+API-level task hosts use the test host's selected `dotnet`; explicit bootstrap-launch helpers select
+the bootstrap host separately. This also lets the non-self-build test lane run on the engineering
+runtime without forcing its task hosts onto the older bootstrap runtime.
 
 Outside a two-stage build, the repository manifest still selects the engineering SDK. To build a
 repository sample with the Core bootstrap directly, invoke its MSBuild assembly rather than an SDK
