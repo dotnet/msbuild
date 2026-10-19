@@ -113,9 +113,9 @@ Read-only commands (`get-default-channels`, `get-subscriptions`, `get-channel`) 
 
 ## Branch retirement (Phase 1.3)
 
-Each release audits `vs*` branches for servicing and dependency-automation retirement. **This is an audit of every live branch, not a check of one candidate.** The rule of thumb (`vs{{THIS_RELEASE_VERSION}} - 3`) identifies only the *newest* candidate; nothing in the process ever revisits older branches, so a single missed retirement persists forever and the backlog grows every month.
+Each release audits `vs*` branches for retirement. **This is an audit of every live branch, not a check of one candidate.** The rule of thumb (`vs{{THIS_RELEASE_VERSION}} - 3`) identifies only the *newest* candidate; nothing in the process ever revisits older branches, so a single missed retirement persists forever and the backlog grows every month.
 
-**Servicing and automation are separate.** Follow [Branch servicing and support](../../../documentation/release.md#branch-servicing-and-support). An explicit decision to retire routine dependency updates does not change published product support. Record how any required servicing will be handled until that support ends; do not automatically recreate retired subscriptions during later audits.
+**Branch inventory:** the former `.config/git-merge-flow-config.jsonc` list was removed with the inter-branch merge workflow in [dotnet/msbuild#14786](https://github.com/dotnet/msbuild/pull/14786). Use the live DARC mappings, inbound/outbound subscriptions, and repository branches queried in checklist step 1.3a.
 
 **Two lifecycles, two sources — you need both.** Neither one decides a branch on its own:
 
@@ -138,7 +138,7 @@ Each release audits `vs*` branches for servicing and dependency-automation retir
 
 🛑 **Maestro is not a lifecycle source.** A `.NET X.Y.Zxx SDK` channel — including `... SDK Release` variants — persists long after the band dies. Reasoning "the channel still exists, so the band is supported" is invalid and is exactly how `vs18.6` (band 10.0.3xx, EOL Aug 2026) was missed during the 18.11 release and had to be retired afterwards.
 
-Apply the **combined rule** when declaring a branch out of support: a branch paired with both an SDK band and a VS version is out of support only when *both* lifecycles agree. Two mechanical cleanup signals find most of the backlog, but do not establish end of support:
+Apply the **combined rule** when checking support: a branch paired with both an SDK band and a VS version is out of support only when *both* lifecycles agree. Two mechanical cleanup signals find most of the backlog:
 
 | Signal | Meaning |
 |---|---|
@@ -147,7 +147,7 @@ Apply the **combined rule** when declaring a branch out of support: a branch pai
 
 Worked example from 18.11: `vs18.0` pairs with 10.0.1xx (EOL Nov 2028) so it is **kept despite being the oldest branch**; `vs18.6` (10.0.3xx, EOL Aug 2026) retires; `vs18.4` and `vs18.5` were orphaned default channels for deleted branches.
 
-**Complete the automation cleanup.** Checklist step 2.3e removes inbound subscriptions, MSBuild outbound subscriptions, and default-channel associations, including any disabled subscriptions. Preserve outbound flow still needed by another MSBuild branch on the same channel, shared channel definitions, and other producers' subscriptions. Approval alone does not apply the change: wait for merge and ingestion, then verify all targeted entries are absent.
+**Retirement cleanup (2.3e):** remove inbound subscriptions, unused MSBuild outbound subscriptions, and branch-to-channel associations, including disabled subscriptions. Preserve shared channels and flows still needed by other branches or producers; verify removals after merge and ingestion.
 
 ## Executing a Phase
 
@@ -167,7 +167,7 @@ When asked to execute a specific phase:
 | File | Purpose |
 |---|---|
 | [`documentation/release-checklist.md`](../../../documentation/release-checklist.md) | **Operational checklist** — the source of truth |
-| [`documentation/release.md`](../../../documentation/release.md) | Branch servicing and support, release flow, final branding, package API compatibility, major version steps |
+| [`documentation/release.md`](../../../documentation/release.md) | Process description: final branding, package API compatibility, major version steps |
 | [`documentation/wiki/ChangeWaves.md`](../../../documentation/wiki/ChangeWaves.md) | Source doc for the Learn page sync — always sync the `vsXX.Y` (Insiders/preview-SDK) copy, not `main` |
 | [MSBuild Change Waves Learn page](https://learn.microsoft.com/visualstudio/msbuild/change-waves) | Public docs target to [`MicrosoftDocs/visualstudio-docs-pr`](https://github.com/MicrosoftDocs/visualstudio-docs-pr) (`docs/msbuild/change-waves.md`) |
 | [`eng/Versions.props`](../../../eng/Versions.props) | `VersionPrefix`, `PackageValidationBaselineVersion`, `BootstrapSdkVersion` |
