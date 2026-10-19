@@ -44,17 +44,15 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             _itemsToUpdate ??= ImmutableList.CreateBuilder<ItemBatchingContext>();
             _itemsToUpdate.Clear();
 
-            for (int i = 0; i < listBuilder.Count; i++)
-            {
-                var itemData = listBuilder[i];
-
-                var matchResult = _matchItemSpec(_itemSpec, itemData.Item);
-
-                if (matchResult.IsMatch)
+            // Each replacement immediately follows its match, retaining matching items without matching twice.
+            MatchResult matchResult = default;
+            listBuilder.UpdateAll(
+                itemData =>
                 {
-                    listBuilder[i] = UpdateItem(listBuilder[i], matchResult.MatchingItems);
-                }
-            }
+                    matchResult = _matchItemSpec(_itemSpec, itemData.Item);
+                    return matchResult.IsMatch;
+                },
+                itemData => UpdateItem(itemData, matchResult.MatchingItems));
 
             DecorateItemsWithMetadata(_itemsToUpdate.ToImmutableList(), _metadata, _needToExpandMetadataForEachItem);
         }

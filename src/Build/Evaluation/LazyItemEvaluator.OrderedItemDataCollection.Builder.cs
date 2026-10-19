@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -14,21 +14,21 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     private sealed partial class OrderedItemDataCollection
     {
         /// <summary>
-        /// A mutable and enumerable version of <see cref="OrderedItemDataCollection"/>.
+        ///  Mutable evaluation state over a piece-list editor, with a lazy path index for Removes.
         /// </summary>
         internal sealed class Builder : IEnumerable<ItemData>
         {
             /// <summary>
-            /// The list of items in the collection. Defines the enumeration order.
+            ///  The current item data; creating a snapshot preserves it for later bookmark reads.
             /// </summary>
-            private ImmutableList<ItemData>.Builder _listBuilder;
+            private readonly ImmutablePieceList<ItemData>.Editor _listBuilder;
 
             /// <summary>
             ///  The normalized item paths present in the collection.
             /// </summary>
             private HashSet<string> _normalizedItemPaths;
 
-            internal Builder(ImmutableList<ItemData>.Builder listBuilder)
+            internal Builder(ImmutablePieceList<ItemData>.Editor listBuilder)
             {
                 _listBuilder = listBuilder;
             }
@@ -72,15 +72,14 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 {
                     if (_normalizedItemPaths is null)
                     {
-                        _normalizedItemPaths = [with(StringComparer.OrdinalIgnoreCase)];
-                        for (int i = 0; i < _listBuilder.Count; i++)
+                        HashSet<string> paths = [with(StringComparer.OrdinalIgnoreCase)];
+                        // Persist cached normalization in one sequential rewrite, not an indexed scan through sequence.
+                        _listBuilder.UpdateAll(static _ => true, itemData =>
                         {
-                            ItemData itemData = _listBuilder[i];
-                            _normalizedItemPaths.Add(itemData.NormalizedItemValue);
-
-                            // Persist the lazily computed normalized value for later removal scans.
-                            _listBuilder[i] = itemData;
-                        }
+                            paths.Add(itemData.NormalizedItemValue);
+                            return itemData;
+                        });
+                        _normalizedItemPaths = paths;
                     }
                     return _normalizedItemPaths;
                 }
@@ -100,6 +99,25 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             {
                 _listBuilder.Clear();
                 _normalizedItemPaths?.Clear();
+            }
+
+            /// <summary>
+            ///  Replaces matching items sequentially, preserving a computed path index when paths remain unchanged.
+            /// </summary>
+            /// <param name="match">The predicate selecting items to replace.</param>
+            /// <param name="update">The replacement operation for each matching item.</param>
+            /// <returns>
+            ///  The number of matched items.
+            /// </returns>
+            /// <exception cref="ArgumentNullException">Either callback is <see langword="null"/>.</exception>
+            public int UpdateAll(Predicate<ItemData> match, Func<ItemData, ItemData> update)
+            {
+                ArgumentNullException.ThrowIfNull(match);
+                ArgumentNullException.ThrowIfNull(update);
+
+                return _normalizedItemPaths is null
+                    ? _listBuilder.UpdateAll(match, update)
+                    : UpdateAllWithPathIndex(match, update);
             }
 
             /// <summary>
@@ -132,6 +150,37 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             public OrderedItemDataCollection ToImmutable()
             {
                 return new OrderedItemDataCollection(_listBuilder.ToImmutable());
+            }
+
+            /// <summary>
+            ///  Updates items while checking whether an existing path index needs to be rebuilt after commit.
+            /// </summary>
+            /// <param name="match">The validated predicate selecting items.</param>
+            /// <param name="update">The validated replacement operation.</param>
+            /// <returns>
+            ///  The number of matched items.
+            /// </returns>
+            /// <remarks>
+            ///  The index is invalidated only after successful replacement. Metadata-only updates retain it,
+            ///  and builders without an index avoid this additional callback and normalization work.
+            /// </remarks>
+            private int UpdateAllWithPathIndex(Predicate<ItemData> match, Func<ItemData, ItemData> update)
+            {
+                HashSet<string> paths = _normalizedItemPaths;
+                bool pathsChanged = false;
+                int matched = _listBuilder.UpdateAll(match, itemData =>
+                {
+                    ItemData replacement = update(itemData);
+                    pathsChanged |= !paths.Comparer.Equals(itemData.NormalizedItemValue, replacement.NormalizedItemValue);
+                    return replacement;
+                });
+
+                if (pathsChanged)
+                {
+                    _normalizedItemPaths = null;
+                }
+
+                return matched;
             }
         }
     }
