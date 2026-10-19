@@ -117,3 +117,8 @@ These custom options can be combined with any BenchmarkDotNet options:
 ```
 dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark*" --job short --disable-ngen
 ```
+
+## Benchmark-Specific Documentation
+
+- [Lazy item evaluation benchmarks](Evaluation/Items/README.md): Workload coverage and
+  comparison guidance.
