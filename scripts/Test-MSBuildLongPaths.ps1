@@ -78,8 +78,8 @@ $project = Join-Path $OutputDirectory 'repro.proj'
         lines.Add("TargetFramework=" + AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName);
         lines.Add("UseLegacyPathHandling=" + legacy);
         lines.Add("BlockLongPaths=" + block);
-        lines.Add("LegacyOverrideFound=" + legacyFound);
-        lines.Add("BlockOverrideFound=" + blockFound);
+        lines.Add("LegacySwitchFound=" + legacyFound);
+        lines.Add("BlockSwitchFound=" + blockFound);
         int nativeImages = 0;
         using (Process process = Process.GetCurrentProcess())
         {
