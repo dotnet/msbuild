@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Logging;
 using Shouldly;
@@ -26,8 +27,121 @@ public class NodeStatus_Transition_Tests
     }
 
     [Fact]
-    public void NodeStatusTargetThrowsForInputWithAnsi()
+    public void ClearingFrameResetsProgressRows()
     {
+        TerminalProgressStatus progress = new(new TaskProgressStartedEventArgs(1, "Work", TaskProgressUnit.Items), 0);
+        TerminalNodesFrame frame = new([], [progress], width: 80, height: 40);
+        frame.Render(new TerminalNodesFrame([], width: 80, height: 40));
+        frame.ProgressCount.ShouldBe(1);
+
+        frame.Clear();
+
+        frame.NodesCount.ShouldBe(0);
+        frame.ProgressCount.ShouldBe(0);
+        frame.GetPhysicalRows(20).ShouldBe(0);
+        new TerminalNodesFrame([], [progress], width: 80, height: 40).Render(frame)
+            .ShouldStartWith($"{AnsiCodes.CSI}1{AnsiCodes.MoveUpToLineStart}");
+    }
+
+    [Fact]
+    public void ProgressRowsReflowUsingTheirPreviouslyRenderedWidth()
+    {
+        TerminalProgressStatus progress = new(new TaskProgressStartedEventArgs(1, new string('x', 100), TaskProgressUnit.Items), 0);
+        TerminalNodesFrame frame = new([], [progress], width: 80, height: 40);
+        frame.Render(new TerminalNodesFrame([], width: 80, height: 40));
+        frame.GetPhysicalRows(20).ShouldBe(4);
+
+        // The frame records what was drawn, not the mutable operation's current text.
+        progress.Update(new TaskProgressUpdatedEventArgs(1, 1, long.MaxValue, long.MaxValue, "Changed"));
+        frame.GetPhysicalRows(20).ShouldBe(4);
+        string resized = new TerminalNodesFrame([], [progress], width: 20, height: 40).Render(frame);
+        resized.ShouldStartWith($"{AnsiCodes.CSI}5{AnsiCodes.MoveUpToLineStart}");
+        resized.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+    }
+
+    /// <summary>
+    /// Several projects often download similarly named files at once, so an operation has to appear
+    /// with the project that reported it rather than in a block at the end.
+    /// </summary>
+    [Fact]
+    public void ProgressIsRenderedUnderTheProjectThatReportedIt()
+    {
+        TerminalNodeStatus first = new("First.Project", null, null, "Build", new MockStopwatch());
+        TerminalNodeStatus second = new("Second.Project", null, null, "Build", new MockStopwatch());
+
+        TerminalProgressStatus firstProgress = new(new TaskProgressStartedEventArgs(1, "Downloading first.zip", TaskProgressUnit.Bytes), 0);
+        TerminalProgressStatus secondProgress = new(new TaskProgressStartedEventArgs(2, "Downloading second.zip", TaskProgressUnit.Bytes), 1);
+
+        TerminalNodesFrame frame = new([first, second], [firstProgress, secondProgress], width: 120, height: 10);
+        string rendered = frame.Render(new TerminalNodesFrame([], width: 120, height: 10));
+
+        rendered.IndexOf("First.Project", StringComparison.Ordinal)
+            .ShouldBeLessThan(rendered.IndexOf("first.zip", StringComparison.Ordinal));
+        rendered.IndexOf("first.zip", StringComparison.Ordinal)
+            .ShouldBeLessThan(rendered.IndexOf("Second.Project", StringComparison.Ordinal));
+        rendered.IndexOf("Second.Project", StringComparison.Ordinal)
+            .ShouldBeLessThan(rendered.IndexOf("second.zip", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// A project can stop being displayed while its operation is still running, and the operation
+    /// must not disappear with it.
+    /// </summary>
+    [Fact]
+    public void ProgressForAnUndisplayedProjectIsStillRendered()
+    {
+        TerminalNodeStatus node = new("Only.Project", null, null, "Build", new MockStopwatch());
+        TerminalProgressStatus orphan = new(new TaskProgressStartedEventArgs(1, "Downloading orphan.zip", TaskProgressUnit.Bytes), 7);
+
+        TerminalNodesFrame frame = new([node], [orphan], width: 120, height: 10);
+        string rendered = frame.Render(new TerminalNodesFrame([], width: 120, height: 10));
+
+        rendered.ShouldContain("orphan.zip");
+    }
+
+    /// <summary>
+    /// Operations update many times a second, so a frame that keeps every line in place has to update
+    /// those lines rather than erase and repaint the whole block, which the terminal shows as flicker.
+    /// </summary>
+    [Fact]
+    public void ProgressUpdateDoesNotEraseTheWholeBlockWhenLinesKeepTheirPlace()
+    {
+        TerminalNodeStatus node = new("Only.Project", null, null, "Build", new MockStopwatch());
+        TaskProgressStartedEventArgs started = new(1, "Downloading main.zip", TaskProgressUnit.Bytes);
+
+        TerminalProgressStatus before = new(started, 0);
+        TerminalNodesFrame previousFrame = new([node], [before], width: 120, height: 10);
+        previousFrame.Render(new TerminalNodesFrame([], width: 120, height: 10));
+
+        TerminalProgressStatus after = new(started, 0);
+        after.Update(new TaskProgressUpdatedEventArgs(1, 2, 512, 1024, "Downloading"));
+        string rendered = new TerminalNodesFrame([node], [after], width: 120, height: 10).Render(previousFrame);
+
+        rendered.ShouldNotContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+        rendered.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
+        rendered.ShouldContain("512 of 1,024 bytes");
+    }
+
+    /// <summary>
+    /// Starting or finishing an operation moves every line below it, so that frame does need a full repaint.
+    /// </summary>
+    [Fact]
+    public void StartingAnotherOperationRedrawsTheWholeBlock()
+    {
+        TerminalNodeStatus node = new("Only.Project", null, null, "Build", new MockStopwatch());
+        TerminalProgressStatus first = new(new TaskProgressStartedEventArgs(1, "Downloading first.zip", TaskProgressUnit.Bytes), 0);
+
+        TerminalNodesFrame previousFrame = new([node], [first], width: 120, height: 10);
+        previousFrame.Render(new TerminalNodesFrame([], width: 120, height: 10));
+
+        TerminalProgressStatus second = new(new TaskProgressStartedEventArgs(2, "Downloading second.zip", TaskProgressUnit.Bytes), 0);
+        string rendered = new TerminalNodesFrame([node], [first, second], width: 120, height: 10).Render(previousFrame);
+
+        rendered.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+    }
+
+    [Fact]
+    public void NodeStatusTargetThrowsForInputWithAnsi()    {
 #if DEBUG
         // This is testing a Debug.Assert, which won't throw in Release mode.
         Func<TerminalNodeStatus> newNodeStatus = () => new TerminalNodeStatus("project", "tfm", "rid", AnsiCodes.Colorize("colorized target", TerminalColor.Green), new MockStopwatch());

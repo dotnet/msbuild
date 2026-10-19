@@ -29,6 +29,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal Dictionary<(int nodeId, int contextId), string> propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
         private readonly List<RegisteredLoggerInfo> _registeredLoggers = new();
+
+        /// <summary>
+        /// Holds the title and unit of each in-flight task progress operation so that the operation can
+        /// be described when it ends.
+        /// </summary>
+        private readonly ConsoleProgressTracker _progressTracker = new();
         #region Constructors
         /// <summary>
         /// Default constructor.
@@ -1134,6 +1140,38 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Turns a task progress event into the single message that describes the finished operation,
+        /// or returns <see langword="null"/> when the event does not produce console output.
+        /// </summary>
+        /// <remarks>
+        /// The returned message is given <see cref="MessageImportance.Normal"/> so that a finished
+        /// operation appears at the default verbosity, the same place the task's own messages appear.
+        /// The progress events themselves are low importance because they are written for a live
+        /// display rather than for a log.
+        /// </remarks>
+        private BuildMessageEventArgs SummarizeProgress(BuildMessageEventArgs e)
+        {
+            switch (e)
+            {
+                case TaskProgressStartedEventArgs started:
+                    _progressTracker.Start(started);
+                    return null;
+                case TaskProgressFinishedEventArgs finished:
+                    return new BuildMessageEventArgs(
+                        _progressTracker.Finish(finished),
+                        helpKeyword: null,
+                        senderName: finished.SenderName,
+                        importance: MessageImportance.Normal,
+                        eventTimestamp: finished.Timestamp)
+                    {
+                        BuildEventContext = finished.BuildEventContext,
+                    };
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
         /// Prints a message event
         /// </summary>
         public override void MessageHandler(object sender, BuildMessageEventArgs e)
@@ -1150,6 +1188,19 @@ namespace Microsoft.Build.BackEnd.Logging
             ArgumentNullException.ThrowIfNull(e.BuildEventContext, "BuildEventContext");
             bool print = false;
             bool lightenText = false;
+
+            if (e is TaskProgressStartedEventArgs or TaskProgressUpdatedEventArgs or TaskProgressFinishedEventArgs)
+            {
+                // The console cannot animate a progress row, so intermediate updates have nothing to
+                // draw to. Only the end of an operation is rendered, as one ordinary message.
+                BuildMessageEventArgs summary = SummarizeProgress(e);
+                if (summary == null)
+                {
+                    return;
+                }
+
+                e = summary;
+            }
 
             if (e is TaskCommandLineEventArgs)
             {

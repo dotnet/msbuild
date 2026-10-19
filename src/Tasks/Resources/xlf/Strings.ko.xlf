@@ -319,6 +319,16 @@
         <target state="translated">오류 코드 {1}(으)로 인해 {0} 라이브러리 호출이 실패했습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Copy.ProgressTitle">
+        <source>Copying files</source>
+        <target state="new">Copying files</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Copy.ProgressTitleToFolder">
+        <source>Copying files to "{0}"</source>
+        <target state="new">Copying files to "{0}"</target>
+        <note>LOCALIZATION: {0} is a destination folder path.</note>
+      </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
         <source>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</source>
         <target state="translated">"{0}"을(를) "{1}"(으)로 복사하는 데 링크를 사용할 수 없습니다. 대신 파일을 복사합니다. {2}</target>
@@ -2616,6 +2626,11 @@
         <target state="translated">MSB4326: 형식 값 "{0}"이(가) 잘못되었습니다. "Pax", "Ustar", "V7" 또는 "Gnu" 중 하나를 지정하세요.</target>
         <note>{StrBegin="MSB4326: "}</note>
       </trans-unit>
+      <trans-unit id="TarDirectory.ProgressTitle">
+        <source>Creating archive "{0}"</source>
+        <target state="new">Creating archive "{0}"</target>
+        <note>LOCALIZATION: {0} is the archive file name.</note>
+      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: "{0}" 작업은 MSBuild의 .NET Core 버전에서 지원되지 않습니다. MSBuild의 .NET Framework 버전을 사용하세요. 자세한 내용은 https://aka.ms/msbuild/MSB4803을 참조하세요.</target>
@@ -2785,6 +2800,11 @@
         <source>Untarring file "{0}" to "{1}".</source>
         <target state="translated">파일 "{0}"의 압축을 "{1}"에 푸는 중입니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Untar.ProgressTitle">
+        <source>Extracting "{0}"</source>
+        <target state="new">Extracting "{0}"</target>
+        <note>LOCALIZATION: {0} is the archive file name.</note>
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
         <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>

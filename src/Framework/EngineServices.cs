@@ -26,13 +26,18 @@ namespace Microsoft.Build.Framework
         public const int Version2 = 2;
 
         /// <summary>
+        /// Version 3 with task progress reporting.
+        /// </summary>
+        public const int Version3 = 3;
+
+        /// <summary>
         /// Gets an explicit version of this class.
         /// </summary>
         /// <remarks>
         /// Must be incremented whenever new members are added. Derived classes should override
         /// the property to return the version actually being implemented.
         /// </remarks>
-        public virtual int Version => Version2;
+        public virtual int Version => Version3;
 
         /// <summary>
         /// Returns <see langword="true"/> if the given message importance is not guaranteed to be ignored by registered loggers.
@@ -55,5 +60,81 @@ namespace Microsoft.Build.Framework
         public virtual bool IsTaskInputLoggingEnabled => throw new NotImplementedException();
 
         public virtual bool IsOutOfProcRarNodeEnabled => throw new NotImplementedException();
+
+        /// <summary>
+        /// Creates a reporter for a task operation.
+        /// </summary>
+        /// <param name="title">A short, stable description of the operation.</param>
+        /// <param name="unit">The unit used by progress updates.</param>
+        /// <returns>A progress reporter. Hosts that do not support progress return a no-op reporter.</returns>
+        public virtual ITaskProgressReporter CreateTaskProgressReporter(
+            string title,
+            TaskProgressUnit unit = TaskProgressUnit.Unspecified)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(title);
+            return NullTaskProgressReporter.Instance;
+        }
+
+        /// <remarks>
+        /// Serializable so that a task in a separate AppDomain can receive it by value.
+        /// </remarks>
+        [Serializable]
+        internal sealed class NullTaskProgressReporter : ITaskProgressReporter
+        {
+            internal static readonly NullTaskProgressReporter Instance = new NullTaskProgressReporter();
+
+            private NullTaskProgressReporter()
+            {
+            }
+
+            public void Report(TaskProgressUpdate value)
+            {
+            }
+
+            public void Complete(string? summary = null)
+            {
+            }
+
+            public void Cancel(string? summary = null)
+            {
+            }
+
+            public void Fail(string? summary = null)
+            {
+            }
+
+            public void Increment(long delta = 1)
+            {
+            }
+
+            public void AddToTotal(long delta)
+            {
+            }
+
+            public void SetTotal(long? total)
+            {
+            }
+
+            public void SetStatus(string? status)
+            {
+            }
+
+            public void SetStatusProvider(Func<string?>? provider)
+            {
+            }
+
+            public ITaskProgressReporter CreateNestedReporter(
+                string title,
+                TaskProgressUnit unit = TaskProgressUnit.Unspecified,
+                TaskProgressNestedRetention retention = TaskProgressNestedRetention.Remove)
+            {
+                ArgumentException.ThrowIfNullOrWhiteSpace(title);
+                return this;
+            }
+
+            public void Dispose()
+            {
+            }
+        }
     }
 }

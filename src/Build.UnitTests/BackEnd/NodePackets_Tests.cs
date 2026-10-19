@@ -12,6 +12,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -86,6 +87,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             AssemblyResolutionSearchTraceEventArgs assemblyResolutionSearch = CreateAssemblyResolutionSearch();
             AssemblyConflictDependencyDetailsMessageEventArgs assemblyConflictDependencyDetails = CreateAssemblyConflictDependencyDetails();
             AssemblyConflictWarningEventArgs assemblyConflictWarning = CreateAssemblyConflictWarning();
+            TaskProgressStartedEventArgs taskProgressStarted = new(1, "Downloading", TaskProgressUnit.Bytes);
+            TaskProgressUpdatedEventArgs taskProgressUpdated = new(1, 1, 50, 100, "Halfway there");
+            TaskProgressFinishedEventArgs taskProgressFinished = new(1, 2, TaskProgressOutcome.Completed, 100, 100, "Done");
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
@@ -127,6 +131,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(assemblyResolutionSearch, LoggingEventType.AssemblyResolutionSearchTraceEvent);
             VerifyLoggingPacket(assemblyConflictDependencyDetails, LoggingEventType.AssemblyConflictDependencyDetailsEvent);
             VerifyLoggingPacket(assemblyConflictWarning, LoggingEventType.AssemblyConflictWarningEvent);
+            VerifyLoggingPacket(taskProgressStarted, LoggingEventType.TaskProgressStartedEvent);
+            VerifyLoggingPacket(taskProgressUpdated, LoggingEventType.TaskProgressUpdatedEvent);
+            VerifyLoggingPacket(taskProgressFinished, LoggingEventType.TaskProgressFinishedEvent);
         }
 
         private static BuildEventContext CreateBuildEventContext()
@@ -347,6 +354,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     CreateAssemblyResolutionSearch(),
                     CreateAssemblyConflictDependencyDetails(),
                     CreateAssemblyConflictWarning(),
+                    new TaskProgressStartedEventArgs(1, "Downloading", TaskProgressUnit.Bytes) { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7), ParentOperationId = 5, Retention = TaskProgressNestedRetention.Persist },
+                    new TaskProgressUpdatedEventArgs(1, 1, 50, 100, "Halfway there") { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7) },
+                    new TaskProgressFinishedEventArgs(1, 2, TaskProgressOutcome.Completed, 100, 100, "Done") { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7) },
                 };
                 foreach (BuildEventArgs arg in testArgs)
                 {
@@ -373,6 +383,65 @@ namespace Microsoft.Build.UnitTests.BackEnd
             finally
             {
                 Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
+            }
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(8)]
+        [InlineData(9)]
+        public void TaskProgressTransportFallsBackForOlderPeers(byte version)
+        {
+            var context = new BuildEventContext(1, 2, 3, 4);
+            BuildMessageEventArgs[] events =
+            [
+                new TaskProgressStartedEventArgs(1, "Work", TaskProgressUnit.Items),
+                new TaskProgressUpdatedEventArgs(1, 1, 1, 2, "Working"),
+                new TaskProgressFinishedEventArgs(1, 2, TaskProgressOutcome.Completed, 2, 2, "Done"),
+            ];
+            foreach (BuildMessageEventArgs progress in events)
+            {
+                progress.BuildEventContext = context;
+                var packet = new LogMessagePacketBase(new KeyValuePair<int, BuildEventArgs>(7, progress), version);
+                ITranslator writer = TranslationHelpers.GetWriteTranslator();
+                writer.NegotiatedPacketVersion = version;
+                packet.Translate(writer);
+                var read = new LogMessagePacketBase(TranslationHelpers.GetReadTranslator());
+                KeyValuePair<int, BuildEventArgs> readEvent = read.NodeBuildEvent.Value;
+                BuildEventArgs deserialized = readEvent.Value;
+
+                deserialized.GetType().ShouldBe(version < NodePacketTypeExtensions.TaskProgressMinVersion ? typeof(BuildMessageEventArgs) : progress.GetType());
+                deserialized.Message.ShouldBe(progress.Message);
+                deserialized.BuildEventContext.ShouldBe(context);
+                readEvent.Key.ShouldBe(7);
+                progress.BuildEventContext.ShouldBeSameAs(context);
+                if (version >= NodePacketTypeExtensions.TaskProgressMinVersion)
+                {
+                    packet.NodeBuildEvent.Value.Value.ShouldBeSameAs(progress);
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        public void TaskProgressWorkerTransportPreservesStructuredEvents(byte version)
+        {
+            BuildMessageEventArgs[] events =
+            [
+                new TaskProgressStartedEventArgs(1, "Work", TaskProgressUnit.Items),
+                new TaskProgressUpdatedEventArgs(1, 1, 1, 2, "Working"),
+                new TaskProgressFinishedEventArgs(1, 2, TaskProgressOutcome.Completed, 2, 2, "Done"),
+            ];
+            foreach (BuildMessageEventArgs progress in events)
+            {
+                var packet = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(7, progress));
+                ITranslator writer = TranslationHelpers.GetWriteTranslator();
+                writer.NegotiatedPacketVersion = version;
+                packet.Translate(writer);
+                var read = (LogMessagePacket)LogMessagePacket.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+                read.NodeBuildEvent.Value.Value.GetType().ShouldBe(progress.GetType());
+                packet.NodeBuildEvent.Value.Value.ShouldBeSameAs(progress);
             }
         }
 

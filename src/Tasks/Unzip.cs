@@ -137,7 +137,7 @@ namespace Microsoft.Build.Tasks
                                 {
                                     try
                                     {
-                                        Extract(zipArchive, destinationDirectory);
+                                        Extract(zipArchive, destinationDirectory, Path.GetFileName(sourceFilePath.Value));
                                     }
                                     catch (Exception e)
                                     {
@@ -174,121 +174,156 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="sourceArchive">The <see cref="ZipArchive"/> containing the files to extract.</param>
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract files to.</param>
-        private void Extract(ZipArchive sourceArchive, DirectoryInfo destinationDirectory)
+        /// <param name="archiveName">The file name of the archive being extracted, used for progress reporting.</param>
+        private void Extract(ZipArchive sourceArchive, DirectoryInfo destinationDirectory, string archiveName)
         {
             AbsolutePath fullDestinationDirectoryPath = TaskEnvironment.GetAbsolutePath(FileUtilities.EnsureTrailingSlash(destinationDirectory.FullName)).GetCanonicalForm();
 
-            foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
+            int entryCount = sourceArchive.Entries.Count;
+            int processedEntries = 0;
+            ITaskProgressReporter progress = null;
+            bool extractionSucceeded = false;
+
+            try
             {
-                if (ShouldSkipEntry(zipArchiveEntry))
+                foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
                 {
-                    Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFilter", zipArchiveEntry.FullName);
-                    continue;
-                }
+                    // Reporting at the start of the iteration keeps a single report site even though the
+                    // entry-handling paths below use `continue` for skipped and failed entries.
+                    progress?.Report(new TaskProgressUpdate(processedEntries, entryCount, zipArchiveEntry.FullName));
+                    processedEntries++;
 
-                AbsolutePath fullDestinationPath = TaskEnvironment.GetAbsolutePath(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName)).GetCanonicalForm();
-                ErrorUtilities.VerifyThrowInvalidOperation(fullDestinationPath.Value.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", fullDestinationPath);
+                    if (ShouldSkipEntry(zipArchiveEntry))
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFilter", zipArchiveEntry.FullName);
+                        continue;
+                    }
 
-                FileInfo destinationPath = new(fullDestinationPath);
+                    AbsolutePath fullDestinationPath = TaskEnvironment.GetAbsolutePath(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName)).GetCanonicalForm();
+                    ErrorUtilities.VerifyThrowInvalidOperation(fullDestinationPath.Value.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", fullDestinationPath);
 
-                // Zip archives can have directory entries listed explicitly.
-                // If this entry is a directory we should create it and move to the next entry.
-                if (Path.GetFileName(destinationPath.FullName).Length == 0)
-                {
-                    // The entry is a directory
-                    Directory.CreateDirectory(destinationPath.FullName);
-                    continue;
-                }
+                    FileInfo destinationPath = new(fullDestinationPath);
 
-                if (!destinationPath.FullName.StartsWith(destinationDirectory.FullName, StringComparison.OrdinalIgnoreCase))
-                {
-                    // ExtractToDirectory() throws an IOException for this but since we're extracting one file at a time
-                    // for logging and cancellation, we need to check for it ourselves.
-                    Log.LogErrorFromResources("Unzip.ErrorExtractingResultsInFilesOutsideDestination", destinationPath.FullName, destinationDirectory.FullName);
-                    continue;
-                }
+                    // Zip archives can have directory entries listed explicitly.
+                    // If this entry is a directory we should create it and move to the next entry.
+                    if (Path.GetFileName(destinationPath.FullName).Length == 0)
+                    {
+                        // The entry is a directory
+                        Directory.CreateDirectory(destinationPath.FullName);
+                        continue;
+                    }
 
-                if (ShouldSkipEntry(zipArchiveEntry, destinationPath))
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFileMatch", zipArchiveEntry.FullName, destinationPath.FullName, nameof(SkipUnchangedFiles), "true");
-                    continue;
-                }
-                else if (FailIfNotIncremental)
-                {
-                    Log.LogErrorFromResources("Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
-                    continue;
-                }
+                    if (!destinationPath.FullName.StartsWith(destinationDirectory.FullName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // ExtractToDirectory() throws an IOException for this but since we're extracting one file at a time
+                        // for logging and cancellation, we need to check for it ourselves.
+                        Log.LogErrorFromResources("Unzip.ErrorExtractingResultsInFilesOutsideDestination", destinationPath.FullName, destinationDirectory.FullName);
+                        continue;
+                    }
 
-                try
-                {
-                    destinationPath.Directory?.Create();
-                }
-                catch (Exception e)
-                {
-                    Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotCreateDestinationDirectory", destinationPath.DirectoryName, e.Message);
-                    continue;
-                }
+                    if (ShouldSkipEntry(zipArchiveEntry, destinationPath))
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFileMatch", zipArchiveEntry.FullName, destinationPath.FullName, nameof(SkipUnchangedFiles), "true");
+                        continue;
+                    }
+                    else if (FailIfNotIncremental)
+                    {
+                        Log.LogErrorFromResources("Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
+                        continue;
+                    }
 
-                if (OverwriteReadOnlyFiles && destinationPath.Exists && destinationPath.IsReadOnly)
-                {
                     try
                     {
-                        destinationPath.IsReadOnly = false;
+                        destinationPath.Directory?.Create();
                     }
                     catch (Exception e)
                     {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(destinationPath.FullName);
-                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotMakeFileWriteable", zipArchiveEntry.FullName, destinationPath.FullName, e.Message, lockedFileMessage);
+                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotCreateDestinationDirectory", destinationPath.DirectoryName, e.Message);
                         continue;
                     }
-                }
 
-                try
-                {
-                    Log.LogMessageFromResources(MessageImportance.Normal, "Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
+                    if (OverwriteReadOnlyFiles && destinationPath.Exists && destinationPath.IsReadOnly)
+                    {
+                        try
+                        {
+                            destinationPath.IsReadOnly = false;
+                        }
+                        catch (Exception e)
+                        {
+                            string lockedFileMessage = LockCheck.GetLockedFileMessage(destinationPath.FullName);
+                            Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotMakeFileWriteable", zipArchiveEntry.FullName, destinationPath.FullName, e.Message, lockedFileMessage);
+                            continue;
+                        }
+                    }
+
+                    try
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Normal, "Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
+
+                        // Only start an operation once an entry actually needs extracting, so archives that are
+                        // entirely up to date or filtered out do not create a progress operation at all.
+                        progress ??= (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
+                            $"Extracting {archiveName}",
+                            TaskProgressUnit.Items);
 
 #if NET
-                    FileStreamOptions fileStreamOptions = new()
-                    {
-                        Access = FileAccess.Write,
-                        Mode = FileMode.Create,
-                        Share = FileShare.None,
-                        BufferSize = 0x1000
-                    };
+                        FileStreamOptions fileStreamOptions = new()
+                        {
+                            Access = FileAccess.Write,
+                            Mode = FileMode.Create,
+                            Share = FileShare.None,
+                            BufferSize = 0x1000
+                        };
 
-                    const UnixFileMode OwnershipPermissions =
-                        UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
-                        UnixFileMode.GroupRead | UnixFileMode.GroupWrite | UnixFileMode.GroupExecute |
-                        UnixFileMode.OtherRead | UnixFileMode.OtherWrite | UnixFileMode.OtherExecute;
+                        const UnixFileMode OwnershipPermissions =
+                            UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+                            UnixFileMode.GroupRead | UnixFileMode.GroupWrite | UnixFileMode.GroupExecute |
+                            UnixFileMode.OtherRead | UnixFileMode.OtherWrite | UnixFileMode.OtherExecute;
 
-                    // Restore Unix permissions.
-                    // For security, limit to ownership permissions, and respect umask (through UnixCreateMode).
-                    // We don't apply UnixFileMode.None because .zip files created on Windows and .zip files created
-                    // with previous versions of .NET don't include permissions.
-                    UnixFileMode mode = (UnixFileMode)(zipArchiveEntry.ExternalAttributes >> 16) & OwnershipPermissions;
-                    if (mode != UnixFileMode.None && NativeMethodsShared.IsUnixLike)
-                    {
-                        fileStreamOptions.UnixCreateMode = mode;
-                    }
-                    using (FileStream destination = new FileStream(destinationPath.FullName, fileStreamOptions))
+                        // Restore Unix permissions.
+                        // For security, limit to ownership permissions, and respect umask (through UnixCreateMode).
+                        // We don't apply UnixFileMode.None because .zip files created on Windows and .zip files created
+                        // with previous versions of .NET don't include permissions.
+                        UnixFileMode mode = (UnixFileMode)(zipArchiveEntry.ExternalAttributes >> 16) & OwnershipPermissions;
+                        if (mode != UnixFileMode.None && NativeMethodsShared.IsUnixLike)
+                        {
+                            fileStreamOptions.UnixCreateMode = mode;
+                        }
+                        using (FileStream destination = new FileStream(destinationPath.FullName, fileStreamOptions))
 #else
-                    using (Stream destination = File.Open(destinationPath.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
+                        using (Stream destination = File.Open(destinationPath.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
 #endif
 #pragma warning disable CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
-                    using (Stream stream = zipArchiveEntry.Open())
-                    {
-                        stream.CopyToAsync(destination, _DefaultCopyBufferSize, _cancellationToken.Token)
-                            .ConfigureAwait(continueOnCapturedContext: false)
-                            .GetAwaiter()
-                            .GetResult();
-                    }
+                        using (Stream stream = zipArchiveEntry.Open())
+                        {
+                            stream.CopyToAsync(destination, _DefaultCopyBufferSize, _cancellationToken.Token)
+                                .ConfigureAwait(continueOnCapturedContext: false)
+                                .GetAwaiter()
+                                .GetResult();
+                        }
 #pragma warning restore CA2025
 
-                    destinationPath.LastWriteTimeUtc = zipArchiveEntry.LastWriteTime.UtcDateTime;
+                        destinationPath.LastWriteTimeUtc = zipArchiveEntry.LastWriteTime.UtcDateTime;
+                    }
+                    catch (IOException e)
+                    {
+                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotExtractFile", zipArchiveEntry.FullName, destinationPath.FullName, e.Message);
+                    }
                 }
-                catch (IOException e)
+
+                if (progress is not null && !_cancellationToken.IsCancellationRequested)
                 {
-                    Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotExtractFile", zipArchiveEntry.FullName, destinationPath.FullName, e.Message);
+                    progress.Report(new TaskProgressUpdate(processedEntries, entryCount));
+                }
+
+                extractionSucceeded = !Log.HasLoggedErrors;
+            }
+            finally
+            {
+                if (progress is not null)
+                {
+                    progress.Finish(extractionSucceeded, _cancellationToken.Token);
+                    progress.Dispose();
                 }
             }
         }
