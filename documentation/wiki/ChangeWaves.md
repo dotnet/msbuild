@@ -36,11 +36,11 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.13
+- [Task hosts preserve ordinary task-environment variables instead of undoing them as startup differences; Windows architecture-specific variables retain their bitness adjustments. This prevents coordinator/static-graph restore deadlocks in multithreaded builds. Opting out restores the legacy reconciliation and can reintroduce the deadlock.](https://github.com/dotnet/msbuild/pull/15032)
 - [ResolveAssemblyReference discovers redist and subset lists relative to the project directory when `TargetFrameworkDirectories` contains relative paths.](https://github.com/dotnet/msbuild/pull/15089)
 - [ClickOnce application manifest generation resolves relative sentinel assembly dependencies against the task project directory before reading their identities, preventing duplicate .NET Framework 3.0/3.5 prerequisite entries.](https://github.com/dotnet/msbuild/pull/15222)
 
 ### 18.12
-- [Task hosts preserve ordinary task-environment variables instead of undoing them as startup differences; Windows architecture-specific variables retain their bitness adjustments. This prevents coordinator/static-graph restore deadlocks in multithreaded builds. Opting out restores the legacy reconciliation and can reintroduce the deadlock.](https://github.com/dotnet/msbuild/issues/14986)
 - [Multi-threaded builds use an empty sentinel current directory, check CWD after tasks, and detect unresolved relative-path writes at project/build completion.](https://github.com/dotnet/msbuild/pull/14917)
 - [TaskHosts used to run a task out of process under `-mt` stay connected to the process that launched them and exit with it, instead of remaining available for any other process to reuse. TaskHosts of a different runtime or architecture are unaffected.](https://github.com/dotnet/msbuild/pull/14584)
 - [Events that a task logs from a TaskHost - extended errors, warnings and messages, critical messages, telemetry, and any other event kind the router did not enumerate - reach the parent process instead of being dropped.](https://github.com/dotnet/msbuild/pull/14876)

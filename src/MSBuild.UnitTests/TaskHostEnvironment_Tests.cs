@@ -4,12 +4,13 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.CommandLine;
+using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests;
 
-public class TaskHostEnvironment_Tests
+public class TaskHostEnvironment_Tests(ITestOutputHelper output)
 {
     [Theory]
     [InlineData(true, null, "task")]
@@ -20,6 +21,7 @@ public class TaskHostEnvironment_Tests
     [InlineData(false, "host", null)]
     public void OrdinaryVariablesAreNotReconciled(bool isWindows, string? hostValue, string? taskValue)
     {
+        using TestEnvironment env = CreateEnvironment(useLegacyBehavior: false);
         CreateTable("CUSTOM_VARIABLE", hostValue, taskValue, isWindows: isWindows).ShouldBeEmpty();
         CreateTable("MSBUILDCOORDINATORGRANTID", hostValue, taskValue, isWindows: isWindows).ShouldBeEmpty();
     }
@@ -32,7 +34,8 @@ public class TaskHostEnvironment_Tests
     [InlineData("host", "")]
     public void LegacyPolicyPreservesStartupReconciliation(string? hostValue, string? taskValue)
     {
-        var table = CreateTable("CUSTOM_VARIABLE", hostValue, taskValue, useLegacyBehavior: true);
+        using TestEnvironment env = CreateEnvironment(useLegacyBehavior: true);
+        var table = CreateTable("CUSTOM_VARIABLE", hostValue, taskValue);
         table.Count.ShouldBe(1);
         table["CUSTOM_VARIABLE"].Key.ShouldBe(taskValue);
         table["CUSTOM_VARIABLE"].Value.ShouldBe(hostValue);
@@ -49,6 +52,7 @@ public class TaskHostEnvironment_Tests
     [InlineData("programfiles", "host", "parent")]
     public void WindowsArchitectureVariablesAreReconciled(string name, string? hostValue, string? taskValue)
     {
+        using TestEnvironment env = CreateEnvironment(useLegacyBehavior: false);
         var table = CreateTable(name, hostValue, taskValue);
         table.Count.ShouldBe(1);
         table[name].Key.ShouldBe(taskValue);
@@ -61,13 +65,23 @@ public class TaskHostEnvironment_Tests
     [InlineData(true)]
     public void EqualValuesDoNotNeedReconciliation(bool useLegacyBehavior)
     {
-        CreateTable("PROCESSOR_ARCHITECTURE", "AMD64", "amd64", useLegacyBehavior).ShouldBeEmpty();
-        CreateTable("ProgramFiles", null, null, useLegacyBehavior).ShouldBeEmpty();
-        CreateTable("ProgramFiles", "", "", useLegacyBehavior).ShouldBeEmpty();
+        using TestEnvironment env = CreateEnvironment(useLegacyBehavior);
+        CreateTable("PROCESSOR_ARCHITECTURE", "AMD64", "amd64").ShouldBeEmpty();
+        CreateTable("ProgramFiles", null, null).ShouldBeEmpty();
+        CreateTable("ProgramFiles", "", "").ShouldBeEmpty();
+    }
+
+    private TestEnvironment CreateEnvironment(bool useLegacyBehavior)
+    {
+        TestEnvironment env = TestEnvironment.Create(output);
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION",
+            useLegacyBehavior ? ChangeWaves.Wave18_13.ToString() : null);
+        ChangeWaves.ResetStateForTests();
+        return env;
     }
 
     private static IDictionary<string, KeyValuePair<string?, string?>> CreateTable(
-        string name, string? hostValue, string? taskValue, bool useLegacyBehavior = false, bool isWindows = true)
+        string name, string? hostValue, string? taskValue, bool isWindows = true)
     {
         Dictionary<string, string> hostEnvironment = new(StringComparer.OrdinalIgnoreCase);
         Dictionary<string, string> taskEnvironment = new(StringComparer.OrdinalIgnoreCase);
@@ -81,6 +95,6 @@ public class TaskHostEnvironment_Tests
             taskEnvironment[name] = taskValue;
         }
 
-        return TaskHostEnvironment.CreateMismatchedEnvironmentTable(taskEnvironment, hostEnvironment, useLegacyBehavior, isWindows);
+        return TaskHostEnvironment.CreateMismatchedEnvironmentTable(taskEnvironment, hostEnvironment, isWindows);
     }
 }

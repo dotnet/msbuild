@@ -17,23 +17,26 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd;
 public class TaskHostEnvironment_E2E_Tests(ITestOutputHelper output)
 {
     [Theory]
-    [InlineData(false, false, null, "build", false)]
-    [InlineData(false, false, "process", "build", false)]
-    [InlineData(false, false, "process", null, false)]
-    [InlineData(false, true, null, "build", false)]
-    [InlineData(false, true, "process", "build", false)]
-    [InlineData(false, true, "process", null, false)]
-    [InlineData(true, false, null, "build", false)]
-    [InlineData(true, false, "process", "build", false)]
-    [InlineData(true, false, "process", null, false)]
-    [InlineData(true, false, null, "build", true)]
-    [InlineData(true, false, "process", "build", true)]
-    [InlineData(true, false, "process", null, true)]
+    [InlineData(false, false, null, "build", null)]
+    [InlineData(false, false, "process", "build", null)]
+    [InlineData(false, false, "process", null, null)]
+    [InlineData(false, true, null, "build", null)]
+    [InlineData(false, true, "process", "build", null)]
+    [InlineData(false, true, "process", null, null)]
+    [InlineData(true, false, null, "build", null)]
+    [InlineData(true, false, "process", "build", null)]
+    [InlineData(true, false, "process", null, null)]
+    [InlineData(true, false, null, "build", "18.12")]
+    [InlineData(true, false, "process", "build", "18.12")]
+    [InlineData(true, false, "process", null, "18.12")]
+    [InlineData(true, false, null, "build", "18.13")]
+    [InlineData(true, false, "process", "build", "18.13")]
+    [InlineData(true, false, "process", null, "18.13")]
     public void TaskEnvironmentSurvivesTaskHostReconciliation(
-        bool multiThreaded, bool explicitTaskHost, string? processValue, string? buildValue, bool disableChangeWave)
+        bool multiThreaded, bool explicitTaskHost, string? processValue, string? buildValue, string? disableFeaturesFromVersion)
     {
         using TestEnvironment env = TestEnvironment.Create(output);
-        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableChangeWave ? "18.12" : null);
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFeaturesFromVersion);
         string variable = $"MSBUILD_TASK_ENVIRONMENT_{Guid.NewGuid():N}";
         env.SetEnvironmentVariable(variable, processValue);
         string taskFactory = explicitTaskHost ? """TaskFactory="TaskHostFactory" """ : string.Empty;
@@ -78,7 +81,7 @@ public class TaskHostEnvironment_E2E_Tests(ITestOutputHelper output)
         result.ShouldHaveSucceeded();
         ProjectInstance? state = result.ProjectStateAfterBuild;
         state.ShouldNotBeNull();
-        string expectedValue = (disableChangeWave ? processValue : buildValue) ?? string.Empty;
+        string expectedValue = (disableFeaturesFromVersion is not null ? processValue : buildValue) ?? string.Empty;
         state.GetPropertyValue("FirstValue").ShouldBe(expectedValue);
         state.GetPropertyValue("SecondValue").ShouldBe(expectedValue);
         state.GetPropertyValue("ChangedValue").ShouldBe("changed-by-task");

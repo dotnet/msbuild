@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.CommandLine;
 
@@ -23,12 +24,11 @@ internal static class TaskHostEnvironment
     internal static IDictionary<string, KeyValuePair<string?, string?>> CreateMismatchedEnvironmentTable(
         IDictionary<string, string> taskEnvironment,
         IDictionary<string, string> hostEnvironment,
-        bool useLegacyBehavior,
         bool isWindows)
     {
         Dictionary<string, KeyValuePair<string?, string?>> mismatches = new(StringComparer.OrdinalIgnoreCase);
 
-        if (useLegacyBehavior)
+        if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
         {
             foreach (string name in hostEnvironment.Keys)
             {
