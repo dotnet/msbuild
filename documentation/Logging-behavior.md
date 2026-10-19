@@ -13,6 +13,20 @@ For more information on custom messages please reference the Microsoft Learn pag
 Terminal logger is a new feature which improves the console experience for end users by focusing the output on the diagnostics raised from a build for each project. It also allows users to see at-a-glance information about how the engine is building their projects at any time. It is opinionated and explicitly hides some build messages and output to deliver a more streamlined end-user experience. Users that need more detailed output should use the [console logger](#console-logger) or a [binary log](#binary-logger-build-logger) along with the [Structured Log Viewer](https://msbuildlog.com/) to drive their investigations.
 For more information on how the terminal logger behaves see the [dotnet build options](https://learn.microsoft.com/dotnet/core/tools/dotnet-build#options) under `-tl`.
 
+When output is connected to an interactive terminal, the terminal logger reports build status using the [OSC 7501 Program Status Protocol](https://www.superlogical.com/rex/docs/build/program-status): `working` while the build runs, followed by `done` or `error`. Redirected output is unchanged.
+
+The logger also reports active projects and targets as independent child records, including during restore.
+Project titles include the file name, target framework, and runtime identifier when available.
+Target titles contain the target name.
+Execution IDs distinguish concurrent projects and targets, even when their names match.
+Completed scopes are cleared, including their descendants.
+The final build status remains available after all child records are cleared.
+
+The logger reports at most 63 child records, leaving room for the build status within the protocol's minimum capacity.
+Additional scopes are omitted while this limit is reached.
+Titles use UTF-8 base64 encoding, exclude control characters, and respect the protocol's size limit.
+Reports do not include estimated progress or inferred authentication states.
+
 To specify verbosity the `-verbosity` flag or `/tlp:verbosity={verbosity level}`
 
 | Verbosity                  | Quiet | Minimal | Normal | Detailed | Diagnostic |
@@ -36,6 +50,11 @@ The console logger is a 1:1 textual representation of the data that are emitted 
 
 The console logger defaults to normal verbosity, and can be overriden by passing the `-verbosity` attribute, or passing the `verbosity` property to the console logger `clp:verbosity={verbosity level}`.
 
+On interactive ANSI terminals, the console logger reports `working`, then `done` or `error`, using the [OSC 7501 Program Status Protocol](https://www.superlogical.com/rex/docs/build/program-status).
+These build-level reports use `app=msbuild` and do not depend on verbosity.
+Redirected output, custom output handlers, and file loggers do not receive these reports.
+Set `MSBUILDDISABLEFEATURESFROMVERSION=18.13` to restore the previous console output.
+
 | Verbosity                  | Quiet | Minimal | Normal | Detailed | Diagnostic |
 | ---------                  | ----- | ------- | ------ | -------- | ---------- |
 | Errors                     |&check;| &check; | &check;| &check;  | &check;    |
@@ -47,4 +66,3 @@ The console logger defaults to normal verbosity, and can be overriden by passing
 
 ### File logger
 The File logger saves all the build data to a file. It's verbosity is determined by passing the `verbosity` parameter to the `flp` attribute, or the default is set to `diagnostic`, and it follows the same message display rules as the console logger.
-

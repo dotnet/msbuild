@@ -37,6 +37,11 @@ internal interface ITerminal : IDisposable
     bool SupportsProgressReporting { get; }
 
     /// <summary>
+    /// <see langword="true"/> if output is connected to an interactive terminal.
+    /// </summary>
+    bool SupportsProgramStatusReporting { get; }
+
+    /// <summary>
     /// Starts buffering the text passed via the <c>Write*</c> methods.
     /// </summary>
     /// <remarks>
