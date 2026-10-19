@@ -337,6 +337,138 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void RepeatedMaterializationPreservesEarlierPieceSnapshots()
+    {
+        const int phaseCount = 64;
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Selected Include="a.cs" />
+                    <Source Include="a.cs;b.cs">
+                        <Trace>initial</Trace>
+                    </Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        List<ProjectItemGroupElement> groups = [.. project.Xml.ItemGroups];
+        for (int phase = 1; phase <= phaseCount; phase++)
+        {
+            ProjectItemGroupElement group = project.Xml.AddItemGroup();
+            ProjectItemElement update = project.Xml.CreateItemElement("Source");
+            update.Update = phase % 2 == 0 ? "a.cs" : "@(Selected)";
+            group.AppendChild(update);
+            update.AddMetadata("Trace", $"%(Trace)-{phase}");
+            ProjectItemElement capture = project.Xml.CreateItemElement($"Snapshot{phase}", "@(Source)");
+            group.AppendChild(capture);
+            groups.Add(group);
+        }
+
+        var evaluator = CreateEvaluator(project, default);
+        IItemProvider<ProjectItem> provider = evaluator;
+        evaluator.ProcessItemGroups([groups[0]], project.Xml.DirectoryPath);
+        ICollection<ProjectItem> initialResult = provider.GetItems("Source");
+        ProjectItem[] initialItems = [.. initialResult];
+        initialItems.Length.ShouldBe(2);
+        List<(ICollection<ProjectItem> Items, string Trace)> versions = [(initialResult, "initial")];
+        string trace = "initial";
+        for (int phase = 1; phase <= phaseCount; phase++)
+        {
+            evaluator.ProcessItemGroups([groups[phase]], project.Xml.DirectoryPath);
+            trace += $"-{phase}";
+            ICollection<ProjectItem> result = provider.GetItems("Source");
+            provider.GetItems("Source").ShouldBeSameAs(result);
+            versions.Add((result, trace));
+        }
+
+        for (int phase = 0; phase < versions.Count; phase++)
+        {
+            ProjectItem[] items = [.. versions[phase].Items];
+            items.Length.ShouldBe(2);
+            items[0].EvaluatedInclude.ShouldBe("a.cs");
+            items[0].GetMetadataValue("Trace").ShouldBe(versions[phase].Trace);
+            items[1].ShouldBeSameAs(initialItems[1]);
+            items[1].GetMetadataValue("Trace").ShouldBe("initial");
+            if (phase > 0)
+            {
+                ICollection<ProjectItem> capturedResult = provider.GetItems($"Snapshot{phase}");
+                provider.GetItems($"Snapshot{phase}").ShouldBeSameAs(capturedResult);
+                ProjectItem[] captured = [.. capturedResult];
+                captured.Length.ShouldBe(2);
+                captured[0].EvaluatedInclude.ShouldBe("a.cs");
+                captured[0].GetMetadataValue("Trace").ShouldBe(versions[phase].Trace);
+                captured[1].EvaluatedInclude.ShouldBe("b.cs");
+                captured[1].GetMetadataValue("Trace").ShouldBe("initial");
+            }
+        }
+
+        provider.GetItems("Source").ShouldBeSameAs(versions[versions.Count - 1].Items);
+    }
+
+    [Fact]
+    public void QualifiedUpdatesPreservePerItemCapturesWithAnExistingPathIndex()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="a.cs">
+                        <Value>from-a</Value>
+                    </Lookup>
+                    <Lookup Include="b.cs">
+                        <Value>from-b</Value>
+                    </Lookup>
+                    <Source Include="a.cs;a.cs;b.cs;c.cs">
+                        <Trace>initial</Trace>
+                    </Source>
+                    <Before Include="@(Source)" />
+                    <Source Remove="missing.cs" />
+                    <Source Update="@(Lookup)">
+                        <Trace>%(Trace)-%(Lookup.Value)</Trace>
+                    </Source>
+                    <After Include="@(Source)" />
+                    <Lookup Update="*">
+                        <Value>later</Value>
+                    </Lookup>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        ProjectItem[] lookup = [.. provider.GetItems("Lookup")];
+        lookup.Length.ShouldBe(2);
+        foreach (ProjectItem item in lookup)
+        {
+            item.GetMetadataValue("Value").ShouldBe("later");
+        }
+
+        string[] expectedIncludes = ["a.cs", "a.cs", "b.cs", "c.cs"];
+        string[] expectedTrace = ["initial-from-a", "initial-from-a", "initial-from-b", "initial"];
+        string[] itemTypes = ["Source", "Before", "After"];
+        foreach (string itemType in itemTypes)
+        {
+            ICollection<ProjectItem> result = provider.GetItems(itemType);
+            provider.GetItems(itemType).ShouldBeSameAs(result);
+            ProjectItem[] items = [.. result];
+            items.Length.ShouldBe(expectedIncludes.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                items[i].EvaluatedInclude.ShouldBe(expectedIncludes[i]);
+                items[i].GetMetadataValue("Trace").ShouldBe(itemType == "Before" ? "initial" : expectedTrace[i]);
+            }
+        }
+    }
+
+    [Fact]
     public void ConditionsUseItemsVisibleAtEachElement()
     {
         using ProjectCollection collection = new();

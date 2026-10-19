@@ -12,24 +12,23 @@ namespace Microsoft.Build.Evaluation;
 internal partial class LazyItemEvaluator<P, I, M, D>
 {
     /// <summary>
-    /// A collection of ItemData that maintains insertion order and internally optimizes some access patterns, e.g. bulk removal
-    /// based on normalized item values.
+    ///  An immutable snapshot of ordered item data, sharing unchanged ranges with earlier snapshots.
     /// </summary>
     private sealed partial class OrderedItemDataCollection : IEnumerable<ItemData>
     {
         /// <summary>
-        /// The list of items in the collection. Defines the enumeration order.
+        ///  The piece-list snapshot that defines item order and preserves historical item states.
         /// </summary>
-        private readonly ImmutableList<ItemData> _list;
+        private readonly ImmutablePieceList<ItemData> _list;
 
         private ICollection<I> _matchedItems;
 
         /// <summary>
         ///  Gets the shared empty item collection.
         /// </summary>
-        public static OrderedItemDataCollection Empty { get; } = new([]);
+        public static OrderedItemDataCollection Empty { get; } = new(ImmutablePieceList<ItemData>.Empty);
 
-        private OrderedItemDataCollection(ImmutableList<ItemData> list)
+        private OrderedItemDataCollection(ImmutablePieceList<ItemData> list)
         {
             _list = list;
         }
@@ -43,13 +42,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// Creates a new mutable collection.
         /// </summary>
         public static Builder CreateBuilder()
-            => new(ImmutableList.CreateBuilder<ItemData>());
+            => new(ImmutablePieceList<ItemData>.Empty.ToEditor());
 
         /// <summary>
         /// Creates a mutable view of this collection. Changes made to the returned builder are not reflected in this collection.
         /// </summary>
         public Builder ToBuilder()
-            => new(_list.ToBuilder());
+            => new(_list.ToEditor());
 
         /// <summary>
         ///  Gets the condition-true items, caching the projection for subsequent reads of this snapshot.
@@ -87,7 +86,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// <returns>
         ///  An enumerator over this snapshot.
         /// </returns>
-        public ImmutableList<ItemData>.Enumerator GetEnumerator() => _list.GetEnumerator();
+        public ImmutablePieceList<ItemData>.Enumerator GetEnumerator() => _list.GetEnumerator();
 
         IEnumerator<ItemData> IEnumerable<ItemData>.GetEnumerator() => GetEnumerator();
 

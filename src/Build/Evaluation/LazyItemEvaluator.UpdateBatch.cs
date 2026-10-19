@@ -79,14 +79,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 return;
             }
 
-            for (int i = 0; i < items.Count; i++)
-            {
-                string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(items[i].Item.EvaluatedInclude, items[i].Item.ProjectDirectory);
-                if (updates.TryGetValue(fullPath, out UpdateOperation? operation))
-                {
-                    items[i] = operation.UpdateItem(items[i]);
-                }
-            }
+            // The replacement runs immediately after a successful lookup, while its selected operation is current.
+            UpdateOperation? operation = null;
+            items.UpdateAll(
+                itemData => updates.TryGetValue(itemData.NormalizedItemValue, out operation),
+                itemData => operation!.UpdateItem(itemData));
 
             updates.Clear();
         }
