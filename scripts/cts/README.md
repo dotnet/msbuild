@@ -11,6 +11,7 @@ surface stays in sync; only the runner stack differs.
 
 | File                       | Role                                                       |
 | -------------------------- | ---------------------------------------------------------- |
+| `MSBuild.VSTest.slnx`      | CI-only solution; kept here so root builds select `MSBuild.slnx` |
 | `projects.json`            | Registry of `*.UnitTests.VSTest` projects + demo files     |
 | `cts.config.json`          | CTS configuration (Modules / SourceCodeFiles / Filter)     |
 | `_Common.ps1`              | Tiny PS helpers (paths, build, registry lookup)            |
@@ -90,7 +91,7 @@ snapshot store. Two pipelines drive it:
 * `azure-pipelines/cts-apply.yml` — runs in parallel on PRs (non-blocking);
   downloads the latest `cts-baseline-<os>` from main via
   `DownloadPipelineArtifact@2`, runs `cts apply vstest` against
-  `MSBuild.VSTest.slnx`. If `collectPipelineId` isn't configured yet (or
+  `scripts/cts/MSBuild.VSTest.slnx`. If `collectPipelineId` isn't configured yet (or
   download fails), the apply step is skipped and only metrics are emitted
   — we do **not** duplicate the regular PR pipeline's full test run.
 
@@ -98,7 +99,7 @@ Both pipelines emit `cts-metrics.json` per OS (schema documented in
 [`METRICS.md`](METRICS.md)) so we can later quantify the incrementality
 CTS achieves.
 
-`Check-SlnxParity.ps1` verifies that `MSBuild.VSTest.slnx`'s production
+`Check-SlnxParity.ps1` verifies that `scripts/cts/MSBuild.VSTest.slnx`'s production
 project list matches `MSBuild.slnx`'s so additions to one solution don't
 silently skip the other. It is wired into `azure-pipelines/cts-apply.yml` as
 a **non-blocking** PR-time step, and can also be run locally:

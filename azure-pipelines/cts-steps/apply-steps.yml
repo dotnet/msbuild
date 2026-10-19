@@ -48,7 +48,7 @@ steps:
   fetchDepth: 0   # Need history for baselineAgeCommits.
   clean: true
 
-# Drift guard: MSBuild.VSTest.slnx must mirror MSBuild.slnx's production graph
+# Drift guard: scripts/cts/MSBuild.VSTest.slnx must mirror MSBuild.slnx's production graph
 # (see scripts/cts/Check-SlnxParity.ps1). Non-blocking so it never gates a PR —
 # a failure surfaces as succeededWithIssues and the "Present/Missing" project
 # lists are printed to the step log for triage.
@@ -189,14 +189,14 @@ steps:
       & "$(Build.SourcesDirectory)/build.cmd" `
         -ci `
         -configuration $(BuildConfiguration) `
-        -projects "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" `
+        -projects "$(Build.SourcesDirectory)/scripts/cts/MSBuild.VSTest.slnx" `
         -verbosity minimal `
         /p:UsingToolVisualStudioIbcTraining=false
     } else {
       bash "$(Build.SourcesDirectory)/build.sh" `
         --ci `
         --configuration $(BuildConfiguration) `
-        --projects "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" `
+        --projects "$(Build.SourcesDirectory)/scripts/cts/MSBuild.VSTest.slnx" `
         --verbosity minimal `
         /p:UsingToolVisualStudioIbcTraining=false
     }
