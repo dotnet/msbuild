@@ -21,12 +21,13 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
         private readonly IDictionary<string, string> _metadataValues;
         private readonly ProjectItemElementLink _xmlLink;
 
-        public FakeProjectItemLink(Project project, string itemType, string evaluatedInclude, string definedFilePath, IDictionary<string, string> metadataValues)
+        public FakeProjectItemLink(Project project, string itemType, string evaluatedInclude, string definedFilePath, IDictionary<string, string> metadataValues, ICollection<ProjectMetadata>? directMetadata = null)
         {
             Project = project ?? throw new ArgumentNullException(nameof(project));
             EvaluatedInclude = evaluatedInclude;
             _metadataValues = metadataValues ?? throw new ArgumentNullException(nameof(metadataValues));
             _xmlLink = new FakeProjectItemElementLink(itemType, definedFilePath);
+            DirectMetadata = directMetadata ?? new FakeCachedEntityDictionary<ProjectMetadata>();
         }
 
         public override Project Project { get; }
@@ -38,7 +39,7 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 
         public override ICollection<ProjectMetadata> MetadataCollection => throw new NotImplementedException();
 
-        public override ICollection<ProjectMetadata> DirectMetadata { get; } = new FakeCachedEntityDictionary<ProjectMetadata>();
+        public override ICollection<ProjectMetadata> DirectMetadata { get; }
 
         public override void ChangeItemType(string newItemType) => throw new NotImplementedException();
 

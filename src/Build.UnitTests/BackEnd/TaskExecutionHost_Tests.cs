@@ -14,6 +14,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -1687,6 +1688,38 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        [Fact]
+        public void TaskItemOutputsTrackOutputLocation()
+        {
+            ProjectItemInstance source = new(CreateTestProject(), "Source", "item%3Bname.txt", "source.proj", 3, 4);
+            source.SetMetadata("Custom", "value%3B");
+            ITaskItem[] outputs =
+            [
+                new TaskItem(source),
+                new Microsoft.Build.Utilities.TaskItem(source),
+                new TaskItem<string>(source),
+                new TaskThatReturnsDictionaryTaskItem.MinimalDictionaryTaskItem(
+                    new MinimalDictionary<string, string> { { "Custom", source.GetMetadataValue("Custom") } }),
+            ];
+            TaskBuilderTestTask task = Assert.IsType<TaskBuilderTestTask>(_host.TaskInstance);
+            task.ItemArrayParam = [null, outputs[0], outputs[1], null, outputs[2], outputs[3], null];
+            ElementLocation parameterLocation = ElementLocation.Create(
+                Path.Combine(Path.GetTempPath(), "output%3B;$(literal).proj"), 17, 9);
+
+            _host.GatherTaskOutputs("ItemArrayOutput", parameterLocation, true, "output").ShouldBeTrue();
+
+            ProjectItemInstance[] items = _bucket.Lookup.GetItems("output").ToArray();
+            items.Length.ShouldBe(outputs.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                items[i].EvaluatedInclude.ShouldBe(outputs[i].ItemSpec);
+                items[i].GetMetadataValue("Custom").ShouldBe(source.GetMetadataValue("Custom"));
+                items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(parameterLocation.File);
+                items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("17");
+                items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("9");
+            }
+        }
+
         /// <summary>
         /// Validate that an item array output to a property produces the correct semi-colon-delimited evaluated value.
         /// </summary>
@@ -2276,11 +2309,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private void ValidateOutputItem(string outputName, string value)
         {
-            Assert.True(_host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output"));
-            Assert.True(_outputsReadFromTask.ContainsKey(outputName));
+            _host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output").ShouldBeTrue();
+            _outputsReadFromTask.ShouldContainKey(outputName);
 
-            Assert.Single(_bucket.Lookup.GetItems("output"));
-            Assert.Equal(value, _bucket.Lookup.GetItems("output").First().EvaluatedInclude);
+            ProjectItemInstance item = _bucket.Lookup.GetItems("output").ShouldHaveSingleItem();
+            item.EvaluatedInclude.ShouldBe(value);
+            item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("1");
+            item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("1");
         }
 
         /// <summary>
@@ -2288,13 +2323,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private void ValidateOutputItems(string outputName, string[] values)
         {
-            Assert.True(_host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output"));
-            Assert.True(_outputsReadFromTask.ContainsKey(outputName));
+            _host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output").ShouldBeTrue();
+            _outputsReadFromTask.ShouldContainKey(outputName);
 
-            Assert.Equal(values.Length, _bucket.Lookup.GetItems("output").Count);
+            _bucket.Lookup.GetItems("output").Count.ShouldBe(values.Length);
             for (int i = 0; i < values.Length; i++)
             {
-                Assert.Equal(values[i], _bucket.Lookup.GetItems("output").ElementAt(i).EvaluatedInclude);
+                ProjectItemInstance item = _bucket.Lookup.GetItems("output").ElementAt(i);
+                item.EvaluatedInclude.ShouldBe(values[i]);
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("1");
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("1");
             }
         }
 

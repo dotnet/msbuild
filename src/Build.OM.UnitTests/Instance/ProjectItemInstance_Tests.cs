@@ -3,12 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
@@ -24,7 +26,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// The number of built-in metadata for items.
         /// </summary>
-        public const int BuiltInMetadataCount = 15;
+        public static int BuiltInMetadataCount => ItemSpecModifiers.All.Length;
         private Lazy<DummyMappedDrive> _mappedDrive = DummyMappedDriveUtils.GetLazyDummyMappedDrive();
 
 
@@ -77,6 +79,32 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal("i", item.ItemType);
             Assert.Equal("i1", item.EvaluatedInclude);
             Assert.False(item.Metadata.GetEnumerator().MoveNext());
+        }
+
+        [Fact]
+        public void LocationTracksOriginatingItemElement()
+        {
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                """
+                <Project>
+                  <ItemGroup>
+                    <i Include="i1" />
+                  </ItemGroup>
+                </Project>
+                """);
+
+            ProjectRootElement xml = projectRootElementFromString.Project;
+            ProjectItemElement itemElement = xml.Items.Single();
+            ProjectItemInstance item = new ProjectInstance(xml).GetItems("i").Single();
+
+            ITaskItem[] items = [item, new Utilities.TaskItem(item), new TaskItem<string>(item)];
+            foreach (ITaskItem taskItem in items)
+            {
+                taskItem.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(itemElement.Location.File);
+                taskItem.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(itemElement.Location.Line.ToString(CultureInfo.InvariantCulture));
+                taskItem.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(itemElement.Location.Column.ToString(CultureInfo.InvariantCulture));
+                taskItem.CloneCustomMetadata().Contains(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeFalse();
+            }
         }
 
         /// <summary>
