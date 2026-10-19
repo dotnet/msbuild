@@ -187,8 +187,6 @@ Nested grants avoid this by treating child processes as participants in the pare
 
 Nested grants do not implement a scheduler within the root grant. Each nested process is capped by the root grant's node count, but the coordinator does not track combined concurrency across the root process and all nested participants. The root build is expected to coordinate its own nested work so it does not oversubscribe the resources it was granted.
 
-Starting with Change Wave 18.13, TaskHost startup reconciliation preserves ordinary task-environment variables, including the grant token, instead of treating every difference from process startup as a bitness adjustment. Opting out of that wave restores the legacy reconciliation and can reintroduce a deadlock when a task-hosted restore process loses the token.
-
 Nested grant validation happens when the nested process joins the root grant. If the root grant is released later, the coordinator rejects new joins for that grant ID, but it does not revoke nested grants that were already issued. Those nested builds continue until they release or disconnect.
 
 Nested grants are capability-gated. Older peers that do not advertise `nested-grants` continue to exchange `NodeGrantMessage` using the legacy int-only wire shape (`GrantId` is `Guid.Empty` and never sent on the wire), and clients only send `JoinGrantMessage` when the server advertises the capability.

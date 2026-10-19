@@ -36,7 +36,7 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.13
-- [Task hosts preserve ordinary task-environment variables instead of undoing them as startup differences; Windows architecture-specific variables retain their bitness adjustments. This prevents coordinator/static-graph restore deadlocks in multithreaded builds. Opting out restores the legacy reconciliation and can reintroduce the deadlock.](https://github.com/dotnet/msbuild/pull/15032)
+- [Task hosts preserve ordinary task-environment variables while retaining Windows bitness adjustments.](https://github.com/dotnet/msbuild/pull/15032)
 - [ResolveAssemblyReference discovers redist and subset lists relative to the project directory when `TargetFrameworkDirectories` contains relative paths.](https://github.com/dotnet/msbuild/pull/15089)
 - [ClickOnce application manifest generation resolves relative sentinel assembly dependencies against the task project directory before reading their identities, preventing duplicate .NET Framework 3.0/3.5 prerequisite entries.](https://github.com/dotnet/msbuild/pull/15222)
 

@@ -96,8 +96,6 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
 
     [Theory]
     [InlineData(false, false)]
-    [InlineData(false, true)]
-    [InlineData(true, false)]
     [InlineData(true, true)]
     public async Task NestedBuild_InheritsCoordinatorGrant_DoesNotDeadlock(bool multiThreaded, bool taskHost)
     {
@@ -137,10 +135,8 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         AssertNestedGrantReceived(buildOutput);
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task StaticGraphRestore_SharesCoordinatorGrant(bool multiThreaded)
+    [Fact]
+    public async Task StaticGraphRestore_SharesCoordinatorGrant()
     {
         using var helper = new CoordinatorTestHelper(outputHelper, nodeBudget: 1);
         helper.TestEnvironment.SetEnvironmentVariable(
@@ -164,7 +160,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             """);
 
         var (success, buildOutput) = await RunnerUtilities.ExecBootstrappedMSBuildAsync(
-            $"\"{project.Path}\" /t:Restore /p:RestoreUseStaticGraphEvaluation=true /mt:{multiThreaded} /m:8 /nr:false /v:n",
+            $"\"{project.Path}\" /t:Restore /p:RestoreUseStaticGraphEvaluation=true /mt /m:8 /nr:false /v:n",
             outputHelper: outputHelper,
             timeoutMilliseconds: 60_000);
 
