@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if FEATURE_APPDOMAIN
+using System.CodeDom.Compiler;
+#endif
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -23,6 +26,9 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
+#if FEATURE_APPDOMAIN
+using Microsoft.CSharp;
+#endif
 using Shouldly;
 using Xunit;
 
@@ -3225,6 +3231,97 @@ EndGlobal
                 output.ShouldNotContain(expectedVersionString);
             }
         }
+
+#if FEATURE_APPDOMAIN
+        public static bool WindowsLongPathsEnabled => NativeMethodsShared.IsLongPathsEnabled() is NativeMethodsShared.LongPathsStatus.Enabled;
+
+        [Theory(Skip = "Requires Windows long-path support.", SkipUnless = nameof(WindowsLongPathsEnabled))]
+        [InlineData("WriteLinesToFile")]
+        [InlineData("Unzip")]
+        public void LongPathsWorkWhenFrameworkQuirksInitializeEarly(string target)
+        {
+            string root = _env.CreateFolder().Path;
+            string fileName = new string('f', 60) + ".txt";
+            string directory = Path.Combine(root, new string('d', 291 - root.Length - fileName.Length - 2));
+            string outputFile = Path.Combine(directory, fileName);
+            outputFile.Length.ShouldBe(291);
+
+            string zipFile = Path.Combine(root, "input.zip");
+            using (ZipArchive archive = ZipFile.Open(zipFile, ZipArchiveMode.Create))
+            using (StreamWriter writer = new(archive.CreateEntry(fileName).Open()))
+            {
+                writer.Write("Long paths work.");
+            }
+
+            string project = _env.CreateFile("LongPaths.proj", $"""
+                <Project>
+                  <Target Name="WriteLinesToFile">
+                    <MakeDir Directories="{directory}" />
+                    <WriteLinesToFile File="{outputFile}" Lines="Long paths work." Overwrite="true" />
+                  </Target>
+                  <Target Name="Unzip">
+                    <Unzip SourceFiles="{zipFile}" DestinationFolder="{directory}" />
+                  </Target>
+                  <Target Name="Verify" AfterTargets="WriteLinesToFile;Unzip">
+                    <ReadLinesFromFile File="{outputFile}">
+                      <Output TaskParameter="Lines" ItemName="OutputLines" />
+                    </ReadLinesFromFile>
+                    <Error Condition="'@(OutputLines)' != 'Long paths work.'" Text="Unexpected long-path file contents." />
+                  </Target>
+                </Project>
+                """).Path;
+            string msbuild = RunnerUtilities.BootstrapMSBuildExecutablePath;
+            string host = Path.Combine(root, "LongPathHost.exe");
+            foreach (string assembly in Directory.EnumerateFiles(Path.GetDirectoryName(msbuild), "*.dll"))
+            {
+                File.Copy(assembly, Path.Combine(root, Path.GetFileName(assembly)));
+            }
+
+            using CSharpCodeProvider compiler = new();
+            CompilerResults compilation = compiler.CompileAssemblyFromSource(
+                new CompilerParameters
+                {
+                    GenerateExecutable = true,
+                    OutputAssembly = host,
+                    CompilerOptions = $"/platform:x86 /win32manifest:\"{Path.Combine(AppContext.BaseDirectory, "MSBuild.exe.manifest")}\""
+                },
+                """
+                using System;
+                using System.Reflection;
+                [assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.0")]
+
+                public static class Program
+                {
+                    public static int Main(string[] args)
+                    {
+                        Assembly assembly = Assembly.LoadFrom(args[0]);
+                        MethodInfo execute = assembly.GetType("Microsoft.Build.CommandLine.MSBuildApp")
+                            .GetMethod("Execute", new[] { typeof(string[]) });
+                        string[] commandLine =
+                        {
+                            args[0], args[1], "-target:" + args[2], "-noAutoResponse",
+                            "-nodeReuse:false", "-maxCpuCount:1", "-mt:false"
+                        };
+                        return Convert.ToInt32(execute.Invoke(null, new object[] { commandLine }));
+                    }
+                }
+                """);
+            compilation.Errors.HasErrors.ShouldBeFalse(string.Join(Environment.NewLine, compilation.Errors.Cast<CompilerError>()));
+
+            // Configuration overrides are read from the process config, not a secondary AppDomain's config.
+            // A 4.0 host reproduces the premature CLR defaults without relying on installed NGEN images.
+            File.Copy(msbuild + ".config", host + ".config");
+            Dictionary<string, string> environment = RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables();
+            environment["MSBUILD_EXE_PATH"] = msbuild;
+            environment["MSBUILDNOINPROCNODE"] = null;
+            environment["MSBUILDFORCEALLTASKSOUTOFPROC"] = null;
+            string output = RunnerUtilities.RunProcessAndGetOutput(
+                host, $"\"{msbuild}\" \"{project}\" {target}", out bool success,
+                outputHelper: _output, environmentVariables: environment);
+
+            success.ShouldBeTrue(output);
+        }
+#endif
 
         [Theory]
         [MemberData(nameof(MinimumMessageImportanceTestData))]

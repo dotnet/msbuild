@@ -43,6 +43,13 @@ One major reason why a native image is rejected is loading into the LoadFrom con
 it to say that when an assembly is loaded by `Assembly.LoadFrom`, it is automatically disqualified from having its native image used.
 This is bad news for any app with an add-in system where extension assemblies are loaded by path.
 
+### CLR compatibility switches
+
+Loading an assembly through a `codeBase` redirect can initialize .NET Framework compatibility switches before the application's
+target framework is available, selecting .NET 4.0 defaults instead. This [known CLR issue](https://github.com/dotnet/msbuild/issues/5331#issuecomment-651870236)
+can disable long-path support even though MSBuild targets .NET Framework 4.7.2. Keep `Switch.System.IO.UseLegacyPathHandling=false`
+and `Switch.System.IO.BlockLongPaths=false` explicit in the executable configuration files; setting them in `Main` is too late.
+
 ## SDK resolvers
 
 One class of assemblies loaded by MSBuild by path are SDK resolvers. MSBuild scans the `SdkResolvers` subdirectory to discover

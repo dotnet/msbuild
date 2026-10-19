@@ -50,6 +50,7 @@
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
+    <None Include="..\MSBuild\MSBuild.exe.manifest" Link="MSBuild.exe.manifest" CopyToOutputDirectory="PreserveNewest" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     <None Include="..\Shared\UnitTests\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
