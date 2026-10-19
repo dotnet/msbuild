@@ -107,37 +107,33 @@ Read-only commands (`get-default-channels`, `get-subscriptions`, `get-channel`) 
 
 **Non-interactive (`-q`).** `darc add-default-channel` / `add-subscription` prompt `y/n` when the target branch does not exist yet (e.g. pre-creating the `vs{{NEXT_VERSION}}` mapping in Phase 1.2c, or adding the new `vs{{THIS_RELEASE_VERSION}}` backflow in Phase 2). `darc delete-subscriptions` always prompts for confirmation. Console input is redirected in an agent session, so the prompt **fails or hangs the command** — always pass `-q` for these writes. Note the verb is `delete-subscriptions` (plural); `delete-subscription` does not exist.
 
-**Phase 2 — what moves vs. what stays.** When rotating `main` to the next channel, retarget **only** the subscriptions whose **target branch is `main`** (`dotnet/dotnet @ main`, `dotnet/fsharp @ main`). **Never** retarget a subscription that targets a VMR servicing/release branch (`dotnet/dotnet @ release/*`) — that includes the SDK band paired with the new `vs{{THIS_RELEASE_VERSION}}` branch and any `.NET-next` preview band (`release/*-preview*`). Those stay on `VS {{THIS_RELEASE_VERSION}}` so the new release branch owns their downstream flow; moving them steals it. (This bit the 18.9 release: the band and preview subs were moved and had to be reverted.)
+**Phase 2 — forward-flow rotation.** Move subscriptions targeting `main` (`dotnet/dotnet @ main`, `dotnet/fsharp @ main`) to the next channel so those consumers receive next-version builds. Keep VMR `release/*` targets, including `.NET-next` preview bands, on `VS {{THIS_RELEASE_VERSION}}` so the release branch continues to feed its SDK bands.
 
-**Phase 2 — VMR backflow rotation (easy to miss).** Backflow (`dotnet/dotnet → msbuild`, source-enabled) must rotate too **when the new `vs{{THIS_RELEASE_VERSION}}` is paired with an SDK band** (skip for a VS-only release): repoint the `→ main` backflow to the **next** SDK band channel (`.NET <NEXT_BAND> SDK`, the channel `dotnet/dotnet @ main` publishes to), and **add** a backflow from the **outgoing** band channel into the new `vs{{THIS_RELEASE_VERSION}}` branch (mirror the prior release branch's backflow, e.g. `vs18.0 ← .NET 10.0.1xx SDK`). See checklist steps 2.2b / 2.3f / 2.3g.
+**Phase 2 — VMR backflow rotation.** Backflow (`dotnet/dotnet → msbuild`, source-enabled) keeps each MSBuild branch's dependencies aligned with its SDK band. When the new `vs{{THIS_RELEASE_VERSION}}` is paired with an SDK band, repoint the `→ main` backflow to the **next** SDK band channel and add backflow from the **outgoing** band channel into the release branch. Skip this for a VS-only release. See checklist steps 2.2b / 2.3f / 2.3g.
 
 ## Branch retirement (Phase 1.3)
 
-Each release audits `vs*` branches for retirement. **This is an audit of every live branch, not a check of one candidate.** The rule of thumb (`vs{{THIS_RELEASE_VERSION}} - 3`) identifies only the *newest* candidate; nothing in the process ever revisits older branches, so a single missed retirement persists forever and the backlog grows every month.
+Audit every release branch to keep required SDK/VS servicing flows active and remove unused dependency automation.
 
 **Branch inventory:** [Maintained branches](../../../documentation/release.md#maintained-branches) is the static list. Update its branch rows, SDK/VS sources, and support deadlines when cutting or retiring branches; cross-check the live DARC mappings, subscriptions, and repository branches in checklist step 1.3a.
 
-**Two lifecycles, two sources — you need both.** Neither one decides a branch on its own:
+Check both lifecycles because either the SDK or Visual Studio can require a branch:
 
 | Lifecycle | Source |
 |---|---|
 | **SDK band** | [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) — maps each feature band to its VS version and support end date |
 | **Visual Studio** | [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) — annual releases and the LTSC table |
 
-**VS 2026 and later use an annual model: 2 years per release** — one year of monthly feature updates, then one security-only year on the LTSC. Only the **LTSC baseline version** gets that second year; an ordinary monthly release falls out of support as soon as the next monthly ships. So each year exactly one `vs18.x` becomes the LTSC and must be kept ~2 years while its neighbours retire quickly — identify it from the LTSC table on the servicing page (`2026-LTSC` ends **November 9, 2027**).
+**VS 2026 and later:** each annual release has one year of feature updates and one year of LTSC security servicing. Only the published **LTSC baseline** receives the second year; use the servicing page to identify that baseline.
 
-⚠️ **A VS LTSC can expire before the SDK band that shipped with it** — `2026-LTSC` ends Nov 2027, but .NET 10 (LTS) runs to Nov 2028. So the SDK side is frequently what keeps a branch alive, which is why `vs18.0` stays despite being the oldest branch.
+Use published SDK and VS deadlines for lifecycle decisions, and DARC channels and subscriptions for dependency routing.
 
-🛑 **Maestro is not a lifecycle source.** A `.NET X.Y.Zxx SDK` channel — including `... SDK Release` variants — persists long after the band dies. Reasoning "the channel still exists, so the band is supported" is invalid and is exactly how `vs18.6` (band 10.0.3xx, EOL Aug 2026) was missed during the 18.11 release and had to be retired afterwards.
-
-Apply the **combined rule** when checking support: a branch paired with both an SDK band and a VS version is out of support only when *both* lifecycles agree. Two mechanical cleanup signals find most of the backlog:
+Apply the **combined rule** when checking support: a branch paired with both an SDK band and a VS version is out of support only when *both* lifecycles agree. Check these candidates for automation cleanup:
 
 | Signal | Meaning |
 |---|---|
-| Branch's `VS X.Y` channel has **no MSBuild outbound subscription** | No downstream consumes MSBuild builds from that branch. Compare a live one: `vs18.0 → dotnet/dotnet release/10.0.1xx`. |
+| Branch's `VS X.Y` channel has **no MSBuild outbound subscription** | No downstream consumes MSBuild builds from that branch. |
 | Default channel exists for a **branch that isn't in the repo** | Pure orphan — delete the mapping. |
-
-Worked example from 18.11: `vs18.0` pairs with 10.0.1xx (EOL Nov 2028) so it is **kept despite being the oldest branch**; `vs18.6` (10.0.3xx, EOL Aug 2026) retires; `vs18.4` and `vs18.5` were orphaned default channels for deleted branches.
 
 **Retirement cleanup (2.3e):** remove inbound subscriptions, unused MSBuild outbound subscriptions, and branch-to-channel associations, including disabled subscriptions. Preserve shared channels and flows still needed by other branches or producers; verify removals after merge and ingestion.
 
