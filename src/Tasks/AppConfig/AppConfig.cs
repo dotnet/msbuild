@@ -32,7 +32,9 @@ namespace Microsoft.Build.Tasks
 
                 // Need a filestream as the XmlReader doesn't support nonstandard unicode characters in path.
                 // No need to dispose - as 'CloseInput' was passed to XmlReaderSettings
+#pragma warning disable MSBuildTask0005 // RAR supplies a fully qualified path in MT mode; Wave18_8 opt-out is a non-MT fallback.
                 FileStream fs = File.OpenRead(appConfigFilePath);
+#pragma warning restore MSBuildTask0005
 #pragma warning disable CA2000 // Dispose objects before losing scope is suppressed because the reader is disposed in the finally block
                 reader = XmlReader.Create(fs, readerSettings);
 #pragma warning restore CA2000 // Dispose objects before losing scope

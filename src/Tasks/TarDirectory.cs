@@ -136,8 +136,12 @@ namespace Microsoft.Build.Tasks
         /// <returns>A <see cref="System.Threading.Tasks.Task{Boolean}"/> that resolves to <see langword="true"/> when the archive was written without errors or cancellation.</returns>
         private async System.Threading.Tasks.Task<bool> ExecuteAsync()
         {
+#pragma warning disable MSBuildTask0003 // TaskEnvironment supplies a fully qualified source directory.
             _sourceDirectory = new DirectoryInfo(TaskEnvironment.GetAbsolutePath(SourceDirectory.ItemSpec).Value);
+#pragma warning restore MSBuildTask0003
+#pragma warning disable MSBuildTask0003 // TaskEnvironment supplies a fully qualified destination path.
             _destinationFile = new FileInfo(TaskEnvironment.GetAbsolutePath(DestinationFile.ItemSpec).Value);
+#pragma warning restore MSBuildTask0003
 
             if (!_sourceDirectory.Exists)
             {

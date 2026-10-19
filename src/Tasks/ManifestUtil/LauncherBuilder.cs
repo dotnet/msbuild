@@ -106,7 +106,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             try
             {
                 EnsureFolderExists(Path.GetDirectoryName(outputExe.Value));
+#pragma warning disable MSBuildTask0005 // Both paths are fully qualified by Build using TaskEnvironment.
                 File.Copy(launcher.Value, outputExe.Value, true);
+#pragma warning restore MSBuildTask0005
                 ClearReadOnlyAttribute(outputExe.Value);
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
@@ -122,17 +124,23 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             if (!FileSystems.Default.DirectoryExists(strFolderPath))
             {
+#pragma warning disable MSBuildTask0005 // strFolderPath is the parent of the fully qualified outputExe path.
                 Directory.CreateDirectory(strFolderPath);
+#pragma warning restore MSBuildTask0005
             }
         }
 
         private static void ClearReadOnlyAttribute(string strFileName)
         {
+#pragma warning disable MSBuildTask0005 // strFileName is the fully qualified outputExe path.
             FileAttributes attribs = File.GetAttributes(strFileName);
+#pragma warning restore MSBuildTask0005
             if ((attribs & FileAttributes.ReadOnly) != 0)
             {
                 attribs &= (~FileAttributes.ReadOnly);
+#pragma warning disable MSBuildTask0005 // strFileName is the fully qualified outputExe path.
                 File.SetAttributes(strFileName, attribs);
+#pragma warning restore MSBuildTask0005
             }
         }
     }

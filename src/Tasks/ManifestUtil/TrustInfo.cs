@@ -432,7 +432,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">The name of the input file.</param>
         public void Read(string path)
         {
+#pragma warning disable MSBuildTask0005 // GenerateApplicationManifest supplies a TaskEnvironment-resolved TrustInfoFile path.
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+#pragma warning restore MSBuildTask0005
             {
                 Read(s);
             }
@@ -549,7 +551,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [RequiresDynamicCode("Writes trust info through XslCompiledTransform, which generates IL at runtime and is not supported with Native AOT.")]
         public void Write(string path)
         {
+#pragma warning disable MSBuildTask0005 // ManifestWriter supplies a unique, fully qualified temporary-file path.
             using (Stream s = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.None))
+#pragma warning restore MSBuildTask0005
             {
                 Write(s);
                 s.Flush();

@@ -76,7 +76,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [RequiresDynamicCode("Writes a ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         public static void WriteManifest(Manifest manifest, string path, string targetframeWorkVersion)
         {
+#pragma warning disable MSBuildTask0005 // GenerateManifestBase supplies a TaskEnvironment-resolved output path.
             using (Stream s = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.Write))
+#pragma warning restore MSBuildTask0005
             {
                 WriteManifest(manifest, s, targetframeWorkVersion);
             }
@@ -143,7 +145,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                         try
                         {
+                            // TODO: XML identity names can override logPath with a drive-relative path or collide across projects.
+                            // Known opt-in VSPLOG risk: https://github.com/dotnet/msbuild/issues/13645.
+#pragma warning disable MSBuildTask0005
                             File.Copy(temp, Path.Combine(Util.logPath, n + ".trust-file.xml"), true);
+#pragma warning restore MSBuildTask0005
                         }
                         catch (IOException)
                         {
@@ -166,7 +172,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     }
                     finally
                     {
+#pragma warning disable MSBuildTask0005 // temp is a unique, fully qualified FileUtilities.GetTemporaryFileName path.
                         File.Delete(temp);
+#pragma warning restore MSBuildTask0005
                     }
                 }
             }
@@ -191,7 +199,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
                 finally
                 {
+#pragma warning disable MSBuildTask0005 // temp is a unique, fully qualified path from Util.WriteTempFile.
                     File.Delete(temp);
+#pragma warning restore MSBuildTask0005
                 }
                 Util.WriteLogFile(n + ".write.2-merged.xml", s3);
             }

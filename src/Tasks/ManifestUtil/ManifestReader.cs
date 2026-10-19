@@ -142,7 +142,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static Manifest ReadManifest(string manifestType, string path, bool preserveStream)
         {
             Manifest m;
+            // TODO: EntryPoint.ResolvedPath can remain drive-relative during deployment validation.
+            // Tracked by https://github.com/dotnet/msbuild/issues/13196.
+#pragma warning disable MSBuildTask0005
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+#pragma warning restore MSBuildTask0005
             {
                 byte[] buffer = new byte[2];
                 s.ReadExactly(buffer, 0, 2);
