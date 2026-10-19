@@ -9,7 +9,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Evaluation;
+#if !NET
 using Microsoft.Build.Shared;
+#endif
 
 #nullable disable
 
