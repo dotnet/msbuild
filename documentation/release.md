@@ -15,12 +15,11 @@ Update this list when cutting or retiring a branch.
 | `vs17.14` | [Visual Studio 2022](https://learn.microsoft.com/visualstudio/releases/2022/servicing-vs2022) | January 2032 |
 | `vs18.0` | [SDK 10.0.1xx](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) | [November 14, 2028](https://dotnet.microsoft.com/platform/support/policy/dotnet-core) |
 | `vs18.9` | [SDK 10.0.4xx](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) | [November 14, 2028](https://dotnet.microsoft.com/platform/support/policy/dotnet-core) |
-| `vs18.10` | [VS servicing window](./release-checklist.md#phase-1-branch--prepare) | Outside the current release plus two preceding releases; check LTSC |
-| `vs18.11` | [VS servicing window](./release-checklist.md#phase-1-branch--prepare) | Outside the current release plus two preceding releases; check LTSC |
+| `vs18.11` | [VS Stable](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs#stable-channel-support) | Next Stable promotion, unless selected as an LTSC baseline |
 | `vs18.12` | [SDK 11.0.1xx](https://github.com/dotnet/dotnet/blob/release/11.0.1xx/src/msbuild/eng/Versions.props) | [November 9, 2028 (planned GA lifecycle)](https://github.com/dotnet/core/blob/main/release-notes/11.0/README.md) |
 | `main` | [Development](../eng/Versions.props) | No fixed end date |
 
-Recheck rolling VS rows against the [LTSC baseline](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) at each audit; confirm planned SDK deadlines at GA.
+Check Stable promotions and the published [LTSC baseline](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) at each audit; confirm planned SDK deadlines at GA.
 
 ## How MSBuild releases flow into VS
 

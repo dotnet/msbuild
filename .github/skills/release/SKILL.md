@@ -124,11 +124,11 @@ Check both lifecycles because either the SDK or Visual Studio can require a bran
 | **SDK band** | [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) — maps each feature band to its VS version and support end date |
 | **Visual Studio** | [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) — annual releases and the LTSC table |
 
-**VS 2026 and later:** each annual release has one year of feature updates and one year of LTSC security servicing. Only the published **LTSC baseline** receives the second year; use the servicing page to identify that baseline.
+**VS 2026 and later:** non-LTSC releases are serviced through Insiders and for one month after Stable release. A new Stable promotion ends VS support for the previous release. LTSC baselines receive one year of servicing after release; use the published LTSC table to identify them.
 
 Use published SDK and VS deadlines for lifecycle decisions, and DARC channels and subscriptions for dependency routing.
 
-Apply the **combined rule** when checking support: a branch paired with both an SDK band and a VS version is out of support only when *both* lifecycles agree. Check these candidates for automation cleanup:
+Apply the **combined rule**: retire a branch paired with an SDK band and a VS version only when both lifecycles agree it is out of support. Check these candidates for automation cleanup:
 
 | Signal | Meaning |
 |---|---|

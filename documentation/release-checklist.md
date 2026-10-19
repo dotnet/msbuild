@@ -94,12 +94,14 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
   `darc get-subscriptions --source-repo https://github.com/dotnet/msbuild` \
   `git fetch upstream && git branch -r --list 'upstream/vs*'`
 
-  How to identify an out-of-support branch:
-    - **The combined rule:** a branch paired with both an SDK band and a VS version is **out of support only when both lifecycles agree**. If either is still supported, keep servicing available for that lifecycle.
+  How to decide branch retirement:
+    - **The combined rule:** a branch paired with both an SDK band and a VS version is retired **only when both lifecycles agree it is out of support**. If either is still supported, keep servicing available for that lifecycle.
     - **SDK lifecycle.** The band ↔ VS version ↔ EOL mapping is the [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions). It states which VS version each SDK band pairs with and when that band's support ends. \
     Use the published lifecycle for support decisions and Maestro channels for dependency routing.
     - **VS lifecycle — a separate source; the SDK table does not answer it.** Use [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs). \
-    **VS 2026 and later:** annual releases receive one year of feature updates and one year of LTSC security servicing; only the published **LTSC baseline** receives the second year. For non-LTSC maintenance, audit the current release and two preceding releases; `vs{{THIS_RELEASE_VERSION}} - 3` is the newest retirement candidate, and all older branches must also be evaluated.
+    **VS 2026 and later: one month of support after Stable release.** Non-LTSC releases are serviced through Insiders and Stable; promoting a new release to Stable ends VS support for the previous release. LTSC baselines are supported for one year after release; identify them from the published LTSC table.
+
+    **At branch snap, before Stable promotion:** the current release plus two preceding releases is a useful audit window, so `vs{{THIS_RELEASE_VERSION}} - 3` is worth checking. Use actual Stable promotions and SDK/VS deadlines for retirement decisions.
 
     - Check the SDK deadline independently of the VS LTSC deadline.
     - **VS-only branches** (not paired with any active SDK band) are retired purely on the VS lifecycle.
