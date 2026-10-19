@@ -3233,9 +3233,15 @@ EndGlobal
         }
 
 #if FEATURE_APPDOMAIN
-        public static bool WindowsLongPathsEnabled => NativeMethodsShared.IsLongPathsEnabled() is NativeMethodsShared.LongPathsStatus.Enabled;
+        private static string X86BootstrapMSBuildExecutablePath => Path.Combine(
+            RunnerUtilities.BootstrapRootPath, "net472", "MSBuild", "Current", "Bin", "MSBuild.exe");
 
-        [Theory(Skip = "Requires Windows long-path support.", SkipUnless = nameof(WindowsLongPathsEnabled))]
+        public static bool CanRunX86LongPathTests =>
+            NativeMethodsShared.IsLongPathsEnabled() is NativeMethodsShared.LongPathsStatus.Enabled &&
+            File.Exists(X86BootstrapMSBuildExecutablePath) &&
+            File.Exists(X86BootstrapMSBuildExecutablePath + ".config");
+
+        [Theory(Skip = "Requires Windows long-path support and the x86 .NET Framework bootstrap.", SkipUnless = nameof(CanRunX86LongPathTests))]
         [InlineData("WriteLinesToFile")]
         [InlineData("Unzip")]
         public void LongPathsWorkWhenFrameworkQuirksInitializeEarly(string target)
@@ -3270,7 +3276,7 @@ EndGlobal
                   </Target>
                 </Project>
                 """).Path;
-            string msbuild = RunnerUtilities.BootstrapMSBuildExecutablePath;
+            string msbuild = X86BootstrapMSBuildExecutablePath;
             string host = Path.Combine(root, "LongPathHost.exe");
             foreach (string assembly in Directory.EnumerateFiles(Path.GetDirectoryName(msbuild), "*.dll"))
             {
