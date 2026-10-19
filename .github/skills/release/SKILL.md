@@ -115,7 +115,7 @@ Read-only commands (`get-default-channels`, `get-subscriptions`, `get-channel`) 
 
 Each release audits `vs*` branches for retirement. **This is an audit of every live branch, not a check of one candidate.** The rule of thumb (`vs{{THIS_RELEASE_VERSION}} - 3`) identifies only the *newest* candidate; nothing in the process ever revisits older branches, so a single missed retirement persists forever and the backlog grows every month.
 
-**Branch inventory:** the former `.config/git-merge-flow-config.jsonc` list was removed with the inter-branch merge workflow in [dotnet/msbuild#14786](https://github.com/dotnet/msbuild/pull/14786). Use the live DARC mappings, inbound/outbound subscriptions, and repository branches queried in checklist step 1.3a.
+**Branch inventory:** [Maintained branches](../../../documentation/release.md#maintained-branches) is the static list. Update its branch rows, SDK/VS sources, and support deadlines when cutting or retiring branches; cross-check the live DARC mappings, subscriptions, and repository branches in checklist step 1.3a.
 
 **Two lifecycles, two sources — you need both.** Neither one decides a branch on its own:
 
@@ -123,14 +123,6 @@ Each release audits `vs*` branches for retirement. **This is an audit of every l
 |---|---|
 | **SDK band** | [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) — maps each feature band to its VS version and support end date |
 | **Visual Studio** | [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) — annual releases and the LTSC table |
-
-**Long-lived VS versions — hardcoded, don't re-derive these each release.** These keep their branches alive for years:
-
-| Visual Studio | MSBuild branch | Supported until |
-|---|---|---|
-| Visual Studio 2022 | `vs17.14` | January 2032 |
-| Visual Studio 2019 | `vs16.11` | April 2029 |
-| Visual Studio 2017 | `vs15.9` | April 2027 |
 
 **VS 2026 and later use an annual model: 2 years per release** — one year of monthly feature updates, then one security-only year on the LTSC. Only the **LTSC baseline version** gets that second year; an ordinary monthly release falls out of support as soon as the next monthly ships. So each year exactly one `vs18.x` becomes the LTSC and must be kept ~2 years while its neighbours retire quickly — identify it from the LTSC table on the servicing page (`2026-LTSC` ends **November 9, 2027**).
 
@@ -167,7 +159,7 @@ When asked to execute a specific phase:
 | File | Purpose |
 |---|---|
 | [`documentation/release-checklist.md`](../../../documentation/release-checklist.md) | **Operational checklist** — the source of truth |
-| [`documentation/release.md`](../../../documentation/release.md) | Process description: final branding, package API compatibility, major version steps |
+| [`documentation/release.md`](../../../documentation/release.md) | Maintained-branch inventory and release process |
 | [`documentation/wiki/ChangeWaves.md`](../../../documentation/wiki/ChangeWaves.md) | Source doc for the Learn page sync — always sync the `vsXX.Y` (Insiders/preview-SDK) copy, not `main` |
 | [MSBuild Change Waves Learn page](https://learn.microsoft.com/visualstudio/msbuild/change-waves) | Public docs target to [`MicrosoftDocs/visualstudio-docs-pr`](https://github.com/MicrosoftDocs/visualstudio-docs-pr) (`docs/msbuild/change-waves.md`) |
 | [`eng/Versions.props`](../../../eng/Versions.props) | `VersionPrefix`, `PackageValidationBaselineVersion`, `BootstrapSdkVersion` |
