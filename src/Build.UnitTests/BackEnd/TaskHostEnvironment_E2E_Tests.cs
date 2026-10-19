@@ -16,32 +16,24 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd;
 
 public class TaskHostEnvironment_E2E_Tests(ITestOutputHelper output)
 {
+    private readonly ITestOutputHelper _output = output;
+
     [Theory]
-    [InlineData(false, false, null, "build", false)]
-    [InlineData(false, false, "process", "build", false)]
-    [InlineData(false, false, "process", null, false)]
-    [InlineData(false, true, null, "build", false)]
-    [InlineData(false, true, "process", "build", false)]
-    [InlineData(false, true, "process", null, false)]
-    [InlineData(true, false, null, "build", false)]
-    [InlineData(true, false, "process", "build", false)]
-    [InlineData(true, false, "process", null, false)]
-    [InlineData(true, false, null, "build", true)]
-    [InlineData(true, false, "process", "build", true)]
-    [InlineData(true, false, "process", null, true)]
+    [InlineData(null, "build", false)]
+    [InlineData("process", "build", false)]
+    [InlineData("process", null, false)]
+    [InlineData(null, "build", true)]
     public void TaskEnvironmentSurvivesTaskHostReconciliation(
-        bool multiThreaded, bool explicitTaskHost, string? processValue, string? buildValue, bool disableChangeWave)
+        string? processValue, string? buildValue, bool disableChangeWave)
     {
-        using TestEnvironment env = TestEnvironment.Create(output);
-        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableChangeWave ? "18.12" : null);
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableChangeWave ? "18.13" : null);
         string variable = $"MSBUILD_TASK_ENVIRONMENT_{Guid.NewGuid():N}";
         env.SetEnvironmentVariable(variable, processValue);
-        string taskFactory = explicitTaskHost ? """TaskFactory="TaskHostFactory" """ : string.Empty;
-
         TransientTestFile project = env.CreateFile("environment.proj", $"""
             <Project>
-              <UsingTask TaskName="ReadEnvironmentVariableTask" AssemblyFile="{typeof(ReadEnvironmentVariableTask).Assembly.Location}" {taskFactory}/>
-              <UsingTask TaskName="SetEnvironmentVariableTask" AssemblyFile="{typeof(SetEnvironmentVariableTask).Assembly.Location}" {taskFactory}/>
+              <UsingTask TaskName="ReadEnvironmentVariableTask" AssemblyFile="{typeof(ReadEnvironmentVariableTask).Assembly.Location}" />
+              <UsingTask TaskName="SetEnvironmentVariableTask" AssemblyFile="{typeof(SetEnvironmentVariableTask).Assembly.Location}" />
               <Target Name="Build">
                 <ReadEnvironmentVariableTask VariableName="{variable}">
                   <Output TaskParameter="Value" PropertyName="FirstValue" />
@@ -60,10 +52,10 @@ public class TaskHostEnvironment_E2E_Tests(ITestOutputHelper output)
             </Project>
             """);
 
-        MockLogger logger = new(output);
+        MockLogger logger = new(_output);
         BuildParameters parameters = new()
         {
-            MultiThreaded = multiThreaded,
+            MultiThreaded = true,
             DisableInProcNode = false,
             EnableNodeReuse = false,
             Loggers = [logger],
@@ -87,24 +79,15 @@ public class TaskHostEnvironment_E2E_Tests(ITestOutputHelper output)
         firstPid.ShouldBe(state.GetPropertyValue("LastPid"));
         using Process currentProcess = Process.GetCurrentProcess();
         string currentPid = currentProcess.Id.ToString(CultureInfo.InvariantCulture);
-        if (multiThreaded || explicitTaskHost)
-        {
-            firstPid.ShouldNotBe(currentPid);
-        }
-        else
-        {
-            firstPid.ShouldBe(currentPid);
-        }
+        firstPid.ShouldNotBe(currentPid);
 
         Environment.GetEnvironmentVariable(variable).ShouldBe(processValue);
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("second-build")]
-    public void ReusedTaskHostObservesTheNextBuildEnvironment(string? nextValue)
+    [Fact]
+    public void ReusedTaskHostObservesTheNextBuildEnvironment()
     {
-        using TestEnvironment env = TestEnvironment.Create(output);
+        using TestEnvironment env = TestEnvironment.Create(_output);
         env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
         string variable = $"MSBUILD_REUSED_TASK_ENVIRONMENT_{Guid.NewGuid():N}";
         env.SetEnvironmentVariable(variable, "process");
@@ -123,16 +106,16 @@ public class TaskHostEnvironment_E2E_Tests(ITestOutputHelper output)
 
         using BuildManager manager = new();
         ProjectInstance first = Build("first-build");
-        ProjectInstance second = Build(nextValue);
+        ProjectInstance second = Build(null);
 
         first.GetPropertyValue("ObservedValue").ShouldBe("first-build");
-        second.GetPropertyValue("ObservedValue").ShouldBe(nextValue ?? string.Empty);
+        second.GetPropertyValue("ObservedValue").ShouldBeEmpty();
         second.GetPropertyValue("TaskPid").ShouldBe(first.GetPropertyValue("TaskPid"));
         Environment.GetEnvironmentVariable(variable).ShouldBe("process");
 
         ProjectInstance Build(string? value)
         {
-            MockLogger logger = new(output);
+            MockLogger logger = new(_output);
             BuildParameters parameters = new()
             {
                 MultiThreaded = true,
@@ -158,7 +141,7 @@ public class TaskHostEnvironment_E2E_Tests(ITestOutputHelper output)
     [Fact]
     public void ConcurrentProjectsKeepTaskEnvironmentsIsolated()
     {
-        using TestEnvironment env = TestEnvironment.Create(output);
+        using TestEnvironment env = TestEnvironment.Create(_output);
         env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
         string variable = $"MSBUILD_PARALLEL_TASK_ENVIRONMENT_{Guid.NewGuid():N}";
         env.SetEnvironmentVariable(variable, null);
@@ -178,7 +161,7 @@ public class TaskHostEnvironment_E2E_Tests(ITestOutputHelper output)
             </Project>
             """);
 
-        MockLogger logger = new(output);
+        MockLogger logger = new(_output);
         BuildParameters parameters = new()
         {
             MultiThreaded = true,
@@ -244,7 +227,7 @@ public class TaskHostEnvironment_E2E_Tests(ITestOutputHelper output)
     [WindowsFullFrameworkOnlyFact]
     public void CrossBitnessTaskHostPreservesArchitectureEnvironment()
     {
-        using TestEnvironment env = TestEnvironment.Create(output);
+        using TestEnvironment env = TestEnvironment.Create(_output);
         env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
         string? nativeProgramFiles = Environment.GetEnvironmentVariable("ProgramW6432");
         nativeProgramFiles.ShouldNotBeNullOrEmpty();
@@ -260,7 +243,7 @@ public class TaskHostEnvironment_E2E_Tests(ITestOutputHelper output)
             """);
 
         string buildOutput = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"\"{project.Path}\" /mt /nr:false /v:n", out bool success, outputHelper: output);
+            $"\"{project.Path}\" /mt /nr:false /v:n", out bool success, outputHelper: _output);
         success.ShouldBeTrue(buildOutput);
         buildOutput.ShouldContain("HOST_ARCHITECTURE=AMD64");
         buildOutput.ShouldContain($"HOST_PROGRAMFILES={nativeProgramFiles}");

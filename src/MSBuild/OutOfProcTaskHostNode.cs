@@ -1984,7 +1984,7 @@ namespace Microsoft.Build.CommandLine
             s_mismatchedEnvironmentValues ??= TaskHostEnvironment.CreateMismatchedEnvironmentTable(
                 environment,
                 _savedEnvironment,
-                useLegacyBehavior: !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12),
+                useLegacyBehavior: !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13),
                 isWindows: NativeMethodsShared.IsWindows);
         }
 
