@@ -93,8 +93,9 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
   `darc get-subscriptions --source-repo https://github.com/dotnet/msbuild` \
   `git fetch upstream && git branch -r --list 'upstream/vs*'`
 
-  How to identify a retired branch:
-    - **The combined rule:** a branch paired with both an SDK band and a VS version is retired **only when both lifecycles agree it is out of support**. If only one side says retired but the other is still supported, **keep the branch** — the still-supported lifecycle must keep receiving fixes.
+  How to identify servicing and automation retirement:
+    - **The combined rule:** a branch paired with both an SDK band and a VS version is **out of support only when both lifecycles agree**. If either is still supported, keep servicing available for that lifecycle.
+    - **Dependency automation is separate.** Routine dependency updates can be retired by an explicit maintenance decision without changing published product support. Record any remaining servicing arrangements in step 1.3c; do not classify the branch as out of support solely because its automation is retired. See [Branch servicing and support](./release.md#branch-servicing-and-support).
     - **SDK lifecycle.** The band ↔ VS version ↔ EOL mapping is the [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions). It states which VS version each SDK band pairs with and when that band's support ends. \
     🛑 **Never infer lifecycle from Maestro.** The existence of a `.NET X.Y.Zxx SDK` channel — including `... SDK Release` channels — says nothing about support status; channels for long-dead bands persist indefinitely. Using channel existence as a proxy is how `vs18.6` (band 10.0.3xx, EOL Aug 2026) was missed during the 18.11 release.
     - **VS lifecycle — a separate source; the SDK table does not answer it.** Use [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs). \
@@ -111,12 +112,12 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
     - **VS-only branches** (not paired with any active SDK band) are retired purely on the VS lifecycle.
     - **Worked example (18.11).** `vs18.0` pairs with 10.0.1xx (EOL Nov 2028) → **keep**, despite being the oldest branch. `vs18.6` pairs with 10.0.3xx (EOL Aug 2026) and VS 18.6 is outside the window → **retire**. `vs18.4` (10.0.2xx, EOL May 2026) and `vs18.5` (VS-only) had default channels for branches already deleted from the repo → **retire the mappings**.
 
-  - [ ] **1.3b** For **each** `vs*` default channel, apply the rules above and classify it as **keep** or **retire**. Two red flags that almost always mean "retire", and are worth checking first because they are mechanical:
-    - **No outbound subscription** — nothing consumes that branch's `VS X.Y` channel, so the branch feeds nothing. (A live branch looks like `vs18.0 → dotnet/dotnet release/10.0.1xx`.)
+  - [ ] **1.3b** For **each** `vs*` default channel, record whether to keep or retire routine dependency automation, separately from product support. Two mechanical cleanup signals are worth checking first; neither establishes end of support:
+    - **No MSBuild outbound subscription** — no downstream consumes MSBuild builds from that branch's `VS X.Y` channel. (A live branch looks like `vs18.0 → dotnet/dotnet release/10.0.1xx`.)
     - **Default channel for a branch that does not exist** in `dotnet/msbuild` — a pure orphan; delete the mapping.
-  - [ ] **1.3c** Record the verdict for every branch in the table below, including the ones you keep and why. This is what makes the next release's audit cheap.
+  - [ ] **1.3c** Record the servicing status and automation decision for every branch in the table below, including the ones you keep and why. If automation is retired before published support ends, record how any required servicing will be handled.
 
-  | Branch | Paired SDK band | Band EOL | VS supported? | Verdict |
+  | Branch | Paired SDK band | Band EOL | VS supported? | Servicing / automation decision |
   |---|---|---|---|---|
   | | | | | |
 
@@ -154,9 +155,15 @@ _Tip: `darc add-default-channel` / `add-subscription` prompt interactively when 
   `darc update-subscription --id <main_targeting_sub_id> --channel "VS {{NEXT_VERSION}}" --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
   - [ ] **2.3d** If release branch association was missing in 2.2, add it: \
   `darc add-default-channel --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
-  - [ ] **2.3e** **Delete subscriptions for retired branches.** For each branch identified as retired in step 1.3 (apply the same combined SDK+VS rule — do **not** delete subscriptions for a branch that's retired on only one side, since fixes must keep flowing into the still-supported lifecycle), remove its inbound subscriptions and any default channel associations.
-  List them: `darc get-subscriptions --target-repo https://github.com/dotnet/msbuild --target-branch <retired_branch>` \
-  Delete each: `darc delete-subscriptions --id <subscription_id> -q --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr` \
+  - [ ] **2.3e** **Retire dependency automation for the branches recorded in step 1.3.** Remove inbound subscriptions, MSBuild outbound subscriptions, and default-channel associations. Any remaining product support must have explicit servicing arrangements recorded in step 1.3c.
+  List inbound subscriptions: `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --target-branch <retired_branch>` \
+  List MSBuild outbound subscriptions: `darc get-subscriptions --exact --source-repo https://github.com/dotnet/msbuild --channel "VS <retired_version>"` \
+  Before deleting outbound subscriptions, verify that no other MSBuild branch retaining routine automation publishes to the same channel. Preserve any outbound flow still needed by that branch. \
+  Repeat the subscription queries with `--disabled` to include disabled entries in the audit. \
+  Delete each subscription: `darc delete-subscriptions --id <subscription_id> -q --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr` \
+  List default-channel associations: `darc get-default-channels --source-repo https://github.com/dotnet/msbuild --branch <retired_branch>` \
+  Delete each association matching the exact repository and branch: `darc delete-default-channel --id <association_id> --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr` \
+  Preserve shared channel definitions and subscriptions from other producers. After step 2.3j confirms ingestion, repeat the queries and verify that the branches' inbound subscriptions and default-channel associations, and the outbound subscriptions selected for retirement, are absent. \
   _(Note the plural verb: `delete-subscription` does not exist. `-q` skips the confirmation prompt, which would otherwise hang in a non-interactive session.)_
   - [ ] **2.3f** **(VMR backflow — skip for a VS-only release, or if 2.2b found the channel unchanged.)** Repoint the `→ main` backflow (ID from 2.2b) to the **next** SDK band channel so the bumped `main` pulls next-version VMR dependencies: \
   `darc update-subscription --id <main_backflow_id> --channel ".NET <NEXT_BAND> SDK" --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
@@ -170,7 +177,7 @@ Verifications (**parallel** — read-only, no ordering dependency):
 
 - [ ] **2.4** Verify the Arcade subscription for `vs{{THIS_RELEASE_VERSION}}`: \
 `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`
-  - **Every supported branch must have an Arcade subscription** from the matching `.NET <X> Eng` channel (the channel is determined by the .NET band the branch is paired with — e.g. a branch paired with .NET 10 subscribes to `.NET 10 Eng`).
+  - **Every release branch retaining routine dependency automation must have an Arcade subscription** from the matching `.NET <X> Eng` channel (the channel is determined by the .NET band the branch is paired with — e.g. a branch paired with .NET 10 subscribes to `.NET 10 Eng`). For a branch whose automation was explicitly retired, check the remaining servicing arrangements in step 1.3c instead of automatically recreating subscriptions.
 > _Roslyn subscription verification intentionally omitted from the per-release checklist: there is always exactly one Roslyn subscription, targeting `main` only and its channel does not rotate with SDK bands._
 >
 > **NuGet subscription:** when the next-to-ship SDK band rotates (e.g. `4xx` → `5xx`), the NuGet → `msbuild/main` subscription must be re-pointed to the new band's channel.
@@ -297,7 +304,7 @@ Steps are **mostly parallel** unless noted.
   - [ ] **5.3d** Create release at https://github.com/dotnet/msbuild/releases/new — use `Generate Release Notes` to prepopulate, with `v{{PREVIOUS_RELEASE_EXACT_VERSION}}` as the previous tag.
 - [ ] **5.4** Update `BootstrapSdkVersion` in [`eng/Versions.props`](https://github.com/dotnet/msbuild/blob/main/eng/Versions.props) if a fresh SDK was released. Check https://dotnet.microsoft.com/download/visual-studio-sdks — always verify the details for the targeted .NET version.
 - [ ] **5.4b** Update `tools.dotnet` in [`global.json`](https://github.com/dotnet/msbuild/blob/main/global.json) to the latest released SDK in the targeted band.
-- [ ] **5.5** Verify the overall subscription map across **every still-supported branch** — each `vsXX.Y` branch has an Arcade subscription matching its targeted .NET band, and each supported branch's outbound subscriptions land in the right downstream (e.g. SDK band, VMR). \
+- [ ] **5.5** Verify the overall subscription map across **every branch retaining routine dependency automation** — each `vsXX.Y` branch has an Arcade subscription matching its targeted .NET band, and each branch's outbound subscriptions land in the right downstream (e.g. SDK band, VMR). For branches whose automation was retired, verify the remaining servicing arrangements from step 1.3c rather than recreating subscriptions. \
   You can find more info [here](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/52573/MSBuild-Maestro-Flow).
 - [ ] **5.6** Review this tracking issue for any process deviations. If the process changed, create a PR to update `documentation/release-checklist.md` with the improvements.
 

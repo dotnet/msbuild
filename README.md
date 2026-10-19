@@ -9,6 +9,8 @@ For more information on MSBuild, see the [MSBuild documentation](https://learn.m
 
 The [changelog](documentation/Changelog.md) has detailed information about changes made in different releases.
 
+For release-branch maintenance and servicing policy, see [Branch servicing and support](documentation/release.md#branch-servicing-and-support).
+
 ## Building
 
 ### Building MSBuild with Visual Studio 2026 on Windows

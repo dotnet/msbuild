@@ -4,6 +4,22 @@ This is a description of the steps required to release MSBuild. The complete ope
 
 MSBuild ships in both Visual Studio (monthly) and the .NET SDK (quarterly). Each monthly VS release gets its own `vs*` branch, final branding, and VS insertion. The checklist is organized into 6 timeline-gated phases (0–5) with explicit triggers and ordering.
 
+## Branch servicing and support
+
+Repository maintenance and product support are separate. Use the published [Visual Studio lifecycle](https://learn.microsoft.com/lifecycle/products/visual-studio-2022) and [.NET SDK lifecycle](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) to determine support for MSBuild shipped in those products, not the presence or absence of dependency automation.
+
+Routine automatic dependency updates are retired for these release branches:
+
+| MSBuild branch | Associated .NET SDK band |
+|---|---|
+| `vs17.8` | `8.0.1xx` |
+| `vs17.11` | `8.0.4xx` |
+| `vs17.12` | `9.0.1xx` |
+
+The published SDK support end date for these bands is **November 10, 2026**, under the [.NET support policy](https://dotnet.microsoft.com/platform/support/policy/dotnet-core). Retiring automatic dependency updates does not change that date or the conditions of support. Any required servicing must be explicitly coordinated; dependency flows can be re-established when needed.
+
+This retires automatic dependency flow, not branch history, release tags, or published packages.
+
 ## How MSBuild releases flow into VS
 
 MSBuild is a **component** inserted into Visual Studio. VS ships monthly; MSBuild must branch and prepare its bits **before** VS is ready to take them.
