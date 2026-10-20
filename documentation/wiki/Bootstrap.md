@@ -29,8 +29,8 @@ engineering builds launch the engineering SDK's actual `MSBuild.dll` directly, i
 the source SDK selector. Framework builds use the source SDK's targets and runtime configuration.
 
 For a `-stage2` build (`--stage2` on Unix), the build scripts select the freshly built Core or
-Framework engine, the bootstrap .NET host, and the already-restored stage1 Arcade toolset.
-An early validation target checks the selected SDK imports and runtime configuration.
+Framework engine and the bootstrap .NET host. Framework SDK resolution is directed to that
+bootstrap installation; Core uses its normal `dotnet msbuild` command.
 Neither stage rewrites `global.json`, and no checkout lock, backup, or recovery protocol is needed.
 
 The build scripts also set Arcade's `TestDotNetRoot` to that bootstrap installation so test apphosts

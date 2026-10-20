@@ -24,8 +24,6 @@ Param(
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
-$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-
 $pwshPath = (Get-Process -Id $PID).Path
 $buildScript = Join-Path $PSScriptRoot 'common\build.ps1'
 
@@ -138,6 +136,7 @@ if ($LASTEXITCODE -ne 0) {
   throw "Stage 1 build failed with exit code $LASTEXITCODE"
 }
 
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $ArtifactsDir = Join-Path $RepoRoot 'artifacts'
 $Stage1Dir = Join-Path $RepoRoot 'stage1'
 $Stage1BinDir = Join-Path $Stage1Dir 'bin'
@@ -172,42 +171,24 @@ if (-not $msbuildEngine) {
   }
 }
 
-[xml]$Versions = Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'Versions.props')
-$BootstrapSdkVersion = $Versions.SelectSingleNode('/Project/PropertyGroup/BootstrapSdkVersion').InnerText
-$BootstrapCoreRoot = Join-Path $BootstrapRoot 'core'
-if (-not (Test-Path -LiteralPath (Join-Path $BootstrapCoreRoot "sdk\$BootstrapSdkVersion\MSBuild.dll"))) {
-  throw "The stage 1 bootstrap SDK '$BootstrapSdkVersion' is missing from '$BootstrapCoreRoot'. Rebuild stage 1 before running the self-build."
-}
-
 if ($msbuildEngine -eq 'vs')
 {
   $buildToolPath = Join-Path $BootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.exe"
   $buildToolCommand = "";
+  $env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR="$BootstrapRoot\core"
 }
 else
 {
   $buildToolPath = "$BootstrapRoot\core\dotnet.exe"
-  $buildToolCommand = Join-Path $BootstrapCoreRoot "sdk\$BootstrapSdkVersion\MSBuild.dll"
+  $buildToolCommand = "msbuild"
+  $env:DOTNET_ROOT="$BootstrapRoot\core"
 }
-$env:DOTNET_ROOT = $BootstrapCoreRoot
-$env:DOTNET_ROOT_X64 = $BootstrapCoreRoot
-$env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR = $BootstrapCoreRoot
-$env:PATH = "$BootstrapCoreRoot;$env:PATH"
 
 # Communicate the bootstrapped build tool to the (out-of-proc) stage 2 build.ps1 via environment
 # variables so it does not require dot-sourcing tools.ps1 here. tools.ps1's InitializeBuildTool
 # honors _BuildToolPath / _BuildToolCommand and only consumes Path and Command.
 $env:_BuildToolPath    = $buildToolPath
-$env:_BuildToolCommand = if ($buildToolCommand) { '"' + $buildToolCommand + '"' } else { '' }
-
-# Reuse the restored Arcade toolset instead of repeating its shell bootstrap.
-if (-not $env:_InitializeToolset) {
-  $ArcadeSdkVersion = $GlobalJson.'msbuild-sdks'.'Microsoft.DotNet.Arcade.Sdk'
-  $env:_InitializeToolset = Join-Path $Stage1Dir "toolset\$ArcadeSdkVersion\Build.proj"
-  if (-not (Test-Path -LiteralPath $env:_InitializeToolset)) {
-    throw "The stage 1 Arcade toolset is missing from '$env:_InitializeToolset'."
-  }
-}
+$env:_BuildToolCommand = $buildToolCommand
 
 # Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
 $env:MSBUILDDONOTLAUNCHDEBUGGER="true"
@@ -225,21 +206,6 @@ $env:DOTNET_INSTALL_DIR = Join-Path $BootstrapRoot 'core'
 
 # Keep test apphosts on the bootstrap runtime even when Arcade provisions a newer SDK.
 $env:TestDotNetRoot = "$BootstrapRoot\core\"
-
-$validationArgs = @()
-if ($buildToolCommand) {
-  $validationArgs += $buildToolCommand
-}
-$validationArgs += @(
-  (Join-Path $PSScriptRoot 'ValidateBootstrapSdk.proj'),
-  '-target:ValidateBootstrapSdk',
-  '-nologo',
-  '-nr:false',
-  "-bl:$ArtifactsDir\log\$configuration\ValidateBootstrapSdk-{}.binlog")
-& $buildToolPath @validationArgs
-if ($LASTEXITCODE -ne 0) {
-  throw 'The self-build did not select the required bootstrap SDK/runtime. See the validation errors above.'
-}
 
 # $stage2Argument are appended to the stage 2 build only.
 # Use this for switches like /mt that should not be passed to the stage1 build

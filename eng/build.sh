@@ -62,7 +62,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-repo_root="$( cd "$scriptroot/.." && pwd )"
 build_script="$scriptroot/common/build.sh"
 
 # Arguments common to the stage1 and stage2 builds, including any caller-supplied properties.
@@ -110,6 +109,7 @@ if [ $stage1_exit_code -ne 0 ]; then
   exit $stage1_exit_code
 fi
 
+repo_root="$scriptroot/.."
 artifacts_dir="$repo_root/artifacts"
 stage1_dir="$repo_root/stage1"
 stage1_bin_dir="$stage1_dir/bin"
@@ -130,35 +130,15 @@ if [ -d "$stage1_dir/log" ]; then
   cp -rf "$stage1_dir/log" "$artifacts_dir/" || true
 fi
 
-bootstrap_sdk_version=$(sed -nE 's/.*<BootstrapSdkVersion>([^<]+)<\/BootstrapSdkVersion>.*/\1/p' "$scriptroot/Versions.props")
-if [ -z "$bootstrap_sdk_version" ] ||
-   [ ! -f "$bootstrap_root/core/sdk/$bootstrap_sdk_version/MSBuild.dll" ]; then
-  echo "The required bootstrap SDK could not be found in '$bootstrap_root/core'. Check BootstrapSdkVersion and rebuild stage 1 before running the self-build." >&2
-  exit 1
-fi
-
 build_tool_path="$bootstrap_root/core/dotnet"
-build_tool_command="$bootstrap_root/core/sdk/$bootstrap_sdk_version/MSBuild.dll"
+build_tool_command="msbuild"
 export DOTNET_ROOT="$bootstrap_root/core"
-export DOTNET_ROOT_X64="$bootstrap_root/core"
-export DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR="$bootstrap_root/core"
-export PATH="$bootstrap_root/core:$PATH"
 
 # Communicate the bootstrapped build tool to the (out-of-proc) stage 2 build.sh via environment
 # variables so it does not require sourcing tools.sh here. tools.sh's InitializeBuildTool
 # honors _BuildToolPath / _BuildToolCommand and only consumes Path and Command.
 export _BuildToolPath="$build_tool_path"
 export _BuildToolCommand="$build_tool_command"
-
-# Reuse the restored Arcade toolset instead of repeating its shell bootstrap.
-if [ -z "${_InitializeToolset:-}" ]; then
-  arcade_sdk_version=$(sed -nE 's/.*"Microsoft\.DotNet\.Arcade\.Sdk"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' "$repo_root/global.json")
-  export _InitializeToolset="$stage1_dir/toolset/$arcade_sdk_version/Build.proj"
-  if [ ! -f "$_InitializeToolset" ]; then
-    echo "The stage 1 Arcade toolset is missing from '$_InitializeToolset'." >&2
-    exit 1
-  fi
-fi
 
 # Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
 export MSBUILDDONOTLAUNCHDEBUGGER=true
@@ -175,10 +155,6 @@ export DOTNET_INSTALL_DIR="$bootstrap_root/core"
 
 # Keep test apphosts on the bootstrap runtime even when Arcade provisions a newer SDK.
 export TestDotNetRoot="$bootstrap_root/core/"
-
-"$build_tool_path" "$build_tool_command" "$scriptroot/ValidateBootstrapSdk.proj" \
-  -target:ValidateBootstrapSdk -nologo -nr:false \
-  "-bl:$artifacts_dir/log/$configuration/ValidateBootstrapSdk-{}.binlog" || exit $?
 
 stage2_build_args=( "${common_build_args[@]}" )
 

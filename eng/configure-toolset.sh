@@ -6,15 +6,9 @@ fi
 # Keep both SDKs in the repo-local installation unless the caller supplies one.
 use_installed_dotnet_cli=false
 InitializeDotNetCli "$restore"
-ReadGlobalVersion "version"
-source_sdk_version="$_ReadGlobalVersion"
-if [ ! -d "$_InitializeDotNetCli/sdk/$source_sdk_version" ]; then
-  if [ "$restore" != true ]; then
-    Write-PipelineTelemetryError -category 'InitializeToolset' "SDK '$source_sdk_version' is missing from '$_InitializeDotNetCli'. Run with --restore."
-    ExitWithExitCode 1
-  fi
-
-  InstallDotNetSdk "$_InitializeDotNetCli" "$source_sdk_version"
+if [ "$restore" = true ]; then
+  ReadGlobalVersion "version"
+  InstallDotNetSdk "$_InitializeDotNetCli" "$_ReadGlobalVersion"
 fi
 
 export DOTNET_ROOT="$_InitializeDotNetCli"
