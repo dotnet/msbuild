@@ -1005,6 +1005,41 @@ public class EndToEndTests : IDisposable
     }
 
 #if NET
+    [Theory]
+    [InlineData("123", true)]
+    [InlineData("123", false)]
+    [InlineData("BuildCheck", true)]
+    public void BuildCheckTemplateFileReferencesMatchProjectName(string projectName, bool explicitName)
+    {
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+        string hivePath = Path.Combine(workFolder.Path, "hive");
+        string outputPath = Path.Combine(workFolder.Path, projectName);
+        string templatePath = Path.Combine(BuildCheckUnitTestsConstants.RepoRoot, "template_feed", "content", "Microsoft.CheckTemplate");
+
+        void RunDotnetNew(string arguments)
+        {
+            string output = RunnerUtilities.RunProcessAndGetOutput(
+                "dotnet",
+                $"new {arguments} --debug:custom-hive \"{hivePath}\"",
+                out bool success);
+            success.ShouldBeTrue(output);
+        }
+
+        RunDotnetNew($"install \"{templatePath}\"");
+        string nameArgument = explicitName ? $"--name \"{projectName}\"" : string.Empty;
+        RunDotnetNew($"msbuildcheck {nameArgument} --output \"{outputPath}\" --no-update-check");
+
+        var project = new XmlDocument();
+        project.Load(Path.Combine(outputPath, $"{projectName}.csproj"));
+        XmlElement propsItem = (XmlElement)project.SelectSingleNode("//None[@Pack='true']")!;
+        string propsFileName = propsItem.GetAttribute("Include");
+        File.Exists(Path.Combine(outputPath, propsFileName)).ShouldBeTrue(propsFileName);
+        propsItem.GetAttribute("PackagePath").ShouldBe($"build\\{projectName}.props");
+
+        string propsContent = File.ReadAllText(Path.Combine(outputPath, propsFileName));
+        propsContent.ShouldContain($"$(MSBuildThisFileDirectory){projectName}.dll");
+    }
+
     [ActiveIssue("https://github.com/dotnet/msbuild/issues/14392")]
     [Fact]
     public void TestBuildCheckTemplate()

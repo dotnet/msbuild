@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <MSBuildCheck>$([MSBuild]::RegisterBuildCheck($(MSBuildThisFileDirectory)Company.CheckTemplate.dll))</MSBuildCheck>
+    <MSBuildCheck>$([MSBuild]::RegisterBuildCheck($(MSBuildThisFileDirectory)CheckLibraryName.dll))</MSBuildCheck>
   </PropertyGroup>
 
 </Project>

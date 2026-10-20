@@ -23,6 +23,13 @@
     }
   ],
   "symbols": {
+    "CheckLibraryName": {
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "identity",
+      "replaces": "CheckLibraryName",
+      "description": "The project name used in file references, without C# identifier normalization."
+    },
     "MicrosoftBuildVersion": {
       "type": "parameter",
       "description": "Overrides the default Microsoft.Build version where check's interfaces are placed",

@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Company.CheckTemplate.props" Pack="true" PackagePath="build\Company.CheckTemplate.props" />
+    <None Include="CheckLibraryName.props" Pack="true" PackagePath="build\CheckLibraryName.props" />
     <None Include="README.md" />
   </ItemGroup>
 
