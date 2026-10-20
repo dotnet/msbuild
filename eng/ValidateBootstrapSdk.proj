@@ -10,7 +10,7 @@
       <_ActualRuntime>$([System.Runtime.InteropServices.RuntimeInformation]::FrameworkDescription)</_ActualRuntime>
     </PropertyGroup>
     <Error Condition="'$(NETCoreSdkVersion)' != '$(BootstrapSdkVersion)'"
-           Text="The self-build resolved SDK '$(NETCoreSdkVersion)' instead of bootstrap SDK '$(BootstrapSdkVersion)'. Check the stage2 global.json and SDK resolver environment." />
+           Text="The self-build resolved SDK '$(NETCoreSdkVersion)' instead of bootstrap SDK '$(BootstrapSdkVersion)'. Check the repository SDK pin and SDK resolver environment." />
     <Error Condition="'$(_ActualBundledVersions)' != '$(_ExpectedBundledVersions)'"
            Text="The self-build imported SDK defaults from '$(NETCoreSdkBundledVersionsProps)' instead of '$(_ExpectedBundledVersions)'. Remove conflicting SDK resolver overrides." />
     <Error Condition="!Exists('$(TestDotNetRoot)shared/Microsoft.NETCore.App/$(BundledNETCoreAppPackageVersion)')"

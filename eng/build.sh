@@ -63,42 +63,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 repo_root="$( cd "$scriptroot/.." && pwd )"
-global_json="$repo_root/global.json"
-sdk_stage_state="$repo_root/.build-stage-sdk"
-original_global_json="$sdk_stage_state/global.original.json"
-bootstrap_global_json="$sdk_stage_state/global.bootstrap.json"
-if ! mkdir "$sdk_stage_state"; then
-  echo "A build already owns '$sdk_stage_state', or an earlier build was interrupted. If no build is running, check global.json against the saved files there, restore global.original.json if necessary, and remove that directory before building again." >&2
-  exit 1
-fi
-if ! (set -C; : > "$sdk_stage_state/owner.lock"); then
-  echo "Could not exclusively acquire '$sdk_stage_state/owner.lock'. Another build may have started; leave its state untouched and wait for it to finish." >&2
-  exit 1
-fi
-
-function restore_stage_sdk {
-  local result=$?
-  if [ -f "$bootstrap_global_json" ]; then
-    if cmp -s "$global_json" "$bootstrap_global_json"; then
-      cp "$original_global_json" "$global_json" || exit 1
-    elif ! cmp -s "$global_json" "$original_global_json"; then
-      echo "global.json changed during the self-build. It was not overwritten; the original is saved at '$original_global_json'. Reconcile the files before removing '$sdk_stage_state'." >&2
-      exit 1
-    fi
-    rm "$bootstrap_global_json" || exit 1
-  fi
-  if [ -f "$original_global_json" ]; then
-    rm "$original_global_json" || exit 1
-  fi
-  rm "$sdk_stage_state/owner.lock" || exit 1
-  rmdir "$sdk_stage_state" || exit 1
-  exit "$result"
-}
-trap restore_stage_sdk EXIT
-trap 'exit 130' INT
-trap 'exit 143' TERM
-trap 'exit 129' HUP
-
 build_script="$scriptroot/common/build.sh"
 
 # Arguments common to the stage1 and stage2 builds, including any caller-supplied properties.
@@ -173,17 +137,8 @@ if [ -z "$bootstrap_sdk_version" ] ||
   exit 1
 fi
 
-# Arcade and the SDK resolver must select the same SDK as the Core bootstrap.
-cp "$global_json" "$original_global_json" || exit 1
-sed -E \
-  -e "/^[[:space:]]*\"sdk\"[[:space:]]*:/,/^[[:space:]]*}/ s/(\"version\"[[:space:]]*:[[:space:]]*\")[^\"]*\"/\1$bootstrap_sdk_version\"/" \
-  -e "s/(\"dotnet\"[[:space:]]*:[[:space:]]*\")[^\"]*\"/\1$bootstrap_sdk_version\"/" \
-  -e 's/("rollForward"[[:space:]]*:[[:space:]]*")[^"]*"/\1disable"/' \
-  "$original_global_json" > "$bootstrap_global_json" || exit 1
-cp "$bootstrap_global_json" "$global_json" || exit 1
-
 build_tool_path="$bootstrap_root/core/dotnet"
-build_tool_command="msbuild"
+build_tool_command="$bootstrap_root/core/sdk/$bootstrap_sdk_version/MSBuild.dll"
 export DOTNET_ROOT="$bootstrap_root/core"
 export DOTNET_ROOT_X64="$bootstrap_root/core"
 export DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR="$bootstrap_root/core"
@@ -194,6 +149,16 @@ export PATH="$bootstrap_root/core:$PATH"
 # honors _BuildToolPath / _BuildToolCommand and only consumes Path and Command.
 export _BuildToolPath="$build_tool_path"
 export _BuildToolCommand="$build_tool_command"
+
+# Reuse the restored Arcade toolset instead of repeating its shell bootstrap.
+if [ -z "${_InitializeToolset:-}" ]; then
+  arcade_sdk_version=$(sed -nE 's/.*"Microsoft\.DotNet\.Arcade\.Sdk"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' "$repo_root/global.json")
+  export _InitializeToolset="$stage1_dir/toolset/$arcade_sdk_version/Build.proj"
+  if [ ! -f "$_InitializeToolset" ]; then
+    echo "The stage 1 Arcade toolset is missing from '$_InitializeToolset'." >&2
+    exit 1
+  fi
+fi
 
 # Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
 export MSBUILDDONOTLAUNCHDEBUGGER=true
@@ -211,7 +176,7 @@ export DOTNET_INSTALL_DIR="$bootstrap_root/core"
 # Keep test apphosts on the bootstrap runtime even when Arcade provisions a newer SDK.
 export TestDotNetRoot="$bootstrap_root/core/"
 
-"$build_tool_path" msbuild "$scriptroot/ValidateBootstrapSdk.proj" \
+"$build_tool_path" "$build_tool_command" "$scriptroot/ValidateBootstrapSdk.proj" \
   -target:ValidateBootstrapSdk -nologo -nr:false \
   "-bl:$artifacts_dir/log/$configuration/ValidateBootstrapSdk-{}.binlog" || exit $?
 

@@ -19,14 +19,19 @@ The constructed SDK is used for both local end-to-end tests and CI runs.
 
 The engineering SDK and the bootstrap SDK can use different .NET releases.
 `tools.dotnet` in `global.json` provisions the SDK used by Arcade for the outer build.
+`sdk.version` selects the SDK for ordinary SDK commands and Framework-hosted SDK resolution.
 `BootstrapSdkVersion` in `eng/Versions.props` selects the SDK used to test the freshly built MSBuild.
 The product target framework is controlled separately by `LatestDotNetCoreForMSBuild`.
 
-The checked-in `global.json` pins the engineering SDK exactly, with SDK roll-forward disabled.
-For a `-stage2` build (`--stage2` on Unix), the build scripts temporarily set both `sdk.version`
-and `tools.dotnet` to `BootstrapSdkVersion`, while keeping the same Arcade SDK. This makes both
-Core and .NET Framework self-builds resolve the bootstrap SDK's targets, targeting packs, and
-task-host runtime. An early validation target checks the actual SDK and runtime selection.
+The checked-in `global.json` keeps the source SDK at the bootstrap version. The configure-toolset
+hooks install it alongside the engineering SDK, preserving the newer shared host files. Core
+engineering builds launch the engineering SDK's actual `MSBuild.dll` directly, independently of
+the source SDK selector. Framework builds use the source SDK's targets and runtime configuration.
+
+For a `-stage2` build (`--stage2` on Unix), the build scripts select the freshly built Core or
+Framework engine, the bootstrap .NET host, and the already-restored stage1 Arcade toolset.
+An early validation target checks the selected SDK imports and runtime configuration.
+Neither stage rewrites `global.json`, and no checkout lock, backup, or recovery protocol is needed.
 
 The build scripts also set Arcade's `TestDotNetRoot` to that bootstrap installation so test apphosts
 run on its runtime rather than rolling forward to the engineering SDK's newer runtime.
@@ -34,20 +39,11 @@ API-level task hosts use the test host's selected `dotnet`; explicit bootstrap-l
 the bootstrap host separately. This also lets the non-self-build test lane run on the engineering
 runtime without forcing its task hosts onto the older bootstrap runtime.
 
-Outside a two-stage build, the repository manifest still selects the engineering SDK. To build a
-repository sample with the Core bootstrap directly, invoke its MSBuild assembly rather than an SDK
-command such as `dotnet build`:
+To build a repository sample with the Core bootstrap directly:
 
 ```powershell
-artifacts\bin\bootstrap\core\dotnet.exe exec artifacts\bin\bootstrap\core\sdk\<BootstrapSdkVersion>\MSBuild.dll src\Samples\Dependency\Dependency.csproj -restore
+artifacts\bin\bootstrap\core\dotnet.exe build src\Samples\Dependency\Dependency.csproj
 ```
-
-Builds require exclusive use of the checkout. The scripts restore the original `global.json`
-bytes when the build finishes or fails. If a process is forcibly terminated, the next build refuses
-to start while `.build-stage-sdk` remains. After confirming that no build is running, compare
-`global.json` with the saved original and bootstrap manifests in that directory, restore the original
-if needed, and remove the directory. If `global.json` was edited during stage2, the scripts preserve
-those edits and the backup instead of overwriting them.
 
 ## Potential Cons
 The reliance on downloading the SDK from a remote source requires an internet connection. For the initial build of the repository, this doesn't change as the SDK is always downloaded to the .dotnet folder first. For subsequent runs, the SDK in bootstrap will be downloaded again only **if the requested version was changed**.
