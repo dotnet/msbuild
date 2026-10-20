@@ -47,8 +47,11 @@ This is bad news for any app with an add-in system where extension assemblies ar
 
 Loading an assembly through a `codeBase` redirect can initialize .NET Framework compatibility switches before the application's
 target framework is available, selecting .NET 4.0 defaults instead. This [known CLR issue](https://github.com/dotnet/msbuild/issues/5331#issuecomment-651870236)
-can disable long-path support even though MSBuild targets .NET Framework 4.7.2. Keep `Switch.System.IO.UseLegacyPathHandling=false`
-and `Switch.System.IO.BlockLongPaths=false` explicit in the executable configuration files; setting them in `Main` is too late.
+can disable long-path support even though MSBuild targets .NET Framework 4.7.2. It can also affect async culture flow,
+cancellation callback registration, claims-identity copying, crypto-provider window handles, and portable-PDB stack traces.
+Keep the `AppContextSwitchOverrides` values aligned between `app.config` and `app.amd64.config`, including
+`Switch.System.IO.UseLegacyPathHandling=false` and `Switch.System.IO.BlockLongPaths=false`; setting them in `Main` is too late.
+These overrides mitigate the listed compatibility switches; they do not repair the CLR initialization order or configure other host executables.
 
 ## SDK resolvers
 

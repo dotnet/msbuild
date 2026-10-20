@@ -3236,10 +3236,13 @@ EndGlobal
         private static string X86BootstrapMSBuildExecutablePath => Path.Combine(
             RunnerUtilities.BootstrapRootPath, "net472", "MSBuild", "Current", "Bin", "MSBuild.exe");
 
-        public static bool CanRunX86LongPathTests =>
-            NativeMethodsShared.IsLongPathsEnabled() is NativeMethodsShared.LongPathsStatus.Enabled &&
+        public static bool CanRunX86FrameworkQuirkTests =>
             File.Exists(X86BootstrapMSBuildExecutablePath) &&
             File.Exists(X86BootstrapMSBuildExecutablePath + ".config");
+
+        public static bool CanRunX86LongPathTests =>
+            NativeMethodsShared.IsLongPathsEnabled() is NativeMethodsShared.LongPathsStatus.Enabled &&
+            CanRunX86FrameworkQuirkTests;
 
         [Theory(Skip = "Requires Windows long-path support and the x86 .NET Framework bootstrap.", SkipUnless = nameof(CanRunX86LongPathTests))]
         [InlineData("WriteLinesToFile")]
@@ -3276,21 +3279,7 @@ EndGlobal
                   </Target>
                 </Project>
                 """).Path;
-            string msbuild = X86BootstrapMSBuildExecutablePath;
-            string host = Path.Combine(root, "LongPathHost.exe");
-            foreach (string assembly in Directory.EnumerateFiles(Path.GetDirectoryName(msbuild), "*.dll"))
-            {
-                File.Copy(assembly, Path.Combine(root, Path.GetFileName(assembly)));
-            }
-
-            using CSharpCodeProvider compiler = new();
-            CompilerResults compilation = compiler.CompileAssemblyFromSource(
-                new CompilerParameters
-                {
-                    GenerateExecutable = true,
-                    OutputAssembly = host,
-                    CompilerOptions = $"/platform:x86 /win32manifest:\"{Path.Combine(AppContext.BaseDirectory, "MSBuild.exe.manifest")}\""
-                },
+            RunWithLegacyFrameworkDefaults(root,
                 """
                 using System;
                 using System.Reflection;
@@ -3311,7 +3300,88 @@ EndGlobal
                         return Convert.ToInt32(execute.Invoke(null, new object[] { commandLine }));
                     }
                 }
-                """);
+                """, $"\"{project}\" {target}");
+        }
+
+        [Theory(Skip = "Requires the x86 .NET Framework bootstrap.", SkipUnless = nameof(CanRunX86FrameworkQuirkTests))]
+        [InlineData("Culture")]
+        [InlineData("Cancellation")]
+        [InlineData("Claims")]
+        public void FrameworkBehaviorWorksWhenQuirksInitializeEarly(string behavior)
+        {
+            RunWithLegacyFrameworkDefaults(_env.CreateFolder().Path,
+                """
+                using System;
+                using System.Globalization;
+                using System.Security.Claims;
+                using System.Threading;
+                using System.Threading.Tasks;
+                [assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.0")]
+
+                public static class Program
+                {
+                    public static void Main(string[] args)
+                    {
+                        switch (args[1])
+                        {
+                            case "Culture":
+                                CultureInfo culture = (CultureInfo)CultureInfo.InvariantCulture.Clone();
+                                culture.NumberFormat.NumberDecimalSeparator = "msbuild-async-culture";
+                                Thread.CurrentThread.CurrentCulture = culture;
+                                string separator = Task.Run(delegate
+                                {
+                                    return Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+                                }).GetAwaiter().GetResult();
+                                if (separator != "msbuild-async-culture")
+                                    throw new Exception("CurrentCulture did not flow to the task.");
+                                break;
+
+                            case "Cancellation":
+                                CancellationTokenSource source = new CancellationTokenSource();
+                                CancellationToken token = source.Token;
+                                source.Dispose();
+                                using (token.Register(delegate { }))
+                                {
+                                }
+                                break;
+
+                            case "Claims":
+                                ClaimsIdentity identity = new ClaimsIdentity();
+                                identity.Actor = new ClaimsIdentity();
+                                identity.Actor.AddClaim(new Claim("marker", "original"));
+                                ClaimsIdentity copy = new ClaimsIdentity(identity);
+                                copy.Actor.AddClaim(new Claim("marker", "copy-only"));
+                                if (identity.Actor.HasClaim("marker", "copy-only") ||
+                                    !copy.Actor.HasClaim("marker", "original"))
+                                    throw new Exception("Copying ClaimsIdentity did not independently clone its actor.");
+                                break;
+
+                            default:
+                                throw new ArgumentException("Unknown behavior.");
+                        }
+                    }
+                }
+                """, behavior);
+        }
+
+        private void RunWithLegacyFrameworkDefaults(string root, string code, string arguments)
+        {
+            string msbuild = X86BootstrapMSBuildExecutablePath;
+            string host = Path.Combine(root, "FrameworkQuirkHost.exe");
+            foreach (string assembly in Directory.EnumerateFiles(Path.GetDirectoryName(msbuild), "*.dll"))
+            {
+                File.Copy(assembly, Path.Combine(root, Path.GetFileName(assembly)));
+            }
+
+            using CSharpCodeProvider compiler = new();
+            CompilerResults compilation = compiler.CompileAssemblyFromSource(
+                new CompilerParameters
+                {
+                    GenerateExecutable = true,
+                    OutputAssembly = host,
+                    CompilerOptions = $"/platform:x86 /win32manifest:\"{Path.Combine(AppContext.BaseDirectory, "MSBuild.exe.manifest")}\""
+                },
+                code);
             compilation.Errors.HasErrors.ShouldBeFalse(string.Join(Environment.NewLine, compilation.Errors.Cast<CompilerError>()));
 
             // Configuration overrides are read from the process config, not a secondary AppDomain's config.
@@ -3322,7 +3392,7 @@ EndGlobal
             environment["MSBUILDNOINPROCNODE"] = null;
             environment["MSBUILDFORCEALLTASKSOUTOFPROC"] = null;
             string output = RunnerUtilities.RunProcessAndGetOutput(
-                host, $"\"{msbuild}\" \"{project}\" {target}", out bool success,
+                host, $"\"{msbuild}\" {arguments}", out bool success,
                 outputHelper: _output, environmentVariables: environment);
 
             success.ShouldBeTrue(output);
