@@ -44,6 +44,7 @@ namespace Microsoft.Build.UnitTests
         private readonly ConcurrentQueue<BuildErrorEventArgs> _errorEvents = new ConcurrentQueue<BuildErrorEventArgs>();
         private readonly ConcurrentQueue<BuildWarningEventArgs> _warningEvents = new ConcurrentQueue<BuildWarningEventArgs>();
         private readonly ConcurrentQueue<BuildMessageEventArgs> _messageEvents = new ConcurrentQueue<BuildMessageEventArgs>();
+        private int _yieldThreadId = -1;
 
         public MockEngine() : this(false)
         {
@@ -363,10 +364,16 @@ namespace Microsoft.Build.UnitTests
 
         public void Yield()
         {
+            _yieldThreadId.ShouldBe(-1, "Cannot call Yield() while yielding.");
+            _yieldThreadId = Environment.CurrentManagedThreadId;
         }
 
         public void Reacquire()
         {
+            // Mirrors the real TaskHost, which requires Reacquire() on the same thread that called Yield().
+            _yieldThreadId.ShouldNotBe(-1, "Cannot call Reacquire() before Yield().");
+            Environment.CurrentManagedThreadId.ShouldBe(_yieldThreadId, "Reacquire() must be called on the thread that called Yield().");
+            _yieldThreadId = -1;
         }
 
         public bool BuildProjectFile(
