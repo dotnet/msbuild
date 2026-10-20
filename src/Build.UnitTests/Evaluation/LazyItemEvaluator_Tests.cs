@@ -337,6 +337,56 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void ReplayedWildcardUpdatesKeepTemporaryContextsIsolated()
+    {
+        const string updateCondition = "'WildcardUpdateScratch' == 'WildcardUpdateScratch'";
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs;b.tmp">
+                        <Trace>initial</Trace>
+                    </Source>
+                    <Source Update="*">
+                        <Trace Condition="{updateCondition}">%(Trace)-updated</Trace>
+                        <EarlierTrace>@(Source->'%(Trace)')</EarlierTrace>
+                    </Source>
+                    <BeforeRemove Include="@(Source)" />
+                    <Source Remove="*.tmp" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+        using EventSourceTestHelper listener = new();
+
+        ProjectItem[] currentItems = [.. provider.GetItems("Source")];
+        currentItems.Length.ShouldBe(1);
+        currentItems[0].EvaluatedInclude.ShouldBe("a.cs");
+        currentItems[0].GetMetadataValue("Trace").ShouldBe("initial-updated");
+        currentItems[0].GetMetadataValue("EarlierTrace").ShouldBe("initial;initial");
+        CountEvents(listener, nameof(MSBuildEventSource.EvaluateConditionStart), updateCondition).ShouldBe(2);
+
+        // The earlier reference replays the same Update without the later Remove's exclusion context.
+        ProjectItem[] earlierItems = [.. provider.GetItems("BeforeRemove")];
+        earlierItems.Length.ShouldBe(2);
+        earlierItems[0].EvaluatedInclude.ShouldBe("a.cs");
+        earlierItems[1].EvaluatedInclude.ShouldBe("b.tmp");
+        foreach (ProjectItem item in earlierItems)
+        {
+            item.GetMetadataValue("Trace").ShouldBe("initial-updated");
+            item.GetMetadataValue("EarlierTrace").ShouldBe("initial;initial");
+        }
+
+        CountEvents(listener, nameof(MSBuildEventSource.EvaluateConditionStart), updateCondition).ShouldBe(2);
+        currentItems[0].GetMetadataValue("Trace").ShouldBe("initial-updated");
+        provider.GetItems("Source").ShouldHaveSingleItem().ShouldBeSameAs(currentItems[0]);
+    }
+
+    [Fact]
     public void RepeatedMaterializationPreservesEarlierPieceSnapshots()
     {
         const int phaseCount = 64;

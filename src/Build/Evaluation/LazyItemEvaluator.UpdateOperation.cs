@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
+using Microsoft.CodeAnalysis.Collections;
 
 #nullable disable
 
@@ -17,7 +18,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     private sealed partial class UpdateOperation : LazyItemOperation
     {
         private readonly ImmutableArray<ProjectMetadataElement> _metadata;
-        private ImmutableList<ItemBatchingContext>.Builder _itemsToUpdate = null;
+
+        // Metadata expansion may evaluate captured item lists, but their prefixes exclude this Update.
+        // It therefore cannot reenter this operation and clear the list while it is being enumerated,
+        // so metadata application can consume the mutable scratch list without an immutable snapshot.
+        private SegmentedList<ItemBatchingContext> _itemsToUpdate = null;
         private ItemSpecMatchesItem _matchItemSpec = null;
         private bool? _needToExpandMetadataForEachItem = null;
 
@@ -41,20 +46,25 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
 
             SetMatchItemSpec();
-            _itemsToUpdate ??= ImmutableList.CreateBuilder<ItemBatchingContext>();
-            _itemsToUpdate.Clear();
+            _itemsToUpdate ??= [];
+            try
+            {
+                // Each replacement immediately follows its successful match, preserving captures without matching twice.
+                MatchResult matchResult = default;
+                listBuilder.UpdateAll(
+                    itemData =>
+                    {
+                        matchResult = _matchItemSpec(_itemSpec, itemData.Item);
+                        return matchResult.IsMatch;
+                    },
+                    itemData => UpdateItem(itemData, matchResult.CapturedItemsFromReferencedItemTypes));
 
-            // Each replacement immediately follows its successful match, preserving captures without matching twice.
-            MatchResult matchResult = default;
-            listBuilder.UpdateAll(
-                itemData =>
-                {
-                    matchResult = _matchItemSpec(_itemSpec, itemData.Item);
-                    return matchResult.IsMatch;
-                },
-                itemData => UpdateItem(itemData, matchResult.CapturedItemsFromReferencedItemTypes));
-
-            DecorateItemsWithMetadata(_itemsToUpdate.ToImmutableList(), _metadata, _needToExpandMetadataForEachItem);
+                DecorateItemsWithMetadata(_itemsToUpdate, _metadata, _needToExpandMetadataForEachItem);
+            }
+            finally
+            {
+                _itemsToUpdate.Clear();
+            }
         }
 
         /// <summary>
@@ -67,14 +77,20 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             if (_conditionResult)
             {
                 SetMatchItemSpec();
-                _itemsToUpdate ??= ImmutableList.CreateBuilder<ItemBatchingContext>();
-                _itemsToUpdate.Clear();
-                MatchResult matchResult = _matchItemSpec(_itemSpec, item.Item);
-                if (matchResult.IsMatch)
+                _itemsToUpdate ??= [];
+                try
                 {
-                    ItemData clonedData = UpdateItem(item, matchResult.CapturedItemsFromReferencedItemTypes);
-                    DecorateItemsWithMetadata(_itemsToUpdate.ToImmutableList(), _metadata, _needToExpandMetadataForEachItem);
-                    return clonedData;
+                    MatchResult matchResult = _matchItemSpec(_itemSpec, item.Item);
+                    if (matchResult.IsMatch)
+                    {
+                        ItemData clonedData = UpdateItem(item, matchResult.CapturedItemsFromReferencedItemTypes);
+                        DecorateItemsWithMetadata(_itemsToUpdate, _metadata, _needToExpandMetadataForEachItem);
+                        return clonedData;
+                    }
+                }
+                finally
+                {
+                    _itemsToUpdate.Clear();
                 }
             }
             return item;
