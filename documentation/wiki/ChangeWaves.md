@@ -36,6 +36,7 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.13
+- [Task hosts preserve ordinary task-environment variables while retaining Windows bitness adjustments.](https://github.com/dotnet/msbuild/pull/15032)
 - [ResolveAssemblyReference discovers redist and subset lists relative to the project directory when `TargetFrameworkDirectories` contains relative paths.](https://github.com/dotnet/msbuild/pull/15089)
 - [ClickOnce application manifest generation resolves relative sentinel assembly dependencies against the task project directory before reading their identities, preventing duplicate .NET Framework 3.0/3.5 prerequisite entries.](https://github.com/dotnet/msbuild/pull/15222)
 - [The logging event queue grows from its default 200,000 events instead of blocking the threads that log, as long as the memory that the GC reports as still available could hold the added capacity. This prevents stalls such as the one of ResolveAssemblyReference in multithreaded builds, and applies to .NET only.](https://github.com/dotnet/msbuild/pull/15281) Setting `MSBUILDLOGGINGQUEUECAPACITY` keeps the queue at a fixed capacity.

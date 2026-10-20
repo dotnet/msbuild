@@ -593,7 +593,7 @@ namespace Microsoft.Build.Tasks
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
                 {
                     AbsolutePath stateFileAbsolutePath = taskEnvironment.GetAbsolutePath(stateFile.ItemSpec);
-                    stateFilePath = stateFileAbsolutePath.Value;
+                    stateFilePath = stateFileAbsolutePath;
 
                     // Verify that it's a real stateFile. Log message but do not error if not.
                     sysState = DeserializeCache<SystemState>(stateFileAbsolutePath, log);

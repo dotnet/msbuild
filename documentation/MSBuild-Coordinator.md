@@ -179,7 +179,7 @@ Without nested grants, the child process could request a new root grant while th
 Nested grants avoid this by treating child processes as participants in the parent grant:
 
 1. The root build receives a grant token in `NodeGrantMessage`.
-2. `BuildManager` records that token in the build process environment as `MSBUILDCOORDINATORGRANTID`, so task-launched child processes inherit it.
+2. `BuildManager` records that token as `MSBUILDCOORDINATORGRANTID` in the build's environment snapshot, not the parent process's global environment. In multithreaded mode, each request receives it through `TaskEnvironment`; tasks dispatched to a TaskHost receive that environment in their configuration. Task-launched child processes then inherit the token from the task's execution environment.
 3. A child process that sees the token and a server that supports `nested-grants` sends `JoinGrantMessage`.
 4. The coordinator validates that the root grant is still active.
 5. If valid, the child receives a grant capped by the root grant's node count without consuming additional global budget.
