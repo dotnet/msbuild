@@ -331,9 +331,9 @@ namespace Microsoft.Build.Evaluation
         /// <returns>
         ///  The set of matching paths, using the comparison rules of <paramref name="normalizedItemPaths"/>.
         /// </returns>
-        public ISet<string> IntersectsWith(HashSet<string> normalizedItemPaths)
+        public ISet<NormalizedItemPath> IntersectsWith(HashSet<NormalizedItemPath> normalizedItemPaths)
         {
-            HashSet<string> matches = null;
+            HashSet<NormalizedItemPath> matches = null;
 
             foreach (var fragment in Fragments)
             {
@@ -343,7 +343,7 @@ namespace Microsoft.Build.Evaluation
                     // The fragment can enumerate its referenced items, so use path membership lookups.
                     foreach (var spec in referencedItems)
                     {
-                        string key = FileUtilities.NormalizePathForComparisonNoThrow(spec, fragment.ProjectDirectory);
+                        NormalizedItemPath key = new(FileUtilities.NormalizePathForComparisonNoThrow(spec, fragment.ProjectDirectory));
                         if (normalizedItemPaths.Contains(key))
                         {
                             matches ??= [with(normalizedItemPaths.Comparer)];
@@ -354,9 +354,9 @@ namespace Microsoft.Build.Evaluation
                 else
                 {
                     // The fragment cannot enumerate its referenced items. Test each indexed path.
-                    foreach (string path in normalizedItemPaths)
+                    foreach (NormalizedItemPath path in normalizedItemPaths)
                     {
-                        if (fragment.IsMatchNormalized(path))
+                        if (fragment.IsMatchNormalized(path.Value))
                         {
                             matches ??= [with(normalizedItemPaths.Comparer)];
                             matches.Add(path);
@@ -365,7 +365,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            return matches is not null ? matches : FrozenSet<string>.Empty;
+            return matches is not null ? matches : FrozenSet<NormalizedItemPath>.Empty;
         }
 
         /// <summary>

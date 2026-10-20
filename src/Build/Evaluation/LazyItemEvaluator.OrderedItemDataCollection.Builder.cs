@@ -26,7 +26,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             /// <summary>
             ///  The normalized item paths present in the collection.
             /// </summary>
-            private HashSet<string> _normalizedItemPaths;
+            private HashSet<NormalizedItemPath> _normalizedItemPaths;
 
             internal Builder(ImmutablePieceList<ItemData>.Editor listBuilder)
             {
@@ -66,19 +66,18 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             /// <summary>
             ///  Gets or creates an index of the normalized item paths.
             /// </summary>
-            public HashSet<string> NormalizedItemPaths
+            public HashSet<NormalizedItemPath> NormalizedItemPaths
             {
                 get
                 {
                     if (_normalizedItemPaths is null)
                     {
-                        HashSet<string> paths = [with(StringComparer.OrdinalIgnoreCase)];
-                        // Persist cached normalization in one sequential rewrite, not an indexed scan through sequence.
-                        _listBuilder.UpdateAll(static _ => true, itemData =>
+                        HashSet<NormalizedItemPath> paths = [];
+                        foreach (ItemData itemData in _listBuilder)
                         {
                             paths.Add(itemData.NormalizedItemValue);
-                            return itemData;
-                        });
+                        }
+
                         _normalizedItemPaths = paths;
                     }
                     return _normalizedItemPaths;
@@ -133,7 +132,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             ///  Removes all items whose normalized path is in <paramref name="itemPathsToRemove"/>.
             /// </summary>
             /// <param name="itemPathsToRemove">The matched paths, using the normalized-path index's comparison rules.</param>
-            public void RemoveAll(ISet<string> itemPathsToRemove)
+            public void RemoveAll(ISet<NormalizedItemPath> itemPathsToRemove)
             {
                 if (itemPathsToRemove.Count == 0)
                 {
@@ -166,7 +165,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             /// </remarks>
             private int UpdateAllWithPathIndex(Predicate<ItemData> match, Func<ItemData, ItemData> update)
             {
-                HashSet<string> paths = _normalizedItemPaths;
+                HashSet<NormalizedItemPath> paths = _normalizedItemPaths;
                 bool pathsChanged = false;
                 int matched = _listBuilder.UpdateAll(match, itemData =>
                 {
