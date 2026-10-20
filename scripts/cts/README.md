@@ -33,6 +33,9 @@ Build the repository once using its normal build instructions to bootstrap the
 repo-local SDK. Ensure the global `cts` host can find the .NET 10 runtime and
 the native test hosts can find a .NET 11 runtime. The CI steps install both;
 the repo-local SDK alone does not install runtimes into the global host.
+CI installs the tool through `eng/common/dotnet.ps1` (Windows) or `dotnet.sh`
+(Linux), which bootstraps the SDK pinned by `global.json` before the solution
+build. Runtime-only agent setup cannot run `dotnet tool update` on its own.
 
 Install the same CTS version used by the collect and apply pipelines:
 

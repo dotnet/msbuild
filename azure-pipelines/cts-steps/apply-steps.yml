@@ -87,10 +87,20 @@ steps:
       '</configuration>'
     )
     Set-Content -Path $cfgPath -Value $lines -Encoding utf8
-    $installArgs = @('tool', 'update', 'cts', '--global', '--prerelease', '--configfile', "$cfgPath")
+    $installArgs = @('tool', 'update', 'cts', '--global', '--configfile', "$cfgPath")
     $toolVersion = '${{ parameters.ctsToolVersion }}'
-    if ($toolVersion) { $installArgs += @('--version', $toolVersion) }
-    dotnet @installArgs
+    if ($toolVersion) {
+      $installArgs += @('--version', $toolVersion)
+    } else {
+      $installArgs += '--prerelease'
+    }
+    # Runtime installation above does not provide the SDK required by global.json.
+    # Bootstrap in a child process so the CTS apphost keeps its runtime environment.
+    if ($IsWindows) {
+      pwsh -NoProfile -File "$(Build.SourcesDirectory)/eng/common/dotnet.ps1" @installArgs
+    } else {
+      bash "$(Build.SourcesDirectory)/eng/common/dotnet.sh" @installArgs
+    }
     if ($LASTEXITCODE -ne 0) { throw "cts install/update failed" }
     $toolsDir = if ($IsWindows) { Join-Path $env:USERPROFILE '.dotnet\tools' } else { Join-Path $env:HOME '.dotnet/tools' }
     Write-Host "##vso[task.prependpath]$toolsDir"
