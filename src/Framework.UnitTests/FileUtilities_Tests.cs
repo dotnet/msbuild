@@ -942,8 +942,11 @@ public class FileUtilities_Tests
         }
     }
 
-    [UnixOnlyFact]
-    public void RelativePathMaybeAdjustFilePathWithBaseDirectory()
+    [UnixOnlyTheory]
+    [InlineData("second\\file.txt", "second/file.txt")]
+    [InlineData("second\\nested/file.txt", "second/nested/file.txt")]
+    [InlineData("second/nested\\file.txt", "second/nested/file.txt")]
+    public void RelativePathMaybeAdjustFilePathWithBaseDirectory(string value, string adjustedValue)
     {
         // <tmp_dir>/first/second/file.txt
         string filePath = ObjectModelHelpers.CreateFileInTempProjectDirectory("first/second/file.txt", String.Empty);
@@ -958,10 +961,12 @@ public class FileUtilities_Tests
             Directory.SetCurrentDirectory(tmpDirectory);
 
             // We are in <tmp_dir> and second is not under that, so this won't convert
-            Assert.Equal("second\\file.txt", FileUtilities.MaybeAdjustFilePath("second\\file.txt"));
+            FileUtilities.MaybeAdjustFilePath(value).ShouldBe(value);
+            FileUtilities.MaybeAdjustFilePath(value.AsMemory()).ToString().ShouldBe(value);
 
             // .. but if we have baseDirectory:firstDirectory, then it will
-            Assert.Equal("second/file.txt", FileUtilities.MaybeAdjustFilePath("second\\file.txt", firstDirectory));
+            FileUtilities.MaybeAdjustFilePath(value, firstDirectory).ShouldBe(adjustedValue);
+            FileUtilities.MaybeAdjustFilePath(value.AsMemory(), firstDirectory).ToString().ShouldBe(adjustedValue);
         }
         finally
         {
@@ -972,6 +977,40 @@ public class FileUtilities_Tests
             Directory.SetCurrentDirectory(oldCWD);
         }
     }
+
+#if NET
+    [UnixOnlyTheory]
+    [InlineData("file.txt")]
+    [InlineData("Configuration=Debug;RuntimeConfiguration=Release")]
+    [InlineData("'quoted value'")]
+    [InlineData("%2f;%(Metadata);$(Property);@(Items)")]
+    [InlineData("/tmp/file.txt")]
+    [InlineData("obj/Debug/file.txt")]
+    [InlineData("obj//Debug/file.txt")]
+    public void MaybeAdjustFilePathWithoutBackslashesDoesNotAllocate(string value)
+    {
+        ReadOnlyMemory<char> memory = value.AsMemory();
+        for (int i = 0; i < 64; i++)
+        {
+            FileUtilities.MaybeAdjustFilePath(value);
+            FileUtilities.MaybeAdjustFilePath(memory);
+        }
+
+        string result = null;
+        ReadOnlyMemory<char> memoryResult = default;
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 0; i < 256; i++)
+        {
+            result = FileUtilities.MaybeAdjustFilePath(value);
+            memoryResult = FileUtilities.MaybeAdjustFilePath(memory);
+        }
+
+        long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        result.ShouldBeSameAs(value);
+        memoryResult.Equals(memory).ShouldBeTrue();
+        allocated.ShouldBe(0);
+    }
+#endif
 
     /// <summary>
     /// MaybeAdjustFilePath should correctly convert backslashes to forward slashes
