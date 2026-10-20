@@ -219,6 +219,7 @@
     <Compile Include="Evaluation\LazyItemEvaluator.ReferencedItemLists.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.UpdateBatch.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.MatchResult.cs" />
+    <Compile Include="Evaluation\NormalizedItemPath.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="Evaluation\PropertyFunctionReceiver.cs" />
     <Compile Include="Evaluation\ToolsetElement.cs" />

@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
@@ -20,7 +19,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     /// </remarks>
     private struct UpdateBatch
     {
-        private Dictionary<string, UpdateOperation>? _updates;
+        private Dictionary<NormalizedItemPath, UpdateOperation>? _updates;
 
         /// <summary>
         ///  Tries to add a literal Update to the pending batch.
@@ -41,8 +40,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     break;
                 }
 
-                string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(fragment.TextFragment, fragment.ProjectDirectory);
-                _updates ??= [with(StringComparer.OrdinalIgnoreCase)];
+                NormalizedItemPath fullPath = new(FileUtilities.NormalizePathForComparisonNoThrow(fragment.TextFragment, fragment.ProjectDirectory));
+                _updates ??= [];
                 if (_updates.ContainsKey(fullPath))
                 {
                     // Another update will already happen on this path. Make that happen before evaluating this one.
@@ -61,7 +60,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             for (int i = 0; i < fragmentIndex; i++)
             {
                 ItemSpecFragment fragment = operation.Spec.Fragments[i];
-                string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(fragment.TextFragment, fragment.ProjectDirectory);
+                NormalizedItemPath fullPath = new(FileUtilities.NormalizePathForComparisonNoThrow(fragment.TextFragment, fragment.ProjectDirectory));
                 _updates!.Remove(fullPath);
             }
 

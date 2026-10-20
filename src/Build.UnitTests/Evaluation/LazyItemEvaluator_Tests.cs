@@ -818,6 +818,44 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void BatchedUpdatesPreserveEarlierItemsAndReuseUnchangedItems()
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs;b.cs">
+                        <Trace>initial</Trace>
+                    </Source>
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Update="a.cs">
+                        <Trace>updated</Trace>
+                    </Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
+        evaluator.ProcessItemGroups([groups[0]], project.Xml.DirectoryPath);
+        ImmutableArray<ProjectItem> before = CollectItems(evaluator);
+
+        evaluator.ProcessItemGroups([groups[1]], project.Xml.DirectoryPath);
+        ImmutableArray<ProjectItem> after = CollectItems(evaluator);
+
+        AssertIncludes(before, ["a.cs", "b.cs"]);
+        AssertIncludes(after, ["a.cs", "b.cs"]);
+        before[0].ShouldNotBeSameAs(after[0]);
+        after[0].Xml.ShouldBeSameAs(before[0].Xml);
+        before[0].GetMetadataValue("Trace").ShouldBe("initial");
+        after[0].GetMetadataValue("Trace").ShouldBe("updated");
+        after[1].ShouldBeSameAs(before[1]);
+        after[1].GetMetadataValue("Trace").ShouldBe("initial");
+    }
+
+    [Fact]
     public void CapturedPositionsSurviveGrowthAcrossSegments()
     {
         using ProjectCollection collection = new();
