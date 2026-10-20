@@ -263,23 +263,6 @@ internal partial class Expander<P, I>
     }
 
     /// <summary>
-    /// Used only for unit tests. Expands the property expression (including any metadata expressions) and returns
-    /// the result typed (i.e. not converted into a string if the result is a function return).
-    /// </summary>
-    internal object ExpandPropertiesLeaveTypedAndEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
-    {
-        if (expression.Length == 0)
-        {
-            return String.Empty;
-        }
-
-        Assumed.NotNull(elementLocation);
-
-        string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
-        return PropertyExpander.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
-    }
-
-    /// <summary>
     /// Expands embedded item metadata, properties, and embedded item lists (in that order) as specified in the provided options,
     /// then splits on semi-colons into a list of strings.
     /// Use this form when the result is going to be processed further, for example by matching against the file system,
