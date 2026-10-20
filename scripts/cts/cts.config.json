@@ -42,7 +42,14 @@
   },
   "Filter": {
     "Include": [
-      "**/artifacts/bin/*.VSTest/Debug/net11.0/*.UnitTests.dll"
+      "**/artifacts/bin/StringTools.UnitTests/Debug/net11.0/Microsoft.NET.StringTools.UnitTests.dll",
+      "**/artifacts/bin/Microsoft.Build.Framework.UnitTests/Debug/net11.0/Microsoft.Build.Framework.UnitTests.dll",
+      "**/artifacts/bin/Microsoft.Build.Utilities.UnitTests/Debug/net11.0/Microsoft.Build.Utilities.UnitTests.dll",
+      "**/artifacts/bin/Microsoft.Build.Engine.OM.UnitTests/Debug/net11.0/Microsoft.Build.Engine.OM.UnitTests.dll",
+      "**/artifacts/bin/Microsoft.Build.CommandLine.UnitTests/Debug/net11.0/Microsoft.Build.CommandLine.UnitTests.dll",
+      "**/artifacts/bin/Microsoft.Build.Engine.UnitTests/Debug/net11.0/Microsoft.Build.Engine.UnitTests.dll",
+      "**/artifacts/bin/Microsoft.Build.Tasks.UnitTests/Debug/net11.0/Microsoft.Build.Tasks.UnitTests.dll",
+      "**/artifacts/bin/Microsoft.Build.BuildCheck.UnitTests/Debug/net11.0/Microsoft.Build.BuildCheck.UnitTests.dll"
     ],
     "Exclude": [
       "**/*.resources.dll"
