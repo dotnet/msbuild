@@ -6,6 +6,10 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Pipes;
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+using System.Security.AccessControl;
+using System.Security.Principal;
+#endif
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Internal;
 
@@ -129,12 +133,32 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// </returns>
     private async Task<NamedPipeServerStream?> WaitForClientAsync(CancellationToken token)
     {
+        PipeOptions pipeOptions = PipeOptions.Asynchronous;
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+        pipeOptions |= PipeOptions.CurrentUserOnly;
+#else
+        PipeAccessRights pipeAccessRights = PipeAccessRights.ReadWrite | PipeAccessRights.CreateNewInstance;
+        PipeAccessRule rule = new(WindowsIdentity.GetCurrent().Owner, pipeAccessRights, AccessControlType.Allow);
+        PipeSecurity security = new();
+        security.AddAccessRule(rule);
+        security.SetOwner(rule.IdentityReference);
+#endif
+
         NamedPipeServerStream pipeStream = new(
             _pipeName,
             PipeDirection.InOut,
             NamedPipeServerStream.MaxAllowedServerInstances,
             PipeTransmissionMode.Byte,
-            PipeOptions.Asynchronous);
+            pipeOptions
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+            , inBufferSize: 0,
+            outBufferSize: 0,
+            security,
+            HandleInheritability.None
+#endif
+#pragma warning disable SA1111 // Closing parenthesis should be on line of last parameter
+            );
+#pragma warning restore SA1111 // Closing parenthesis should be on line of last parameter
 
         try
         {

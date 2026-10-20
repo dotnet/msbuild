@@ -28,11 +28,11 @@ internal sealed partial class CoordinatorClient
 
             try
             {
-                pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+                pipeStream = CreatePipe(settings.PipeName);
 
                 output.WriteLine($"CoordinatorClient: Connecting to test pipe '{settings.PipeName}'");
 
-                if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
+                if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs, output))
                 {
                     output.WriteLine("CoordinatorClient: Test connection timed out");
                     return null;

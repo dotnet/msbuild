@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
@@ -156,10 +158,10 @@ internal class BuildCheckBuildEventHandler
                 acquisitionData.AssemblyPath);
 
             checkContext.DispatchAsErrorFromText(
-                null,
+                DiagnosticSubcategory.None,
                 errorCode,
                 helpKeyword,
-                string.IsNullOrEmpty(acquisitionData.ProjectPath) ? BuildEventFileInfo.Empty : new BuildEventFileInfo(acquisitionData.ProjectPath),
+                ElementLocation.Create(acquisitionData.ProjectPath),
                 message);
         }
     }

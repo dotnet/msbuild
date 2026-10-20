@@ -1,5 +1,5 @@
 ---
-applyTo: "src/*.UnitTests/**/*.cs"
+applyTo: "src/*.Tests/**/*.cs"
 ---
 
 # Testing Instructions
@@ -47,7 +47,7 @@ Test assemblies use assembly fixtures (for example, `Microsoft.Build.UnitTests.M
 
 ## Data-Driven and Async Tests
 
-Prefer a focused regression that directly proves the requested behavior over a Boolean matrix covering unrelated modes or languages. For task-routing tests, compare the task's PID with a known in-process assembly task. Avoid duplicating existing end-to-end routing coverage.
+Prefer a focused regression that directly proves the requested behavior over a Boolean matrix covering unrelated modes or languages. Do not retest behavior owned by external frameworks, and keep process-test matrices to the minimum needed because each case adds runtime and resource-exhaustion flake risk. For task-routing tests, compare the task's PID with a known in-process assembly task. Avoid duplicating existing end-to-end routing coverage.
 
 Use `[Theory]` with `[InlineData]` for simple inputs. Use `[MemberData]` or `TheoryData<T>` for complex objects (returning `IEnumerable<object[]>`). If the data type is custom, implement `IXunitSerializable`.
 

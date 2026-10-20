@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
     Microsoft ResX Schema
@@ -1641,10 +1641,6 @@
   <data name="BuildStarted" xml:space="preserve">
     <value>Build started.</value>
   </data>
-  <data name="FileLocation" xml:space="preserve">
-    <value>{0} ({1},{2})</value>
-    <comment>A file location to be embedded in a string.</comment>
-  </data>
   <data name="MissingWarnAsMessageParameterError" xml:space="preserve">
     <value>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch.</value>
     <comment>
@@ -1864,15 +1860,6 @@
   <data name="ModifyingTaskHostEnvironmentVariable" xml:space="preserve">
     <value>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</value>
     <comment>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</comment>
-  </data>
-  <data name="SubCategoryForSchemaValidationErrors" xml:space="preserve">
-    <value>Schema validation</value>
-    <comment>
-      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
-      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
-      "MSBUILD : Schema validation error MSB0000: This is an error."
-      LOCALIZATION: This fragment needs to be localized.
-    </comment>
   </data>
     <!--
         The command line message bucket is: MSB1001 - MSB1999

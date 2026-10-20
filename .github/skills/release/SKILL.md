@@ -85,10 +85,10 @@ It computes `git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}`, find
 | Phase | Trigger | Key Actions |
 |---|---|---|
 | **0: Instantiate** | User-initiated | Validate inputs, create GitHub tracking issue |
-| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), **audit all `vs*` branches for retirement**, `VisualStudio.ChannelName` |
+| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), **audit all `vs*` branches for retirement** |
 | **2: DARC Subscription Updates** | Phase 1 branch exists (`vs*` created) | Retarget `main`-targeting subs + VMR backflow to next channel, retired-branch cleanup (batched PR), Arcade verify |
-| **3: Bump Main** | Phase 2 merged | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, refresh OptProf baseline) |
-| **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Telemetry evidence checks, public API promotion, OptProf bootstrap, VS insertion before Insiders snap |
+| **3: Bump Main** | Phase 2 ingested and verified | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, refresh OptProf baseline) |
+| **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Telemetry evidence checks, package API compatibility review, OptProf bootstrap, VS insertion before Insiders snap |
 | **5: Post-GA** | VS shipped (`VS_SHIP_DATE`) | Resolve the exact shipped version (SDK-coupled? SDK wins over VS `rel/stable`), nuget.org publish, docs, GitHub release, Change Waves Learn sync, retro |
 
 ## DARC Batching
@@ -98,56 +98,51 @@ DARC write commands push to the [maestro-configuration](https://dev.azure.com/dn
 1. Choose a branch name like `release/msbuild-{{THIS_RELEASE_VERSION}}`
 2. Add `--configuration-branch <name> --no-pr` to every write command except the last
 3. Last command: use `--configuration-branch <name>` without `--no-pr` to create the PR
-4. Get the PR reviewed and merged
+4. Review the diff before merging; disable auto-complete if the PR must remain review-only.
+5. After merging, complete [DARC configuration PR verification](../../../documentation/release-checklist.md#darc-configuration-pr-verification) before dependent release steps.
+
+Check existing channels and mappings before writing: the previous release normally pre-created the current release's mapping. Skip satisfied writes rather than constructing a redundant batch.
 
 Read-only commands (`get-default-channels`, `get-subscriptions`, `get-channel`) don't need these flags.
 
 **Non-interactive (`-q`).** `darc add-default-channel` / `add-subscription` prompt `y/n` when the target branch does not exist yet (e.g. pre-creating the `vs{{NEXT_VERSION}}` mapping in Phase 1.2c, or adding the new `vs{{THIS_RELEASE_VERSION}}` backflow in Phase 2). `darc delete-subscriptions` always prompts for confirmation. Console input is redirected in an agent session, so the prompt **fails or hangs the command** — always pass `-q` for these writes. Note the verb is `delete-subscriptions` (plural); `delete-subscription` does not exist.
 
-**Phase 2 — what moves vs. what stays.** When rotating `main` to the next channel, retarget **only** the subscriptions whose **target branch is `main`** (`dotnet/dotnet @ main`, `dotnet/fsharp @ main`). **Never** retarget a subscription that targets a VMR servicing/release branch (`dotnet/dotnet @ release/*`) — that includes the SDK band paired with the new `vs{{THIS_RELEASE_VERSION}}` branch and any `.NET-next` preview band (`release/*-preview*`). Those stay on `VS {{THIS_RELEASE_VERSION}}` so the new release branch owns their downstream flow; moving them steals it. (This bit the 18.9 release: the band and preview subs were moved and had to be reverted.)
+**Phase 2 — forward-flow rotation.** Move subscriptions targeting `main` (`dotnet/dotnet @ main`, `dotnet/fsharp @ main`) to the next channel so those consumers receive next-version builds. Keep VMR `release/*` targets, including `.NET-next` preview bands, on `VS {{THIS_RELEASE_VERSION}}` so the release branch continues to feed its SDK bands.
 
-**Phase 2 — VMR backflow rotation (easy to miss).** Backflow (`dotnet/dotnet → msbuild`, source-enabled) must rotate too **when the new `vs{{THIS_RELEASE_VERSION}}` is paired with an SDK band** (skip for a VS-only release): repoint the `→ main` backflow to the **next** SDK band channel (`.NET <NEXT_BAND> SDK`, the channel `dotnet/dotnet @ main` publishes to), and **add** a backflow from the **outgoing** band channel into the new `vs{{THIS_RELEASE_VERSION}}` branch (mirror the prior release branch's backflow, e.g. `vs18.0 ← .NET 10.0.1xx SDK`). See checklist steps 2.2b / 2.3f / 2.3g.
+**Phase 2 — VMR backflow rotation.** Backflow (`dotnet/dotnet → msbuild`, source-enabled) keeps each MSBuild branch's dependencies aligned with its SDK band. When the new `vs{{THIS_RELEASE_VERSION}}` is paired with an SDK band, repoint the `→ main` backflow to the **next** SDK band channel and add backflow from the **outgoing** band channel into the release branch. Skip this for a VS-only release. See checklist steps 2.2b / 2.3f / 2.3g.
 
 ## Branch retirement (Phase 1.3)
 
-Each release retires the `vs*` branches that have fallen out of support. **This is an audit of every live branch, not a check of one candidate.** The rule of thumb (`vs{{THIS_RELEASE_VERSION}} - 3`) identifies only the *newest* candidate; nothing in the process ever revisits older branches, so a single missed retirement persists forever and the backlog grows every month.
+Audit every release branch to keep required SDK/VS servicing flows active and remove unused dependency automation.
 
-**Two lifecycles, two sources — you need both.** Neither one decides a branch on its own:
+**Branch inventory:** [Maintained branches](../../../documentation/release.md#maintained-branches) is the static list. Update its branch rows, SDK/VS sources, and support deadlines when cutting or retiring branches; cross-check the live DARC mappings, subscriptions, and repository branches in checklist step 1.3a.
+
+Check both lifecycles because either the SDK or Visual Studio can require a branch:
 
 | Lifecycle | Source |
 |---|---|
 | **SDK band** | [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) — maps each feature band to its VS version and support end date |
 | **Visual Studio** | [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) — annual releases and the LTSC table |
 
-**Long-lived VS versions — hardcoded, don't re-derive these each release.** These keep their branches alive for years:
+**VS 2026 and later:** non-LTSC releases are serviced through Insiders and for one month after Stable release. A new Stable promotion ends VS support for the previous release. LTSC baselines receive one year of servicing after release; use the published LTSC table to identify them.
 
-| Visual Studio | MSBuild branch | Supported until |
-|---|---|---|
-| Visual Studio 2022 | `vs17.14` | January 2032 |
-| Visual Studio 2019 | `vs16.11` | April 2029 |
-| Visual Studio 2017 | `vs15.9` | April 2027 |
+Use published SDK and VS deadlines for lifecycle decisions, and DARC channels and subscriptions for dependency routing.
 
-**VS 2026 and later use an annual model: 2 years per release** — one year of monthly feature updates, then one security-only year on the LTSC. Only the **LTSC baseline version** gets that second year; an ordinary monthly release falls out of support as soon as the next monthly ships. So each year exactly one `vs18.x` becomes the LTSC and must be kept ~2 years while its neighbours retire quickly — identify it from the LTSC table on the servicing page (`2026-LTSC` ends **November 9, 2027**).
-
-⚠️ **A VS LTSC can expire before the SDK band that shipped with it** — `2026-LTSC` ends Nov 2027, but .NET 10 (LTS) runs to Nov 2028. So the SDK side is frequently what keeps a branch alive, which is why `vs18.0` stays despite being the oldest branch.
-
-🛑 **Maestro is not a lifecycle source.** A `.NET X.Y.Zxx SDK` channel — including `... SDK Release` variants — persists long after the band dies. Reasoning "the channel still exists, so the band is supported" is invalid and is exactly how `vs18.6` (band 10.0.3xx, EOL Aug 2026) was missed during the 18.11 release and had to be retired afterwards.
-
-Apply the **combined rule**: a branch paired with both an SDK band and a VS version retires only when *both* lifecycles agree. Two mechanical red flags find most of the backlog:
+Apply the **combined rule**: retire a branch paired with an SDK band and a VS version only when both lifecycles agree it is out of support. Check these candidates for automation cleanup:
 
 | Signal | Meaning |
 |---|---|
-| Branch's `VS X.Y` channel has **no outbound subscription** | Nothing consumes it — the branch feeds nothing. Compare a live one: `vs18.0 → dotnet/dotnet release/10.0.1xx`. |
+| Branch's `VS X.Y` channel has **no MSBuild outbound subscription** | No downstream consumes MSBuild builds from that branch. |
 | Default channel exists for a **branch that isn't in the repo** | Pure orphan — delete the mapping. |
 
-Worked example from 18.11: `vs18.0` pairs with 10.0.1xx (EOL Nov 2028) so it is **kept despite being the oldest branch**; `vs18.6` (10.0.3xx, EOL Aug 2026) retires; `vs18.4` and `vs18.5` were orphaned default channels for deleted branches.
+**Retirement cleanup (2.3e):** remove inbound subscriptions, unused MSBuild outbound subscriptions, and branch-to-channel associations, including disabled subscriptions. Preserve shared channels and flows still needed by other branches or producers; verify removals after merge and ingestion.
 
 ## Executing a Phase
 
 When asked to execute a specific phase:
 
 1. Read the full phase from `documentation/release-checklist.md`
-2. Verify the trigger condition is met (previous phases completed)
+2. Verify the trigger condition is met (previous phases completed, including ingestion and live verification of prerequisite DARC changes)
 3. Execute steps in order — respect sequential/parallel annotations
 4. For DARC commands: batch writes into one configuration PR per phase
 5. Record all output URLs in the tracking issue's artifact table
@@ -160,16 +155,16 @@ When asked to execute a specific phase:
 | File | Purpose |
 |---|---|
 | [`documentation/release-checklist.md`](../../../documentation/release-checklist.md) | **Operational checklist** — the source of truth |
-| [`documentation/release.md`](../../../documentation/release.md) | Process description: final branding, public API, major version steps |
+| [`documentation/release.md`](../../../documentation/release.md) | Maintained-branch inventory and release process |
 | [`documentation/wiki/ChangeWaves.md`](../../../documentation/wiki/ChangeWaves.md) | Source doc for the Learn page sync — always sync the `vsXX.Y` (Insiders/preview-SDK) copy, not `main` |
 | [MSBuild Change Waves Learn page](https://learn.microsoft.com/visualstudio/msbuild/change-waves) | Public docs target to [`MicrosoftDocs/visualstudio-docs-pr`](https://github.com/MicrosoftDocs/visualstudio-docs-pr) (`docs/msbuild/change-waves.md`) |
 | [`eng/Versions.props`](../../../eng/Versions.props) | `VersionPrefix`, `PackageValidationBaselineVersion`, `BootstrapSdkVersion` |
-| [`azure-pipelines/vs-insertion.yml`](../../../azure-pipelines/vs-insertion.yml) | VS insertion pipeline — `AutoInsertTargetBranch` mappings |
+| [`azure-pipelines/vs-insertion.yml`](../../../azure-pipelines/vs-insertion.yml) | VS insertion pipeline — `TargetBranch` parameter and `InsertTargetBranch` routing |
 | [`azure-pipelines/vs-insertion-experimental.yml`](../../../azure-pipelines/vs-insertion-experimental.yml) | Experimental insertion — `TargetBranch` parameter values |
 | [`scripts/Get-PackageValidationBaseline.ps1`](../../../scripts/Get-PackageValidationBaseline.ps1) | Phase 3.2 — resolves `PackageValidationBaselineVersion` deterministically (merge-base → pipeline 9434 → dotnet-tools feed) |
 | [`scripts/Get-LatestOptProfDrop.ps1`](../../../scripts/Get-LatestOptProfDrop.ps1) | Phase 3.3 — resolves the latest main OptProf drop (MSBuild-OptProf pipeline 17389) to refresh `OptProfBaselineDrop` in `.vsts-dotnet.yml` |
 | [`.vsts-dotnet.yml`](../../../.vsts-dotnet.yml) | Build pipeline entry point — `OptProfBaselineDrop` (hardcoded OptProf seed for new `vs*` branches) |
-| [`azure-pipelines/.vsts-dotnet-build-jobs.yml`](../../../azure-pipelines/.vsts-dotnet-build-jobs.yml) | Build jobs — `VisualStudio.ChannelName` (update each release) |
+| [`azure-pipelines/.vsts-dotnet-build-jobs.yml`](../../../azure-pipelines/.vsts-dotnet-build-jobs.yml) | Build jobs — `VisualStudio.ChannelName` is release-agnostic (`int.main`); no per-release edit |
 
 ## Validation
 

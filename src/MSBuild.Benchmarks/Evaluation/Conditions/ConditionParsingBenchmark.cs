@@ -23,7 +23,7 @@ public class ConditionParsingBenchmark
 
     [GlobalSetup]
     public void GlobalSetup()
-        => _elementLocation = ElementLocation.EmptyLocation;
+        => _elementLocation = ElementLocation.Empty;
 
     [Benchmark(Baseline = true)]
     public object SimpleEquality_Parse()

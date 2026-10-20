@@ -6,6 +6,9 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+using System.Security.Principal;
+#endif
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
@@ -115,13 +118,13 @@ internal sealed partial class CoordinatorClient : IDisposable
         NamedPipeClientStream? pipeStream = null;
         try
         {
-            pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            pipeStream = CreatePipe(settings.PipeName);
 
             output.WriteLine($"CoordinatorClient: Connecting to pipe '{settings.PipeName}'");
 
             // Fast probe: use a short timeout to check if a coordinator is already running.
             // If no pipe exists, this fails quickly (~200ms) instead of waiting the full 5s.
-            if (!TryConnectToPipe(pipeStream, settings.InitialConnectionTimeoutMs))
+            if (!TryConnectToPipe(pipeStream, settings.InitialConnectionTimeoutMs, output))
             {
                 output.WriteLine("CoordinatorClient: No coordinator running, attempting to launch");
 
@@ -232,11 +235,11 @@ internal sealed partial class CoordinatorClient : IDisposable
         }
 
         // Wait for the coordinator to be ready by connecting to its pipe.
-        NamedPipeClientStream? pipeStream = new(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+        NamedPipeClientStream? pipeStream = CreatePipe(settings.PipeName);
 
         try
         {
-            if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
+            if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs, output))
             {
                 output.WriteLine("CoordinatorClient: Failed to connect to coordinator");
                 loggingService.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorFailedToConnect");
@@ -444,11 +447,27 @@ internal sealed partial class CoordinatorClient : IDisposable
         ICoordinatorDebugOutput output)
         => new(connection, grant.GrantId, grant.GrantedNodes, GrantOwnership.Nested, heartbeatIntervalMs, output);
 
-    private static bool TryConnectToPipe(NamedPipeClientStream pipeStream, int timeoutMs)
+    private static NamedPipeClientStream CreatePipe(string pipeName) =>
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        new(
+            ".",
+            pipeName,
+            PipeDirection.InOut,
+            PipeOptions.Asynchronous
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+            | PipeOptions.CurrentUserOnly
+#endif
+        );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+
+    private static bool TryConnectToPipe(NamedPipeClientStream pipeStream, int timeoutMs, ICoordinatorDebugOutput output)
     {
         try
         {
             pipeStream.Connect(timeoutMs);
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+            ValidateRemotePipeOwner(pipeStream, output);
+#endif
             return true;
         }
         catch (TimeoutException)
@@ -456,6 +475,21 @@ internal sealed partial class CoordinatorClient : IDisposable
             return false;
         }
     }
+
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+    private static void ValidateRemotePipeOwner(NamedPipeClientStream pipeStream, ICoordinatorDebugOutput output)
+    {
+        SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+        PipeSecurity remoteSecurity = pipeStream.GetAccessControl();
+        IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
+
+        if (remoteOwner != identifier)
+        {
+            output.WriteLine($"CoordinatorClient: The remote pipe owner {remoteOwner.Value} does not match {identifier.Value}");
+            throw new UnauthorizedAccessException();
+        }
+    }
+#endif
 
     private static bool TryLaunchCoordinator(ILoggingService loggingService, ICoordinatorDebugOutput output)
     {

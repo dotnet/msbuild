@@ -1757,10 +1757,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="BuildStarted" xml:space="preserve">
     <value>Build started.</value>
   </data>
-  <data name="FileLocation" xml:space="preserve">
-    <value>{0} ({1},{2})</value>
-    <comment>A file location to be embedded in a string.</comment>
-  </data>
   <data name="MSBuild.CannotRebaseOutputItemPath" xml:space="preserve">
     <value>MSB3203: The output path "{0}" cannot be rebased. {1}</value>
     <comment>{StrBegin="MSB3203: "}UE: This message is shown when the user asks the "MSBuild" task to rebase the paths of its output items relative to the project from where the "MSBuild" task is called (as opposed to the project(s) on which the "MSBuild" task is called), and one of the output item paths is invalid. LOCALIZATION: "{1}" is a localized message from a CLR/FX exception explaining the problem.</comment>
@@ -2347,6 +2343,14 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="BuildCheck_BC0302_MessageFmt" xml:space="preserve">
     <value>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</value>
   </data>
+  <data name="BuildCheck_BC0303_Title" xml:space="preserve">
+    <value>The 'Overwrite' parameter should be specified when using the 'WriteLinesToFile' task.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0303_MessageFmt" xml:space="preserve">
+    <value>The 'WriteLinesToFile' task in project {0} does not specify the 'Overwrite' parameter. Set it explicitly to 'true' to overwrite the file or 'false' to append to it.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
   <data name="BuildCheck_BC0201_Title" xml:space="preserve">
     <value>A property that is accessed should be declared first.</value>
   </data>
@@ -2680,13 +2684,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="SolutionParseWebProjectPropertiesError" xml:space="preserve">
     <value>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</value>
     <comment>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</comment>
-  </data>
-  <data name="SubCategoryForSolutionParsingErrors" xml:space="preserve">
-    <value>Solution file</value>
-    <comment>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
-      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
-      "MSBUILD : Solution file error MSB0000: This is an error."
-      LOCALIZATION: This fragment needs to be localized.</comment>
   </data>
   <data name="UnrecognizedSolutionComment" xml:space="preserve">
     <value>Unrecognized solution version "{0}", attempting to continue.</value>

@@ -9,9 +9,11 @@ using System.Reflection;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 #endif
-
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if NETFRAMEWORK
 using Microsoft.IO;
@@ -19,12 +21,10 @@ using Microsoft.IO;
 using System.IO;
 #endif
 
+using Constants = Microsoft.Build.Framework.Constants;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
-using Microsoft.Build.Execution;
-using Microsoft.Build.BackEnd.Logging;
-using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
 
@@ -281,7 +281,12 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (exception != null)
                     {
-                        targetLoggingContext.LogError(new BuildEventFileInfo(taskProjectFile), "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, exception.Message);
+                        targetLoggingContext.LogError(
+                            ElementLocation.Create(taskProjectFile),
+                            "TaskLoadFailure",
+                            taskName,
+                            loadInfo.AssemblyLocation,
+                            exception.Message);
                     }
                 }
 
@@ -395,7 +400,10 @@ namespace Microsoft.Build.BackEnd
                     taskLocation.Line,
                     taskLocation.Column,
                     new TaskLoader.LogError((taskLoc, taskLine, taskColumn, message, messageArgs) =>
-                        taskLoggingContext.LogError(new BuildEventFileInfo(taskLoc, taskLine, taskColumn), message, messageArgs)),
+                        taskLoggingContext.LogError(
+                            ElementLocation.Create(taskLoc, taskLine, taskColumn),
+                            message,
+                            messageArgs)),
                     taskEnvironment,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
@@ -481,7 +489,12 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (exception != null)
                     {
-                        targetLoggingContext.LogError(new BuildEventFileInfo(taskProjectFile), "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, exception.Message);
+                        targetLoggingContext.LogError(
+                            ElementLocation.Create(taskProjectFile),
+                            "TaskLoadFailure",
+                            taskName,
+                            _loadedType.Assembly.AssemblyLocation,
+                            exception.Message);
                     }
                 }
 

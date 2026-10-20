@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Internal;
 
 #nullable disable
 
@@ -24,9 +24,9 @@ namespace Microsoft.Build.Evaluation
             {
                 _matchOnMetadata = builder.MatchOnMetadata.ToImmutable();
 
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     _matchOnMetadata.IsEmpty || _itemSpec.Fragments.All(f => f is ItemSpec<P, I>.ItemExpressionFragment),
-                    new BuildEventFileInfo(string.Empty),
+                    ElementLocation.Empty,
                     "OM_MatchOnMetadataIsRestrictedToReferencedItems");
 
                 if (!_matchOnMetadata.IsEmpty)

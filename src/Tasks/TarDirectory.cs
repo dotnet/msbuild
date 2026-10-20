@@ -136,8 +136,8 @@ namespace Microsoft.Build.Tasks
         /// <returns>A <see cref="System.Threading.Tasks.Task{Boolean}"/> that resolves to <see langword="true"/> when the archive was written without errors or cancellation.</returns>
         private async System.Threading.Tasks.Task<bool> ExecuteAsync()
         {
-            _sourceDirectory = new DirectoryInfo(TaskEnvironment.GetAbsolutePath(SourceDirectory.ItemSpec).Value);
-            _destinationFile = new FileInfo(TaskEnvironment.GetAbsolutePath(DestinationFile.ItemSpec).Value);
+            _sourceDirectory = new DirectoryInfo(TaskEnvironment.GetAbsolutePath(SourceDirectory.ItemSpec));
+            _destinationFile = new FileInfo(TaskEnvironment.GetAbsolutePath(DestinationFile.ItemSpec));
 
             if (!_sourceDirectory.Exists)
             {

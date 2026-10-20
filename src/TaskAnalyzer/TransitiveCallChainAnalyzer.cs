@@ -20,6 +20,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// Unlike <see cref="MultiThreadableTaskAnalyzer"/> which only checks direct API calls within
     /// a task class, this analyzer builds a compilation-wide call graph and traces method calls
     /// transitively to find unsafe APIs called by helper methods, utility classes, etc.
+    /// Reports call chains from MT-scoped tasks, or regular tasks with migration analysis enabled.
     ///
     /// Reports MSBuildTask0005 at the unsafe call site — so that <c>#pragma warning disable</c> and
     /// <c>[SuppressMessage]</c> next to the reviewed call are honored — with the full call chain in
@@ -195,7 +196,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 {
                     return;
                 }
-                
+
                 if (IsReportedByDirectAnalyzer(context, entry.Category, directAnalysisState))
                 {
                     return;
@@ -268,7 +269,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return false;
             }
 
-            return AppliesToRegularTasks(category) ||
+            return category == BannedApiDefinitions.ApiCategory.CriticalError ||
                 directAnalysisState.AnalyzeAsMultiThreadable ||
                 ReadAnalyzeAllTasksOption(
                     context.Options.AnalyzerConfigOptionsProvider,
@@ -391,7 +392,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                             foreach (var v in violations)
                             {
                                 if (isMultiThreadableTask ||
-                                    AppliesToRegularTasks(v) ||
                                     ShouldReportMtMigrationViolation(context, v, analyzeAllTasksByTree))
                                 {
                                     ReportTransitiveViolation(context, method, v, chain, reportedViolations);
@@ -460,21 +460,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             return implementation;
-        }
-
-        private static bool AppliesToRegularTasks(ViolationInfo violation)
-        {
-            return AppliesToRegularTasks(violation.Category);
-        }
-
-        private static bool AppliesToRegularTasks(BannedApiDefinitions.ApiCategory category)
-        {
-            return category switch
-            {
-                BannedApiDefinitions.ApiCategory.CriticalError or
-                BannedApiDefinitions.ApiCategory.PotentialIssue => true,
-                _ => false,
-            };
         }
 
         private static bool ShouldReportMtMigrationViolation(
