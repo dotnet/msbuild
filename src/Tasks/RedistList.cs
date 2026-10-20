@@ -689,7 +689,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Redist name of the redist list just read in</returns>
         internal static string ReadFile(AssemblyTableInfo assemblyTableInfo, List<AssemblyEntry> assembliesList, List<Exception> errorsList, List<string> errorFilenamesList, List<AssemblyRemapping> remapEntries)
         {
-            string path = assemblyTableInfo.Path.Value;
+            string path = assemblyTableInfo.Path;
             string redistName = null;
             XmlReader reader = null;
 
