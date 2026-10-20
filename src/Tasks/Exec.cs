@@ -287,6 +287,11 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if the command completes successfully; otherwise, false.</returns>
         public override bool Execute()
         {
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+            {
+                return base.Execute();
+            }
+
             bool useCommandProcessor = UseCommandProcessor;
             UseCommandProcessor = false;
 

@@ -125,6 +125,10 @@ namespace Microsoft.Build.UnitTests
         [WindowsOnlyFact]
         public void ExecWithCommandProcessorUsesCmdExe()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+
             Exec exec = PrepareExec("echo ExecWithCommandProcessorUsesCmdExe");
             exec.UseCommandProcessor = true;
             exec.ConsoleToMSBuild = true;
@@ -132,6 +136,24 @@ namespace Microsoft.Build.UnitTests
             exec.Execute().ShouldBeTrue();
             exec.UseCommandProcessor.ShouldBeTrue();
             exec.ConsoleOutput.Select(item => item.ItemSpec).ShouldContain("ExecWithCommandProcessorUsesCmdExe");
+        }
+
+        [WindowsOnlyFact]
+        public void ExecWithCommandProcessorPreservesLegacyBehaviorWhenWaveDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_13.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            Exec exec = PrepareExec("echo ExecCommandProcessorSentinel");
+            exec.UseCommandProcessor = true;
+            exec.ConsoleToMSBuild = true;
+
+            exec.Execute().ShouldBeFalse();
+            exec.UseCommandProcessor.ShouldBeTrue();
+            exec.ExitCode.ShouldNotBe(0);
+            exec.ConsoleOutput.Select(item => item.ItemSpec).ShouldNotContain("ExecCommandProcessorSentinel");
+            ((MockEngine)exec.BuildEngine).AssertLogContains("MSB3073");
         }
 
         [Fact]
