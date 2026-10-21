@@ -549,6 +549,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         completed.ShouldBeSameAs(serverTask);
     }
 
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/15341", TestPlatforms.Linux)]
     [Fact]
     public async Task SamePidReconnects_CleanlyHandled()
     {
