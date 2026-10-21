@@ -29,10 +29,10 @@ ownership and consumption patterns.
 
 ## Measurement boundaries
 
-All focused suites use editable `ProjectItem` data and the evaluator's deferred item enumeration. XML parsing,
+All focused suites use editable `ProjectItem` data and the collector-based evaluator API. XML parsing,
 outer project initialization, file creation, and expected-result modeling happen during global setup.
-Each `Evaluate` creates a fresh evaluator, records declarations, and enumerates every final and captured
-item. Setup separately checks ordered identities, `Trace` metadata, item counts,
+Each `Evaluate` creates a fresh evaluator, records declarations, and publishes every final and captured
+item to a counting collector. Setup separately checks ordered identities, `Trace` metadata, item counts,
 and Include/defining-project provenance against an independent scenario model. Incorrect condition
 counts produce an unexpected `ReadMismatch` item, so a failed probe cannot silently pass validation.
 
@@ -50,7 +50,7 @@ have an initial bulk Include followed by `OperationCount` Updates; Include histo
 `LazyItemEvaluationBenchmark` remains the complementary whole-project instance-model control. It
 includes collection construction, disk XML loading, and outer evaluation, with files already created
 and normally served from the OS cache. Neither its timings nor the remote fixture's checksum-based
-`ProjectItemInstance` measurements are interchangeable with focused enumeration timings.
+`ProjectItemInstance` measurements are interchangeable with focused counting-collector timings.
 
 Allocated bytes and GC counts do not measure peak retained memory. Use separate memory profiling to
 evaluate checkpoint/projection retention. In particular, retiring cached snapshots does not prove

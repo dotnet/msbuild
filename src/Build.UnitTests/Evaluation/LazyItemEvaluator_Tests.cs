@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
@@ -171,10 +172,9 @@ public sealed class LazyItemEvaluator_Tests
             recorder.ItemGlobElements.ShouldBeNull();
         }
 
-        LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.ItemData[] items =
-            [.. evaluator.GetAllItemsDeferred()];
+        ImmutableArray<ProjectItem> items = CollectItems(evaluator);
         AssertIncludes(items, ["first.cs", "readme.txt", "second.txt"]);
-        items[0].Item.GetMetadataValue("M").ShouldBe("updated");
+        items[0].GetMetadataValue("M").ShouldBe("updated");
     }
 
     [Theory]
@@ -211,17 +211,12 @@ public sealed class LazyItemEvaluator_Tests
         recordedElements.ShouldBe(expectedRecordedElements);
         recorder.ItemGlobElements.ShouldBe(expectedRecordedElements);
 
-        LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.ItemData[] items =
-            [.. evaluator.GetAllItemsDeferred()];
+        ImmutableArray<ProjectItem> items = CollectItems(evaluator);
         string[] expectedIncludes = evaluateFalseConditions
             ? ["false-group.cs", "false-group-and-item.cs", "false-item.cs", "first.cs", "second.cs"]
             : ["first.cs", "second.cs"];
-        bool[] expectedConditions = evaluateFalseConditions ? [false, false, false, true, true] : [true, true];
         AssertIncludes(items, expectedIncludes);
-        for (int i = 0; i < items.Length; i++)
-        {
-            items[i].ConditionResult.ShouldBe(expectedConditions[i]);
-        }
+        AssertIncludes(CollectItems(evaluator, ignoreConditions: false), ["first.cs", "second.cs"]);
     }
 
     [Fact]
@@ -258,8 +253,7 @@ public sealed class LazyItemEvaluator_Tests
         ProjectItemElement[] expectedGlobElements = [elements[0], elements[1]];
         recordedElements.ShouldBe(expectedRecordedElements);
         recorder.ItemGlobElements.ShouldBe(expectedGlobElements);
-        LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.ItemData[] items =
-            [.. evaluator.GetAllItemsDeferred()];
+        ImmutableArray<ProjectItem> items = CollectItems(evaluator);
         AssertIncludes(items, ["first.cs", "second.cs", "readme.txt"]);
     }
 
@@ -302,20 +296,28 @@ public sealed class LazyItemEvaluator_Tests
             recordedElements.ShouldBeEmpty();
         }
 
-        LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.ItemData[] items =
-            [.. evaluator.GetAllItemsDeferred()];
+        ImmutableArray<ProjectItem> items = CollectItems(evaluator);
         AssertIncludes(items, ["first.cs"]);
     }
 
-    private static void AssertIncludes(
-        LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.ItemData[] items,
-        string[] expectedIncludes)
+    private static ImmutableArray<ProjectItem> CollectItems(
+        LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition> evaluator,
+        bool ignoreConditions = true)
     {
-        items.Length.ShouldBe(expectedIncludes.Length);
-        for (int i = 0; i < items.Length; i++)
+        ImmutableArrayItemCollector<ProjectItem> collector = new(ignoreConditions);
+        evaluator.AddAllItems(collector);
+        return collector.ToImmutable();
+    }
+
+    private static void AssertIncludes(IEnumerable<ProjectItem> items, string[] expectedIncludes)
+    {
+        List<string> actual = [];
+        foreach (ProjectItem item in items)
         {
-            items[i].Item.EvaluatedInclude.ShouldBe(expectedIncludes[i]);
+            actual.Add(item.EvaluatedInclude);
         }
+
+        actual.ShouldBe(expectedIncludes);
     }
 
     private static Project CreateProject(

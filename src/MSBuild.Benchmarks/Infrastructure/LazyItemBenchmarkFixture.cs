@@ -17,8 +17,8 @@ namespace MSBuild.Benchmarks;
 /// <remarks>
 ///  Each cold invocation owns fresh evaluator state and reference captures. CPU-only scenarios also own a
 ///  fresh evaluation context; glob scenarios reuse a setup-warmed file cache over an owned bounded tree.
-///  The project data remains empty: lazy results are consumed directly and are never saved into the
-///  project's final item table.
+///  The project data remains empty: output collectors count or validate the results without saving them
+///  into the project's final item table.
 /// </remarks>
 internal sealed class LazyItemBenchmarkFixture : IDisposable
 {
@@ -30,6 +30,7 @@ internal sealed class LazyItemBenchmarkFixture : IDisposable
     private readonly LazyItemBenchmarkScenario _scenario;
     private readonly TemporaryDirectory? _directory;
     private readonly EvaluationContext? _sharedContext;
+    private readonly CountingItemCollector _countingCollector = new();
     private LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition> _cachedEvaluator = null!;
     private List<ProjectItemGroupElement> _readGroups = null!;
 
@@ -134,45 +135,70 @@ internal sealed class LazyItemBenchmarkFixture : IDisposable
             _sharedContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated),
             evaluatedItemElementRecorder: default);
 
-    private static int CountItems(LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition> evaluator)
+    private int CountItems(LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition> evaluator)
     {
-        int count = 0;
-        foreach (var item in evaluator.GetAllItemsDeferred())
-        {
-            count++;
-        }
-
-        return count;
+        _countingCollector.Reset();
+        evaluator.AddAllItems(_countingCollector);
+        return _countingCollector.Count;
     }
 
     private void Validate(LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition> evaluator)
     {
-        int index = 0;
-        foreach (var data in evaluator.GetAllItemsDeferred())
+        ValidatingItemCollector collector = new(_scenario, _project.FullPath);
+        evaluator.AddAllItems(collector);
+        if (collector.Count != _scenario.ExpectedItems.Count)
         {
-            if (index >= _scenario.ExpectedItems.Count)
+            throw new InvalidOperationException($"Lazy item evaluation produced {collector.Count} items; expected {_scenario.ExpectedItems.Count}.");
+        }
+    }
+
+    private sealed class CountingItemCollector : IItemEvaluationCollector<ProjectItem>
+    {
+        public bool ShouldEvaluateForDesignTime => false;
+
+        public int Count { get; private set; }
+
+        public void Reset() => Count = 0;
+
+        public void AddItem(ProjectItem item) => Count++;
+
+        public void AddToAllEvaluatedItemsList(ProjectItem item)
+            => throw new InvalidOperationException("Unexpected design-time item output.");
+
+        public void AddItemIgnoringCondition(ProjectItem item)
+            => throw new InvalidOperationException("Unexpected condition-ignoring item output.");
+    }
+
+    private sealed class ValidatingItemCollector(LazyItemBenchmarkScenario scenario, string projectPath) : IItemEvaluationCollector<ProjectItem>
+    {
+        public bool ShouldEvaluateForDesignTime => false;
+
+        public int Count { get; private set; }
+
+        public void AddItem(ProjectItem item)
+        {
+            if (Count >= scenario.ExpectedItems.Count)
             {
                 throw new InvalidOperationException("Lazy item evaluation produced more items than expected.");
             }
 
-            var expected = _scenario.ExpectedItems[index++];
-            ProjectItem actual = data.Item;
-            if (!data.ConditionResult
-                || actual.ItemType != expected.ItemType
-                || actual.EvaluatedInclude != expected.Include
-                || actual.GetMetadataValue("Trace") != expected.Trace
-                || actual.Xml.Include.Length == 0
-                || actual.GetMetadataValue("DefiningProjectFullPath") != _project.FullPath)
+            var expected = scenario.ExpectedItems[Count++];
+            if (item.ItemType != expected.ItemType
+                || item.EvaluatedInclude != expected.Include
+                || item.GetMetadataValue("Trace") != expected.Trace
+                || item.Xml.Include.Length == 0
+                || item.GetMetadataValue("DefiningProjectFullPath") != projectPath)
             {
                 throw new InvalidOperationException(
-                    $"Lazy item result {index - 1} differs: expected {expected}, "
-                    + $"actual ({actual.ItemType}, {actual.EvaluatedInclude}, {actual.GetMetadataValue("Trace")}).");
+                    $"Lazy item result {Count - 1} differs: expected {expected}, "
+                    + $"actual ({item.ItemType}, {item.EvaluatedInclude}, {item.GetMetadataValue("Trace")}).");
             }
         }
 
-        if (index != _scenario.ExpectedItems.Count)
-        {
-            throw new InvalidOperationException($"Lazy item evaluation produced {index} items; expected {_scenario.ExpectedItems.Count}.");
-        }
+        public void AddToAllEvaluatedItemsList(ProjectItem item)
+            => throw new InvalidOperationException("Unexpected design-time item output.");
+
+        public void AddItemIgnoringCondition(ProjectItem item)
+            => throw new InvalidOperationException("Unexpected condition-ignoring item output.");
     }
 }

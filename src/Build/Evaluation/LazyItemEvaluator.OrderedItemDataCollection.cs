@@ -13,7 +13,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     /// A collection of ItemData that maintains insertion order and internally optimizes some access patterns, e.g. bulk removal
     /// based on normalized item values.
     /// </summary>
-    internal sealed partial class OrderedItemDataCollection
+    private sealed partial class OrderedItemDataCollection
     {
         /// <summary>
         /// The list of items in the collection. Defines the enumeration order.

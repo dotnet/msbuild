@@ -11,7 +11,7 @@ namespace Microsoft.Build.Evaluation;
 
 internal partial class LazyItemEvaluator<P, I, M, D>
 {
-    internal sealed partial class OrderedItemDataCollection
+    private sealed partial class OrderedItemDataCollection
     {
         /// <summary>
         /// A mutable and enumerable version of <see cref="OrderedItemDataCollection"/>.

@@ -205,7 +205,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         }
     }
 
-    public IEnumerable<ItemData> GetAllItemsDeferred()
+    private IEnumerable<ItemData> GetAllItemsDeferred()
     {
         return _itemLists.Values.SelectMany(itemList => itemList.GetItemData(ImmutableHashSet<string>.Empty))
                                 .OrderBy(itemData => itemData.ElementOrder);

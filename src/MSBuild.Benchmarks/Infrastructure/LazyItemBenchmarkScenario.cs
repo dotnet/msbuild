@@ -683,7 +683,7 @@ internal sealed class LazyItemBenchmarkScenario
         _xml.Append("</Project>");
         ProjectXml = _xml.ToString();
 
-        // GetAllItemsDeferred orders by originating Include declaration, not by item type or snapshot publication.
+        // Final output is ordered by originating Include declaration, not by item type or snapshot publication.
         List<(string ItemType, string Include, string Trace, int Order)> ordered = [];
         foreach ((string? include, string? trace, int order) in _source)
         {
