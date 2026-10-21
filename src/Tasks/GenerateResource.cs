@@ -4058,6 +4058,7 @@ namespace Microsoft.Build.Tasks
         /// from ReadTextResources
         /// </summary>
         [Serializable]
+        // CodeQL [SM02227] False positive: static call-graph over-approximation via virtual ToString/Flush in VMR build; deserialization only reads primitive fields.
         internal sealed class TextFileException : Exception
         {
             private String fileName;
