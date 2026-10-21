@@ -95,7 +95,7 @@ internal static class ReservedPropertyNames
     ///  <see langword="false"/>.
     /// </returns>
     internal static bool IsReservedProperty(string property)
-        => TryGetKind(property, out _);
+        => property is not null && TryGetKind(property, out _);
 
     /// <summary>
     ///  Attempts to identify a reserved MSBuild property.
