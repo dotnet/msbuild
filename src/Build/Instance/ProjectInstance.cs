@@ -1610,7 +1610,7 @@ namespace Microsoft.Build.Execution
         /// as well as items respecting condition; and collect
         /// conditioned properties, as well as regular properties
         /// </summary>
-        bool IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.ShouldEvaluateForDesignTime
+        bool IItemEvaluationCollector<ProjectItemInstance>.ShouldEvaluateForDesignTime
         {
             get { return false; }
         }
@@ -1847,7 +1847,7 @@ namespace Microsoft.Build.Execution
         /// Adds a new item
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AddItem(ProjectItemInstance item)
+        void IItemEvaluationCollector<ProjectItemInstance>.AddItem(ProjectItemInstance item)
         {
             _items.Add(item);
         }
@@ -1858,7 +1858,7 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// Because ShouldEvaluateForDesignTime returns false, this should not be called.
         /// </remarks>
-        void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AddItemIgnoringCondition(ProjectItemInstance item)
+        void IItemEvaluationCollector<ProjectItemInstance>.AddItemIgnoringCondition(ProjectItemInstance item)
             => Assumed.Unreachable();
 
         /// <summary>
@@ -1907,7 +1907,7 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// Because ShouldEvaluateForDesignTime returns false, this should not be called.
         /// </remarks>
-        void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AddToAllEvaluatedItemsList(ProjectItemInstance item)
+        void IItemEvaluationCollector<ProjectItemInstance>.AddToAllEvaluatedItemsList(ProjectItemInstance item)
             => Assumed.Unreachable();
 
         /// <summary>
