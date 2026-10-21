@@ -685,7 +685,7 @@ internal partial class Expander<P, I>
                 return false;
             }
 
-#if RUNTIME_TYPE_NETCORE
+#if NET
             // .NET Core MSBuild used to always return empty, so match that behavior
             // on non-Windows (no registry).
             if (!NativeMethodsShared.IsWindows)
@@ -746,24 +746,6 @@ internal partial class Expander<P, I>
 
             try
             {
-                // Full-framework MSBuild can run on non-Windows runtimes such as Mono. Avoid
-                // registry access there except for supported user keys and the compatibility case.
-                if (!NativeMethodsShared.IsWindows && !keyName.StartsWith("HKEY_CURRENT_USER", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Fake common requests to HKLM that we can resolve
-
-                    // This is the base path of the framework
-                    if (keyName.StartsWith(@"HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework", StringComparison.OrdinalIgnoreCase) &&
-                        valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
-                    {
-                        result = NativeMethodsShared.FrameworkBasePath + Path.DirectorySeparatorChar;
-                        return true;
-                    }
-
-                    result = string.Empty;
-                    return true;
-                }
-
                 object value = Registry.GetValue(keyName, valueName, defaultValue: null);
                 result = PropertyValueConverter.ToString(value);
                 return true;
