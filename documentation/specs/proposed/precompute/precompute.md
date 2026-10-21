@@ -107,7 +107,7 @@ For simplicity, this example doesn't use any SDKs but hopefully it still illustr
             OutputDirectory="$(OutputDirectory)"
             Flags="$(GeneratorFlags)"
         >
-            <Output Parameter="GeneratorMetadata" ItemName="CompilerMetadata" />
+            <Output TaskParameter="GeneratorMetadata" ItemName="CompilerMetadata" />
         </GenerateTask>
 
         <ItemGroup>
@@ -190,7 +190,7 @@ Again, the following is a rough representation of the resulting node:
 	"Steps": [
         { 
             "Type": "ExecuteTask",
-            "TaskActivationData": { "Task": "CompileTask", "AssemblyFile": "path\\to\\CompileAssembly.dll" },
+            "TaskActivationData": { "Task": "CompileTask", "AssemblyFile": "path\\to\\CompilerAssembly.dll" },
             "Parameters": { 
                 "Sources": ["code.src", "bin\\schema.src"],
                 "SomeCompilerSetting": "True",
