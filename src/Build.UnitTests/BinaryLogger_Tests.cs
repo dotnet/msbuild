@@ -8,7 +8,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 #if NETFRAMEWORK
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
 #endif
 using System.Text;
 using System.Threading;
@@ -1666,11 +1666,7 @@ namespace Microsoft.Build.UnitTests
                 ? new BinaryLogEventFilterException(metadata, (long)int.MaxValue + 1, 17, innerException)
                 : new BinaryLogEventFilterException(innerException);
 
-            using var stream = new MemoryStream();
-            var formatter = new BinaryFormatter();
-            formatter.Serialize(stream, exception);
-            stream.Position = 0;
-            var roundTripped = (BinaryLogEventFilterException)formatter.Deserialize(stream);
+            var roundTripped = RoundTripSerialize(exception);
 
             roundTripped.Message.ShouldBe(exception.Message);
             roundTripped.RecordKind.ShouldBe(exception.RecordKind);
@@ -1685,6 +1681,23 @@ namespace Microsoft.Build.UnitTests
             roundTripped.InnerException.InnerException.Message.ShouldBe("root cause");
 
             CreateExpectedLogFile();
+        }
+
+        private static TException RoundTripSerialize<TException>(TException exception)
+            where TException : Exception
+        {
+            var info = new SerializationInfo(typeof(TException), new FormatterConverter());
+            var context = new StreamingContext(StreamingContextStates.All);
+            exception.GetObjectData(info, context);
+
+            ConstructorInfo ctor = typeof(TException).GetConstructor(
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                binder: null,
+                types: [typeof(SerializationInfo), typeof(StreamingContext)],
+                modifiers: null);
+            ctor.ShouldNotBeNull();
+
+            return (TException)ctor.Invoke([info, context]);
         }
 #endif
 
