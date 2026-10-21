@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="InvalidRedistFile">
         <source>There was an error reading the redist list file "{0}". {1}</source>
-        <target state="new">There was an error reading the redist list file "{0}". {1}</target>
+        <target state="translated">Erro ao ler o arquivo da lista de pacote redistribuível "{0}". {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotCreateChain">
         <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
-        <target state="new">The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</target>
+        <target state="translated">A estrutura no caminho "{0}" tentou incluir a estrutura do caminho "{1}" como parte de seus caminhos de assembly de referência, mas ocorreu um erro. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="DebugPathTooLong">
@@ -134,7 +134,7 @@
       </trans-unit>
       <trans-unit id="PlatformManifest_MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
-        <target state="new">MSB6010: Could not find platform manifest file at "{0}".</target>
+        <target state="translated">MSB6010: não foi possível encontrar o arquivo de manifesto da plataforma em "{0}".</target>
         <note>{StrBegin="MSB6010: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
@@ -144,7 +144,7 @@
       </trans-unit>
       <trans-unit id="ToolLocationHelper_UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
-        <target state="new">.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <target state="translated">Não há suporte para a versão "{0}" do .NET Framework. Especifique um valor da enumeração Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">

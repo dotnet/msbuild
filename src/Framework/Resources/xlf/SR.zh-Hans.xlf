@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="InvalidRedistFile">
         <source>There was an error reading the redist list file "{0}". {1}</source>
-        <target state="new">There was an error reading the redist list file "{0}". {1}</target>
+        <target state="translated">读取可再发行程序包列表文件“{0}”时出错。{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotCreateChain">
         <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
-        <target state="new">The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</target>
+        <target state="translated">路径为“{0}”的框架尝试将路径为“{1}”的框架包含在其引用程序集路径中，但出现了错误。{2}</target>
         <note />
       </trans-unit>
       <trans-unit id="DebugPathTooLong">
@@ -134,7 +134,7 @@
       </trans-unit>
       <trans-unit id="PlatformManifest_MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
-        <target state="new">MSB6010: Could not find platform manifest file at "{0}".</target>
+        <target state="translated">MSB6010: 找不到“{0}”中的平台清单文件。</target>
         <note>{StrBegin="MSB6010: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
@@ -144,7 +144,7 @@
       </trans-unit>
       <trans-unit id="ToolLocationHelper_UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
-        <target state="new">.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <target state="translated">不支持 .NET Framework 版本“{0}”。请指定枚举 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中的某个值。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
