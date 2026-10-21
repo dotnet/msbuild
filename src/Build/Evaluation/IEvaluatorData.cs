@@ -22,7 +22,7 @@ namespace Microsoft.Build.Evaluation
     /// <typeparam name="I">The type of items to be produced.</typeparam>
     /// <typeparam name="M">The type of metadata on those items.</typeparam>
     /// <typeparam name="D">The type of item definitions to be produced.</typeparam>
-    internal interface IEvaluatorData<P, I, M, D> : IPropertyProvider<P>, IItemProvider<I>
+    internal interface IEvaluatorData<P, I, M, D> : IPropertyProvider<P>, IItemProvider<I>, IItemEvaluationCollector<I>
         where P : class, IProperty, IEquatable<P>, IValued
         where I : class, IItem
         where M : class, IMetadatum
@@ -146,16 +146,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Whether evaluation should collect items ignoring condition,
-        /// as well as items respecting condition; and collect
-        /// conditioned properties, as well as regular properties
-        /// </summary>
-        bool ShouldEvaluateForDesignTime
-        {
-            get;
-        }
-
-        /// <summary>
         /// Tells the evaluator whether it should evaluate elements with false conditions
         /// </summary>
         bool CanEvaluateElementsWithFalseConditions
@@ -234,16 +224,6 @@ namespace Microsoft.Build.Evaluation
         void FinishEvaluation();
 
         /// <summary>
-        /// Adds a new item
-        /// </summary>
-        void AddItem(I item);
-
-        /// <summary>
-        /// Adds a new item to the collection of all items ignoring condition
-        /// </summary>
-        void AddItemIgnoringCondition(I item);
-
-        /// <summary>
         /// Adds a new item definition
         /// </summary>
         IItemDefinition<M> AddItemDefinition(string itemType);
@@ -263,14 +243,6 @@ namespace Microsoft.Build.Evaluation
         /// elements whose conditions did not evaluate to true.
         /// </summary>
         void AddToAllEvaluatedItemDefinitionMetadataList(M itemDefinitionMetadatum);
-
-        /// <summary>
-        /// Items encountered during evaluation. These are read during the third evaluation pass.
-        /// Unlike those returned by the Items property, these are ordered.
-        /// It does not include any elements whose conditions did not evaluate to true.
-        /// It does not include any items added since the last evaluation.
-        /// </summary>
-        void AddToAllEvaluatedItemsList(I item);
 
         /// <summary>
         /// Retrieves an existing item definition, if any.

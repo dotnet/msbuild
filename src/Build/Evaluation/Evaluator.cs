@@ -811,23 +811,7 @@ namespace Microsoft.Build.Evaluation
                 using (_evaluationProfiler.TrackPass(EvaluationPass.LazyItems))
                 {
                     // Tell the lazy evaluator to compute the items and add them to _data
-                    foreach (var itemData in lazyEvaluator.GetAllItemsDeferred())
-                    {
-                        if (itemData.ConditionResult)
-                        {
-                            _data.AddItem(itemData.Item);
-
-                            if (_data.ShouldEvaluateForDesignTime)
-                            {
-                                _data.AddToAllEvaluatedItemsList(itemData.Item);
-                            }
-                        }
-
-                        if (_data.ShouldEvaluateForDesignTime)
-                        {
-                            _data.AddItemIgnoringCondition(itemData.Item);
-                        }
-                    }
+                    lazyEvaluator.AddAllItems(_data);
 
                     // lazy evaluator can be collected now, the rest of evaluation does not need it anymore
                     lazyEvaluator = null;

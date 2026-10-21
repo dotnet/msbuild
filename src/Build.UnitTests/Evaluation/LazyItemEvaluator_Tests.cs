@@ -8,6 +8,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
@@ -16,6 +17,101 @@ namespace Microsoft.Build.UnitTests.Evaluation;
 
 public sealed class LazyItemEvaluator_Tests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AddAllItemsPreservesDeclarationOrderAndConditionRouting(bool evaluateFalseConditions)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <First Include="z.cs;a.cs">
+                        <Trace>initial</Trace>
+                    </First>
+                    <Second Include="s.cs;r.cs" Condition="false" />
+                    <Empty Include="gone.cs" />
+                    <Third Include="t.cs" />
+                    <First Update="a.cs">
+                        <Trace>updated</Trace>
+                    </First>
+                    <Second Include="q.cs;p.cs" />
+                    <First Include="d.cs;c.cs" />
+                    <Third Include="v.cs;u.cs" />
+                    <Empty Remove="@(Empty)" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection,
+            evaluateFalseConditions ? ProjectLoadSettings.Default : ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+
+        evaluator.AddAllItems(project.TestOnlyGetPrivateData);
+
+        List<string> actual = [];
+        foreach (ProjectItem item in project.AllEvaluatedItems)
+        {
+            actual.Add($"{item.ItemType}:{item.EvaluatedInclude}");
+            item.Xml.Include.ShouldNotBeEmpty();
+            item.Xml.Update.ShouldBeEmpty();
+            if (item.EvaluatedInclude == "a.cs")
+            {
+                item.GetMetadataValue("Trace").ShouldBe("updated");
+            }
+        }
+
+        string[] expected =
+        [
+            "First:z.cs", "First:a.cs", "Third:t.cs", "Second:q.cs", "Second:p.cs",
+            "First:d.cs", "First:c.cs", "Third:v.cs", "Third:u.cs",
+        ];
+        actual.ShouldBe(expected);
+        project.Items.Count.ShouldBe(expected.Length);
+        if (evaluateFalseConditions)
+        {
+            project.ItemsIgnoringCondition.Count.ShouldBe(expected.Length + 2);
+        }
+
+        project.GetItems("Empty").ShouldBeEmpty();
+
+        List<string> secondItems = [];
+        foreach (ProjectItem item in project.GetItemsIgnoringCondition("Second"))
+        {
+            secondItems.Add(item.EvaluatedInclude);
+        }
+
+        string[] expectedSecondItems = evaluateFalseConditions ? ["s.cs", "r.cs", "q.cs", "p.cs"] : ["q.cs", "p.cs"];
+        secondItems.ShouldBe(expectedSecondItems);
+    }
+
+    [Fact]
+    public void AddAllItemsComputesAllSnapshotsBeforeAddingAnyItems()
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <First Include="first.cs" />
+                    <Second Include="second.cs">
+                        <M Condition="'%(Identity)' ==">invalid-condition</M>
+                    </Second>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+
+        Should.Throw<InvalidProjectFileException>(() => evaluator.AddAllItems(project.TestOnlyGetPrivateData));
+
+        project.Items.ShouldBeEmpty();
+        project.AllEvaluatedItems.ShouldBeEmpty();
+        project.ItemsIgnoringCondition.ShouldBeEmpty();
+    }
+
     [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]

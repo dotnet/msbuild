@@ -178,6 +178,33 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         }
     }
 
+    /// <summary>
+    ///  Computes the final items and adds them to the collector in declaration order.
+    /// </summary>
+    /// <param name="collector">The destination for items and design-time evaluation lists.</param>
+    public void AddAllItems(IItemEvaluationCollector<I> collector)
+    {
+        ArgumentNullException.ThrowIfNull(collector);
+
+        foreach (ItemData itemData in GetAllItemsDeferred())
+        {
+            if (itemData.ConditionResult)
+            {
+                collector.AddItem(itemData.Item);
+
+                if (collector.ShouldEvaluateForDesignTime)
+                {
+                    collector.AddToAllEvaluatedItemsList(itemData.Item);
+                }
+            }
+
+            if (collector.ShouldEvaluateForDesignTime)
+            {
+                collector.AddItemIgnoringCondition(itemData.Item);
+            }
+        }
+    }
+
     public IEnumerable<ItemData> GetAllItemsDeferred()
     {
         return _itemLists.Values.SelectMany(itemList => itemList.GetItemData(ImmutableHashSet<string>.Empty))
