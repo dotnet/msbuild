@@ -549,6 +549,53 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         completed.ShouldBeSameAs(serverTask);
     }
 
+    [Fact]
+    public async Task Dispose_WaitsForInFlightShutdownCallback()
+    {
+        using ManualResetEventSlim callbackStarted = new();
+        using ManualResetEventSlim releaseCallback = new();
+        using ManualResetEventSlim callbackCompleted = new();
+        using ManualResetEventSlim disposeStarted = new();
+        var output = new TestCoordinatorDebugOutput(
+            testOutput,
+            message =>
+            {
+                if (message == "CoordinatorServer: Auto-shutdown (no active or waiting builds)")
+                {
+                    callbackStarted.Set();
+                    releaseCallback.Wait();
+                    callbackCompleted.Set();
+                }
+            });
+
+        CoordinatorServer server = new(
+            DefaultSettings with
+            {
+                ShutdownTimeoutMs = 1,
+            },
+            output);
+
+        Task serverTask = server.RunAsync(_cts.Token);
+        bool callbackStartedBeforeTimeout = callbackStarted.Wait(TimeSpan.FromSeconds(5));
+        Task releaseTask = Task.Run(
+            async () =>
+            {
+                disposeStarted.Wait();
+                await Task.Delay(200);
+                releaseCallback.Set();
+            });
+
+        disposeStarted.Set();
+        server.Dispose();
+        bool callbackCompletedBeforeDisposeReturned = callbackCompleted.IsSet;
+
+        await releaseTask;
+        await serverTask;
+
+        callbackStartedBeforeTimeout.ShouldBeTrue();
+        callbackCompletedBeforeDisposeReturned.ShouldBeTrue();
+    }
+
     [ActiveIssue("https://github.com/dotnet/msbuild/issues/15341", TestPlatforms.Linux)]
     [Fact]
     public async Task SamePidReconnects_CleanlyHandled()
