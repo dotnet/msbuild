@@ -3,6 +3,12 @@
   <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="dfdd32e8a9349462e71f687679bc7e5837b8ef4a" BarId="324417" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
+    <Dependency Name="Microsoft.Bcl.AsyncInterfaces" Version="10.0.13">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>
+      </Sha>
+    </Dependency>
+    <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="10.0.8">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>

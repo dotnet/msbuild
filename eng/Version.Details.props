@@ -11,6 +11,7 @@ This file should be imported by eng/Versions.props
     <!-- dotnet-roslyn dependencies -->
     <MicrosoftNetCompilersToolsetPackageVersion>5.9.0-1.26319.6</MicrosoftNetCompilersToolsetPackageVersion>
     <!-- dotnet-runtime dependencies -->
+    <MicrosoftBclAsyncInterfacesPackageVersion>10.0.13</MicrosoftBclAsyncInterfacesPackageVersion>
     <SystemCodeDomPackageVersion>10.0.8</SystemCodeDomPackageVersion>
     <SystemCollectionsImmutablePackageVersion>10.0.8</SystemCollectionsImmutablePackageVersion>
     <SystemConfigurationConfigurationManagerPackageVersion>10.0.8</SystemConfigurationConfigurationManagerPackageVersion>
@@ -39,6 +40,7 @@ This file should be imported by eng/Versions.props
     <!-- dotnet-roslyn dependencies -->
     <MicrosoftNetCompilersToolsetVersion>$(MicrosoftNetCompilersToolsetPackageVersion)</MicrosoftNetCompilersToolsetVersion>
     <!-- dotnet-runtime dependencies -->
+    <MicrosoftBclAsyncInterfacesVersion>$(MicrosoftBclAsyncInterfacesPackageVersion)</MicrosoftBclAsyncInterfacesVersion>
     <SystemCodeDomVersion>$(SystemCodeDomPackageVersion)</SystemCodeDomVersion>
     <SystemCollectionsImmutableVersion>$(SystemCollectionsImmutablePackageVersion)</SystemCollectionsImmutableVersion>
     <SystemConfigurationConfigurationManagerVersion>$(SystemConfigurationConfigurationManagerPackageVersion)</SystemConfigurationConfigurationManagerVersion>
