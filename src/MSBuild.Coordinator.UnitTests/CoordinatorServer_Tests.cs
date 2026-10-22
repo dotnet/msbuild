@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO.Pipes;
-using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
@@ -36,19 +34,13 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client = await ConnectClientPipeAsync();
-        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer, reader);
-        writer.Write(new RequestNodesMessage(requestedNodes: 16));
-
-        ServerMessage response = reader.ReadServerMessage();
+        using TestCoordinatorClient client = await TestCoordinatorClient.ConnectAsync(_pipeName);
+        ServerMessage response = client.RequestNodes(requestedNodes: 16);
 
         response.ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(16);
 
-        writer.Write(ReleaseNodesMessage.Instance);
+        client.ReleaseNodes();
         _cts.Cancel();
         await serverTask;
     }
@@ -59,19 +51,13 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client = await ConnectClientPipeAsync();
-        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer, reader);
-        writer.Write(new RequestNodesMessage(requestedNodes: 4));
-
-        ServerMessage response = reader.ReadServerMessage();
+        using TestCoordinatorClient client = await TestCoordinatorClient.ConnectAsync(_pipeName);
+        ServerMessage response = client.RequestNodes(requestedNodes: 4);
 
         response.ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(4);
 
-        writer.Write(ReleaseNodesMessage.Instance);
+        client.ReleaseNodes();
         _cts.Cancel();
         await serverTask;
     }
@@ -82,18 +68,12 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client = await ConnectClientPipeAsync();
-        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer, reader, supportsNestedGrants: true);
-        writer.Write(new RequestNodesMessage(requestedNodes: 4));
-
-        NodeGrantMessage response = reader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
+        using TestCoordinatorClient client = await TestCoordinatorClient.ConnectAsync(_pipeName, supportsNestedGrants: true);
+        NodeGrantMessage response = client.RequestNodes(requestedNodes: 4).ShouldBeOfType<NodeGrantMessage>();
         response.GrantedNodes.ShouldBe(4);
         response.GrantId.ShouldNotBe(Guid.Empty);
 
-        writer.Write(ReleaseNodesMessage.Instance);
+        client.ReleaseNodes();
         _cts.Cancel();
         await serverTask;
     }
@@ -104,17 +84,11 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client = await ConnectClientPipeAsync();
-        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer, reader, supportsNestedGrants: false);
-        writer.Write(new RequestNodesMessage(requestedNodes: 4));
-
-        reader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+        using TestCoordinatorClient client = await TestCoordinatorClient.ConnectAsync(_pipeName, supportsNestedGrants: false);
+        client.RequestNodes(requestedNodes: 4).ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(4);
 
-        writer.Write(ReleaseNodesMessage.Instance);
+        client.ReleaseNodes();
         _cts.Cancel();
         await serverTask;
     }
@@ -125,14 +99,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client = await ConnectClientPipeAsync();
-        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer, reader, supportsNestedGrants: false);
-        writer.Write(new JoinGrantMessage(Guid.NewGuid(), requestedNodes: 4));
-
-        reader.ReadServerMessage().ShouldBeOfType<ErrorMessage>();
+        using TestCoordinatorClient client = await TestCoordinatorClient.ConnectAsync(_pipeName, supportsNestedGrants: false);
+        client.JoinGrant(Guid.NewGuid(), requestedNodes: 4).ShouldBeOfType<ErrorMessage>();
 
         _cts.Cancel();
         await serverTask;
@@ -144,44 +112,36 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream rootClient = await ConnectClientPipeAsync();
-        using BinaryWriter rootWriter = new(rootClient, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader rootReader = new(rootClient, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(rootWriter, rootReader, processId: 10001, supportsNestedGrants: true);
-        rootWriter.Write(new RequestNodesMessage(requestedNodes: 4));
-
-        NodeGrantMessage rootGrant = rootReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
+        using TestCoordinatorClient rootClient = await TestCoordinatorClient.ConnectAsync(
+            _pipeName,
+            processId: 10001,
+            supportsNestedGrants: true);
+        NodeGrantMessage rootGrant = rootClient.RequestNodes(requestedNodes: 4).ShouldBeOfType<NodeGrantMessage>();
         rootGrant.GrantedNodes.ShouldBe(4);
 
-        using NamedPipeClientStream nestedClient = await ConnectClientPipeAsync();
-        using BinaryWriter nestedWriter = new(nestedClient, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader nestedReader = new(nestedClient, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(nestedWriter, nestedReader, processId: 10002, supportsNestedGrants: true);
-        nestedWriter.Write(new JoinGrantMessage(rootGrant.GrantId, requestedNodes: 4));
-
-        NodeGrantMessage nestedGrant = nestedReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
+        using TestCoordinatorClient nestedClient = await TestCoordinatorClient.ConnectAsync(
+            _pipeName,
+            processId: 10002,
+            supportsNestedGrants: true);
+        NodeGrantMessage nestedGrant = nestedClient.JoinGrant(rootGrant.GrantId, requestedNodes: 4).ShouldBeOfType<NodeGrantMessage>();
         nestedGrant.GrantedNodes.ShouldBe(4);
         nestedGrant.GrantId.ShouldBe(rootGrant.GrantId);
 
-        using NamedPipeClientStream unrelatedClient = await ConnectClientPipeAsync();
-        using BinaryWriter unrelatedWriter = new(unrelatedClient, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader unrelatedReader = new(unrelatedClient, Encoding.UTF8, leaveOpen: true);
+        using TestCoordinatorClient unrelatedClient = await TestCoordinatorClient.ConnectAsync(
+            _pipeName,
+            processId: 10003,
+            supportsNestedGrants: true);
+        unrelatedClient.RequestNodes(requestedNodes: 4).ShouldBeOfType<WaitMessage>();
 
-        SendHandshake(unrelatedWriter, unrelatedReader, processId: 10003, supportsNestedGrants: true);
-        unrelatedWriter.Write(new RequestNodesMessage(requestedNodes: 4));
-        unrelatedReader.ReadServerMessage().ShouldBeOfType<WaitMessage>();
-
-        nestedWriter.Write(ReleaseNodesMessage.Instance);
-        Task<ServerMessage> unrelatedGrantTask = Task.Run(() => unrelatedReader.ReadServerMessage());
+        nestedClient.ReleaseNodes();
+        Task<ServerMessage> unrelatedGrantTask = Task.Run(unrelatedClient.ReadServerMessage);
         Task completedBeforeRootRelease = await Task.WhenAny(unrelatedGrantTask, Task.Delay(200));
         completedBeforeRootRelease.ShouldNotBeSameAs(unrelatedGrantTask);
 
-        rootWriter.Write(ReleaseNodesMessage.Instance);
+        rootClient.ReleaseNodes();
         (await unrelatedGrantTask).ShouldBeOfType<NodeGrantMessage>();
 
-        unrelatedWriter.Write(ReleaseNodesMessage.Instance);
+        unrelatedClient.ReleaseNodes();
         _cts.Cancel();
         await serverTask;
     }
@@ -193,31 +153,21 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         Task serverTask = server.RunAsync(_cts.Token);
 
         // First client takes all 8 nodes.
-        using NamedPipeClientStream client1 = await ConnectClientPipeAsync();
-        using BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer1, reader1, processId: 10001);
-        writer1.Write(new RequestNodesMessage(requestedNodes: 8));
-        reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+        using TestCoordinatorClient client1 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId: 10001);
+        client1.RequestNodes(requestedNodes: 8).ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(8);
 
         // Second client should get a Wait.
-        using NamedPipeClientStream client2 = await ConnectClientPipeAsync();
-        using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer2, reader2, processId: 10002);
-        writer2.Write(new RequestNodesMessage(requestedNodes: 8));
-        reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+        using TestCoordinatorClient client2 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId: 10002);
+        client2.RequestNodes(requestedNodes: 8).ShouldBeOfType<WaitMessage>();
 
         // First client releases. Second client should receive a NodeGrant.
-        writer1.Write(ReleaseNodesMessage.Instance);
+        client1.ReleaseNodes();
 
-        NodeGrantMessage grantAfterWait = reader2.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
+        NodeGrantMessage grantAfterWait = client2.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
         grantAfterWait.GrantedNodes.ShouldBeGreaterThan(0);
 
-        writer2.Write(ReleaseNodesMessage.Instance);
+        client2.ReleaseNodes();
         _cts.Cancel();
         await serverTask;
     }
@@ -231,46 +181,31 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         Task serverTask = server.RunAsync(_cts.Token);
 
         // First client takes all 8 nodes.
-        using NamedPipeClientStream client1 = await ConnectClientPipeAsync();
-        using BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer1, reader1, processId: 10001);
-        writer1.Write(new RequestNodesMessage(requestedNodes: 8));
-        reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+        using TestCoordinatorClient client1 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId: 10001);
+        client1.RequestNodes(requestedNodes: 8).ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(8);
 
         // Second client waits.
-        using NamedPipeClientStream client2 = await ConnectClientPipeAsync();
-        using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer2, reader2, processId: 10002);
-        writer2.Write(new RequestNodesMessage(requestedNodes: 8));
-        reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+        using TestCoordinatorClient client2 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId: 10002);
+        client2.RequestNodes(requestedNodes: 8).ShouldBeOfType<WaitMessage>();
 
         // Third client waits.
-        using NamedPipeClientStream client3 = await ConnectClientPipeAsync();
-        using BinaryWriter writer3 = new(client3, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader3 = new(client3, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer3, reader3, processId: 10003);
-        writer3.Write(new RequestNodesMessage(requestedNodes: 8));
-        reader3.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+        using TestCoordinatorClient client3 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId: 10003);
+        client3.RequestNodes(requestedNodes: 8).ShouldBeOfType<WaitMessage>();
 
         // Release first client. Both waiters should get grants.
-        writer1.Write(ReleaseNodesMessage.Instance);
+        client1.ReleaseNodes();
 
-        NodeGrantMessage grant2 = reader2.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
-        NodeGrantMessage grant3 = reader3.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
+        NodeGrantMessage grant2 = client2.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
+        NodeGrantMessage grant3 = client3.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
 
         // Both should get nodes, and together they shouldn't exceed budget.
         grant2.GrantedNodes.ShouldBeGreaterThan(0);
         grant3.GrantedNodes.ShouldBeGreaterThan(0);
         (grant2.GrantedNodes + grant3.GrantedNodes).ShouldBeLessThanOrEqualTo(8);
 
-        writer2.Write(ReleaseNodesMessage.Instance);
-        writer3.Write(ReleaseNodesMessage.Instance);
+        client2.ReleaseNodes();
+        client3.ReleaseNodes();
         _cts.Cancel();
 
         await serverTask;
@@ -286,46 +221,29 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         Task serverTask = server.RunAsync(_cts.Token);
 
         // Active client takes all 4 nodes.
-        using NamedPipeClientStream client1 = await ConnectClientPipeAsync();
-        using BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer1, reader1, processId: 10001);
-        writer1.Write(new RequestNodesMessage(requestedNodes: 4));
-        reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
+        using TestCoordinatorClient client1 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId: 10001);
+        client1.RequestNodes(requestedNodes: 4).ShouldBeOfType<NodeGrantMessage>();
 
         // First waiter.
-        NamedPipeClientStream client2 = await ConnectClientPipeAsync();
-        BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
-        BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer2, reader2, processId: 10002);
-        writer2.Write(new RequestNodesMessage(requestedNodes: 4));
-        reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+        TestCoordinatorClient client2 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId: 10002);
+        client2.RequestNodes(requestedNodes: 4).ShouldBeOfType<WaitMessage>();
 
         // Second waiter.
-        using NamedPipeClientStream client3 = await ConnectClientPipeAsync();
-        using BinaryWriter writer3 = new(client3, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader3 = new(client3, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer3, reader3, processId: 10003);
-        writer3.Write(new RequestNodesMessage(requestedNodes: 4));
-        reader3.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+        using TestCoordinatorClient client3 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId: 10003);
+        client3.RequestNodes(requestedNodes: 4).ShouldBeOfType<WaitMessage>();
 
         // First waiter disconnects abruptly.
-        writer2.Dispose();
-        reader2.Dispose();
         client2.Dispose();
 
         // Active client releases. The server will attempt to grant the disconnected
         // waiter, fail with IOException, and then grant the remaining waiter.
-        writer1.Write(ReleaseNodesMessage.Instance);
+        client1.ReleaseNodes();
 
-        ServerMessage grant = reader3.ReadServerMessage();
+        ServerMessage grant = client3.ReadServerMessage();
         grant.ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBeGreaterThan(0);
 
-        writer3.Write(ReleaseNodesMessage.Instance);
+        client3.ReleaseNodes();
         _cts.Cancel();
 
         await serverTask;
@@ -335,59 +253,49 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     [Fact]
     public async Task ConcurrentClients_AllReceiveGrants()
     {
-#pragma warning disable CA2000 // Dispose objects before losing scope
-
         // Budget of 16 with 4 clients each requesting 4.
         // All should connect and receive grants without waiting.
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // Connect all clients concurrently.
-        Task<NamedPipeClientStream>[] connectTasks =
+#pragma warning disable CA2000 // Dispose objects before losing scope
+        Task<TestCoordinatorClient>[] connectTasks =
         [
-            ConnectClientPipeAsync(),
-            ConnectClientPipeAsync(),
-            ConnectClientPipeAsync(),
-            ConnectClientPipeAsync(),
+            TestCoordinatorClient.ConnectAsync(_pipeName, sendHandshake: false),
+            TestCoordinatorClient.ConnectAsync(_pipeName, sendHandshake: false),
+            TestCoordinatorClient.ConnectAsync(_pipeName, sendHandshake: false),
+            TestCoordinatorClient.ConnectAsync(_pipeName, sendHandshake: false),
         ];
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
-        NamedPipeClientStream[] clients = await Task.WhenAll(connectTasks);
+        TestCoordinatorClient[] clients = await Task.WhenAll(connectTasks);
 
         try
         {
-            // Send handshakes and requests.
             for (int i = 0; i < clients.Length; i++)
             {
-                int processId = 20001 + i;
-                BinaryWriter w = new(clients[i], Encoding.UTF8, leaveOpen: true);
-                BinaryReader r = new(clients[i], Encoding.UTF8, leaveOpen: true);
-                SendHandshake(w, r, processId);
-                w.Write(new RequestNodesMessage(requestedNodes: 4));
+                clients[i].Handshake(processId: 20001 + i);
+                clients[i].SendRequestNodes(requestedNodes: 4);
             }
 
-            // All should receive grants (no waits).
-            for (int i = 0; i < clients.Length; i++)
+            foreach (TestCoordinatorClient client in clients)
             {
-                BinaryReader r = new(clients[i], Encoding.UTF8, leaveOpen: true);
-                ServerMessage response = r.ReadServerMessage();
-                response.ShouldBeOfType<NodeGrantMessage>()
+                client.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
                     .GrantedNodes.ShouldBeGreaterThan(0);
             }
         }
         finally
         {
-            foreach (NamedPipeClientStream client in clients)
+            foreach (TestCoordinatorClient client in clients)
             {
-                BinaryWriter w = new(client, Encoding.UTF8, leaveOpen: true);
-                w.Write(ReleaseNodesMessage.Instance);
+                client.ReleaseNodes();
                 client.Dispose();
             }
 
             _cts.Cancel();
-
             await serverTask;
         }
-#pragma warning restore CA2000 // Dispose objects before losing scope
     }
 
     [Fact]
@@ -396,21 +304,16 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client = await ConnectClientPipeAsync();
-        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer, reader);
-        writer.Write(new RequestNodesMessage(requestedNodes: 4));
-        reader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
+        using TestCoordinatorClient client = await TestCoordinatorClient.ConnectAsync(_pipeName);
+        client.RequestNodes(requestedNodes: 4).ShouldBeOfType<NodeGrantMessage>();
 
         // Send several heartbeats. None should cause an error or disconnect.
-        writer.Write(HeartbeatMessage.Instance);
-        writer.Write(HeartbeatMessage.Instance);
-        writer.Write(HeartbeatMessage.Instance);
+        client.SendHeartbeat();
+        client.SendHeartbeat();
+        client.SendHeartbeat();
 
         // Connection should still be alive — release cleanly.
-        writer.Write(ReleaseNodesMessage.Instance);
+        client.ReleaseNodes();
 
         _cts.Cancel();
 
@@ -424,34 +327,22 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         Task serverTask = server.RunAsync(_cts.Token);
 
         // First client connects, gets grant, then disconnects abruptly.
-        NamedPipeClientStream client1 = await ConnectClientPipeAsync();
-        BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
-        BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer1, reader1, processId: 10001);
-        writer1.Write(new RequestNodesMessage(requestedNodes: 4));
-        reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
+        TestCoordinatorClient client1 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId: 10001);
+        client1.RequestNodes(requestedNodes: 4).ShouldBeOfType<NodeGrantMessage>();
 
         // Second client queued.
-        using NamedPipeClientStream client2 = await ConnectClientPipeAsync();
-        using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer2, reader2, processId: 10002);
-        writer2.Write(new RequestNodesMessage(requestedNodes: 4));
-        reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+        using TestCoordinatorClient client2 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId: 10002);
+        client2.RequestNodes(requestedNodes: 4).ShouldBeOfType<WaitMessage>();
 
         // Abruptly disconnect first client.
-        writer1.Dispose();
-        reader1.Dispose();
         client1.Dispose();
 
         // Second client should eventually receive a grant.
-        ServerMessage grantAfterDisconnect = reader2.ReadServerMessage();
+        ServerMessage grantAfterDisconnect = client2.ReadServerMessage();
         grantAfterDisconnect.ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBeGreaterThan(0);
 
-        writer2.Write(ReleaseNodesMessage.Instance);
+        client2.ReleaseNodes();
         _cts.Cancel();
 
         await serverTask;
@@ -463,14 +354,10 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client = await ConnectClientPipeAsync();
-        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
-
         // Send a Heartbeat as the first message (should be rejected).
-        writer.Write(HeartbeatMessage.Instance);
-
-        ServerMessage response = reader.ReadServerMessage();
+        using TestCoordinatorClient client = await TestCoordinatorClient.ConnectAsync(_pipeName, sendHandshake: false);
+        client.SendHeartbeat();
+        ServerMessage response = client.ReadServerMessage();
         response.ShouldBeOfType<ErrorMessage>();
 
         _cts.Cancel();
@@ -484,13 +371,9 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client = await ConnectClientPipeAsync();
-        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
-
-        writer.Write(new ClientHandshakeMessage(Guid.NewGuid(), processId: 0, []));
-
-        reader.ReadServerMessage().ShouldBeOfType<ErrorMessage>();
+        using TestCoordinatorClient client = await TestCoordinatorClient.ConnectAsync(_pipeName, sendHandshake: false);
+        client.Send(new ClientHandshakeMessage(Guid.NewGuid(), processId: 0, []));
+        client.ReadServerMessage().ShouldBeOfType<ErrorMessage>();
 
         _cts.Cancel();
         await serverTask;
@@ -502,29 +385,18 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client1 = await ConnectClientPipeAsync();
-        using BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
+        using TestCoordinatorClient client1 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId: 10001);
+        client1.RequestNodes(requestedNodes: 4).ShouldBeOfType<NodeGrantMessage>();
 
-        SendHandshake(writer1, reader1, processId: 10001);
-        writer1.Write(new RequestNodesMessage(requestedNodes: 4));
-        reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
+        using TestCoordinatorClient client2 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId: 10002);
+        client2.RequestNodes(requestedNodes: 4).ShouldBeOfType<WaitMessage>();
 
-        using NamedPipeClientStream client2 = await ConnectClientPipeAsync();
-        using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
+        client1.RequestNodes(requestedNodes: 1).ShouldBeOfType<ErrorMessage>();
 
-        SendHandshake(writer2, reader2, processId: 10002);
-        writer2.Write(new RequestNodesMessage(requestedNodes: 4));
-        reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
-
-        writer1.Write(new RequestNodesMessage(requestedNodes: 1));
-        reader1.ReadServerMessage().ShouldBeOfType<ErrorMessage>();
-
-        reader2.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+        client2.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBeGreaterThan(0);
 
-        writer2.Write(ReleaseNodesMessage.Instance);
+        client2.ReleaseNodes();
         _cts.Cancel();
 
         await serverTask;
@@ -556,6 +428,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using ManualResetEventSlim releaseCallback = new();
         using ManualResetEventSlim callbackCompleted = new();
         using ManualResetEventSlim disposeStarted = new();
+
         var output = new TestCoordinatorDebugOutput(
             testOutput,
             message =>
@@ -606,57 +479,24 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         int processId = 30001;
 
         // First connection.
-        NamedPipeClientStream client1 = await ConnectClientPipeAsync();
-        BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
-        BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer1, reader1, processId);
-        writer1.Write(new RequestNodesMessage(requestedNodes: 4));
-        reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
+        TestCoordinatorClient client1 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId);
+        client1.RequestNodes(requestedNodes: 4).ShouldBeOfType<NodeGrantMessage>();
 
         // Disconnect abruptly.
-        writer1.Dispose();
-        reader1.Dispose();
         client1.Dispose();
 
         // Reconnect with the same PID. The server will overwrite the old connection
         // entry when it processes the new RequestNodes, and the old connection's
         // finally block will clean up its grant independently.
-        using NamedPipeClientStream client2 = await ConnectClientPipeAsync();
-        using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(writer2, reader2, processId);
-        writer2.Write(new RequestNodesMessage(requestedNodes: 4));
-
-        ServerMessage response = reader2.ReadServerMessage();
+        using TestCoordinatorClient client2 = await TestCoordinatorClient.ConnectAsync(_pipeName, processId);
+        ServerMessage response = client2.RequestNodes(requestedNodes: 4);
         response.ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBeGreaterThan(0);
 
-        writer2.Write(ReleaseNodesMessage.Instance);
+        client2.ReleaseNodes();
         _cts.Cancel();
 
         await serverTask;
-    }
-
-    private async Task<NamedPipeClientStream> ConnectClientPipeAsync()
-    {
-        NamedPipeClientStream client = new(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
-        await client.ConnectAsync(5000);
-        return client;
-    }
-
-    /// <summary>
-    ///  Performs the handshake and returns the ConnectionId used.
-    /// </summary>
-    private static void SendHandshake(BinaryWriter writer, BinaryReader reader, int? processId = null, bool supportsNestedGrants = false)
-    {
-        var connectionId = Guid.NewGuid();
-        writer.Write(new ClientHandshakeMessage(
-            connectionId,
-            processId is int pid ? pid : EnvironmentUtilities.CurrentProcessId,
-            supportsNestedGrants ? [Capabilities.NestedGrants] : []));
-        reader.ReadServerMessage().ShouldBeOfType<ServerHandshakeMessage>();
     }
 
     private CoordinatorServer CreateServer(int totalNodeBudget)
