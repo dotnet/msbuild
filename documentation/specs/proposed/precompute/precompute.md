@@ -8,6 +8,11 @@ This is a fundamentally different approach to graph construction than [static gr
 
 This document is meant to be an introduction to precompute mode, not a full specification or detailed design.
 
+Precompute mode mainly affects SDK authors (i.e. Targets authors).
+Many users just consume an SDK and provide items / properties to them and so they will likely not need to change or understand precompute mode in detail.
+Basic `.csproj/.vcxproj` project files, such as those that come from `dotnet new`, will need no changes to get the benefits of precompute mode.
+
+## Motivation
 MSBuild's lack of enforcement around inputs/outputs, timestamp-based incrementality, little support for handling target changes correctly, and other issues cause incremental builds to be widely considered untrustworthy for production outputs.
 As a result, MSBuild users are forced to build dramatically more than would be optimal, usually from a clean state each time.
 Precompute mode's goal is to systematically address and handle these issues to significantly improve reliability and performance.
