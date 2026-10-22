@@ -210,14 +210,15 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput)
             // Budget of 16 with 4 clients each requesting 4.
             // All should connect and receive grants without waiting.
 
-            // Connect all clients concurrently.
+            // Connect and handshake all clients concurrently so accepted server connections
+            // can progress while the accept loop creates the remaining pipe instances.
 #pragma warning disable CA2000 // Dispose objects before losing scope
             Task<TestCoordinatorClient>[] connectTasks =
             [
-                TestCoordinatorClient.ConnectAsync(_pipeName, sendHandshake: false),
-                TestCoordinatorClient.ConnectAsync(_pipeName, sendHandshake: false),
-                TestCoordinatorClient.ConnectAsync(_pipeName, sendHandshake: false),
-                TestCoordinatorClient.ConnectAsync(_pipeName, sendHandshake: false),
+                TestCoordinatorClient.ConnectAsync(_pipeName, processId: 20001),
+                TestCoordinatorClient.ConnectAsync(_pipeName, processId: 20002),
+                TestCoordinatorClient.ConnectAsync(_pipeName, processId: 20003),
+                TestCoordinatorClient.ConnectAsync(_pipeName, processId: 20004),
             ];
 #pragma warning restore CA2000 // Dispose objects before losing scope
 
@@ -225,10 +226,9 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput)
 
             try
             {
-                for (int i = 0; i < clients.Length; i++)
+                foreach (TestCoordinatorClient client in clients)
                 {
-                    clients[i].Handshake(processId: 20001 + i);
-                    clients[i].SendRequestNodes(requestedNodes: 4);
+                    client.SendRequestNodes(requestedNodes: 4);
                 }
 
                 foreach (TestCoordinatorClient client in clients)
