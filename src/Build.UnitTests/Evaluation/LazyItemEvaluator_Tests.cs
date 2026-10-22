@@ -798,6 +798,89 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
+    public void QualifiedUpdatesPreserveLastSourcePerTypeAndLiteralMatches(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="shared.txt"><Trace>first</Trace></Lookup>
+                    <Lookup Include="shared.txt"><Trace>last</Trace></Lookup>
+                    <Other Include="shared.txt"><Trace>other</Trace></Other>
+                    <Source Include="shared.txt;literal.txt;unmatched.txt"><Trace>initial</Trace></Source>
+                    <Before Include="@(Source)" />
+                    <Source Update="@(Lookup);@(Other);literal.txt">
+                        <Trace>%(Source.Trace)|%(Lookup.Trace)|%(Other.Trace)</Trace>
+                    </Source>
+                    <After Include="@(Source)" />
+                    <Lookup Update="*"><Trace>later</Trace></Lookup>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Before", "Source", "After").ShouldBe(
+        [
+            "Before:shared.txt:initial", "Before:literal.txt:initial", "Before:unmatched.txt:initial",
+            "Source:shared.txt:initial|last|other", "Source:literal.txt:initial||", "Source:unmatched.txt:initial",
+            "After:shared.txt:initial|last|other", "After:literal.txt:initial||", "After:unmatched.txt:initial",
+        ]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void QualifiedUpdateTransformsRetainWildcardMatching(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="origin"><Trace>captured</Trace></Lookup>
+                    <Source Include="one.txt;two.txt;other.cs" />
+                    <Source Update="@(Lookup->'*.txt')"><Trace>%(Lookup.Trace)</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(
+            ["Source:one.txt:captured", "Source:two.txt:captured", "Source:other.cs:"]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void QualifiedUpdatesKeepEscapedWildcardsLiteral(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="literal%2A.txt"><Trace>captured</Trace></Lookup>
+                    <Source Include="literal%2A.txt;literal-other.txt" />
+                    <Source Update="@(Lookup)"><Trace>%(Lookup.Trace)</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(
+            ["Source:literal*.txt:captured", "Source:literal-other.txt:"]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
     public void CurrentReadsAndBookmarksPreserveDistinctMetadataStates(bool instanceModel)
     {
         using ProjectCollection collection = new();
@@ -880,6 +963,31 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             "Before:a.cs:initial", "Before:b.tmp:initial", "Before:c.g.cs:initial",
             "Middle:a.cs:initial", "Middle:c.g.cs:initial", "Checks:unpruned:",
         ]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MetadataRemovalUsesAllNamesFromStoredItemMetadata(bool instanceModel)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="key"><Trace>match</Trace><Group>one</Group></Lookup>
+                    <Source Include="removed"><Trace>match</Trace><Group>one</Group></Source>
+                    <Source Include="different-group"><Trace>match</Trace><Group>two</Group></Source>
+                    <Source Include="missing-group"><Trace>match</Trace></Source>
+                    <Source Remove="@(Lookup)" MatchOnMetadata="Trace;Group" />
+                    <Lookup Update="*"><Trace>later</Trace><Group>two</Group></Lookup>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(
+            ["Source:different-group:match", "Source:missing-group:match"]);
     }
 
     [Fact]
