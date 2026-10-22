@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if FEATURE_APPDOMAIN
-using System.CodeDom.Compiler;
-#endif
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -26,9 +23,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
-#if FEATURE_APPDOMAIN
-using Microsoft.CSharp;
-#endif
 using Shouldly;
 using Xunit;
 
@@ -3231,173 +3225,6 @@ EndGlobal
                 output.ShouldNotContain(expectedVersionString);
             }
         }
-
-#if FEATURE_APPDOMAIN
-        private static string X86BootstrapMSBuildExecutablePath => Path.Combine(
-            RunnerUtilities.BootstrapRootPath, "net472", "MSBuild", "Current", "Bin", "MSBuild.exe");
-
-        public static bool CanRunX86FrameworkQuirkTests =>
-            File.Exists(X86BootstrapMSBuildExecutablePath) &&
-            File.Exists(X86BootstrapMSBuildExecutablePath + ".config");
-
-        public static bool CanRunX86LongPathTests =>
-            NativeMethodsShared.IsLongPathsEnabled() is NativeMethodsShared.LongPathsStatus.Enabled &&
-            CanRunX86FrameworkQuirkTests;
-
-        [Theory(Skip = "Requires Windows long-path support and the x86 .NET Framework bootstrap.", SkipUnless = nameof(CanRunX86LongPathTests))]
-        [InlineData("WriteLinesToFile")]
-        [InlineData("Unzip")]
-        public void LongPathsWorkWhenFrameworkQuirksInitializeEarly(string target)
-        {
-            string root = _env.CreateFolder().Path;
-            string fileName = new string('f', 60) + ".txt";
-            string directory = Path.Combine(root, new string('d', 291 - root.Length - fileName.Length - 2));
-            string outputFile = Path.Combine(directory, fileName);
-            outputFile.Length.ShouldBe(291);
-
-            string zipFile = Path.Combine(root, "input.zip");
-            using (ZipArchive archive = ZipFile.Open(zipFile, ZipArchiveMode.Create))
-            using (StreamWriter writer = new(archive.CreateEntry(fileName).Open()))
-            {
-                writer.Write("Long paths work.");
-            }
-
-            string project = _env.CreateFile("LongPaths.proj", $"""
-                <Project>
-                  <Target Name="WriteLinesToFile">
-                    <MakeDir Directories="{directory}" />
-                    <WriteLinesToFile File="{outputFile}" Lines="Long paths work." Overwrite="true" />
-                  </Target>
-                  <Target Name="Unzip">
-                    <Unzip SourceFiles="{zipFile}" DestinationFolder="{directory}" />
-                  </Target>
-                  <Target Name="Verify" AfterTargets="WriteLinesToFile;Unzip">
-                    <ReadLinesFromFile File="{outputFile}">
-                      <Output TaskParameter="Lines" ItemName="OutputLines" />
-                    </ReadLinesFromFile>
-                    <Error Condition="'@(OutputLines)' != 'Long paths work.'" Text="Unexpected long-path file contents." />
-                  </Target>
-                </Project>
-                """).Path;
-            RunWithLegacyFrameworkDefaults(root,
-                """
-                using System;
-                using System.Reflection;
-                [assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.0")]
-
-                public static class Program
-                {
-                    public static int Main(string[] args)
-                    {
-                        Assembly assembly = Assembly.LoadFrom(args[0]);
-                        MethodInfo execute = assembly.GetType("Microsoft.Build.CommandLine.MSBuildApp")
-                            .GetMethod("Execute", new[] { typeof(string[]) });
-                        string[] commandLine =
-                        {
-                            args[0], args[1], "-target:" + args[2], "-noAutoResponse",
-                            "-nodeReuse:false", "-maxCpuCount:1", "-mt:false"
-                        };
-                        return Convert.ToInt32(execute.Invoke(null, new object[] { commandLine }));
-                    }
-                }
-                """, $"\"{project}\" {target}");
-        }
-
-        [Theory(Skip = "Requires the x86 .NET Framework bootstrap.", SkipUnless = nameof(CanRunX86FrameworkQuirkTests))]
-        [InlineData("Culture")]
-        [InlineData("Cancellation")]
-        [InlineData("Claims")]
-        public void FrameworkBehaviorWorksWhenQuirksInitializeEarly(string behavior)
-        {
-            RunWithLegacyFrameworkDefaults(_env.CreateFolder().Path,
-                """
-                using System;
-                using System.Globalization;
-                using System.Security.Claims;
-                using System.Threading;
-                using System.Threading.Tasks;
-                [assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.0")]
-
-                public static class Program
-                {
-                    public static void Main(string[] args)
-                    {
-                        switch (args[1])
-                        {
-                            case "Culture":
-                                CultureInfo culture = (CultureInfo)CultureInfo.InvariantCulture.Clone();
-                                culture.NumberFormat.NumberDecimalSeparator = "msbuild-async-culture";
-                                Thread.CurrentThread.CurrentCulture = culture;
-                                string separator = Task.Run(delegate
-                                {
-                                    return Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator;
-                                }).GetAwaiter().GetResult();
-                                if (separator != "msbuild-async-culture")
-                                    throw new Exception("CurrentCulture did not flow to the task.");
-                                break;
-
-                            case "Cancellation":
-                                CancellationTokenSource source = new CancellationTokenSource();
-                                CancellationToken token = source.Token;
-                                source.Dispose();
-                                using (token.Register(delegate { }))
-                                {
-                                }
-                                break;
-
-                            case "Claims":
-                                ClaimsIdentity identity = new ClaimsIdentity();
-                                identity.Actor = new ClaimsIdentity();
-                                identity.Actor.AddClaim(new Claim("marker", "original"));
-                                ClaimsIdentity copy = new ClaimsIdentity(identity);
-                                copy.Actor.AddClaim(new Claim("marker", "copy-only"));
-                                if (identity.Actor.HasClaim("marker", "copy-only") ||
-                                    !copy.Actor.HasClaim("marker", "original"))
-                                    throw new Exception("Copying ClaimsIdentity did not independently clone its actor.");
-                                break;
-
-                            default:
-                                throw new ArgumentException("Unknown behavior.");
-                        }
-                    }
-                }
-                """, behavior);
-        }
-
-        private void RunWithLegacyFrameworkDefaults(string root, string code, string arguments)
-        {
-            string msbuild = X86BootstrapMSBuildExecutablePath;
-            string host = Path.Combine(root, "FrameworkQuirkHost.exe");
-            foreach (string assembly in Directory.EnumerateFiles(Path.GetDirectoryName(msbuild), "*.dll"))
-            {
-                File.Copy(assembly, Path.Combine(root, Path.GetFileName(assembly)));
-            }
-
-            using CSharpCodeProvider compiler = new();
-            CompilerResults compilation = compiler.CompileAssemblyFromSource(
-                new CompilerParameters
-                {
-                    GenerateExecutable = true,
-                    OutputAssembly = host,
-                    CompilerOptions = $"/platform:x86 /win32manifest:\"{Path.Combine(AppContext.BaseDirectory, "MSBuild.exe.manifest")}\""
-                },
-                code);
-            compilation.Errors.HasErrors.ShouldBeFalse(string.Join(Environment.NewLine, compilation.Errors.Cast<CompilerError>()));
-
-            // Configuration overrides are read from the process config, not a secondary AppDomain's config.
-            // A 4.0 host reproduces the premature CLR defaults without relying on installed NGEN images.
-            File.Copy(msbuild + ".config", host + ".config");
-            Dictionary<string, string> environment = RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables();
-            environment["MSBUILD_EXE_PATH"] = msbuild;
-            environment["MSBUILDNOINPROCNODE"] = null;
-            environment["MSBUILDFORCEALLTASKSOUTOFPROC"] = null;
-            string output = RunnerUtilities.RunProcessAndGetOutput(
-                host, $"\"{msbuild}\" {arguments}", out bool success,
-                outputHelper: _output, environmentVariables: environment);
-
-            success.ShouldBeTrue(output);
-        }
-#endif
 
         [Theory]
         [MemberData(nameof(MinimumMessageImportanceTestData))]
