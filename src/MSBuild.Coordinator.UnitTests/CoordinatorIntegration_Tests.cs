@@ -135,6 +135,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         AssertNestedGrantReceived(buildOutput);
     }
 
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/15340", TestPlatforms.Windows, TargetFrameworkMonikers.NetFramework)]
     [Fact]
     public async Task StaticGraphRestore_SharesCoordinatorGrant()
     {
