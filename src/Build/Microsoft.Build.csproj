@@ -208,6 +208,7 @@
     <Compile Include="Evaluation\IItemEvaluationCollector.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="Evaluation\IntrinsicFunctionOverload.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.IncludeData.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemCacheKey.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemData.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemListReference.cs" />

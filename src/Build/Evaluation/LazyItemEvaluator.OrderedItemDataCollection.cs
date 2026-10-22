@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.Build.Collections;
+using Microsoft.CodeAnalysis.Collections;
 
 #nullable disable
 
@@ -53,10 +54,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// <summary>
         ///  Gets the condition-true items, caching the projection for subsequent reads of this snapshot.
         /// </summary>
+        /// <param name="includes">The owning evaluator's Include table, indexed by each record's Include identity.</param>
         /// <returns>
         ///  The same read-only collection of matching items in evaluation order on each call.
         /// </returns>
-        public ICollection<I> GetMatchedItems()
+        public ICollection<I> GetMatchedItems(SegmentedList<IncludeData> includes)
         {
             if (_matchedItems is not null)
             {
@@ -71,7 +73,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             using RefArrayBuilder<I> items = new(Count);
             foreach (ItemData data in this)
             {
-                if (data.ConditionResult)
+                if (includes[data.IncludeId].ConditionResult)
                 {
                     items.Add(data.Item);
                 }

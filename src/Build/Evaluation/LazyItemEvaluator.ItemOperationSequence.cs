@@ -44,7 +44,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  The cached read-only collection of matching items in evaluation order.
         /// </returns>
         public ICollection<I> GetMatchedItems(int operationCount)
-            => GetItemData(operationCount).GetMatchedItems();
+            => GetItemData(operationCount).GetMatchedItems(_lazyEvaluator._includes);
 
         /// <summary>
         ///  Gets the items produced by a prefix, reusing the result cached at its stopping position.

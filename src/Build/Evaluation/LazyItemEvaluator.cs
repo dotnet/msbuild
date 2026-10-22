@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -49,7 +48,10 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
         ? []
         : [with(StringComparer.OrdinalIgnoreCase)];
 
-    private int _nextElementOrder = 0;
+    /// <summary>
+    ///  Stores Include declarations and their captured condition results in processing order.
+    /// </summary>
+    private readonly SegmentedList<IncludeData> _includes = [];
 
     /// <summary>
     ///  Stores admitted prefix results for this evaluation.
@@ -197,37 +199,108 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     }
 
     /// <summary>
-    ///  Computes the final items and adds them to the collector in declaration order.
+    ///  Computes all final item snapshots and adds their items to the destination in declaration order.
     /// </summary>
     /// <param name="collector">The destination for items and design-time evaluation lists.</param>
+    /// <remarks>
+    ///  All snapshots are computed before any items are added. False-condition records are retained only
+    ///  in the destination's condition-ignoring list when design-time evaluation is enabled.
+    ///  <para>
+    ///   Each item type's snapshot is already ordered by <see cref="ItemData.IncludeId"/>: Includes append
+    ///   items in declaration order, Updates preserve their Include identity, and Removes preserve survivor
+    ///   order. Walking the Include table supplies the global publication order; each declaration selects
+    ///   its item type's next surviving run without sorting or comparing different streams.
+    ///  </para>
+    ///  <para>
+    ///   One snapshot enumerator is retained per item type. A lookup maps item types to positioned
+    ///   enumerators until they are exhausted, using the same name comparer as the operation lists.
+    ///   Temporary storage is proportional to item-type count, not total item count.
+    ///  </para>
+    /// </remarks>
     public void AddAllItems(IItemEvaluationCollector<I> collector)
     {
         ArgumentNullException.ThrowIfNull(collector);
 
-        foreach (ItemData itemData in GetAllItemsDeferred())
+        if (_itemLists.Count == 0)
         {
-            if (itemData.ConditionResult)
-            {
-                collector.AddItem(itemData.Item);
+            return;
+        }
 
-                if (collector.ShouldEvaluateForDesignTime)
+        ImmutablePieceList<ItemData>.Enumerator[] enumerators = new ImmutablePieceList<ItemData>.Enumerator[_itemLists.Count];
+        Dictionary<string, int> itemTypeIndices = new(_itemLists.Count, _itemLists.Comparer);
+        try
+        {
+            // Finish every final snapshot before publishing anything to the collector. The enumerators
+            // retain those snapshots; advancing them later cannot execute more item operations.
+            int index = 0;
+            foreach (var itemList in _itemLists)
+            {
+                enumerators[index] = itemList.Value.CaptureCurrent().GetItemData().GetEnumerator();
+                if (enumerators[index].MoveNext())
                 {
-                    collector.AddToAllEvaluatedItemsList(itemData.Item);
+                    itemTypeIndices.Add(itemList.Key, index);
                 }
+
+                index++;
             }
 
-            if (collector.ShouldEvaluateForDesignTime)
+            bool recordDesignTimeItems = itemTypeIndices.Count > 0 && collector.ShouldEvaluateForDesignTime;
+            for (int includeId = 0; includeId < _includes.Count && itemTypeIndices.Count > 0; includeId++)
             {
-                collector.AddItemIgnoringCondition(itemData.Item);
+                IncludeData include = _includes[includeId];
+                string itemType = include.ItemElement.ItemType;
+                if (!itemTypeIndices.TryGetValue(itemType, out int itemTypeIndex))
+                {
+                    continue;
+                }
+
+                // Advance the actual struct enumerator, not a copy. If this Include produced no surviving
+                // items, the enumerator is already at a later Include and the loop leaves it untouched.
+                ref ImmutablePieceList<ItemData>.Enumerator enumerator = ref enumerators[itemTypeIndex];
+                while (enumerator.Current.IncludeId == includeId)
+                {
+                    I item = enumerator.Current.Item;
+                    if (include.ConditionResult)
+                    {
+                        collector.AddItem(item);
+
+                        if (recordDesignTimeItems)
+                        {
+                            collector.AddToAllEvaluatedItemsList(item);
+                        }
+                    }
+
+                    if (recordDesignTimeItems)
+                    {
+                        collector.AddItemIgnoringCondition(item);
+                    }
+
+                    if (!enumerator.MoveNext())
+                    {
+                        // Later declarations of this type have no surviving items either.
+                        itemTypeIndices.Remove(itemType);
+                        break;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            for (int i = 0; i < enumerators.Length; i++)
+            {
+                enumerators[i].Dispose();
             }
         }
     }
 
-    private IEnumerable<ItemData> GetAllItemsDeferred()
-    {
-        return _itemLists.Values.SelectMany(sequence => sequence.CaptureCurrent().GetItemData())
-                                .OrderBy(itemData => itemData.ElementOrder);
-    }
+    /// <summary>
+    ///  Gets the source element and captured condition result for an Include in this evaluation.
+    /// </summary>
+    /// <param name="includeId">The Include identity carried by an item record.</param>
+    /// <returns>
+    ///  The data registered when the Include operation was created.
+    /// </returns>
+    private IncludeData GetIncludeData(int includeId) => _includes[includeId];
 
     private bool TryGetCachedItems(
         LazyItemOperation operation,
@@ -265,7 +338,8 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
 
     private IncludeOperation CreateIncludeOperation(ProjectItemElement itemElement, bool conditionResult, string rootDirectory)
     {
-        int elementOrder = _nextElementOrder++;
+        int includeId = _includes.Count;
+        _includes.Add(new IncludeData(itemElement, conditionResult));
         using ReferencedItemLists.Builder builder = default;
 
         // Process include
@@ -304,7 +378,7 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
             itemSpec,
             conditionResult,
             builder.ToImmutable(),
-            elementOrder,
+            includeId,
             rootDirectory,
             excludes?.ToImmutable() ?? ImmutableSegmentedList<string>.Empty,
             metadata);
