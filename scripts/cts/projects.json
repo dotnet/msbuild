@@ -61,5 +61,11 @@
     "CsProj": "src/BuildCheck.UnitTests/Microsoft.Build.BuildCheck.UnitTests.csproj",
     "Dll": "Microsoft.Build.BuildCheck.UnitTests.dll",
     "BinDir": "Microsoft.Build.BuildCheck.UnitTests"
+  },
+  {
+    "Key": "Coordinator",
+    "CsProj": "src/MSBuild.Coordinator.UnitTests/MSBuild.Coordinator.UnitTests.csproj",
+    "Dll": "MSBuild.Coordinator.UnitTests.dll",
+    "BinDir": "MSBuild.Coordinator.UnitTests"
   }
 ]

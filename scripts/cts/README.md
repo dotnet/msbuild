@@ -12,8 +12,8 @@ Arcade's test extensions remain on the existing compatible versions.
 
 | File | Role |
 | --- | --- |
-| `projects.json` | The original eight CTS test projects and their demo files |
-| `cts.config.json` | Coverage/source filters and the same eight native net11 test DLLs |
+| `projects.json` | Local project keys, build paths and demo files |
+| `cts.config.json` | Coverage/source filters and native Debug/net11 unit-test DLL discovery |
 | `_Common.ps1` | Shared paths, build and registry helpers |
 | `Collect-Local.ps1` | `cts collect testingplatform --coverage` |
 | `Run-Local.ps1` | `cts apply testingplatform --local-development` |
@@ -23,9 +23,11 @@ Arcade's test extensions remain on the existing compatible versions.
 | `demos/Demo-UnrelatedEdit.ps1` | Touch a file outside the project (expect 0 impacted) |
 
 Configuration belongs in `projects.json` or `cts.config.json`, not in the
-PowerShell. Keep their test-module lists aligned when intentionally adding
-coverage; building the normal solution does not automatically opt every test
-project into CTS.
+PowerShell. CI discovers all built modules matching
+`**/artifacts/bin/*/Debug/net11.0/*.UnitTests.dll`, including Coordinator.
+New matching unit-test outputs are automatically included. Add their project
+entries to `projects.json` to make them available through the local scripts too.
+Use a clean build output directory to avoid collecting stale matching modules.
 
 ## Prerequisites
 
@@ -63,7 +65,7 @@ rejects `--add-source`. The `cts` command must resolve on PATH.
 .\scripts\cts\demos\Demo-UnrelatedEdit.ps1  -Project StringTools
 ```
 
-Omit `-Project` to operate on all eight registered projects. `Run-Local.ps1`
+Omit `-Project` to operate on all nine registered projects. `Run-Local.ps1`
 builds by default; use `-SkipBuild` only when the binaries already match the
 source being tested. The demos illustrate file-level selection using a blank
 line edit and existing binaries, not validation of a changed implementation.
@@ -76,13 +78,13 @@ Logs remain in `.cts/logs`. These directories are gitignored.
 
 ## Coverage gap vs the regular PR pipeline
 
-CTS still targets only the original eight projects' latest .NETCoreApp outputs.
-This migration does not add net472, macOS, Release or additional test modules.
+CTS targets Debug/net11 unit-test outputs, including Coordinator in addition to
+the original eight projects. This migration does not add net472, macOS or Release.
 Native net472 operation has not been validated.
 
 | Target | Regular PR pipeline | CTS pipeline |
 | --- | --- | --- |
-| Latest .NETCoreApp, registered Windows/Linux projects | Yes | Yes |
+| Debug/net11 unit-test modules, Windows/Linux | Yes | Yes |
 | .NET Framework, Windows | Yes | Not validated |
 | Remaining regular CI matrix | Yes | No |
 
