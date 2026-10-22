@@ -94,6 +94,62 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void AddAllItemsSkipsEmptyAndRemovedIncludes()
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="removed.cs" />
+                    <Other Include="other.txt" />
+                    <Source Include="@(Missing)" />
+                    <Source Include="kept.cs;last.cs" />
+                    <Source Include="tail.cs" />
+                    <Source Remove="removed.cs;tail.cs" />
+                    <Source Include="@(Missing)" />
+                    <Empty Include="@(Missing)" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+
+        for (int read = 0; read < 2; read++)
+        {
+            AssertIncludes(CollectItems(evaluator), ["other.txt", "kept.cs", "last.cs"]);
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AddAllItemsUsesTheOperationListsItemNameComparer(bool caseSensitive)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES", caseSensitive ? "1" : null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="first.cs" />
+                    <source Include="second.cs" />
+                    <Other Include="other.txt" />
+                    <Source Include="third.cs;fourth.cs" />
+                    <source Include="last.cs" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+
+        AssertIncludes(CollectItems(evaluator), ["first.cs", "second.cs", "other.txt", "third.cs", "fourth.cs", "last.cs"]);
+    }
+
+    [Fact]
     public void AddAllItemsComputesAllSnapshotsBeforeAddingAnyItems()
     {
         using ProjectCollection collection = new();
@@ -865,6 +921,87 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
 
             actual.ShouldBe(expected);
         }
+    }
+
+    [Fact]
+    public void IncludeConditionsAndOrderSurviveReevaluationAndLaterDeclarations()
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs;b.tmp" />
+                    <Source Include="c.cs;d.tmp" Condition="false" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Remove="*.tmp" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Include="e.cs" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
+        ProjectItemElement[] elements = [.. project.Xml.Items];
+        evaluator.ProcessItemGroups([groups[0]], project.Xml.DirectoryPath);
+        ImmutableArray<ProjectItem> before = CollectItems(evaluator);
+
+        AssertIncludes(before, ["a.cs", "b.tmp", "c.cs", "d.tmp"]);
+        for (int i = 0; i < before.Length; i++)
+        {
+            before[i].Xml.ShouldBeSameAs(elements[i / 2]);
+        }
+
+        AssertIncludes(CollectItems(evaluator, ignoreConditions: false), ["a.cs", "b.tmp"]);
+
+        evaluator.ProcessItemGroups([groups[1]], project.Xml.DirectoryPath);
+        ImmutableArray<ProjectItem> after = CollectItems(evaluator);
+
+        AssertIncludes(after, ["a.cs", "c.cs"]);
+        for (int i = 0; i < after.Length; i++)
+        {
+            after[i].ShouldNotBeSameAs(before[i * 2]);
+            after[i].Xml.ShouldBeSameAs(before[i * 2].Xml);
+        }
+
+        evaluator.ProcessItemGroups([groups[2]], project.Xml.DirectoryPath);
+        ImmutableArray<ProjectItem> final = CollectItems(evaluator);
+        AssertIncludes(final, ["a.cs", "c.cs", "e.cs"]);
+        final[2].Xml.ShouldBeSameAs(elements[3]);
+        AssertIncludes(CollectItems(evaluator, ignoreConditions: false), ["a.cs", "e.cs"]);
+        AssertIncludes(before, ["a.cs", "b.tmp", "c.cs", "d.tmp"]);
+    }
+
+    [Fact]
+    public void RepeatedElementProcessingStoresIndependentConditions()
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs" Condition="true" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
+        ProjectItemElement element = project.Xml.Items.ShouldHaveSingleItem();
+        evaluator.ProcessItemGroups([.. groups], project.Xml.DirectoryPath);
+        ProjectItem before = CollectItems(evaluator).ShouldHaveSingleItem();
+
+        element.Condition = "false";
+        evaluator.ProcessItemGroups([.. groups], project.Xml.DirectoryPath);
+        ImmutableArray<ProjectItem> after = CollectItems(evaluator);
+
+        AssertIncludes(after, ["a.cs", "a.cs"]);
+        after[0].Xml.ShouldBeSameAs(element);
+        after[1].Xml.ShouldBeSameAs(element);
+        CollectItems(evaluator, ignoreConditions: false).ShouldHaveSingleItem().ShouldBeSameAs(before);
     }
 
     [Fact]

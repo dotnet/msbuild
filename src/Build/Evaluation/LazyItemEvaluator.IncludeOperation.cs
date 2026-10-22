@@ -19,7 +19,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 {
     private sealed class IncludeOperation : ItemOperation
     {
-        private readonly int _elementOrder;
+        private readonly int _includeId;
         private readonly string? _rootDirectory;
         private readonly ImmutableSegmentedList<string> _excludes;
         private readonly ImmutableArray<ProjectMetadataElement> _metadata;
@@ -30,7 +30,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             ItemSpec<P, I> itemSpec,
             bool conditionResult,
             ItemListBookmarks itemListBookmarks,
-            int elementOrder,
+            int includeId,
             string? rootDirectory,
             ImmutableSegmentedList<string> excludes,
             ImmutableArray<ProjectMetadataElement> metadata)
@@ -40,7 +40,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                   conditionResult,
                   itemListBookmarks)
         {
-            _elementOrder = elementOrder;
+            _includeId = includeId;
             _rootDirectory = rootDirectory;
             _excludes = excludes;
             _metadata = metadata;
@@ -222,7 +222,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         {
             foreach (var item in items)
             {
-                listBuilder.Add(new ItemData(item, _itemElement, _elementOrder, _conditionResult));
+                listBuilder.Add(new ItemData(item, _includeId));
             }
         }
     }

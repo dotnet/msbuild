@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -11,30 +10,23 @@ namespace Microsoft.Build.Evaluation;
 internal partial class LazyItemEvaluator<P, I, M, D>
 {
     /// <summary>
-    ///  Associates an evaluated item with its originating Include, declaration order, condition result, and cached path key.
+    ///  Associates an evaluated item with its originating Include's evaluation-local identity and a cached path key.
     /// </summary>
     /// <param name="item">The evaluated item represented by this record.</param>
-    /// <param name="originatingItemElement">The Include element that originally produced the item, retained across Updates.</param>
-    /// <param name="elementOrder">The originating Include's order in item declaration processing, shared by its produced items.</param>
-    /// <param name="conditionResult">Whether both the originating item-group and item conditions evaluated to <see langword="true"/>.</param>
+    /// <param name="includeId">The Include table index assigned when the originating declaration was processed.</param>
     /// <param name="normalizedItemValue">
     ///  An already computed path key for <paramref name="item"/>, or <see langword="null"/> to compute it on first access.
     /// </param>
     /// <remarks>
-    ///  Evaluation snapshots can share this record. Its item reference and originating Include information do not change, but the
-    ///  referenced item itself is not made immutable by this type. Updates must use <see cref="Clone"/> before
-    ///  changing metadata so that earlier snapshots retain their item state.
+    ///  Evaluation snapshots can share this record. Its item reference and Include identity do not change, but
+    ///  the referenced item itself is not made immutable by this type. Updates must clone the item before using
+    ///  <see cref="WithItem"/> so that earlier snapshots retain their item state.
     ///  <para>
     ///   Initializing the derived path cache is safe for shared records because it does not change their logical
     ///   item state. Item identity and project directory must remain unchanged while the record is shared.
     ///  </para>
     /// </remarks>
-    private sealed class ItemData(
-        I item,
-        ProjectItemElement originatingItemElement,
-        int elementOrder,
-        bool conditionResult,
-        NormalizedItemPath? normalizedItemValue = null)
+    private sealed class ItemData(I item, int includeId, NormalizedItemPath? normalizedItemValue = null)
     {
         /// <summary>
         ///  Gets the evaluated item for this state, which must be cloned before changing metadata in a later state.
@@ -42,23 +34,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         public I Item => item;
 
         /// <summary>
-        ///  Gets the Include element that originally produced the item, rather than a subsequent Update element.
+        ///  Gets the originating Include's table index, also used to restore declaration order across item types.
         /// </summary>
-        public ProjectItemElement OriginatingItemElement => originatingItemElement;
-
-        /// <summary>
-        ///  Gets the originating Include's order, used to merge different item types back into declaration order.
-        /// </summary>
-        public int ElementOrder => elementOrder;
-
-        /// <summary>
-        ///  Gets whether the originating item-group and item conditions were both <see langword="true"/>.
-        /// </summary>
-        /// <remarks>
-        ///  Records whose conditions were <see langword="false"/> may be retained for design-time evaluation, but are excluded
-        ///  from matched-item projections.
-        /// </remarks>
-        public bool ConditionResult => conditionResult;
+        public int IncludeId => includeId;
 
         /// <summary>
         ///  The lazily computed path key shared by all snapshots referencing this record, or <see langword="null"/> before first access.
@@ -66,26 +44,16 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         private NormalizedItemPath? _normalizedItemValue = normalizedItemValue;
 
         /// <summary>
-        ///  Creates a new record and cloned item for metadata mutation without altering an earlier snapshot.
+        ///  Creates a record for a metadata-only replacement item, retaining the Include identity and path-cache state.
         /// </summary>
-        /// <param name="itemFactory">The factory used to clone the evaluated item and its metadata.</param>
-        /// <param name="initialItemElementForFactory">The element to assign back to the factory after creating the clone.</param>
+        /// <param name="item">The replacement item, with the same evaluated include and project directory.</param>
         /// <returns>
-        ///  A new item record retaining this record's originating Include information, declaration order, condition result, and path-cache state.
+        ///  A new item record with the replacement item and this record's Include identity and path-cache state.
         /// </returns>
         /// <remarks>
-        ///  The factory temporarily uses <see cref="OriginatingItemElement"/> so the clone's defining-project
-        ///  metadata continues to describe the original Include rather than the Update that requested the clone.
-        ///  An initialized path key is reused; cloning does not force an uninitialized key to be computed.
+        ///  An initialized path key is reused; replacement does not force an uninitialized key to be computed.
         /// </remarks>
-        public ItemData Clone(IItemFactory<I, I> itemFactory, ProjectItemElement initialItemElementForFactory)
-        {
-            itemFactory.ItemElement = OriginatingItemElement;
-            var clonedItem = itemFactory.CreateItem(Item, OriginatingItemElement.ContainingProject.FullPath);
-            itemFactory.ItemElement = initialItemElementForFactory;
-
-            return new ItemData(clonedItem, OriginatingItemElement, ElementOrder, ConditionResult, _normalizedItemValue);
-        }
+        public ItemData WithItem(I item) => new(item, IncludeId, _normalizedItemValue);
 
         /// <summary>
         ///  Gets the lazily computed normalized item path and cached hash used by indexed Removes and literal Update batches.

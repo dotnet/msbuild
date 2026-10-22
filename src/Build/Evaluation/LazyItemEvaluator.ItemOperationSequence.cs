@@ -43,7 +43,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  The cached read-only collection of filtered items in evaluation order.
         /// </returns>
         public ICollection<I> GetFilteredItems(int operationCount)
-            => GetItemData(operationCount).GetFilteredItems();
+            => GetItemData(operationCount).GetFilteredItems(_lazyEvaluator._includes);
 
         /// <summary>
         ///  Gets the snapshot after the requested number of operations, reusing a cached result when possible.

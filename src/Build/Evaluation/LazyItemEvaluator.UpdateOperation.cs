@@ -98,10 +98,14 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
         private ItemData UpdateItem(ItemData item, Dictionary<string, I> matchingItems)
         {
-            // items should be deep immutable, so clone and replace items before mutating them
-            // otherwise, with GetItems caching enabled, the mutations would leak into the cache causing
-            // future operations to mutate the state of past operations
-            ItemData clonedData = item.Clone(_itemFactory, _itemElement);
+            // Clone before metadata mutation to preserve earlier snapshots, using the originating Include
+            // so defining-project metadata does not start referring to this Update.
+            ProjectItemElement originatingItemElement = _lazyEvaluator.GetIncludeData(item.IncludeId).ItemElement;
+            _itemFactory.ItemElement = originatingItemElement;
+            var clonedItem = _itemFactory.CreateItem(item.Item, originatingItemElement.ContainingProject.FullPath);
+            _itemFactory.ItemElement = _itemElement;
+
+            ItemData clonedData = item.WithItem(clonedItem);
             _itemsToUpdate.Add(new ItemBatchingContext(clonedData.Item, matchingItems));
             return clonedData;
         }
