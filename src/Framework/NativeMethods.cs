@@ -915,9 +915,9 @@ internal static class NativeMethods
             }
 #endif
 
-            // CodeQL [SM00414] False positive: GetLastWriteFileUtcTime operates on local project input/output paths during up-to-date checks.
+            // CodeQL [SM00414] False positive: GetLastWriteFileUtcTime operates on trusted build paths.
             return File.Exists(path)
-                // CodeQL [SM00414] False positive: GetLastWriteFileUtcTime operates on local project input/output paths during up-to-date checks.
+                // CodeQL [SM00414] False positive: GetLastWriteFileUtcTime operates on trusted build paths.
                 ? File.GetLastWriteTimeUtc(path)
                 : DateTime.MinValue;
         }
