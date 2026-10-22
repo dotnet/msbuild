@@ -8,6 +8,7 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
@@ -52,7 +53,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             """,
             collection,
             evaluateFalseConditions ? ProjectLoadSettings.Default : ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
 
         evaluator.AddAllItems(project.TestOnlyGetPrivateData);
@@ -113,7 +114,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
 
         for (int read = 0; read < 2; read++)
@@ -143,7 +144,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
 
         AssertIncludes(CollectItems(evaluator), ["first.cs", "second.cs", "other.txt", "third.cs", "fourth.cs", "last.cs"]);
@@ -165,7 +166,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
 
         Should.Throw<InvalidProjectFileException>(() => evaluator.AddAllItems(project.TestOnlyGetPrivateData));
@@ -300,7 +301,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
         IItemProvider<ProjectItem> provider = evaluator;
 
@@ -350,7 +351,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         IItemProvider<ProjectItem> provider = evaluator;
         ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
         evaluator.ProcessItemGroups([groups[0]], project.Xml.DirectoryPath);
@@ -414,7 +415,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
         IItemProvider<ProjectItem> provider = evaluator;
         using EventSourceTestHelper listener = new();
@@ -472,7 +473,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             groups.Add(group);
         }
 
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         IItemProvider<ProjectItem> provider = evaluator;
         evaluator.ProcessItemGroups([groups[0]], project.Xml.DirectoryPath);
         ICollection<ProjectItem> initialResult = provider.GetItems("Source");
@@ -546,7 +547,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
         IItemProvider<ProjectItem> provider = evaluator;
 
@@ -572,6 +573,201 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
                 items[i].GetMetadataValue("Trace").ShouldBe(itemType == "Before" ? "initial" : expectedTrace[i]);
             }
         }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void QualifiedUpdatesPreserveLastSourcePerTypeAndLiteralMatches(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="shared.txt"><Trace>first</Trace></Lookup>
+                    <Lookup Include="shared.txt"><Trace>last</Trace></Lookup>
+                    <Other Include="shared.txt"><Trace>other</Trace></Other>
+                    <Source Include="shared.txt;literal.txt;unmatched.txt"><Trace>initial</Trace></Source>
+                    <Before Include="@(Source)" />
+                    <Source Update="@(Lookup);@(Other);literal.txt">
+                        <Trace>%(Source.Trace)|%(Lookup.Trace)|%(Other.Trace)</Trace>
+                    </Source>
+                    <After Include="@(Source)" />
+                    <Lookup Update="*"><Trace>later</Trace></Lookup>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Before", "Source", "After").ShouldBe(
+        [
+            "Before:shared.txt:initial", "Before:literal.txt:initial", "Before:unmatched.txt:initial",
+            "Source:shared.txt:initial|last|other", "Source:literal.txt:initial||", "Source:unmatched.txt:initial",
+            "After:shared.txt:initial|last|other", "After:literal.txt:initial||", "After:unmatched.txt:initial",
+        ]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void QualifiedUpdateTransformsRetainWildcardMatching(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="origin"><Trace>captured</Trace></Lookup>
+                    <Source Include="one.txt;two.txt;other.cs" />
+                    <Source Update="@(Lookup->'*.txt')"><Trace>%(Lookup.Trace)</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(
+            ["Source:one.txt:captured", "Source:two.txt:captured", "Source:other.cs:"]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void QualifiedUpdatesKeepEscapedWildcardsLiteral(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="literal%2A.txt"><Trace>captured</Trace></Lookup>
+                    <Source Include="literal%2A.txt;literal-other.txt" />
+                    <Source Update="@(Lookup)"><Trace>%(Lookup.Trace)</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(
+            ["Source:literal*.txt:captured", "Source:literal-other.txt:"]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CurrentReadsAndCapturedPrefixesPreserveDistinctMetadataStates(bool instanceModel)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.txt;b.txt"><Trace>initial</Trace></Source>
+                </ItemGroup>
+                <ItemGroup Condition="'@(Source->'%(Trace)')' == 'initial;initial'">
+                    <Checks Include="initial" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Before Include="@(Source)" />
+                    <Source Update="a.txt"><Trace>one</Trace></Source>
+                </ItemGroup>
+                <ItemGroup Condition="'@(Source->'%(Trace)')' == 'one;initial'">
+                    <Checks Include="one" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Middle Include="@(Source)" />
+                    <Source Update="b.txt"><Trace>two</Trace></Source>
+                </ItemGroup>
+                <ItemGroup Condition="'@(Source->'%(Trace)')' == 'one;two'">
+                    <Checks Include="two" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Remove="a.txt" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source", "Before", "Middle", "Checks").ShouldBe(
+        [
+            "Source:b.txt:two",
+            "Before:a.txt:initial", "Before:b.txt:initial",
+            "Middle:a.txt:one", "Middle:b.txt:initial",
+            "Checks:initial:", "Checks:one:", "Checks:two:",
+        ]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void GlobReadsCapturesAndReinclusionKeepRemovalBoundariesIndependent(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "a.cs", contents: string.Empty);
+        env.CreateFile(folder, "b.tmp", contents: string.Empty);
+        env.CreateFile(folder, "c.g.cs", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="*"><Trace>initial</Trace></Source>
+                </ItemGroup>
+                <ItemGroup Condition="'@(Source->Count())' == '3'">
+                    <Checks Include="unpruned" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Before Include="@(Source)" />
+                    <Source Remove="*.tmp" />
+                    <Middle Include="@(Source)" />
+                    <Source Remove="*.cs" Condition="false" />
+                    <Source Remove="*.g.cs" />
+                    <Source Include="*.tmp"><Trace>reinserted</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection,
+            ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+
+        EvaluateHistory(project, instanceModel, "Source", "Before", "Middle", "Checks").ShouldBe(
+        [
+            "Source:a.cs:initial", "Source:b.tmp:reinserted",
+            "Before:a.cs:initial", "Before:b.tmp:initial", "Before:c.g.cs:initial",
+            "Middle:a.cs:initial", "Middle:c.g.cs:initial", "Checks:unpruned:",
+        ]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MetadataRemovalUsesAllNamesFromTheCapturedSource(bool instanceModel)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="key"><Trace>match</Trace><Group>one</Group></Lookup>
+                    <Source Include="removed"><Trace>match</Trace><Group>one</Group></Source>
+                    <Source Include="different-group"><Trace>match</Trace><Group>two</Group></Source>
+                    <Source Include="missing-group"><Trace>match</Trace></Source>
+                    <Source Remove="@(Lookup)" MatchOnMetadata="Trace;Group" />
+                    <Lookup Update="*"><Trace>later</Trace><Group>two</Group></Lookup>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(
+            ["Source:different-group:match", "Source:missing-group:match"]);
     }
 
     [Fact]
@@ -700,7 +896,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             changes.AddItem($"Source{i}", $"after{i}");
         }
 
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
 
         List<string> capturedIncludes = [];
@@ -791,7 +987,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             }
         }
 
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
         string[] expected =
         [
@@ -842,7 +1038,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
         IItemProvider<ProjectItem> provider = evaluator;
 
@@ -899,7 +1095,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
         string[] expected =
         [
@@ -943,7 +1139,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
         ProjectItemElement[] elements = [.. project.Xml.Items];
         evaluator.ProcessItemGroups([groups[0]], project.Xml.DirectoryPath);
@@ -988,7 +1184,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
         ProjectItemElement element = project.Xml.Items.ShouldHaveSingleItem();
         evaluator.ProcessItemGroups([.. groups], project.Xml.DirectoryPath);
@@ -1024,7 +1220,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
         evaluator.ProcessItemGroups([groups[0]], project.Xml.DirectoryPath);
         ImmutableArray<ProjectItem> before = CollectItems(evaluator);
@@ -1066,7 +1262,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
         operations.AddItem("Source", "last");
         project.Xml.AddItemGroup().AddItem("After", "@(Source)");
 
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
 
         List<string> actual = [];
@@ -1111,7 +1307,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             collection);
         project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
 
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
 
         List<string> actual = [];
@@ -1158,7 +1354,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             """,
             collection);
 
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
 
         ImmutableArray<ProjectItem> items = CollectItems(evaluator);
@@ -1188,7 +1384,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
         IItemProvider<ProjectItem> provider = evaluator;
         using EventSourceTestHelper listener = new();
@@ -1232,7 +1428,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
         IItemProvider<ProjectItem> provider = evaluator;
         using EventSourceTestHelper listener = new();
@@ -1291,7 +1487,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             </Project>
             """,
             collection);
-        var evaluator = CreateEvaluator(project, default);
+        var evaluator = CreateEvaluator(project);
         IItemProvider<ProjectItem> provider = evaluator;
         ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
         using EventSourceTestHelper listener = new();
@@ -1328,6 +1524,37 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
         string[] expectedCopies = ["a.cs", "b.tmp"];
         copiedIncludes.ShouldBe(expectedCopies);
         CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), itemType).ShouldBe(1);
+    }
+
+    private static List<string> EvaluateHistory(Project project, bool instanceModel, params string[] itemTypes)
+    {
+        List<string> result = [];
+        if (instanceModel)
+        {
+            ProjectInstance instance = new(project.Xml, globalProperties: null, toolsVersion: null, project.ProjectCollection);
+            foreach (string itemType in itemTypes)
+            {
+                AddItems(itemType, instance.GetItems(itemType));
+            }
+        }
+        else
+        {
+            project.ReevaluateIfNecessary();
+            foreach (string itemType in itemTypes)
+            {
+                AddItems(itemType, project.GetItems(itemType));
+            }
+        }
+
+        return result;
+
+        void AddItems(string itemType, IEnumerable<IItem> items)
+        {
+            foreach (IItem item in items)
+            {
+                result.Add($"{itemType}:{item.EvaluatedInclude}:{item.GetMetadataValue("Trace")}");
+            }
+        }
     }
 
     private static int CountEvents(EventSourceTestHelper listener, string eventName, string firstPayload)
@@ -1383,7 +1610,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
 
     private static LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition> CreateEvaluator(
         Project project,
-        EvaluatedItemElementRecorder recorder)
+        EvaluatedItemElementRecorder recorder = default)
         => new(
             project.TestOnlyGetPrivateData,
             new ProjectItem.ProjectItemFactory(project),
