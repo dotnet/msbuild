@@ -9,7 +9,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -98,6 +100,7 @@ namespace Microsoft.Build.Internal
         /// used after drive enumeration detection.</param>
         /// <param name="disableExcludeDriveEnumerationWarning">Flag used to detect when to properly log a warning
         /// for the Exclude attribute after detecting a drive enumerating wildcard.</param>
+        /// <param name="globbingMeasurement">Optional accumulator for evaluation glob searches, excluding cached results.</param>
         /// <returns>Array of file paths, escaped.</returns>
         internal static string[] GetFileListEscaped(
             string? directoryEscaped,
@@ -111,7 +114,8 @@ namespace Microsoft.Build.Internal
             IElementLocation? importLocation = null,
             BuildEventContext? buildEventContext = null,
             string? projectFilePath = null,
-            bool disableExcludeDriveEnumerationWarning = false)
+            bool disableExcludeDriveEnumerationWarning = false,
+            EvaluationInstrumentation.GlobbingMeasurement? globbingMeasurement = null)
         {
             return GetFileList(
                 directoryEscaped,
@@ -126,7 +130,8 @@ namespace Microsoft.Build.Internal
                 importLocation: importLocation,
                 projectFilePath: projectFilePath,
                 buildEventContext: buildEventContext,
-                disableExcludeDriveEnumerationWarning: disableExcludeDriveEnumerationWarning);
+                disableExcludeDriveEnumerationWarning: disableExcludeDriveEnumerationWarning,
+                globbingMeasurement: globbingMeasurement);
         }
 
         internal static bool FilespecHasWildcards(string filespecEscaped)
@@ -169,6 +174,7 @@ namespace Microsoft.Build.Internal
         /// used after drive enumeration detection.</param>
         /// <param name="disableExcludeDriveEnumerationWarning">Flag used to detect when to properly log a warning
         /// for the Exclude attribute after detecting a drive enumerating wildcard.</param>
+        /// <param name="globbingMeasurement">Optional accumulator for evaluation glob searches, excluding cached results.</param>
         /// <returns>Array of file paths.</returns>
         private static string[] GetFileList(
             string? directoryEscaped,
@@ -183,7 +189,8 @@ namespace Microsoft.Build.Internal
             IElementLocation? importLocation = null,
             BuildEventContext? buildEventContext = null,
             string? projectFilePath = null,
-            bool disableExcludeDriveEnumerationWarning = false)
+            bool disableExcludeDriveEnumerationWarning = false,
+            EvaluationInstrumentation.GlobbingMeasurement? globbingMeasurement = null)
         {
             Assumed.NotNullOrEmpty(filespecEscaped);
 
@@ -342,7 +349,12 @@ namespace Microsoft.Build.Internal
                     // as a relative path, we will get back a bunch of relative paths.
                     // If the filespec started out as an absolute path, we will get
                     // back a bunch of absolute paths
-                    (fileList, _, _, string? globFailure) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+                    long globMeasurementStart = globbingMeasurement is not null ? EvaluationInstrumentation.StartMeasurement() : 0;
+                    (fileList, FileMatcher.SearchAction action, _, string? globFailure) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+                    if (globbingMeasurement is not null && action is FileMatcher.SearchAction.RunSearch or FileMatcher.SearchAction.LogDriveEnumeratingWildcard)
+                    {
+                        globbingMeasurement.AddMeasurement(globMeasurementStart);
+                    }
 
                     // log globing failure with the present logging mechanism, skip if there is no logging mechanism
                     if (globFailure != null && loggingMechanism != null)

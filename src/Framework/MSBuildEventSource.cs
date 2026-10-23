@@ -877,6 +877,22 @@ namespace Microsoft.Build.Eventing
             WriteEvent(114, durationSeconds, stage, pass, origin, projectFile, evaluationId);
         }
 
+        /// <summary>
+        /// Records aggregate glob search time for one completed project evaluator invocation.
+        /// </summary>
+        /// <param name="durationSeconds">Sum of item and import glob search durations in seconds, excluding cached results.
+        /// Zero means no searches ran. NaN means measurement was unavailable or evaluation failed.</param>
+        /// <param name="stage">The requested evaluation stage: properties, item_definitions, items, using_tasks, or full.</param>
+        /// <param name="origin">Whether evaluation occurred within a build_submission or outside_build_submission.</param>
+        /// <param name="succeeded">Whether evaluation completed without an error.</param>
+        /// <param name="projectFile">Full path to the evaluated project, or an empty string for an unnamed in-memory project.</param>
+        /// <param name="evaluationId">The evaluation's logging-service ID; see <see cref="ProjectEvaluationCompleted"/> for correlation limits.</param>
+        [Event(117, Level = EventLevel.Informational, Opcode = EventOpcode.Info, Keywords = Keywords.EvaluationMeasurements)]
+        public void ProjectEvaluationGlobbingCompleted(double durationSeconds, string stage, string origin, bool succeeded, string projectFile, int evaluationId)
+        {
+            WriteEvent(117, durationSeconds, stage, origin, succeeded, projectFile, evaluationId);
+        }
+
         #endregion
 
         #region Strict mode events
