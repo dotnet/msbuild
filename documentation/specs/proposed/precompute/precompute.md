@@ -23,7 +23,7 @@ Parameters, conditions, item and property groups that can be evaluated during pr
 Operations that depend on values produced during compute must be encoded into the graph.
 Tasks must be configured to determine if they should be done during the precompute phase or be encoded into the graph.
 For work encoded in the build graph that affects items or properties (e.g. a task's `<Output />` elements) the engine will note these items and properties.
-Subsequent users of those items or properties must put those uses in the build graph and the engine will ensure the values are correctly propagated during the compute phase.
+Subsequent users of those items or properties must be encoded into the build graph and the engine will ensure the values are correctly propagated during the compute phase.
 The value propagation is done the same whether the producer is executed, up-to-date, or replayed from cache.
 
 By default each target becomes a separate node in the build graph with input/output files defined by the target.
@@ -54,14 +54,14 @@ The precompute phase:
 
 With a graph, the compute phase can be improved to:
  - perform content-based hashing of all inputs/outputs (with higher accuracy than manual target inputs/outputs)
- - hash the definition of the node to safely re-use or re-execute based on if parameters/what tasks/etc have changed
-   - this is often the result of expanding items and properties but also includes other changes that affect the final semantics of target(s)
+ - hash the definition of the node to take into the account if the actions target(s) will take (e.g. tasks and their parameters) have changed or not
+   - this is often the result of expanding items and properties or XML changes, but includes any changes that affect the final definition of target(s)
  - store outputs into a cache based on the hash of the inputs and node definition
  - safely distribute the build across many machines to speed up large builds
  - sandbox targets to:
    - enforce the inputs/outputs are complete
    - determine which inputs were used and which were not and use that to skip hashing inputs that were unused
- - delete prior outputs to ensure a clean execution state
+ - automatically delete prior outputs to ensure a clean execution state
  - clean extraneous content that is no longer covered by the graph
  - allow nodes (including batches of a target) to execute concurrently if there is no file or compute-phase value dependency between them, including within a single project
 
@@ -154,7 +154,8 @@ Next `GenerateTarget` executes and it processes its first `PropertyGroup`, setti
 When execution gets to the `GenerateTask`, the task's annotation `PrecomputeMode="Graph"` means it will not be invoked during precompute and will instead be stored into the graph as a step in a node.
 The node also notes that the `GeneratorMetadata` output parameter of the `GenerateTask` will be added to `@(CompilerMetadata)`.
 The engine notes that the `CompilerMetadata` item is now only known during the compute phase and cannot be expanded during the precompute phase.
-It adds a special output that represents these resulting items so that other nodes can depend on that if they need the values of items or properties produced by this target.
+It adds a special output to the `GenerateTarget` node that represents these resulting items.
+Then, other nodes can depend on that if they need the values of items or properties produced by this target.
 Finally it will process the `ItemGroup` that adds `@(GeneratorOutputs)` to `@(Compile)`.
 Because `@(GeneratorOutputs)` is knowable without running `GenerateTask`, this is done immediately and not put into the build graph.
 The target's work not performed in the precompute phase becomes a node in the graph with inputs/outputs coming from the `Inputs` and `Outputs` attributes of the target and the steps being the task.
