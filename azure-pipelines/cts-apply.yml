@@ -5,7 +5,7 @@
 # Behavior:
 #   1. Download the most recent `cts-baseline-<os>` artifact from the collect
 #      pipeline on `main` (latestFromBranch).
-#   2. Build MSBuild.VSTest.slnx and run `cts apply vstest` against the
+#   2. Build scripts/cts/MSBuild.VSTest.slnx and run `cts apply vstest` against the
 #      wrapped projects.
 #   3. Emit cts-metrics.json per OS (schema: scripts/cts/METRICS.md).
 #

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Verifies that MSBuild.VSTest.slnx and MSBuild.slnx reference the same
+    Verifies that scripts/cts/MSBuild.VSTest.slnx and MSBuild.slnx reference the same
     production projects. Fails (exit 1) on drift.
 
 .DESCRIPTION
@@ -26,7 +26,9 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 
 function Get-ProductionProjects([string]$slnx) {
-    $xml = [xml](Get-Content (Join-Path $repoRoot $slnx) -Raw)
+    $solutionPath = Join-Path $repoRoot $slnx
+    $solutionDirectory = Split-Path $solutionPath
+    $xml = [xml](Get-Content $solutionPath -Raw)
     $all = @()
     $all += @($xml.Solution.Project)
     foreach ($f in @($xml.Solution.Folder)) { $all += @($f.Project) }
@@ -45,8 +47,12 @@ function Get-ProductionProjects([string]$slnx) {
     )
 
     $all |
-        Where-Object { $_ -and $_.Path -and $_.Path -like 'src/*' } |
-        ForEach-Object { ($_.Path -replace '\\','/') } |
+        Where-Object { $_ -and $_.Path } |
+        ForEach-Object {
+            $projectPath = [IO.Path]::GetFullPath((Join-Path $solutionDirectory $_.Path))
+            [IO.Path]::GetRelativePath($repoRoot, $projectPath) -replace '\\','/'
+        } |
+        Where-Object { $_ -like 'src/*' } |
         Where-Object {
             $p = $_
             -not ($excludeLike | Where-Object { $p -like $_ })
@@ -55,7 +61,7 @@ function Get-ProductionProjects([string]$slnx) {
 }
 
 $mainProd   = Get-ProductionProjects 'MSBuild.slnx'
-$vstestProd = Get-ProductionProjects 'MSBuild.VSTest.slnx'
+$vstestProd = Get-ProductionProjects 'scripts/cts/MSBuild.VSTest.slnx'
 
 $missing = $mainProd | Where-Object { $_ -notin $vstestProd }
 $extra   = $vstestProd | Where-Object { $_ -notin $mainProd }
