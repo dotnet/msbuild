@@ -153,6 +153,9 @@ export DOTNET_PERFLOG_DIR="$perf_log_dir"
 export DOTNET_HOST_PATH="$bootstrap_root/core/dotnet"
 export DOTNET_INSTALL_DIR="$bootstrap_root/core"
 
+# Keep test apphosts on the bootstrap runtime even when Arcade provisions a newer SDK.
+export TestDotNetRoot="$bootstrap_root/core/"
+
 stage2_build_args=( "${common_build_args[@]}" )
 
 # Give the stage 2 binary log a distinct name so it doesn't collide with the stage 1 binlog
