@@ -1,0 +1,15 @@
+<Project>
+  <!-- Arcade's desktop acquisition task has incompatible System.Memory dependencies.
+       Run only SDK acquisition in a .NET task host, preserving desktop product builds. -->
+  <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Full'">
+    <DOTNET_HOST_PATH>$(DotNetTool)</DOTNET_HOST_PATH>
+    <RuntimeIdentifierGraphPath>$(DotNetRoot)sdk\$(DotNetCliVersion)\RuntimeIdentifierGraph.json</RuntimeIdentifierGraphPath>
+  </PropertyGroup>
+
+  <UsingTask TaskName="Microsoft.DotNet.Arcade.Sdk.InstallDotNetCore"
+             AssemblyFile="$(ArcadeSdkBuildTasksAssembly.Replace('\netframework\', '\net\'))"
+             TaskFactory="TaskHostFactory"
+             Runtime="NET"
+             Override="true"
+             Condition="'$(MSBuildRuntimeType)' == 'Full'" />
+</Project>

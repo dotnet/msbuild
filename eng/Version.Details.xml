@@ -33,7 +33,7 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Formats.Asn1" Version="9.0.18">
+    <Dependency Name="System.Formats.Asn1" Version="9.0.21">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
@@ -69,13 +69,13 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Pkcs" Version="9.0.18">
+    <Dependency Name="System.Security.Cryptography.Pkcs" Version="9.0.21">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Xml" Version="9.0.18">
+    <Dependency Name="System.Security.Cryptography.Xml" Version="9.0.21">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
@@ -106,9 +106,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26468.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26515.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>ad80d0623f6532c4864d1e5e2e6dcab26b81a658</Sha>
+      <Sha>ed9b62fbe0647cadb40b25793463110495e19984</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="7.0.0-preview.2.254">
       <Uri>https://github.com/nuget/nuget.client</Uri>
@@ -118,9 +118,9 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>5d47bb1c178652caa40b55664c06c74e35edebdf</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.26468.2">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.26515.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>ad80d0623f6532c4864d1e5e2e6dcab26b81a658</Sha>
+      <Sha>ed9b62fbe0647cadb40b25793463110495e19984</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
