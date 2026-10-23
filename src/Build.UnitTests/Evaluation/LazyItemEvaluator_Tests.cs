@@ -8,13 +8,13 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
@@ -855,9 +855,73 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     }
 
     [Theory]
+    [InlineData(false, "literal%2A.txt", "literal*.txt")]
+    [InlineData(true, "literal%2A.txt", "literal*.txt")]
+    [InlineData(false, "literal%3F.txt", "literal?.txt")]
+    [InlineData(true, "literal%3F.txt", "literal?.txt")]
+    [InlineData(false, "literal%3Bname.txt", "literal;name.txt")]
+    [InlineData(true, "literal%3Bname.txt", "literal;name.txt")]
+    [InlineData(false, "literal%253Bname.txt", "literal%3Bname.txt")]
+    [InlineData(true, "literal%253Bname.txt", "literal%3Bname.txt")]
+    public void QualifiedUpdatesKeepEscapedIdentitiesLiteral(bool instanceModel, string escapedIdentity, string identity)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="{escapedIdentity}"><Trace>captured</Trace></Lookup>
+                    <Source Include="{escapedIdentity};literal-other.txt" />
+                    <Source Update="@(Lookup)"><Trace>%(Lookup.Trace)</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(
+            [$"Source:{identity}:captured", "Source:literal-other.txt:"]);
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void QualifiedUpdatesKeepEscapedWildcardsLiteral(bool instanceModel)
+    public void QualifiedUpdatesIndexNormalizedTransformedIdentities(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        string normalizedAlias = Path.Combine("folder", "..", "CANDIDATE.TXT");
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="first">
+                        <Match>./candidate.txt</Match>
+                        <Trace>first</Trace>
+                    </Lookup>
+                    <Lookup Include="second">
+                        <Match>{normalizedAlias}</Match>
+                        <Trace>last</Trace>
+                    </Lookup>
+                    <Source Include="candidate.txt;candidate.txt;unmatched.txt"><Trace>initial</Trace></Source>
+                    <Source Update="@(Lookup->'%(Match)')">
+                        <Trace>%(Lookup.Trace)|%(Source.Identity)</Trace>
+                    </Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(
+            ["Source:candidate.txt:last|candidate.txt", "Source:candidate.txt:last|candidate.txt", "Source:unmatched.txt:initial"]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void QualifiedUpdatesPreserveWildcardAndLiteralSourceWinnerOrder(bool instanceModel)
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
@@ -866,8 +930,116 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             """
             <Project>
                 <ItemGroup>
-                    <Lookup Include="literal%2A.txt"><Trace>captured</Trace></Lookup>
-                    <Source Include="literal%2A.txt;literal-other.txt" />
+                    <Lookup Include="wildcard"><Match>*.txt</Match><Trace>wildcard</Trace></Lookup>
+                    <Lookup Include="literal"><Match>one.txt</Match><Trace>literal</Trace></Lookup>
+                    <Source Include="one.txt;two.txt;other.cs"><Trace>initial</Trace></Source>
+                    <Source Update="@(Lookup->'%(Match)')"><Trace>%(Lookup.Trace)</Trace></Source>
+                    <Earlier Include="@(Source)" />
+                    <Lookup Include="later"><Match>*.txt</Match><Trace>later-wildcard</Trace></Lookup>
+                    <Source Update="@(Lookup->'%(Match)')"><Trace>%(Lookup.Trace)</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Earlier", "Source").ShouldBe(
+        [
+            "Earlier:one.txt:literal", "Earlier:two.txt:wildcard", "Earlier:other.cs:initial",
+            "Source:one.txt:later-wildcard", "Source:two.txt:later-wildcard", "Source:other.cs:initial",
+        ]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void QualifiedUpdatesWithEmptySourcesStillMatchLiteralFragments(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="literal.txt;unmatched.txt"><Trace>initial</Trace></Source>
+                    <Source Update="@(Missing);literal.txt">
+                        <Trace>%(Missing.Trace)|%(Source.Identity)</Trace>
+                    </Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(
+            ["Source:literal.txt:|literal.txt", "Source:unmatched.txt:initial"]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void QualifiedUpdateSourcesApplyToMetadataConditions(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="one.txt"><Trace>lookup</Trace></Lookup>
+                    <Source Include="one.txt;two.txt"><Trace>initial</Trace></Source>
+                    <Source Update="@(Lookup);two.txt">
+                        <Trace Condition="'%(Lookup.Trace)' == 'lookup'">updated</Trace>
+                    </Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(
+            ["Source:one.txt:updated", "Source:two.txt:initial"]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void BareSelfUpdatesPreservePerItemQualifiedMetadata(bool instanceModel)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.txt"><Trace>first</Trace></Source>
+                    <Source Include="b.txt"><Trace>second</Trace></Source>
+                    <Before Include="@(Source)" />
+                    <Source Update="@(Source)"><Trace>%(Source.Trace)-updated</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Before", "Source").ShouldBe(
+        [
+            "Before:a.txt:first", "Before:b.txt:second",
+            "Source:a.txt:first-updated", "Source:b.txt:second-updated",
+        ]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void QualifiedUpdatesPreserveTheMetadataExpansionEscapeHatch(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", "1");
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="one.txt"><Trace>lookup</Trace></Lookup>
+                    <Source Include="one.txt;two.txt"><Trace>initial</Trace></Source>
                     <Source Update="@(Lookup)"><Trace>%(Lookup.Trace)</Trace></Source>
                 </ItemGroup>
             </Project>
@@ -875,7 +1047,161 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             collection);
 
         EvaluateHistory(project, instanceModel, "Source").ShouldBe(
-            ["Source:literal*.txt:captured", "Source:literal-other.txt:"]);
+            ["Source:one.txt:", "Source:two.txt:initial"]);
+    }
+
+    [Fact]
+    public void QualifiedUpdatesRootMatchingInTheFragmentDirectoryInsteadOfTheCachedItemDirectory()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
+        var projectFolder = env.CreateFolder();
+        var matchingFolder = env.CreateFolder();
+        string absoluteIdentity = Path.Combine(projectFolder.Path, "one.txt");
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="{absoluteIdentity}"><Trace>lookup</Trace></Lookup>
+                    <Source Include="one.txt;{absoluteIdentity}"><Trace>initial</Trace></Source>
+                    <Source Remove="missing.txt" />
+                    <Source Update="@(Lookup)"><Trace>%(Lookup.Trace)</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        project.Xml.FullPath = Path.Combine(projectFolder.Path, "test.proj");
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], matchingFolder.Path);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        ProjectItem[] items = [.. provider.GetItems("Source")];
+        items.Length.ShouldBe(2);
+        items[0].EvaluatedInclude.ShouldBe("one.txt");
+        items[0].GetMetadataValue("Trace").ShouldBe("initial");
+        items[1].EvaluatedInclude.ShouldBe(absoluteIdentity);
+        items[1].GetMetadataValue("Trace").ShouldBe("lookup");
+    }
+
+    [Fact]
+    public void ReevaluatedQualifiedUpdatesReuseMatchingItemsWithoutMutatingEarlierItems()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="a.cs"><Trace>from-a</Trace></Lookup>
+                    <Lookup Include="b.tmp"><Trace>from-b</Trace></Lookup>
+                    <Source Include="a.cs;a.cs;b.tmp"><Trace>initial</Trace></Source>
+                    <Source Update="@(Lookup)">
+                        <Trace>%(Source.Trace)-%(Lookup.Trace)</Trace>
+                    </Source>
+                    <BeforeRemove Include="@(Source)" />
+                    <Source Remove="*.tmp" />
+                    <Lookup Update="*"><Trace>later</Trace></Lookup>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        foreach (ProjectItem item in provider.GetItems("Lookup"))
+        {
+            item.GetMetadataValue("Trace").ShouldBe("later");
+        }
+
+        ICollection<ProjectItem> current = provider.GetItems("Source");
+        ProjectItem[] currentItems = [.. current];
+        currentItems.Length.ShouldBe(2);
+        foreach (ProjectItem item in currentItems)
+        {
+            item.EvaluatedInclude.ShouldBe("a.cs");
+            item.GetMetadataValue("Trace").ShouldBe("initial-from-a");
+        }
+
+        ProjectItem[] earlierItems = [.. provider.GetItems("BeforeRemove")];
+        AssertIncludes(earlierItems, ["a.cs", "a.cs", "b.tmp"]);
+        earlierItems[0].GetMetadataValue("Trace").ShouldBe("initial-from-a");
+        earlierItems[1].GetMetadataValue("Trace").ShouldBe("initial-from-a");
+        earlierItems[2].GetMetadataValue("Trace").ShouldBe("initial-from-b");
+        provider.GetItems("Source").ShouldBeSameAs(current);
+        foreach (ProjectItem item in currentItems)
+        {
+            item.GetMetadataValue("Trace").ShouldBe("initial-from-a");
+        }
+    }
+
+    [Fact]
+    public void QualifiedUpdateSourceExpansionRemainsDeferredUntilAnItemNeedsMatching()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="one.txt"><Trace>lookup</Trace></Lookup>
+                    <Source Update="@(Lookup->NotAnItemFunction())"><Trace>%(Lookup.Trace)</Trace></Source>
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Include="one.txt" />
+                    <Source Update="@(Lookup->NotAnItemFunction())" Condition="false"><Trace>%(Lookup.Trace)</Trace></Source>
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Update="@(Lookup->NotAnItemFunction())"><Trace>%(Lookup.Trace)</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
+        evaluator.ProcessItemGroups([groups[0]], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+        provider.GetItems("Source").ShouldBeEmpty();
+
+        evaluator.ProcessItemGroups([groups[1]], project.Xml.DirectoryPath);
+        provider.GetItems("Source").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("one.txt");
+
+        evaluator.ProcessItemGroups([groups[2]], project.Xml.DirectoryPath);
+        Should.Throw<InvalidProjectFileException>(() => provider.GetItems("Source"));
+    }
+
+    [Theory]
+    [InlineData("true")]
+    [InlineData("false")]
+    public void UpdateMatchingPreparationPreservesEmptySelectionDiagnosticTiming(string condition)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Source Update="*.txt" Condition="{condition}">
+                        <Trace>$([System.Int32]::Parse('invalid'))</Trace>
+                    </Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+
+        if (condition == "true")
+        {
+            Should.Throw<InvalidProjectFileException>(() => CollectItems(evaluator));
+        }
+        else
+        {
+            CollectItems(evaluator).ShouldBeEmpty();
+        }
     }
 
     [Theory]

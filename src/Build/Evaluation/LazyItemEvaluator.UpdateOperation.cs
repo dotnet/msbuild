@@ -1,10 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.CodeAnalysis.Collections;
@@ -23,7 +22,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         // It therefore cannot reenter this operation and clear the list while it is being enumerated,
         // so metadata application can consume the mutable scratch list without an immutable snapshot.
         private SegmentedList<ItemBatchingContext> _itemsToUpdate = null;
-        private ItemSpecMatchesItem _matchItemSpec = null;
+        private QualifiedUpdateMatcher _qualifiedUpdateMatcher;
+        private MatchStrategy _matchStrategy;
         private bool? _needToExpandMetadataForEachItem = null;
 
         public UpdateOperation(
@@ -45,7 +45,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 return;
             }
 
-            SetMatchItemSpec();
+            PrepareMatching();
             _itemsToUpdate ??= [];
             try
             {
@@ -54,7 +54,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 listBuilder.UpdateAll(
                     itemData =>
                     {
-                        matchResult = _matchItemSpec(_itemSpec, itemData.Item);
+                        matchResult = MatchItemSpec(itemData);
                         return matchResult.IsMatch;
                     },
                     itemData => UpdateItem(itemData, matchResult.MatchingItems));
@@ -76,11 +76,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         {
             if (_conditionResult)
             {
-                SetMatchItemSpec();
+                PrepareMatching();
                 _itemsToUpdate ??= [];
                 try
                 {
-                    MatchResult matchResult = _matchItemSpec(_itemSpec, item.Item);
+                    MatchResult matchResult = MatchItemSpec(item);
                     if (matchResult.IsMatch)
                     {
                         ItemData clonedData = UpdateItem(item, matchResult.MatchingItems);
@@ -111,64 +111,69 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         }
 
         /// <summary>
-        /// This sets the function used to determine whether an item matches an item spec.
+        ///  Prepares matching and metadata-expansion requirements on the first true-condition application.
         /// </summary>
-        private void SetMatchItemSpec()
+        private void PrepareMatching()
         {
+            if (_matchStrategy != MatchStrategy.Uninitialized)
+            {
+                return;
+            }
+
+            _needToExpandMetadataForEachItem = NeedToExpandMetadataForEachItem(_metadata, out var references);
+
             if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
             {
                 // Perf optimization: If the Update operation references itself (e.g. <I Update="@(I)"/>)
                 // then all items are updated and matching is not necessary
-                _matchItemSpec = (itemSpec, item) => new MatchResult(true, null);
+                _matchStrategy = MatchStrategy.All;
+                return;
             }
-            else if (ItemSpecContainsItemReferences(_itemSpec)
-                     && QualifiedMetadataReferencesExist(_metadata, out _needToExpandMetadataForEachItem)
-                     && !Traits.Instance.EscapeHatches.DoNotExpandQualifiedMetadataInUpdateOperation)
-            {
-                var itemReferenceFragments = _itemSpec.Fragments.OfType<ItemSpec<P, I>.ItemExpressionFragment>().ToArray();
-                var nonItemReferenceFragments = _itemSpec.Fragments.Where(f => !(f is ItemSpec<P, I>.ItemExpressionFragment)).ToArray();
 
-                _matchItemSpec = (itemSpec, item) =>
+            bool hasQualifiedMetadata = false;
+            if (references.Metadata is not null)
+            {
+                foreach (var reference in references.Metadata.Values)
                 {
-                    var isMatch = nonItemReferenceFragments.Any(f => f.IsMatch(item.EvaluatedInclude));
-                    Dictionary<string, I> matchingItems = null;
-
-                    foreach (var itemReferenceFragment in itemReferenceFragments)
+                    if (!string.IsNullOrWhiteSpace(reference.ItemName))
                     {
-                        foreach (var referencedItem in itemReferenceFragment.ReferencedItems)
-                        {
-                            if (referencedItem.ItemAsValueFragment.IsMatch(item.EvaluatedInclude))
-                            {
-                                isMatch = true;
-
-                                matchingItems ??= new Dictionary<string, I>(StringComparer.OrdinalIgnoreCase);
-
-                                matchingItems[referencedItem.Item.Key] = referencedItem.Item;
-                            }
-                        }
+                        hasQualifiedMetadata = true;
+                        break;
                     }
+                }
+            }
 
-                    return new MatchResult(isMatch, matchingItems);
-                };
-            }
-            else
+            if (hasQualifiedMetadata
+                && !Traits.Instance.EscapeHatches.DoNotExpandQualifiedMetadataInUpdateOperation
+                && ItemSpecContainsItemReferences())
             {
-                _matchItemSpec = (itemSpec, item) => new MatchResult(itemSpec.MatchesItem(item), null);
+                using RefArrayBuilder<ItemSpec<P, I>.ItemExpressionFragment> referenceFragments = default;
+                using RefArrayBuilder<ItemSpecFragment> nonReferenceFragments = default;
+                foreach (ItemSpecFragment fragment in _itemSpec.Fragments)
+                {
+                    if (fragment is ItemSpec<P, I>.ItemExpressionFragment referenceFragment)
+                    {
+                        referenceFragments.Add(referenceFragment);
+                    }
+                    else
+                    {
+                        nonReferenceFragments.Add(fragment);
+                    }
+                }
+
+                _qualifiedUpdateMatcher = new QualifiedUpdateMatcher(referenceFragments.ToImmutable(), nonReferenceFragments.ToImmutable());
+                _matchStrategy = MatchStrategy.QualifiedUpdate;
+                return;
             }
+
+            _matchStrategy = MatchStrategy.Specification;
         }
 
-        private bool QualifiedMetadataReferencesExist(ImmutableArray<ProjectMetadataElement> metadata, out bool? needToExpandMetadataForEachItem)
+        private bool ItemSpecContainsItemReferences()
         {
-            needToExpandMetadataForEachItem = NeedToExpandMetadataForEachItem(metadata, out var itemsAndMetadataFound);
-
-            if (itemsAndMetadataFound.Metadata == null)
+            foreach (ItemSpecFragment fragment in _itemSpec.Fragments)
             {
-                return false;
-            }
-
-            foreach (var metadataReference in itemsAndMetadataFound.Metadata)
-            {
-                if (!string.IsNullOrWhiteSpace(metadataReference.Value.ItemName))
+                if (fragment is ItemSpec<P, I>.ItemExpressionFragment)
                 {
                     return true;
                 }
@@ -177,9 +182,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             return false;
         }
 
-        private static bool ItemSpecContainsItemReferences(ItemSpec<P, I> itemSpec)
-        {
-            return itemSpec.Fragments.Any(f => f is ItemSpec<P, I>.ItemExpressionFragment);
-        }
+        private MatchResult MatchItemSpec(ItemData itemData)
+            => _matchStrategy switch
+            {
+                MatchStrategy.All => new MatchResult(isMatch: true, matchingItems: null),
+                MatchStrategy.Specification => new MatchResult(_itemSpec.MatchesItem(itemData.Item), matchingItems: null),
+                MatchStrategy.QualifiedUpdate => _qualifiedUpdateMatcher.Match(itemData),
+                _ => Assumed.Unreachable<MatchResult>(),
+            };
     }
 }
