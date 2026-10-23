@@ -7,7 +7,7 @@
 #   ctsFeed : NuGet feed URL where the `cts` global tool lives
 #
 # Published artifacts:
-#   cts-baseline-<osTag>          : the snapshot directory (one slot per OS,
+#   cts-mtp-baseline-<osTag>      : the native snapshot directory (one slot per OS,
 #                                   overwritten by the latest successful daily run).
 #   cts-collect-metrics-<osTag>   : cts-metrics.json (schema in scripts/cts/METRICS.md);
 #                                   contains the SHA that the baseline was taken at.
@@ -25,7 +25,7 @@ parameters:
   # format out from under `cts apply` (which would surface only as an opaque
   # fallbackReason=baseline-download-failed). Bump the pin intentionally.
   type: string
-  default: ''
+  default: '2.13.0-alpha.26519.2'
 
 steps:
 - checkout: self
@@ -33,22 +33,22 @@ steps:
   clean: true
 
 - task: UseDotNet@2
-  # cts itself is built against net8.0 (its apphost looks for the .NET 8
+  # The pinned cts tool targets net10.0 (its apphost looks for the .NET 10
   # runtime). Install it into the agent hostedtoolcache so apphosts pick
   # it up via DOTNET_ROOT.
-  displayName: Install .NET 8 runtime (cts apphost)
+  displayName: Install .NET 10 runtime (cts apphost)
   inputs:
     packageType: runtime
-    version: 8.0.x
+    version: 10.0.x
 
 - task: UseDotNet@2
-  # vstest spawns testhost.exe (an apphost) per test DLL; the test DLLs
-  # target $(LatestDotNetCoreForMSBuild), so testhost needs a matching
+  # CTS launches each native MTP test DLL in a dotnet process. The DLLs
+  # target $(LatestDotNetCoreForMSBuild), so the host needs a matching
   # Microsoft.NETCore.App version in the agent hostedtoolcache.
   # The full SDK install used to compile the slnx is handled by eng/common/build.ps1
   # which puts it in the repo-local .dotnet/ -- but apphosts don't look
   # there, only at DOTNET_ROOT.
-  displayName: Install .NET runtime (testhost)
+  displayName: Install .NET runtime (native MTP test host)
   inputs:
     packageType: runtime
     version: 11.0.x
@@ -80,10 +80,20 @@ steps:
     Set-Content -Path $cfgPath -Value $lines -Encoding utf8
     # `tool update` is idempotent: installs if missing, updates if outdated.
     # Avoids the "tool already installed" exit on warm self-hosted agents.
-    $installArgs = @('tool', 'update', 'cts', '--global', '--prerelease', '--configfile', "$cfgPath")
+    $installArgs = @('tool', 'update', 'cts', '--global', '--configfile', "$cfgPath")
     $toolVersion = '${{ parameters.ctsToolVersion }}'
-    if ($toolVersion) { $installArgs += @('--version', $toolVersion) }
-    dotnet @installArgs
+    if ($toolVersion) {
+      $installArgs += @('--version', $toolVersion)
+    } else {
+      $installArgs += '--prerelease'
+    }
+    # Runtime installation above does not provide the SDK required by global.json.
+    # Bootstrap in a child process so the CTS apphost keeps its runtime environment.
+    if ($IsWindows) {
+      pwsh -NoProfile -File "$(Build.SourcesDirectory)/eng/common/dotnet.ps1" @installArgs
+    } else {
+      bash "$(Build.SourcesDirectory)/eng/common/dotnet.sh" @installArgs
+    }
     if ($LASTEXITCODE -ne 0) { throw "cts install/update failed" }
     $toolsDir = if ($IsWindows) { Join-Path $env:USERPROFILE '.dotnet\tools' } else { Join-Path $env:HOME '.dotnet/tools' }
     Write-Host "##vso[task.prependpath]$toolsDir"
@@ -102,7 +112,7 @@ steps:
     # Use Arcade's build entry point so init-tools / bootstrap (which the
     # MSBuild.Bootstrap project requires for DotNetInstallScriptRootPath +
     # bundled SDK props) runs before the slnx build. Direct `dotnet build
-    # MSBuild.VSTest.slnx` skips init and fails with MSB4044/MSB3030.
+    # MSBuild.slnx` skips init and fails with MSB4044/MSB3030.
     # UsingToolVisualStudioIbcTraining=false: we're not producing VS
     # Insertion outputs, so skip Arcade's AfterSigning IBC-inputs step
     # which otherwise errors on missing artifacts/VSSetup/Debug/Insertion.
@@ -110,23 +120,23 @@ steps:
       & "$(Build.SourcesDirectory)/build.cmd" `
         -ci `
         -configuration $(BuildConfiguration) `
-        -projects "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" `
+        -projects "$(Build.SourcesDirectory)/MSBuild.slnx" `
         -verbosity minimal `
         /p:UsingToolVisualStudioIbcTraining=false
     } else {
       bash "$(Build.SourcesDirectory)/build.sh" `
         --ci `
         --configuration $(BuildConfiguration) `
-        --projects "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" `
+        --projects "$(Build.SourcesDirectory)/MSBuild.slnx" `
         --verbosity minimal `
         /p:UsingToolVisualStudioIbcTraining=false
     }
-    if ($LASTEXITCODE -ne 0) { throw "Build MSBuild.VSTest.slnx failed" }
-  displayName: Build MSBuild.VSTest.slnx
+    if ($LASTEXITCODE -ne 0) { throw "Build MSBuild.slnx failed" }
+  displayName: Build MSBuild.slnx
 
 - pwsh: |
     $sw = [Diagnostics.Stopwatch]::StartNew()
-    $baselineDir = "$(Build.SourcesDirectory)/.cts/baseline"
+    $baselineDir = "$(Build.SourcesDirectory)/.cts/mtp-baseline"
     $logsDir     = "$(Build.SourcesDirectory)/.cts/logs"
     New-Item -ItemType Directory -Force -Path $baselineDir, $logsDir | Out-Null
 
@@ -138,7 +148,7 @@ steps:
     # is published (true/false) no matter what failure mode happens.
     $exit = -1
     try {
-        cts collect vstest `
+        cts collect testingplatform `
           --rootPath                    "$(Build.SourcesDirectory)" `
           --config                      "$(CtsConfigPath)" `
           --storage-type                filesystem `
@@ -173,7 +183,7 @@ steps:
         }
 
         # The publish step keys off this variable: 'true' means "we have
-        # data worth publishing as cts-baseline-<os>". Anything else means
+        # data worth publishing as cts-mtp-baseline-<os>". Anything else means
         # skip the publish to avoid an empty/garbage artifact masquerading
         # as a usable baseline (which would silently break cts apply for
         # everyone consuming this artifact).
@@ -208,7 +218,7 @@ steps:
     # marks the whole task as Failed (which skips the artifact publish).
     $global:LASTEXITCODE = 0
     exit 0
-  displayName: cts collect vstest
+  displayName: cts collect testingplatform
 
 - task: PublishPipelineArtifact@1
   # TODO(1ES): when this pipeline is wrapped in 1ES.Official.PipelineTemplate.yml,
@@ -220,17 +230,17 @@ steps:
   # cts step somehow throws (e.g. an unhandled exception in the parsing
   # code) but the baseline was already on disk: we still get the artifact
   # for triage / apply consumption.
-  displayName: Publish cts-baseline-${{ parameters.osTag }}
+  displayName: Publish cts-mtp-baseline-${{ parameters.osTag }}
   condition: and(always(), eq(variables['CtsBaselineProduced'], 'true'))
   inputs:
-    targetPath: $(Build.SourcesDirectory)/.cts/baseline
-    artifact: cts-baseline-${{ parameters.osTag }}
+    targetPath: $(Build.SourcesDirectory)/.cts/mtp-baseline
+    artifact: cts-mtp-baseline-${{ parameters.osTag }}
 
 - pwsh: |
     if ('$(CtsBaselineProduced)' -ne 'true') {
-      Write-Host "##vso[task.logissue type=warning]cts-baseline-${{ parameters.osTag }} was NOT published (CtsBaselineProduced=$(CtsBaselineProduced)). Downstream cts apply runs will hit fallbackReason=baseline-download-failed. See the 'cts collect vstest' step log for the underlying reason."
+      Write-Host "##vso[task.logissue type=warning]cts-mtp-baseline-${{ parameters.osTag }} was NOT published (CtsBaselineProduced=$(CtsBaselineProduced)). Downstream cts apply runs will hit fallbackReason=baseline-download-failed. See the 'cts collect testingplatform' step log for the underlying reason."
     } else {
-      Write-Host "cts-baseline-${{ parameters.osTag }} published successfully (CtsBaselineProduced=true)."
+      Write-Host "cts-mtp-baseline-${{ parameters.osTag }} published successfully (CtsBaselineProduced=true)."
     }
   displayName: Confirm baseline publish status
   condition: always()
@@ -248,7 +258,7 @@ steps:
       ctsToolVersion  = $version
       timestampUtc    = (Get-Date).ToUniversalTime().ToString('o')
       sha             = '$(CtsSha)'
-      artifactName    = "cts-baseline-${{ parameters.osTag }}"
+      artifactName    = "cts-mtp-baseline-${{ parameters.osTag }}"
     }
     $out = "$(Build.ArtifactStagingDirectory)/cts-collect-metrics-${{ parameters.osTag }}/cts-metrics.json"
     New-Item -ItemType Directory -Force -Path (Split-Path $out) | Out-Null
