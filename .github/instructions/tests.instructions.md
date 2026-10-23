@@ -1,5 +1,5 @@
 ---
-applyTo: "src/*.UnitTests/**/*.cs"
+applyTo: "src/*.Tests/**/*.cs"
 ---
 
 # Testing Instructions
@@ -46,6 +46,8 @@ Use existing custom attributes for platform-specific tests instead of runtime `i
 Test assemblies use assembly fixtures (for example, `Microsoft.Build.UnitTests.MSBuildTestAssemblyFixture` and `Microsoft.Build.UnitTests.MSBuildTestEnvironmentFixture`). Avoid duplicating global setup in individual tests.
 
 ## Data-Driven and Async Tests
+
+Prefer a focused regression that directly proves the requested behavior over a Boolean matrix covering unrelated modes or languages. Do not retest behavior owned by external frameworks, and keep process-test matrices to the minimum needed because each case adds runtime and resource-exhaustion flake risk. For task-routing tests, compare the task's PID with a known in-process assembly task. Avoid duplicating existing end-to-end routing coverage.
 
 Use `[Theory]` with `[InlineData]` for simple inputs. Use `[MemberData]` or `TheoryData<T>` for complex objects (returning `IEnumerable<object[]>`). If the data type is custom, implement `IXunitSerializable`.
 

@@ -360,6 +360,21 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 wrappedTask.BuildEngine = oopTaskHostNode;
+
+                if (wrappedTask is IMultiThreadableTask multiThreadableTask)
+                {
+#if FEATURE_APPDOMAIN
+                    if (_taskAppDomain is not null)
+                    {
+                        // TaskEnvironment is not serializable; assign the fallback inside the task's AppDomain.
+                        _taskAppDomain.DoCallBack(new TaskEnvironmentInitializer(multiThreadableTask).Initialize);
+                    }
+                    else
+#endif
+                    {
+                        multiThreadableTask.TaskEnvironment = TaskEnvironment.Fallback;
+                    }
+                }
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -381,11 +396,26 @@ namespace Microsoft.Build.CommandLine
 
             foreach (KeyValuePair<string, TaskParameter> param in taskParams)
             {
+                PropertyInfo paramInfo = null;
                 try
                 {
-                    PropertyInfo paramInfo = wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
-                    paramInfo.SetValue(wrappedTask, param.Value?.WrappedParameter, null);
+                    paramInfo = wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
+                    object parameterValue = param.Value?.WrappedParameter;
+#if NET
+                    parameterValue = ConvertTaskParameterValue(parameterValue, paramInfo.PropertyType);
+#endif
+                    paramInfo.SetValue(wrappedTask, parameterValue, null);
                 }
+#if NET
+                catch (TaskParameterConversionException e)
+                {
+                    return new OutOfProcTaskHostTaskResult(
+                        TaskCompleteType.CrashedDuringInitialization,
+                        e.InnerException,
+                        "InvalidTaskParameterValueError",
+                        [e.Value, param.Key, paramInfo.PropertyType.FullName, taskName]);
+                }
+#endif
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
                     return new OutOfProcTaskHostTaskResult(
@@ -437,7 +467,13 @@ namespace Microsoft.Build.CommandLine
                             outputValue = FilterNullsFromStringArray(stringArray, value.Name);
                         }
 
+#if NET
+                        finalParameterValues[value.Name] = outputValue is null
+                            ? TaskParameter.CreateForTaskOutput(outputValue, value.PropertyType)
+                            : outputValue;
+#else
                         finalParameterValues[value.Name] = outputValue;
+#endif
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
@@ -451,6 +487,70 @@ namespace Microsoft.Build.CommandLine
 
             return new OutOfProcTaskHostTaskResult(success ? TaskCompleteType.Success : TaskCompleteType.Failure, finalParameterValues);
         }
+
+#if FEATURE_APPDOMAIN
+        [Serializable]
+        private sealed class TaskEnvironmentInitializer(IMultiThreadableTask task)
+        {
+            public void Initialize() => task.TaskEnvironment = TaskEnvironment.Fallback;
+        }
+#endif
+
+#if NET
+        internal static object ConvertTaskParameterValue(object value, Type targetType)
+        {
+            if (value is null || targetType.IsInstanceOfType(value))
+            {
+                return value;
+            }
+
+            if (targetType.IsArray && value is Array sourceArray)
+            {
+                Type elementType = targetType.GetElementType();
+                Array convertedArray = Array.CreateInstance(elementType, sourceArray.Length);
+                for (int i = 0; i < sourceArray.Length; i++)
+                {
+                    convertedArray.SetValue(ConvertTaskParameterValue(sourceArray.GetValue(i), elementType), i);
+                }
+
+                return convertedArray;
+            }
+
+            if (TaskItemTypeDetector.TryGetTaskItemValueType(targetType, out Type taskItemValueType)
+                && value is ITaskItem taskItem)
+            {
+                Type taskItemType = typeof(TaskItem<>).MakeGenericType(taskItemValueType);
+                try
+                {
+                    return Activator.CreateInstance(taskItemType, taskItem);
+                }
+                catch (TargetInvocationException e) when (e.InnerException is ArgumentException)
+                {
+                    throw new TaskParameterConversionException(taskItem.ItemSpec, e.InnerException);
+                }
+            }
+
+            if (value is not string stringValue)
+            {
+                return value;
+            }
+
+            try
+            {
+                return ValueTypeParser.Parse(stringValue, targetType);
+            }
+            catch (ArgumentException e)
+            {
+                throw new TaskParameterConversionException(stringValue, e);
+            }
+        }
+
+        private sealed class TaskParameterConversionException(string value, Exception innerException)
+            : Exception(null, innerException)
+        {
+            internal string Value { get; } = value;
+        }
+#endif
 
         /// <summary>
         /// Logs errors from TaskLoader

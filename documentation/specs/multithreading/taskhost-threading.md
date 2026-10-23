@@ -25,8 +25,8 @@ When the main thread receives a `TaskHostConfiguration` packet, it spawns the ta
 
 1. Sets up the environment (working directory, env vars, culture)
 2. Loads the task assembly and instantiates the task
-3. Sets task parameters via reflection
-4. Calls `task.Execute()` -- for tasks implementing `IMultiThreadableTask`, the default `TaskEnvironment` (backed by `MultiProcessTaskEnvironmentDriver`) is available, providing safe access to the task host process's working directory and environment variables
+3. Assigns `TaskEnvironment.Fallback` to tasks implementing `IMultiThreadableTask`, then sets task parameters via reflection
+4. Calls `task.Execute()` -- the supplied `TaskEnvironment` (backed by `MultiProcessTaskEnvironmentDriver`) provides access to the task host process's working directory and environment variables
 5. Collects output parameters
 6. Packages the result into `TaskHostTaskComplete` and signals `_taskCompleteEvent`
 
@@ -127,6 +127,7 @@ sequenceDiagram
     PP-->>SC: Nested task done
 
     SC-->>PP: BuildProjectFile result
+    PP->>PP: Remember which task is resuming
     PP-->>MT: TaskHostBuildResponse
     MT->>MT: HandleCallbackResponse()<br/>(sets TCS result)
     MT-->>TR: TCS unblocks
@@ -143,9 +144,18 @@ Two counters track the TaskHost's availability:
 
 **Transition ordering**: When blocking, increment `_blockedTaskCount` BEFORE decrementing `_activeTaskCount`. When resuming, the reverse. This ensures the sum is never zero during transition.
 
-### Handler Stack (Process Reuse)
+### Resuming a Task
 
-`NodeProviderOutOfProcTaskHost` uses a `Stack<INodePacketHandler>` to manage multiple `TaskHostTask` handlers on the same node. Push on nested task dispatch, peek for packet routing, pop on nested task completion.
+The parent associates a TaskHost with the task currently running in it, so it knows
+which task should receive the TaskHost's messages. Starting another task changes
+that association; resuming a paused task must change it back.
+
+Completing a nested build does not immediately resume its waiting task. The task
+first waits for the scheduler to give it its owning node back, as with an
+in-process task. It can then resume even if a later-started task is still blocked
+on another nested build. The parent must restore its association with the task
+**before sending the callback response that lets the task continue**. Both sides
+then agree which task is running, and its next messages reach the right receiver.
 
 Attachment and terminal notification are synchronized. A terminal failure notifies every attached task and removes its registrations. Each task sends replies and cancellation through its acquired connection, not a reusable lookup key, so a late reply cannot reach a replacement TaskHost.
 
@@ -157,9 +167,17 @@ On .NET Framework, callbacks from a task in another AppDomain carry its task ID 
 
 ## TaskHost Lifecycle
 
-The TaskHost process can execute multiple tasks, both sequentially and concurrently. After finishing one task, it returns to an idle state and waits for either a new task or a shutdown signal. When a task calls `BuildProjectFile`, the TaskHost blocks (incrementing `_blockedTaskCount`, then decrementing `_activeTaskCount`), allowing the scheduler to dispatch a nested task to the same process while the outer task is blocked waiting for the callback response.
+A TaskHost normally runs one task at a time. While that task waits for a nested
+build, another task can use the same process. Tasks do not have to resume in the
+order in which they started.
 
 A **sidecar** is a TaskHost that matches its launcher's runtime and architecture and is used for routing of non-multithreadable tasks in `-mt` execution and under `MSBUILDFORCEALLTASKSOUTOFPROC`. Under Change Wave 18.12 a sidecar shares the lifetime of its launcher; opting out of the wave makes it disconnect and idle after each build, as every TaskHost did before.
+
+### Completion Handoff
+
+A finished task leaves its result in a queue for the main thread to send. This
+keeps a later result from overwriting one that has not been sent yet. Buffered
+console output is sent before the result.
 
 ### Event Loop Cycle
 
@@ -176,8 +194,8 @@ stateDiagram-v2
 
 1. **Idle**: `WaitAny()` blocks on the four wait handles. No task thread exists. `_currentConfiguration` is null.
 2. **TaskHostConfiguration arrives**: `HandleTaskHostConfiguration()` stores the config and spawns a task runner thread (stored in `TaskExecutionContext.ExecutingThread`) to call `RunTask()`. The main thread immediately returns to `WaitAny()`.
-3. **Task executes**: `RunTask()` sets up the environment, loads the task assembly, calls `task.Execute()`, collects output parameters, and stores the result in `_taskCompletePacket`. On completion (success or failure), it signals `_taskCompleteEvent`.
-4. **CompleteTask()**: The main thread wakes on index 2, sends `_taskCompletePacket` as a `TaskHostTaskComplete` packet to the owning worker node. When no tasks remain active or blocked, it clears `_currentConfiguration`. The node is now idle again.
+3. **Task executes**: `RunTask()` sets up the environment, loads the task assembly, calls `task.Execute()`, and collects output parameters. After cleanup, it enqueues its `TaskHostTaskComplete` result and signals `_taskCompleteEvent`.
+4. **CompleteTask()**: The main thread wakes on index 2 and sends the queued results, flushing console output before each one. When no tasks remain active or blocked, it clears `_currentConfiguration`.
 5. **Back to step 1**: The main thread loops back to `WaitAny()`, ready for another `TaskHostConfiguration` or a `NodeBuildComplete`.
 
 ### State Between Tasks
@@ -187,7 +205,7 @@ Each new `TaskHostConfiguration` carries a full environment snapshot, task param
 **Reset per task:** `_currentConfiguration`, `_debugCommunications`, `_updateEnvironment`, `_warningsAsErrors`/`_warningsNotAsErrors`/`_warningsAsMessages`, `_fileAccessData`, per-task `TaskExecutionContext`
 
 **Persists across tasks (within a single build):**
-- `s_mismatchedEnvironmentValues` (static) -- environment variable fixups for bitness differences, computed once per process
+- `s_mismatchedEnvironmentValues` (static) -- environment variable fixups for bitness differences, computed once per process. Starting with Change Wave 18.13, only the documented Windows WOW64 variables (`PROCESSOR_ARCHITECTURE`, `PROCESSOR_ARCHITEW6432`, `ProgramFiles`, `ProgramW6432`, `CommonProgramFiles`, and `CommonProgramW6432`) are reconciled. Unix task hosts do not apply these Windows-specific fixups. Other variables come from the task's environment, including additions, replacements, and removals that differ from process startup. They also pass back to the parent without reverse fixups, so an earlier task or build cannot overwrite later virtualized state through this table. Opting out of Wave 18.13 restores the legacy behavior of reconciling all startup differences.
 - `_registeredTaskObjectCache` -- task object cache with `Build` lifetime scope. A TaskHost whose current `Run()` call ends disposes it in `HandleShutdown()`; the next `Run()` call creates a fresh one. A sidecar stays connected across builds, so it disposes the `Build`-scoped objects in `PrepareForNextBuild()` and keeps the cache instance itself.
 - `_pendingCallbackRequests` / `_nextCallbackRequestId` -- callback tracking (should be empty between tasks)
 

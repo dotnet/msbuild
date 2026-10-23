@@ -86,7 +86,7 @@ namespace Microsoft.Build.Tasks
             {
                 // Read only the beginning of the file - DOCTYPE must appear before the root element.
                 // 8KB should be more than enough to find it in any reasonable XML file.
-                using var stream = File.OpenRead(filePath.Value);
+                using var stream = File.OpenRead(filePath);
                 using var reader = new StreamReader(stream);
                 var buffer = new char[8192];
                 int charsRead = reader.Read(buffer, 0, buffer.Length);

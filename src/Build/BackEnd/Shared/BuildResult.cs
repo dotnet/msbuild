@@ -196,7 +196,12 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="existingResults">The existing results.</param>
         /// <param name="targetNames">The target names whose results we will take from the existing results, if they exist.</param>
-        internal BuildResult(BuildResult existingResults, string[] targetNames)
+        /// <param name="failuresMaskedByLegacyCallTarget">
+        /// Unrequested failures omitted from the inherited overall-result snapshot by CallTarget's legacy ContinueOnError
+        /// behavior. Requested target results, previously recorded after-target failures, exceptions, and circular
+        /// dependencies are unaffected.
+        /// </param>
+        internal BuildResult(BuildResult existingResults, string[] targetNames, HashSet<string>? failuresMaskedByLegacyCallTarget)
         {
             _submissionId = existingResults._submissionId;
             _configurationId = existingResults._configurationId;
@@ -205,7 +210,7 @@ namespace Microsoft.Build.Execution
             _nodeRequestId = existingResults._nodeRequestId;
             _requestException = existingResults._requestException;
             _resultsByTarget = CreateTargetResultDictionaryWithContents(existingResults, targetNames);
-            _baseOverallResult = existingResults.OverallResult == BuildResultCode.Success;
+            _baseOverallResult = existingResults.ComputeOverallResult(failuresMaskedByLegacyCallTarget) == BuildResultCode.Success;
             _buildRequestDataFlags = existingResults._buildRequestDataFlags;
             _projectStateAfterBuild = existingResults._projectStateAfterBuild;
 
@@ -380,24 +385,28 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public override BuildResultCode OverallResult
         {
-            get
+            get => ComputeOverallResult();
+        }
+
+        private BuildResultCode ComputeOverallResult(HashSet<string>? failuresMaskedByLegacyCallTarget = null)
+        {
+            if (_requestException != null || _circularDependency || !_baseOverallResult)
             {
-                if (_requestException != null || _circularDependency || !_baseOverallResult)
+                return BuildResultCode.Failure;
+            }
+
+            foreach (KeyValuePair<string, TargetResult> result in _resultsByTarget ?? [])
+            {
+                if ((result.Value.ResultCode == TargetResultCode.Failure &&
+                    !result.Value.TargetFailureDoesntCauseBuildFailure &&
+                    !(failuresMaskedByLegacyCallTarget?.Contains(result.Key) ?? false))
+                    || result.Value.AfterTargetsHaveFailed)
                 {
                     return BuildResultCode.Failure;
                 }
-
-                foreach (KeyValuePair<string, TargetResult> result in _resultsByTarget ?? [])
-                {
-                    if ((result.Value.ResultCode == TargetResultCode.Failure && !result.Value.TargetFailureDoesntCauseBuildFailure)
-                        || result.Value.AfterTargetsHaveFailed)
-                    {
-                        return BuildResultCode.Failure;
-                    }
-                }
-
-                return BuildResultCode.Success;
             }
+
+            return BuildResultCode.Success;
         }
 
         /// <summary>
@@ -541,6 +550,21 @@ namespace Microsoft.Build.Execution
         /// <param name="result">The results for the target.</param>
         public void AddResultsForTarget(string target, TargetResult result)
         {
+            AddResultsForTarget(target, result, preserveExistingNonSkippedResult: false);
+        }
+
+        /// <summary>
+        /// Atomically publishes a skipped result while preserving any existing non-skipped result. Non-skipped results
+        /// use the same replacement and collision behavior as <see cref="AddResultsForTarget(string, TargetResult)"/>.
+        /// </summary>
+        /// <returns>The result stored for the target.</returns>
+        internal TargetResult AddResultsForTargetOrPreserveExistingNonSkippedResult(string target, TargetResult result)
+        {
+            return AddResultsForTarget(target, result, preserveExistingNonSkippedResult: true);
+        }
+
+        private TargetResult AddResultsForTarget(string target, TargetResult result, bool preserveExistingNonSkippedResult)
+        {
             ArgumentNullException.ThrowIfNull(target);
             ArgumentNullException.ThrowIfNull(result);
 
@@ -549,12 +573,36 @@ namespace Microsoft.Build.Execution
                 _resultsByTarget ??= CreateTargetResultDictionary(1);
             }
 
-            if (_resultsByTarget.TryGetValue(target, out TargetResult? targetResult))
+            if (!preserveExistingNonSkippedResult || result.ResultCode != TargetResultCode.Skipped)
             {
-                Assumed.Equal(targetResult.ResultCode, TargetResultCode.Skipped, $"Items already exist for target {target}.");
+                if (_resultsByTarget.TryGetValue(target, out TargetResult? existingResult))
+                {
+                    Assumed.Equal(existingResult.ResultCode, TargetResultCode.Skipped, $"Items already exist for target {target}.");
+                }
+
+                _resultsByTarget[target] = result;
+                return result;
             }
 
-            _resultsByTarget[target] = result;
+            while (true)
+            {
+                if (_resultsByTarget.TryGetValue(target, out TargetResult? existingResult))
+                {
+                    if (existingResult.ResultCode != TargetResultCode.Skipped)
+                    {
+                        return existingResult;
+                    }
+
+                    if (_resultsByTarget.TryUpdate(target, result, existingResult))
+                    {
+                        return result;
+                    }
+                }
+                else if (_resultsByTarget.TryAdd(target, result))
+                {
+                    return result;
+                }
+            }
         }
 
         /// <summary>

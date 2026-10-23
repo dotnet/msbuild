@@ -11,9 +11,10 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Eventing;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Logging;
 using Shouldly;
@@ -329,7 +330,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using var secondLifetime = new ScopeLifetime(second);
             File.WriteAllText("second.txt", "content");
 
-            first.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out bool recovered);
+            first.VerifyUnresolvedPathWrites(ElementLocation.Empty, out bool recovered);
 
             recovered.ShouldBeFalse();
             File.Exists(Path.Combine(second.SentinelDirectory, "second.txt")).ShouldBeTrue();
@@ -382,7 +383,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using EventSourceTestHelper listener = new();
             string? entries = null;
             bool recovered = false;
-            Exception? exception = Record.Exception(() => entries = scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out recovered));
+            Exception? exception = Record.Exception(() => entries = scope.VerifyUnresolvedPathWrites(ElementLocation.Empty, out recovered));
             if (state == "Write")
             {
                 exception.ShouldBeNull();
@@ -436,13 +437,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Directory.Delete(Path.GetDirectoryName(scope.SentinelDirectory)!);
             }
 
-            scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out bool recovered).ShouldBeNull();
+            scope.VerifyUnresolvedPathWrites(ElementLocation.Empty, out bool recovered).ShouldBeNull();
 
             recovered.ShouldBeTrue();
             MultiThreadedStrictModeScope.ActiveScope.ShouldBeSameAs(scope);
             Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
             File.WriteAllText("after-recovery.txt", "content");
-            scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out recovered).ShouldBe("after-recovery.txt");
+            scope.VerifyUnresolvedPathWrites(ElementLocation.Empty, out recovered).ShouldBe("after-recovery.txt");
             recovered.ShouldBeFalse();
         }
 
@@ -453,7 +454,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using var lifetime = new ScopeLifetime(scope);
             Directory.Delete(scope.SentinelDirectory);
 
-            scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out bool recovered).ShouldBeNull();
+            scope.VerifyUnresolvedPathWrites(ElementLocation.Empty, out bool recovered).ShouldBeNull();
 
             recovered.ShouldBeTrue();
             Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
@@ -473,7 +474,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             System.Threading.Tasks.Parallel.For(0, 16, _ =>
             {
-                scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out bool recovered).ShouldBeNull();
+                scope.VerifyUnresolvedPathWrites(ElementLocation.Empty, out bool recovered).ShouldBeNull();
                 if (recovered)
                 {
                     Interlocked.Increment(ref recoveries);
@@ -1519,7 +1520,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 manager.BuildRequest(new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
                     .ShouldHaveSucceeded();
                 ((IBuildComponentHost)manager).LoggingService.LogWarningFromText(
-                    BuildEventContext.Invalid, null, "OTHER0001", null, BuildEventFileInfo.Empty, "Unrelated warning");
+                    BuildEventContext.Invalid, DiagnosticSubcategory.None, "OTHER0001", null, ElementLocation.Empty, "Unrelated warning");
                 File.WriteAllText(Path.Combine(MultiThreadedStrictModeScope.ActiveScope!.SentinelDirectory, "late.txt"), "late output");
             }
             finally

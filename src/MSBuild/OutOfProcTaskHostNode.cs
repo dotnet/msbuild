@@ -37,11 +37,10 @@ namespace Microsoft.Build.CommandLine
         INodePacketFactory, INodePacketHandler, IBuildEngine10
     {
         /// <summary>
-        /// Keeps a record of all environment variables that, on startup of the task host, have a different
-        /// value from those that are passed to the task host in the configuration packet for the first task.
-        /// These environments are assumed to be effectively identical, so the only difference between the
-        /// two sets of values should be any environment variables that differ between e.g. a 32-bit and a 64-bit
-        /// process.  Those are the variables that this dictionary should store.
+        /// Records architecture-specific differences between task-host startup and the first task's
+        /// environment. Ordinary variables must come from the task configuration: in multithreaded mode
+        /// they can differ from the parent process's environment without being architecture adjustments.
+        /// The legacy change-wave opt-out records all startup differences instead.
         ///
         /// - The key into the dictionary is the name of the environment variable.
         /// - The Key of the KeyValuePair is the value of the variable in the owning worker node process -- the value that we
@@ -145,10 +144,9 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// The completed task packet waiting to be sent by the main thread.
-        /// Only one task can be completing at a time (blocked tasks can't complete
-        /// until they resume, and the resumed task is the only active one).
+        /// Distinct results must survive coalesced completion event signals.
         /// </summary>
-        private TaskHostTaskComplete _taskCompletePacket;
+        private readonly ConcurrentQueue<TaskHostTaskComplete> _taskCompletePackets = new();
 
         /// <summary>
         /// The event which is set when a task is cancelled
@@ -1302,12 +1300,14 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void CompleteTask()
         {
-            if (_nodeEndpoint.LinkStatus == LinkStatus.Active && _taskCompletePacket is not null)
+            if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
-                _consoleOutWriter?.Flush();
-                _consoleErrorWriter?.Flush();
-                _nodeEndpoint.SendData(_taskCompletePacket);
-                _taskCompletePacket = null;
+                while (_taskCompletePackets.TryDequeue(out TaskHostTaskComplete packet))
+                {
+                    _consoleOutWriter?.Flush();
+                    _consoleErrorWriter?.Flush();
+                    _nodeEndpoint.SendData(packet);
+                }
             }
 
             // Only clear _currentConfiguration when no tasks remain (active or blocked).
@@ -1456,7 +1456,7 @@ namespace Microsoft.Build.CommandLine
             // Per-task state -- the configuration, the warning sets, the environment flags, the task
             // wrapper and its completion packet -- is assigned unconditionally from each incoming
             // TaskHostConfiguration before it is ever read, so clearing it here would be dead code
-            // and clearing _taskCompletePacket could discard a result that has not been sent yet.
+            // and clearing the completion queue could discard a result that has not been sent yet.
 
             // Defensive, and matches HandleShutdown: a task blocked on a callback would never
             // unblock once the parent stops answering for this build. No-op when nothing is pending.
@@ -1522,15 +1522,9 @@ namespace Microsoft.Build.CommandLine
                 debugWriter?.WriteLine("Failed to restore the original environment: {0}.", ex);
             }
 
-            if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
-            {
-                // Notify the BuildManager that we are done.
-                _nodeEndpoint.SendData(new NodeShutdown(_shutdownReason == NodeEngineShutdownReason.Error ? NodeShutdownReason.Error : NodeShutdownReason.Requested));
+            SendShutdownNotification(_nodeEndpoint);
 
-                // Flush all packets to the pipe and close it down.  This blocks until the shutdown is complete.
-                _nodeEndpoint.OnLinkStatusChanged -= new LinkStatusChangedDelegate(OnLinkStatusChanged);
-            }
-
+            // Flush all packets to the pipe and close it down. This blocks until shutdown is complete.
             _nodeEndpoint.Disconnect();
 
             // Dispose these WaitHandles
@@ -1540,6 +1534,18 @@ namespace Microsoft.Build.CommandLine
             _taskCancelledEvent.Dispose();
 
             return _shutdownReason;
+        }
+
+        internal void SendShutdownNotification(INodeEndpoint endpoint)
+        {
+            if (endpoint.LinkStatus == LinkStatus.Active)
+            {
+                // The parent can close the pipe as soon as it receives this packet. That expected
+                // disconnect must not change BuildCompleteReuse into ConnectionFailed.
+                endpoint.ClientWillDisconnect();
+                endpoint.OnLinkStatusChanged -= new LinkStatusChangedDelegate(OnLinkStatusChanged);
+                endpoint.SendData(new NodeShutdown(_shutdownReason == NodeEngineShutdownReason.Error ? NodeShutdownReason.Error : NodeShutdownReason.Requested));
+            }
         }
 
         private void InitializeConsoleRedirection()
@@ -1754,6 +1760,7 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
+                TaskHostTaskComplete taskCompletePacket = null;
                 try
                 {
                     // BlockForCallback/ResumeAfterCallback are always paired, so a task
@@ -1769,7 +1776,7 @@ namespace Microsoft.Build.CommandLine
                         CommunicationsUtilities.AreDictionariesEquivalent(currentEnvironment, taskConfiguration.BuildProcessEnvironment);
 
                     taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
-                    _taskCompletePacket = new TaskHostTaskComplete(
+                    taskCompletePacket = new TaskHostTaskComplete(
                         taskResult,
 #if FEATURE_REPORTFILEACCESSES
                         _fileAccessData,
@@ -1778,7 +1785,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (NodePacketTypeExtensions.GetNegotiatedPacketVersion(_parentPacketVersion) >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion && environmentUnchangedByTask)
                     {
-                        _taskCompletePacket.EnvironmentMode = InvariantPayloadTransferMode.Identical;
+                        taskCompletePacket.EnvironmentMode = InvariantPayloadTransferMode.Identical;
                     }
 
 #if FEATURE_APPDOMAIN
@@ -1803,7 +1810,7 @@ namespace Microsoft.Build.CommandLine
                 catch (Exception e)
                 {
                     // Create a minimal taskCompletePacket to carry the exception so that the TaskHostTask does not hang while waiting
-                    _taskCompletePacket = new TaskHostTaskComplete(
+                    taskCompletePacket = new TaskHostTaskComplete(
                         new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
 #if FEATURE_REPORTFILEACCESSES
                         _fileAccessData,
@@ -1836,6 +1843,7 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     // The task has now fully completed executing.
+                    _taskCompletePackets.Enqueue(taskCompletePacket);
                     // Guard against ObjectDisposedException if HandleShutdown already disposed
                     // the event (can happen if thread.Join timed out during shutdown).
                     try
@@ -1973,50 +1981,10 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void InitializeMismatchedEnvironmentTable(IDictionary<string, string> environment)
         {
-            if (s_mismatchedEnvironmentValues == null)
-            {
-                // This is the first time that we have received a TaskHostConfiguration packet, so we
-                // need to construct the mismatched environment table based on our current environment
-                // (assumed to be effectively identical to startup) and the environment we were given
-                // via the task host configuration, assumed to be effectively identical to the startup
-                // environment of the task host, given that the configuration packet is sent immediately
-                // after the node is launched.
-                s_mismatchedEnvironmentValues = new Dictionary<string, KeyValuePair<string, string>>(StringComparer.OrdinalIgnoreCase);
-
-                foreach (KeyValuePair<string, string> variable in _savedEnvironment)
-                {
-                    string oldValue = variable.Value;
-                    string newValue;
-                    if (!environment.TryGetValue(variable.Key, out newValue))
-                    {
-                        s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(null, oldValue);
-                    }
-                    else
-                    {
-                        if (!String.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
-                        {
-                            s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(newValue, oldValue);
-                        }
-                    }
-                }
-
-                foreach (KeyValuePair<string, string> variable in environment)
-                {
-                    string newValue = variable.Value;
-                    string oldValue;
-                    if (!_savedEnvironment.TryGetValue(variable.Key, out oldValue))
-                    {
-                        s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(newValue, null);
-                    }
-                    else
-                    {
-                        if (!String.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
-                        {
-                            s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(newValue, oldValue);
-                        }
-                    }
-                }
-            }
+            s_mismatchedEnvironmentValues ??= TaskHostEnvironment.CreateMismatchedEnvironmentTable(
+                environment,
+                _savedEnvironment,
+                isWindows: NativeMethodsShared.IsWindows);
         }
 
         /// <summary>
@@ -2038,7 +2006,8 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
+                TaskHostConfiguration configuration = EffectiveConfiguration;
+                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(configuration.NodeId, e));
                 _nodeEndpoint.SendData(logMessage);
             }
         }
