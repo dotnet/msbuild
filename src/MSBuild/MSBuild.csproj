@@ -93,6 +93,7 @@
     <Compile Include="AssemblyResources.cs" />
     <Compile Include="AutomaticEncodingRestorer.cs" />
     <Compile Include="CommandLine\CommandLineParser.cs" />
+    <Compile Include="CommandLine\CommandLineParsingOptions.cs" />
     <Compile Include="CommandLine\CommandLineSwitches.cs" />
     <Compile Include="CommandLine\CommandLineSwitchException.cs" />
     <Compile Include="CommandLine\CommandLineSwitchesAccessor.cs" />
