@@ -94,6 +94,17 @@ Source count varies independently of the fixed target count; metadata-name order
 through an item transform. It selects the same targets and qualified metadata as the literal workload,
 but requires wildcard matching rather than assuming a literal-identity lookup can resolve it.
 
+### Qualified-Update indexing
+
+Qualified Updates prepare matching lazily and index literal transformed source identities once per
+operation. This removes the source-by-target search for literal sources without adding analysis or
+index construction during recording. Wildcard-valued sources retain ordered matching, and path keys
+use the Update fragment's directory rather than blindly reusing an item's cached project-relative key.
+
+Compare `LazyItemQualifiedUpdateBenchmark` against pre-transfer tip `948c8ff64c`, using the same
+fixtures and all source/target count combinations. Keep recording-only histories and ordinary
+literal/wildcard Updates as controls. No performance results for this indexing change are recorded yet.
+
 ## Comparable baseline on the benchmark VM
 
 Run benchmarks on the dedicated benchmark VM, not on the development machine, including smoke runs.

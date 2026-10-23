@@ -11,8 +11,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 {
     private partial class UpdateOperation
     {
-        private delegate MatchResult ItemSpecMatchesItem(ItemSpec<P, I> itemSpec, I itemToMatch);
-
         private readonly struct MatchResult
         {
             public bool IsMatch { get; }
