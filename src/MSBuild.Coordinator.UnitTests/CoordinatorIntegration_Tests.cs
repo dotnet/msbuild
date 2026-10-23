@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
@@ -220,17 +221,29 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         buildOutput.ShouldNotContain("Failed to connect to the build coordinator");
     }
 
+    /// <summary>
+    ///  Configures an isolated external coordinator and owns its process-wide test environment until the coordinator exits.
+    /// </summary>
     private sealed class CoordinatorTestHelper : IDisposable
     {
+        private const int CoordinatorExitTimeoutMs = 10_000;
+
         public TestEnvironment TestEnvironment { get; }
 
         private readonly string _debugLogPath;
+        private readonly string _serverMutexName;
 
         public CoordinatorTestHelper(ITestOutputHelper outputHelper, int? nodeBudget = null)
         {
             TestEnvironment = TestEnvironment.Create(outputHelper);
 
+            // Each test needs a distinct coordinator identity so parallel build processes
+            // launched by this test do not connect to another test's coordinator.
             string pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";
+
+            // The coordinator holds this named mutex for its entire process lifetime.
+            // Cleanup uses it to determine when trace files can no longer be written.
+            _serverMutexName = (CoordinatorSettings.Default with { PipeName = pipeName }).ServerMutexName;
             TestEnvironment.SetEnvironmentVariable(Traits.UseCoordinatorEnvVarName, "1");
             TestEnvironment.SetEnvironmentVariable(Constants.PipeNameEnvVarName, pipeName);
             TestEnvironment.SetEnvironmentVariable(Constants.GrantIdEnvVarName, null);
@@ -245,6 +258,8 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             // allowing coordinator processes to shut down quickly after each test.
             TestEnvironment.SetEnvironmentVariable(Constants.ShutdownTimeoutEnvVarName, "1000");
 
+            // Coordinator tracing is enabled so integration failures include the server-side
+            // protocol trace. FrameworkDebugUtils caches this process-wide path.
             _debugLogPath = Path.Combine(Path.GetTempPath(), $"msbuild-coordinator-test-debug-{Guid.NewGuid():N}");
             TestEnvironment.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
             TestEnvironment.SetEnvironmentVariable("MSBUILDDEBUGPATH", _debugLogPath);
@@ -252,10 +267,31 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             FrameworkDebugUtils.SetDebugPath();
         }
 
+        /// <summary>
+        ///  Waits for the external coordinator to exit before restoring process-wide test state and removing its trace directory.
+        /// </summary>
         public void Dispose()
         {
-            TestEnvironment.Dispose();
-            FileUtilities.DeleteDirectoryNoThrow(_debugLogPath, recursive: true);
+            // Build processes can exit before the separately launched coordinator reaches
+            // its idle timeout. Wait for its lifetime mutex to disappear so no process can
+            // still have a trace file open when TestEnvironment checks build-failure logs.
+            bool coordinatorExited = SpinWait.SpinUntil(
+                () => !IsCoordinatorRunning(),
+                CoordinatorExitTimeoutMs);
+
+            try
+            {
+                TestEnvironment.Dispose();
+            }
+            finally
+            {
+                // TestEnvironment restores MSBUILDDEBUGPATH, but FrameworkDebugUtils caches
+                // the resolved value and must be refreshed before subsequent tests run.
+                FrameworkDebugUtils.SetDebugPath();
+                FileUtilities.DeleteDirectoryNoThrow(_debugLogPath, recursive: true);
+            }
+
+            coordinatorExited.ShouldBeTrue($"Coordinator mutex '{_serverMutexName}' was still present after {CoordinatorExitTimeoutMs}ms.");
         }
 
         public TransientTestFile CreateFile(TransientTestFolder folder, string fileName, string contents)
@@ -266,5 +302,19 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
 
         public TransientTestFolder CreateFolder()
             => TestEnvironment.CreateFolder();
+
+        /// <summary>
+        ///  Checks whether the external coordinator still holds its process-lifetime mutex.
+        /// </summary>
+        private bool IsCoordinatorRunning()
+        {
+            if (!Mutex.TryOpenExisting(_serverMutexName, out Mutex? mutex))
+            {
+                return false;
+            }
+
+            mutex.Dispose();
+            return true;
+        }
     }
 }
