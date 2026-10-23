@@ -42,9 +42,15 @@ namespace Microsoft.Build.Tasks
         // threads at the advantage of performing file copies more quickly in the kernel - we must avoid
         // taking up the whole threadpool esp. when hosted in Visual Studio. IOW we use a specific number
         // instead of int.MaxValue.
-        private static readonly int DefaultCopyParallelism = NativeMethodsShared.GetLogicalCoreCount() > 4 ? 6 : 4;
+        // Computed once at process start from Traits.Instance.CopyTaskParallelism.
+        // > 0 = explicit override; < 0 (default) or 0 = use empirical heuristic below.
+        private static readonly int DefaultCopyParallelism =
+            Traits.Instance.CopyTaskParallelism > 0
+                ? Traits.Instance.CopyTaskParallelism
+                : NativeMethodsShared.GetLogicalCoreCount() > 4 ? 6 : 4;
         private static Thread[] copyThreads;
         private static AutoResetEvent[] copyThreadSignals;
+        private static int s_loggedDefaultCopyParallelism;
         private AutoResetEvent _signalCopyTasksCompleted;
 
         private static ConcurrentQueue<Action> _copyActionQueue = new ConcurrentQueue<Action>();
@@ -435,6 +441,8 @@ namespace Microsoft.Build.Tasks
             CopyFileWithState copyFile,
             bool copyInParallel)
         {
+            LogDefaultCopyParallelism();
+
             // If there are no source files then just return success.
             if (IsSourceSetEmpty())
             {
@@ -1158,10 +1166,18 @@ namespace Microsoft.Build.Tasks
             return source.Path == destination.Path;
         }
 
+        private void LogDefaultCopyParallelism()
+        {
+            if (Interlocked.Exchange(ref s_loggedDefaultCopyParallelism, 1) == 0)
+            {
+                bool overridden = Traits.Instance.CopyTaskParallelism > 0;
+                Log.LogMessage(MessageImportance.Low, "Copy parallelism = {0}{1}", DefaultCopyParallelism, overridden ? " (overridden)" : "");
+            }
+        }
+
         private static bool GetParallelismFromEnvironment()
         {
-            int parallelism = Traits.Instance.CopyTaskParallelism;
-            return parallelism != 1;
+            return Traits.Instance.CopyTaskParallelism != 1;
         }
     }
 }
