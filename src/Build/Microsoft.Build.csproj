@@ -431,7 +431,6 @@
     <Compile Include="Collections\CopyOnReadEnumerable.cs" />
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
-    <Compile Include="Collections\IConstrainableDictionary.cs" />
     <Compile Include="Collections\ICopyOnWritePropertyDictionary.cs" />
     <Compile Include="Collections\IItemDictionary.cs" />
     <Compile Include="Collections\IMultiDictionary.cs" />

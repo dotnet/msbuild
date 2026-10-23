@@ -578,7 +578,7 @@ internal partial class Expander<P, I>
         /// </returns>
         private string LookupProperty(string propertyName, int startIndex, int length)
         {
-            P property = _properties.GetProperty(propertyName, startIndex, endIndex: startIndex + length - 1);
+            P property = _properties.GetProperty(propertyName, startIndex, length);
 
             if (property is null)
             {
