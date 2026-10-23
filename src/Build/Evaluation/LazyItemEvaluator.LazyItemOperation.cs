@@ -33,7 +33,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         // This is used only when evaluating an expression, which instantiates
         //  the items and then removes them
         protected readonly IItemFactory<I, I> _itemFactory;
-        internal ItemSpec<P, I> Spec => _itemSpec;
 
         protected LazyItemOperation(
             LazyItemEvaluator<P, I, M, D> lazyEvaluator,

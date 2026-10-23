@@ -3,8 +3,6 @@
 
 using System.Collections.Generic;
 
-#nullable disable
-
 namespace Microsoft.Build.Evaluation;
 
 internal partial class LazyItemEvaluator<P, I, M, D>
@@ -14,9 +12,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         private readonly struct MatchResult
         {
             public bool IsMatch { get; }
-            public Dictionary<string, I> CapturedItemsFromReferencedItemTypes { get; }
 
-            public MatchResult(bool isMatch, Dictionary<string, I> capturedItemsFromReferencedItemTypes)
+            /// <summary>
+            ///  Gets the last matching source of each referenced item type, or <see langword="null"/> when no sources were captured.
+            /// </summary>
+            public Dictionary<string, I>? CapturedItemsFromReferencedItemTypes { get; }
+
+            public MatchResult(bool isMatch, Dictionary<string, I>? capturedItemsFromReferencedItemTypes)
             {
                 IsMatch = isMatch;
                 CapturedItemsFromReferencedItemTypes = capturedItemsFromReferencedItemTypes;

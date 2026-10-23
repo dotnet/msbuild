@@ -105,6 +105,19 @@ Compare `LazyItemQualifiedUpdateBenchmark` against pre-transfer tip `948c8ff64c`
 fixtures and all source/target count combinations. Keep recording-only histories and ordinary
 literal/wildcard Updates as controls. No performance results for this indexing change are recorded yet.
 
+### Literal Update batch keys
+
+Literal Updates classify batch eligibility and cache their unique normalized keys on the first
+admission attempt, not during recording. Specifications containing expansion syntax or duplicate
+normalized keys retain ordinary matching, and that classification is cached too. Batch admission
+checks the complete candidate for overlap before inserting any keys; rejection leaves the pending
+batch unchanged and needs no rollback.
+
+Compare disjoint and overlapping Update cases against `37cf2e840b`, with recording-only histories
+and ordinary operation controls. Keep the fixture unchanged on both revisions. Key arrays are retained
+on eligible operations, so examine allocation as well as time; no performance results for this
+batch-key change are recorded yet.
+
 ## Comparable baseline on the benchmark VM
 
 Run benchmarks on the dedicated benchmark VM, not on the development machine, including smoke runs.

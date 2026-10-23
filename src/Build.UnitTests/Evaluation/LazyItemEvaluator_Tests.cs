@@ -1652,6 +1652,11 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     [InlineData("a.cs;a.cs", false, "initial")]
     [InlineData("a.cs;a.cs", true, "initial-pending")]
     [InlineData("a.cs;./a.cs", false, "initial")]
+    [InlineData("a.cs;./a.cs", true, "initial-pending")]
+    [InlineData("a.cs;A.CS", true, "initial-pending")]
+    [InlineData("a.cs;b.cs;b.cs", true, "initial-pending-update")]
+    [InlineData("./a.cs;B.CS", true, "initial-pending-update")]
+    [InlineData("a.cs;a%2Ecs", true, "initial-pending")]
     [InlineData("a.cs;b.cs;*.cs", false, "initial-update")]
     [InlineData("a.cs;b.cs", true, "initial-pending-update")]
     public void RejectedUpdateBatchDoesNotLeaveTentativeEntries(string updateSpec, bool queueEarlierUpdate, string expectedBTrace)
@@ -1690,8 +1695,136 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     }
 
     [Theory]
+    [InlineData("file$.cs", "file$.cs", true)]
+    [InlineData("file@.cs", "file@.cs", true)]
+    [InlineData("file$@.cs", "file$@.cs", true)]
+    [InlineData("file(name).cs", "file(name).cs", true)]
+    [InlineData("suffix$", "suffix$", true)]
+    [InlineData("suffix@", "suffix@", true)]
+    [InlineData("$file.cs", "$file*.cs", false)]
+    [InlineData("@file1.cs", "@file?.cs", false)]
+    [InlineData("$@file.cs", "$@file*.cs", false)]
+    [InlineData("@$file1.cs", "@$file?.cs", false)]
+    [InlineData("$file%name.cs", "$file%name.cs", false)]
+    [InlineData("@file%name.cs", "@file%name.cs", false)]
+    [InlineData("file%name.cs", "file%name.cs", false)]
+    [InlineData("file.cs", "@(Lookup)", false)]
+    public void LiteralUpdateBatchEligibilityPreservesExpansionTokenRules(string include, string updateSpec, bool canBatch)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="{include}" />
+                    <Source Include="{include}"><Trace>initial</Trace></Source>
+                    <Source Update="{updateSpec}"><Trace>updated</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+        using EventSourceTestHelper listener = new();
+
+        ProjectItem item = provider.GetItems("Source").ShouldHaveSingleItem();
+        item.EvaluatedInclude.ShouldBe(include);
+        item.GetMetadataValue("Trace").ShouldBe("updated");
+
+        // Batched Updates do not call Apply; non-batchable Updates run after the Source Include.
+        int expectedApplications = canBatch ? 1 : 2;
+        CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), "Source").ShouldBe(expectedApplications);
+    }
+
+    [Theory]
+    [InlineData("a.cs;b.cs", "initial-pending-candidate", 3)]
+    [InlineData("a.cs;a.cs", "initial-pending", 1)]
+    [InlineData("a.cs;*.cs", "initial-pending-candidate", 3)]
+    [InlineData("a.cs;a%2Ecs", "initial-pending", 1)]
+    public void ReplayedUpdateBatchCandidatesPreserveOrderingAndMetadataCounts(
+        string updateSpec, string expectedBTrace, int expectedMetadataEvaluations)
+    {
+        const string candidateCondition = "'ReplayedBatchCandidate' == 'ReplayedBatchCandidate'";
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs;b.cs;b.cs;c.tmp"><Trace>initial</Trace></Source>
+                    <Source Update="b.cs"><Trace>%(Trace)-pending</Trace></Source>
+                    <Source Update="{updateSpec}">
+                        <Trace Condition="{candidateCondition}">%(Trace)-candidate</Trace>
+                    </Source>
+                    <Source Update="a.cs"><Trace>%(Trace)-later</Trace></Source>
+                    <BeforeRemove Include="@(Source)" />
+                    <Source Remove="*.tmp" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+        using EventSourceTestHelper listener = new();
+
+        ICollection<ProjectItem> current = provider.GetItems("Source");
+        ProjectItem[] currentItems = [.. current];
+        AssertIncludes(currentItems, ["a.cs", "b.cs", "b.cs"]);
+        currentItems[0].GetMetadataValue("Trace").ShouldBe("initial-candidate-later");
+        currentItems[1].GetMetadataValue("Trace").ShouldBe(expectedBTrace);
+        currentItems[2].GetMetadataValue("Trace").ShouldBe(expectedBTrace);
+        CountEvents(listener, nameof(MSBuildEventSource.EvaluateConditionStart), candidateCondition).ShouldBe(expectedMetadataEvaluations);
+
+        // The earlier capture replays the same operations without the Remove's glob-exclusion context.
+        ProjectItem[] earlierItems = [.. provider.GetItems("BeforeRemove")];
+        AssertIncludes(earlierItems, ["a.cs", "b.cs", "b.cs", "c.tmp"]);
+        earlierItems[0].GetMetadataValue("Trace").ShouldBe("initial-candidate-later");
+        earlierItems[1].GetMetadataValue("Trace").ShouldBe(expectedBTrace);
+        earlierItems[2].GetMetadataValue("Trace").ShouldBe(expectedBTrace);
+        earlierItems[3].GetMetadataValue("Trace").ShouldBe("initial");
+        CountEvents(listener, nameof(MSBuildEventSource.EvaluateConditionStart), candidateCondition).ShouldBe(expectedMetadataEvaluations);
+
+        provider.GetItems("Source").ShouldBeSameAs(current);
+        currentItems[0].GetMetadataValue("Trace").ShouldBe("initial-candidate-later");
+        currentItems[1].GetMetadataValue("Trace").ShouldBe(expectedBTrace);
+        currentItems[2].GetMetadataValue("Trace").ShouldBe(expectedBTrace);
+        CountEvents(listener, nameof(MSBuildEventSource.EvaluateConditionStart), candidateCondition).ShouldBe(0);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MultiLiteralUpdateBatchesPreserveNormalizedMatchesAndCapturedStates(bool instanceModel)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs;./a.cs;b.cs;c.cs"><Trace>initial</Trace></Source>
+                    <Source Update="A.CS;b.cs"><Trace>%(Trace)-first</Trace></Source>
+                    <Source Update="c.cs"><Trace>%(Trace)-second</Trace></Source>
+                    <Before Include="@(Source)" />
+                    <Source Update="./b.cs;c.cs"><Trace>%(Trace)-overlap</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Before", "Source").ShouldBe(
+        [
+            "Before:a.cs:initial-first", "Before:./a.cs:initial-first",
+            "Before:b.cs:initial-first", "Before:c.cs:initial-second",
+            "Source:a.cs:initial-first", "Source:./a.cs:initial-first",
+            "Source:b.cs:initial-first-overlap", "Source:c.cs:initial-second-overlap",
+        ]);
+    }
+
+    [Theory]
     [InlineData("missing.cs", "true")]
     [InlineData("a.cs", "false")]
+    [InlineData("$(Missing)", "true")]
     public void LiteralUpdatesWithoutEffectsStillCacheTheRequestedPrefix(string updateSpec, string condition)
     {
         const string itemType = "UnchangedBatchCacheSource";
