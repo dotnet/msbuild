@@ -33,7 +33,7 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Formats.Asn1" Version="10.0.10">
+    <Dependency Name="System.Formats.Asn1" Version="10.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
@@ -63,19 +63,19 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="10.0.10">
+    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="10.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Pkcs" Version="10.0.10">
+    <Dependency Name="System.Security.Cryptography.Pkcs" Version="10.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Xml" Version="10.0.10">
+    <Dependency Name="System.Security.Cryptography.Xml" Version="10.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
@@ -116,9 +116,9 @@
          in our public surface). At runtime we still bind to whatever NuGet.Frameworks.dll the
          host SDK ships, so per the toolset-vs-product test in dotnet/arcade-services'
          docs/Darc.md this is a toolset dependency, not a product one. -->
-    <Dependency Name="NuGet.Build.Tasks" Version="8.0.0-rc.126">
+    <Dependency Name="NuGet.Build.Tasks" Version="8.1.0-rc.14">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>3dca69bf4ad1f03fa4738e0f3e99506c24135340</Sha>
+      <Sha>4c4510d29a64fcbcba6360e29c3a1e8288a87f9f</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.13.0-1.26516.4">
       <Uri>https://github.com/dotnet/roslyn</Uri>
