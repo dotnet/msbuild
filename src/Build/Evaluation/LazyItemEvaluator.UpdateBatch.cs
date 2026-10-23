@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation;
 
@@ -30,41 +27,35 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </returns>
         public bool TryAdd(UpdateOperation operation)
         {
-            int fragmentIndex = 0;
-            for (; fragmentIndex < operation.Spec.Fragments.Count; fragmentIndex++)
+            if (!operation.TryGetLiteralKeys(out var keys))
             {
-                ItemSpecFragment fragment = operation.Spec.Fragments[fragmentIndex];
-                if (MSBuildConstants.CharactersForExpansion.Any(fragment.TextFragment.Contains))
-                {
-                    // Fragment contains wild cards, items, or properties. Cannot batch over it using a dictionary.
-                    break;
-                }
-
-                NormalizedItemPath fullPath = new(FileUtilities.NormalizePathForComparisonNoThrow(fragment.TextFragment, fragment.ProjectDirectory));
-                _updates ??= [];
-                if (_updates.ContainsKey(fullPath))
-                {
-                    // Another update will already happen on this path. Make that happen before evaluating this one.
-                    break;
-                }
-
-                _updates.Add(fullPath, operation);
+                return false;
             }
 
-            if (fragmentIndex == operation.Spec.Fragments.Count)
+            // Check every key first so rejection leaves the pending batch unchanged.
+            if (_updates is not null)
+            {
+                foreach (NormalizedItemPath key in keys)
+                {
+                    if (_updates.ContainsKey(key))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            if (keys.IsEmpty)
             {
                 return true;
             }
 
-            // Remove only this Update's tentative entries, using the same normalized keys as insertion.
-            for (int i = 0; i < fragmentIndex; i++)
+            _updates ??= [];
+            foreach (NormalizedItemPath key in keys)
             {
-                ItemSpecFragment fragment = operation.Spec.Fragments[i];
-                NormalizedItemPath fullPath = new(FileUtilities.NormalizePathForComparisonNoThrow(fragment.TextFragment, fragment.ProjectDirectory));
-                _updates!.Remove(fullPath);
+                _updates.Add(key, operation);
             }
 
-            return false;
+            return true;
         }
 
         /// <summary>
