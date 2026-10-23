@@ -207,7 +207,7 @@ namespace Microsoft.Build.BackEnd
             {
                 foreach (ProjectPropertyInstance property in PrimaryPropertySets)
                 {
-                    if (String.Equals(property.Name, ReservedPropertyNames.lastTaskResult, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(property.Name, ReservedPropertyNames.LastTaskResult, StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }

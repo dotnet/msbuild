@@ -798,14 +798,14 @@ namespace Microsoft.Build.Evaluation
 
                 List<ProjectPropertyInstance> reservedProperties = new List<ProjectPropertyInstance>();
 
-                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.binPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
-                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.toolsVersion, ToolsVersion, mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.BinPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.ToolsVersion, ToolsVersion, mayBeReserved: true));
 
-                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.toolsPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
-                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion, mayBeReserved: true));
-                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild, mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.ToolsPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.AssemblyVersion, Constants.AssemblyVersion, mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.Version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild, mayBeReserved: true));
 
-                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.msbuildRuntimeType,
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.MSBuildRuntimeType,
 #if RUNTIME_TYPE_NETCORE
                     Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core",
 #else
