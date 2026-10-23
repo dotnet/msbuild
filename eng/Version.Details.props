@@ -6,24 +6,25 @@ This file should be imported by eng/Versions.props
 <Project>
   <PropertyGroup>
     <!-- dotnet-arcade dependencies -->
-    <MicrosoftDotNetArcadeSdkPackageVersion>10.0.0-beta.26501.4</MicrosoftDotNetArcadeSdkPackageVersion>
-    <MicrosoftDotNetXUnitV3ExtensionsPackageVersion>10.0.0-beta.26501.4</MicrosoftDotNetXUnitV3ExtensionsPackageVersion>
+    <MicrosoftDotNetArcadeSdkPackageVersion>10.0.0-beta.26515.1</MicrosoftDotNetArcadeSdkPackageVersion>
+    <MicrosoftDotNetXUnitV3ExtensionsPackageVersion>10.0.0-beta.26515.1</MicrosoftDotNetXUnitV3ExtensionsPackageVersion>
     <!-- dotnet-roslyn dependencies -->
     <MicrosoftNetCompilersToolsetPackageVersion>5.9.0-1.26319.6</MicrosoftNetCompilersToolsetPackageVersion>
     <!-- dotnet-runtime dependencies -->
+    <MicrosoftBclAsyncInterfacesPackageVersion>10.0.13</MicrosoftBclAsyncInterfacesPackageVersion>
     <SystemCodeDomPackageVersion>10.0.8</SystemCodeDomPackageVersion>
     <SystemCollectionsImmutablePackageVersion>10.0.8</SystemCollectionsImmutablePackageVersion>
     <SystemConfigurationConfigurationManagerPackageVersion>10.0.8</SystemConfigurationConfigurationManagerPackageVersion>
     <SystemDiagnosticsDiagnosticSourcePackageVersion>10.0.8</SystemDiagnosticsDiagnosticSourcePackageVersion>
     <SystemDiagnosticsEventLogPackageVersion>10.0.8</SystemDiagnosticsEventLogPackageVersion>
-    <SystemFormatsAsn1PackageVersion>10.0.10</SystemFormatsAsn1PackageVersion>
+    <SystemFormatsAsn1PackageVersion>10.0.13</SystemFormatsAsn1PackageVersion>
     <SystemFormatsNrbfPackageVersion>10.0.8</SystemFormatsNrbfPackageVersion>
     <SystemReflectionMetadataPackageVersion>10.0.8</SystemReflectionMetadataPackageVersion>
     <SystemReflectionMetadataLoadContextPackageVersion>10.0.8</SystemReflectionMetadataLoadContextPackageVersion>
     <SystemResourcesExtensionsPackageVersion>10.0.8</SystemResourcesExtensionsPackageVersion>
-    <SystemSecurityCryptographyPkcsPackageVersion>10.0.10</SystemSecurityCryptographyPkcsPackageVersion>
+    <SystemSecurityCryptographyPkcsPackageVersion>10.0.13</SystemSecurityCryptographyPkcsPackageVersion>
     <SystemSecurityCryptographyProtectedDataPackageVersion>10.0.8</SystemSecurityCryptographyProtectedDataPackageVersion>
-    <SystemSecurityCryptographyXmlPackageVersion>10.0.10</SystemSecurityCryptographyXmlPackageVersion>
+    <SystemSecurityCryptographyXmlPackageVersion>10.0.13</SystemSecurityCryptographyXmlPackageVersion>
     <SystemTextEncodingCodePagesPackageVersion>10.0.8</SystemTextEncodingCodePagesPackageVersion>
     <SystemTextJsonPackageVersion>10.0.8</SystemTextJsonPackageVersion>
     <SystemThreadingChannelsPackageVersion>10.0.8</SystemThreadingChannelsPackageVersion>
@@ -39,6 +40,7 @@ This file should be imported by eng/Versions.props
     <!-- dotnet-roslyn dependencies -->
     <MicrosoftNetCompilersToolsetVersion>$(MicrosoftNetCompilersToolsetPackageVersion)</MicrosoftNetCompilersToolsetVersion>
     <!-- dotnet-runtime dependencies -->
+    <MicrosoftBclAsyncInterfacesVersion>$(MicrosoftBclAsyncInterfacesPackageVersion)</MicrosoftBclAsyncInterfacesVersion>
     <SystemCodeDomVersion>$(SystemCodeDomPackageVersion)</SystemCodeDomVersion>
     <SystemCollectionsImmutableVersion>$(SystemCollectionsImmutablePackageVersion)</SystemCollectionsImmutableVersion>
     <SystemConfigurationConfigurationManagerVersion>$(SystemConfigurationConfigurationManagerPackageVersion)</SystemConfigurationConfigurationManagerVersion>

@@ -3,6 +3,12 @@
   <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="dfdd32e8a9349462e71f687679bc7e5837b8ef4a" BarId="324417" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
+    <Dependency Name="Microsoft.Bcl.AsyncInterfaces" Version="10.0.13">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>
+      </Sha>
+    </Dependency>
+    <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="10.0.8">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
@@ -33,7 +39,7 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Formats.Asn1" Version="10.0.10">
+    <Dependency Name="System.Formats.Asn1" Version="10.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
@@ -69,13 +75,13 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Pkcs" Version="10.0.10">
+    <Dependency Name="System.Security.Cryptography.Pkcs" Version="10.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Xml" Version="10.0.10">
+    <Dependency Name="System.Security.Cryptography.Xml" Version="10.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
@@ -106,9 +112,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26501.4">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26515.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>f6209a1c4124a46b7a202ac73d000e220f562d62</Sha>
+      <Sha>ed9b62fbe0647cadb40b25793463110495e19984</Sha>
     </Dependency>
     <!-- This is the NuGet.* package family. NuGet.Frameworks is also pulled in via this
          version on .NET Core, where Microsoft.Build takes a direct compile-time PackageReference
@@ -124,9 +130,9 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>db649bc3ca504bd1236a119d1cd86c7f8050e95b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="10.0.0-beta.26501.4">
+    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="10.0.0-beta.26515.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>f6209a1c4124a46b7a202ac73d000e220f562d62</Sha>
+      <Sha>ed9b62fbe0647cadb40b25793463110495e19984</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
