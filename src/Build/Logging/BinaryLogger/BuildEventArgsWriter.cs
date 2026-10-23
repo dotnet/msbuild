@@ -53,6 +53,12 @@ namespace Microsoft.Build.Logging
         private readonly MemoryStream nameValueListStream;
 
         /// <summary>
+        /// The binary writer around the nameValueListStream, reused across NameValueList records
+        /// to avoid an allocation per distinct list.
+        /// </summary>
+        private readonly BinaryWriter nameValueListWriter;
+
+        /// <summary>
         /// The binary writer around the originalStream.
         /// </summary>
         private readonly BinaryWriter originalBinaryWriter;
