@@ -16,7 +16,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 {
     private sealed class RemoveOperation : LazyItemOperation
     {
-        private readonly ImmutableList<string> _matchOnMetadata;
+        private readonly ImmutableArray<string> _matchOnMetadata;
         private MetadataTrie<P, I> _metadataSet;
 
         public RemoveOperation(
@@ -25,7 +25,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             ItemSpec<P, I> itemSpec,
             bool conditionResult,
             ReferencedItemLists referencedItemLists,
-            ImmutableList<string> matchOnMetadata,
+            ImmutableArray<string> matchOnMetadata,
             MatchOnMetadataOptions matchOnMetadataOptions)
             : base(lazyEvaluator, itemElement, itemSpec, conditionResult, referencedItemLists)
         {
@@ -38,7 +38,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
             if (!_matchOnMetadata.IsEmpty)
             {
-                _metadataSet = new MetadataTrie<P, I>(matchOnMetadataOptions, _matchOnMetadata, _itemSpec);
+                _metadataSet = MetadataTrie<P, I>.Create(matchOnMetadataOptions, _matchOnMetadata, _itemSpec);
             }
         }
 
@@ -94,7 +94,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
         private bool MatchesItemOnMetadata(I item)
         {
-            return _metadataSet.Contains(_matchOnMetadata.Select(m => item.GetMetadataValue(m)));
+            return _metadataSet.Contains(item, _matchOnMetadata);
         }
 
         public ImmutableHashSet<string>.Builder GetRemovedGlobs()

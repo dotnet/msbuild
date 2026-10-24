@@ -666,7 +666,7 @@ namespace Microsoft.Build.BackEnd
                 "OM_MatchOnMetadataIsRestrictedToReferencedItems",
                 child.RemoveLocation,
                 child.Remove);
-            MetadataTrie<ProjectPropertyInstance, ProjectItemInstance> metadataSet = new MetadataTrie<ProjectPropertyInstance, ProjectItemInstance>(matchingOptions, matchOnMetadata, itemSpec);
+            var metadataSet = MetadataTrie<ProjectPropertyInstance, ProjectItemInstance>.Create(matchingOptions, matchOnMetadata, itemSpec);
             return group.Where(item => metadataSet.Contains(matchOnMetadata.Select(m => item.GetMetadataValue(m)))).ToList();
         }
 

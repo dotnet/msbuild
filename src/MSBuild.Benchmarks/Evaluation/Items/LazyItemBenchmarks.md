@@ -118,6 +118,28 @@ and ordinary operation controls. Keep the fixture unchanged on both revisions. K
 on eligible operations, so examine allocation as well as time; no performance results for this
 batch-key change are recorded yet.
 
+### Include/Remove allocation reductions
+
+Include selection uses a scoped `RefArrayBuilder` and copies its results before returning the pooled
+buffer. Expanded Exclude patterns use an ordinary list, literal Includes with no exclusions do not
+allocate matcher arrays, and metadata-expansion requirements are cached on first application.
+Stored Include exclusions remain segmented; this change does not introduce a large contiguous
+array for the 16,384-exclusion case.
+
+Metadata-based Removes store metadata names in an immutable array and look up candidate values
+directly, without a per-candidate LINQ projection. Trie nodes allocate child dictionaries only when
+they acquire children, so leaves and empty tries retain no empty dictionaries. Qualified metadata
+access resolves its source table directly rather than dispatching through a delegate.
+Source tuples are built by a static factory with direct metadata reads, without projected value
+sequences. Path-like normalization uses a captured base directory rather than a normalization delegate.
+
+Use `fa3c928159` for the incremental comparison, and retain the original `cbc0a321dc` baseline for
+cumulative branch results. Include `MetadataRemove`, Exclude cardinalities, Include/glob cases, and
+recording controls. The current `MetadataRemove` scenario has one source and one metadata name:
+it can measure the lookup allocation change but does not establish trie efficiency across larger
+source sets, metadata tuples, or prefix-sharing patterns. No performance results for these changes
+are recorded yet.
+
 ## Comparable baseline on the benchmark VM
 
 Run benchmarks on the dedicated benchmark VM, not on the development machine, including smoke runs.
