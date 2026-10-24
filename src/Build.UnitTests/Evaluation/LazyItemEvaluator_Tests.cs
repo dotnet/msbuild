@@ -1316,6 +1316,211 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
             ["Source:different-group:match", "Source:missing-group:match"]);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MetadataRemovalKeepsValuesFromDifferentSourceTuplesSeparate(bool instanceModel)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Names Include="Trace;Group" />
+                    <Lookup Include="first"><Trace>shared</Trace><Group>left</Group></Lookup>
+                    <Lookup Include="second"><Trace>shared</Trace><Group>right</Group></Lookup>
+                    <Lookup Include="third"><Trace>other</Trace><Group>third</Group></Lookup>
+                    <Lookup Include="duplicate"><Trace>shared</Trace><Group>left</Group></Lookup>
+                    <Source Include="match"><Trace>shared</Trace><Group>right</Group></Source>
+                    <Source Include="cross-tuple"><Trace>other</Trace><Group>right</Group></Source>
+                    <Source Include="missing-group"><Trace>shared</Trace></Source>
+                    <Before Include="@(Source)" />
+                    <Source Remove="@(Lookup)" MatchOnMetadata="@(Names)" />
+                    <Lookup Update="*"><Trace>later</Trace></Lookup>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source", "Before").ShouldBe(
+        [
+            "Source:cross-tuple:other", "Source:missing-group:shared",
+            "Before:match:shared", "Before:cross-tuple:other", "Before:missing-group:shared",
+        ]);
+    }
+
+    [Theory]
+    [InlineData(false, "CaseSensitive", "Source:candidate:VALUE")]
+    [InlineData(true, "CaseSensitive", "Source:candidate:VALUE")]
+    [InlineData(false, "CaseInsensitive", null)]
+    [InlineData(true, "CaseInsensitive", null)]
+    public void MetadataRemovalPreservesTheSelectedComparisonMode(bool instanceModel, string options, string? expectedItem)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="key"><Trace>value</Trace><Group>one</Group></Lookup>
+                    <Source Include="candidate"><Trace>VALUE</Trace><Group>ONE</Group></Source>
+                    <Source Remove="@(Lookup)" MatchOnMetadata="Trace;Group" MatchOnMetadataOptions="{options}" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        List<string> actual = EvaluateHistory(project, instanceModel, "Source");
+        if (expectedItem is null)
+        {
+            actual.ShouldBeEmpty();
+        }
+        else
+        {
+            actual.ShouldBe([expectedItem]);
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MetadataRemovalPreservesPathLikeTupleNormalization(bool instanceModel)
+    {
+        string alias = Path.Combine("folder", "..", "match.txt");
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="key"><Path>{alias}</Path><Group>one</Group></Lookup>
+                    <Source Include="match"><Path>match.txt</Path><Group>one</Group><Trace>removed</Trace></Source>
+                    <Source Include="other-group"><Path>match.txt</Path><Group>two</Group><Trace>kept</Trace></Source>
+                    <Source Remove="@(Lookup)" MatchOnMetadata="Path;Group" MatchOnMetadataOptions="PathLike" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(["Source:other-group:kept"]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void QualifiedMetadataRoutingPreservesOperationPrecedenceAndEscaping(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBuildDoNotExpandQualifiedMetadataInUpdateOperation", null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="same.txt"><Trace>first</Trace></Source>
+                    <Source Include="same.txt"><Trace>second</Trace></Source>
+                    <Lookup Include="same.txt"><Value>look%3Bup</Value></Lookup>
+                    <Source Update="@(Source);@(Lookup)">
+                        <Trace>%(Source.Trace)|%(lookup.Value)|%(Lookup.Missing)|%(Missing.Value)</Trace>
+                    </Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(
+            ["Source:same.txt:first|look;up||", "Source:same.txt:second|look;up||"]);
+    }
+
+    [Fact]
+    public void ReevaluatedIncludesPreserveBookmarkedExcludesAndPerItemMetadata()
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Excluded Include="b.tmp" />
+                    <Lookup Include="a.cs;b.tmp;c.cs" />
+                    <Source Include="literal.txt;@(Lookup)" Exclude="@(Excluded);c.cs">
+                        <Trace Condition="'%(Extension)' == '.cs'">%(Filename)</Trace>
+                        <Trace Condition="'%(Extension)' != '.cs'">literal</Trace>
+                    </Source>
+                    <BeforeRemove Include="@(Source)" />
+                    <Source Remove="*.txt" />
+                    <Excluded Include="a.cs" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        ProjectItem current = provider.GetItems("Source").ShouldHaveSingleItem();
+        current.EvaluatedInclude.ShouldBe("a.cs");
+        current.GetMetadataValue("Trace").ShouldBe("a");
+        ProjectItem[] earlier = [.. provider.GetItems("BeforeRemove")];
+        AssertIncludes(earlier, ["literal.txt", "a.cs"]);
+        earlier[0].GetMetadataValue("Trace").ShouldBe("literal");
+        earlier[1].GetMetadataValue("Trace").ShouldBe("a");
+        current.GetMetadataValue("Trace").ShouldBe("a");
+    }
+
+    [Fact]
+    public void IncludeSelectionPreservesMixedFragmentOrderAndExcludes()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "one.cs", contents: string.Empty);
+        env.CreateFile(folder, "two.cs", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="from-reference.txt;excluded.txt"><Original>copied</Original></Lookup>
+                    <Source Include="semi%3Bcolon.txt;@(Lookup);*.cs" Exclude="excluded.txt;two.cs">
+                        <Trace>%(Filename)</Trace>
+                    </Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        ProjectItem[] items = [.. provider.GetItems("Source")];
+        AssertIncludes(items, ["semi;colon.txt", "from-reference.txt", "one.cs"]);
+        items[0].GetMetadataValue("Trace").ShouldBe("semi;colon");
+        items[1].GetMetadataValue("Trace").ShouldBe("from-reference");
+        items[1].GetMetadataValue("Original").ShouldBe("copied");
+        items[2].GetMetadataValue("Trace").ShouldBe("one");
+    }
+
+    [Theory]
+    [InlineData("true")]
+    [InlineData("false")]
+    public void IncludeAllocationChangesPreserveEmptySelectionDiagnosticTiming(string condition)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Source Include="@(Missing)" Condition="{condition}">
+                        <Trace>$([System.Int32]::Parse('invalid'))</Trace>
+                    </Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+
+        Should.Throw<InvalidProjectFileException>(() => CollectItems(evaluator));
+    }
+
     [Fact]
     public void ConditionsUseItemsVisibleAtEachElement()
     {

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
@@ -23,6 +24,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         private readonly string? _rootDirectory;
         private readonly ImmutableSegmentedList<string> _excludes;
         private readonly ImmutableArray<ProjectMetadataElement> _metadata;
+        private bool? _needToExpandMetadataForEachItem;
 
         public IncludeOperation(
             LazyItemEvaluator<P, I, M, D> lazyEvaluator,
@@ -48,7 +50,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
         protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
         {
-            var items = SelectItems(listBuilder, laterRemoveGlobPatterns);
+            var items = SelectItems(laterRemoveGlobPatterns);
             MutateItems(items);
             SaveItems(items, listBuilder);
         }
@@ -57,12 +59,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  Creates the items contributed by this Include operation.
         /// </summary>
         [SuppressMessage("Microsoft.Dispose", "CA2000:Dispose objects before losing scope", Justification = "_lazyEvaluator._evaluationProfiler has own dipose logic.")]
-        private ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        private ImmutableArray<I> SelectItems(ImmutableHashSet<string> laterRemoveGlobPatterns)
         {
-            ImmutableArray<I>.Builder? itemsToAdd = null;
+            using RefArrayBuilder<I> itemsToAdd = default;
 
-            ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
-            if (_excludes != null)
+            List<string> excludePatterns = [];
+            if (!_excludes.IsEmpty)
             {
                 // STEP 4: Evaluate, split, expand and subtract any Exclude
                 foreach (string exclude in _excludes)
@@ -90,8 +92,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                         isTransformExpression: out _,
                         elementLocation: _itemElement.IncludeLocation);
 
-                    itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
-
                     if (excludePatterns.Count > 0)
                     {
                         matchers ??= new FileSpecMatcherTester?[excludePatterns.Count];
@@ -106,19 +106,25 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     }
                     else
                     {
-                        itemsToAdd.AddRange(itemsFromExpression);
+                        foreach (I item in itemsFromExpression)
+                        {
+                            itemsToAdd.Add(item);
+                        }
                     }
                 }
                 else if (fragment is ValueFragment valueFragment)
                 {
                     string value = valueFragment.TextFragment;
-                    matchers ??= new FileSpecMatcherTester?[excludePatterns.Count];
-
-                    if (excludePatterns.Count == 0 || !ExcludeTester(_rootDirectory, excludePatterns, matchers, EscapingUtilities.UnescapeAll(value)))
+                    if (excludePatterns.Count > 0)
                     {
-                        itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
-                        itemsToAdd.Add(_itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath));
+                        matchers ??= new FileSpecMatcherTester?[excludePatterns.Count];
+                        if (ExcludeTester(_rootDirectory, excludePatterns, matchers, EscapingUtilities.UnescapeAll(value)))
+                        {
+                            continue;
+                        }
                     }
+
+                    itemsToAdd.Add(_itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath));
                 }
                 else if (fragment is GlobFragment globFragment)
                 {
@@ -159,7 +165,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                         foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                         {
-                            itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
                             itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
                         }
                     }
@@ -170,9 +175,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 }
             }
 
-            return itemsToAdd?.ToImmutable() ?? ImmutableArray<I>.Empty;
+            // ToImmutable copies the selected items before the temporary pooled buffer is returned.
+            return itemsToAdd.ToImmutable();
 
-            static bool ExcludeTester(string? directory, ImmutableList<string>.Builder excludePatterns, FileSpecMatcherTester?[] matchers, string item)
+            static bool ExcludeTester(string? directory, List<string> excludePatterns, FileSpecMatcherTester?[] matchers, string item)
             {
                 if (excludePatterns.Count == 0)
                 {
@@ -200,7 +206,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
         }
 
-        private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> laterRemoveGlobPatterns, ImmutableList<string>.Builder excludePatterns)
+        private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> laterRemoveGlobPatterns, List<string> excludePatterns)
         {
             var anyExcludes = excludePatterns.Count > 0;
             var anyGlobsToIgnore = laterRemoveGlobPatterns.Count > 0;
@@ -215,7 +221,15 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
         private void MutateItems(ImmutableArray<I> items)
         {
-            DecorateItemsWithMetadata(items.Select(i => new ItemBatchingContext(i)), _metadata);
+            if (_metadata.IsEmpty)
+            {
+                return;
+            }
+
+            _needToExpandMetadataForEachItem ??= NeedToExpandMetadataForEachItem(_metadata, out _);
+
+            // Constant metadata must still be evaluated when selection is empty, preserving diagnostics.
+            DecorateItemsWithMetadata(items.Select(i => new ItemBatchingContext(i)), _metadata, _needToExpandMetadataForEachItem);
         }
 
         private void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder)

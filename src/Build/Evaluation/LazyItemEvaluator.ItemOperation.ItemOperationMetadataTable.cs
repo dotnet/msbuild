@@ -32,27 +32,30 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
             public string GetEscapedValue(string itemType, string name)
             {
-                return RouteCall(itemType, name, (t, it, n) => t.GetEscapedValue(it, n));
+                IMetadataTable table = GetMetadataTable(itemType);
+                return table is null ? string.Empty : table.GetEscapedValue(itemType, name);
             }
 
             public string GetEscapedValueIfPresent(string itemType, string name)
             {
-                return RouteCall(itemType, name, (t, it, n) => t.GetEscapedValueIfPresent(it, n));
+                IMetadataTable table = GetMetadataTable(itemType);
+                // An existing table's null result is distinct from an absent matching item type.
+                return table is null ? string.Empty : table.GetEscapedValueIfPresent(itemType, name);
             }
 
-            private string RouteCall(string itemType, string name, Func<IMetadataTable, string, string, string> getEscapedValueFunc)
+            private IMetadataTable GetMetadataTable(string itemType)
             {
                 if (itemType?.Equals(_operationItem.Key, StringComparison.OrdinalIgnoreCase) != false)
                 {
-                    return getEscapedValueFunc(_operationItem, itemType, name);
+                    return _operationItem;
                 }
                 else if (_matchingItems.TryGetValue(itemType, out var item))
                 {
-                    return getEscapedValueFunc(item, itemType, name);
+                    return item;
                 }
                 else
                 {
-                    return string.Empty;
+                    return null;
                 }
             }
         }

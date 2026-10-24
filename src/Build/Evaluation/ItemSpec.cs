@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
@@ -531,112 +532,262 @@ namespace Microsoft.Build.Evaluation
     }
 
     /// <summary>
-    /// A Trie representing the sets of values of specified metadata taken on by the referenced items.
-    /// A single flat list or set of metadata values would not work in this case because we are matching
-    /// on multiple metadata. If one item specifies NotTargetFramework to be net46 and TargetFramework to
-    /// be netcoreapp3.1, we wouldn't want to match that to an item with TargetFramework 46 and
-    /// NotTargetFramework netcoreapp3.1.
-    ///
-    /// Implementing this as a list of sets where each metadatum key has its own set also would not work
-    /// because different items could match on different metadata, and we want to check to see if any
-    /// single item matches on all the metadata. As an example, consider this scenario:
-    /// Item Baby has metadata GoodAt="eating" BadAt="talking" OkAt="sleeping"
-    /// Item Child has metadata GoodAt="sleeping" BadAt="eating" OkAt="talking"
-    /// Item Adolescent has metadata GoodAt="talking" BadAt="sleeping" OkAt="eating"
-    /// Specifying these three metadata:
-    /// Item Forgind with metadata GoodAt="sleeping" BadAt="talking" OkAt="eating"
-    /// should match none of them because Forgind doesn't match all three metadata of any of the items.
-    /// With a list of sets, Forgind would match Baby on BadAt, Child on GoodAt, and Adolescent on OkAt,
-    /// and Forgind would be erroneously removed.
-    ///
-    /// With a Trie as below, Items specify paths in the tree, so going to any child node eliminates all
-    /// items that don't share that metadatum. This ensures the match is proper.
-    ///
-    /// Todo: Tries naturally can have different shapes depending on in what order the metadata are considered.
-    /// Specifically, if all the items share a single metadata value for the one metadatum and have different
-    /// values for a second metadatum, it will have only one node more than the number of items if the first
-    /// metadatum is considered first. If the metadatum is considered first, it will have twice that number.
-    /// Users can theoretically specify the order in which metadata should be considered by reordering them
-    /// on the line invoking this, but that is extremely nonobvious from a user's perspective.
-    /// It would be nice to detect poorly-ordered metadata and account for it to avoid making more nodes than
-    /// necessary. This would need to order if appropriately both in creating the MetadataTrie and in using it,
-    /// so it could best be done as a preprocessing step. For now, wait to find out if it's necessary (users'
-    /// computers run out of memory) before trying to implement it.
+    ///  Stores ordered tuples of metadata values from the referenced source items.
     /// </summary>
     /// <typeparam name="P">Property type</typeparam>
     /// <typeparam name="I">Item type</typeparam>
+    /// <remarks>
+    ///  Each level represents one metadata name in the caller's sequence, and each edge is a complete
+    ///  value for that name. Tuples such as <c>(shared, left)</c> and <c>(shared, right)</c> share their
+    ///  first edge. Following a complete path requires all values to match the same source tuple;
+    ///  independent sets of values could incorrectly combine metadata from different sources.
+    ///  <para>
+    ///   For example, sources with tuples <c>(a, x)</c> and <c>(b, y)</c> must not match a candidate
+    ///   with <c>(a, y)</c>. Separate sets for each metadata name would accept both candidate values,
+    ///   but no single source has that combination. A flat set of values would also lose the
+    ///   association between a value and its metadata name. The trie preserves both the tuple
+    ///   boundaries and the position of each value within the tuple.
+    ///  </para>
+    ///  <para>
+    ///   Construction and lookup must use the same ordered metadata names. There are no terminal
+    ///   markers because all tuples have the same width. Empty candidate values never match.
+    ///   The tree captures values during creation and is only read afterward; subsequent source
+    ///   item changes do not alter it. Leaf nodes have no child dictionary.
+    ///  </para>
+    ///  <para>
+    ///   Metadata ordering affects sharing of leading metadata values and memory use. For <c>N</c> distinct two-value
+    ///   tuples sharing their first value, the tree needs one shared node and <c>N</c> second-level
+    ///   nodes, excluding the root. If those metadata names are reversed, the unique values come
+    ///   first and each needs its own child for the shared value, producing <c>2N</c> nodes instead.
+    ///   Thus, users can affect the tree's shape by ordering names in <c>MatchOnMetadata</c>.
+    ///  </para>
+    ///  <para>
+    ///   A future optimization could choose an order that improves sharing of leading metadata values, but it would
+    ///   need to apply the same permutation to source construction and candidate lookup. Reordering
+    ///   only one side would compare different metadata names at corresponding levels. No such
+    ///   reordering is currently performed.
+    ///  </para>
+    /// </remarks>
     internal sealed class MetadataTrie<P, I>
         where P : class, IProperty
         where I : class, IItem, IMetadataTable
     {
         private readonly Dictionary<string, MetadataTrie<P, I>> _children;
-        private readonly Func<string, string> _normalize;
 
-        internal MetadataTrie(MatchOnMetadataOptions options, IEnumerable<string> metadata, ItemSpec<P, I> itemSpec)
+        /// <summary>
+        ///  The captured directory for path-like comparisons, or <see langword="null"/> when values are compared unchanged.
+        /// </summary>
+        private readonly string _baseDirectory;
+
+        private MetadataTrie(Dictionary<string, MetadataTrie<P, I>> children, string baseDirectory)
         {
-            StringComparer comparer = options == MatchOnMetadataOptions.CaseSensitive ? StringComparer.Ordinal :
-                options == MatchOnMetadataOptions.CaseInsensitive || FileUtilities.PathComparison == StringComparison.OrdinalIgnoreCase ? StringComparer.OrdinalIgnoreCase :
-                StringComparer.Ordinal;
-            _children = new Dictionary<string, MetadataTrie<P, I>>(comparer);
+            _children = children;
+            _baseDirectory = baseDirectory;
+        }
+
+        /// <summary>
+        ///  Creates a trie from the captured source items using the specified metadata comparison policy.
+        /// </summary>
+        /// <param name="options">The comparison and normalization policy.</param>
+        /// <param name="metadataNames">The metadata names, whose enumeration order must remain consistent during construction and lookup.</param>
+        /// <param name="itemSpec">The captured source item references.</param>
+        /// <returns>
+        ///  The completed trie, including an empty trie when no source tuples contribute child edges.
+        /// </returns>
+        public static MetadataTrie<P, I> Create(
+            MatchOnMetadataOptions options,
+            ImmutableArray<string> metadataNames,
+            ItemSpec<P, I> itemSpec)
+        {
+            var (comparer, baseDirectory) = GetComparisonPolicy(options);
+            int metadataCount = metadataNames.Length;
+            Dictionary<string, MetadataTrie<P, I>> rootChildren = null;
+
+            // Keep this enumeration concrete to avoid boxing the immutable array or its enumerator.
+            foreach (ItemSpec<P, I>.ItemExpressionFragment fragment in itemSpec.Fragments)
+            {
+                foreach (ItemSpec<P, I>.ReferencedItem source in fragment.ReferencedItems)
+                {
+                    if (metadataCount == 0)
+                    {
+                        continue;
+                    }
+
+                    rootChildren ??= [with(comparer)];
+                    Dictionary<string, MetadataTrie<P, I>> currentChildren = rootChildren;
+                    int level = 0;
+                    foreach (string name in metadataNames)
+                    {
+                        string value = source.Item.GetMetadataValue(name);
+                        bool hasMoreMetadata = level < metadataCount - 1;
+                        MetadataTrie<P, I> child = GetOrAddChild(currentChildren, value, hasMoreMetadata, comparer, baseDirectory);
+                        currentChildren = child._children;
+                        level++;
+                    }
+                }
+            }
+
+            return new(rootChildren, baseDirectory);
+        }
+
+        /// <summary>
+        ///  Creates a trie from the captured source items using the specified metadata comparison policy.
+        /// </summary>
+        /// <param name="options">The comparison and normalization policy.</param>
+        /// <param name="metadataNames">The metadata names, whose enumeration order must remain consistent during construction and lookup.</param>
+        /// <param name="itemSpec">The captured source item references.</param>
+        /// <returns>
+        ///  The completed trie, including an empty trie when no source tuples contribute child edges.
+        /// </returns>
+        public static MetadataTrie<P, I> Create(
+            MatchOnMetadataOptions options,
+            HashSet<string> metadataNames,
+            ItemSpec<P, I> itemSpec)
+        {
+            var (comparer, baseDirectory) = GetComparisonPolicy(options);
+            int metadataCount = metadataNames.Count;
+            Dictionary<string, MetadataTrie<P, I>> rootChildren = null;
+
+            // The execution-time caller's HashSet enumerator also stays unboxed.
+            foreach (ItemSpec<P, I>.ItemExpressionFragment fragment in itemSpec.Fragments)
+            {
+                foreach (ItemSpec<P, I>.ReferencedItem source in fragment.ReferencedItems)
+                {
+                    if (metadataCount == 0)
+                    {
+                        continue;
+                    }
+
+                    rootChildren ??= [with(comparer)];
+                    Dictionary<string, MetadataTrie<P, I>> currentChildren = rootChildren;
+                    int level = 0;
+                    foreach (string name in metadataNames)
+                    {
+                        string value = source.Item.GetMetadataValue(name);
+                        bool hasMoreMetadata = level < metadataCount - 1;
+                        MetadataTrie<P, I> child = GetOrAddChild(currentChildren, value, hasMoreMetadata, comparer, baseDirectory);
+                        currentChildren = child._children;
+                        level++;
+                    }
+                }
+            }
+
+            return new(rootChildren, baseDirectory);
+        }
+
+        private static (StringComparer Comparer, string BaseDirectory) GetComparisonPolicy(MatchOnMetadataOptions options)
+        {
+            StringComparer comparer = options switch
+            {
+                MatchOnMetadataOptions.CaseSensitive => StringComparer.Ordinal,
+                MatchOnMetadataOptions.CaseInsensitive => StringComparer.OrdinalIgnoreCase,
+                _ => FileUtilities.PathComparison == StringComparison.OrdinalIgnoreCase
+                    ? StringComparer.OrdinalIgnoreCase
+                    : StringComparer.Ordinal,
+            };
+
+            string baseDirectory = null;
             if (options == MatchOnMetadataOptions.PathLike)
             {
-                // In multithreaded (-mt) mode each project gets its own thread-local working directory while the
-                // process current directory is shared, so relative metadata must be rooted against the former or it
-                // resolves under an unrelated project and comparisons silently stop matching.
-                string baseDirectory = FileUtilities.CurrentThreadWorkingDirectory is { Length: > 0 } threadWorkingDirectory
+                // Capture the project's thread-local directory rather than an unrelated process directory.
+                // Construction and every later lookup must normalize against this same context.
+                baseDirectory = FileUtilities.CurrentThreadWorkingDirectory is { Length: > 0 } threadWorkingDirectory
                     ? threadWorkingDirectory
                     : Environment.CurrentDirectory;
-                _normalize = p => FileUtilities.NormalizePathForComparisonNoThrow(p, baseDirectory);
-            }
-            else
-            {
-                _normalize = p => p;
             }
 
-            foreach (ItemSpec<P, I>.ItemExpressionFragment frag in itemSpec.Fragments)
-            {
-                foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)
-                {
-                    this.Add(metadata.Select(m => referencedItem.Item.GetMetadataValue(m)), comparer);
-                }
-            }
+            return (comparer, baseDirectory);
         }
 
-        private MetadataTrie(StringComparer comparer)
+        /// <summary>
+        ///  Finds or creates one edge, allocating child storage only when the source tuple has another level.
+        /// </summary>
+        /// <param name="children">The current level's child dictionary.</param>
+        /// <param name="value">The source item's metadata value.</param>
+        /// <param name="hasMoreMetadata">Whether another metadata value follows this one.</param>
+        /// <param name="comparer">The comparison policy for newly created child dictionaries.</param>
+        /// <param name="baseDirectory">The captured directory for path-like values, or <see langword="null"/> for unchanged values.</param>
+        /// <returns>
+        ///  The child node for the normalized metadata value.
+        /// </returns>
+        private static MetadataTrie<P, I> GetOrAddChild(
+            Dictionary<string, MetadataTrie<P, I>> children,
+            string value,
+            bool hasMoreMetadata,
+            StringComparer comparer,
+            string baseDirectory)
         {
-            _children = new Dictionary<string, MetadataTrie<P, I>>(comparer);
+            string normalizedValue = NormalizeValue(value, baseDirectory);
+            if (!children.TryGetValue(normalizedValue, out var child))
+            {
+                Dictionary<string, MetadataTrie<P, I>> childDictionary = null;
+                if (hasMoreMetadata)
+                {
+                    childDictionary = [with(comparer)];
+                }
+
+                child = new MetadataTrie<P, I>(childDictionary, baseDirectory: null);
+                children.Add(normalizedValue, child);
+            }
+
+            return child;
         }
 
-        // Relies on IEnumerable returning the metadata in a reasonable order. Reasonable?
-        private void Add(IEnumerable<string> metadata, StringComparer comparer)
-        {
-            MetadataTrie<P, I> current = this;
-            foreach (string m in metadata)
-            {
-                string normalizedString = _normalize(m);
-                if (!current._children.TryGetValue(normalizedString, out MetadataTrie<P, I> child))
-                {
-                    child = new MetadataTrie<P, I>(comparer);
-                    current._children.Add(normalizedString, child);
-                }
-                current = child;
-            }
-        }
+        private static string NormalizeValue(string value, string baseDirectory)
+            => baseDirectory is null ? value : FileUtilities.NormalizePathForComparisonNoThrow(value, baseDirectory);
 
         internal bool Contains(IEnumerable<string> metadata)
         {
             MetadataTrie<P, I> current = this;
+
             foreach (string m in metadata)
             {
-                if (String.IsNullOrEmpty(m))
+                if (m.IsNullOrEmpty())
                 {
                     return false;
                 }
-                if (!current._children.TryGetValue(_normalize(m), out current))
+
+                string normalizedValue = NormalizeValue(m, _baseDirectory);
+                if (current._children is null || !current._children.TryGetValue(normalizedValue, out var child))
                 {
                     return false;
                 }
+
+                current = child;
             }
+
+            return true;
+        }
+
+        /// <summary>
+        ///  Looks up an item's metadata tuple without allocating a projected sequence of values.
+        /// </summary>
+        /// <param name="item">The candidate item.</param>
+        /// <param name="metadataNames">The same ordered metadata names used when constructing this trie.</param>
+        /// <returns>
+        ///  <see langword="true"/> when all nonempty values follow a stored tuple; otherwise, <see langword="false"/>.
+        /// </returns>
+        public bool Contains(I item, ImmutableArray<string> metadataNames)
+        {
+            MetadataTrie<P, I> current = this;
+
+            foreach (string name in metadataNames)
+            {
+                string value = item.GetMetadataValue(name);
+                if (value.IsNullOrEmpty())
+                {
+                    return false;
+                }
+
+                string normalizedValue = NormalizeValue(value, _baseDirectory);
+                if (current._children is null || !current._children.TryGetValue(normalizedValue, out var child))
+                {
+                    return false;
+                }
+
+                current = child;
+            }
+
             return true;
         }
     }

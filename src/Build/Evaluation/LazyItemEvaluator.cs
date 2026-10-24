@@ -389,7 +389,7 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
         using ItemListBookmarks.Builder builder = default;
         var itemSpec = ProcessItemSpec(itemElement.Remove, itemElement.RemoveLocation, rootDirectory, ref builder.AsRef());
 
-        ImmutableList<string>.Builder matchOnMetadata = null;
+        using RefArrayBuilder<string> matchOnMetadata = default;
 
         // Process MatchOnMetadata
         if (itemElement.MatchOnMetadata.Length > 0)
@@ -412,7 +412,6 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
 
                     foreach (string metadataSplit in ExpressionShredder.SplitSemiColonSeparatedList(metadataExpanded))
                     {
-                        matchOnMetadata ??= ImmutableList.CreateBuilder<string>();
                         matchOnMetadata.Add(metadataSplit);
                     }
                 }
@@ -431,7 +430,7 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
             itemSpec,
             conditionResult,
             builder.ToImmutable(),
-            matchOnMetadata?.ToImmutable() ?? [],
+            matchOnMetadata.ToImmutable(),
             matchOnMetadataOptions);
     }
 
