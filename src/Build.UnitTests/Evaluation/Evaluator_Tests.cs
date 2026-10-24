@@ -4475,6 +4475,81 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 #endif
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SameConditionCanEvaluateConcurrently(bool warmCache)
+        {
+            string identity = Guid.NewGuid().ToString("N");
+            string condition = $"Exists('$(ConcurrentConditionPath)') And '{identity}' != ''";
+            string firstPath = Path.Combine(Path.GetTempPath(), "first-" + identity);
+            string secondPath = Path.Combine(Path.GetTempPath(), "second-" + identity);
+            TimeSpan timeout = TimeSpan.FromSeconds(10);
+            using ManualResetEventSlim firstEntered = new(false);
+            using ManualResetEventSlim secondEntered = new(false);
+            using ManualResetEventSlim releaseFirst = new(false);
+
+            IFileSystem firstFileSystem = new ConditionEvaluationFileSystem(path =>
+            {
+                path.ShouldBe(firstPath);
+                firstEntered.Set();
+                releaseFirst.Wait(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+                return true;
+            });
+            IFileSystem secondFileSystem = new ConditionEvaluationFileSystem(path =>
+            {
+                path.ShouldBe(secondPath);
+                secondEntered.Set();
+                return false;
+            });
+
+            if (warmCache)
+            {
+                Evaluate(secondPath, secondFileSystem).ShouldBeFalse();
+                secondEntered.Reset();
+            }
+
+            Task<bool> first = Task.Factory.StartNew(
+                () => Evaluate(firstPath, firstFileSystem), TaskCreationOptions.LongRunning);
+            Task<bool> second = null;
+            try
+            {
+                firstEntered.Wait(timeout).ShouldBeTrue();
+                second = Task.Factory.StartNew(
+                    () => Evaluate(secondPath, secondFileSystem), TaskCreationOptions.LongRunning);
+                secondEntered.Wait(timeout).ShouldBeTrue("a blocked evaluation must not hold the shared condition pool lock");
+            }
+            finally
+            {
+                releaseFirst.Set();
+                Task.WaitAll(second is null ? [first] : [first, second], timeout).ShouldBeTrue();
+            }
+
+            first.Result.ShouldBeTrue();
+            second.Result.ShouldBeFalse();
+
+            bool Evaluate(string path, IFileSystem fileSystem)
+            {
+                PropertyDictionary<ProjectPropertyInstance> properties = new();
+                properties.Set(ProjectPropertyInstance.Create("ConcurrentConditionPath", path));
+                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(properties, fileSystem);
+                return ConditionEvaluator.EvaluateCondition(
+                    condition,
+                    ParserOptions.AllowAll,
+                    expander,
+                    ExpanderOptions.ExpandProperties,
+                    Directory.GetCurrentDirectory(),
+                    MockElementLocation.Instance,
+                    fileSystem,
+                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+            }
+        }
+
+        private sealed class ConditionEvaluationFileSystem(Func<string, bool> exists) : ManagedFileSystem
+        {
+            public override bool FileOrDirectoryExists(string path) => exists(path);
+        }
+
         /// <summary>
         /// Verify that Condition Evaluator does reset the cached state when the evaluation throws an exception.
         /// </summary>
