@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.Collections;
@@ -36,11 +36,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             string? rootDirectory,
             ImmutableSegmentedList<string> excludes,
             ImmutableArray<ProjectMetadataElement> metadata)
-            : base(lazyEvaluator,
-                  itemElement,
-                  itemSpec,
-                  conditionResult,
-                  itemListBookmarks)
+            : base(lazyEvaluator, itemElement, itemSpec, conditionResult, itemListBookmarks)
         {
             _includeId = includeId;
             _rootDirectory = rootDirectory;
@@ -62,29 +58,35 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         private ImmutableArray<I> SelectItems(ImmutableHashSet<string> laterRemoveGlobPatterns)
         {
             using RefArrayBuilder<I> itemsToAdd = default;
+            using RefArrayBuilder<string> excludePatterns = default;
 
-            List<string> excludePatterns = [];
             if (!_excludes.IsEmpty)
             {
                 // STEP 4: Evaluate, split, expand and subtract any Exclude
                 foreach (string exclude in _excludes)
                 {
-                    string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation);
-                    var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
-                    excludePatterns.AddRange(excludeSplits);
+                    string expandedExclude = _expander.ExpandIntoStringLeaveEscaped(
+                        exclude,
+                        ExpanderOptions.ExpandPropertiesAndItems,
+                        _itemElement.ExcludeLocation);
+
+                    foreach (string value in ExpressionShredder.SplitSemiColonSeparatedList(expandedExclude))
+                    {
+                        excludePatterns.Add(value);
+                    }
                 }
             }
 
-            ISet<string>? excludePatternsForGlobs = null;
+            ImmutableHashSet<string>? excludePatternsForGlobs = null;
             FileSpecMatcherTester?[]? matchers = null;
 
             foreach (var fragment in _itemSpec.Fragments)
             {
-                if (fragment is ItemSpec<P, I>.ItemExpressionFragment itemReferenceFragment)
+                if (fragment is ItemSpec<P, I>.ItemExpressionFragment itemVectorFragment)
                 {
                     // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                     var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
-                        itemReferenceFragment.Capture,
+                        itemVectorFragment.Capture,
                         _itemListBookmarks,
                         _itemFactory,
                         ExpanderOptions.ExpandItems,
@@ -98,7 +100,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                         foreach (var item in itemsFromExpression)
                         {
-                            if (!ExcludeTester(_rootDirectory, excludePatterns, matchers, item.EvaluatedInclude))
+                            if (!ExcludeTester(_rootDirectory, excludePatterns.AsSpan(), matchers, item.EvaluatedInclude))
                             {
                                 itemsToAdd.Add(item);
                             }
@@ -118,7 +120,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     if (excludePatterns.Count > 0)
                     {
                         matchers ??= new FileSpecMatcherTester?[excludePatterns.Count];
-                        if (ExcludeTester(_rootDirectory, excludePatterns, matchers, EscapingUtilities.UnescapeAll(value)))
+                        if (ExcludeTester(_rootDirectory, excludePatterns.AsSpan(), matchers, EscapingUtilities.UnescapeAll(value)))
                         {
                             continue;
                         }
@@ -135,10 +137,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     {
                         string glob = globFragment.TextFragment;
 
-                        if (excludePatternsForGlobs == null)
-                        {
-                            excludePatternsForGlobs = BuildExcludePatternsForGlobs(laterRemoveGlobPatterns, excludePatterns);
-                        }
+                        excludePatternsForGlobs ??= BuildExcludePatternsForGlobs(laterRemoveGlobPatterns, excludePatterns.AsSpan());
 
                         string[] includeSplitFilesEscaped;
                         if (MSBuildEventSource.Log.IsEnabled())
@@ -146,14 +145,14 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                             MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory ?? string.Empty, glob, string.Join(", ", excludePatternsForGlobs));
                         }
 
-                        using (_lazyEvaluator?._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
+                        using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                         {
                             includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                                 _rootDirectory,
                                 glob,
                                 excludePatternsForGlobs,
                                 fileMatcher: FileMatcher,
-                                loggingMechanism: _lazyEvaluator?._loggingContext,
+                                loggingMechanism: _lazyEvaluator._loggingContext,
                                 includeLocation: _itemElement.IncludeLocation,
                                 excludeLocation: _itemElement.ExcludeLocation);
                         }
@@ -178,12 +177,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // ToImmutable copies the selected items before the temporary pooled buffer is returned.
             return itemsToAdd.ToImmutable();
 
-            static bool ExcludeTester(string? directory, List<string> excludePatterns, FileSpecMatcherTester?[] matchers, string item)
+            static bool ExcludeTester(string? directory, ReadOnlySpan<string> excludePatterns, FileSpecMatcherTester?[] matchers, string item)
             {
-                if (excludePatterns.Count == 0)
-                {
-                    return false;
-                }
+                Debug.Assert(excludePatterns.Length > 0, $"{nameof(ExcludeTester)} must be called with exclude patterns.");
 
                 bool found = false;
                 for (int i = 0; i < matchers.Length; ++i)
@@ -206,17 +202,26 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
         }
 
-        private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> laterRemoveGlobPatterns, List<string> excludePatterns)
+        private static ImmutableHashSet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> laterRemoveGlobPatterns, ReadOnlySpan<string> excludePatterns)
         {
-            var anyExcludes = excludePatterns.Count > 0;
-            var anyGlobsToIgnore = laterRemoveGlobPatterns.Count > 0;
-
-            if (anyGlobsToIgnore && anyExcludes)
+            if (excludePatterns.Length > 0)
             {
-                return excludePatterns.Concat(laterRemoveGlobPatterns).ToImmutableHashSet(FileUtilities.PathComparer);
+                var builder = ImmutableHashSet.CreateBuilder<string>(FileUtilities.PathComparer);
+
+                foreach (string exclude in excludePatterns)
+                {
+                    builder.Add(exclude);
+                }
+
+                if (laterRemoveGlobPatterns.Count > 0)
+                {
+                    builder.UnionWith(laterRemoveGlobPatterns);
+                }
+
+                return builder.ToImmutable();
             }
 
-            return anyExcludes ? excludePatterns.ToImmutableHashSet(FileUtilities.PathComparer) : laterRemoveGlobPatterns;
+            return laterRemoveGlobPatterns;
         }
 
         private void MutateItems(ImmutableArray<I> items)
