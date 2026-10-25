@@ -145,7 +145,9 @@ internal static class GlobResultBuilder
                 itemElement.Exclude, expander, itemElement.ExcludeLocation, itemElement.ContainingProject.DirectoryPath);
             var matcher = new ItemSpecMatcher<P, I>(excludeItemspec, expander);
 
-            excludeFragmentStrings = matcher.FlattenFragmentsAsStrings().ToImmutableHashSet();
+            var fragmentStrings = ImmutableHashSet.CreateBuilder<string>();
+            matcher.AddFragmentStringsTo(fragmentStrings);
+            excludeFragmentStrings = fragmentStrings.ToImmutable();
             excludeGlob = matcher.ToMSBuildGlob();
         }
 
@@ -189,7 +191,7 @@ internal static class GlobResultBuilder
             itemElement.Remove, expander, itemElement.RemoveLocation, itemElement.ContainingProject.DirectoryPath);
         var matcher = new ItemSpecMatcher<P, I>(removeSpec, expander);
 
-        cumulativeRemoveElementData.AccumulateInformationFromRemoveItemSpec(matcher.FlattenFragmentsAsStrings(), matcher.ToMSBuildGlob());
+        cumulativeRemoveElementData.AccumulateInformationFromRemoveItemSpec(matcher);
     }
 
     // represents cumulated remove information for a particular item type
@@ -210,14 +212,12 @@ internal static class GlobResultBuilder
             };
         }
 
-        public readonly void AccumulateInformationFromRemoveItemSpec(IEnumerable<string> removeSpecFragmentStrings, IMSBuildGlob removeGlob)
+        public readonly void AccumulateInformationFromRemoveItemSpec<P, I>(ItemSpecMatcher<P, I> matcher)
+            where P : class, IProperty
+            where I : class, IItem
         {
-            _globs.Add(removeGlob);
-
-            foreach (var removeFragment in removeSpecFragmentStrings)
-            {
-                _fragmentStrings.Add(removeFragment);
-            }
+            _globs.Add(matcher.ToMSBuildGlob());
+            matcher.AddFragmentStringsTo(_fragmentStrings);
         }
     }
 }
