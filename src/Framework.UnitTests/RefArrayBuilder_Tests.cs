@@ -758,34 +758,59 @@ public class RefArrayBuilder_Tests
         result.IsEmpty.ShouldBeTrue();
     }
 
-    [Fact]
-    public void ToImmutable_WithItems_ReturnsImmutableArrayWithCorrectElements()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    public void ToImmutable_WithValueTypes_ReturnsIndependentImmutableArray(int itemCount)
     {
-        using RefArrayBuilder<int> builder = new(4);
-        builder.Add(1);
-        builder.Add(2);
-        builder.Add(3);
+        using RefArrayBuilder<int> builder = default;
+        for (int i = 0; i < itemCount; i++)
+        {
+            builder.Add(i + 1);
+        }
 
         var result = builder.ToImmutable();
 
-        result.Length.ShouldBe(3);
-        result[0].ShouldBe(1);
-        result[1].ShouldBe(2);
-        result[2].ShouldBe(3);
+        result.IsDefault.ShouldBeFalse();
+        result.Length.ShouldBe(itemCount);
+        builder.Count.ShouldBe(itemCount);
+        for (int i = 0; i < itemCount; i++)
+        {
+            builder[i] = -1;
+            result[i].ShouldBe(i + 1);
+        }
     }
 
-    [Fact]
-    public void ToImmutable_WithReferenceTypes_ReturnsImmutableArrayWithCorrectElements()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    public void ToImmutable_WithReferenceTypes_ReturnsIndependentImmutableArray(int itemCount)
     {
-        using RefArrayBuilder<string> builder = new(4);
-        builder.Add("hello");
-        builder.Add("world");
+        string[] values = ["first", "second", "third", "fourth", "fifth"];
+        using RefArrayBuilder<string> builder = default;
+        for (int i = 0; i < itemCount; i++)
+        {
+            builder.Add(values[i]);
+        }
 
         var result = builder.ToImmutable();
 
-        result.Length.ShouldBe(2);
-        result[0].ShouldBe("hello");
-        result[1].ShouldBe("world");
+        result.IsDefault.ShouldBeFalse();
+        result.Length.ShouldBe(itemCount);
+        builder.Count.ShouldBe(itemCount);
+        for (int i = 0; i < itemCount; i++)
+        {
+            builder[i] = "changed";
+            result[i].ShouldBe(values[i]);
+        }
     }
 
     [Fact]

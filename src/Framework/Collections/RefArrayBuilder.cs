@@ -360,7 +360,19 @@ internal ref struct RefArrayBuilder<T>
     /// </summary>
     /// <returns>An immutable array containing the elements.</returns>
     public readonly ImmutableArray<T> ToImmutable()
-        => ImmutableArray.Create(AsSpan());
+        => _count switch
+        {
+            0 => [],
+
+            // Note: Intentially avoid used collection expressions to
+            // avoid constructing a span for small cases.
+            1 => ImmutableArray.Create(_scope[0]),
+            2 => ImmutableArray.Create(_scope[0], _scope[1]),
+            3 => ImmutableArray.Create(_scope[0], _scope[1], _scope[2]),
+            4 => ImmutableArray.Create(_scope[0], _scope[1], _scope[2], _scope[3]),
+
+            _ => ImmutableArray.Create(AsSpan()),
+        };
 
     /// <summary>
     ///  Determines whether the builder contains any elements.
