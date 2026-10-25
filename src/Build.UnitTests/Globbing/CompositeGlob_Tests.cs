@@ -1,11 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Globbing.Extensions;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -168,6 +169,47 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             Assert.Same(glob1, composite.Globs.First());
             Assert.Same(glob2, composite.Globs.Skip(1).First());
             Assert.Equal(2, composite.Globs.Count());
+        }
+
+        [Fact]
+        public void CreateFromImmutableArrayShouldReuseEmptySingleton()
+        {
+            ImmutableArray<IMSBuildGlob> children = [];
+            IEnumerable<IMSBuildGlob> enumerable = children;
+
+            IMSBuildGlob result = CompositeGlob.Create(children);
+
+            result.IsMatch("").ShouldBeFalse();
+            result.IsMatch("anything").ShouldBeFalse();
+            result.ShouldBeSameAs(CompositeGlob.Create(enumerable));
+        }
+
+        [Fact]
+        public void CreateFromImmutableArrayShouldReturnSingleChildUnchanged()
+        {
+            IMSBuildGlob child = MSBuildGlob.Parse("a*");
+            ImmutableArray<IMSBuildGlob> children = [child];
+            IEnumerable<IMSBuildGlob> enumerable = children;
+
+            CompositeGlob.Create(children).ShouldBeSameAs(child);
+            CompositeGlob.Create(enumerable).ShouldBeSameAs(child);
+        }
+
+        [Fact]
+        public void CreateFromImmutableArrayShouldPreserveChildrenAndMatching()
+        {
+            IMSBuildGlob first = MSBuildGlob.Parse("a*");
+            IMSBuildGlob second = MSBuildGlob.Parse("b*");
+            ImmutableArray<IMSBuildGlob> children = [first, second];
+            IEnumerable<IMSBuildGlob> enumerable = children;
+
+            IMSBuildGlob result = CompositeGlob.Create(children);
+            var composite = result.ShouldBeOfType<CompositeGlob>();
+            result.IsMatch("alpha").ShouldBeTrue();
+            result.IsMatch("beta").ShouldBeTrue();
+            result.IsMatch("gamma").ShouldBeFalse();
+            composite.Globs.ShouldBe(children);
+            CompositeGlob.Create(enumerable).ShouldBeOfType<CompositeGlob>().Globs.ShouldBe(children);
         }
     }
 }

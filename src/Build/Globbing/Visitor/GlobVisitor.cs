@@ -16,7 +16,7 @@ namespace Microsoft.Build.Globbing.Visitor
             {
                 VisitCompositeGlob(compositeGlob);
 
-                foreach (var globPart in compositeGlob.Globs)
+                foreach (var globPart in compositeGlob.GlobArray)
                 {
                     Visit(globPart);
                 }
