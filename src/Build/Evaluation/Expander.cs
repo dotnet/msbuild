@@ -399,16 +399,33 @@ internal partial class Expander<P, I>
             includeNullEntries, out isTransformExpression, elementLocation);
     }
 
-    internal bool ExpandExpressionCapture(
-        ExpressionShredder.ItemExpressionCapture expressionCapture,
-        IElementLocation elementLocation,
-        ExpanderOptions options,
-        bool includeNullEntries,
-        out bool isTransformExpression,
-        out List<TransformEntry> entries)
+#nullable enable
+    /// <summary>
+    ///  Expands a parsed item vector into escaped values and optional source-item associations.
+    /// </summary>
+    /// <param name="itemVector">The parsed item vector to expand.</param>
+    /// <param name="location">The diagnostic location of the expression.</param>
+    /// <returns>
+    ///  The expanded entries, or <see langword="null"/> when the vector produces no entries.
+    /// </returns>
+    /// <remarks>
+    ///  Null-valued entries are excluded. The caller owns the returned list.
+    /// </remarks>
+    internal List<TransformEntry>? ExpandItemVector(ExpressionShredder.ItemExpressionCapture itemVector, IElementLocation location)
     {
-        return ItemExpander.ExpandItemVector(this, expressionCapture, _items, elementLocation, options, includeNullEntries, out isTransformExpression, out entries);
+        ItemExpander.ExpandItemVector(
+            this,
+            itemVector,
+            _items,
+            location,
+            ExpanderOptions.ExpandItems,
+            includeNullEntries: false,
+            isTransformExpression: out _,
+            entries: out var entries);
+
+        return entries;
     }
+#nullable disable
 
     private static string TruncateString(string metadataValue)
     {

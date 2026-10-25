@@ -742,7 +742,7 @@ internal partial class Expander<P, I>
             int startLength = builder.Length;
             bool truncate = IsTruncationEnabled(options);
 
-            // if the capture.Separator is not null, then ExpandExpressionCapture would have joined the items using that separator itself
+            // If capture.Separator is not null, ExpandItemVector has already joined the items using that separator.
             for (int i = 0; i < entries.Count; i++)
             {
                 var entry = entries[i];
