@@ -1292,6 +1292,114 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     }
 
     [Theory]
+    [InlineData(false, "$(EmptyNames)")]
+    [InlineData(true, "$(EmptyNames)")]
+    [InlineData(false, "@(MissingNames)")]
+    [InlineData(true, "@(MissingNames)")]
+    public void EmptyExpandedMetadataNamesUseSpecificationRemoval(bool instanceModel, string metadataNames)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <PropertyGroup>
+                    <EmptyNames />
+                </PropertyGroup>
+                <ItemGroup>
+                    <Source Include="removed;kept"><Trace>initial</Trace></Source>
+                    <Source Remove="removed" MatchOnMetadata="{metadataNames}" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(["Source:kept:initial"]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MetadataSelfRemovalDoesNotUseTheSpecificationClearFastPath(bool instanceModel)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="empty" />
+                    <Source Include="populated"><Trace>value</Trace></Source>
+                    <Source Remove="@(Source)" MatchOnMetadata="Trace" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Source").ShouldBe(["Source:empty:"]);
+    }
+
+    [Theory]
+    [InlineData("literal")]
+    [InlineData("*.cs")]
+    public void MetadataRemovalRejectsNonVectorSpecificationsDuringCollection(string specification)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Source Remove="{specification}" MatchOnMetadata="Trace" Condition="false" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+
+        Should.Throw<InvalidProjectFileException>(
+            () => evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MetadataAndSpecificationRemovesPreserveBookmarkedStatesAndLaterRemovePatterns(bool instanceModel)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "a.cs", contents: string.Empty);
+        env.CreateFile(folder, "b.tmp", contents: string.Empty);
+        env.CreateFile(folder, "c.g.cs", contents: string.Empty);
+        env.CreateFile(folder, "d.skip", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Lookup Include="key"><Trace>drop</Trace></Lookup>
+                    <Source Include="*"><Trace>keep</Trace></Source>
+                    <Source Update="b.tmp"><Trace>drop</Trace></Source>
+                    <Before Include="@(Source)" />
+                    <Source Remove="*.skip" />
+                    <Source Remove="@(Lookup)" MatchOnMetadata="Trace" />
+                    <AfterMetadata Include="@(Source)" />
+                    <Lookup Update="*"><Trace>keep</Trace></Lookup>
+                    <Source Remove="@(Lookup)" MatchOnMetadata="Trace" Condition="false" />
+                    <Source Remove="*.g.cs" />
+                    <Source Include="*.tmp"><Trace>again</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+
+        EvaluateHistory(project, instanceModel, "Source", "Before", "AfterMetadata").ShouldBe(
+        [
+            "Source:a.cs:keep", "Source:b.tmp:again",
+            "Before:a.cs:keep", "Before:b.tmp:drop", "Before:c.g.cs:keep", "Before:d.skip:keep",
+            "AfterMetadata:a.cs:keep", "AfterMetadata:c.g.cs:keep",
+        ]);
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void MetadataRemovalUsesAllNamesFromStoredItemMetadata(bool instanceModel)

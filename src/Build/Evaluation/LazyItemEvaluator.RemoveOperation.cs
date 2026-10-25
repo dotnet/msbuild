@@ -6,9 +6,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
-
-#nullable disable
 
 namespace Microsoft.Build.Evaluation;
 
@@ -16,30 +13,14 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 {
     private sealed class RemoveOperation : ItemOperation
     {
-        private readonly ImmutableArray<string> _matchOnMetadata;
-        private MetadataTrie _metadataSet;
-
         public RemoveOperation(
             LazyItemEvaluator<P, I, M, D> lazyEvaluator,
             ProjectItemElement itemElement,
             ItemSpec<P, I> itemSpec,
             bool conditionResult,
-            ItemListBookmarks itemListBookmarks,
-            ImmutableArray<string> matchOnMetadata,
-            MatchOnMetadataOptions matchOnMetadataOptions)
+            ItemListBookmarks itemListBookmarks)
             : base(lazyEvaluator, itemElement, itemSpec, conditionResult, itemListBookmarks)
         {
-            _matchOnMetadata = matchOnMetadata;
-
-            ProjectErrorUtilities.VerifyThrowInvalidProject(
-                _matchOnMetadata.IsEmpty || _itemSpec.Fragments.All(f => f is ItemSpec<P, I>.ItemExpressionFragment),
-                ElementLocation.Empty,
-                "OM_MatchOnMetadataIsRestrictedToReferencedItems");
-
-            if (!_matchOnMetadata.IsEmpty)
-            {
-                _metadataSet = MetadataTrie.Create(matchOnMetadataOptions, _matchOnMetadata, _itemSpec);
-            }
         }
 
         /// <summary>
@@ -55,32 +36,27 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 return;
             }
 
-            bool matchingOnMetadata = !_matchOnMetadata.IsEmpty;
-            if (!matchingOnMetadata)
+            if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
             {
-                if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
-                {
-                    // Perf optimization: If the Remove operation references itself (e.g. <I Remove="@(I)"/>)
-                    // then all items are removed and matching is not necessary
-                    listBuilder.Clear();
-                    return;
-                }
+                // Perf optimization: If the Remove operation references itself (e.g. <I Remove="@(I)"/>)
+                // then all items are removed and matching is not necessary
+                listBuilder.Clear();
+                return;
+            }
 
-                if (listBuilder.Count >= Traits.Instance.DictionaryBasedItemRemoveThreshold)
-                {
-                    // For large item lists, index normalized paths and use membership lookups to find items to remove.
-                    ISet<NormalizedItemPath> matches = _itemSpec.IntersectsWith(listBuilder.NormalizedItemPaths);
-                    listBuilder.RemoveAll(matches);
-                    return;
-                }
+            if (listBuilder.Count >= Traits.Instance.DictionaryBasedItemRemoveThreshold)
+            {
+                // For large item lists, index normalized paths and use membership lookups to find items to remove.
+                ISet<NormalizedItemPath> matches = _itemSpec.IntersectsWith(listBuilder.NormalizedItemPaths);
+                listBuilder.RemoveAll(matches);
+                return;
             }
 
             // todo Perf: do not match against the globs: https://github.com/dotnet/msbuild/issues/2329
-            HashSet<I> items = null;
+            HashSet<I>? items = null;
             foreach (ItemData item in listBuilder)
             {
-                bool isMatch = matchingOnMetadata ? MatchesItemOnMetadata(item.Item) : _itemSpec.MatchesItem(item.Item);
-                if (isMatch)
+                if (_itemSpec.MatchesItem(item.Item))
                 {
                     items ??= new HashSet<I>();
                     items.Add(item.Item);
@@ -90,11 +66,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             {
                 listBuilder.RemoveAll(items);
             }
-        }
-
-        private bool MatchesItemOnMetadata(I item)
-        {
-            return _metadataSet.Contains(item, _matchOnMetadata);
         }
 
         public ImmutableHashSet<string>.Builder GetRemoveGlobPatterns()

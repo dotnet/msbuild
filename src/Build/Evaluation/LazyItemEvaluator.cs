@@ -384,14 +384,12 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
             metadata);
     }
 
-    private RemoveOperation CreateRemoveOperation(ProjectItemElement itemElement, bool conditionResult, string rootDirectory)
+    private ItemOperation CreateRemoveOperation(ProjectItemElement itemElement, bool conditionResult, string rootDirectory)
     {
         using ItemListBookmarks.Builder builder = default;
-        var itemSpec = ProcessItemSpec(itemElement.Remove, itemElement.RemoveLocation, rootDirectory, ref builder.AsRef());
-
         using RefArrayBuilder<string> matchOnMetadata = default;
 
-        // Process MatchOnMetadata
+        // Expand names before selecting the removal mode. A present attribute can expand to nothing.
         if (itemElement.MatchOnMetadata.Length > 0)
         {
             string evaluatedmatchOnMetadata = _expander.ExpandIntoStringLeaveEscaped(
@@ -418,13 +416,21 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
             }
         }
 
+        var itemSpec = ProcessItemSpec(itemElement.Remove, itemElement.RemoveLocation, rootDirectory, ref builder.AsRef());
+        if (matchOnMetadata.IsEmpty)
+        {
+            // Empty expanded names retain ordinary identity matching, including literals and globs.
+            return new RemoveOperation(this, itemElement, itemSpec, conditionResult, builder.ToImmutable());
+        }
+
         var matchOnMetadataOptions = MatchOnMetadataOptions.CaseSensitive;
         if (Enum.TryParse(itemElement.MatchOnMetadataOptions, out MatchOnMetadataOptions options))
         {
             matchOnMetadataOptions = options;
         }
 
-        return new(
+        // Metadata removal validates and captures source tuples during construction, not application.
+        return new MetadataRemoveOperation(
             this,
             itemElement,
             itemSpec,
