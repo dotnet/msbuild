@@ -5,6 +5,7 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
@@ -105,17 +106,17 @@ internal sealed partial class ItemSpecMatcher<P, I>
     /// <param name="itemToMatch">The identity to match.</param>
     /// <param name="matches">The total number of matching occurrences, including duplicate vector values.</param>
     /// <returns>
-    ///  The original matching fragments in specification order, or an empty collection when none match.
+    ///  The original matching fragments in specification order, or an empty array when none match.
     /// </returns>
     /// <remarks>
     ///  All fragments are inspected to compute the complete count. Each matching fragment appears once
     ///  in the result, but <paramref name="matches"/> can exceed the result's length when a vector
     ///  contributes several matching values.
     /// </remarks>
-    public IEnumerable<ItemSpecFragment> FragmentsMatchingItem(string itemToMatch, out int matches)
+    public ImmutableArray<ItemSpecFragment> FragmentsMatchingItem(string itemToMatch, out int matches)
     {
         var fragments = ItemSpec.Fragments;
-        var result = new List<ItemSpecFragment>(fragments.Length);
+        using RefArrayBuilder<ItemSpecFragment> result = default;
         matches = 0;
 
         for (int i = 0; i < fragments.Length; i++)
@@ -145,7 +146,7 @@ internal sealed partial class ItemSpecMatcher<P, I>
             }
         }
 
-        return result;
+        return result.ToImmutable();
     }
 
     /// <summary>
@@ -232,17 +233,15 @@ internal sealed partial class ItemSpecMatcher<P, I>
     }
 
     /// <summary>
-    ///  Enumerates fragment text, substituting resolved values for item vectors.
+    ///  Adds fragment text to a set, substituting resolved values for item vectors.
     /// </summary>
-    /// <returns>
-    ///  Literal text, glob patterns, and resolved vector values in specification order, retaining duplicates.
-    /// </returns>
+    /// <param name="builder">The destination set builder, whose existing entries and comparer are preserved.</param>
     /// <remarks>
-    ///  Enumeration is lazy: vectors are resolved as they are reached and reuse this matcher's cache.
+    ///  All vectors are resolved, reusing this matcher's cache.
     ///  Literal and resolved vector values remain escaped; glob patterns were unescaped during parsing.
-    ///  Glob patterns are returned as patterns rather than enumerated into files.
+    ///  Glob patterns are added without enumerating files.
     /// </remarks>
-    public IEnumerable<string> FlattenFragmentsAsStrings()
+    public void AddFragmentStringsTo(ImmutableHashSet<string>.Builder builder)
     {
         var fragments = ItemSpec.Fragments;
         for (int i = 0; i < fragments.Length; i++)
@@ -253,12 +252,12 @@ internal sealed partial class ItemSpecMatcher<P, I>
                 ValueState[] values = GetValues(i, vector);
                 for (int j = 0; j < values.Length; j++)
                 {
-                    yield return values[j].Text;
+                    builder.Add(values[j].Text);
                 }
             }
             else
             {
-                yield return fragment.Text;
+                builder.Add(fragment.Text);
             }
         }
     }

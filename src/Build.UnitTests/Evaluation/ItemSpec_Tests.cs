@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -72,6 +73,51 @@ namespace Microsoft.Build.UnitTests.Evaluation
             glob.IsMatch("").ShouldBeFalse();
             glob.IsMatch("anything").ShouldBeFalse();
             matcher.ToMSBuildGlob().ShouldBeSameAs(glob);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("@(Missing)")]
+        public void AddingEmptyFragmentStringsPreservesExistingEntries(string specification)
+        {
+            var matcher = CreateMatcherFrom(specification, CreateExpander(new Dictionary<string, string[]>()));
+            var builder = ImmutableHashSet.CreateBuilder<string>();
+            builder.Add("existing");
+
+            matcher.AddFragmentStringsTo(builder);
+
+            builder.ToImmutable().ShouldBe(["existing"], ignoreOrder: true);
+        }
+
+        [Fact]
+        public void AddingFragmentStringsPreservesEscapingAndCombinesAllFragmentKinds()
+        {
+            var matcher = CreateMatcherFrom(
+                "same.txt;literal%3Bname;g%3Blob*.cs;@(Missing);@(Lookup);@(Lookup);tail",
+                CreateExpander(new Dictionary<string, string[]> { ["Lookup"] = ["vector.txt", "same.txt", "vector.txt"] }));
+            var builder = ImmutableHashSet.CreateBuilder<string>();
+            builder.Add("existing");
+
+            matcher.AddFragmentStringsTo(builder);
+
+            builder.ToImmutable().ShouldBe(
+                ["existing", "same.txt", "literal%3Bname", "g;lob*.cs", "vector.txt", "tail"], ignoreOrder: true);
+        }
+
+        [Fact]
+        public void AddingFragmentStringsUsesEachDestinationComparer()
+        {
+            var matcher = CreateMatcherFrom(
+                "same.txt;@(Lookup)",
+                CreateExpander(new Dictionary<string, string[]> { ["Lookup"] = ["SAME.txt"] }));
+            var caseSensitive = ImmutableHashSet.CreateBuilder<string>(StringComparer.Ordinal);
+            var caseInsensitive = ImmutableHashSet.CreateBuilder<string>(StringComparer.OrdinalIgnoreCase);
+
+            matcher.AddFragmentStringsTo(caseSensitive);
+            matcher.AddFragmentStringsTo(caseInsensitive);
+
+            caseSensitive.ToImmutable().ShouldBe(["same.txt", "SAME.txt"], ignoreOrder: true);
+            caseInsensitive.ToImmutable().ShouldBe(["same.txt"], ignoreOrder: true);
         }
 
         [Fact]
@@ -167,6 +213,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             matcher.MatchesItem(thirdItem).ShouldBeFalse();
             matcher.ToMSBuildGlob().IsMatch("second.txt").ShouldBeTrue();
             matcher.ToMSBuildGlob().IsMatch("third.txt").ShouldBeFalse();
+
+            var fragmentStrings = ImmutableHashSet.CreateBuilder<string>();
+            matcher.AddFragmentStringsTo(fragmentStrings);
+            fragmentStrings.ToImmutable().ShouldBe(["first.txt", "second.txt"], ignoreOrder: true);
         }
 
         [Fact]
@@ -206,8 +256,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 "same.txt;@(Lookup)",
                 CreateExpander(new Dictionary<string, string[]> { ["Lookup"] = ["same.txt", "same.txt", "other.txt"] }));
 
-            List<ItemSpecFragment> matchingFragments = [.. matcher.FragmentsMatchingItem("same.txt", out int occurrences)];
-            matchingFragments.Count.ShouldBe(2);
+            var matchingFragments = matcher.FragmentsMatchingItem("same.txt", out int occurrences);
+            matchingFragments.Length.ShouldBe(2);
             occurrences.ShouldBe(3);
 
             string directory = matcher.ItemSpec.Fragments[0].ProjectDirectory;
