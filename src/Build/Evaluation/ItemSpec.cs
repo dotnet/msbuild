@@ -119,13 +119,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     _expander = _containingItemSpec.Expander;
 
-                    _expander.ExpandExpressionCapture(
-                        Capture,
-                        _containingItemSpec.ItemSpecLocation,
-                        ExpanderOptions.ExpandItems,
-                        includeNullEntries: false,
-                        isTransformExpression: out _,
-                        entries: out var entries);
+                    var entries = _expander.ExpandItemVector(Capture, _containingItemSpec.ItemSpecLocation);
                     _referencedItems =
                         entries?.Select(i => new ReferencedItem(i.Item, new ValueFragment(i.Value, ProjectDirectory))).ToList() ?? [];
 
