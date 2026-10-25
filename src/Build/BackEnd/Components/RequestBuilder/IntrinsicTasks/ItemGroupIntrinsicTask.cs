@@ -659,15 +659,10 @@ namespace Microsoft.Build.BackEnd
             HashSet<string> matchOnMetadata,
             MatchOnMetadataOptions matchingOptions)
         {
-            ItemSpec<ProjectPropertyInstance, ProjectItemInstance> itemSpec = new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, expander, child.RemoveLocation, Project.Directory, true);
-            ProjectErrorUtilities.VerifyThrowInvalidProject(
-                itemSpec.Fragments.All(f => f is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment),
-                ElementLocation.Empty,
-                "OM_MatchOnMetadataIsRestrictedToReferencedItems",
-                child.RemoveLocation,
-                child.Remove);
-            var metadataSet = MetadataTrie.Create(matchingOptions, matchOnMetadata, itemSpec);
-            return group.Where(item => metadataSet.Contains(matchOnMetadata.Select(m => item.GetMetadataValue(m)))).ToList();
+            var sourceFragments = ItemSpec.ParseItemVectorFragments(child.Remove, expander, child.RemoveLocation, Project.Directory);
+            var metadataSet = MetadataTrie.Create(matchingOptions, matchOnMetadata, sourceFragments, expander);
+
+            return [.. group.Where(item => metadataSet.Contains(matchOnMetadata.Select(m => item.GetMetadataValue(m))))];
         }
 
         /// <summary>

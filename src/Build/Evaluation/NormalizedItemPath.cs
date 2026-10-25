@@ -11,7 +11,7 @@ namespace Microsoft.Build.Evaluation;
 /// </summary>
 /// <remarks>
 ///  <see cref="LazyItemEvaluator{P, I, M, D}"/> caches these keys on item records and uses them in its
-///  normalized-path index and literal Update batches. <see cref="ItemSpec{P, I}.IntersectsWith"/> matches
+///   normalized-path index and literal Update batches. <see cref="ItemSpecMatcher{P, I}.IntersectsWith"/> matches
 ///  Remove specifications against that index and returns keys for removing the matching items.
 ///  Keeping the hash with the path avoids hashing its characters again on each membership lookup.
 ///  <para>

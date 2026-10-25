@@ -1,525 +1,306 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Frozen;
-using System.Collections.Generic;
-using System.Linq;
+using System;
+using System.Collections.Immutable;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
-#nullable disable
+namespace Microsoft.Build.Evaluation;
 
-namespace Microsoft.Build.Evaluation
+/// <summary>
+///  Stores the original text and property-expanded syntax of an item specification.
+/// </summary>
+/// <param name="text">The original escaped attribute text, before property expansion.</param>
+/// <param name="fragments">The parsed, property-expanded fragments in specification order.</param>
+/// <remarks>
+///  Specifications can contain literals, globs, and item vectors. Parsing does not resolve vectors
+///  or expand filesystem globs. Consumers supply their own expansion context and own derived matching state;
+///  the specification and its fragments do not retain an expander or evaluation caches.
+/// </remarks>
+internal sealed class ItemSpec(string text, ImmutableArray<ItemSpecFragment> fragments)
 {
     /// <summary>
-    ///     Represents the elements of an item specification string (e.g. Include="*.cs;foo;@(i)") and
-    ///     provides some operations over them (like matching items against a given ItemSpec)
+    ///  Gets the original escaped specification text, before property expansion.
     /// </summary>
-    internal class ItemSpec<P, I>
-        where P : class, IProperty
-        where I : class, IItem, IMetadataTable
+    public string Text { get; } = text;
+
+    /// <summary>
+    ///  Gets the property-expanded fragments in specification order.
+    /// </summary>
+    public ImmutableArray<ItemSpecFragment> Fragments { get; } = fragments;
+
+    /// <summary>
+    ///  Determines whether this specification is a single, untransformed vector of <paramref name="itemType"/>.
+    /// </summary>
+    /// <param name="itemType">The item type the vector must reference, compared case-insensitively.</param>
+    /// <returns>
+    ///  <see langword="true"/> if the specification is a simple vector of the requested type;
+    ///  otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    ///  This is a syntax-only test and does not resolve the vector. Item functions and transforms
+    ///  are excluded, but an explicit separator currently does not disqualify the vector.
+    /// </remarks>
+    public bool IsSimpleItemVector(string itemType)
     {
-        internal readonly struct ReferencedItem
+        if (Fragments is not [ItemVectorFragment vector])
         {
-            public I Item { get; }
-            public ValueFragment ItemAsValueFragment { get; }
-
-            public ReferencedItem(I item, ValueFragment itemAsValueFragment)
-            {
-                Item = item;
-                ItemAsValueFragment = itemAsValueFragment;
-            }
-        }
-
-        internal class ItemExpressionFragment : ItemSpecFragment
-        {
-            private readonly ItemSpec<P, I> _containingItemSpec;
-            private Expander<P, I> _expander;
-
-            private IMSBuildGlob _msbuildGlob;
-
-            private List<ReferencedItem> _referencedItems;
-            public ExpressionShredder.ItemExpressionCapture Capture { get; }
-
-            public List<ReferencedItem> ReferencedItems
-            {
-                get
-                {
-                    InitReferencedItemsIfNecessary();
-                    return _referencedItems;
-                }
-            }
-
-            protected override IMSBuildGlob MsBuildGlob
-            {
-                get
-                {
-                    if (InitReferencedItemsIfNecessary() || _msbuildGlob == null)
-                    {
-                        _msbuildGlob = CreateMsBuildGlob();
-                    }
-
-                    return _msbuildGlob;
-                }
-            }
-
-            public ItemExpressionFragment(
-                ExpressionShredder.ItemExpressionCapture capture,
-                string textFragment,
-                ItemSpec<P, I> containingItemSpec,
-                string projectDirectory)
-                : base(textFragment, projectDirectory)
-            {
-                Capture = capture;
-
-                _containingItemSpec = containingItemSpec;
-                _expander = _containingItemSpec.Expander;
-            }
-
-            public override int MatchCount(string itemToMatch)
-            {
-                return ReferencedItems.Count(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
-            }
-
-            public override bool IsMatch(string itemToMatch)
-            {
-                return ReferencedItems.Any(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
-            }
-
-            public override IEnumerable<string> GetReferencedItems()
-            {
-                return ReferencedItems.Select(v => EscapingUtilities.UnescapeAll(v.ItemAsValueFragment.TextFragment));
-            }
-
-            public override IMSBuildGlob ToMSBuildGlob()
-            {
-                return MsBuildGlob;
-            }
-
-            protected override IMSBuildGlob CreateMsBuildGlob()
-            {
-                if (ReferencedItems.Count == 1)
-                {
-                    // Optimize the common case, avoiding allocation of enumerable/enumerator.
-                    return ReferencedItems[0].ItemAsValueFragment.ToMSBuildGlob();
-                }
-
-                return CompositeGlob.Create(ReferencedItems.Select(i => i.ItemAsValueFragment.ToMSBuildGlob()));
-            }
-
-            private bool InitReferencedItemsIfNecessary()
-            {
-                // cache referenced items as long as the expander does not change
-                // reference equality works for now since the expander cannot mutate its item state (hopefully it stays that way)
-                if (_referencedItems == null || _expander != _containingItemSpec.Expander)
-                {
-                    _expander = _containingItemSpec.Expander;
-
-                    var entries = _expander.ExpandItemVector(Capture, _containingItemSpec.ItemSpecLocation);
-                    _referencedItems =
-                        entries?.Select(i => new ReferencedItem(i.Item, new ValueFragment(i.Value, ProjectDirectory))).ToList() ?? [];
-
-                    return true;
-                }
-
-                return false;
-            }
-        }
-
-        public string ItemSpecString { get; }
-
-        /// <summary>
-        ///     The fragments that compose an item spec string (values, globs, item references)
-        /// </summary>
-        public List<ItemSpecFragment> Fragments { get; }
-
-        /// <summary>
-        ///     The expander needs to have a default item factory set.
-        /// </summary>
-        // todo Make this type immutable. Dealing with an Expander change is painful. See the ItemExpressionFragment
-        public Expander<P, I> Expander { get; set; }
-
-        /// <summary>
-        ///     The xml attribute where this itemspec comes from
-        /// </summary>
-        public IElementLocation ItemSpecLocation { get; }
-
-        /// <param name="itemSpec">The string containing item syntax</param>
-        /// <param name="expander">Expects the expander to have a default item factory set</param>
-        /// <param name="itemSpecLocation">The xml location the itemspec comes from</param>
-        /// <param name="projectDirectory">The directory that the project is in.</param>
-        /// <param name="expandProperties">Expand properties before breaking down fragments. Defaults to true</param>
-        public ItemSpec(
-            string itemSpec,
-            Expander<P, I> expander,
-            IElementLocation itemSpecLocation,
-            string projectDirectory,
-            bool expandProperties = true)
-        {
-            ItemSpecString = itemSpec;
-            Expander = expander;
-            ItemSpecLocation = itemSpecLocation;
-
-            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties);
-        }
-
-        private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
-        {
-            // Code corresponds to Evaluator.CreateItemsFromInclude
-            var evaluatedItemspecEscaped = ItemSpecString;
-
-            if (string.IsNullOrEmpty(evaluatedItemspecEscaped))
-            {
-                return new List<ItemSpecFragment>();
-            }
-
-            // STEP 1: Expand properties in Include
-            if (expandProperties)
-            {
-                evaluatedItemspecEscaped = Expander.ExpandIntoStringLeaveEscaped(
-                    ItemSpecString,
-                    ExpanderOptions.ExpandProperties,
-                    itemSpecLocation);
-            }
-
-            var semicolonCount = 0;
-            foreach (var c in evaluatedItemspecEscaped)
-            {
-                if (c == ';')
-                {
-                    semicolonCount++;
-                }
-            }
-
-            // estimate the number of fragments with the number of semicolons. This is will overestimate in case of transforms with semicolons, but won't underestimate.
-            var fragments = new List<ItemSpecFragment>(semicolonCount + 1);
-
-            // STEP 2: Split Include on any semicolons, and take each split in turn
-            if (evaluatedItemspecEscaped.Length > 0)
-            {
-                var splitsEscaped = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedItemspecEscaped);
-
-                foreach (var splitEscaped in splitsEscaped)
-                {
-                    // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
-                    var itemReferenceFragment = ProcessItemExpression(
-                        splitEscaped,
-                        itemSpecLocation,
-                        projectDirectory,
-                        out var isItemListExpression);
-
-                    if (isItemListExpression)
-                    {
-                        fragments.Add(itemReferenceFragment);
-                    }
-                    else
-                    {
-                        // The expression is not of the form "@(X)". Treat as string
-
-                        // Code corresponds to EngineFileUtilities.GetFileList
-                        if (!FileMatcher.HasWildcards(splitEscaped))
-                        {
-                            // No real wildcards means we just return the original string.  Don't even bother
-                            // escaping ... it should already be escaped appropriately since it came directly
-                            // from the project file
-
-                            fragments.Add(new ValueFragment(splitEscaped, projectDirectory));
-                        }
-                        else if (EscapingUtilities.ContainsEscapedWildcards(splitEscaped))
-                        {
-                            // '*' is an illegal character to have in a filename.
-                            // todo: file-system assumption on legal path characters: https://github.com/dotnet/msbuild/issues/781
-                            // Just return the original string.
-                            fragments.Add(new ValueFragment(splitEscaped, projectDirectory));
-                        }
-                        else
-                        {
-                            // Unescape before handing it to the filesystem.
-                            var filespecUnescaped = EscapingUtilities.UnescapeAll(splitEscaped);
-
-                            fragments.Add(new GlobFragment(filespecUnescaped, projectDirectory));
-                        }
-                    }
-                }
-            }
-
-            return fragments;
-        }
-
-        private ItemExpressionFragment ProcessItemExpression(
-            string expression,
-            IElementLocation elementLocation,
-            string projectDirectory,
-            out bool isItemListExpression)
-        {
-            isItemListExpression = false;
-
-            if (Expander<P, I>.TryExpandSingleItemVectorExpression(
-                    expression,
-                    ExpanderOptions.ExpandItems,
-                    elementLocation,
-                    out ExpressionShredder.ItemExpressionCapture itemVector))
-            {
-                isItemListExpression = true;
-
-                return new ItemExpressionFragment(itemVector, expression, this, projectDirectory);
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        ///     Return true if the given <paramref name="item" /> matches this itemspec
-        /// </summary>
-        /// <param name="item">The item to attempt to find a match for.</param>
-        public bool MatchesItem(I item)
-        {
-            // Avoid unnecessary LINQ/Func/Enumerator allocations on this path, this is called a lot
-
-            var evaluatedInclude = item.EvaluatedInclude;
-            foreach (var fragment in Fragments)
-            {
-                if (fragment.IsMatch(evaluatedInclude))
-                {
-                    return true;
-                }
-            }
-
             return false;
         }
 
-        /// <summary>
-        ///     Return the fragments that match against the given <paramref name="itemToMatch" />
-        /// </summary>
-        /// <param name="itemToMatch">The item to match.</param>
-        /// <param name="matches">
-        ///     Total number of matches. Some fragments match more than once (item expression may contain multiple instances of
-        ///     <paramref name="itemToMatch" />)
-        /// </param>
-        public IEnumerable<ItemSpecFragment> FragmentsMatchingItem(string itemToMatch, out int matches)
+        if (!vector.ItemVector.ItemType.Equals(itemType, StringComparison.OrdinalIgnoreCase))
         {
-            var result = new List<ItemSpecFragment>(Fragments.Count);
-            matches = 0;
-
-            foreach (var fragment in Fragments)
-            {
-                var itemMatches = fragment.MatchCount(itemToMatch);
-
-                if (itemMatches > 0)
-                {
-                    result.Add(fragment);
-                    matches += itemMatches;
-                }
-            }
-
-            return result;
+            return false;
         }
 
-        /// <summary>
-        ///  Returns the normalized item paths matched by this item specification.
-        /// </summary>
-        /// <param name="normalizedItemPaths">The normalized item paths to match against.</param>
-        /// <returns>
-        ///  The set of matching paths, using the comparison rules of <paramref name="normalizedItemPaths"/>.
-        /// </returns>
-        public ISet<NormalizedItemPath> IntersectsWith(HashSet<NormalizedItemPath> normalizedItemPaths)
-        {
-            HashSet<NormalizedItemPath> matches = null;
-
-            foreach (var fragment in Fragments)
-            {
-                IEnumerable<string> referencedItems = fragment.GetReferencedItems();
-                if (referencedItems is not null)
-                {
-                    // The fragment can enumerate its referenced items, so use path membership lookups.
-                    foreach (var spec in referencedItems)
-                    {
-                        NormalizedItemPath key = new(FileUtilities.NormalizePathForComparisonNoThrow(spec, fragment.ProjectDirectory));
-                        if (normalizedItemPaths.Contains(key))
-                        {
-                            matches ??= [with(normalizedItemPaths.Comparer)];
-                            matches.Add(key);
-                        }
-                    }
-                }
-                else
-                {
-                    // The fragment cannot enumerate its referenced items. Test each indexed path.
-                    foreach (NormalizedItemPath path in normalizedItemPaths)
-                    {
-                        if (fragment.IsMatchNormalized(path.Value))
-                        {
-                            matches ??= [with(normalizedItemPaths.Comparer)];
-                            matches.Add(path);
-                        }
-                    }
-                }
-            }
-
-            return matches is not null ? matches : FrozenSet<NormalizedItemPath>.Empty;
-        }
-
-        /// <summary>
-        ///     Return an MSBuildGlob that represents this ItemSpec.
-        /// </summary>
-        public IMSBuildGlob ToMSBuildGlob()
-        {
-            if (Fragments.Count == 1)
-            {
-                // Optimize the common case, avoiding allocation of enumerable/enumerator.
-                return Fragments[0].ToMSBuildGlob();
-            }
-
-            return CompositeGlob.Create(Fragments.Select(f => f.ToMSBuildGlob()));
-        }
-
-        /// <summary>
-        ///     Returns all the fragment strings that represent it.
-        ///     "1;*;2;@(foo)" gets returned as ["1", "2", "*", "a", "b"], given that @(foo)=["a", "b"]
-        ///     Order is not preserved. Globs are not expanded. Item expressions get replaced with their referring item instances.
-        /// </summary>
-        public IEnumerable<string> FlattenFragmentsAsStrings()
-        {
-            foreach (var fragment in Fragments)
-            {
-                if (fragment is ValueFragment or GlobFragment)
-                {
-                    yield return fragment.TextFragment;
-                }
-                else if (fragment is ItemExpressionFragment itemExpression)
-                {
-                    foreach (var referencedItem in itemExpression.ReferencedItems)
-                    {
-                        yield return referencedItem.ItemAsValueFragment.TextFragment;
-                    }
-                }
-                else
-                {
-                    Assumed.Unreachable();
-                }
-            }
-        }
-
-        public override string ToString()
-        {
-            return ItemSpecString;
-        }
+        // @(X->Something(...)) can return different identities from a bare @(X).
+        // UNDONE: Explicit separators can also change identities, but currently still qualify as simple.
+        return vector.ItemVector.Captures is null;
     }
 
-    internal abstract class ItemSpecFragment
+    /// <summary>
+    ///  Expands properties and creates a specification without resolving item vectors.
+    /// </summary>
+    /// <typeparam name="P">The property representation used by the expander.</typeparam>
+    /// <typeparam name="I">The item representation used by the expander.</typeparam>
+    /// <param name="itemSpec">The original escaped attribute text; an empty string produces no fragments.</param>
+    /// <param name="expander">The property-expansion context used during parsing.</param>
+    /// <param name="itemSpecLocation">The diagnostic location of the specification.</param>
+    /// <param name="projectDirectory">The base directory used to interpret relative paths in the fragments.</param>
+    /// <returns>
+    ///  A specification retaining the original <paramref name="itemSpec"/> text and its parsed fragments.
+    /// </returns>
+    /// <exception cref="Exceptions.InvalidProjectFileException">
+    ///  Property expansion fails or a recognized item vector is embedded in another fragment.
+    /// </exception>
+    public static ItemSpec Parse<P, I>(
+        string itemSpec,
+        Expander<P, I> expander,
+        IElementLocation itemSpecLocation,
+        string projectDirectory)
+        where P : class, IProperty
+        where I : class, IItem
+        => new(itemSpec, ParseFragments(itemSpec, expander, itemSpecLocation, projectDirectory));
+
+    /// <summary>
+    ///  Expands properties and parses a specification without resolving its item vectors.
+    /// </summary>
+    /// <typeparam name="P">The property representation used by the expander.</typeparam>
+    /// <typeparam name="I">The item representation used by the expander.</typeparam>
+    /// <param name="itemSpec">The original escaped attribute text; an empty string produces no fragments.</param>
+    /// <param name="expander">The property-expansion context used during parsing.</param>
+    /// <param name="itemSpecLocation">The diagnostic location of the specification.</param>
+    /// <param name="projectDirectory">The base directory used to interpret relative paths in the fragments.</param>
+    /// <returns>
+    ///  The parsed fragments in specification order, or an empty array when no nonempty fragments remain.
+    /// </returns>
+    /// <exception cref="Exceptions.InvalidProjectFileException">
+    ///  Property expansion fails or a recognized item vector is embedded in another fragment.
+    /// </exception>
+    /// <remarks>
+    ///  Properties are expanded before fragment classification. Fragments are split at semicolons
+    ///  outside item-vector expressions; surrounding whitespace and empty fragments are discarded.
+    ///  Literal and vector text remains escaped, while glob patterns are unescaped.
+    /// </remarks>
+    public static ImmutableArray<ItemSpecFragment> ParseFragments<P, I>(
+        string itemSpec,
+        Expander<P, I> expander,
+        IElementLocation itemSpecLocation,
+        string projectDirectory)
+        where P : class, IProperty
+        where I : class, IItem
     {
-        private FileSpecMatcherTester _fileMatcher;
-
-        private bool _fileMatcherInitialized;
-
-        private IMSBuildGlob _msbuildGlob;
-
-        /// <summary>
-        ///     The substring from the original itemspec representing this fragment
-        /// </summary>
-        public string TextFragment { get; }
-
-        /// <summary>
-        ///     Path of the project the itemspec is coming from
-        /// </summary>
-        internal string ProjectDirectory { get; }
-
-        // not a Lazy to reduce memory
-        private ref FileSpecMatcherTester FileMatcher
+        if (itemSpec.Length == 0)
         {
-            get
-            {
-                if (!_fileMatcherInitialized)
-                {
-                    _fileMatcher = CreateFileSpecMatcher();
-                    _fileMatcherInitialized = true;
-                }
+            return [];
+        }
 
-                return ref _fileMatcher;
+        string expandedItemSpec = expander.ExpandIntoStringLeaveEscaped(
+            itemSpec,
+            ExpanderOptions.ExpandProperties,
+            itemSpecLocation);
+
+        using RefArrayBuilder<ItemSpecFragment> fragments = default;
+
+        foreach (string split in ExpressionShredder.SplitSemiColonSeparatedList(expandedItemSpec))
+        {
+            if (Expander<P, I>.TryExpandSingleItemVectorExpression(
+                split,
+                ExpanderOptions.ExpandItems,
+                itemSpecLocation,
+                out ExpressionShredder.ItemExpressionCapture itemVector))
+            {
+                fragments.Add(new ItemVectorFragment(itemVector, split, itemSpecLocation, projectDirectory));
+            }
+            else if (!FileMatcher.HasWildcards(split))
+            {
+                // No real wildcards means the original, already escaped string is a literal.
+                fragments.Add(new ValueFragment(split, projectDirectory));
+            }
+            else if (EscapingUtilities.ContainsEscapedWildcards(split))
+            {
+                // '*' is an illegal character to have in a filename.
+                // todo: file-system assumption on legal path characters: https://github.com/dotnet/msbuild/issues/781
+                // Preserve the original string as a literal, even when it also contains unescaped wildcards.
+                fragments.Add(new ValueFragment(split, projectDirectory));
+            }
+            else
+            {
+                string filespecUnescaped = EscapingUtilities.UnescapeAll(split);
+                fragments.Add(new GlobFragment(filespecUnescaped, projectDirectory));
             }
         }
 
-        // not a Lazy to reduce memory
-        protected virtual IMSBuildGlob MsBuildGlob => _msbuildGlob ??= CreateMsBuildGlob();
-
-        protected ItemSpecFragment(string textFragment, string projectDirectory)
-        {
-            TextFragment = textFragment;
-            ProjectDirectory = projectDirectory;
-        }
-
-        /// <returns>The number of times the
-        ///     <param name="itemToMatch"></param>
-        ///     appears in this fragment
-        /// </returns>
-        public virtual int MatchCount(string itemToMatch)
-        {
-            return IsMatch(itemToMatch)
-                ? 1
-                : 0;
-        }
-
-        public virtual bool IsMatch(string itemToMatch)
-        {
-            return FileMatcher.IsMatch(itemToMatch);
-        }
-
-        public virtual bool IsMatchNormalized(string normalizedItemToMatch)
-        {
-            return FileMatcher.IsMatchNormalized(normalizedItemToMatch);
-        }
-
-        public virtual IEnumerable<string> GetReferencedItems()
-        {
-            return Enumerable.Repeat(EscapingUtilities.UnescapeAll(TextFragment), 1);
-        }
-
-        public virtual IMSBuildGlob ToMSBuildGlob()
-        {
-            return MsBuildGlob;
-        }
-
-        protected virtual IMSBuildGlob CreateMsBuildGlob()
-        {
-            return MSBuildGlob.Parse(ProjectDirectory, EscapingUtilities.UnescapeAll(TextFragment));
-        }
-
-        private FileSpecMatcherTester CreateFileSpecMatcher()
-        {
-            return FileSpecMatcherTester.Parse(ProjectDirectory, TextFragment);
-        }
+        return fragments.ToImmutable();
     }
 
-    internal class ValueFragment : ItemSpecFragment
+    /// <summary>
+    ///  Expands properties and parses only item-vector fragments without resolving them.
+    /// </summary>
+    /// <typeparam name="P">The property representation used by the expander.</typeparam>
+    /// <typeparam name="I">The item representation used by the expander.</typeparam>
+    /// <param name="itemSpec">The original escaped attribute text; an empty string produces no fragments.</param>
+    /// <param name="expander">The property-expansion context used during parsing.</param>
+    /// <param name="itemSpecLocation">The diagnostic location of the specification.</param>
+    /// <param name="projectDirectory">The base directory used to interpret relative paths in the fragments.</param>
+    /// <returns>
+    ///  The parsed vectors in specification order, or an empty array when no nonempty fragments remain.
+    /// </returns>
+    /// <exception cref="Exceptions.InvalidProjectFileException">
+    ///  Property expansion fails or a nonempty fragment is not a standalone item vector.
+    /// </exception>
+    /// <remarks>
+    ///  Every nonempty fragment must be an item vector; literals and globs are rejected rather than
+    ///  filtered out. Empty fragments are discarded, and semicolons inside vector expressions are preserved.
+    ///  The returned vectors retain their syntax and origin, not the supplied <paramref name="expander"/>.
+    /// </remarks>
+    public static ImmutableArray<ItemVectorFragment> ParseItemVectorFragments<P, I>(
+        string itemSpec,
+        Expander<P, I> expander,
+        IElementLocation itemSpecLocation,
+        string projectDirectory)
+        where P : class, IProperty
+        where I : class, IItem
     {
-        public ValueFragment(string textFragment, string projectDirectory)
-            : base(textFragment, projectDirectory)
+        if (itemSpec.Length == 0)
         {
+            return [];
         }
+
+        string expandedItemSpec = expander.ExpandIntoStringLeaveEscaped(
+            itemSpec,
+            ExpanderOptions.ExpandProperties,
+            itemSpecLocation);
+
+        using RefArrayBuilder<ItemVectorFragment> fragments = default;
+
+        foreach (string split in ExpressionShredder.SplitSemiColonSeparatedList(expandedItemSpec))
+        {
+            if (!Expander<P, I>.TryExpandSingleItemVectorExpression(
+                split,
+                ExpanderOptions.ExpandItems,
+                itemSpecLocation,
+                out ExpressionShredder.ItemExpressionCapture itemVector))
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(
+                    ElementLocation.Empty,
+                    "OM_MatchOnMetadataIsRestrictedToReferencedItems");
+            }
+
+            fragments.Add(new ItemVectorFragment(itemVector, split, itemSpecLocation, projectDirectory));
+        }
+
+        return fragments.ToImmutable();
     }
 
-    internal class GlobFragment : ItemSpecFragment
-    {
-        public GlobFragment(string textFragment, string projectDirectory)
-            : base(textFragment, projectDirectory)
-        {
-        }
+    /// <summary>
+    ///  Returns the original specification text.
+    /// </summary>
+    /// <returns>
+    ///  The value of <see cref="Text"/>.
+    /// </returns>
+    public override string ToString()
+        => Text;
+}
 
-        public override IEnumerable<string> GetReferencedItems()
-        {
-            // This fragment cannot efficiently enumerate its referenced items.
-            return null;
-        }
+/// <summary>
+///  Stores one parsed component of a property-expanded item specification.
+/// </summary>
+/// <param name="text">The fragment text after property expansion.</param>
+/// <param name="projectDirectory">The base directory used to interpret relative paths.</param>
+internal abstract class ItemSpecFragment(string text, string projectDirectory)
+{
+    /// <summary>
+    ///  Gets the fragment text after property expansion.
+    /// </summary>
+    /// <remarks>
+    ///  <see cref="ValueFragment"/> and <see cref="ItemVectorFragment"/> retain escaped text.
+    ///  <see cref="GlobFragment"/> stores an unescaped pattern.
+    /// </remarks>
+    public string Text { get; } = text;
 
-        /// <summary>
-        /// True if TextFragment starts with /**/ or a variation thereof with backslashes.
-        /// </summary>
-        public bool IsFullFileSystemScan => TextFragment.Length >= 4
-            && FileUtilities.IsAnySlash(TextFragment[0])
-            && TextFragment[1] == '*'
-            && TextFragment[2] == '*'
-            && FileUtilities.IsAnySlash(TextFragment[3]);
-    }
+    /// <summary>
+    ///  Gets the base directory used to interpret relative paths in this fragment.
+    /// </summary>
+    internal string ProjectDirectory { get; } = projectDirectory;
+}
+
+/// <summary>
+///  Stores an item vector's syntax and origin without owning its expansion context or results.
+/// </summary>
+/// <param name="itemVector">The parsed item type, transform chain, and optional separator.</param>
+/// <param name="text">The escaped vector expression after property expansion.</param>
+/// <param name="itemSpecLocation">The location used for diagnostics when the vector is resolved.</param>
+/// <param name="projectDirectory">The base directory used to interpret relative paths.</param>
+internal sealed class ItemVectorFragment(
+    ExpressionShredder.ItemExpressionCapture itemVector,
+    string text,
+    IElementLocation itemSpecLocation,
+    string projectDirectory) : ItemSpecFragment(text, projectDirectory)
+{
+    /// <summary>
+    ///  Gets the parsed item type, transform chain, and optional separator.
+    /// </summary>
+    public ExpressionShredder.ItemExpressionCapture ItemVector { get; } = itemVector;
+
+    /// <summary>
+    ///  Gets the location used for diagnostics when the vector is resolved.
+    /// </summary>
+    public IElementLocation ItemSpecLocation { get; } = itemSpecLocation;
+}
+
+/// <summary>
+///  Represents a fragment classified as a literal value rather than a glob or item vector.
+/// </summary>
+/// <param name="text">The escaped literal value after property expansion.</param>
+/// <param name="projectDirectory">The base directory used to interpret relative paths.</param>
+internal sealed class ValueFragment(string text, string projectDirectory)
+    : ItemSpecFragment(text, projectDirectory)
+{
+}
+
+/// <summary>
+///  Represents an unescaped filesystem glob parsed from an item specification.
+/// </summary>
+/// <param name="text">The unescaped glob pattern.</param>
+/// <param name="projectDirectory">The base directory used to interpret relative paths.</param>
+internal sealed class GlobFragment(string text, string projectDirectory)
+    : ItemSpecFragment(text, projectDirectory)
+{
+    /// <summary>
+    ///  Gets whether the pattern starts with a rooted recursive-directory wildcard such as <c>/**/</c>.
+    /// </summary>
+    /// <remarks>
+    ///  Both forward slashes and backslashes are recognized as separators.
+    /// </remarks>
+    public bool IsFullFileSystemScan
+        => Text.Length >= 4
+        && FileUtilities.IsAnySlash(Text[0])
+        && Text[1] == '*'
+        && Text[2] == '*'
+        && FileUtilities.IsAnySlash(Text[3]);
 }

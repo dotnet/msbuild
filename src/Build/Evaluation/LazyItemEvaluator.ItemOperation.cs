@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 #if DEBUG
@@ -25,7 +24,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
         protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
         protected readonly ProjectItemElement _itemElement;
-        protected readonly ItemSpec<P, I> _itemSpec;
         protected readonly ItemListBookmarks _itemListBookmarks;
         protected readonly Expander<P, I> _expander;
         protected readonly bool _conditionResult;
@@ -37,12 +35,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         protected ItemOperation(
             LazyItemEvaluator<P, I, M, D> lazyEvaluator,
             ProjectItemElement itemElement,
-            ItemSpec<P, I> itemSpec,
             bool conditionResult,
             ItemListBookmarks itemListBookmarks)
         {
             _itemElement = itemElement;
-            _itemSpec = itemSpec;
             _conditionResult = conditionResult;
             _lazyEvaluator = lazyEvaluator;
             _itemListBookmarks = itemListBookmarks;
@@ -52,7 +48,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 _itemListBookmarks,
                 _lazyEvaluator.EvaluationContext,
                 _lazyEvaluator._loggingContext);
-            _itemSpec.Expander = _expander;
         }
 
         protected FileMatcher FileMatcher => _lazyEvaluator.FileMatcher;
@@ -236,39 +231,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
 
             return needToExpandMetadataForEachItem;
-        }
-
-        /// <summary>
-        /// Is this spec a single reference to a specific item?
-        /// </summary>
-        /// <returns>True if the item is a simple reference to the referenced item type.</returns>
-        protected static bool ItemspecContainsASingleBareItemReference(ItemSpec<P, I> itemSpec, string referencedItemType)
-        {
-            if (itemSpec.Fragments.Count != 1)
-            {
-                return false;
-            }
-
-            var itemExpressionFragment = itemSpec.Fragments[0] as ItemSpec<P, I>.ItemExpressionFragment;
-            if (itemExpressionFragment == null)
-            {
-                return false;
-            }
-
-            if (!itemExpressionFragment.Capture.ItemType.Equals(referencedItemType, StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            // If the itemSpec is a single call to an item function, like @(X->Something(...)), it may get this
-            // far, but shouldn't be treated as a single reference: the item function may return entirely
-            // different results from a bare reference like @(X).
-            if (itemExpressionFragment.Capture.Captures is object)
-            {
-                return false;
-            }
-
-            return true;
         }
     }
 }

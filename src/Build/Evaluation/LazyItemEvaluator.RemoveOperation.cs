@@ -13,14 +13,19 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 {
     private sealed class RemoveOperation : ItemOperation
     {
+        private readonly ItemSpec _itemSpec;
+
+        private ItemSpecMatcher<P, I> Matcher => field ??= new(_itemSpec, _expander);
+
         public RemoveOperation(
             LazyItemEvaluator<P, I, M, D> lazyEvaluator,
             ProjectItemElement itemElement,
-            ItemSpec<P, I> itemSpec,
+            ItemSpec itemSpec,
             bool conditionResult,
             ItemListBookmarks itemListBookmarks)
-            : base(lazyEvaluator, itemElement, itemSpec, conditionResult, itemListBookmarks)
+            : base(lazyEvaluator, itemElement, conditionResult, itemListBookmarks)
         {
+            _itemSpec = itemSpec;
         }
 
         /// <summary>
@@ -36,7 +41,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 return;
             }
 
-            if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
+            if (_itemSpec.IsSimpleItemVector(_itemElement.ItemType))
             {
                 // Perf optimization: If the Remove operation references itself (e.g. <I Remove="@(I)"/>)
                 // then all items are removed and matching is not necessary
@@ -47,7 +52,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             if (listBuilder.Count >= Traits.Instance.DictionaryBasedItemRemoveThreshold)
             {
                 // For large item lists, index normalized paths and use membership lookups to find items to remove.
-                ISet<NormalizedItemPath> matches = _itemSpec.IntersectsWith(listBuilder.NormalizedItemPaths);
+                ISet<NormalizedItemPath> matches = Matcher.IntersectsWith(listBuilder.NormalizedItemPaths);
                 listBuilder.RemoveAll(matches);
                 return;
             }
@@ -56,7 +61,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             HashSet<I>? items = null;
             foreach (ItemData item in listBuilder)
             {
-                if (_itemSpec.MatchesItem(item.Item))
+                if (Matcher.MatchesItem(item.Item))
                 {
                     items ??= new HashSet<I>();
                     items.Add(item.Item);
@@ -77,7 +82,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 return builder;
             }
 
-            var globs = _itemSpec.Fragments.OfType<GlobFragment>().Select(g => g.TextFragment);
+            var globs = _itemSpec.Fragments.OfType<GlobFragment>().Select(g => g.Text);
 
             builder.UnionWith(globs);
 

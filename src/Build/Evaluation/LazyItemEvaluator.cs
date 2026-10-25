@@ -219,7 +219,7 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     /// </remarks>
     public void AddAllItems(IItemEvaluationCollector<I> collector)
     {
-        ArgumentNullException.ThrowIfNull(collector);
+        Assumed.NotNull(collector);
 
         if (_itemLists.Count == 0)
         {
@@ -389,9 +389,11 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
         using ItemListBookmarks.Builder builder = default;
         using RefArrayBuilder<string> matchOnMetadata = default;
 
-        // Expand names before selecting the removal mode. A present attribute can expand to nothing.
+        // Expand metadata names before choosing a parser. A present attribute can expand to nothing,
+        // in which case Remove still accepts ordinary literal and glob specifications.
         if (itemElement.MatchOnMetadata.Length > 0)
         {
+            // A property value can introduce item references that need bookmarks before expansion.
             string evaluatedmatchOnMetadata = _expander.ExpandIntoStringLeaveEscaped(
                 itemElement.MatchOnMetadata,
                 ExpanderOptions.ExpandProperties,
@@ -416,11 +418,21 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
             }
         }
 
-        var itemSpec = ProcessItemSpec(itemElement.Remove, itemElement.RemoveLocation, rootDirectory, ref builder.AsRef());
         if (matchOnMetadata.IsEmpty)
         {
-            // Empty expanded names retain ordinary identity matching, including literals and globs.
+            // This includes a present MatchOnMetadata attribute that expands to nothing. Ordinary removal
+            // matches identities against the specification, so only this path needs an ItemSpec.
+            var itemSpec = ProcessItemSpec(itemElement.Remove, itemElement.RemoveLocation, rootDirectory, ref builder.AsRef());
             return new RemoveOperation(this, itemElement, itemSpec, conditionResult, builder.ToImmutable());
+        }
+
+        // Metadata matching accepts only item vectors. Reject literals and globs during parsing,
+        // before resolving those vectors through the operation's bookmarks.
+        var sourceFragments = ItemSpec.ParseItemVectorFragments(
+            itemElement.Remove, _outerExpander, itemElement.RemoveLocation, rootDirectory);
+        foreach (var fragment in sourceFragments)
+        {
+            AddItemListBookmark(fragment.ItemVector.ItemType, ref builder.AsRef());
         }
 
         var matchOnMetadataOptions = MatchOnMetadataOptions.CaseSensitive;
@@ -429,11 +441,12 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
             matchOnMetadataOptions = options;
         }
 
-        // Metadata removal validates and captures source tuples during construction, not application.
+        // The constructor resolves vectors and stores metadata values now; applying the Remove is deferred.
+        // Later source updates must not change the tuples this Remove matches.
         return new MetadataRemoveOperation(
             this,
             itemElement,
-            itemSpec,
+            sourceFragments,
             conditionResult,
             builder.ToImmutable(),
             matchOnMetadata.ToImmutable(),
@@ -455,25 +468,32 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
             metadata);
     }
 
-    private ItemSpec<P, I> ProcessItemSpec(
+    private ItemSpec ProcessItemSpec(
+        string itemSpec,
+        IElementLocation location,
+        string rootDirectory,
+        ref ItemListBookmarks.Builder builder)
+        => new(itemSpec, ProcessItemFragments(itemSpec, location, rootDirectory, ref builder));
+
+    private ImmutableArray<ItemSpecFragment> ProcessItemFragments(
         string itemSpec,
         IElementLocation location,
         string rootDirectory,
         ref ItemListBookmarks.Builder builder)
     {
-        ItemSpec<P, I> result = new(itemSpec, _outerExpander, location, rootDirectory);
+        var fragments = ItemSpec.ParseFragments(itemSpec, _outerExpander, location, rootDirectory);
 
-        foreach (ItemSpecFragment fragment in result.Fragments)
+        foreach (ItemSpecFragment fragment in fragments)
         {
-            if (fragment is ItemSpec<P, I>.ItemExpressionFragment itemExpression)
+            if (fragment is ItemVectorFragment itemExpression)
             {
                 // Captures holds the -> transform chain, not nested item vectors.
                 // Only the top-level capture has an ItemType to reference.
-                AddItemListBookmark(itemExpression.Capture.ItemType, ref builder);
+                AddItemListBookmark(itemExpression.ItemVector.ItemType, ref builder);
             }
         }
 
-        return result;
+        return fragments;
     }
 
     private ImmutableArray<ProjectMetadataElement> ProcessMetadataElements(ProjectItemElement itemElement, ref ItemListBookmarks.Builder builder)

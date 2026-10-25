@@ -26,7 +26,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         private const uint ExpansionMarkerBitmask = 0x1800_0043u;
 #endif
 
+        private readonly ItemSpec _itemSpec;
         private readonly ImmutableArray<ProjectMetadataElement> _metadata;
+
+        private ItemSpecMatcher<P, I> SpecificationMatcher => field ??= new(_itemSpec, _expander);
 
         private QualifiedUpdateMatcher? _qualifiedUpdateMatcher;
         private MatchStrategy _matchStrategy;
@@ -56,12 +59,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         public UpdateOperation(
             LazyItemEvaluator<P, I, M, D> lazyEvaluator,
             ProjectItemElement itemElement,
-            ItemSpec<P, I> itemSpec,
+            ItemSpec itemSpec,
             bool conditionResult,
             ItemListBookmarks itemListBookmarks,
             ImmutableArray<ProjectMetadataElement> metadata)
-            : base(lazyEvaluator, itemElement, itemSpec, conditionResult, itemListBookmarks)
+            : base(lazyEvaluator, itemElement, conditionResult, itemListBookmarks)
         {
+            _itemSpec = itemSpec;
             _metadata = metadata;
         }
 
@@ -85,7 +89,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
 
             var fragments = _itemSpec.Fragments;
-            int fragmentCount = fragments.Count;
+            int fragmentCount = fragments.Length;
             if (fragmentCount == 0)
             {
                 _literalKeys = [];
@@ -97,14 +101,14 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             if (fragmentCount == 1)
             {
                 ItemSpecFragment fragment = fragments[0];
-                if (ContainsExpansionSyntax(fragment.TextFragment))
+                if (ContainsExpansionSyntax(fragment.Text))
                 {
                     _literalKeysChecked = true;
                     keys = default;
                     return false;
                 }
 
-                string normalizedPath = FileUtilities.NormalizePathForComparisonNoThrow(fragment.TextFragment, fragment.ProjectDirectory);
+                string normalizedPath = FileUtilities.NormalizePathForComparisonNoThrow(fragment.Text, fragment.ProjectDirectory);
                 _literalKeys = [new NormalizedItemPath(normalizedPath)];
                 _literalKeysChecked = true;
                 keys = _literalKeys;
@@ -117,14 +121,14 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             for (int i = 0; i < fragmentCount; i++)
             {
                 ItemSpecFragment fragment = fragments[i];
-                if (ContainsExpansionSyntax(fragment.TextFragment))
+                if (ContainsExpansionSyntax(fragment.Text))
                 {
                     _literalKeysChecked = true;
                     keys = default;
                     return false;
                 }
 
-                string normalizedPath = FileUtilities.NormalizePathForComparisonNoThrow(fragment.TextFragment, fragment.ProjectDirectory);
+                string normalizedPath = FileUtilities.NormalizePathForComparisonNoThrow(fragment.Text, fragment.ProjectDirectory);
                 NormalizedItemPath key = new(normalizedPath);
 
                 // Different literal spellings can identify the same path and must not enter one batch.
@@ -279,7 +283,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
             _needToExpandMetadataForEachItem = NeedToExpandMetadataForEachItem(_metadata, out var references);
 
-            if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
+            if (_itemSpec.IsSimpleItemVector(_itemElement.ItemType))
             {
                 // Perf optimization: If the Update operation references itself (e.g. <I Update="@(I)"/>)
                 // then all items are updated and matching is not necessary
@@ -304,11 +308,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 && !Traits.Instance.EscapeHatches.DoNotExpandQualifiedMetadataInUpdateOperation
                 && ItemSpecContainsItemReferences())
             {
-                using RefArrayBuilder<ItemSpec<P, I>.ItemExpressionFragment> referenceFragments = default;
+                using RefArrayBuilder<ItemVectorFragment> referenceFragments = default;
                 using RefArrayBuilder<ItemSpecFragment> nonReferenceFragments = default;
                 foreach (ItemSpecFragment fragment in _itemSpec.Fragments)
                 {
-                    if (fragment is ItemSpec<P, I>.ItemExpressionFragment referenceFragment)
+                    if (fragment is ItemVectorFragment referenceFragment)
                     {
                         referenceFragments.Add(referenceFragment);
                     }
@@ -318,7 +322,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     }
                 }
 
-                _qualifiedUpdateMatcher = new QualifiedUpdateMatcher(referenceFragments.ToImmutable(), nonReferenceFragments.ToImmutable());
+                _qualifiedUpdateMatcher = new QualifiedUpdateMatcher(
+                    referenceFragments.ToImmutable(), nonReferenceFragments.ToImmutable(), _expander);
                 _matchStrategy = MatchStrategy.QualifiedUpdate;
                 return;
             }
@@ -330,7 +335,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         {
             foreach (ItemSpecFragment fragment in _itemSpec.Fragments)
             {
-                if (fragment is ItemSpec<P, I>.ItemExpressionFragment)
+                if (fragment is ItemVectorFragment)
                 {
                     return true;
                 }
@@ -343,7 +348,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             => _matchStrategy switch
             {
                 MatchStrategy.All => new MatchResult(isMatch: true, matchingItems: null),
-                MatchStrategy.Specification => new MatchResult(_itemSpec.MatchesItem(itemData.Item), matchingItems: null),
+                MatchStrategy.Specification => new MatchResult(
+                    SpecificationMatcher.MatchesItem(itemData.Item), matchingItems: null),
                 MatchStrategy.QualifiedUpdate when _qualifiedUpdateMatcher is not null => _qualifiedUpdateMatcher.Match(itemData),
                 _ => Assumed.Unreachable<MatchResult>(),
             };

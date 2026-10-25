@@ -3,9 +3,7 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Evaluation;
 
@@ -22,21 +20,16 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         public MetadataRemoveOperation(
             LazyItemEvaluator<P, I, M, D> lazyEvaluator,
             ProjectItemElement itemElement,
-            ItemSpec<P, I> itemSpec,
+            ImmutableArray<ItemVectorFragment> sourceFragments,
             bool conditionResult,
             ItemListBookmarks itemListBookmarks,
             ImmutableArray<string> matchOnMetadata,
             MatchOnMetadataOptions matchOnMetadataOptions)
-            : base(lazyEvaluator, itemElement, itemSpec, conditionResult, itemListBookmarks)
+            : base(lazyEvaluator, itemElement, conditionResult, itemListBookmarks)
         {
             _matchOnMetadata = matchOnMetadata;
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject(
-                itemSpec.Fragments.All(f => f is ItemSpec<P, I>.ItemExpressionFragment),
-                ElementLocation.Empty,
-                "OM_MatchOnMetadataIsRestrictedToReferencedItems");
-
-            _metadataSet = MetadataTrie.Create(matchOnMetadataOptions, _matchOnMetadata, itemSpec);
+            _metadataSet = MetadataTrie.Create(matchOnMetadataOptions, _matchOnMetadata, sourceFragments, _expander);
         }
 
         protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)

@@ -20,6 +20,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 {
     private sealed class IncludeOperation : ItemOperation
     {
+        private readonly ItemSpec _itemSpec;
         private readonly int _includeId;
         private readonly string? _rootDirectory;
         private readonly ImmutableSegmentedList<string> _excludes;
@@ -29,15 +30,16 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         public IncludeOperation(
             LazyItemEvaluator<P, I, M, D> lazyEvaluator,
             ProjectItemElement itemElement,
-            ItemSpec<P, I> itemSpec,
+            ItemSpec itemSpec,
             bool conditionResult,
             ItemListBookmarks itemListBookmarks,
             int includeId,
             string? rootDirectory,
             ImmutableSegmentedList<string> excludes,
             ImmutableArray<ProjectMetadataElement> metadata)
-            : base(lazyEvaluator, itemElement, itemSpec, conditionResult, itemListBookmarks)
+            : base(lazyEvaluator, itemElement, conditionResult, itemListBookmarks)
         {
+            _itemSpec = itemSpec;
             _includeId = includeId;
             _rootDirectory = rootDirectory;
             _excludes = excludes;
@@ -82,11 +84,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
             foreach (var fragment in _itemSpec.Fragments)
             {
-                if (fragment is ItemSpec<P, I>.ItemExpressionFragment itemVectorFragment)
+                if (fragment is ItemVectorFragment itemVectorFragment)
                 {
                     // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                     var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
-                        itemVectorFragment.Capture,
+                        itemVectorFragment.ItemVector,
                         _itemListBookmarks,
                         _itemFactory,
                         ExpanderOptions.ExpandItems,
@@ -116,7 +118,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 }
                 else if (fragment is ValueFragment valueFragment)
                 {
-                    string value = valueFragment.TextFragment;
+                    string value = valueFragment.Text;
                     if (excludePatterns.Count > 0)
                     {
                         matchers ??= new FileSpecMatcherTester?[excludePatterns.Count];
@@ -135,7 +137,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs;
                     if (!skipGlob)
                     {
-                        string glob = globFragment.TextFragment;
+                        string glob = globFragment.Text;
 
                         excludePatternsForGlobs ??= BuildExcludePatternsForGlobs(laterRemoveGlobPatterns, excludePatterns.AsSpan());
 
