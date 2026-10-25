@@ -99,9 +99,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
 
             ImmutableArray<string> names = ["First", "Second"];
-            var trie = MetadataTrie<ProjectPropertyInstance, ProjectItemInstance>.Create(MatchOnMetadataOptions.CaseSensitive, names, itemSpec);
+            var trie = MetadataTrie.Create(MatchOnMetadataOptions.CaseSensitive, names, itemSpec);
             HashSet<string> nameSet = [.. names];
-            var hashSetTrie = MetadataTrie<ProjectPropertyInstance, ProjectItemInstance>.Create(MatchOnMetadataOptions.CaseSensitive, nameSet, itemSpec);
+            var hashSetTrie = MetadataTrie.Create(MatchOnMetadataOptions.CaseSensitive, nameSet, itemSpec);
             ImmutableArray<string> hashSetOrder = [.. nameSet];
 
             // Reuse an item after construction to check that the trie captured values, not live item state.
@@ -136,19 +136,20 @@ namespace Microsoft.Build.UnitTests.Evaluation
             fragment.ReferencedItems[0].Item.SetMetadata("Value", "one");
             fragment.ReferencedItems[1].Item.SetMetadata("Value", "two");
             ImmutableArray<string> names = ["Value"];
-            var trie = MetadataTrie<ProjectPropertyInstance, ProjectItemInstance>.Create(MatchOnMetadataOptions.CaseSensitive, names, itemSpec);
+            var trie = MetadataTrie.Create(MatchOnMetadataOptions.CaseSensitive, names, itemSpec);
             HashSet<string> nameSet = [.. names];
-            var hashSetTrie = MetadataTrie<ProjectPropertyInstance, ProjectItemInstance>.Create(MatchOnMetadataOptions.CaseSensitive, nameSet, itemSpec);
+            var hashSetTrie = MetadataTrie.Create(MatchOnMetadataOptions.CaseSensitive, nameSet, itemSpec);
             ProjectItemInstance candidate = fragment.ReferencedItems[0].Item;
+            IItem candidateItem = candidate;
             string[] candidateValues = ["one", "two", "missing"];
 
             foreach (string value in candidateValues)
             {
                 candidate.SetMetadata("Value", value);
                 bool expected = value != "missing";
-                trie.Contains(candidate, names).ShouldBe(expected);
+                trie.Contains(candidateItem, names).ShouldBe(expected);
                 trie.Contains([value]).ShouldBe(expected);
-                hashSetTrie.Contains(candidate, names).ShouldBe(expected);
+                hashSetTrie.Contains(candidateItem, names).ShouldBe(expected);
             }
         }
 
@@ -163,7 +164,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ["Lookup"] = sources,
             }));
             ImmutableArray<string> names = ["Missing"];
-            var trie = MetadataTrie<ProjectPropertyInstance, ProjectItemInstance>.Create(MatchOnMetadataOptions.CaseSensitive, names, itemSpec);
+            var trie = MetadataTrie.Create(MatchOnMetadataOptions.CaseSensitive, names, itemSpec);
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
             ProjectItemInstance candidate = new(project, "Candidate", "candidate", project.FullPath);
 

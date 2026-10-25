@@ -81,7 +81,7 @@ namespace Microsoft.Build.BackEnd
                             HashSet<string> keepMetadata = null;
                             HashSet<string> removeMetadata = null;
                             HashSet<string> matchOnMetadata = null;
-                            MatchOnMetadataOptions matchOnMetadataOptions = MatchOnMetadataConstants.MatchOnMetadataOptionsDefaultValue;
+                            MatchOnMetadataOptions matchOnMetadataOptions = MatchOnMetadataOptions.Default;
 
                             if (!String.IsNullOrEmpty(child.KeepMetadata))
                             {
@@ -666,7 +666,7 @@ namespace Microsoft.Build.BackEnd
                 "OM_MatchOnMetadataIsRestrictedToReferencedItems",
                 child.RemoveLocation,
                 child.Remove);
-            var metadataSet = MetadataTrie<ProjectPropertyInstance, ProjectItemInstance>.Create(matchingOptions, matchOnMetadata, itemSpec);
+            var metadataSet = MetadataTrie.Create(matchingOptions, matchOnMetadata, itemSpec);
             return group.Where(item => metadataSet.Contains(matchOnMetadata.Select(m => item.GetMetadataValue(m)))).ToList();
         }
 

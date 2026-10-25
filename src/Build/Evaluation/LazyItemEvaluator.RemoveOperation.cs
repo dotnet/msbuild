@@ -17,7 +17,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     private sealed class RemoveOperation : ItemOperation
     {
         private readonly ImmutableArray<string> _matchOnMetadata;
-        private MetadataTrie<P, I> _metadataSet;
+        private MetadataTrie _metadataSet;
 
         public RemoveOperation(
             LazyItemEvaluator<P, I, M, D> lazyEvaluator,
@@ -38,7 +38,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
             if (!_matchOnMetadata.IsEmpty)
             {
-                _metadataSet = MetadataTrie<P, I>.Create(matchOnMetadataOptions, _matchOnMetadata, _itemSpec);
+                _metadataSet = MetadataTrie.Create(matchOnMetadataOptions, _matchOnMetadata, _itemSpec);
             }
         }
 
