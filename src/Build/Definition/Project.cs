@@ -24,8 +24,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Constants = Microsoft.Build.Framework.Constants;
-using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
-using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -2676,8 +2674,10 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (elementLocation != null && !string.IsNullOrEmpty(itemSpec))
                     {
-                        EvaluationItemSpec expandedItemSpec = new EvaluationItemSpec(itemSpec, _data.Expander, elementLocation, itemElement.ContainingProject.DirectoryPath, expandProperties: true);
-                        int matchOccurrences = ItemMatchesInItemSpec(itemToMatch, expandedItemSpec, out Provenance provenance);
+                        var expandedItemSpec = ItemSpec.Parse(
+                            itemSpec, _data.Expander, elementLocation, itemElement.ContainingProject.DirectoryPath);
+                        var matcher = new ItemSpecMatcher<ProjectProperty, ProjectItem>(expandedItemSpec, _data.Expander);
+                        int matchOccurrences = ItemMatchesInItemSpec(itemToMatch, matcher, out Provenance provenance);
                         return matchOccurrences > 0 ? new ProvenanceResult(itemElement, operation, provenance, matchOccurrences) : null;
                     }
 
@@ -2697,32 +2697,27 @@ namespace Microsoft.Build.Evaluation
             ///
             /// The temporary hack is to use the expander to expand the strings, and if any property or item references were encountered, return Provenance.Inconclusive.
             /// </summary>
-            private static int ItemMatchesInItemSpec(string itemToMatch, EvaluationItemSpec itemSpec, out Provenance provenance)
+            private static int ItemMatchesInItemSpec(
+                string itemToMatch,
+                ItemSpecMatcher<ProjectProperty, ProjectItem> matcher,
+                out Provenance provenance)
             {
                 provenance = Provenance.Undefined;
 
-                IEnumerable<ItemSpecFragment> fragmentsMatchingItem = itemSpec.FragmentsMatchingItem(itemToMatch, out int occurrences);
+                var fragmentsMatchingItem = matcher.FragmentsMatchingItem(itemToMatch, out int occurrences);
                 foreach (var fragment in fragmentsMatchingItem)
                 {
-                    if (fragment is ValueFragment)
+                    provenance |= fragment switch
                     {
-                        provenance |= Provenance.StringLiteral;
-                    }
-                    else if (fragment is GlobFragment)
-                    {
-                        provenance |= Provenance.Glob;
-                    }
-                    else if (fragment is EvaluationItemExpressionFragment)
-                    {
-                        provenance |= Provenance.Inconclusive;
-                    }
-                    else
-                    {
-                        Assumed.Unreachable();
-                    }
+                        ValueFragment => Provenance.StringLiteral,
+                        GlobFragment => Provenance.Glob,
+                        ItemVectorFragment => Provenance.Inconclusive,
+
+                        _ => Assumed.Unreachable<Provenance>(),
+                    };
 
                     // Result is inconclusive if properties are present
-                    if (ExpressionShredder.ContainsPropertyMarker(itemSpec.ItemSpecString))
+                    if (ExpressionShredder.ContainsPropertyMarker(matcher.ItemSpec.Text))
                     {
                         provenance |= Provenance.Inconclusive;
                     }

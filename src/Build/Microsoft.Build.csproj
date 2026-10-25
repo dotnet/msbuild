@@ -208,6 +208,8 @@
     <Compile Include="Evaluation\IItemEvaluationCollector.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="Evaluation\IntrinsicFunctionOverload.cs" />
+    <Compile Include="Evaluation\ItemSpecMatcher.FragmentState.cs" />
+    <Compile Include="Evaluation\ItemSpecMatcher.ValueState.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.IncludeData.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemCacheKey.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemData.cs" />
@@ -348,6 +350,7 @@
     <Compile Include="Evaluation\Profiler\EvaluationLocationTabSeparatedPrettyPrinter.cs" />
     <Compile Include="Evaluation\Profiler\EvaluationProfiler.cs" />
     <Compile Include="Evaluation\ItemSpec.cs" />
+    <Compile Include="Evaluation\ItemSpecMatcher.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />
     <Compile Include="Evaluation\EvaluatedItemElementRecorder.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.cs" />

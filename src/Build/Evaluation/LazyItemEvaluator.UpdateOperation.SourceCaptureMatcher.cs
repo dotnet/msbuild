@@ -19,11 +19,15 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="referenceFragments">The nonempty sequence of item-reference fragments, in specification order.</param>
         /// <param name="nonReferenceFragments">The literal and glob fragments that can match without capturing source items.</param>
+        /// <param name="expander">The fixed expansion context for the captured source lists.</param>
         private sealed class SourceCaptureMatcher(
-            ImmutableArray<ItemSpec<P, I>.ItemExpressionFragment> referenceFragments,
-            ImmutableArray<ItemSpecFragment> nonReferenceFragments)
+            ImmutableArray<ItemVectorFragment> referenceFragments,
+            ImmutableArray<ItemSpecFragment> nonReferenceFragments,
+            Expander<P, I> expander)
         {
             private bool _sourceIndexChecked;
+            private SourceState[]? _sourceStates;
+            private FileSpecMatcherTester?[]? _nonReferenceMatchers;
 
             /// <summary>
             ///  The completed source index, or <see langword="null"/> before checking eligibility or when ordered matching is required.
@@ -34,9 +38,18 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             {
                 I item = itemData.Item;
                 bool isMatch = false;
-                foreach (ItemSpecFragment fragment in nonReferenceFragments)
+                for (int i = 0; i < nonReferenceFragments.Length; i++)
                 {
-                    if (fragment.IsMatch(item.EvaluatedInclude))
+                    _nonReferenceMatchers ??= new FileSpecMatcherTester?[nonReferenceFragments.Length];
+                    ItemSpecFragment fragment = nonReferenceFragments[i];
+                    FileSpecMatcherTester? matcher = _nonReferenceMatchers[i];
+                    if (!matcher.HasValue)
+                    {
+                        matcher = FileSpecMatcherTester.Parse(fragment.ProjectDirectory, fragment.Text);
+                        _nonReferenceMatchers[i] = matcher;
+                    }
+
+                    if (matcher.Value.IsMatch(item.EvaluatedInclude))
                     {
                         isMatch = true;
                         break;
@@ -62,15 +75,34 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 }
 
                 Dictionary<string, I>? capturedItems = null;
-                foreach (var fragment in referenceFragments)
+                for (int i = 0; i < referenceFragments.Length; i++)
                 {
-                    foreach (var source in fragment.ReferencedItems)
+                    var sources = GetSources(i);
+                    if (sources is null)
                     {
-                        if (source.ItemAsValueFragment.IsMatch(item.EvaluatedInclude))
+                        continue;
+                    }
+
+                    ref SourceState state = ref GetSourceState(i);
+                    state.Matchers ??= new FileSpecMatcherTester?[sources.Count];
+                    for (int j = 0; j < sources.Count; j++)
+                    {
+                        string? value = sources[j].Value;
+                        Assumed.NotNull(value);
+                        FileSpecMatcherTester? matcher = state.Matchers[j];
+                        if (!matcher.HasValue)
                         {
+                            matcher = FileSpecMatcherTester.Parse(referenceFragments[i].ProjectDirectory, value);
+                            state.Matchers[j] = matcher;
+                        }
+
+                        if (matcher.Value.IsMatch(item.EvaluatedInclude))
+                        {
+                            I? source = sources[j].Item;
+                            Assumed.NotNull(source);
                             isMatch = true;
                             capturedItems ??= [with(StringComparer.OrdinalIgnoreCase)];
-                            capturedItems[source.Item.Key] = source.Item;
+                            capturedItems[source.Key] = source;
                         }
                     }
                 }
@@ -95,17 +127,26 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 }
 
                 string directory = referenceFragments[0].ProjectDirectory;
-                foreach (var fragment in referenceFragments)
+                for (int i = 0; i < referenceFragments.Length; i++)
                 {
+                    ItemVectorFragment fragment = referenceFragments[i];
                     if (!string.Equals(directory, fragment.ProjectDirectory, StringComparison.Ordinal))
                     {
                         _sourceIndexChecked = true;
                         return;
                     }
 
-                    foreach (var source in fragment.ReferencedItems)
+                    var sources = GetSources(i);
+                    if (sources is null)
                     {
-                        if (EngineFileUtilities.FilespecHasWildcards(source.ItemAsValueFragment.TextFragment))
+                        continue;
+                    }
+
+                    foreach (var source in sources)
+                    {
+                        string? value = source.Value;
+                        Assumed.NotNull(value);
+                        if (EngineFileUtilities.FilespecHasWildcards(value))
                         {
                             _sourceIndexChecked = true;
                             return;
@@ -114,27 +155,68 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 }
 
                 Dictionary<NormalizedItemPath, Dictionary<string, I>> matchingSources = [];
-                foreach (var fragment in referenceFragments)
+                for (int i = 0; i < referenceFragments.Length; i++)
                 {
-                    foreach (var source in fragment.ReferencedItems)
+                    var entries = GetSources(i);
+                    if (entries is null)
                     {
-                        string unescapedSourceIdentity = EscapingUtilities.UnescapeAll(source.ItemAsValueFragment.TextFragment);
+                        continue;
+                    }
+
+                    foreach (var entry in entries)
+                    {
+                        string? value = entry.Value;
+                        I? source = entry.Item;
+                        Assumed.NotNull(value);
+                        Assumed.NotNull(source);
+                        string unescapedSourceIdentity = EscapingUtilities.UnescapeAll(value);
                         string normalizedSourceIdentity = FileUtilities.NormalizePathForComparisonNoThrow(
-                            unescapedSourceIdentity, fragment.ProjectDirectory);
+                            unescapedSourceIdentity, referenceFragments[i].ProjectDirectory);
                         NormalizedItemPath key = new(normalizedSourceIdentity);
 
                         if (!matchingSources.TryGetValue(key, out var sources))
                         {
-                            sources = new Dictionary<string, I>(StringComparer.OrdinalIgnoreCase);
+                            sources = [with(StringComparer.OrdinalIgnoreCase)];
                             matchingSources.Add(key, sources);
                         }
 
-                        sources[source.Item.Key] = source.Item;
+                        sources[source.Key] = source;
                     }
                 }
 
                 _matchingSources = matchingSources;
+
+                // The index owns the needed associations; expanded entries are no longer needed.
+                _sourceStates = null;
                 _sourceIndexChecked = true;
+            }
+
+            private ref SourceState GetSourceState(int index)
+            {
+                _sourceStates ??= new SourceState[referenceFragments.Length];
+                return ref _sourceStates[index];
+            }
+
+            private List<Expander<P, I>.TransformEntry>? GetSources(int index)
+            {
+                ref SourceState state = ref GetSourceState(index);
+                if (!state.Expanded)
+                {
+                    ItemVectorFragment fragment = referenceFragments[index];
+                    var entries = expander.ExpandItemVector(fragment.ItemVector, fragment.ItemSpecLocation);
+                    state.Entries = entries;
+                    state.Expanded = true;
+                }
+
+                return state.Entries;
+            }
+
+            private struct SourceState
+            {
+                // A null entry list is a valid empty expansion, not an uninitialized cache.
+                public bool Expanded;
+                public List<Expander<P, I>.TransformEntry>? Entries;
+                public FileSpecMatcherTester?[]? Matchers;
             }
         }
     }

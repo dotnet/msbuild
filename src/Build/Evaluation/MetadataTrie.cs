@@ -65,25 +65,34 @@ internal sealed class MetadataTrie
     /// <typeparam name="I">The item representation used by the expansion context.</typeparam>
     /// <param name="options">The comparison and normalization policy.</param>
     /// <param name="metadataNames">The metadata names, whose enumeration order must remain consistent during construction and lookup.</param>
-    /// <param name="itemSpec">The captured source item references.</param>
+    /// <param name="sourceFragments">The parsed source item expressions, in specification order.</param>
+    /// <param name="expander">The captured item-list expansion context.</param>
     /// <returns>
     ///  The completed trie, including an empty trie when no source tuples contribute child edges.
     /// </returns>
     public static MetadataTrie Create<P, I>(
         MatchOnMetadataOptions options,
         ImmutableArray<string> metadataNames,
-        ItemSpec<P, I> itemSpec)
+        ImmutableArray<ItemVectorFragment> sourceFragments,
+        Expander<P, I> expander)
         where P : class, IProperty
-        where I : class, IItem, IMetadataTable
+        where I : class, IItem
     {
         var (comparer, baseDirectory) = GetComparisonPolicy(options);
         int metadataCount = metadataNames.Length;
         Dictionary<string, MetadataTrie>? rootChildren = null;
 
         // Keep this enumeration concrete to avoid boxing the immutable array or its enumerator.
-        foreach (ItemSpec<P, I>.ItemExpressionFragment fragment in itemSpec.Fragments)
+        foreach (ItemVectorFragment fragment in sourceFragments)
         {
-            foreach (var source in fragment.ReferencedItems)
+            var entries = expander.ExpandItemVector(fragment.ItemVector, fragment.ItemSpecLocation);
+
+            if (entries is null)
+            {
+                continue;
+            }
+
+            foreach (var source in entries)
             {
                 if (metadataCount == 0)
                 {
@@ -120,25 +129,34 @@ internal sealed class MetadataTrie
     /// <typeparam name="I">The item representation used by the expansion context.</typeparam>
     /// <param name="options">The comparison and normalization policy.</param>
     /// <param name="metadataNames">The metadata names, whose enumeration order must remain consistent during construction and lookup.</param>
-    /// <param name="itemSpec">The captured source item references.</param>
+    /// <param name="sourceFragments">The parsed source item expressions, in specification order.</param>
+    /// <param name="expander">The captured item-list expansion context.</param>
     /// <returns>
     ///  The completed trie, including an empty trie when no source tuples contribute child edges.
     /// </returns>
     public static MetadataTrie Create<P, I>(
         MatchOnMetadataOptions options,
         HashSet<string> metadataNames,
-        ItemSpec<P, I> itemSpec)
+        ImmutableArray<ItemVectorFragment> sourceFragments,
+        Expander<P, I> expander)
         where P : class, IProperty
-        where I : class, IItem, IMetadataTable
+        where I : class, IItem
     {
         var (comparer, baseDirectory) = GetComparisonPolicy(options);
         int metadataCount = metadataNames.Count;
         Dictionary<string, MetadataTrie>? rootChildren = null;
 
         // The execution-time caller's HashSet enumerator also stays unboxed.
-        foreach (ItemSpec<P, I>.ItemExpressionFragment fragment in itemSpec.Fragments)
+        foreach (ItemVectorFragment fragment in sourceFragments)
         {
-            foreach (var source in fragment.ReferencedItems)
+            var entries = expander.ExpandItemVector(fragment.ItemVector, fragment.ItemSpecLocation);
+
+            if (entries is null)
+            {
+                continue;
+            }
+
+            foreach (var source in entries)
             {
                 if (metadataCount == 0)
                 {

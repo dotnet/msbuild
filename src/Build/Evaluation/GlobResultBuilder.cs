@@ -11,6 +11,7 @@ using System.Buffers;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation;
 
@@ -108,14 +109,15 @@ internal static class GlobResultBuilder
         where P : class, IProperty
         where I : class, IItem, IMetadataTable
     {
-        var includeItemspec = new ItemSpec<P, I>(itemElement.Include, expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
+        var includeFragments = ItemSpec.ParseFragments(
+            itemElement.Include, expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
 
         List<ItemSpecFragment>? includeGlobFragmentsList = null;
-        foreach (ItemSpecFragment fragment in includeItemspec.Fragments)
+        foreach (ItemSpecFragment fragment in includeFragments)
         {
-            if (fragment is GlobFragment && fragment.TextFragment.AsSpan().IndexOfAny(s_invalidGlobChars) < 0)
+            if (fragment is GlobFragment && fragment.Text.AsSpan().IndexOfAny(s_invalidGlobChars) < 0)
             {
-                includeGlobFragmentsList ??= new List<ItemSpecFragment>(includeItemspec.Fragments.Count);
+                includeGlobFragmentsList ??= new List<ItemSpecFragment>(includeFragments.Length);
                 includeGlobFragmentsList.Add(fragment);
             }
         }
@@ -128,20 +130,23 @@ internal static class GlobResultBuilder
         string[] includeGlobStrings = new string[includeGlobFragmentsList.Count];
         for (int i = 0; i < includeGlobStrings.Length; ++i)
         {
-            includeGlobStrings[i] = includeGlobFragmentsList[i].TextFragment;
+            includeGlobStrings[i] = includeGlobFragmentsList[i].Text;
         }
 
-        var includeGlob = CompositeGlob.Create(includeGlobFragmentsList.Select(f => f.ToMSBuildGlob()));
+        var includeGlob = CompositeGlob.Create(includeGlobFragmentsList.Select(
+            f => MSBuildGlob.Parse(f.ProjectDirectory, EscapingUtilities.UnescapeAll(f.Text))));
 
         IEnumerable<string> excludeFragmentStrings = [];
         IMSBuildGlob? excludeGlob = null;
 
         if (!string.IsNullOrEmpty(itemElement.Exclude))
         {
-            var excludeItemspec = new ItemSpec<P, I>(itemElement.Exclude, expander, itemElement.ExcludeLocation, itemElement.ContainingProject.DirectoryPath);
+            var excludeItemspec = ItemSpec.Parse(
+                itemElement.Exclude, expander, itemElement.ExcludeLocation, itemElement.ContainingProject.DirectoryPath);
+            var matcher = new ItemSpecMatcher<P, I>(excludeItemspec, expander);
 
-            excludeFragmentStrings = excludeItemspec.FlattenFragmentsAsStrings().ToImmutableHashSet();
-            excludeGlob = excludeItemspec.ToMSBuildGlob();
+            excludeFragmentStrings = matcher.FlattenFragmentsAsStrings().ToImmutableHashSet();
+            excludeGlob = matcher.ToMSBuildGlob();
         }
 
         IEnumerable<string> removeFragmentStrings = [];
@@ -180,9 +185,11 @@ internal static class GlobResultBuilder
             removeElementCache[itemElement.ItemType] = cumulativeRemoveElementData;
         }
 
-        var removeSpec = new ItemSpec<P, I>(itemElement.Remove, expander, itemElement.RemoveLocation, itemElement.ContainingProject.DirectoryPath);
+        var removeSpec = ItemSpec.Parse(
+            itemElement.Remove, expander, itemElement.RemoveLocation, itemElement.ContainingProject.DirectoryPath);
+        var matcher = new ItemSpecMatcher<P, I>(removeSpec, expander);
 
-        cumulativeRemoveElementData.AccumulateInformationFromRemoveItemSpec(removeSpec.FlattenFragmentsAsStrings(), removeSpec.ToMSBuildGlob());
+        cumulativeRemoveElementData.AccumulateInformationFromRemoveItemSpec(matcher.FlattenFragmentsAsStrings(), matcher.ToMSBuildGlob());
     }
 
     // represents cumulated remove information for a particular item type
