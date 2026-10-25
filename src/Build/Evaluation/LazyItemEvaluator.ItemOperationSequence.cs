@@ -84,7 +84,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             OrderedItemDataCollection.Builder? items = null;
             int firstUncachedIndex = operationCount;
 
-            // Save cumulative exclusion contexts at Remove boundaries so forward replay can restore them.
+            // Save cumulative exclusion contexts at ordinary Remove boundaries so forward replay can restore them.
             using RefStack<ImmutableHashSet<string>> globsToIgnoreStack = default;
 
             // Plan backward within the requested prefix only. Later Removes determine both which cached
@@ -108,6 +108,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                 // This Remove can prune earlier Includes. Extend the context only after checking its cache:
                 // the Remove's own cached result is keyed by later exclusions, not by its own patterns.
+                // Metadata Removes never prune Includes and do not push or pop exclusion contexts.
                 if (operation is RemoveOperation removeOperation)
                 {
                     var globsToIgnoreForPreviousOperations = removeOperation.GetRemovedGlobs();
