@@ -222,6 +222,9 @@
     <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.MatchResult.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.MatchStrategy.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.SourceCaptureMatcher.cs" />
+    <Compile Include="Evaluation\MatchOnMetadataConstants.cs" />
+    <Compile Include="Evaluation\MatchOnMetadataOptions.cs" />
+    <Compile Include="Evaluation\MetadataTrie.cs" />
     <Compile Include="Evaluation\NormalizedItemPath.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="Evaluation\PropertyFunctionReceiver.cs" />
