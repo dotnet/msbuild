@@ -498,48 +498,69 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
 
     private ImmutableArray<ProjectMetadataElement> ProcessMetadataElements(ProjectItemElement itemElement, ref ItemListBookmarks.Builder builder)
     {
-        if (!itemElement.HasMetadata)
+        using var metadataEnumerator = itemElement.GetMetadataEnumerator();
+        if (!metadataEnumerator.MoveNext())
         {
             return [];
         }
 
-        ItemsAndMetadataPair itemsAndMetadataFound = default;
+        HashSet<string> referencedItemTypes = null;
+        ProjectMetadataElement firstMetadata = metadataEnumerator.Current;
+        CollectReferences(firstMetadata, ref referencedItemTypes);
 
-        // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
-        // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
-        // See: https://github.com/dotnet/msbuild/issues/3460
-        const ExpanderOptions expanderOptions = ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError;
+        ImmutableArray<ProjectMetadataElement> metadata;
 
-        using RefArrayBuilder<ProjectMetadataElement> metadata = default;
-
-        foreach (var metadataElement in itemElement.MetadataEnumerable)
+        if (!metadataEnumerator.MoveNext())
         {
-            metadata.Add(metadataElement);
+            metadata = [firstMetadata];
+        }
+        else
+        {
+            using RefArrayBuilder<ProjectMetadataElement> metadataBuilder = default;
+            metadataBuilder.Add(firstMetadata);
+
+            do
+            {
+                ProjectMetadataElement metadataElement = metadataEnumerator.Current;
+                metadataBuilder.Add(metadataElement);
+                CollectReferences(metadataElement, ref referencedItemTypes);
+            }
+            while (metadataEnumerator.MoveNext());
+
+            metadata = metadataBuilder.ToImmutable();
+        }
+
+        if (referencedItemTypes is not null)
+        {
+            foreach (string itemType in referencedItemTypes)
+            {
+                AddItemListBookmark(itemType, ref builder);
+            }
+        }
+
+        return metadata;
+
+        void CollectReferences(ProjectMetadataElement metadataElement, ref HashSet<string> itemTypes)
+        {
+            // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
+            // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
+            // See: https://github.com/dotnet/msbuild/issues/3460
+            const ExpanderOptions expanderOptions = ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError;
 
             string expression = _expander.ExpandIntoStringLeaveEscaped(
                 metadataElement.Value,
                 expanderOptions,
                 metadataElement.Location);
 
-            ExpressionShredder.GetReferencedItemNamesAndMetadata(expression, 0, expression.Length, ref itemsAndMetadataFound, ShredderOptions.All);
+            ExpressionShredder.CollectReferencedItemVectorTypes(expression, ref itemTypes);
 
             expression = _expander.ExpandIntoStringLeaveEscaped(
                 metadataElement.Condition,
                 expanderOptions,
                 metadataElement.ConditionLocation);
 
-            ExpressionShredder.GetReferencedItemNamesAndMetadata(expression, 0, expression.Length, ref itemsAndMetadataFound, ShredderOptions.All);
+            ExpressionShredder.CollectReferencedItemVectorTypes(expression, ref itemTypes);
         }
-
-        if (itemsAndMetadataFound.Items != null)
-        {
-            foreach (var itemType in itemsAndMetadataFound.Items)
-            {
-                AddItemListBookmark(itemType, ref builder);
-            }
-        }
-
-        return metadata.ToImmutable();
     }
 
     private void AddItemReferences(string expression, IElementLocation location, ref ItemListBookmarks.Builder builder)

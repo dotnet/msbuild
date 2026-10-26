@@ -381,6 +381,83 @@ namespace Microsoft.Build.UnitTests.Evaluation
             VerifySplitSemiColonSeparatedList("a", "a");
         }
 
+        [Theory]
+        [InlineData("")]
+        [InlineData("literal")]
+        [InlineData("%(Trace)x")]
+        [InlineData("%(Source.Trace)")]
+        [InlineData("%40(Lookup)")]
+        [InlineData("@")]
+        [InlineData("@(")]
+        [InlineData("@()")]
+        [InlineData("@(Missing")]
+        public void CollectItemVectorTypesLeavesSetUnallocatedWithoutReferences(string expression)
+        {
+            HashSet<string> itemTypes = null;
+
+            ExpressionShredder.CollectReferencedItemVectorTypes(expression, ref itemTypes);
+
+            itemTypes.ShouldBeNull();
+        }
+
+        [Theory]
+        [InlineData("@(First)", "First")]
+        [InlineData("prefix@(First)suffix", "First")]
+        [InlineData("@(First);@(Second);@(first)", "First;Second")]
+        [InlineData("@(First->'%(Filename)')", "First")]
+        [InlineData("@(First->Count())", "First")]
+        [InlineData("@(First->'%(Filename)'->Distinct(), '%(Separator)')", "First")]
+        [InlineData("@(First->AnyFunction('@(Hidden)', '%(Meta)'))", "First")]
+        [InlineData("@(First->'@(Hidden)')", "First")]
+        [InlineData("@(First, '@(Hidden)');@(Second)", "First;Second")]
+        [InlineData("@(First, '%(Other.Name)');%(Qualified.Value);@(Second)", "First;Second")]
+        [InlineData("@(First-->'x')", "First-")]
+        [InlineData("@(Broken->@(Recovered))", "Recovered")]
+        [InlineData("@(Broken, '@(Recovered)'", "Recovered")]
+        [InlineData("@(1Invalid);@(Valid)", "Valid")]
+        public void CollectItemVectorTypesPreservesVectorBoundariesAndRecovery(string expression, string expectedTypes)
+        {
+            HashSet<string> itemTypes = null;
+
+            ExpressionShredder.CollectReferencedItemVectorTypes(expression, ref itemTypes);
+
+            itemTypes.ShouldNotBeNull().ShouldBe(expectedTypes.Split(';'), ignoreOrder: true);
+        }
+
+        [Fact]
+        public void CollectItemVectorTypesAccumulatesCaseInsensitivelyWithoutReplacingTheSet()
+        {
+            HashSet<string> itemTypes = null;
+            ExpressionShredder.CollectReferencedItemVectorTypes("@(First)", ref itemTypes);
+            HashSet<string> originalSet = itemTypes;
+
+            ExpressionShredder.CollectReferencedItemVectorTypes("%(Qualified.Value);@(first);@(Second)", ref itemTypes);
+
+            itemTypes.ShouldBeSameAs(originalSet);
+            itemTypes.ShouldBe(["First", "Second"], ignoreOrder: true);
+            itemTypes.Contains("FIRST").ShouldBeTrue();
+        }
+
+        [Fact]
+        public void CollectItemVectorTypesMatchesCombinedScannerAcrossTheMedley()
+        {
+            foreach (string expression in _medleyTests)
+            {
+                HashSet<string> itemTypes = null;
+                ExpressionShredder.CollectReferencedItemVectorTypes(expression, ref itemTypes);
+                var expected = ExpressionShredder.GetReferencedItemNamesAndMetadata([expression]);
+
+                if (expected.Items is null)
+                {
+                    itemTypes.ShouldBeNull();
+                }
+                else
+                {
+                    itemTypes.ShouldNotBeNull().ShouldBe(expected.Items, ignoreOrder: true);
+                }
+            }
+        }
+
         [Fact]
         public void BasicSplit()
         {

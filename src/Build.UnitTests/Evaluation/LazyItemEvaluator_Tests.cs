@@ -1573,6 +1573,54 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
         current.GetMetadataValue("Trace").ShouldBe("a");
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MetadataCollectionPreservesOrderAndBookmarks(bool instanceModel)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <PropertyGroup>
+                    <Reference>@(Lookup)</Reference>
+                </PropertyGroup>
+                <ItemGroup>
+                    <Lookup Include="first" />
+                    <Flag Include="yes" />
+                    <Zero Include="zero" />
+                    <Single Include="single">
+                        <Trace Condition="'@(Flag)' == 'yes'">$(Reference)</Trace>
+                    </Single>
+                    <Multiple Include="multiple">
+                        <Trace>$(Reference)</Trace>
+                        <Trace>%(Trace)|second</Trace>
+                        <Trace Condition="'@(Flag)' == 'yes'">%(Trace)|third</Trace>
+                    </Multiple>
+                    <Zero Update="zero" />
+                    <Single Update="single">
+                        <Trace Condition="'@(Flag)' == 'yes'">%(Trace)|$(Reference)</Trace>
+                    </Single>
+                    <Multiple Update="multiple">
+                        <Trace>%(Trace)|$(Reference)</Trace>
+                        <Trace>%(Trace)|fourth</Trace>
+                        <Trace Condition="'@(Flag)' == 'yes'">%(Trace)|fifth</Trace>
+                    </Multiple>
+                    <Lookup Include="later" />
+                    <Flag Remove="@(Flag)" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        EvaluateHistory(project, instanceModel, "Zero", "Single", "Multiple").ShouldBe(
+        [
+            "Zero:zero:",
+            "Single:single:first|first",
+            "Multiple:multiple:first|second|third|first|fourth|fifth",
+        ]);
+    }
+
     [Fact]
     public void IncludeSelectionPreservesMixedFragmentOrderAndExcludes()
     {
