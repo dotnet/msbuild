@@ -286,9 +286,13 @@ namespace Microsoft.Build.Construction
         public ICollection<ProjectMetadataElement> Metadata => GetChildrenOfType<ProjectMetadataElement>();
 
         /// <summary>
-        /// Use this instead of <see cref="Metadata"/> to avoid boxing the struct enumerator.
+        ///  Gets a struct enumerator over child metadata without allocating a collection.
         /// </summary>
-        internal ProjectElementSiblingSubTypeCollection<ProjectMetadataElement> MetadataEnumerable => GetChildrenOfType<ProjectMetadataElement>();
+        /// <returns>
+        ///  An enumerator over the child metadata elements in declaration order.
+        /// </returns>
+        internal ProjectElementSiblingSubTypeCollection<ProjectMetadataElement>.Enumerator GetMetadataEnumerator()
+            => new(FirstChild);
 
         /// <summary>
         /// Location of the include attribute

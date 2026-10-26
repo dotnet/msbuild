@@ -316,6 +316,115 @@ namespace Microsoft.Build.Evaluation
             return pair;
         }
 
+#nullable enable
+
+        /// <summary>
+        ///  Collects item types referenced by item vectors without collecting metadata references or expression captures.
+        /// </summary>
+        /// <param name="expression">The expression to scan.</param>
+        /// <param name="itemTypes">
+        ///  The set to accumulate into, allocated with the MSBuild name comparer only when a reference is found.
+        /// </param>
+        /// <remarks>
+        ///  Qualified metadata does not contribute an item-vector dependency. References inside transforms
+        ///  and separators of recognized vectors are skipped. Invalid expressions are skipped without
+        ///  reporting diagnostics, and scanning continues for later valid vectors.
+        /// </remarks>
+        public static void CollectReferencedItemVectorTypes(string expression, ref HashSet<string>? itemTypes)
+        {
+            int end = expression.Length;
+            int i = 0;
+            while ((i = IndexOfItemVectorMarker(expression, i)) >= 0)
+            {
+                i += 2;
+                int restartPoint = i;
+                SinkWhitespace(expression, ref i);
+
+                int startOfName = i;
+                if (!SinkValidName(expression, ref i, end))
+                {
+                    i = restartPoint;
+                    continue;
+                }
+
+                // The final '-' in '->' belongs to the transform, not the item type.
+                if (end > i && expression[i - 1] == '-' && expression[i] == '>')
+                {
+                    i--;
+                }
+
+                int nameLength = i - startOfName;
+                SinkWhitespace(expression, ref i);
+
+                bool validTransforms = true;
+                while (Sink(expression, ref i, end, '-', '>'))
+                {
+                    SinkWhitespace(expression, ref i);
+
+                    if (SinkSingleQuotedExpression(expression, ref i, end))
+                    {
+                        SinkWhitespace(expression, ref i);
+                        continue;
+                    }
+
+                    // Skip a function's name and arguments without constructing a capture.
+                    if (!SinkValidName(expression, ref i, end))
+                    {
+                        validTransforms = false;
+                        break;
+                    }
+
+                    SinkWhitespace(expression, ref i);
+                    if (!SinkArgumentsInParentheses(expression, ref i, end))
+                    {
+                        validTransforms = false;
+                        break;
+                    }
+
+                    SinkWhitespace(expression, ref i);
+                }
+
+                if (!validTransforms)
+                {
+                    i = restartPoint;
+                    continue;
+                }
+
+                SinkWhitespace(expression, ref i);
+
+                if (Sink(expression, ref i, ','))
+                {
+                    SinkWhitespace(expression, ref i);
+                    if (!Sink(expression, ref i, '\''))
+                    {
+                        i = restartPoint;
+                        continue;
+                    }
+
+                    int closingQuote = expression.IndexOf('\'', i);
+                    if (closingQuote == -1)
+                    {
+                        i = restartPoint;
+                        continue;
+                    }
+
+                    i = closingQuote + 1;
+                }
+
+                SinkWhitespace(expression, ref i);
+                if (!Sink(expression, ref i, ')'))
+                {
+                    i = restartPoint;
+                    continue;
+                }
+
+                itemTypes ??= [with(MSBuildNameIgnoreCaseComparer.Default)];
+                itemTypes.Add(expression.Substring(startOfName, nameLength));
+            }
+        }
+
+#nullable disable
+
         /// <summary>
         /// Returns true if there is a metadata expression (outside of a transform) in the expression.
         /// </summary>
