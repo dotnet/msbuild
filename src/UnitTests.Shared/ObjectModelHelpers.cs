@@ -2188,12 +2188,14 @@ namespace Microsoft.Build.UnitTests
             public bool DirectoryExists(string path)
             {
                 IncrementExistenceChecks(path);
+                // CodeQL [SM00414] False positive: test helper LoggingDirectoryCache checks existence of local test paths.
                 return Directory.Exists(path);
             }
 
             public bool FileExists(string path)
             {
                 IncrementExistenceChecks(path);
+                // CodeQL [SM00414] False positive: test helper LoggingDirectoryCache checks existence of local test paths.
                 return File.Exists(path);
             }
 

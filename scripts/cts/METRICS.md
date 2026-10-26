@@ -29,7 +29,7 @@ consumers; new fields will be added at the end of this list.
 | Field | Type | Notes |
 | --- | --- | --- |
 | `sha` | string | HEAD SHA of `main` at job start. The baseline tag passed to `cts collect --tag`. |
-| `artifactName` | string | Pipeline artifact name (`cts-baseline-<os>`). |
+| `artifactName` | string | Pipeline artifact name (`cts-mtp-baseline-<os>`). |
 
 ## `phase=apply`
 
@@ -50,9 +50,11 @@ consumers; new fields will be added at the end of this list.
 
 ## Coverage note
 
-Tests are latest .NETCoreApp only — the wrappers cannot host the net472 leg (xunit.v3
-requires `OutputType=Exe`, CTS requires `OutputType=Library`). The regular
-PR pipeline continues to provide net472 signal. See `scripts/cts/README.md`
+Tests use native MTP hosts matching
+`**/artifacts/bin/*/Debug/net11.0/*.UnitTests.dll`, including Coordinator and the
+original eight CTS projects. New matching built modules are included automatically.
+The net472 leg has not been validated for CTS. The regular PR pipeline provides net472
+signal. See `scripts/cts/README.md`
 → "Coverage gap" for the details.
 
 ## Not yet populated

@@ -1,17 +1,17 @@
 <#
 .SYNOPSIS
     Runs only the tests CTS considers impacted by the current working tree
-    against the *.UnitTests.VSTest projects.
+    against the normal native MTP test projects.
 
 .DESCRIPTION
-    Runs `cts apply vstest --local-development` per project. Requires a
+    Runs `cts apply testingplatform --local-development` per project. Requires a
     baseline from .\Collect-Local.ps1.
 
 .PARAMETER Project
     Short key from projects.json (e.g. StringTools). Default: all projects.
 
 .PARAMETER SkipBuild
-    Reuse already-built VSTest DLLs.
+    Reuse already-built native MTP test DLLs.
 
 .PARAMETER TimeoutMinutes
     Per-project timeout. Default 15.
@@ -56,7 +56,7 @@ foreach ($p in $projects) {
     $errFile = Join-Path $script:LogsDir "apply-$($p.Key).err.log"
 
     $ctsArgs = @(
-        'apply','vstest',
+        'apply','testingplatform',
         '--rootPath',                    $script:RepoRoot,
         '--config',                      $script:ConfigPath,
         '--storage-type',                'filesystem',

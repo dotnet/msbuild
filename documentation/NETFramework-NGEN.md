@@ -43,6 +43,14 @@ One major reason why a native image is rejected is loading into the LoadFrom con
 it to say that when an assembly is loaded by `Assembly.LoadFrom`, it is automatically disqualified from having its native image used.
 This is bad news for any app with an add-in system where extension assemblies are loaded by path.
 
+### CLR compatibility switches
+
+NGEN can also affect how .NET Framework loads assemblies and how it computes quirks.
+[dotnet/msbuild#15333](https://github.com/dotnet/msbuild/issues/15333) reported problems that arose from .NET Framework
+failing to enable long-path support for `MSBuild.exe` despite targeting .NET 4.7.2, but only in some NGEN states.
+To mitigate this, specify `AppContextSwitchOverrides` explicitly _including .NET Framework built-in quirks_
+in both `app.config` and `app.amd64.config`.
+
 ## SDK resolvers
 
 One class of assemblies loaded by MSBuild by path are SDK resolvers. MSBuild scans the `SdkResolvers` subdirectory to discover

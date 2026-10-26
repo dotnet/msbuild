@@ -446,7 +446,7 @@ internal static class NativeMethods
     /// <summary>
     /// Cached value for IsUnixLike (this method is called frequently during evaluation).
     /// </summary>
-    private static readonly bool s_isUnixLike = IsLinux || IsOSX || IsBSD || IsHaiku;
+    private static readonly bool s_isUnixLike = IsLinux || IsOSX || IsBSD || IsHaiku || IsOpenHarmony;
 
     /// <summary>
     /// Gets a flag indicating if we are running under a Unix-like system (Mac, Linux, etc.)
@@ -464,6 +464,14 @@ internal static class NativeMethods
     internal static bool IsLinux
     {
         get { return RuntimeInformation.IsOSPlatform(OSPlatform.Linux); }
+    }
+
+    /// <summary>
+    /// Gets a flag indicating if we are running under OpenHarmony
+    /// </summary>
+    internal static bool IsOpenHarmony
+    {
+        get { return RuntimeInformation.IsOSPlatform(OSPlatform.Create("OPENHARMONY")); }
     }
 
     /// <summary>
@@ -915,7 +923,9 @@ internal static class NativeMethods
             }
 #endif
 
+            // CodeQL [SM00414] False positive: GetLastWriteFileUtcTime operates on trusted build paths.
             return File.Exists(path)
+                // CodeQL [SM00414] False positive: GetLastWriteFileUtcTime operates on trusted build paths.
                 ? File.GetLastWriteTimeUtc(path)
                 : DateTime.MinValue;
         }

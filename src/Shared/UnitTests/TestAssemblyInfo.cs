@@ -223,8 +223,13 @@ namespace Microsoft.Build.UnitTests
 
             _testEnvironment.DoNotLaunchDebugger();
 
+#if !FEATURE_RUN_EXE_IN_TESTS
+            // API task hosts share the test host's runtime, which can differ from the bootstrap.
+            RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(_testEnvironment);
+#else
             var bootstrapCorePath = Path.Combine(Path.Combine(RunnerUtilities.BootstrapRootPath, "core"), Constants.DotnetProcessName);
             _testEnvironment.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, bootstrapCorePath);
+#endif
 
             // Reset the VisualStudioVersion environment variable.  This will be set if tests are run from a VS command prompt.  However,
             //  if the environment variable is set, it will interfere with tests which set the SubToolsetVersion

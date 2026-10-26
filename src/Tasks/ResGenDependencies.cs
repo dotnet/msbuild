@@ -127,6 +127,7 @@ namespace Microsoft.Build.Tasks
             if (!resXFiles.TryGetValue(resxFile, out ResXFile retVal))
             {
                 // Ok, the file wasn't there.  Add it to our cache and return it to the caller.
+                // CodeQL [SM02363] False positive: project resource files tracked by ResGenDependencies are trusted developer build inputs.
                 retVal = AddResxFile(resxFile, useMSBuildResXReader, log, logWarningForBinaryFormatter);
             }
             else
@@ -137,6 +138,7 @@ namespace Microsoft.Build.Tasks
                 {
                     resXFiles.Remove(resxFile);
                     _isDirty = true;
+                    // CodeQL [SM02363] False positive: project resource files tracked by ResGenDependencies are trusted developer build inputs.
                     retVal = AddResxFile(resxFile, useMSBuildResXReader, log, logWarningForBinaryFormatter);
                 }
             }
@@ -149,6 +151,7 @@ namespace Microsoft.Build.Tasks
             // This method adds a .resx file "file" to our .resx cache.  The method causes the file
             // to be cracked for contained files.
 
+            // CodeQL [SM02363] False positive: project resource files tracked by ResGenDependencies are trusted developer build inputs.
             var resxFile = new ResXFile(file, BaseLinkedFileDirectory, useMSBuildResXReader, log, logWarningForBinaryFormatter);
             resXFiles.Add(file, resxFile);
             _isDirty = true;
@@ -231,6 +234,7 @@ namespace Microsoft.Build.Tasks
 
                 if (FileSystems.Default.FileExists(FileName))
                 {
+                    // CodeQL [SM02363] False positive: project resource files tracked by ResGenDependencies are trusted developer build inputs.
                     linkedFiles = GetLinkedFiles(filename, baseLinkedFileDirectory, useMSBuildResXReader, log, logWarningForBinaryFormatter);
                 }
             }
@@ -273,6 +277,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
+                    // CodeQL [SM02363] False positive: project resource files tracked by ResGenDependencies are trusted developer build inputs.
                     using (var resxReader = new ResXResourceReader(filename))
                     {
                         // Tell the reader to return ResXDataNode's instead of the object type

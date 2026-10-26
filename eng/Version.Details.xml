@@ -106,9 +106,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="12.0.0-beta.26505.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="12.0.0-beta.26509.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>5a63d054ea793bdbdb6aa9f4558558e3a8f41529</Sha>
+      <Sha>7dad90156e9d69e991ad499ece9cf805cabcf506</Sha>
     </Dependency>
     <!-- This is the NuGet.* package family. NuGet.Frameworks is also pulled in via this
          version on .NET Core, where Microsoft.Build takes a direct compile-time PackageReference
@@ -116,17 +116,17 @@
          in our public surface). At runtime we still bind to whatever NuGet.Frameworks.dll the
          host SDK ships, so per the toolset-vs-product test in dotnet/arcade-services'
          docs/Darc.md this is a toolset dependency, not a product one. -->
-    <Dependency Name="NuGet.Build.Tasks" Version="7.11.0-rc.32">
+    <Dependency Name="NuGet.Build.Tasks" Version="8.0.0-rc.126">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>76212731a977f820b19f9f11730b90cc2215ff96</Sha>
+      <Sha>3dca69bf4ad1f03fa4738e0f3e99506c24135340</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.12.0-1.26428.6">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.13.0-1.26525.3">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>92a36efa9ae1a26a14872f87798526a1c3dd050b</Sha>
+      <Sha>e3c31f15b79e226656e3b082a921d4d60127b1fa</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="12.0.0-beta.26505.2">
+    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="12.0.0-beta.26509.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>5a63d054ea793bdbdb6aa9f4558558e3a8f41529</Sha>
+      <Sha>7dad90156e9d69e991ad499ece9cf805cabcf506</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
