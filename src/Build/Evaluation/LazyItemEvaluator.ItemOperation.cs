@@ -20,7 +20,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 {
     private abstract partial class ItemOperation
     {
-        private bool _isNeeded;
+        private bool _isBookmarked;
 
         protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
         protected readonly ProjectItemElement _itemElement;
@@ -53,17 +53,17 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         protected FileMatcher FileMatcher => _lazyEvaluator.FileMatcher;
 
         /// <summary>
-        ///  Gets whether this operation's snapshot is needed by a caller.
+        ///  Gets whether a bookmark identifies the item state after this operation.
         /// </summary>
-        public bool IsReferenced => _isNeeded;
+        public bool IsBookmarked => _isBookmarked;
 
         /// <summary>
-        ///  Marks this operation's snapshot for caching when it is computed.
+        ///  Marks this position so snapshots needed by bookmarks remain cached.
         /// </summary>
-        public void MarkAsNeeded() => _isNeeded = true;
+        public void MarkAsBookmarked() => _isBookmarked = true;
 
         /// <summary>
-        ///  Applies the operation and admits its snapshot to the shared cache when referenced.
+        ///  Applies the operation and caches its snapshot when this position has a bookmark.
         /// </summary>
         /// <param name="listBuilder">The items produced by preceding operations.</param>
         /// <param name="laterRemoveGlobPatterns">The later Remove glob patterns used for this computation.</param>
@@ -82,24 +82,24 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             MSBuildEventSource.Log.ApplyLazyItemOperationsStop(_itemElement.ItemType);
 
             // Snapshot creation remains outside the operation's profiling and event scope.
-            CacheResultIfReferenced(listBuilder, laterRemoveGlobPatterns);
+            CacheResultIfBookmarked(listBuilder, laterRemoveGlobPatterns);
         }
 
         /// <summary>
-        ///  Saves a completed snapshot when this operation has been marked as referenced.
+        ///  Caches the completed snapshot when a bookmark identifies this position.
         /// </summary>
         /// <param name="listBuilder">The computed items through this operation, under the supplied later Remove glob patterns.</param>
         /// <param name="laterRemoveGlobPatterns">The later Remove glob patterns used for this computation.</param>
-        public void CacheResultIfReferenced(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        public void CacheResultIfBookmarked(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
         {
-            if (_isNeeded)
+            if (_isBookmarked)
             {
                 _lazyEvaluator.CacheItems(this, laterRemoveGlobPatterns, listBuilder.ToImmutable());
             }
 
 #if DEBUG
-            Debug.Assert(_lazyEvaluator.TryGetCachedItems(this, laterRemoveGlobPatterns, out _) == _isNeeded,
-                "Only referenced operation results should be cached");
+            Debug.Assert(_lazyEvaluator.TryGetCachedItems(this, laterRemoveGlobPatterns, out _) == _isBookmarked,
+                "Only captured intermediate operation results should be cached");
 #endif
         }
 

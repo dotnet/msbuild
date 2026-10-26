@@ -22,19 +22,5 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </returns>
         public ICollection<I> GetFilteredItems()
             => sequence.GetFilteredItems(operationCount);
-
-        /// <summary>
-        ///  Gets all items visible at the bookmarked position.
-        /// </summary>
-        /// <returns>
-        ///  An immutable snapshot of the captured item result.
-        /// </returns>
-        public OrderedItemDataCollection GetItemData()
-            => sequence.GetItemData(operationCount);
-
-        /// <summary>
-        ///  Announces that this position's result will be needed by another operation.
-        /// </summary>
-        public void MarkAsNeeded() => sequence.MarkAsNeeded(operationCount);
     }
 }

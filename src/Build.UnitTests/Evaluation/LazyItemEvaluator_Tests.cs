@@ -614,6 +614,273 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void CurrentConditionReadsRetainOnlyTheLatestSnapshot()
+    {
+        const int phaseCount = 32;
+        const string itemType = "GrowingCurrentCheckpointSource";
+        using ProjectCollection collection = new();
+        Project project = CreateProject("<Project />", collection, ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
+        var evaluator = CreateEvaluator(project);
+        IItemProvider<ProjectItem> provider = evaluator;
+        List<ICollection<ProjectItem>> snapshots = [];
+        List<string> expectedIncludes = [];
+        using EventSourceTestHelper listener = new();
+
+        evaluator.TestOnlyCachedSnapshotCount.ShouldBe(0);
+        for (int phase = 1; phase <= phaseCount; phase++)
+        {
+            string include = $"item{phase}.cs";
+            ProjectItemGroupElement group = project.Xml.AddItemGroup();
+            group.AddItem(itemType, include);
+            ProjectItemGroupElement probe = project.Xml.AddItemGroup();
+            probe.Condition = $"'@({itemType}->Count())' != '{phase}'";
+            probe.AddItem("ReadMismatch", "incorrect-count");
+
+            evaluator.ProcessItemGroups([group, probe], project.Xml.DirectoryPath);
+
+            ICollection<ProjectItem> result = provider.GetItems(itemType);
+            expectedIncludes.Add(include);
+            AssertIncludes(result, [.. expectedIncludes]);
+            provider.GetItems(itemType).ShouldBeSameAs(result);
+            provider.GetItems("ReadMismatch").ShouldBeEmpty();
+            evaluator.TestOnlyCachedSnapshotCount.ShouldBe(1);
+            CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), itemType).ShouldBe(1);
+            snapshots.Add(result);
+        }
+
+        // External collections remain valid even after their cache entries have been retired.
+        for (int phase = 0; phase < snapshots.Count; phase++)
+        {
+            List<string> includes = [];
+            for (int item = 1; item <= phase + 1; item++)
+            {
+                includes.Add($"item{item}.cs");
+            }
+
+            AssertIncludes(snapshots[phase], [.. includes]);
+        }
+    }
+
+    [Theory]
+    [InlineData("a.cs")]
+    [InlineData("*")]
+    public void PreviousCurrentSnapshotsAreRemovedAcrossBatchedAndOrdinaryUpdates(string updateSpec)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs;b.cs"><Trace>initial</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        IItemProvider<ProjectItem> provider = evaluator;
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        List<(ICollection<ProjectItem> Items, string Trace)> snapshots = [(provider.GetItems("Source"), "initial")];
+        string trace = "initial";
+
+        for (int phase = 1; phase <= 8; phase++)
+        {
+            ProjectItemGroupElement group = project.Xml.AddItemGroup();
+            ProjectItemElement update = project.Xml.CreateItemElement("Source");
+            update.Update = updateSpec;
+            group.AppendChild(update);
+            update.AddMetadata("Trace", $"%(Trace)-{phase}");
+            evaluator.ProcessItemGroups([group], project.Xml.DirectoryPath);
+
+            ICollection<ProjectItem> result = provider.GetItems("Source");
+            trace += $"-{phase}";
+            snapshots.Add((result, trace));
+            provider.GetItems("Source").ShouldBeSameAs(result);
+            AssertIncludes(CollectItems(evaluator), ["a.cs", "b.cs"]);
+            provider.GetItems("Source").ShouldBeSameAs(result);
+            evaluator.TestOnlyCachedSnapshotCount.ShouldBe(1);
+        }
+
+        foreach (var snapshot in snapshots)
+        {
+            ProjectItem[] items = [.. snapshot.Items];
+            items[0].GetMetadataValue("Trace").ShouldBe(snapshot.Trace);
+            items[1].GetMetadataValue("Trace").ShouldBe(updateSpec == "*" ? snapshot.Trace : "initial");
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void BookmarksPreserveEarlierStatesWithoutReplacingTheCurrentSnapshot(bool readBeforeCapture)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs"><Trace>initial</Trace></Source>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        IItemProvider<ProjectItem> provider = evaluator;
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        ICollection<ProjectItem>? initial = readBeforeCapture ? provider.GetItems("Source") : null;
+
+        ProjectItemGroupElement capture = project.Xml.AddItemGroup();
+        capture.AddItem("Captured", "@(Source)");
+        evaluator.ProcessItemGroups([capture], project.Xml.DirectoryPath);
+        evaluator.TestOnlyCachedSnapshotCount.ShouldBe(readBeforeCapture ? 1 : 0);
+
+        ICollection<ProjectItem>? captured = null;
+        for (int phase = 1; phase <= 3; phase++)
+        {
+            ProjectItemGroupElement group = project.Xml.AddItemGroup();
+            ProjectItemElement update = project.Xml.CreateItemElement("Source");
+            update.Update = "a.cs";
+            group.AppendChild(update);
+            update.AddMetadata("Trace", $"phase{phase}");
+            evaluator.ProcessItemGroups([group], project.Xml.DirectoryPath);
+
+            ICollection<ProjectItem> current = provider.GetItems("Source");
+            current.ShouldHaveSingleItem().GetMetadataValue("Trace").ShouldBe($"phase{phase}");
+            evaluator.TestOnlyCachedSnapshotCount.ShouldBe(captured is null ? 2 : 3);
+
+            ICollection<ProjectItem> earlier = provider.GetItems("Captured");
+            earlier.ShouldHaveSingleItem().GetMetadataValue("Trace").ShouldBe("initial");
+            if (captured is not null)
+            {
+                earlier.ShouldBeSameAs(captured);
+            }
+
+            captured = earlier;
+            provider.GetItems("Source").ShouldBeSameAs(current);
+            evaluator.TestOnlyCachedSnapshotCount.ShouldBe(3);
+        }
+
+        if (initial is not null)
+        {
+            initial.ShouldHaveSingleItem().GetMetadataValue("Trace").ShouldBe("initial");
+        }
+    }
+
+    [Fact]
+    public void PreviousSnapshotRemovalIsIndependentForEachItemType()
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="first.cs" />
+                    <Other Include="other.cs" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        IItemProvider<ProjectItem> provider = evaluator;
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        ICollection<ProjectItem> original = provider.GetItems("Source");
+        ICollection<ProjectItem> other = provider.GetItems("Other");
+        evaluator.TestOnlyCachedSnapshotCount.ShouldBe(2);
+
+        ProjectItemGroupElement group = project.Xml.AddItemGroup();
+        group.AddItem("Source", "second.cs");
+        evaluator.ProcessItemGroups([group], project.Xml.DirectoryPath);
+
+        AssertIncludes(provider.GetItems("Source"), ["first.cs", "second.cs"]);
+        provider.GetItems("Other").ShouldBeSameAs(other);
+        AssertIncludes(original, ["first.cs"]);
+        evaluator.TestOnlyCachedSnapshotCount.ShouldBe(2);
+    }
+
+    [Fact]
+    public void FailedCurrentReadPreservesThePreviousSnapshotForRetry()
+    {
+        const string itemType = "FailingCurrentCheckpointSource";
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <FailingCurrentCheckpointSource Include="a.cs"><Trace>initial</Trace></FailingCurrentCheckpointSource>
+                </ItemGroup>
+                <ItemGroup>
+                    <FailingCurrentCheckpointSource Update="*">
+                        <Trace Condition="'%(Identity)' ==">updated</Trace>
+                    </FailingCurrentCheckpointSource>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        IItemProvider<ProjectItem> provider = evaluator;
+        ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
+        evaluator.ProcessItemGroups([groups[0]], project.Xml.DirectoryPath);
+        ICollection<ProjectItem> original = provider.GetItems(itemType);
+        evaluator.ProcessItemGroups([groups[1]], project.Xml.DirectoryPath);
+        using EventSourceTestHelper listener = new();
+
+        for (int attempt = 0; attempt < 2; attempt++)
+        {
+            Should.Throw<InvalidProjectFileException>(() => provider.GetItems(itemType));
+
+            evaluator.TestOnlyCachedSnapshotCount.ShouldBe(1);
+            original.ShouldHaveSingleItem().GetMetadataValue("Trace").ShouldBe("initial");
+            // Retry applies only the failing Update, not the preceding Include.
+            CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), itemType).ShouldBe(1);
+        }
+    }
+
+    [Fact]
+    public void RemovingPreviousCurrentSnapshotsPreservesBookmarkedResultsWithLaterRemovePatterns()
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs;b.tmp" />
+                    <Captured Include="@(Source)" />
+                    <Source Remove="*.tmp" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Include="c.cs" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Remove="*.cs" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        IItemProvider<ProjectItem> provider = evaluator;
+        ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
+
+        evaluator.ProcessItemGroups([groups[0]], project.Xml.DirectoryPath);
+        AssertIncludes(provider.GetItems("Source"), ["a.cs"]);
+        evaluator.TestOnlyCachedSnapshotCount.ShouldBe(2);
+
+        evaluator.ProcessItemGroups([groups[1]], project.Xml.DirectoryPath);
+        AssertIncludes(provider.GetItems("Source"), ["a.cs", "c.cs"]);
+        evaluator.TestOnlyCachedSnapshotCount.ShouldBe(2);
+
+        evaluator.ProcessItemGroups([groups[2]], project.Xml.DirectoryPath);
+        ICollection<ProjectItem> current = provider.GetItems("Source");
+        current.ShouldBeEmpty();
+        // The bookmarked Include retains both later-pattern-specific snapshots alongside the current snapshot.
+        evaluator.TestOnlyCachedSnapshotCount.ShouldBe(3);
+
+        AssertIncludes(provider.GetItems("Captured"), ["a.cs", "b.tmp"]);
+        // The bookmark adds the complete earlier snapshot and the Captured type's current result.
+        evaluator.TestOnlyCachedSnapshotCount.ShouldBe(5);
+        provider.GetItems("Source").ShouldBeSameAs(current);
+        evaluator.TestOnlyCachedSnapshotCount.ShouldBe(5);
+    }
+
+    [Fact]
     public void ReevaluatedWildcardUpdatesKeepTemporaryContextsIsolated()
     {
         const string updateCondition = "'WildcardUpdateScratch' == 'WildcardUpdateScratch'";

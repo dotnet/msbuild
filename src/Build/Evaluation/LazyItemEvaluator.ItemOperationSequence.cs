@@ -19,6 +19,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         private readonly SegmentedList<ItemOperation> _operations = [];
 
         /// <summary>
+        ///  The ending operation of the most recent successful current-state computation.
+        /// </summary>
+        private ItemOperation? _lastCurrentReadOperation;
+
+        /// <summary>
         ///  Appends an operation without changing the positions identified by earlier references.
         /// </summary>
         /// <param name="operation">The operation to append.</param>
@@ -28,12 +33,61 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         }
 
         /// <summary>
-        ///  Captures the current exclusive stopping position without computing or copying items.
+        ///  Creates a bookmark at the current operation count without computing or copying items.
         /// </summary>
         /// <returns>
         ///  A bookmark for the operations collected so far.
         /// </returns>
-        public ItemListBookmark BookmarkCurrent() => new(this, _operations.Count);
+        public ItemListBookmark BookmarkCurrent()
+        {
+            if (_operations.Count > 0)
+            {
+                _operations[^1].MarkAsBookmarked();
+            }
+
+            return new(this, _operations.Count);
+        }
+
+        /// <summary>
+        ///  Gets current items filtered by originating Include conditions, reusing the cached collection.
+        /// </summary>
+        /// <returns>
+        ///  The current read-only collection of filtered items in evaluation order.
+        /// </returns>
+        public ICollection<I> GetCurrentFilteredItems()
+            => GetCurrentItemData().GetFilteredItems(_lazyEvaluator._includes);
+
+        /// <summary>
+        ///  Computes the current snapshot before removing a replaceable previous snapshot from the cache.
+        /// </summary>
+        /// <returns>
+        ///  An immutable snapshot of the current item result.
+        /// </returns>
+        /// <remarks>
+        ///  Bookmarked positions and results using later Remove patterns remain cached. Bookmark reads
+        ///  do not replace this sequence's current-state tracking.
+        /// </remarks>
+        public OrderedItemDataCollection GetCurrentItemData()
+        {
+            OrderedItemDataCollection items = GetItemData(_operations.Count);
+            if (_operations.Count > 0)
+            {
+                ItemOperation lastOperation = _operations[^1];
+                if (!ReferenceEquals(_lastCurrentReadOperation, lastOperation))
+                {
+                    ItemOperation? previous = _lastCurrentReadOperation;
+                    _lastCurrentReadOperation = lastOperation;
+
+                    // The previous snapshot remains available until its replacement has been computed successfully.
+                    if (previous is not null && !previous.IsBookmarked)
+                    {
+                        _lazyEvaluator.RemoveCachedItems(previous, s_emptyRemoveGlobPatterns);
+                    }
+                }
+            }
+
+            return items;
+        }
 
         /// <summary>
         ///  Gets the items through the requested position, filtered by originating Include conditions.
@@ -59,15 +113,14 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 return OrderedItemDataCollection.Empty;
             }
 
-            // Captured references announce their demand before evaluation; eager condition reads announce it here.
-            // Direct requests start without later exclusions; backward planning can add them for earlier positions.
-            ItemOperation operation = _operations[operationCount - 1];
-            if (_lazyEvaluator.TryGetCachedItems(operation, s_emptyRemoveGlobPatterns, out OrderedItemDataCollection? items))
+            // Bookmark and current reads request complete item states. Only BookmarkCurrent marks
+            // a position for lasting reuse; a current read must not retain every previous snapshot.
+            ItemOperation lastOperation = _operations[operationCount - 1];
+            if (_lazyEvaluator.TryGetCachedItems(lastOperation, s_emptyRemoveGlobPatterns, out OrderedItemDataCollection? items))
             {
                 return items;
             }
 
-            operation.MarkAsNeeded();
             return ComputeItems(operationCount);
         }
 
@@ -139,12 +192,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                 if (operation is UpdateOperation op && updateBatch.TryAdd(op))
                 {
-                    if (op.IsReferenced)
+                    if (op.IsBookmarked)
                     {
                         // A bookmark ends at this Update. Complete and cache its snapshot before any later
                         // Updates join the batch, without applying this Update a second time through Apply.
                         updateBatch.ApplyTo(items);
-                        op.CacheResultIfReferenced(items, currentRemoveGlobPatterns);
+                        op.CacheResultIfBookmarked(items, currentRemoveGlobPatterns);
                     }
 
                     continue;
@@ -161,27 +214,23 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     currentRemoveGlobPatterns = laterRemoveGlobPatternStack.Count > 0 ? laterRemoveGlobPatternStack.Peek() : s_emptyRemoveGlobPatterns;
                 }
 
-                // Apply saves the complete snapshot when this position has been marked as referenced.
+                // Apply caches intermediate snapshots only at bookmarked positions.
                 operation.Apply(items, currentRemoveGlobPatterns);
             }
 
             // The requested position may end with a pending Update batch.
             updateBatch.ApplyTo(items);
 
-            // GetItemData marks the requested endpoint as referenced, so evaluation has already cached its snapshot.
-            return _lazyEvaluator.GetCachedItems(_operations[operationCount - 1], s_emptyRemoveGlobPatterns);
-        }
-
-        /// <summary>
-        ///  Marks an item state's final operation for caching before another operation requests its result.
-        /// </summary>
-        /// <param name="operationCount">The number of operations in the referenced item state.</param>
-        public void MarkAsNeeded(int operationCount)
-        {
-            if (operationCount > 0)
+            ItemOperation lastOperation = _operations[operationCount - 1];
+            if (lastOperation.IsBookmarked)
             {
-                _operations[operationCount - 1].MarkAsNeeded();
+                return _lazyEvaluator.GetCachedItems(lastOperation, s_emptyRemoveGlobPatterns);
             }
+
+            // Current-only reads need a reusable result, but no persistent operation-level demand.
+            OrderedItemDataCollection result = items.ToImmutable();
+            _lazyEvaluator.CacheItems(lastOperation, s_emptyRemoveGlobPatterns, result);
+            return result;
         }
     }
 }
