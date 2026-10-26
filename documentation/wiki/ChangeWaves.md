@@ -35,6 +35,9 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
+### 18.14
+- [AssignTargetPath recognizes forward slashes in relative path specifiers and correctly handles relative paths outside the root folder cone on Windows.](https://github.com/dotnet/msbuild/pull/15267)
+
 ### 18.13
 - [Task hosts preserve ordinary task-environment variables while retaining Windows bitness adjustments.](https://github.com/dotnet/msbuild/pull/15032)
 - [ResolveAssemblyReference discovers redist and subset lists relative to the project directory when `TargetFrameworkDirectories` contains relative paths.](https://github.com/dotnet/msbuild/pull/15089)
