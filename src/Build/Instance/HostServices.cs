@@ -370,6 +370,22 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        // Build nodes need affinities; task hosts retain their host-object-only wire format.
+        internal void TranslateNodeAffinities(ITranslator translator)
+        {
+            IDictionary<string, NodeAffinity> projectAffinities = _projectAffinities;
+            translator.TranslateDictionary(
+                ref projectAffinities,
+                static (ITranslator t, ref string project) => t.Translate(ref project),
+                static (ITranslator t, ref NodeAffinity affinity) => t.TranslateEnum(ref affinity, (int)affinity),
+                static capacity => new Dictionary<string, NodeAffinity>(capacity, StringComparer.OrdinalIgnoreCase));
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                _projectAffinities = (Dictionary<string, NodeAffinity>)projectAffinities;
+            }
+        }
+
         /// <summary>
         /// Test only
         /// </summary>
