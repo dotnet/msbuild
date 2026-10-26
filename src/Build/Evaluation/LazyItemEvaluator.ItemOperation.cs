@@ -67,10 +67,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="listBuilder">The items produced by preceding operations.</param>
         /// <param name="laterRemoveGlobPatterns">The later Remove glob patterns used for this computation.</param>
-        public void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        public void Apply(OrderedItemDataCollection.Builder listBuilder, RemoveGlobPatterns laterRemoveGlobPatterns)
         {
 #if DEBUG
-            Debug.Assert(!_lazyEvaluator.TryGetCachedItems(this, laterRemoveGlobPatterns, out _),
+            Debug.Assert(!_isBookmarked || !_lazyEvaluator.TryGetCachedItems(this, laterRemoveGlobPatterns, out _),
                 "Apply requires an uncached operation and later Remove glob pattern set");
 #endif
 
@@ -90,7 +90,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="listBuilder">The computed items through this operation, under the supplied later Remove glob patterns.</param>
         /// <param name="laterRemoveGlobPatterns">The later Remove glob patterns used for this computation.</param>
-        public void CacheResultIfBookmarked(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        public void CacheResultIfBookmarked(OrderedItemDataCollection.Builder listBuilder, RemoveGlobPatterns laterRemoveGlobPatterns)
         {
             if (_isBookmarked)
             {
@@ -98,12 +98,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
 
 #if DEBUG
-            Debug.Assert(_lazyEvaluator.TryGetCachedItems(this, laterRemoveGlobPatterns, out _) == _isBookmarked,
-                "Only captured intermediate operation results should be cached");
+            Debug.Assert(!_isBookmarked || _lazyEvaluator.TryGetCachedItems(this, laterRemoveGlobPatterns, out _),
+                "Snapshots at bookmarked positions should be cached");
 #endif
         }
 
-        protected abstract void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns);
+        protected abstract void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, RemoveGlobPatterns laterRemoveGlobPatterns);
 
         protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
         {

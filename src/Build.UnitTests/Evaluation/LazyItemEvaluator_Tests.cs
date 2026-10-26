@@ -2833,6 +2833,356 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
         CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), itemType).ShouldBe(1);
     }
 
+    [Fact]
+    public void UnbookmarkedLiteralSequenceDoesNotCreateRemoveGlobSets()
+    {
+        const int removeCount = 10_000;
+        using ProjectCollection collection = new();
+        Project project = CreateProject("<Project />", collection);
+        ProjectItemGroupElement group = project.Xml.AddItemGroup();
+        group.AddItem("Source", "a.cs;b.tmp");
+        for (int i = 0; i < removeCount; i++)
+        {
+            ProjectItemElement remove = project.Xml.CreateItemElement("Source");
+            remove.Remove = $"missing{i}*.tmp";
+            group.AppendChild(remove);
+        }
+
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([group], project.Xml.DirectoryPath);
+        evaluator.TestOnlyCachedRemoveGlobRangeCount.ShouldBe(0);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        ICollection<ProjectItem> result = provider.GetItems("Source");
+
+        AssertIncludes(result, ["a.cs", "b.tmp"]);
+        provider.GetItems("Source").ShouldBeSameAs(result);
+        evaluator.TestOnlyCachedSnapshotCount.ShouldBe(1);
+        evaluator.TestOnlyCachedRemoveGlobRangeCount.ShouldBe(0);
+        evaluator.TestOnlyCreatedRemoveGlobSetCount.ShouldBe(0);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void GrowingBookmarkedRemoveRangesCreateSetsOnlyForFilesystemExpansion(bool useGlobs)
+    {
+        const int removeCount = 128;
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "a.cs", contents: string.Empty);
+        env.CreateFile(folder, "b.tmp", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject("<Project />", collection);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+        ProjectItemGroupElement first = project.Xml.AddItemGroup();
+        first.AddItem("Source", useGlobs ? "*.cs;*.tmp" : "a.cs;b.tmp").AddMetadata("Trace", "initial");
+        ProjectItemElement track = project.Xml.CreateItemElement("Source");
+        track.Update = "a.cs";
+        first.AppendChild(track);
+        track.AddMetadata("Track", "true");
+
+        for (int position = 0; position <= removeCount; position++)
+        {
+            ProjectItemGroupElement group = project.Xml.AddItemGroup();
+            if (position > 0)
+            {
+                ProjectItemElement remove = project.Xml.CreateItemElement("Source");
+                remove.Remove = $"missing{position}*.tmp";
+                group.AppendChild(remove);
+            }
+
+            group.AddItem($"Snapshot{position}", "@(Source->WithMetadataValue('Track', 'true'))");
+        }
+
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        evaluator.TestOnlyCreatedRemoveGlobSetCount.ShouldBe(0);
+
+        for (int read = 0; read < 2; read++)
+        {
+            ImmutableArray<ProjectItem> items = CollectItems(evaluator);
+            items.Length.ShouldBe(removeCount + 3);
+            for (int index = 0; index < 2; index++)
+            {
+                items[index].ItemType.ShouldBe("Source");
+                items[index].EvaluatedInclude.ShouldBe(index == 0 ? "a.cs" : "b.tmp");
+                items[index].GetMetadataValue("Trace").ShouldBe("initial");
+            }
+            for (int position = 0; position <= removeCount; position++)
+            {
+                ProjectItem item = items[position + 2];
+                item.ItemType.ShouldBe($"Snapshot{position}");
+                item.EvaluatedInclude.ShouldBe("a.cs");
+                item.GetMetadataValue("Trace").ShouldBe("initial");
+            }
+
+            // Cache probes and all distinct bookmarked cache keys must not construct pattern sets.
+            evaluator.TestOnlyCreatedRemoveGlobSetCount.ShouldBe(useGlobs ? removeCount : 0);
+            evaluator.TestOnlyCachedRemoveGlobRangeCount.ShouldBe(useGlobs ? 1 : 0);
+        }
+    }
+
+    [Fact]
+    public void RemoveGlobPlanningRetainsOneTemporaryRangeAcrossUnbookmarkedReevaluations()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "a.cs", contents: string.Empty);
+        env.CreateFile(folder, "b.tmp", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject("<Project />", collection);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+        ProjectItemGroupElement firstGroup = project.Xml.AddItemGroup();
+        firstGroup.AddItem("Source", "*.cs;*.tmp");
+        for (int i = 0; i < 128; i++)
+        {
+            ProjectItemElement remove = project.Xml.CreateItemElement("Source");
+            remove.Remove = $"missing{i}*.tmp";
+            firstGroup.AppendChild(remove);
+        }
+
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([firstGroup], project.Xml.DirectoryPath);
+        evaluator.TestOnlyCachedRemoveGlobRangeCount.ShouldBe(0);
+        IItemProvider<ProjectItem> provider = evaluator;
+        ICollection<ProjectItem> original = provider.GetItems("Source");
+        AssertIncludes(original, ["a.cs", "b.tmp"]);
+        evaluator.TestOnlyCachedRemoveGlobRangeCount.ShouldBe(1);
+
+        for (int phase = 0; phase < 3; phase++)
+        {
+            ProjectItemGroupElement group = project.Xml.AddItemGroup();
+            ProjectItemElement remove = project.Xml.CreateItemElement("Source");
+            remove.Remove = "*.tmp";
+            group.AppendChild(remove);
+            evaluator.ProcessItemGroups([group], project.Xml.DirectoryPath);
+
+            ICollection<ProjectItem> current = provider.GetItems("Source");
+            AssertIncludes(current, ["a.cs"]);
+            provider.GetItems("Source").ShouldBeSameAs(current);
+            evaluator.TestOnlyCachedRemoveGlobRangeCount.ShouldBe(1);
+            evaluator.TestOnlyCachedSnapshotCount.ShouldBe(1);
+        }
+
+        AssertIncludes(original, ["a.cs", "b.tmp"]);
+    }
+
+    [Fact]
+    public void EquivalentRemoveGlobRangesReuseCachedSnapshots()
+    {
+        const string itemType = "DuplicateExclusionRangeSource";
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <DuplicateExclusionRangeSource Include="a.cs;b.tmp" />
+                    <Captured Include="@(DuplicateExclusionRangeSource)" />
+                    <DuplicateExclusionRangeSource Remove="*.tmp;*.tmp;*.g.cs" />
+                </ItemGroup>
+                <ItemGroup>
+                    <DuplicateExclusionRangeSource Remove="*.g.cs;*.tmp;*.g.cs" />
+                </ItemGroup>
+                <ItemGroup>
+                    <DuplicateExclusionRangeSource Remove="*.tmp" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        IItemProvider<ProjectItem> provider = evaluator;
+        ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
+        using EventSourceTestHelper listener = new();
+        int[] expectedApplications = [2, 2, 3];
+
+        for (int phase = 0; phase < groups.Length; phase++)
+        {
+            evaluator.ProcessItemGroups([groups[phase]], project.Xml.DirectoryPath);
+            AssertIncludes(provider.GetItems(itemType), ["a.cs"]);
+
+            // Later reads evaluation only Removes after the reused Include result.
+            CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), itemType)
+                .ShouldBe(expectedApplications[phase]);
+            evaluator.TestOnlyCachedSnapshotCount.ShouldBe(2);
+            evaluator.TestOnlyCachedRemoveGlobRangeCount.ShouldBe(0);
+            evaluator.TestOnlyCreatedRemoveGlobSetCount.ShouldBe(0);
+        }
+
+        for (int phase = 0; phase < 32; phase++)
+        {
+            ProjectItemGroupElement group = project.Xml.AddItemGroup();
+            ProjectItemElement remove = project.Xml.CreateItemElement(itemType);
+            remove.Remove = "*.g.cs;*.tmp;*.tmp";
+            group.AppendChild(remove);
+            evaluator.ProcessItemGroups([group], project.Xml.DirectoryPath);
+
+            ICollection<ProjectItem> current = provider.GetItems(itemType);
+            AssertIncludes(current, ["a.cs"]);
+            provider.GetItems(itemType).ShouldBeSameAs(current);
+            CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), itemType)
+                .ShouldBe(groups.Length + phase + 1);
+            evaluator.TestOnlyCachedSnapshotCount.ShouldBe(2);
+            evaluator.TestOnlyCachedRemoveGlobRangeCount.ShouldBe(0);
+            evaluator.TestOnlyCreatedRemoveGlobSetCount.ShouldBe(0);
+        }
+
+        AssertIncludes(provider.GetItems("Captured"), ["a.cs", "b.tmp"]);
+    }
+
+    [Fact]
+    public void RemoveRangeContentEqualityPreservesNonzeroStartsAndEarlierBounds()
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs;b.tmp;c.g.cs" />
+                    <Source Remove="missing*.tmp" />
+                    <Before Include="@(Source)" />
+                    <Source Remove="missing*.tmp;*.tmp" />
+                    <Middle Include="@(Source)" />
+                    <Source Remove="*.g.cs" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Remove="*.g.cs;missing*.tmp;*.tmp" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        IItemProvider<ProjectItem> provider = evaluator;
+        ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
+        using EventSourceTestHelper listener = new();
+
+        evaluator.ProcessItemGroups([groups[0]], project.Xml.DirectoryPath);
+        AssertIncludes(provider.GetItems("Source"), ["a.cs"]);
+        CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), "Source").ShouldBe(4);
+
+        evaluator.ProcessItemGroups([groups[1]], project.Xml.DirectoryPath);
+        ICollection<ProjectItem> current = provider.GetItems("Source");
+        AssertIncludes(current, ["a.cs"]);
+        // The range after the first Remove includes a repeat of a pattern declared before its start.
+        // Equivalent later contents must reuse that Remove's snapshot, without applying the Include again.
+        CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), "Source").ShouldBe(3);
+
+        AssertIncludes(provider.GetItems("Before"), ["a.cs", "b.tmp", "c.g.cs"]);
+        AssertIncludes(provider.GetItems("Middle"), ["a.cs", "c.g.cs"]);
+        provider.GetItems("Source").ShouldBeSameAs(current);
+        evaluator.TestOnlyCreatedRemoveGlobSetCount.ShouldBe(0);
+        evaluator.TestOnlyCachedRemoveGlobRangeCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public void BookmarkedRemoveGlobRangesStayBoundedAsSequenceGrows()
+    {
+        const int removeCount = 10_000;
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "a.cs", contents: string.Empty);
+        env.CreateFile(folder, "b.tmp", contents: string.Empty);
+        env.CreateFile(folder, "c.skip", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="*" />
+                    <Before Include="@(Source)" />
+                    <Source Remove="*.tmp" />
+                    <After Include="@(Source)" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+        var evaluator = CreateEvaluator(project);
+        IItemProvider<ProjectItem> provider = evaluator;
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        ICollection<ProjectItem> original = provider.GetItems("Source");
+        AssertIncludes(original, ["a.cs", "c.skip"]);
+
+        ProjectItemGroupElement later = project.Xml.AddItemGroup();
+        for (int i = 0; i < removeCount; i++)
+        {
+            ProjectItemElement remove = project.Xml.CreateItemElement("Source");
+            remove.Remove = $"missing{i}*.skip";
+            later.AppendChild(remove);
+        }
+
+        ProjectItemElement finalRemove = project.Xml.CreateItemElement("Source");
+        finalRemove.Remove = "*.cs";
+        later.AppendChild(finalRemove);
+        evaluator.ProcessItemGroups([later], project.Xml.DirectoryPath);
+
+        ICollection<ProjectItem> current = provider.GetItems("Source");
+        AssertIncludes(current, ["c.skip"]);
+        AssertIncludes(provider.GetItems("Before"), ["a.cs", "b.tmp", "c.skip"]);
+        AssertIncludes(provider.GetItems("After"), ["a.cs", "c.skip"]);
+        AssertIncludes(original, ["a.cs", "c.skip"]);
+        provider.GetItems("Source").ShouldBeSameAs(current);
+    }
+
+    [Fact]
+    public void LocalIncludeExcludesDoNotMutateSharedRemoveGlobPatterns()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "a.cs", contents: string.Empty);
+        env.CreateFile(folder, "b.cs", contents: string.Empty);
+        env.CreateFile(folder, "c.cs", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="*.cs" Exclude="a.cs" />
+                    <Captured Include="@(Source)" />
+                    <Source Include="*.cs" Exclude="c.cs" />
+                    <Source Remove="*.tmp" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        AssertIncludes(provider.GetItems("Source"), ["b.cs", "c.cs", "a.cs", "b.cs"]);
+        AssertIncludes(provider.GetItems("Captured"), ["b.cs", "c.cs"]);
+    }
+
+    [Fact]
+    public void FalseAndNonGlobRemovesDoNotCreateRemoveGlobRanges()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "a.cs", contents: string.Empty);
+        env.CreateFile(folder, "b.tmp", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="*.cs;*.tmp" />
+                    <Source Remove="*.cs" Condition="false" />
+                    <Source Remove="b.tmp" />
+                    <Source Remove="@(Missing)" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        AssertIncludes(provider.GetItems("Source"), ["a.cs"]);
+        evaluator.TestOnlyCachedRemoveGlobRangeCount.ShouldBe(0);
+    }
+
     private static List<string> EvaluateHistory(Project project, bool instanceModel, params string[] itemTypes)
     {
         List<string> result = [];

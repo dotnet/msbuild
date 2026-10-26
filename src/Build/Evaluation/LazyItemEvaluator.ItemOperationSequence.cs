@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.Collections;
 
 namespace Microsoft.Build.Evaluation;
@@ -17,6 +16,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     {
         private readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator = lazyEvaluator;
         private readonly SegmentedList<ItemOperation> _operations = [];
+        private RemoveGlobPatternSequence? _removeGlobPatterns;
 
         /// <summary>
         ///  The ending operation of the most recent successful current-state computation.
@@ -29,8 +29,23 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// <param name="operation">The operation to append.</param>
         public void Add(ItemOperation operation)
         {
+            if (operation is RemoveOperation remove)
+            {
+                remove.CollectRemoveGlobPatterns(ref _removeGlobPatterns, _operations.Count + 1);
+            }
+
             _operations.Add(operation);
         }
+
+        /// <summary>
+        ///  Gets the number of pattern sets cached for filesystem expansion.
+        /// </summary>
+        public int CachedRemoveGlobRangeCount => _removeGlobPatterns?.CachedRangeCount ?? 0;
+
+        /// <summary>
+        ///  Gets the total number of pattern sets constructed for filesystem expansion.
+        /// </summary>
+        public int CreatedRemoveGlobSetCount => _removeGlobPatterns?.CreatedSetCount ?? 0;
 
         /// <summary>
         ///  Creates a bookmark at the current operation count without computing or copying items.
@@ -81,7 +96,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     // The previous snapshot remains available until its replacement has been computed successfully.
                     if (previous is not null && !previous.IsBookmarked)
                     {
-                        _lazyEvaluator.RemoveCachedItems(previous, s_emptyRemoveGlobPatterns);
+                        _lazyEvaluator.RemoveCachedItems(previous, default);
                     }
                 }
             }
@@ -116,7 +131,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // Bookmark and current reads request complete item states. Only BookmarkCurrent marks
             // a position for lasting reuse; a current read must not retain every previous snapshot.
             ItemOperation lastOperation = _operations[operationCount - 1];
-            if (_lazyEvaluator.TryGetCachedItems(lastOperation, s_emptyRemoveGlobPatterns, out OrderedItemDataCollection? items))
+            if (_lazyEvaluator.TryGetCachedItems(lastOperation, default, out OrderedItemDataCollection? items))
             {
                 return items;
             }
@@ -136,19 +151,26 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             OrderedItemDataCollection.Builder? items = null;
             int firstUncachedIndex = operationCount;
 
-            // Save cumulative later Remove glob pattern sets at ordinary Remove boundaries so forward evaluation can restore them.
-            Stack<ImmutableHashSet<string>> laterRemoveGlobPatternStack = new();
+            RemoveGlobPatternSequence? removeGlobPatterns = _removeGlobPatterns;
+            int patternEnd = removeGlobPatterns?.GetPatternCount(operationCount) ?? 0;
+            int patternStart = patternEnd;
 
-            // Plan backward within the requested item state only. Later Removes determine both which cached
-            // item states are compatible and which files earlier Includes can skip during enumeration.
+            // Only patterns within the requested sequence participate. Moving the start boundary backward
+            // adds each Remove's patterns without constructing cumulative exclusion sets.
             for (int index = operationCount - 1; index >= 0; index--)
             {
                 ItemOperation operation = _operations[index];
-                var patternsFromLaterOperations = laterRemoveGlobPatternStack.Count > 0 ? laterRemoveGlobPatternStack.Peek() : s_emptyRemoveGlobPatterns;
+                RemoveGlobPatterns laterRemoveGlobPatterns = removeGlobPatterns is null
+                    ? default
+                    : removeGlobPatterns.GetRange(patternStart, patternEnd);
 
-                if (_lazyEvaluator.TryGetCachedItems(
+                // Intermediate snapshots are cached at bookmarks. A current-only result is cached
+                // without later Remove patterns; probing other positions would build unused pattern sets.
+                bool canHaveCachedItems = operation.IsBookmarked
+                    || (ReferenceEquals(operation, _lastCurrentReadOperation) && laterRemoveGlobPatterns.IsEmpty);
+                if (canHaveCachedItems && _lazyEvaluator.TryGetCachedItems(
                     operation,
-                    patternsFromLaterOperations,
+                    laterRemoveGlobPatterns,
                     out OrderedItemDataCollection? itemsFromCache))
                 {
                     // The cached snapshot contains computed items through this operation under these later Remove patterns.
@@ -158,18 +180,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     break;
                 }
 
-                // This Remove can prune earlier Includes. Extend the context only after checking its cache:
-                // the Remove's own cached result is keyed by later exclusions, not by its own patterns.
-                // Metadata Removes never prune Includes and do not push or pop later Remove glob pattern sets.
-                if (operation is RemoveOperation removeOperation)
+                // This operation's own patterns apply only to earlier operations. Metadata Removes
+                // and false-condition Removes never add patterns to the collected sequence.
+                if (operation is RemoveOperation && removeGlobPatterns is not null)
                 {
-                    var earlierRemoveGlobPatterns = removeOperation.GetRemoveGlobPatterns();
-                    foreach (var globToRemove in patternsFromLaterOperations)
-                    {
-                        earlierRemoveGlobPatterns.Add(globToRemove);
-                    }
-
-                    laterRemoveGlobPatternStack.Push(earlierRemoveGlobPatterns.ToImmutable());
+                    patternStart = removeGlobPatterns.IncludePatternsFromOperation(patternStart, index + 1);
                 }
 
                 firstUncachedIndex = index;
@@ -179,8 +194,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // the cached snapshot; shared immutable storage protects that earlier result.
             items ??= OrderedItemDataCollection.CreateBuilder();
 
-            // The first operation to evaluation sees all Remove globs accumulated while planning backward.
-            ImmutableHashSet<string> currentRemoveGlobPatterns = laterRemoveGlobPatternStack.Count > 0 ? laterRemoveGlobPatternStack.Peek() : s_emptyRemoveGlobPatterns;
+            RemoveGlobPatterns currentRemoveGlobPatterns = removeGlobPatterns is null
+                ? default
+                : removeGlobPatterns.GetRange(patternStart, patternEnd);
 
             // Disjoint literal Updates can be applied together with one scan of the current items.
             UpdateBatch updateBatch = default;
@@ -208,10 +224,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                 // Before applying this Remove, keep only the glob patterns from subsequent Removes
                 // before applying it, so its result uses the same cache key checked during backward planning.
-                if (operation is RemoveOperation)
+                if (operation is RemoveOperation && removeGlobPatterns is not null)
                 {
-                    laterRemoveGlobPatternStack.Pop();
-                    currentRemoveGlobPatterns = laterRemoveGlobPatternStack.Count > 0 ? laterRemoveGlobPatternStack.Peek() : s_emptyRemoveGlobPatterns;
+                    patternStart = removeGlobPatterns.SkipPatternsFromOperation(patternStart, patternEnd, index + 1);
+                    currentRemoveGlobPatterns = removeGlobPatterns.GetRange(patternStart, patternEnd);
                 }
 
                 // Apply caches intermediate snapshots only at bookmarked positions.
@@ -224,12 +240,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             ItemOperation lastOperation = _operations[operationCount - 1];
             if (lastOperation.IsBookmarked)
             {
-                return _lazyEvaluator.GetCachedItems(lastOperation, s_emptyRemoveGlobPatterns);
+                return _lazyEvaluator.GetCachedItems(lastOperation, default);
             }
 
             // Current-only reads need a reusable result, but no persistent operation-level demand.
             OrderedItemDataCollection result = items.ToImmutable();
-            _lazyEvaluator.CacheItems(lastOperation, s_emptyRemoveGlobPatterns, result);
+            _lazyEvaluator.CacheItems(lastOperation, default, result);
             return result;
         }
     }

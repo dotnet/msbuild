@@ -196,7 +196,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             return false;
         }
 
-        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, RemoveGlobPatterns laterRemoveGlobPatterns)
         {
             if (!_conditionResult)
             {

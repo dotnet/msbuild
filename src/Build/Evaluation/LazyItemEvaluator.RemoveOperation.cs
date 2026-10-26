@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 
@@ -34,7 +32,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// <remarks>
         /// This override exists to apply the removing-everything short-circuit and to avoid creating a redundant list of items to remove.
         /// </remarks>
-        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, RemoveGlobPatterns laterRemoveGlobPatterns)
         {
             if (!_conditionResult)
             {
@@ -73,20 +71,26 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
         }
 
-        public ImmutableHashSet<string>.Builder GetRemoveGlobPatterns()
+        /// <summary>
+        ///  Collects true-condition Remove glob patterns once when this operation is appended.
+        /// </summary>
+        /// <param name="patterns">The owning sequence's lazily allocated pattern patterns.</param>
+        /// <param name="operationCount">The number of operations through this declaration.</param>
+        public void CollectRemoveGlobPatterns(ref RemoveGlobPatternSequence? patterns, int operationCount)
         {
-            var builder = s_emptyRemoveGlobPatterns.ToBuilder();
-
             if (!_conditionResult)
             {
-                return builder;
+                return;
             }
 
-            var globs = _itemSpec.Fragments.OfType<GlobFragment>().Select(g => g.Text);
-
-            builder.UnionWith(globs);
-
-            return builder;
+            foreach (ItemSpecFragment fragment in _itemSpec.Fragments)
+            {
+                if (fragment is GlobFragment)
+                {
+                    patterns ??= new();
+                    patterns.Add(fragment.Text, operationCount);
+                }
+            }
         }
     }
 }
