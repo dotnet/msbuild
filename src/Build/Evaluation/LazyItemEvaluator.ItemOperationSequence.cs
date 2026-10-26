@@ -20,6 +20,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         private readonly SegmentedList<LazyItemOperation> _operations = [];
 
         /// <summary>
+        ///  The operation identifying the latest successfully computed current checkpoint.
+        /// </summary>
+        private LazyItemOperation? _currentCheckpointOperation;
+
+        /// <summary>
         ///  Appends an operation without changing the positions identified by earlier references.
         /// </summary>
         /// <param name="operation">The operation to append.</param>
@@ -29,12 +34,61 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         }
 
         /// <summary>
-        ///  Captures the current exclusive stopping position without computing or copying items.
+        ///  Captures and retains the current exclusive stopping position without computing or copying items.
         /// </summary>
         /// <returns>
         ///  A reference to the operations recorded so far.
         /// </returns>
-        public ItemListReference CaptureCurrent() => new(this, _operations.Count);
+        public ItemListReference CaptureCurrent()
+        {
+            if (_operations.Count > 0)
+            {
+                _operations[^1].MarkAsCaptured();
+            }
+
+            return new(this, _operations.Count);
+        }
+
+        /// <summary>
+        ///  Gets the condition-true items through the latest operation, reusing the cached projection.
+        /// </summary>
+        /// <returns>
+        ///  The current read-only collection of matching items in evaluation order.
+        /// </returns>
+        public ICollection<I> GetCurrentMatchedItems()
+            => GetCurrentItemData().GetMatchedItems(_lazyEvaluator._includes);
+
+        /// <summary>
+        ///  Computes items through the latest operation and retires the previous current-only checkpoint after success.
+        /// </summary>
+        /// <returns>
+        ///  An immutable snapshot of the current item result.
+        /// </returns>
+        /// <remarks>
+        ///  Captured prefixes and nonempty exclusion contexts are not retired. Historical capture reads
+        ///  do not change this sequence's current checkpoint.
+        /// </remarks>
+        public OrderedItemDataCollection GetCurrentItemData()
+        {
+            OrderedItemDataCollection items = GetItemData(_operations.Count);
+            if (_operations.Count > 0)
+            {
+                LazyItemOperation lastOperation = _operations[^1];
+                if (!ReferenceEquals(_currentCheckpointOperation, lastOperation))
+                {
+                    LazyItemOperation? previous = _currentCheckpointOperation;
+                    _currentCheckpointOperation = lastOperation;
+
+                    // The old result remains a resume point throughout computation, including failed attempts.
+                    if (previous is not null && !previous.IsCaptured)
+                    {
+                        _lazyEvaluator.RemoveCachedItems(previous, s_emptyGlobsToIgnore);
+                    }
+                }
+            }
+
+            return items;
+        }
 
         /// <summary>
         ///  Gets the condition-true items produced by a prefix of this sequence.
@@ -60,15 +114,14 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 return OrderedItemDataCollection.Empty;
             }
 
-            // Captured references announce their demand before evaluation; eager condition reads announce it here.
-            // Direct requests start without later exclusions; backward planning can add them for earlier positions.
-            LazyItemOperation operation = _operations[operationCount - 1];
-            if (_lazyEvaluator.TryGetCachedItems(operation, s_emptyGlobsToIgnore, out OrderedItemDataCollection? items))
+            // Both capture and current reads request an unpruned prefix. Only CaptureCurrent marks
+            // persistent demand; a current read must not permanently retain every prefix it visits.
+            LazyItemOperation lastOperation = _operations[operationCount - 1];
+            if (_lazyEvaluator.TryGetCachedItems(lastOperation, s_emptyGlobsToIgnore, out OrderedItemDataCollection? items))
             {
                 return items;
             }
 
-            operation.MarkAsReferenced();
             return ComputeItems(operationCount);
         }
 
@@ -140,12 +193,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                 if (operation is UpdateOperation op && updateBatch.TryAdd(op))
                 {
-                    if (op.IsReferenced)
+                    if (op.IsCaptured)
                     {
                         // A bookmark ends at this Update. Complete and cache its prefix before any later
                         // Updates join the batch, without applying this Update a second time through Apply.
                         updateBatch.ApplyTo(items);
-                        op.CacheResultIfReferenced(items, currentGlobsToIgnore);
+                        op.CacheResultIfCaptured(items, currentGlobsToIgnore);
                     }
 
                     continue;
@@ -162,27 +215,23 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     currentGlobsToIgnore = globsToIgnoreStack.PeekOrDefault(s_emptyGlobsToIgnore);
                 }
 
-                // Apply saves the complete prefix result when this position has been marked as referenced.
+                // Apply saves intermediate results only where a capture requires them.
                 operation.Apply(items, currentGlobsToIgnore);
             }
 
             // The requested prefix may end with a deferred Update batch.
             updateBatch.ApplyTo(items);
 
-            // GetItemData marks the requested endpoint as referenced, so replay has already cached its snapshot.
-            return _lazyEvaluator.GetCachedItems(_operations[operationCount - 1], s_emptyGlobsToIgnore);
-        }
-
-        /// <summary>
-        ///  Marks a prefix's final operation for caching before another operation requests its result.
-        /// </summary>
-        /// <param name="operationCount">The number of operations in the referenced prefix.</param>
-        public void MarkAsReferenced(int operationCount)
-        {
-            if (operationCount > 0)
+            LazyItemOperation lastOperation = _operations[operationCount - 1];
+            if (lastOperation.IsCaptured)
             {
-                _operations[operationCount - 1].MarkAsReferenced();
+                return _lazyEvaluator.GetCachedItems(lastOperation, s_emptyGlobsToIgnore);
             }
+
+            // Current-only reads need a reusable result, but no persistent operation-level demand.
+            OrderedItemDataCollection result = items.ToImmutable();
+            _lazyEvaluator.CacheItems(lastOperation, s_emptyGlobsToIgnore, result);
+            return result;
         }
     }
 }

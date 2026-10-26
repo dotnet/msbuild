@@ -20,7 +20,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 {
     private abstract partial class LazyItemOperation
     {
-        private bool _isReferenced;
+        private bool _isCaptured;
 
         protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
         protected readonly ProjectItemElement _itemElement;
@@ -53,17 +53,17 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         protected FileMatcher FileMatcher => _lazyEvaluator.FileMatcher;
 
         /// <summary>
-        ///  Gets whether this operation's prefix result is needed by a caller.
+        ///  Gets whether this operation's prefix is retained by an item-vector capture.
         /// </summary>
-        public bool IsReferenced => _isReferenced;
+        public bool IsCaptured => _isCaptured;
 
         /// <summary>
-        ///  Marks this operation's prefix result for caching when it is computed.
+        ///  Retains this operation's prefix results for later item-vector expansion.
         /// </summary>
-        public void MarkAsReferenced() => _isReferenced = true;
+        public void MarkAsCaptured() => _isCaptured = true;
 
         /// <summary>
-        ///  Applies the operation and admits its prefix result to the shared cache when referenced.
+        ///  Applies the operation and caches its prefix result when retained by a capture.
         /// </summary>
         /// <param name="listBuilder">The items produced by preceding operations.</param>
         /// <param name="globsToIgnore">The exclusion context used for this computation.</param>
@@ -82,24 +82,24 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             MSBuildEventSource.Log.ApplyLazyItemOperationsStop(_itemElement.ItemType);
 
             // Snapshot creation remains outside the operation's profiling and event scope.
-            CacheResultIfReferenced(listBuilder, globsToIgnore);
+            CacheResultIfCaptured(listBuilder, globsToIgnore);
         }
 
         /// <summary>
-        ///  Saves a completed prefix result when this operation has been marked as referenced.
+        ///  Saves a completed prefix result when this operation is retained by a capture.
         /// </summary>
         /// <param name="listBuilder">The items produced through this operation, excluding later operations.</param>
         /// <param name="globsToIgnore">The exclusion context used for this computation.</param>
-        public void CacheResultIfReferenced(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+        public void CacheResultIfCaptured(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
         {
-            if (_isReferenced)
+            if (_isCaptured)
             {
                 _lazyEvaluator.CacheItems(this, globsToIgnore, listBuilder.ToImmutable());
             }
 
 #if DEBUG
-            Debug.Assert(_lazyEvaluator.TryGetCachedItems(this, globsToIgnore, out _) == _isReferenced,
-                "Only referenced operation results should be cached");
+            Debug.Assert(_lazyEvaluator.TryGetCachedItems(this, globsToIgnore, out _) == _isCaptured,
+                "Only captured intermediate operation results should be cached");
 #endif
         }
 

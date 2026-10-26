@@ -58,6 +58,11 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     /// </summary>
     private readonly Dictionary<ItemCacheKey, OrderedItemDataCollection> _itemCache = [];
 
+    /// <summary>
+    ///  Gets the number of cached prefix/context pairs for deterministic lifetime tests.
+    /// </summary>
+    internal int TestOnlyCachedPrefixCount => _itemCache.Count;
+
     protected EvaluationContext EvaluationContext { get; }
 
     protected IFileSystem FileSystem => EvaluationContext.FileSystem;
@@ -86,7 +91,7 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     /// <inheritdoc />
     ICollection<I> IItemProvider<I>.GetItems(string itemType)
         => _itemLists.TryGetValue(itemType, out ItemOperationSequence sequence)
-            ? sequence.CaptureCurrent().GetMatchedItems()
+            ? sequence.GetCurrentMatchedItems()
             : Array.Empty<I>();
 
     /// <summary>
@@ -193,7 +198,6 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
         if (_itemLists.TryGetValue(itemType, out ItemOperationSequence sequence))
         {
             ItemListReference itemList = sequence.CaptureCurrent();
-            itemList.MarkAsReferenced();
             builder.Add(itemType, itemList);
         }
     }
@@ -235,7 +239,7 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
             int index = 0;
             foreach (var itemList in _itemLists)
             {
-                enumerators[index] = itemList.Value.CaptureCurrent().GetItemData().GetEnumerator();
+                enumerators[index] = itemList.Value.GetCurrentItemData().GetEnumerator();
                 if (enumerators[index].MoveNext())
                 {
                     itemTypeIndices.Add(itemList.Key, index);
@@ -313,6 +317,9 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
 
     private void CacheItems(LazyItemOperation operation, ImmutableHashSet<string> globsToIgnore, OrderedItemDataCollection items)
         => _itemCache[new ItemCacheKey(operation, globsToIgnore)] = items;
+
+    private void RemoveCachedItems(LazyItemOperation operation, ImmutableHashSet<string> globsToIgnore)
+        => _itemCache.Remove(new ItemCacheKey(operation, globsToIgnore));
 
     private void AddItemOperation(ProjectItemElement itemElement, bool conditionResult, string rootDirectory)
     {

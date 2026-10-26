@@ -140,6 +140,26 @@ it can measure the lookup allocation change but does not establish trie efficien
 source sets, metadata tuples, or prefix-sharing patterns. No performance results for these changes
 are recorded yet.
 
+### Current-checkpoint lifetimes
+
+Current condition reads and final publication keep one unpruned resume checkpoint per item type.
+After a replacement checkpoint is successfully computed, an earlier current-only checkpoint is removed
+from the evaluator cache. A failed replacement leaves the old checkpoint available for retry.
+Item-vector captures retain their historical prefixes independently, including any cached exclusion
+contexts. Reading a capture does not replace the latest current checkpoint.
+
+Use `e9636399db` as the immediate pre-change reference for `LazyItemCheckpointBenchmark`,
+`LazyItemReadBenchmark`, and `LazyItemSnapshotBenchmark`; capture those reference measurements on the
+benchmark VM before measuring the changed revision. Keep recording and glob/replay controls.
+The focused `moar-recording-fast-paths` results do not contain the checkpoint/read/snapshot suites.
+Use the established rebased benchmark checkpoint `b966b20182` for cumulative branch comparisons,
+not `main`.
+
+Deterministic tests count cache entries and preserve returned snapshots without relying on GC timing.
+Allocation and elapsed-time results cannot establish reduced retained memory: use separate memory
+profiling for that claim, and account for piece-list ancestry that may remain reachable after cache
+retirement. No performance results for this lifetime change are recorded yet.
+
 ## Comparable baseline on the benchmark VM
 
 Run benchmarks on the dedicated benchmark VM, not on the development machine, including smoke runs.
