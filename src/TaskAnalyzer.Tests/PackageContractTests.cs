@@ -8,6 +8,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.Diagnostics;
 using NuGet.Packaging;
 using Shouldly;
 using Xunit;
@@ -22,6 +24,27 @@ public sealed class PackageContractTests
     public PackageContractTests(ITestOutputHelper output)
     {
         _output = output;
+    }
+
+    [Fact]
+    public void AnalyzerAssemblyExportsNoCodeFixesAndPreservesAnalyzerDiscovery()
+    {
+        Type[] types = typeof(MultiThreadableTaskAnalyzer).Assembly.GetTypes();
+
+        types.Where(type => type.IsDefined(typeof(ExportCodeFixProviderAttribute), inherit: false))
+            .ShouldBeEmpty();
+        types.Where(type => type.IsDefined(typeof(DiagnosticAnalyzerAttribute), inherit: false))
+            .ShouldBe(
+                [
+                    typeof(MultiThreadableTaskAnalyzer),
+                    typeof(MultiThreadableTaskDeclarationAnalyzer),
+                    typeof(PreferTypedParameterAnalyzer),
+                    typeof(RequiredTaskPropertyInitializationSuppressor),
+                    typeof(TaskEnvironmentConstructorInjectionAnalyzer),
+                    typeof(TransitiveCallChainAnalyzer),
+                    typeof(UnsupportedTaskItemTypeAnalyzer),
+                ],
+                ignoreOrder: true);
     }
 
     [Fact]
