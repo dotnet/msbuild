@@ -2613,6 +2613,248 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
         CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), itemType).ShouldBe(1);
     }
 
+    [Fact]
+    public void UncapturedLiteralHistoryDoesNotMaterializeGlobExclusionSets()
+    {
+        const int removeCount = 10_000;
+        using ProjectCollection collection = new();
+        Project project = CreateProject("<Project />", collection);
+        ProjectItemGroupElement group = project.Xml.AddItemGroup();
+        group.AddItem("Source", "a.cs;b.tmp");
+        for (int i = 0; i < removeCount; i++)
+        {
+            ProjectItemElement remove = project.Xml.CreateItemElement("Source");
+            remove.Remove = $"missing{i}*.tmp";
+            group.AppendChild(remove);
+        }
+
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([group], project.Xml.DirectoryPath);
+        evaluator.TestOnlyMaterializedExclusionCount.ShouldBe(0);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        ICollection<ProjectItem> result = provider.GetItems("Source");
+
+        AssertIncludes(result, ["a.cs", "b.tmp"]);
+        provider.GetItems("Source").ShouldBeSameAs(result);
+        evaluator.TestOnlyCachedPrefixCount.ShouldBe(1);
+        evaluator.TestOnlyMaterializedExclusionCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public void GlobPlanningRetainsOneTemporaryRangeAcrossUncapturedReplays()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "a.cs", contents: string.Empty);
+        env.CreateFile(folder, "b.tmp", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject("<Project />", collection);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+        ProjectItemGroupElement firstGroup = project.Xml.AddItemGroup();
+        firstGroup.AddItem("Source", "*.cs;*.tmp");
+        for (int i = 0; i < 128; i++)
+        {
+            ProjectItemElement remove = project.Xml.CreateItemElement("Source");
+            remove.Remove = $"missing{i}*.tmp";
+            firstGroup.AppendChild(remove);
+        }
+
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([firstGroup], project.Xml.DirectoryPath);
+        evaluator.TestOnlyMaterializedExclusionCount.ShouldBe(0);
+        IItemProvider<ProjectItem> provider = evaluator;
+        ICollection<ProjectItem> original = provider.GetItems("Source");
+        AssertIncludes(original, ["a.cs", "b.tmp"]);
+        evaluator.TestOnlyMaterializedExclusionCount.ShouldBe(1);
+
+        for (int phase = 0; phase < 3; phase++)
+        {
+            ProjectItemGroupElement group = project.Xml.AddItemGroup();
+            ProjectItemElement remove = project.Xml.CreateItemElement("Source");
+            remove.Remove = "*.tmp";
+            group.AppendChild(remove);
+            evaluator.ProcessItemGroups([group], project.Xml.DirectoryPath);
+
+            ICollection<ProjectItem> current = provider.GetItems("Source");
+            AssertIncludes(current, ["a.cs"]);
+            provider.GetItems("Source").ShouldBeSameAs(current);
+            evaluator.TestOnlyMaterializedExclusionCount.ShouldBe(1);
+            evaluator.TestOnlyCachedPrefixCount.ShouldBe(1);
+        }
+
+        AssertIncludes(original, ["a.cs", "b.tmp"]);
+    }
+
+    [Fact]
+    public void DuplicateExclusionRangesReuseCachedItemStates()
+    {
+        const string itemType = "DuplicateExclusionRangeSource";
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <DuplicateExclusionRangeSource Include="a.cs;b.tmp" />
+                    <Captured Include="@(DuplicateExclusionRangeSource)" />
+                    <DuplicateExclusionRangeSource Remove="*.tmp;*.tmp;*.g.cs" />
+                </ItemGroup>
+                <ItemGroup>
+                    <DuplicateExclusionRangeSource Remove="*.g.cs;*.tmp;*.g.cs" />
+                </ItemGroup>
+                <ItemGroup>
+                    <DuplicateExclusionRangeSource Remove="*.tmp" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project);
+        IItemProvider<ProjectItem> provider = evaluator;
+        ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
+        using EventSourceTestHelper listener = new();
+        int[] expectedApplications = [2, 2, 3];
+
+        for (int phase = 0; phase < groups.Length; phase++)
+        {
+            evaluator.ProcessItemGroups([groups[phase]], project.Xml.DirectoryPath);
+            AssertIncludes(provider.GetItems(itemType), ["a.cs"]);
+
+            // Later reads replay only Removes after the reused Include result.
+            CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), itemType)
+                .ShouldBe(expectedApplications[phase]);
+            evaluator.TestOnlyCachedPrefixCount.ShouldBe(2);
+            evaluator.TestOnlyMaterializedExclusionCount.ShouldBe(phase == 0 ? 1 : 2);
+        }
+
+        for (int phase = 0; phase < 32; phase++)
+        {
+            ProjectItemGroupElement group = project.Xml.AddItemGroup();
+            ProjectItemElement remove = project.Xml.CreateItemElement(itemType);
+            remove.Remove = "*.g.cs;*.tmp;*.tmp";
+            group.AppendChild(remove);
+            evaluator.ProcessItemGroups([group], project.Xml.DirectoryPath);
+
+            ICollection<ProjectItem> current = provider.GetItems(itemType);
+            AssertIncludes(current, ["a.cs"]);
+            provider.GetItems(itemType).ShouldBeSameAs(current);
+            CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), itemType)
+                .ShouldBe(groups.Length + phase + 1);
+            evaluator.TestOnlyCachedPrefixCount.ShouldBe(2);
+            evaluator.TestOnlyMaterializedExclusionCount.ShouldBe(2);
+        }
+
+        AssertIncludes(provider.GetItems("Captured"), ["a.cs", "b.tmp"]);
+    }
+
+    [Fact]
+    public void HistoricalGlobRangesStayBoundedAcrossSegmentedHistoryGrowth()
+    {
+        const int removeCount = 10_000;
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "a.cs", contents: string.Empty);
+        env.CreateFile(folder, "b.tmp", contents: string.Empty);
+        env.CreateFile(folder, "c.skip", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="*" />
+                    <Before Include="@(Source)" />
+                    <Source Remove="*.tmp" />
+                    <After Include="@(Source)" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+        var evaluator = CreateEvaluator(project);
+        IItemProvider<ProjectItem> provider = evaluator;
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        ICollection<ProjectItem> original = provider.GetItems("Source");
+        AssertIncludes(original, ["a.cs", "c.skip"]);
+
+        ProjectItemGroupElement later = project.Xml.AddItemGroup();
+        for (int i = 0; i < removeCount; i++)
+        {
+            ProjectItemElement remove = project.Xml.CreateItemElement("Source");
+            remove.Remove = $"missing{i}*.skip";
+            later.AppendChild(remove);
+        }
+
+        ProjectItemElement finalRemove = project.Xml.CreateItemElement("Source");
+        finalRemove.Remove = "*.cs";
+        later.AppendChild(finalRemove);
+        evaluator.ProcessItemGroups([later], project.Xml.DirectoryPath);
+
+        ICollection<ProjectItem> current = provider.GetItems("Source");
+        AssertIncludes(current, ["c.skip"]);
+        AssertIncludes(provider.GetItems("Before"), ["a.cs", "b.tmp", "c.skip"]);
+        AssertIncludes(provider.GetItems("After"), ["a.cs", "c.skip"]);
+        AssertIncludes(original, ["a.cs", "c.skip"]);
+        provider.GetItems("Source").ShouldBeSameAs(current);
+    }
+
+    [Fact]
+    public void LocalIncludeExcludesDoNotMutateSharedRemovalContexts()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "a.cs", contents: string.Empty);
+        env.CreateFile(folder, "b.cs", contents: string.Empty);
+        env.CreateFile(folder, "c.cs", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="*.cs" Exclude="a.cs" />
+                    <Captured Include="@(Source)" />
+                    <Source Include="*.cs" Exclude="c.cs" />
+                    <Source Remove="*.tmp" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        AssertIncludes(provider.GetItems("Source"), ["b.cs", "c.cs", "a.cs", "b.cs"]);
+        AssertIncludes(provider.GetItems("Captured"), ["b.cs", "c.cs"]);
+    }
+
+    [Fact]
+    public void FalseAndNonGlobRemovesDoNotCreateExclusionRanges()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "a.cs", contents: string.Empty);
+        env.CreateFile(folder, "b.tmp", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="*.cs;*.tmp" />
+                    <Source Remove="*.cs" Condition="false" />
+                    <Source Remove="b.tmp" />
+                    <Source Remove="@(Missing)" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+        var evaluator = CreateEvaluator(project);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        AssertIncludes(provider.GetItems("Source"), ["a.cs"]);
+        evaluator.TestOnlyMaterializedExclusionCount.ShouldBe(0);
+    }
+
     private static List<string> EvaluateHistory(Project project, bool instanceModel, params string[] itemTypes)
     {
         List<string> result = [];

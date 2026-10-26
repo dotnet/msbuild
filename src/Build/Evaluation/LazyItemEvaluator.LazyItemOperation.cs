@@ -67,10 +67,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="listBuilder">The items produced by preceding operations.</param>
         /// <param name="globsToIgnore">The exclusion context used for this computation.</param>
-        public void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+        public void Apply(OrderedItemDataCollection.Builder listBuilder, GlobExclusionContext globsToIgnore)
         {
 #if DEBUG
-            Debug.Assert(!_lazyEvaluator.TryGetCachedItems(this, globsToIgnore, out _),
+            Debug.Assert(!_isCaptured || !_lazyEvaluator.TryGetCachedItems(this, globsToIgnore, out _),
                 "Apply should only be called for an uncached operation and exclusion context");
 #endif
 
@@ -90,7 +90,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="listBuilder">The items produced through this operation, excluding later operations.</param>
         /// <param name="globsToIgnore">The exclusion context used for this computation.</param>
-        public void CacheResultIfCaptured(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+        public void CacheResultIfCaptured(OrderedItemDataCollection.Builder listBuilder, GlobExclusionContext globsToIgnore)
         {
             if (_isCaptured)
             {
@@ -98,12 +98,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
 
 #if DEBUG
-            Debug.Assert(_lazyEvaluator.TryGetCachedItems(this, globsToIgnore, out _) == _isCaptured,
-                "Only captured intermediate operation results should be cached");
+            Debug.Assert(!_isCaptured || _lazyEvaluator.TryGetCachedItems(this, globsToIgnore, out _),
+                "Captured intermediate operation results should be cached");
 #endif
         }
 
-        protected abstract void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore);
+        protected abstract void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, GlobExclusionContext globsToIgnore);
 
         protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
         {

@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using Microsoft.Build.Collections;
 using Microsoft.CodeAnalysis.Collections;
 
 namespace Microsoft.Build.Evaluation;
@@ -18,6 +16,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     {
         private readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator = lazyEvaluator;
         private readonly SegmentedList<LazyItemOperation> _operations = [];
+        private GlobExclusionHistory? _globExclusions;
 
         /// <summary>
         ///  The operation identifying the latest successfully computed current checkpoint.
@@ -30,8 +29,18 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// <param name="operation">The operation to append.</param>
         public void Add(LazyItemOperation operation)
         {
+            if (operation is RemoveOperation remove)
+            {
+                remove.RecordRemovedGlobs(ref _globExclusions, _operations.Count + 1);
+            }
+
             _operations.Add(operation);
         }
+
+        /// <summary>
+        ///  Gets the number of materialized exclusion ranges currently retained.
+        /// </summary>
+        public int MaterializedExclusionCount => _globExclusions?.MaterializedRangeCount ?? 0;
 
         /// <summary>
         ///  Captures and retains the current exclusive stopping position without computing or copying items.
@@ -82,7 +91,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     // The old result remains a resume point throughout computation, including failed attempts.
                     if (previous is not null && !previous.IsCaptured)
                     {
-                        _lazyEvaluator.RemoveCachedItems(previous, s_emptyGlobsToIgnore);
+                        _lazyEvaluator.RemoveCachedItems(previous, default);
                     }
                 }
             }
@@ -117,7 +126,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // Both capture and current reads request an unpruned prefix. Only CaptureCurrent marks
             // persistent demand; a current read must not permanently retain every prefix it visits.
             LazyItemOperation lastOperation = _operations[operationCount - 1];
-            if (_lazyEvaluator.TryGetCachedItems(lastOperation, s_emptyGlobsToIgnore, out OrderedItemDataCollection? items))
+            if (_lazyEvaluator.TryGetCachedItems(lastOperation, default, out OrderedItemDataCollection? items))
             {
                 return items;
             }
@@ -137,19 +146,26 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             OrderedItemDataCollection.Builder? items = null;
             int firstUncachedIndex = operationCount;
 
-            // Save cumulative exclusion contexts at ordinary Remove boundaries so forward replay can restore them.
-            using RefStack<ImmutableHashSet<string>> globsToIgnoreStack = default;
+            GlobExclusionHistory? globExclusions = _globExclusions;
+            int exclusionEnd = globExclusions?.GetPatternCount(operationCount) ?? 0;
+            int exclusionStart = exclusionEnd;
 
-            // Plan backward within the requested prefix only. Later Removes determine both which cached
-            // prefixes are compatible and which files earlier Includes can skip during enumeration.
+            // Only patterns within the requested history participate. Moving the start boundary backward
+            // adds each Remove's patterns without constructing cumulative exclusion sets.
             for (int index = operationCount - 1; index >= 0; index--)
             {
                 LazyItemOperation operation = _operations[index];
-                var globsToIgnoreFromFutureOperations = globsToIgnoreStack.PeekOrDefault(s_emptyGlobsToIgnore);
+                GlobExclusionContext globsToIgnore = globExclusions is null
+                    ? default
+                    : globExclusions.GetContext(exclusionStart, exclusionEnd);
 
-                if (_lazyEvaluator.TryGetCachedItems(
+                // Intermediate results exist only for captures. A current-only checkpoint is cached
+                // without exclusions; probing other positions would materialize ranges for no benefit.
+                bool canHaveCachedItems = operation.IsCaptured
+                    || (ReferenceEquals(operation, _currentCheckpointOperation) && globsToIgnore.IsEmpty);
+                if (canHaveCachedItems && _lazyEvaluator.TryGetCachedItems(
                     operation,
-                    globsToIgnoreFromFutureOperations,
+                    globsToIgnore,
                     out OrderedItemDataCollection? itemsFromCache))
                 {
                     // The shared cache contains the complete result through this operation, not just its changes.
@@ -159,18 +175,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     break;
                 }
 
-                // This Remove can prune earlier Includes. Extend the context only after checking its cache:
-                // the Remove's own cached result is keyed by later exclusions, not by its own patterns.
-                // Metadata Removes never prune Includes and do not push or pop exclusion contexts.
-                if (operation is RemoveOperation removeOperation)
+                // This operation's own patterns apply only to earlier operations. Metadata Removes
+                // and false-condition Removes never add patterns to the recorded history.
+                if (operation is RemoveOperation && globExclusions is not null)
                 {
-                    var globsToIgnoreForPreviousOperations = removeOperation.GetRemovedGlobs();
-                    foreach (var globToRemove in globsToIgnoreFromFutureOperations)
-                    {
-                        globsToIgnoreForPreviousOperations.Add(globToRemove);
-                    }
-
-                    globsToIgnoreStack.Push(globsToIgnoreForPreviousOperations.ToImmutable());
+                    exclusionStart = globExclusions.IncludePatternsFromOperation(exclusionStart, index + 1);
                 }
 
                 firstUncachedIndex = index;
@@ -180,8 +189,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // the cached prefix's result; the existing immutable item storage protects that saved result.
             items ??= OrderedItemDataCollection.CreateBuilder();
 
-            // The first operation to replay sees all Remove globs accumulated while planning backward.
-            ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack.PeekOrDefault(s_emptyGlobsToIgnore);
+            GlobExclusionContext currentGlobsToIgnore = globExclusions is null
+                ? default
+                : globExclusions.GetContext(exclusionStart, exclusionEnd);
 
             // Disjoint literal Updates can be applied together with one scan of the current items.
             UpdateBatch updateBatch = default;
@@ -209,10 +219,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                 // This Remove is no longer in the future. Restore the context containing only later Removes
                 // before applying it, so its result uses the same cache key checked during backward planning.
-                if (operation is RemoveOperation)
+                if (operation is RemoveOperation && globExclusions is not null)
                 {
-                    globsToIgnoreStack.Pop();
-                    currentGlobsToIgnore = globsToIgnoreStack.PeekOrDefault(s_emptyGlobsToIgnore);
+                    exclusionStart = globExclusions.SkipPatternsFromOperation(exclusionStart, exclusionEnd, index + 1);
+                    currentGlobsToIgnore = globExclusions.GetContext(exclusionStart, exclusionEnd);
                 }
 
                 // Apply saves intermediate results only where a capture requires them.
@@ -225,12 +235,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             LazyItemOperation lastOperation = _operations[operationCount - 1];
             if (lastOperation.IsCaptured)
             {
-                return _lazyEvaluator.GetCachedItems(lastOperation, s_emptyGlobsToIgnore);
+                return _lazyEvaluator.GetCachedItems(lastOperation, default);
             }
 
             // Current-only reads need a reusable result, but no persistent operation-level demand.
             OrderedItemDataCollection result = items.ToImmutable();
-            _lazyEvaluator.CacheItems(lastOperation, s_emptyGlobsToIgnore, result);
+            _lazyEvaluator.CacheItems(lastOperation, default, result);
             return result;
         }
     }

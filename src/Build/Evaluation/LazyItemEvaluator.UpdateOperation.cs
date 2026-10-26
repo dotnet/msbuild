@@ -196,7 +196,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             return false;
         }
 
-        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, GlobExclusionContext globsToIgnore)
         {
             if (!_conditionResult)
             {

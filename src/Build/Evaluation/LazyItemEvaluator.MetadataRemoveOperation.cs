@@ -32,7 +32,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             _metadataSet = MetadataTrie.Create(matchOnMetadataOptions, _matchOnMetadata, sourceFragments, _expander);
         }
 
-        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, GlobExclusionContext globsToIgnore)
         {
             if (!_conditionResult)
             {

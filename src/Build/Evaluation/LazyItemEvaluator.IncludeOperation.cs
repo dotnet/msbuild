@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -46,7 +47,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             _metadata = metadata;
         }
 
-        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, GlobExclusionContext globsToIgnore)
         {
             var items = SelectItems(globsToIgnore);
             MutateItems(items);
@@ -57,7 +58,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  Creates the items contributed by this Include operation.
         /// </summary>
         [SuppressMessage("Microsoft.Dispose", "CA2000:Dispose objects before losing scope", Justification = "_lazyEvaluator._evaluationProfiler has own dipose logic.")]
-        private ImmutableArray<I> SelectItems(ImmutableHashSet<string> globsToIgnore)
+        private ImmutableArray<I> SelectItems(GlobExclusionContext globsToIgnore)
         {
             using RefArrayBuilder<I> itemsToAdd = default;
             using RefArrayBuilder<string> excludePatterns = default;
@@ -79,7 +80,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 }
             }
 
-            ImmutableHashSet<string>? excludePatternsForGlobs = null;
+            HashSet<string>? excludePatternsForGlobs = null;
             FileSpecMatcherTester?[]? matchers = null;
 
             foreach (var fragment in _itemSpec.Fragments)
@@ -204,26 +205,23 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
         }
 
-        private static ImmutableHashSet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ReadOnlySpan<string> excludePatterns)
+        private static HashSet<string> BuildExcludePatternsForGlobs(GlobExclusionContext globsToIgnore, ReadOnlySpan<string> excludePatterns)
         {
-            if (excludePatterns.Length > 0)
+            HashSet<string> removedGlobs = globsToIgnore.GetPatterns();
+            if (excludePatterns.IsEmpty)
             {
-                var builder = ImmutableHashSet.CreateBuilder<string>(FileUtilities.PathComparer);
-
-                foreach (string exclude in excludePatterns)
-                {
-                    builder.Add(exclude);
-                }
-
-                if (globsToIgnore.Count > 0)
-                {
-                    builder.UnionWith(globsToIgnore);
-                }
-
-                return builder.ToImmutable();
+                return removedGlobs;
             }
 
-            return globsToIgnore;
+            // The context's set may also be a cache key. Never extend that shared set with local Excludes.
+            HashSet<string> combined = new(FileUtilities.PathComparer);
+            foreach (string exclude in excludePatterns)
+            {
+                combined.Add(exclude);
+            }
+
+            combined.UnionWith(removedGlobs);
+            return combined;
         }
 
         private void MutateItems(ImmutableArray<I> items)

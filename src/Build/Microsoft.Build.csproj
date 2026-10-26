@@ -211,6 +211,8 @@
     <Compile Include="Evaluation\ItemSpecMatcher.FragmentState.cs" />
     <Compile Include="Evaluation\ItemSpecMatcher.ValueState.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.IncludeData.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.GlobExclusionContext.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.GlobExclusionHistory.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemCacheKey.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemData.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemListReference.cs" />

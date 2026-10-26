@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 
@@ -34,7 +32,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// <remarks>
         /// This override exists to apply the removing-everything short-circuit and to avoid creating a redundant list of items to remove.
         /// </remarks>
-        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, GlobExclusionContext globsToIgnore)
         {
             if (!_conditionResult)
             {
@@ -73,20 +71,26 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
         }
 
-        public ImmutableHashSet<string>.Builder GetRemovedGlobs()
+        /// <summary>
+        ///  Records true-condition glob exclusions once when this Remove is appended.
+        /// </summary>
+        /// <param name="history">The owning sequence's lazily allocated pattern history.</param>
+        /// <param name="operationCount">The number of operations through this declaration.</param>
+        public void RecordRemovedGlobs(ref GlobExclusionHistory? history, int operationCount)
         {
-            var builder = s_emptyGlobsToIgnore.ToBuilder();
-
             if (!_conditionResult)
             {
-                return builder;
+                return;
             }
 
-            var globs = _itemSpec.Fragments.OfType<GlobFragment>().Select(g => g.Text);
-
-            builder.UnionWith(globs);
-
-            return builder;
+            foreach (ItemSpecFragment fragment in _itemSpec.Fragments)
+            {
+                if (fragment is GlobFragment)
+                {
+                    history ??= new();
+                    history.Add(fragment.Text, operationCount);
+                }
+            }
         }
     }
 }

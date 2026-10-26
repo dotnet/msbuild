@@ -25,12 +25,6 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     where M : class, IMetadatum
     where D : class, IItemDefinition<M>
 {
-    /// <summary>
-    ///  Provides the shared starting exclusion context using the filesystem's path-comparison policy.
-    /// </summary>
-    private static readonly ImmutableHashSet<string> s_emptyGlobsToIgnore =
-        ImmutableHashSet.Create<string>(FileUtilities.PathComparer);
-
     private readonly IEvaluatorData<P, I, M, D> _data;
     private readonly Expander<P, I> _outerExpander;
     private readonly Expander<P, I> _expander;
@@ -62,6 +56,23 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     ///  Gets the number of cached prefix/context pairs for deterministic lifetime tests.
     /// </summary>
     internal int TestOnlyCachedPrefixCount => _itemCache.Count;
+
+    /// <summary>
+    ///  Gets the number of materialized exclusion ranges retained for deterministic planning tests.
+    /// </summary>
+    internal int TestOnlyMaterializedExclusionCount
+    {
+        get
+        {
+            int count = 0;
+            foreach (ItemOperationSequence sequence in _itemLists.Values)
+            {
+                count += sequence.MaterializedExclusionCount;
+            }
+
+            return count;
+        }
+    }
 
     protected EvaluationContext EvaluationContext { get; }
 
@@ -308,17 +319,26 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
 
     private bool TryGetCachedItems(
         LazyItemOperation operation,
-        ImmutableHashSet<string> globsToIgnore,
+        GlobExclusionContext globsToIgnore,
         [NotNullWhen(true)] out OrderedItemDataCollection items)
         => _itemCache.TryGetValue(new ItemCacheKey(operation, globsToIgnore), out items);
 
-    private OrderedItemDataCollection GetCachedItems(LazyItemOperation operation, ImmutableHashSet<string> globsToIgnore)
+    private OrderedItemDataCollection GetCachedItems(LazyItemOperation operation, GlobExclusionContext globsToIgnore)
         => _itemCache[new ItemCacheKey(operation, globsToIgnore)];
 
-    private void CacheItems(LazyItemOperation operation, ImmutableHashSet<string> globsToIgnore, OrderedItemDataCollection items)
-        => _itemCache[new ItemCacheKey(operation, globsToIgnore)] = items;
+    private void CacheItems(LazyItemOperation operation, GlobExclusionContext globsToIgnore, OrderedItemDataCollection items)
+    {
+        int previousCount = _itemCache.Count;
+        _itemCache[new ItemCacheKey(operation, globsToIgnore)] = items;
 
-    private void RemoveCachedItems(LazyItemOperation operation, ImmutableHashSet<string> globsToIgnore)
+        // Updating an equivalent key preserves its original range; retain only newly stored ranges.
+        if (_itemCache.Count > previousCount)
+        {
+            globsToIgnore.Retain();
+        }
+    }
+
+    private void RemoveCachedItems(LazyItemOperation operation, GlobExclusionContext globsToIgnore)
         => _itemCache.Remove(new ItemCacheKey(operation, globsToIgnore));
 
     private void AddItemOperation(ProjectItemElement itemElement, bool conditionResult, string rootDirectory)

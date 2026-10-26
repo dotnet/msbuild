@@ -160,6 +160,32 @@ Allocation and elapsed-time results cannot establish reduced retained memory: us
 profiling for that claim, and account for piece-list ancestry that may remain reachable after cache
 retirement. No performance results for this lifetime change are recorded yet.
 
+### Bounded glob exclusion planning
+
+Ordinary true-condition Removes record their parsed glob patterns once in segmented, append-only
+storage. Backward planning and forward replay move boundaries through that storage instead of
+constructing cumulative exclusion sets. Every context is bounded by the requested operation count,
+so later Removes cannot prune a captured earlier item state. A Remove's own patterns affect only
+earlier operations, not the cached result after that Remove.
+
+Contexts compare by exclusion contents using `FileUtilities.PathComparer`, not just range positions.
+Pattern sets and order-independent hashes are computed lazily for demanded cache contexts; distinct
+ranges with reordered or duplicated equivalent patterns can reuse cached item states. Hash matches
+are always followed by content equality. Uncaptured intermediate operations are not cache probes.
+
+Includes materialize patterns only when expanding filesystem globs. The sets are privately owned
+`HashSet<string>` instances treated as read-only; local Excludes are combined into a separate set.
+Glob expansion and cache lookups share one temporary range per history, including its hash when
+needed. A range is retained permanently only when a new item-cache key is stored; a lookup that
+reuses an equivalent cached state does not retain another permanent set. Empty contexts share an
+empty set. There are no persistent immutable exclusion sets or exclusion stacks on the replay path.
+
+Use `100b68add6` as the immediate pre-change reference for `LazyItemGlobBenchmark`, with recording,
+checkpoint/read, and retained-snapshot controls. Its `checkpoint-lifetimes` exports already contain
+those cases on both TFMs. Keep the original rebased benchmark baseline `b966b20182` for cumulative
+comparisons. Scenario definitions are unchanged, and no performance result for this range-planning
+change is recorded yet.
+
 ## Comparable baseline on the benchmark VM
 
 Run benchmarks on the dedicated benchmark VM, not on the development machine, including smoke runs.
