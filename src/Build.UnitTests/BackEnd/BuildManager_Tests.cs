@@ -411,6 +411,62 @@ namespace Microsoft.Build.UnitTests.BackEnd
             RunOutOfProcBuild(buildParameters => buildParameters.DisableInProcNode = true);
         }
 
+        [Fact]
+        public void OutOfProcRequestAffinityIsPreservedForChildBuilds()
+        {
+            _env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+
+            string parentPath = _env.CreateFile(".proj").Path;
+            string firstChildPath = _env.CreateFile(".proj").Path;
+            string secondChildPath = _env.CreateFile(".proj").Path;
+            string childContents = CleanupFileContents($$"""
+                <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+                  <Target Name='Build' Returns='@(ProcessIds)'>
+                    <ItemGroup>
+                      <ProcessIds Include='$([System.Diagnostics.Process]::GetCurrentProcess().Id)' />
+                    </ItemGroup>
+                    <Exec Command='{{Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(250))}}' />
+                  </Target>
+                </Project>
+                """);
+            File.WriteAllText(firstChildPath, childContents);
+            File.WriteAllText(secondChildPath, childContents);
+            File.WriteAllText(parentPath, CleanupFileContents($$"""
+                <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+                  <Target Name='Build' Returns='@(ProcessIds)'>
+                    <ItemGroup>
+                      <ProcessIds Include='$([System.Diagnostics.Process]::GetCurrentProcess().Id)' />
+                    </ItemGroup>
+                    <MSBuild Projects='{{firstChildPath}};{{secondChildPath}}' Targets='Build' BuildInParallel='true'>
+                      <Output TaskParameter='TargetOutputs' ItemName='ProcessIds' />
+                    </MSBuild>
+                  </Target>
+                </Project>
+                """));
+
+            HostServices hostServices = new();
+            hostServices.SetNodeAffinity(string.Empty, NodeAffinity.OutOfProc);
+            BuildParameters parameters = new(_projectCollection)
+            {
+                EnableNodeReuse = false,
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = [_logger],
+                MaxNodeCount = 2,
+                DisableInProcNode = false
+            };
+            BuildRequestData request = new(parentPath, new Dictionary<string, string>(), null, ["Build"], hostServices);
+
+            BuildResult result = _buildManager.Build(parameters, request);
+
+            Assert.Equal(BuildResultCode.Success, result.OverallResult);
+            ITaskItem[] processIds = result.ResultsByTarget["Build"].Items;
+            Assert.Equal(3, processIds.Length);
+            foreach (ITaskItem processId in processIds)
+            {
+                Assert.NotEqual(Process.GetCurrentProcess().Id, int.Parse(processId.ItemSpec, CultureInfo.InvariantCulture));
+            }
+        }
+
         /// <summary>
         /// Runs a build and verifies it happens out of proc by checking the process ID.
         /// </summary>
