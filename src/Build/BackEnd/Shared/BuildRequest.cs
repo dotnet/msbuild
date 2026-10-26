@@ -434,6 +434,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _skipStaticGraphIsolationConstraints);
             translator.Translate(ref _requestedProjectState);
             translator.Translate(ref _hostServices);
+            _hostServices?.TranslateNodeAffinities(translator);
             translator.Translate(ref _proxyTargets, ProxyTargets.FactoryForDeserialization);
             translator.Translate(ref _projectContextId);
             translator.Translate(ref _scheduledNodeId);
