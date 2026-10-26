@@ -105,6 +105,7 @@ internal sealed class ItemSpec(string text, ImmutableArray<ItemSpecFragment> fra
     ///  Properties are expanded before fragment classification. Fragments are split at semicolons
     ///  outside item-vector expressions; surrounding whitespace and empty fragments are discarded.
     ///  Literal and vector text remains escaped, while glob patterns are unescaped.
+    ///  Empty and single-fragment results do not use a temporary collection buffer.
     /// </remarks>
     public static ImmutableArray<ItemSpecFragment> ParseFragments<P, I>(
         string itemSpec,
@@ -124,38 +125,57 @@ internal sealed class ItemSpec(string text, ImmutableArray<ItemSpecFragment> fra
             ExpanderOptions.ExpandProperties,
             itemSpecLocation);
 
-        using RefArrayBuilder<ItemSpecFragment> fragments = default;
+        using var splits = ExpressionShredder.SplitSemiColonSeparatedList(expandedItemSpec).GetEnumerator();
+        if (!splits.MoveNext())
+        {
+            return [];
+        }
 
-        foreach (string split in ExpressionShredder.SplitSemiColonSeparatedList(expandedItemSpec))
+        ItemSpecFragment firstFragment = CreateFragment(splits.Current, itemSpecLocation, projectDirectory);
+        if (!splits.MoveNext())
+        {
+            return [firstFragment];
+        }
+
+        using RefArrayBuilder<ItemSpecFragment> fragments = default;
+        fragments.Add(firstFragment);
+
+        do
+        {
+            fragments.Add(CreateFragment(splits.Current, itemSpecLocation, projectDirectory));
+        }
+        while (splits.MoveNext());
+
+        return fragments.ToImmutable();
+
+        static ItemSpecFragment CreateFragment(string text, IElementLocation location, string projectDirectory)
         {
             if (Expander<P, I>.TryExpandSingleItemVectorExpression(
-                split,
+                text,
                 ExpanderOptions.ExpandItems,
-                itemSpecLocation,
+                location,
                 out ExpressionShredder.ItemExpressionCapture itemVector))
             {
-                fragments.Add(new ItemVectorFragment(itemVector, split, itemSpecLocation, projectDirectory));
+                return new ItemVectorFragment(itemVector, text, location, projectDirectory);
             }
-            else if (!FileMatcher.HasWildcards(split))
+            else if (!FileMatcher.HasWildcards(text))
             {
                 // No real wildcards means the original, already escaped string is a literal.
-                fragments.Add(new ValueFragment(split, projectDirectory));
+                return new ValueFragment(text, projectDirectory);
             }
-            else if (EscapingUtilities.ContainsEscapedWildcards(split))
+            else if (EscapingUtilities.ContainsEscapedWildcards(text))
             {
                 // '*' is an illegal character to have in a filename.
                 // todo: file-system assumption on legal path characters: https://github.com/dotnet/msbuild/issues/781
                 // Preserve the original string as a literal, even when it also contains unescaped wildcards.
-                fragments.Add(new ValueFragment(split, projectDirectory));
+                return new ValueFragment(text, projectDirectory);
             }
             else
             {
-                string filespecUnescaped = EscapingUtilities.UnescapeAll(split);
-                fragments.Add(new GlobFragment(filespecUnescaped, projectDirectory));
+                string filespecUnescaped = EscapingUtilities.UnescapeAll(text);
+                return new GlobFragment(filespecUnescaped, projectDirectory);
             }
         }
-
-        return fragments.ToImmutable();
     }
 
     /// <summary>
@@ -177,6 +197,7 @@ internal sealed class ItemSpec(string text, ImmutableArray<ItemSpecFragment> fra
     ///  Every nonempty fragment must be an item vector; literals and globs are rejected rather than
     ///  filtered out. Empty fragments are discarded, and semicolons inside vector expressions are preserved.
     ///  The returned vectors retain their syntax and origin, not the supplied <paramref name="expander"/>.
+    ///  Empty and single-vector results do not use a temporary collection buffer.
     /// </remarks>
     public static ImmutableArray<ItemVectorFragment> ParseItemVectorFragments<P, I>(
         string itemSpec,
@@ -196,14 +217,35 @@ internal sealed class ItemSpec(string text, ImmutableArray<ItemSpecFragment> fra
             ExpanderOptions.ExpandProperties,
             itemSpecLocation);
 
-        using RefArrayBuilder<ItemVectorFragment> fragments = default;
+        using var splits = ExpressionShredder.SplitSemiColonSeparatedList(expandedItemSpec).GetEnumerator();
+        if (!splits.MoveNext())
+        {
+            return [];
+        }
 
-        foreach (string split in ExpressionShredder.SplitSemiColonSeparatedList(expandedItemSpec))
+        ItemVectorFragment firstFragment = CreateFragment(splits.Current, itemSpecLocation, projectDirectory);
+        if (!splits.MoveNext())
+        {
+            return [firstFragment];
+        }
+
+        using RefArrayBuilder<ItemVectorFragment> fragments = default;
+        fragments.Add(firstFragment);
+
+        do
+        {
+            fragments.Add(CreateFragment(splits.Current, itemSpecLocation, projectDirectory));
+        }
+        while (splits.MoveNext());
+
+        return fragments.ToImmutable();
+
+        static ItemVectorFragment CreateFragment(string text, IElementLocation location, string projectDirectory)
         {
             if (!Expander<P, I>.TryExpandSingleItemVectorExpression(
-                split,
+                text,
                 ExpanderOptions.ExpandItems,
-                itemSpecLocation,
+                location,
                 out ExpressionShredder.ItemExpressionCapture itemVector))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(
@@ -211,10 +253,8 @@ internal sealed class ItemSpec(string text, ImmutableArray<ItemSpecFragment> fra
                     "OM_MatchOnMetadataIsRestrictedToReferencedItems");
             }
 
-            fragments.Add(new ItemVectorFragment(itemVector, split, itemSpecLocation, projectDirectory));
+            return new ItemVectorFragment(itemVector, text, location, projectDirectory);
         }
-
-        return fragments.ToImmutable();
     }
 
     /// <summary>

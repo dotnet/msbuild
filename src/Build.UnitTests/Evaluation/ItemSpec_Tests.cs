@@ -273,7 +273,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Theory]
         [InlineData("", 0)]
         [InlineData(" ; ; ", 0)]
+        [InlineData("literal", 1)]
+        [InlineData(" ; literal;; ", 1)]
         [InlineData("a;;b;", 2)]
+        [InlineData("a;b;c;d;e", 5)]
         [InlineData("@(Lookup->'a;b')", 1)]
         [InlineData("literal;@(Lookup->'a;b');*.cs", 3)]
         public void FragmentParsingDiscardsEmptyEntriesAndPreservesQuotedSemicolons(string specification, int expectedCount)
@@ -283,7 +286,25 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             var fragments = ItemSpec.ParseFragments(specification, expander, location, Path.GetDirectoryName(location.File));
 
+            fragments.IsDefault.ShouldBeFalse();
             fragments.Length.ShouldBe(expectedCount);
+        }
+
+        [Theory]
+        [InlineData(" ; literal%3Bname;; ", "literal%3Bname", typeof(ValueFragment))]
+        [InlineData(" ; *.cs;; ", "*.cs", typeof(GlobFragment))]
+        [InlineData(" ; %2A;; ", "%2A", typeof(ValueFragment))]
+        [InlineData(" ; @(Lookup->'a;b');; ", "@(Lookup->'a;b')", typeof(ItemVectorFragment))]
+        public void SingleFragmentParsingPreservesKindAndText(string specification, string expectedText, Type expectedType)
+        {
+            var expander = CreateExpander(new Dictionary<string, string[]>());
+            var location = MockElementLocation.Instance;
+
+            var fragments = ItemSpec.ParseFragments(specification, expander, location, Path.GetDirectoryName(location.File));
+
+            fragments.Length.ShouldBe(1);
+            fragments[0].GetType().ShouldBe(expectedType);
+            fragments[0].Text.ShouldBe(expectedText);
         }
 
         [Fact]
@@ -306,6 +327,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [InlineData("", 0)]
         [InlineData(" ; ; ", 0)]
         [InlineData("@(First)", 1)]
+        [InlineData(" ; @(First->'a;b');; ", 1)]
         [InlineData("@(First);@(Second)", 2)]
         [InlineData("@(First->'a;b');@(Second)", 2)]
         public void ItemExpressionParsingPreservesEmptyArraysAndVectorOrder(string specification, int expectedCount)
@@ -315,6 +337,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var itemExpressions = ItemSpec.ParseItemVectorFragments(
                 specification, expander, location, Path.GetDirectoryName(location.File));
 
+            itemExpressions.IsDefault.ShouldBeFalse();
             itemExpressions.Length.ShouldBe(expectedCount);
             for (int i = 0; i < itemExpressions.Length; i++)
             {
@@ -326,6 +349,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [InlineData("literal")]
         [InlineData("*.cs")]
         [InlineData("@(Lookup);literal")]
+        [InlineData("@(First);@(Second);literal")]
         [InlineData("*.cs;@(Lookup)")]
         public void ItemExpressionParsingRejectsNonVectorFragments(string specification)
         {
@@ -360,6 +384,38 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 CreateExpander(new Dictionary<string, string[]> { ["Lookup"] = ["right.txt"] }));
             matcher.ToMSBuildGlob().IsMatch("right.obj").ShouldBeTrue();
             matcher.ToMSBuildGlob().IsMatch("wrong.obj").ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData("", 0)]
+        [InlineData(" ; ; ", 0)]
+        [InlineData("@(First)", 1)]
+        [InlineData("@(First);@(Second)", 2)]
+        public void FragmentParsersUsePropertyExpandedFragmentCount(string propertyValue, int expectedCount)
+        {
+            var properties = new PropertyDictionary<ProjectPropertyInstance>();
+            properties.Set(ProjectPropertyInstance.Create("Spec", propertyValue));
+            var expander = new ProjectInstanceExpander(
+                properties,
+                ToItemDictionary(new Dictionary<string, string[]>()),
+                (IFileSystem)FileSystems.Default,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+            var location = MockElementLocation.Instance;
+            string directory = Path.GetDirectoryName(location.File);
+
+            var fragments = ItemSpec.ParseFragments("$(Spec)", expander, location, directory);
+            var vectors = ItemSpec.ParseItemVectorFragments("$(Spec)", expander, location, directory);
+
+            fragments.IsDefault.ShouldBeFalse();
+            vectors.IsDefault.ShouldBeFalse();
+            fragments.Length.ShouldBe(expectedCount);
+            vectors.Length.ShouldBe(expectedCount);
+            for (int i = 0; i < expectedCount; i++)
+            {
+                var vector = fragments[i].ShouldBeOfType<ItemVectorFragment>();
+                vector.ItemVector.ItemType.ShouldBe(i == 0 ? "First" : "Second");
+                vectors[i].ItemVector.ItemType.ShouldBe(vector.ItemVector.ItemType);
+            }
         }
 
         [Fact]

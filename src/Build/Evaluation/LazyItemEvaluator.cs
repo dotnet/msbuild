@@ -321,10 +321,10 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
         if (!_itemLists.TryGetValue(itemElement.ItemType, out ItemOperationSequence sequence))
         {
             sequence = new ItemOperationSequence(this);
+            _itemLists.Add(itemElement.ItemType, sequence);
         }
 
         sequence.Add(operation);
-        _itemLists[itemElement.ItemType] = sequence;
     }
 
     private ItemOperation CreateOperation(ProjectItemElement itemElement, bool conditionResult, string rootDirectory)
