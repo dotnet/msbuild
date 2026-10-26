@@ -11,12 +11,12 @@
     "runner": "Microsoft.Testing.Platform"
   },
   "tools": {
-    "dotnet": "11.0.100-rc.2.26504.105",
+    "dotnet": "12.0.100-alpha.1.26480.102",
     "vs": {
       "version": "18.6"
     }
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "12.0.0-beta.26505.2"
+    "Microsoft.DotNet.Arcade.Sdk": "12.0.0-beta.26509.4"
   }
 }

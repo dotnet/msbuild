@@ -175,6 +175,7 @@ if ($msbuildEngine -eq 'vs')
 {
   $buildToolPath = Join-Path $BootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.exe"
   $buildToolCommand = "";
+  $env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR="$BootstrapRoot\core"
 }
 else
 {
@@ -202,6 +203,9 @@ $env:DOTNET_PERFLOG_DIR=$PerfLogDir
 # (see eng/BootStrapMsBuild.targets).
 $env:DOTNET_HOST_PATH = Join-Path $BootstrapRoot 'core\dotnet.exe'
 $env:DOTNET_INSTALL_DIR = Join-Path $BootstrapRoot 'core'
+
+# Keep test apphosts on the bootstrap runtime even when Arcade provisions a newer SDK.
+$env:TestDotNetRoot = "$BootstrapRoot\core\"
 
 # $stage2Argument are appended to the stage 2 build only.
 # Use this for switches like /mt that should not be passed to the stage1 build
