@@ -1186,7 +1186,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             string normalizedPath = FileUtilities.NormalizePath(path);
-            return NativeMethodsShared.IsFileSystemCaseSensitive ? normalizedPath : normalizedPath.ToUpperInvariant();
+            return FileUtilities.IsFileSystemCaseSensitive ? normalizedPath : normalizedPath.ToUpperInvariant();
         }
 
         /// <summary>

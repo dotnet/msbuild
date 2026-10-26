@@ -71,37 +71,11 @@ namespace Microsoft.Build.Framework
 
         public static readonly StringComparer PathComparer = IsFileSystemCaseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
 
-        private static bool? s_isFileSystemCaseSensitive;
-
-        public static bool IsFileSystemCaseSensitive
-            => s_isFileSystemCaseSensitive ??= ComputeIsFileSystemCaseSensitive();
+        // Same as https://github.com/dotnet/runtime/blob/085dabced20d9400317f52947f24c1f1f0539c66/src/libraries/Common/src/System/IO/PathInternal.CaseSensitivity.cs
+        public static bool IsFileSystemCaseSensitive => !(NativeMethods.IsWindows || NativeMethods.IsOSX);
 
         /// <summary>
-        ///  Determines whether the file system is case sensitive.
-        ///  Copied from https://github.com/dotnet/runtime/blob/73ba11f3015216b39cb866d9fb7d3d25e93489f2/src/libraries/Common/src/System/IO/PathInternal.CaseSensitivity.cs#L41-L59.
-        /// </summary>
-        private static bool ComputeIsFileSystemCaseSensitive()
-        {
-            try
-            {
-                string pathWithUpperCase = Path.Combine(Path.GetTempPath(), $"CASESENSITIVETEST{Guid.NewGuid():N}");
-                using (new FileStream(pathWithUpperCase, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
-                {
-                    string lowerCased = pathWithUpperCase.ToLowerInvariant();
-                    return !FileSystems.Default.FileExists(lowerCased);
-                }
-            }
-            catch (Exception ex)
-            {
-                // In case something goes terribly wrong, we don't want to fail just because
-                // of a casing test, so we assume case-insensitive-but-preserving.
-                Debug.Fail($"Casing test failed: {ex}");
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Copied from https://github.com/dotnet/corefx/blob/056715ff70e14712419d82d51c8c50c54b9ea795/src/Common/src/System/IO/PathInternal.Windows.cs#L61
+        /// Copied from https://github.com/dotnet/runtime/blob/085dabced20d9400317f52947f24c1f1f0539c66/src/libraries/System.Private.CoreLib/src/System/IO/Path.Windows.cs#L24-L31
         /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/dotnet/msbuild/issues/781#issuecomment-243942514
         /// </summary>
 #if NET
@@ -118,7 +92,7 @@ namespace Microsoft.Build.Framework
         ]);
 
         /// <summary>
-        /// Copied from https://github.com/dotnet/corefx/blob/387cf98c410bdca8fd195b28cbe53af578698f94/src/System.Runtime.Extensions/src/System/IO/Path.Windows.cs#L18
+        /// Copied from https://github.com/dotnet/runtime/blob/085dabced20d9400317f52947f24c1f1f0539c66/src/libraries/System.Private.CoreLib/src/System/IO/Path.Windows.cs#L15-L22
         /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/dotnet/msbuild/issues/781#issuecomment-243942514
         /// </summary>
         internal static readonly char[] InvalidFileNameCharsArray =
