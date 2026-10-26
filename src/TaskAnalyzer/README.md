@@ -12,7 +12,7 @@ MSBuild is introducing multithreaded task execution via `IMultiThreadableTask`. 
 
 This analyzer catches unsafe API usage at compile time and guides migration to the safe `TaskEnvironment` alternatives.
 
-**18.13:** All automatic code fixes are temporarily disabled pending further quality improvements. Diagnostics, their configuration and defaults, and the nullable diagnostic suppressor are unchanged. Apply suggested changes manually.
+**18.13:** Automatic code fixes are temporarily disabled. Diagnostic analysis and the nullable diagnostic suppressor are unchanged.
 
 ## Default Rules and Configuration
 
@@ -276,7 +276,7 @@ public class MyTask : Task
 }
 ```
 
-The last four patterns are the same raw-string shapes that MSBuildTask0002 (`Path.GetFullPath`) and MSBuildTask0003 (a raw string flowing into a `System.IO` path parameter) flag. Surfacing them under MSBuildTask0006 as well means the property can be retyped in **one shot** instead of first introducing a conversion and then being told to retype it. When retyping manually, update each raw site: `Path.GetFullPath(prop)` collapses to `prop` (or `prop.FullName`), and a raw string consumption is fed through `prop.FullName` for `FileInfo`/`DirectoryInfo` (or left unchanged for `AbsolutePath`, which converts to `string` implicitly). Arguments already rooted through `TaskEnvironment.GetAbsolutePath`/`new AbsolutePath(...)` are not re-flagged.
+The last four patterns are the same raw-string shapes that MSBuildTask0002 (`Path.GetFullPath`) and MSBuildTask0003 (a raw string flowing into a `System.IO` path parameter) flag. Surfacing them under MSBuildTask0006 as well means the property can be retyped in **one shot** instead of first applying the 0002/0003 fix (which only introduces a conversion) and then being told to apply 0006. The code fix rewrites each raw site as part of the retype: `Path.GetFullPath(prop)` collapses to `prop` (or `prop.FullName`), and a raw string consumption is fed through `prop.FullName` for `FileInfo`/`DirectoryInfo` (or left unchanged for `AbsolutePath`, which converts to `string` implicitly). Arguments already rooted through `TaskEnvironment.GetAbsolutePath`/`new AbsolutePath(...)` are not re-flagged.
 
 **Not flagged:** `[Output]` properties, non-public properties, read-only properties, values from method calls or literals.
 
@@ -328,13 +328,13 @@ public class MyTask : Task
 
 **Array properties:** When the source property is `ITaskItem[]`, the suggestion correctly formats as `ITaskItem<T>[]` (brackets outside the angle brackets), e.g., `ITaskItem<AbsolutePath>[]`.
 
-**`GetMetadata("FullPath")`:** `ITaskItem.GetMetadata("FullPath")` (metadata name compared case-insensitively) returns the item's absolute path as a `string`, so it is treated the same as `item.ItemSpec` — both as a detection source and, when wrapped in a conversion, as a site to replace manually with `item.Value` after retyping the property. Other metadata names (e.g. `item.GetMetadata("Culture")`) are not flagged.
+**`GetMetadata("FullPath")`:** `ITaskItem.GetMetadata("FullPath")` (metadata name compared case-insensitively) returns the item's absolute path as a `string`, so it is treated the same as `item.ItemSpec` — both as a detection source and, when wrapped in a conversion, as a fixable site rewritten to `item.Value`. Other metadata names (e.g. `item.GetMetadata("Culture")`) are not flagged.
 
 **Not flagged:** Non-`FullPath` metadata access (`item.GetMetadata("Culture")`), `[Output]` properties, non-task classes.
 
 ### MSBuildTask0008 — Initialize a Relative-Default Path Property in `Execute()`
 
-MSBuildTask0006 suggests retyping a `string` path property and reproducing any string default in the property initializer. That only works when the default is already **fully qualified**: rooting a *relative* default requires `TaskEnvironment`, which the engine only supplies **after** the task is constructed, so it is unavailable inside a property initializer (which runs in the constructor).
+MSBuildTask0006 offers to retype a `string` path property and reproduce any string default in the property initializer. That only works when the default is already **fully qualified**: rooting a *relative* default requires `TaskEnvironment`, which the engine only supplies **after** the task is constructed, so it is unavailable inside a property initializer (which runs in the constructor).
 
 When a property flagged by MSBuildTask0006 has a **relative** string default, the analyzer suppresses the 0006 suggestion for that property and instead reports MSBuildTask0008 on the initializer:
 
@@ -353,7 +353,7 @@ public class MyTask : Task
 }
 ```
 
-To address this diagnostic manually, retype the property (leaving it with an *unset* default) and move the default into the top of `Execute()` as a **guarded** assignment, so a value bound by MSBuild from the project XML is not overwritten:
+The code fix retypes the property (leaving it with an *unset* default) and moves the default into the top of `Execute()` as a **guarded** assignment, so a value bound by MSBuild from the project XML is not overwritten:
 
 ```csharp
 public AbsolutePath InputPath { get; set; } = default;
@@ -372,7 +372,7 @@ public override bool Execute()
 
 For a reference-typed target (`FileInfo`/`DirectoryInfo`) the guard is a null-coalescing assignment built through the `string` → `AbsolutePath` → `FileInfo`/`DirectoryInfo` chain, e.g. `LogPath ??= new FileInfo(TaskEnvironment.GetAbsolutePath("logs"));`.
 
-The retained code fix implementation (disabled in 18.13) skips this transformation when there is no editable `Execute()` in the current document, when `Execute()` is expression-bodied (no statement block to prepend to), or when the task has no accessible `TaskEnvironment` member to root the path through.
+**Fix skipped (diagnostic still reported):** when there is no editable `Execute()` in the current document, when `Execute()` is expression-bodied (no statement block to prepend to), or when the task has no accessible `TaskEnvironment` member to root the path through.
 
 ### MSBuildTask0009 — Unsupported `ITaskItem<T>` Type Argument
 
@@ -557,7 +557,7 @@ MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTa
 
 The `[MSBuildMultiThreadableTaskAnalyzed]` attribute enables **direct** MSBuildTask0001–0004 analysis in helper classes. Contributing source base classes also receive direct analysis. MSBuildTask0005 discovers other helpers through the call graph of MT-scoped tasks, or regular tasks with migration analysis enabled. It reports at the unsafe call site and offers no code fixes. The analyzed attribute gives immediate feedback in the helper without requiring a task to reach it.
 
-**When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles) on unsafe APIs within those helpers. Automatic code fixes are disabled in 18.13 — see [Code Fixes](#code-fixes).
+**When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles) on unsafe APIs within those helpers. Note that the MSBuildTask0002/0003 code fixes reference a `TaskEnvironment` member, so they are only offered in a helper that declares one — see [Code Fixes](#code-fixes).
 
 ### Severity Levels
 
@@ -569,11 +569,7 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute enables **direct** MSBuildT
 
 ## Code Fixes
 
-No code fix providers are exported in 18.13, so editors and `dotnet format analyzers` do not offer automatic fixes from this package. The implementations and their tests are retained for future work.
-
-### Retained implementation details (not available in 18.13)
-
-The following describes the disabled implementations, not fixes offered by this release:
+Automatic code fixes are temporarily disabled in 18.13. The following documents the retained implementations, not fixes available in this release:
 
 | Diagnostic | Fix |
 |---|---|
