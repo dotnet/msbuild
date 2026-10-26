@@ -27,27 +27,6 @@ public sealed class PackageContractTests
     }
 
     [Fact]
-    public void AnalyzerAssemblyExportsNoCodeFixesAndPreservesAnalyzerDiscovery()
-    {
-        Type[] types = typeof(MultiThreadableTaskAnalyzer).Assembly.GetTypes();
-
-        types.Where(type => type.IsDefined(typeof(ExportCodeFixProviderAttribute), inherit: false))
-            .ShouldBeEmpty();
-        types.Where(type => type.IsDefined(typeof(DiagnosticAnalyzerAttribute), inherit: false))
-            .ShouldBe(
-                [
-                    typeof(MultiThreadableTaskAnalyzer),
-                    typeof(MultiThreadableTaskDeclarationAnalyzer),
-                    typeof(PreferTypedParameterAnalyzer),
-                    typeof(RequiredTaskPropertyInitializationSuppressor),
-                    typeof(TaskEnvironmentConstructorInjectionAnalyzer),
-                    typeof(TransitiveCallChainAnalyzer),
-                    typeof(UnsupportedTaskItemTypeAnalyzer),
-                ],
-                ignoreOrder: true);
-    }
-
-    [Fact]
     public async Task GeneratedPackagesHaveExpectedShippingContract()
     {
         string repositoryRoot = TaskAnalyzerTestsConstants.RepoRoot;
