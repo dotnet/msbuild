@@ -60,6 +60,12 @@ jobs:
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\packages\$(BuildConfiguration)'
       ArtifactName: PackageArtifacts
 
+    # Also publish the existing final release packages without changing PackageArtifacts.
+    - ${{ if and(eq(parameters.isExperimental, false), eq(parameters.signTypeParameter, 'real')) }}:
+      - output: pipelineArtifact
+        targetPath: '$(Build.SourcesDirectory)\artifacts\official\packages\$(BuildConfiguration)\Release'
+        artifactName: ReleasePackages
+
     # Publish "IntelliSense" XSD files to their own artifact
     # so it can be consumed by the insertion-to-VS job
     - output: pipelineArtifact
