@@ -28,8 +28,11 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 {
     public class ProjectCacheTests : IDisposable
     {
-        // Test fixtures target the product TFM even when the test host runs on a newer runtime.
-        private static readonly string s_currentTargetNETFramework = RunnerUtilities.LatestDotNetCoreForMSBuild;
+        // The sample plugin and the helper apps built by these tests target the runtime MSBuild itself
+        // targets (LatestDotNetCoreForMSBuild), which can lag the bootstrap SDK's TFM.
+        // Derive the TFM from the runtime actually executing these
+        // tests rather than from BootstrapSdkVersion, so the plugin/app paths resolve to the built output.
+        private static string s_currentTargetNETFramework = $"net{Environment.Version.Major}.0";
 
         public ProjectCacheTests(ITestOutputHelper output)
         {
