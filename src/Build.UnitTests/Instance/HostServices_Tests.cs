@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.Versioning;
 using System.Xml;
 
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -186,6 +187,75 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
             Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
             Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project2"));
+        }
+
+        [Theory]
+        [InlineData(NodeAffinity.InProc)]
+        [InlineData(NodeAffinity.OutOfProc)]
+        [InlineData(NodeAffinity.Any)]
+        public void TranslationPreservesDefaultNodeAffinity(NodeAffinity affinity)
+        {
+            HostServices hostServices = new();
+            hostServices.SetNodeAffinity(string.Empty, affinity);
+
+            HostServices deserialized = RoundTripBuildRequest(hostServices);
+
+            Assert.Equal(affinity, deserialized.GetNodeAffinity("project.proj"));
+        }
+
+        [Theory]
+        [InlineData(NodeAffinity.InProc)]
+        [InlineData(NodeAffinity.OutOfProc)]
+        [InlineData(NodeAffinity.Any)]
+        public void TranslationPreservesProjectNodeAffinity(NodeAffinity affinity)
+        {
+            HostServices hostServices = new();
+            hostServices.SetNodeAffinity("project.proj", affinity);
+
+            HostServices deserialized = RoundTripBuildRequest(hostServices);
+
+            Assert.Equal(affinity, deserialized.GetNodeAffinity("PROJECT.PROJ"));
+            Assert.Equal(NodeAffinity.Any, deserialized.GetNodeAffinity("other.proj"));
+        }
+
+        [Fact]
+        public void TranslationPreservesNodeAffinityOverrides()
+        {
+            HostServices hostServices = new();
+            hostServices.SetNodeAffinity(string.Empty, NodeAffinity.OutOfProc);
+            hostServices.SetNodeAffinity("project.proj", NodeAffinity.InProc);
+
+            HostServices deserialized = RoundTripBuildRequest(hostServices);
+
+            Assert.Equal(NodeAffinity.InProc, deserialized.GetNodeAffinity("PROJECT.PROJ"));
+            Assert.Equal(NodeAffinity.OutOfProc, deserialized.GetNodeAffinity("other.proj"));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(NodePacketTypeExtensions.PacketVersion - 1)]
+        [InlineData((int)NodePacketTypeExtensions.PacketVersion)]
+        public void TranslationPreservesLegacyPacketFormat(int? packetVersion)
+        {
+            HostServices hostServices = new();
+            hostServices.SetNodeAffinity(string.Empty, NodeAffinity.OutOfProc);
+
+            ITranslator writer = TranslationHelpers.GetWriteTranslator();
+            writer.NegotiatedPacketVersion = packetVersion.HasValue ? (byte)packetVersion.Value : null;
+            ((ITranslatable)hostServices).Translate(writer);
+            string sentinel = "after host services";
+            writer.Translate(ref sentinel);
+
+            ITranslator reader = TranslationHelpers.GetReadTranslator();
+            reader.NegotiatedPacketVersion = writer.NegotiatedPacketVersion;
+            HostServices deserialized = new();
+            ((ITranslatable)deserialized).Translate(reader);
+            string translatedSentinel = null;
+            reader.Translate(ref translatedSentinel);
+            Assert.Equal(sentinel, translatedSentinel);
+            Assert.Equal(NodeAffinity.Any, deserialized.GetNodeAffinity("project.proj"));
         }
 
         /// <summary>
@@ -466,6 +536,22 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var resultObject = (ITestRemoteHostObject)hostServices.GetHostObject("project", "test", "Message");
 
             resultObject.GetState().ShouldBe(2);
+        }
+
+        private static HostServices RoundTripBuildRequest(HostServices hostServices)
+        {
+            BuildRequest request = new(1, 1, 1, ["Build"], hostServices, BuildEventContext.Invalid, parentRequest: null);
+            ITranslator writer = TranslationHelpers.GetWriteTranslator();
+            request.Translate(writer);
+            string sentinel = "after build request";
+            writer.Translate(ref sentinel);
+
+            ITranslator reader = TranslationHelpers.GetReadTranslator();
+            BuildRequest deserialized = (BuildRequest)BuildRequest.FactoryForDeserialization(reader);
+            string translatedSentinel = null;
+            reader.Translate(ref translatedSentinel);
+            Assert.Equal(sentinel, translatedSentinel);
+            return deserialized.HostServices;
         }
 
         /// <summary>
