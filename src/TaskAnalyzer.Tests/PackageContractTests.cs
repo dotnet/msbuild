@@ -8,6 +8,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.Diagnostics;
 using NuGet.Packaging;
 using Shouldly;
 using Xunit;
