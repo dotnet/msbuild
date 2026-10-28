@@ -6,7 +6,8 @@ operations, computing item states, and reading cached results. Most use
 [`LazyItemBenchmarkFixture`](../../Infrastructure/LazyItemBenchmarkFixture.cs) to separate evaluator
 work from project setup. `LazyItemEvaluationBenchmark` supplies whole-project controls.
 
-See the [benchmark runner guide](../../readme.md) for general options.
+See [item evaluation architecture](../../../../documentation/Item-Evaluation.md) for the evaluator's
+design and ownership rules, and the [benchmark runner guide](../../readme.md) for general options.
 
 ## Terminology
 
