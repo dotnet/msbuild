@@ -72,6 +72,7 @@ The folder contains collection of docs and references for MSBuild, detailed info
 
 ### Evaluation
 
+* [Item evaluation architecture](Item-Evaluation.md)
 * [Evaluation profiling](evaluation-profiling.md)
 
 ### Logging
