@@ -42,9 +42,6 @@
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
-    <Compile Include="..\Shared\NodePipeBase.cs" />
-    <Compile Include="..\Shared\NodePipeClient.cs" />
-    <Compile Include="..\Shared\NodePipeServer.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <!-- Source Files -->
     <Compile Include="BuiltInTasks.cs" />
@@ -107,6 +104,9 @@
     <Compile Include="AssemblyDependency\UnificationVersion.cs" />
     <Compile Include="AssemblyDependency\UnifiedAssemblyName.cs" />
     <Compile Include="AssemblyDependency\WarnOrErrorOnTargetArchitectureMismatchBehavior.cs" />
+    <Compile Include="AssemblyDependency\Node\NodePipeBase.cs" />
+    <Compile Include="AssemblyDependency\Node\NodePipeClient.cs" />
+    <Compile Include="AssemblyDependency\Node\NodePipeServer.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarClient.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarNode.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarNodeEndpoint.cs" />
