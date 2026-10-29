@@ -37,9 +37,7 @@ internal static class ThreadLocalNodeStateBuffer<TState> where TState : struct
             ArrayPool<TState> pool = LazyInitializer.EnsureInitialized(
                 ref s_oversizedPool,
                 static () => ArrayPool<TState>.Create(MaxPooledBufferLength, maxArraysPerBucket: 4))!;
-            TState[] buffer = pool.Rent(minimumLength);
-            Array.Clear(buffer, 0, minimumLength);
-            return buffer;
+            return pool.Rent(minimumLength);
         }
 
         return new TState[minimumLength];
