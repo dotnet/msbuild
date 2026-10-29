@@ -50,6 +50,14 @@ VS handles the progression from `main` → `rel/insiders` → `rel/stable` on it
 
 In [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml), the `TargetBranch` parameter sets `InsertTargetBranch`. The default `auto` currently resolves to VS `main`; verify the branch-local pipeline when servicing an older release. For a one-off servicing insertion, select `rel/insiders` or `rel/stable` explicitly and select the intended official MSBuild resource build. Changes to automatic routing or OptProf routing require a separate reviewed pipeline change.
 
+## OptProf inputs
+
+Official `main` builds float to the current supported VS `main` central profiles through the OptProf plugin's branch lookup, using the build job token. The build accepts only finalized, non-deleted, unexpired inputs owned by the VS central profile store. Arcade remains the only optimizer and applies the selected profiles to the four required .NET Framework core assemblies.
+
+Floating lets `main` consume updated profiles without a repository pin refresh, including profiles newer than the MSBuild commit that produced them. An explicit `OptProfDropName` remains the highest-priority override, and disabling OptProf skips both central lookup and profile application.
+
+Release branches continue to use the fixed `OptProfBaselineDrop`; their routing and pointer automation need a separate follow-up. The legacy scheduled `main` collection is retired, while release recovery continues to require an independently verified, unexpired, branch-compatible MSBuild-owned baseline.
+
 ## Public API
 
 MSBuild uses package API compatibility validation against `PackageValidationBaselineVersion` in [`eng/Versions.props`](../eng/Versions.props). Reviewed exceptions are recorded in the projects' `CompatibilitySuppressions.xml` files.

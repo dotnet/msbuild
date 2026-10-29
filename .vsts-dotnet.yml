@@ -24,24 +24,22 @@ variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
     value: ''
-  # Hardcoded OptProf baseline: the latest known-good OptimizationData drop from main's
-  # MSBuild-OptProf pipeline. A freshly-cut vs* release branch has no OptProf data of its own,
-  # so it inherits this value (see the vs* block below) and its first official build succeeds
-  # without the manual OptProf bootstrap rerun. Refresh this each release in the main-bump PR
-  # (documentation/release-checklist.md, Phase 3) via scripts/Get-LatestOptProfDrop.ps1.
+  # Fixed legacy release baseline: an independently verified MSBuild-owned OptimizationData drop.
+  # A freshly-cut vs* release branch has no OptProf data of its own, so it inherits this value
+  # (see the vs* block below) and its first official build succeeds without a manual bootstrap.
+  # Reverify this baseline for each release using documentation/release-checklist.md, Phase 3.
   - name: OptProfBaselineDrop
     value: 'OptimizationData/DotNet-msbuild-Trusted/main/20261020.2/15759981/1'
   - name: requireDefaultChannels
     value: false
   - name: SourceBranch
     value: $(IbcSourceBranchName)
-  # If we're not on a vs* branch, use main as our optprof collection branch
-  - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
+  # main resolves the current supported VS main central profiles in the build job.
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
     - name: SourceBranch
-      value: main
+      value: ''
   # On a vs* release branch, seed OptProf from the hardcoded baseline above instead of trying to
-  # resolve branch-specific data that does not exist yet at branch-cut time. (main is unaffected:
-  # it keeps collecting and resolving its own OptProf via SourceBranch.)
+  # resolve branch-specific data that does not exist yet at branch-cut time.
   - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs') }}:
     - name: OptProfDrop
       value: $(OptProfBaselineDrop)
@@ -162,6 +160,7 @@ extends:
           enableComponentGovernance: true
           signTypeParameter: ${{ parameters.signTypeParameter }}
           enableOptProf: ${{ parameters.enableOptProf }}
+          useCentralOptProf: ${{ and(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(parameters.OptProfDropName, 'default'), eq(parameters.enableOptProf, true)) }}
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
