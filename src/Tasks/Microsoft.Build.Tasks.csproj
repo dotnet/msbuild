@@ -72,9 +72,6 @@
     <Compile Include="..\Shared\LanguageParser\VisualBasictokenCharReader.cs" />
     <Compile Include="..\Shared\LanguageParser\VisualBasictokenEnumerator.cs" />
     <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs" />
-    <Compile Include="..\Shared\PlatformNegotiation.cs">
-      <Link>PlatformNegotiation.cs</Link>
-    </Compile>
     <Compile Include="AppConfig\*.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersExResolver.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigCache.cs" />
