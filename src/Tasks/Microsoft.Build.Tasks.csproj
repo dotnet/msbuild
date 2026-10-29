@@ -35,14 +35,6 @@
   <ItemGroup>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
-    <!-- Node communication -->
-    <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\INodePacketFactory.cs" />
-    <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\LogMessagePacketBase.cs" />
-    <Compile Include="..\Shared\NodeBuildComplete.cs" />
-    <Compile Include="..\Shared\NodePacketFactory.cs" />
-    <Compile Include="..\Shared\NodeShutdown.cs" />
     <!-- Source Files -->
     <Compile Include="BuiltInTasks.cs" />
     <Compile Include="AssemblyDependency\AssemblyAttributes.cs" />

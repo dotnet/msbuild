@@ -58,12 +58,7 @@
     <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
-    <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
-    <Compile Include="..\Shared\LogMessagePacketBase.cs" />
-    <Compile Include="..\Shared\INodePacketFactory.cs" />
-    <Compile Include="..\Shared\NodePacketFactory.cs" />
-    <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\InvariantPayloadTransferMode.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
@@ -79,8 +74,6 @@
 
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\TypeLoader.cs" />
-    <Compile Include="..\Shared\NodeBuildComplete.cs" />
-    <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\StringExtensions.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />
@@ -144,8 +137,10 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" /><!-- for consistency with Framework via transitives -->
-    <PackageReference Include="System.ValueTuple" ExcludeAssets="Build" /><!-- We ship the new version but binding redirect to the old version manually, so must avoid the drop-binding-redirect logic in the 4.6.1 package. -->
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+    <!-- for consistency with Framework via transitives -->
+    <PackageReference Include="System.ValueTuple" ExcludeAssets="Build" />
+    <!-- We ship the new version but binding redirect to the old version manually, so must avoid the drop-binding-redirect logic in the 4.6.1 package. -->
   </ItemGroup>
 
   <ItemGroup>

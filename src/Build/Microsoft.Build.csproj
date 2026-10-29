@@ -118,14 +118,7 @@
 
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
-    <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
-    <Compile Include="..\Shared\INodePacketFactory.cs" />
-    <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\LogMessagePacketBase.cs" />
-    <Compile Include="..\Shared\NodePacketFactory.cs" />
-    <Compile Include="..\Shared\NodeBuildComplete.cs" />
-    <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
