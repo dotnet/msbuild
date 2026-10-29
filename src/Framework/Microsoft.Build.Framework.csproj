@@ -98,6 +98,7 @@
     <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj"
                       PrivateAssets="all" />
 
+    <PackageReference Include="System.Reflection.MetadataLoadContext" />
     <PackageReference Include="Microsoft.CodeAnalysis.Contracts" PrivateAssets="all" />
 
     <!-- Display files included by the Microsoft.CodeAnalysis.Contracts source package in a 'SourcePackages\Contracts' folder -->
@@ -184,7 +185,7 @@
     </PackageReference>
   </ItemGroup>
 
-    <!-- PolySharp exclusions to avoid conflicts with CsWin32 generated code -->
+  <!-- PolySharp exclusions to avoid conflicts with CsWin32 generated code -->
   <PropertyGroup Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">
     <PolySharpExcludeGeneratedTypes>
       System.Runtime.CompilerServices.OverloadResolutionPriorityAttribute;

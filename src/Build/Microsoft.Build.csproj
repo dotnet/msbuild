@@ -34,8 +34,6 @@
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
 
-    <PackageReference Include="System.Reflection.MetadataLoadContext" />
-
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
     <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
@@ -636,9 +634,6 @@
       <Link>SharedUtilities\ResourceUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Tracing.cs" />
-    <Compile Include="..\Shared\TypeLoader.cs">
-      <Link>SharedUtilities\TypeLoader.cs</Link>
-    </Compile>
     <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
 
     <!-- Win32 RC Files -->
