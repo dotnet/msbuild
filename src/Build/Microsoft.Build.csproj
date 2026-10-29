@@ -115,7 +115,6 @@
     <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
 
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
-    <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />

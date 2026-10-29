@@ -70,7 +70,6 @@
     <Compile Include="..\Shared\TaskHostBuildRequest.cs" />
     <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
 
-    <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\TypeLoader.cs" />
     <Compile Include="..\Shared\StringExtensions.cs" />
     <Compile Include="AssemblyInfo.cs" />
