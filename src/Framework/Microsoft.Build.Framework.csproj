@@ -91,12 +91,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="buildTransitive\Microsoft.Build.Framework.targets"
-          Pack="true"
-          PackagePath="buildTransitive\net10.0\Microsoft.Build.Framework.targets" />
+    <None Include="buildTransitive\Microsoft.Build.Framework.targets" Pack="true" PackagePath="buildTransitive\net10.0\Microsoft.Build.Framework.targets" />
 
-    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj"
-                      PrivateAssets="all" />
+    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" PrivateAssets="all" />
 
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
     <PackageReference Include="Microsoft.CodeAnalysis.Contracts" PrivateAssets="all" />
@@ -224,9 +221,7 @@
     function in eng/build.ps1 by colocating the check with the file it protects. Disable inside VMR as git
     versions are vastly different therer and might be lacking support.
   -->
-  <Target Name="CheckEngineServicesVersionBump"
-          BeforeTargets="Build"
-          Condition="'$(ContinuousIntegrationBuild)' == 'true' and '$(SYSTEM_PULLREQUEST_TARGETBRANCH)' != '' and '$(DotNetBuildFromVMR)' != 'true'">
+  <Target Name="CheckEngineServicesVersionBump" BeforeTargets="Build" Condition="'$(ContinuousIntegrationBuild)' == 'true' and '$(SYSTEM_PULLREQUEST_TARGETBRANCH)' != '' and '$(DotNetBuildFromVMR)' != 'true'">
     <PropertyGroup>
       <!-- Some PRs specify the bare target branch (e.g. "main"), some prefix it with "refs/heads/". Normalize both. -->
       <_EngineServicesTargetBranch>refs/remotes/origin/$(SYSTEM_PULLREQUEST_TARGETBRANCH.Replace('refs/heads/', ''))</_EngineServicesTargetBranch>
@@ -234,10 +229,7 @@
     </PropertyGroup>
 
     <!-- Only run the check when git is available (it may be absent in some source-build/VMR environments). -->
-    <Exec Command="git --version"
-          IgnoreExitCode="true"
-          ContinueOnError="true"
-          StandardOutputImportance="Low">
+    <Exec Command="git --version" IgnoreExitCode="true" ContinueOnError="true" StandardOutputImportance="Low">
       <Output TaskParameter="ExitCode" PropertyName="_GitVersionExitCode" />
     </Exec>
 
@@ -251,10 +243,7 @@
       ensures the "int Version =" check below can only match a genuinely changed version line, never an
       unchanged context line that happens to appear near other edits.
     -->
-    <Exec Command="git --no-pager diff --unified=0 --no-color --exit-code -w &quot;$(_EngineServicesTargetBranch)&quot; HEAD -- &quot;$(_EngineServicesFile)&quot;"
-          Condition="'$(_GitAvailable)' == 'true'"
-          ConsoleToMSBuild="true"
-          IgnoreExitCode="true">
+    <Exec Command="git --no-pager diff --unified=0 --no-color --exit-code -w &quot;$(_EngineServicesTargetBranch)&quot; HEAD -- &quot;$(_EngineServicesFile)&quot;" Condition="'$(_GitAvailable)' == 'true'" ConsoleToMSBuild="true" IgnoreExitCode="true">
       <Output TaskParameter="ConsoleOutput" ItemName="_EngineServicesDiff" />
       <Output TaskParameter="ExitCode" PropertyName="_EngineServicesDiffExitCode" />
     </Exec>
@@ -265,8 +254,7 @@
       <_EngineServicesVersionChanged>$(_EngineServicesDiffText.Contains('int Version ='))</_EngineServicesVersionChanged>
     </PropertyGroup>
 
-    <Error Condition="'$(_GitAvailable)' == 'true' and '$(_EngineServicesChanged)' == 'true' and '$(_EngineServicesVersionChanged)' != 'true'"
-           Text="Detected changes in Framework\EngineServices.cs without a version bump. If you are making API changes, please bump the version. If the changes in the file are cosmetic, please change an inline comment on the &quot;int Version =&quot; line in EngineServices.cs to silence the error." />
+    <Error Condition="'$(_GitAvailable)' == 'true' and '$(_EngineServicesChanged)' == 'true' and '$(_EngineServicesVersionChanged)' != 'true'" Text="Detected changes in Framework\EngineServices.cs without a version bump. If you are making API changes, please bump the version. If the changes in the file are cosmetic, please change an inline comment on the &quot;int Version =&quot; line in EngineServices.cs to silence the error." />
   </Target>
 
 </Project>
