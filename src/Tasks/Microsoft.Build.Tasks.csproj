@@ -50,25 +50,12 @@
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
     <Compile Include="ConvertToAbsolutePath.cs" />
-    <Compile Include="..\Shared\LanguageParser\StreamMappedString.cs">
-      <Link>StreamMappedString.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\Tracing.cs" />
     <Compile Include="..\Shared\VisualStudioConstants.cs">
       <Link>VisualStudioConstants.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\Shared\ResourceUtilities.cs" />
-    <Compile Include="..\Shared\LanguageParser\token.cs" />
-    <Compile Include="..\Shared\LanguageParser\tokenChar.cs" />
-    <Compile Include="..\Shared\LanguageParser\tokenCharReader.cs" />
-    <Compile Include="..\Shared\LanguageParser\tokenEnumerator.cs" />
-    <Compile Include="..\Shared\LanguageParser\CSharptokenCharReader.cs" />
-    <Compile Include="..\Shared\LanguageParser\CSharptokenEnumerator.cs" />
-    <Compile Include="..\Shared\LanguageParser\CSharptokenizer.cs" />
-    <Compile Include="..\Shared\LanguageParser\VisualBasictokenCharReader.cs" />
-    <Compile Include="..\Shared\LanguageParser\VisualBasictokenEnumerator.cs" />
-    <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs" />
     <Compile Include="AppConfig\*.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersExResolver.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigCache.cs" />
@@ -130,6 +117,17 @@
     <Compile Include="ResourceHandling\*.cs" />
     <Compile Include="GetCompatiblePlatform.cs" />
     <Compile Include="IFixedTypeInfo.cs" />
+    <Compile Include="LanguageParser\CSharpTokenCharReader.cs" />
+    <Compile Include="LanguageParser\CSharpTokenEnumerator.cs" />
+    <Compile Include="LanguageParser\CSharptokenizer.cs" />
+    <Compile Include="LanguageParser\StreamMappedString.cs" />
+    <Compile Include="LanguageParser\Token.cs" />
+    <Compile Include="LanguageParser\TokenChar.cs" />
+    <Compile Include="LanguageParser\TokenCharReader.cs" />
+    <Compile Include="LanguageParser\TokenEnumerator.cs" />
+    <Compile Include="LanguageParser\VisualBasicTokenCharReader.cs" />
+    <Compile Include="LanguageParser\VisualBasicTokenEnumerator.cs" />
+    <Compile Include="LanguageParser\VisualBasicTokenizer.cs" />
     <Compile Include="SetRidAgnosticValueForProjects.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />
