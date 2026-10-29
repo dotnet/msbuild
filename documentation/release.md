@@ -17,7 +17,7 @@ Update this list when cutting or retiring a branch.
 | `vs18.9` | [SDK 10.0.4xx](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) | [November 14, 2028](https://dotnet.microsoft.com/platform/support/policy/dotnet-core) |
 | `vs18.11` | [VS Stable](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs#stable-channel-support) | Next Stable promotion, unless selected as an LTSC baseline |
 | `vs18.12` | [SDK 11.0.1xx](https://github.com/dotnet/dotnet/blob/release/11.0.1xx/src/msbuild/eng/Versions.props) | [November 9, 2028 (planned GA lifecycle)](https://github.com/dotnet/core/blob/main/release-notes/11.0/README.md) |
-| `vs18.13` | [SDK 11.0.2xx](https://github.com/dotnet/dotnet/blob/release/11.0.2xx/src/msbuild/eng/Versions.props) and VS release preparation | Retain while either SDK or VS support applies; confirm the SDK band's deadline when published |
+| `vs18.13` | [VS release preparation](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) | Follow VS servicing policy; VMR and Arcade dependency flows remain on `main`, not this release branch |
 | `main` | [Development](../eng/Versions.props) | No fixed end date |
 
 Check Stable promotions and the published [LTSC baseline](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) at each audit; confirm planned SDK deadlines at GA.
