@@ -7,12 +7,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Collections;
-
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 using System.Security;
 #endif
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -788,7 +787,10 @@ namespace Microsoft.Build.BackEnd
 
                 // Non-derivable metadata can only be set at construction time.
                 // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
-                ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName), "CannotChangeItemSpecModifiers", metadataName);
+                if (ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName))
+                {
+                    throw new ArgumentException(SR.FormatCannotChangeItemSpecModifiers(metadataName));
+                }
 
                 _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
@@ -809,7 +811,11 @@ namespace Microsoft.Build.BackEnd
             public void RemoveMetadata(string metadataName)
             {
                 ArgumentNullException.ThrowIfNull(metadataName);
-                ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsItemSpecModifier(metadataName), "CannotChangeItemSpecModifiers", metadataName);
+
+                if (ItemSpecModifiers.IsItemSpecModifier(metadataName))
+                {
+                    throw new ArgumentException(SR.FormatCannotChangeItemSpecModifiers(metadataName));
+                }
 
                 if (_customEscapedMetadata == null)
                 {

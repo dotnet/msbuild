@@ -72,9 +72,6 @@
     <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs">
       <Link>AssemblyNameEx_Tests.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\TaskParameter_Tests.cs">
-      <Link>TaskParameter_Tests.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <None Include="..\Shared\UnitTests\App.config">
