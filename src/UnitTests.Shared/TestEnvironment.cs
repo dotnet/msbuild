@@ -545,7 +545,7 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            debugPath = FrameworkDebugUtils.DebugPath;
+            debugPath = DebugUtils.DebugPath;
             if (debugPath != null)
             {
                 try

@@ -1,7 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\DebuggingSources.proj" />
-
   <PropertyGroup>
     <TargetFrameworks>$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>

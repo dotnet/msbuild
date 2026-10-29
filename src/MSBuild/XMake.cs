@@ -320,7 +320,7 @@ namespace Microsoft.Build.CommandLine
         /// Only the entry process and the server node report builds, so worker, task host and RAR nodes don't create a session for builds.
         /// </summary>
         /// <remarks>
-        /// The node mode comes from the command line (see <see cref="FrameworkDebugUtils.GetProcessNodeMode"/>),
+        /// The node mode comes from the command line (see <see cref="DebugUtils.GetProcessNodeMode"/>),
         /// so a node mode that is supplied only through a response file is not detected and the process is treated as an entry process.
         /// MSBuild itself always launches nodes with <c>/nodemode:N</c> on the command line.
         /// </remarks>
@@ -337,7 +337,7 @@ namespace Microsoft.Build.CommandLine
         /// </remarks>
         internal static void InitializeTelemetryForInProcessBuild()
         {
-            if (OwnsProcessTelemetrySession(FrameworkDebugUtils.GetProcessNodeMode()))
+            if (OwnsProcessTelemetrySession(DebugUtils.GetProcessNodeMode()))
             {
                 TelemetryManager.Instance.Initialize(isStandalone: true);
             }
@@ -843,7 +843,7 @@ namespace Microsoft.Build.CommandLine
                     break;
                 case "3":
                     // Value "3" debugs the main MSBuild process but skips debugging child TaskHost processes
-                    if (!FrameworkDebugUtils.IsInTaskHostNode())
+                    if (!DebugUtils.IsInTaskHostNode())
                     {
                         Debugger.Launch();
                     }
@@ -2201,7 +2201,7 @@ namespace Microsoft.Build.CommandLine
                     new BuildManager.DeferredBuildMessage(
                         ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "MSBuildDebugPath",
-                        FrameworkDebugUtils.DebugPath),
+                        DebugUtils.DebugPath),
                         MessageImportance.High));
             }
 

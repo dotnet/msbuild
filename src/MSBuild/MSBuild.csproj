@@ -1,7 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\DebuggingSources.proj" />
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>

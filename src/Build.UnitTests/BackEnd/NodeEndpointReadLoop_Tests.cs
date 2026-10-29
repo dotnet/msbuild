@@ -46,7 +46,7 @@ public sealed class NodeEndpointReadLoop_Tests(ITestOutputHelper output)
 
         try
         {
-            FrameworkDebugUtils.SetDebugPath();
+            DebugUtils.SetDebugPath();
             DebugUtils.ResetDebugDumpPathInRunningTests = true;
             _ = DebugUtils.DebugDumpPath;
             endpoint.RunReadLoop(stream, new ConcurrentQueue<INodePacket>(), packetAvailable, terminate);
@@ -68,7 +68,7 @@ public sealed class NodeEndpointReadLoop_Tests(ITestOutputHelper output)
         finally
         {
             transientDebugPath.Revert();
-            FrameworkDebugUtils.SetDebugPath();
+            DebugUtils.SetDebugPath();
             DebugUtils.ResetDebugDumpPathInRunningTests = true;
             _ = DebugUtils.DebugDumpPath;
         }

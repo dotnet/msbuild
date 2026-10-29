@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                FrameworkDebugUtils.SetDebugPath();
+                DebugUtils.SetDebugPath();
                 DebugUtils.ResetDebugDumpPathInRunningTests = true;
                 _ = DebugUtils.DebugDumpPath;
 
@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 transientDebugPath.Revert();
-                FrameworkDebugUtils.SetDebugPath();
+                DebugUtils.SetDebugPath();
 
                 DebugUtils.ResetDebugDumpPathInRunningTests = true;
                 _ = DebugUtils.DebugDumpPath;
@@ -74,8 +74,8 @@ namespace Microsoft.Build.UnitTests
                 var transientDebugEngine = env.SetEnvironmentVariable("MSBuildDebugEngine", "1");
                 try
                 {
-                    FrameworkDebugUtils.SetDebugPath();
-                    string resultPath = FrameworkDebugUtils.DebugPath;
+                    DebugUtils.SetDebugPath();
+                    string resultPath = DebugUtils.DebugPath;
                     resultPath.ShouldNotBeNull();
                     resultPath.ShouldBe(Path.Combine(relativePath, ".MSBuild_Logs"));
                     Directory.Exists(resultPath).ShouldBeTrue();
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
                     // Reset DebugPath to not affect other tests
                     transientEnvVar.Revert();
                     transientDebugEngine.Revert();
-                    FrameworkDebugUtils.SetDebugPath();
+                    DebugUtils.SetDebugPath();
                 }
             }
         }
@@ -109,8 +109,8 @@ namespace Microsoft.Build.UnitTests
                 var transientDebugEngine = env.SetEnvironmentVariable("MSBuildDebugEngine", "1");
                 try
                 {
-                    FrameworkDebugUtils.SetDebugPath();
-                    string resultPath = FrameworkDebugUtils.DebugPath;
+                    DebugUtils.SetDebugPath();
+                    string resultPath = DebugUtils.DebugPath;
                     resultPath.ShouldNotBeNull();
                     resultPath.ShouldBe(Path.Combine(fullInSolutionPath, ".MSBuild_Logs"));
                 }
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests
                     // Reset DebugPath to not affect other tests
                     transientEnvVar.Revert();
                     transientDebugEngine.Revert();
-                    FrameworkDebugUtils.SetDebugPath();
+                    DebugUtils.SetDebugPath();
                 }
             }
         }
@@ -140,8 +140,8 @@ namespace Microsoft.Build.UnitTests
                 var transientDebugEngine = env.SetEnvironmentVariable("MSBuildDebugEngine", "1");
                 try
                 {
-                    FrameworkDebugUtils.SetDebugPath();
-                    string resultPath = FrameworkDebugUtils.DebugPath;
+                    DebugUtils.SetDebugPath();
+                    string resultPath = DebugUtils.DebugPath;
                     resultPath.ShouldNotBeNull();
                     resultPath.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), ".MSBuild_Logs"));
                 }
@@ -150,7 +150,7 @@ namespace Microsoft.Build.UnitTests
                     // Reset DebugPath to not affect other tests
                     transientEnvVar.Revert();
                     transientDebugEngine.Revert();
-                    FrameworkDebugUtils.SetDebugPath();
+                    DebugUtils.SetDebugPath();
                 }
             }
         }
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests
         {
             // When running in the main test process (no /nodemode argument),
             // we should not be in a TaskHost node
-            FrameworkDebugUtils.IsInTaskHostNode().ShouldBeFalse();
+            DebugUtils.IsInTaskHostNode().ShouldBeFalse();
         }
     }
 }
