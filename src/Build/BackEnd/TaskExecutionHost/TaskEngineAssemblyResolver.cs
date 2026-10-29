@@ -3,9 +3,8 @@
 
 using System;
 using System.IO;
-using System.Reflection;
 using System.Diagnostics;
-
+using System.Reflection;
 #if FEATURE_ASSEMBLYLOADCONTEXT
 using System.Runtime.Loader;
 #endif
@@ -14,7 +13,7 @@ using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
 
-namespace Microsoft.Build.BackEnd.Logging
+namespace Microsoft.Build.BackEnd
 {
     /// <summary>
     /// This is a helper class to install an AssemblyResolver event handler in whatever AppDomain this class is created in.

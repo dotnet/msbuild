@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\DebuggingSources.proj" />
 
@@ -81,7 +81,6 @@
     <Compile Include="..\Shared\TypeLoader.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
-    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="..\Shared\StringExtensions.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />

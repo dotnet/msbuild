@@ -126,7 +126,6 @@
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
-    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
@@ -170,6 +169,7 @@
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="BackEnd\Shared\BuildResultBase.cs" />
     <Compile Include="BuildCheck\**\*.cs" />
+    <Compile Include="BackEnd\TaskExecutionHost\TaskEngineAssemblyResolver.cs" />
     <Compile Include="Collections\IKeyed.cs" />
     <Compile Include="Collections\IValueDictionaryConverter.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableUnescapedValuedEntryHashSet.cs" />
