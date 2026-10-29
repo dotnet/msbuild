@@ -53,9 +53,6 @@
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
     <Compile Include="ConvertToAbsolutePath.cs" />
-    <Compile Include="..\Shared\PropertyParser.cs">
-      <Link>PropertyParser.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\LanguageParser\StreamMappedString.cs">
       <Link>StreamMappedString.cs</Link>
     </Compile>
