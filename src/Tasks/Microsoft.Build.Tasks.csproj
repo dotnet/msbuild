@@ -51,9 +51,6 @@
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <!-- Source Files -->
     <Compile Include="BuiltInTasks.cs" />
-    <Compile Include="..\Shared\CanonicalError.cs">
-      <Link>CanonicalError.cs</Link>
-    </Compile>
     <Compile Include="AssemblyDependency\AssemblyAttributes.cs" />
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
@@ -61,9 +58,6 @@
     <Compile Include="ConvertToAbsolutePath.cs" />
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>PropertyParser.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
-      <Link>TaskLoggingHelperExtension.cs</Link>
     </Compile>
     <Compile Include="..\Shared\LanguageParser\StreamMappedString.cs">
       <Link>StreamMappedString.cs</Link>

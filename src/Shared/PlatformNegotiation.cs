@@ -4,11 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
-#if BUILD_ENGINE
-using Microsoft.Build.BackEnd;
-#else
 using Microsoft.Build.Utilities;
-#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -96,6 +92,7 @@ namespace Microsoft.Build.Shared
             }
             return buildProjectReferenceAs;
         }
+
         internal static Dictionary<string, string>? ExtractLookupTable(string stringTable, TaskLoggingHelper? log = null)
         {
             if (string.IsNullOrEmpty(stringTable))

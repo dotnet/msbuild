@@ -155,37 +155,31 @@ namespace Microsoft.Build.Shared
         [GeneratedRegex(LineColLineColFromLocationPattern, RegexOptions.IgnoreCase)]
         private static partial Regex LineColLineColFromLocation { get; }
 #else
-        private static Regex s_originCategoryCodeTextExpression;
-        private static Regex OriginCategoryCodeTextExpression => s_originCategoryCodeTextExpression ??=
-            new Regex(OriginCategoryCodeTextExpressionPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private const RegexOptions DefaultRegexOptions = RegexOptions.IgnoreCase | RegexOptions.Compiled;
 
-        private static Regex s_originCategoryCodeTextExpression2;
-        private static Regex OriginCategoryCodeTextExpression2 => s_originCategoryCodeTextExpression2 ??=
-            new Regex(OriginCategoryCodeTextExpression2Pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static Regex OriginCategoryCodeTextExpression
+            => field ??= new(OriginCategoryCodeTextExpressionPattern, DefaultRegexOptions);
 
-        private static Regex s_filenameLocationFromOrigin;
-        private static Regex FilenameLocationFromOrigin => s_filenameLocationFromOrigin ??=
-            new Regex(FilenameLocationFromOriginPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static Regex OriginCategoryCodeTextExpression2
+            => field ??= new(OriginCategoryCodeTextExpression2Pattern, DefaultRegexOptions);
 
-        private static Regex s_lineFromLocation;
-        private static Regex LineFromLocation => s_lineFromLocation ??=
-            new Regex(LineFromLocationPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static Regex FilenameLocationFromOrigin
+            => field ??= new(FilenameLocationFromOriginPattern, DefaultRegexOptions);
 
-        private static Regex s_lineLineFromLocation;
-        private static Regex LineLineFromLocation => s_lineLineFromLocation ??=
-            new Regex(LineLineFromLocationPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static Regex LineFromLocation
+            => field ??= new(LineFromLocationPattern, DefaultRegexOptions);
 
-        private static Regex s_lineColFromLocation;
-        private static Regex LineColFromLocation => s_lineColFromLocation ??=
-            new Regex(LineColFromLocationPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static Regex LineLineFromLocation
+            => field ??= new(LineLineFromLocationPattern, DefaultRegexOptions);
 
-        private static Regex s_lineColColFromLocation;
-        private static Regex LineColColFromLocation => s_lineColColFromLocation ??=
-            new Regex(LineColColFromLocationPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static Regex LineColFromLocation
+            => field ??= new(LineColFromLocationPattern, DefaultRegexOptions);
 
-        private static Regex s_lineColLineColFromLocation;
-        private static Regex LineColLineColFromLocation => s_lineColLineColFromLocation ??=
-            new Regex(LineColLineColFromLocationPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static Regex LineColColFromLocation
+            => field ??= new(LineColColFromLocationPattern, DefaultRegexOptions);
+
+        private static Regex LineColLineColFromLocation
+            => field ??= new(LineColLineColFromLocationPattern, DefaultRegexOptions);
 #endif
 
         /// <summary>

@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 
 // NOTE: This is nearly identical to the MSBuild task in Microsoft.Build.Tasks.  We are deprecating that task,
 // so this is the governing implementation.
@@ -56,8 +58,6 @@ namespace Microsoft.Build.BackEnd
         // Whether to skip project files that don't exist on disk. By default we error for such projects.
         private SkipNonExistentProjectsBehavior _skipNonExistentProjects = SkipNonExistentProjectsBehavior.Undefined;
 
-        private TaskLoggingHelper _logHelper;
-
         /// <inheritdoc />
         /// <summary>
         /// The build engine, from ITask
@@ -68,8 +68,8 @@ namespace Microsoft.Build.BackEnd
 
         public IBuildEngine3 BuildEngine3 => (IBuildEngine3)BuildEngine;
 
-        public TaskLoggingHelper Log => _logHelper ?? (_logHelper = new TaskLoggingHelperExtension(this,
-            AssemblyResources.PrimaryResources, AssemblyResources.SharedResources, "MSBuild."));
+        public TaskLoggingHelper Log
+            => field ??= new TaskLoggingHelperExtension(this, AssemblyResources.PrimaryResources, AssemblyResources.SharedResources, "MSBuild.");
 
         /// <inheritdoc />
         /// <summary>

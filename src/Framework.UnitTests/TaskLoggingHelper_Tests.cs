@@ -4,10 +4,11 @@
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using SR = Microsoft.Build.Framework.Resources.SR;
 
 #nullable disable
 
@@ -15,10 +16,17 @@ namespace Microsoft.Build.UnitTests
 {
     public class TaskLoggingHelperTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public TaskLoggingHelperTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Fact]
         public void CheckMessageCode()
         {
-            Task t = new MockTask();
+            MockTask t = new MockTask();
 
             // normal
             string messageOnly;
@@ -88,8 +96,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CheckMessageFromStreamParsesErrorsAndMessagesCorrectly()
         {
-            IBuildEngine2 mockEngine = new MockEngine3();
-            Task t = new MockTask();
+            IBuildEngine2 mockEngine = new MockEngine(_output);
+            MockTask t = new MockTask();
             t.BuildEngine = mockEngine;
 
             // This should return true since I am passing a canonical error as the stream
@@ -108,8 +116,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LogCommandLine()
         {
-            MockEngine3 mockEngine = new MockEngine3();
-            Task t = new MockTask();
+            MockEngine mockEngine = new MockEngine(_output);
+            MockTask t = new MockTask();
             t.BuildEngine = mockEngine;
 
             t.Log.LogCommandLine("MySuperCommand");
@@ -123,8 +131,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LogMessageWithUnmatchedCurly()
         {
-            MockEngine3 mockEngine = new MockEngine3();
-            Task t = new MockTask();
+            MockEngine mockEngine = new MockEngine(_output);
+            MockTask t = new MockTask();
             t.BuildEngine = mockEngine;
 
 #pragma warning disable CA2241 // Format argument invalid. True! But exactly what we're testing here.
@@ -145,8 +153,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LogFromResources()
         {
-            MockEngine3 mockEngine = new MockEngine3();
-            Task t = new MockTask();
+            MockEngine mockEngine = new MockEngine(_output);
+            MockTask t = new MockTask();
             t.BuildEngine = mockEngine;
 
             t.Log.LogErrorFromResources("MySubcategoryResource", null,
@@ -159,77 +167,93 @@ namespace Microsoft.Build.UnitTests
 
             t.Log.LogWarningFromResources("MyWarningResource", "foo");
 
-            mockEngine.Log.Contains("filename(1,2,3,4): Romulan error : Oops I wiped your harddrive foo").ShouldBeTrue();
-            mockEngine.Log.Contains("filename(1,2,3,4): Romulan warning : Be nice or I wipe your harddrive foo").ShouldBeTrue();
-            mockEngine.Log.Contains("Oops I wiped your harddrive foo").ShouldBeTrue();
-            mockEngine.Log.Contains("Be nice or I wipe your harddrive foo").ShouldBeTrue();
+            mockEngine.Errors.ShouldBe(2);
+            BuildErrorEventArgs error = mockEngine.ErrorEvents[0];
+            error.File.ShouldBe("filename");
+            error.LineNumber.ShouldBe(1);
+            error.ColumnNumber.ShouldBe(2);
+            error.EndLineNumber.ShouldBe(3);
+            error.EndColumnNumber.ShouldBe(4);
+            error.Subcategory.ShouldBe("Romulan");
+            error.Message.ShouldBe("Oops I wiped your harddrive foo");
+
+            mockEngine.Warnings.ShouldBe(2);
+            BuildWarningEventArgs warning = mockEngine.WarningEvents[0];
+            warning.File.ShouldBe("filename");
+            warning.LineNumber.ShouldBe(1);
+            warning.ColumnNumber.ShouldBe(2);
+            warning.EndLineNumber.ShouldBe(3);
+            warning.EndColumnNumber.ShouldBe(4);
+            warning.Subcategory.ShouldBe("Romulan");
+            warning.Message.ShouldBe("Be nice or I wipe your harddrive foo");
+            mockEngine.Log.ShouldContain("Oops I wiped your harddrive foo");
+            mockEngine.Log.ShouldContain("Be nice or I wipe your harddrive foo");
         }
 
         [Fact]
         public void CheckLogMessageFromFile()
         {
-            string file = null;
-
-            try
-            {
-                file = FileUtilities.GetTemporaryFileName();
-
-                string contents = @"a message here
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string file = env.CreateFile().Path;
+            string contents = @"a message here
                     error abcd12345: hey jude.
                     warning xy11: I wanna hold your hand.
                     this is not an error or warning
                     nor is this
                     error def222: norwegian wood";
 
-                // This closes the reader
-                File.WriteAllText(file, contents);
+            File.WriteAllText(file, contents);
 
-                MockEngine3 mockEngine = new MockEngine3();
-                Task t = new MockTask();
-                t.BuildEngine = mockEngine;
-                t.Log.LogMessagesFromFile(file, MessageImportance.High);
+            MockEngine mockEngine = new MockEngine(_output);
+            MockTask t = new MockTask();
+            t.BuildEngine = mockEngine;
+            t.Log.LogMessagesFromFile(file, MessageImportance.High);
 
-                mockEngine.Errors.ShouldBe(2);
-                mockEngine.Warnings.ShouldBe(1);
-                mockEngine.Messages.ShouldBe(3);
+            mockEngine.Errors.ShouldBe(2);
+            mockEngine.Warnings.ShouldBe(1);
+            mockEngine.Messages.ShouldBe(3);
 
-                mockEngine = new MockEngine3();
-                t = new MockTask();
-                t.BuildEngine = mockEngine;
-                t.Log.LogMessagesFromFile(file);
+            mockEngine = new MockEngine(_output);
+            t = new MockTask();
+            t.BuildEngine = mockEngine;
+            t.Log.LogMessagesFromFile(file);
 
-                mockEngine.Errors.ShouldBe(2);
-                mockEngine.Warnings.ShouldBe(1);
-                mockEngine.Messages.ShouldBe(3);
-            }
-            finally
-            {
-                if (file != null)
-                {
-                    File.Delete(file);
-                }
-            }
+            mockEngine.Errors.ShouldBe(2);
+            mockEngine.Warnings.ShouldBe(1);
+            mockEngine.Messages.ShouldBe(3);
         }
 
         [Fact]
         public void CheckResourcesRegistered()
         {
-            Should.Throw<InvalidOperationException>(() =>
-            {
-                Task t = new MockTask(false /*don't register resources*/);
+            MockTask task = new MockTask(registerResources: false);
 
-                try
-                {
-                    t.Log.FormatResourceString("bogus");
-                }
-                catch (Exception e)
-                {
-                    // so I can see the exception message in NUnit's "Standard Out" window
-                    Console.WriteLine(e.Message);
-                    throw;
-                }
-            });
+            InvalidOperationException exception = Should.Throw<InvalidOperationException>(() => task.Log.FormatResourceString("bogus"));
+
+            exception.Message.ShouldBe(SR.FormatTaskResourcesNotRegistered(nameof(MockTask)));
         }
+
+        [Fact]
+        public void MissingResourceThrowsArgumentException()
+        {
+            MockTask task = new MockTask();
+
+            ArgumentException exception = Should.Throw<ArgumentException>(() => task.Log.FormatResourceString("MissingResource"));
+
+            exception.Message.ShouldBe(SR.FormatTaskResourceNotFound("MissingResource", nameof(MockTask)));
+        }
+
+        [Fact]
+        public void LoggingBeforeInitializationStripsMessageCode()
+        {
+            MockTask task = new MockTask();
+
+            InvalidOperationException exception = Should.Throw<InvalidOperationException>(() => task.Log.LogMessage("message"));
+
+            MessageParser.TryStripMSBuildCode(SR.FormatLoggingBeforeTaskInitialization("message"), out string expectedMessage).ShouldBeTrue();
+            exception.Message.ShouldBe(expectedMessage);
+        }
+
         /// <summary>
         /// Verify the LogErrorFromException & LogWarningFromException methods
         /// </summary>
@@ -239,7 +263,7 @@ namespace Microsoft.Build.UnitTests
             string message = "exception message";
             string stackTrace = "TaskLoggingHelperTests.TestLogFromException";
 
-            MockEngine3 engine = new MockEngine3();
+            MockEngine engine = new MockEngine(_output);
             MockTask task = new MockTask();
             task.BuildEngine = engine;
 
@@ -298,7 +322,7 @@ namespace Microsoft.Build.UnitTests
                 new InvalidOperationException("The operation was invalid"),
                 new IOException("An I/O error occurred"));
 
-            MockEngine3 engine = new MockEngine3();
+            MockEngine engine = new MockEngine(_output);
             MockTask task = new MockTask
             {
                 BuildEngine = engine

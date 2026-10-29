@@ -57,4 +57,7 @@
     <data name="MySubcategoryResource">
         <value>Romulan</value>
     </data>
+    <data name="TaskResourceNotFound">
+        <value>Primary resource: {0}, {1}</value>
+    </data>
 </root>

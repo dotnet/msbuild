@@ -13,18 +13,13 @@ using System.Text;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Lifetime;
 #endif
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Shared;
 
 #nullable disable
 
-#if BUILD_ENGINE
-namespace Microsoft.Build.BackEnd
-#else
 namespace Microsoft.Build.Utilities
-#endif
 {
     /// <summary>
     /// Helper logging class - contains all the logging methods used by tasks.
@@ -32,18 +27,11 @@ namespace Microsoft.Build.Utilities
     /// from the Task class, it is provided in the Log property.
     /// This class is thread safe: tasks can log from any threads.
     /// </summary>
-#if BUILD_ENGINE
-    internal
-#else
-    public
-#endif
- class TaskLoggingHelper
+    public class TaskLoggingHelper
 #if FEATURE_APPDOMAIN
         : MarshalByRefObject
 #endif
     {
-        #region Constructors
-
         /// <summary>
         /// public constructor
         /// </summary>
@@ -65,10 +53,6 @@ namespace Microsoft.Build.Utilities
             TaskName = taskName;
             _buildEngine = buildEngine;
         }
-
-        #endregion
-
-        #region Properties
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -101,21 +85,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <value>Upper-case task name string.</value>
         private string TaskNameUpperCase
-        {
-            get
-            {
-                if (_taskNameUpperCase == null)
-                {
-                    // NOTE: use the current thread culture, because this string will be displayed to the user
-                    _taskNameUpperCase = TaskName.ToUpper();
-                }
-
-                return _taskNameUpperCase;
-            }
-        }
-
-        // the upper-case version of the parent task's name (for logging purposes)
-        private string _taskNameUpperCase;
+            => field ??= TaskName.ToUpper(); // NOTE: use the current thread culture, because this string will be displayed to the user
 
         /// <summary>
         /// The build engine we are going to log against
@@ -132,12 +102,7 @@ namespace Microsoft.Build.Utilities
                 // If the task instance does not equal null then use its build engine because
                 // the task instances build engine can be changed for example during tests. This changing of the engine on the same task object is not expected to happen
                 // during normal operation.
-                if (_taskInstance != null)
-                {
-                    return _taskInstance.BuildEngine;
-                }
-
-                return _buildEngine;
+                return _taskInstance != null ? _taskInstance.BuildEngine : _buildEngine;
             }
         }
 
@@ -146,8 +111,6 @@ namespace Microsoft.Build.Utilities
         /// via this property, if they have localized strings.
         /// </summary>
         public ResourceManager TaskResources { get; set; }
-
-        // UI resources (including strings) used by the logging methods
 
         /// <summary>
         /// Gets or sets the prefix used to compose help keywords from string resource names.
@@ -159,10 +122,6 @@ namespace Microsoft.Build.Utilities
         /// Has the task logged any errors through this logging helper object?
         /// </summary>
         public bool HasLoggedErrors { get; private set; }
-
-        #endregion
-
-        #region Utility methods
 
         /// <summary>
         /// Extracts the message code (if any) prefixed to the given message string. Message code prefixes must match the
@@ -208,13 +167,17 @@ namespace Microsoft.Build.Utilities
         public virtual string FormatResourceString(string resourceName, params object[] args)
         {
             ArgumentNullException.ThrowIfNull(resourceName);
-            ErrorUtilities.VerifyThrowInvalidOperation(TaskResources != null, "TaskResourcesNotRegistered", TaskName);
+
+            if (TaskResources is null)
+            {
+                throw new InvalidOperationException(SR.FormatTaskResourcesNotRegistered(TaskName));
+            }
 
             string resourceString = TaskResources.GetString(resourceName, CultureInfo.CurrentUICulture);
 
-            ErrorUtilities.VerifyThrowArgument(resourceString != null, "TaskResourceNotFound", resourceName, TaskName);
-
-            return FormatString(resourceString, args);
+            return resourceString is not null
+                ? FormatString(resourceString, args)
+                : throw new ArgumentException(SR.FormatTaskResourceNotFound(resourceName, TaskName));
         }
 
         /// <summary>
@@ -239,19 +202,47 @@ namespace Microsoft.Build.Utilities
         /// <param name="resourceName">The resource name.</param>
         /// <returns>The message from resource.</returns>
         public virtual string GetResourceMessage(string resourceName)
-        {
-            string resourceString = FormatResourceString(resourceName, null);
-            return resourceString;
-        }
-        #endregion
+            => FormatResourceString(resourceName, args: null);
 
-        #region Message logging methods
+        private void VerifyInitialized(BuildEventArgs eventArgs)
+        {
+            // If BuildEngine is null, task attempted to log before it was set on it,
+            // presumably in its constructor. This is not allowed, and all
+            // we can do is throw.
+            if (BuildEngine is null)
+            {
+                ThrowTaskLoggingHelperNotInitialized(eventArgs.Message);
+            }
+        }
+
+        private void VerifyInitialized(string logMessage)
+        {
+            // If BuildEngine is null, task attempted to log before it was set on it,
+            // presumably in its constructor. This is not allowed, and all
+            // we can do is throw.
+            if (BuildEngine is null)
+            {
+                ThrowTaskLoggingHelperNotInitialized(logMessage);
+            }
+        }
+
+        private void ThrowTaskLoggingHelperNotInitialized(string logMessage)
+        {
+            string message = MessageFormatter.Format(SR.LoggingBeforeTaskInitialization, logMessage);
+
+            message = MessageParser.TryStripMSBuildCode(message, out string strippedMessage)
+                ? strippedMessage
+                : message;
+
+            throw new InvalidOperationException(message);
+        }
 
         /// <summary>
         /// Returns <see langword="true"/> if the build is configured to log all task inputs.
         /// </summary>
-        public bool IsTaskInputLoggingEnabled =>
-            BuildEngine is IBuildEngine10 buildEngine10 && buildEngine10.EngineServices.IsTaskInputLoggingEnabled;
+        public bool IsTaskInputLoggingEnabled
+            => BuildEngine is IBuildEngine10 buildEngine10
+            && buildEngine10.EngineServices.IsTaskInputLoggingEnabled;
 
         /// <summary>
         /// Returns true if a message of given importance should be logged because it is possible that a logger consuming it exists.
@@ -259,10 +250,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="importance">The importance to check.</param>
         /// <returns>True if messages of the given importance should be logged, false if it's guaranteed that such messages would be ignored.</returns>
         public bool LogsMessagesOfImportance(MessageImportance importance)
-        {
-            return BuildEngine is not IBuildEngine10 buildEngine10
-                || buildEngine10.EngineServices.LogsMessagesOfImportance(importance);
-        }
+            => BuildEngine is not IBuildEngine10 buildEngine10
+            || buildEngine10.EngineServices.LogsMessagesOfImportance(importance);
 
         /// <summary>
         /// Logs a message using the specified string.
@@ -277,7 +266,9 @@ namespace Microsoft.Build.Utilities
             // will use this overload, ignore the importance and accidentally format the string.
             // Can't change it now as it's shipped, but this debug assert will help catch callers doing this.
             // Debug only because it is in theory legitimate to pass importance as a string format parameter.
-            Debug.Assert(messageArgs == null || messageArgs.Length == 0 || messageArgs[0].GetType() != typeof(MessageImportance), "Did you call the wrong overload?");
+            Debug.Assert(
+                messageArgs == null || messageArgs.Length == 0 || messageArgs[0].GetType() != typeof(MessageImportance),
+                "Did you call the wrong overload?");
 
             LogMessage(MessageImportance.Normal, message, messageArgs);
         }
@@ -309,23 +300,15 @@ namespace Microsoft.Build.Utilities
                 return;
             }
 
-            BuildMessageEventArgs e = new BuildMessageEventArgs(
-                    message,
-                    helpKeyword: null,
-                    senderName: TaskName,
-                    importance,
-                    DateTime.UtcNow,
-                    messageArgs);
+            BuildMessageEventArgs e = new(
+                message,
+                helpKeyword: null,
+                senderName: TaskName,
+                importance,
+                DateTime.UtcNow,
+                messageArgs);
 
-            // If BuildEngine is null, task attempted to log before it was set on it,
-            // presumably in its constructor. This is not allowed, and all
-            // we can do is throw.
-            if (BuildEngine == null)
-            {
-                // Do not use Verify[...] as it would read e.Message ahead of time
-                ErrorUtilities.ThrowInvalidOperation("LoggingBeforeTaskInitialization", e.Message);
-            }
-
+            VerifyInitialized(e);
             BuildEngine.LogMessageEvent(e);
 
 #if DEBUG
@@ -373,29 +356,26 @@ namespace Microsoft.Build.Utilities
                 return;
             }
 
-            // If BuildEngine is null, task attempted to log before it was set on it,
-            // presumably in its constructor. This is not allowed, and all
-            // we can do is throw.
-            ErrorUtilities.VerifyThrowInvalidOperation(BuildEngine != null, "LoggingBeforeTaskInitialization", message);
+            VerifyInitialized(message);
 
             // If the task has missed out all location information, add the location of the task invocation;
             // that gives the user something.
-            bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
+            bool fillInLocation = string.IsNullOrEmpty(file) && lineNumber == 0 && columnNumber == 0;
 
-            var e = new BuildMessageEventArgs(
-                    subcategory,
-                    code,
-                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
-                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
-                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
-                    endLineNumber,
-                    endColumnNumber,
-                    message,
-                    helpKeyword,
-                    TaskName,
-                    importance,
-                    DateTime.UtcNow,
-                    messageArgs);
+            BuildMessageEventArgs e = new(
+                subcategory,
+                code,
+                fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                endLineNumber,
+                endColumnNumber,
+                message,
+                helpKeyword,
+                TaskName,
+                importance,
+                DateTime.UtcNow,
+                messageArgs);
 
             BuildEngine.LogMessageEvent(e);
         }
@@ -430,28 +410,25 @@ namespace Microsoft.Build.Utilities
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
             ArgumentNullException.ThrowIfNull(message);
 
-            // If BuildEngine is null, task attempted to log before it was set on it,
-            // presumably in its constructor. This is not allowed, and all
-            // we can do is throw.
-            ErrorUtilities.VerifyThrowInvalidOperation(BuildEngine != null, "LoggingBeforeTaskInitialization", message);
+            VerifyInitialized(message);
 
             // If the task has missed out all location information, add the location of the task invocation;
             // that gives the user something.
-            bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
+            bool fillInLocation = string.IsNullOrEmpty(file) && lineNumber == 0 && columnNumber == 0;
 
-            var e = new CriticalBuildMessageEventArgs(
-                    subcategory,
-                    code,
-                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
-                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
-                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
-                    endLineNumber,
-                    endColumnNumber,
-                    message,
-                    helpKeyword,
-                    TaskName,
-                    DateTime.UtcNow,
-                    messageArgs);
+            CriticalBuildMessageEventArgs e = new(
+                subcategory,
+                code,
+                fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                endLineNumber,
+                endColumnNumber,
+                message,
+                helpKeyword,
+                TaskName,
+                DateTime.UtcNow,
+                messageArgs);
 
             BuildEngine.LogMessageEvent(e);
         }
@@ -472,7 +449,9 @@ namespace Microsoft.Build.Utilities
             // will use this overload, ignore the importance and accidentally format the string.
             // Can't change it now as it's shipped, but this debug assert will help catch callers doing this.
             // Debug only because it is in theory legitimate to pass importance as a string format parameter.
-            Debug.Assert(messageArgs == null || messageArgs.Length == 0 || messageArgs[0].GetType() != typeof(MessageImportance), "Did you call the wrong overload?");
+            Debug.Assert(
+                messageArgs == null || messageArgs.Length == 0 || messageArgs[0].GetType() != typeof(MessageImportance),
+                "Did you call the wrong overload?");
 
             LogMessageFromResources(MessageImportance.Normal, messageResourceName, messageArgs);
         }
@@ -539,12 +518,9 @@ namespace Microsoft.Build.Utilities
                 excep = excep.InnerException;
                 flattenedMessage.Append(" ---> ").Append(excep.Message);
             }
+
             return flattenedMessage.ToString();
         }
-
-        #endregion
-
-        #region ExternalProjectStarted/Finished logging methods
 
         /// <summary>
         /// Small helper for logging the custom ExternalProjectStarted build event
@@ -584,19 +560,13 @@ namespace Microsoft.Build.Utilities
             BuildEngine.LogCustomEvent(epf);
         }
 
-        #endregion
-
-        #region Command line logging methods
-
         /// <summary>
         /// Logs the command line for a task's underlying tool/executable/shell command.
         /// Thread safe.
         /// </summary>
         /// <param name="commandLine">The command line string.</param>
         public void LogCommandLine(string commandLine)
-        {
-            LogCommandLine(MessageImportance.Low, commandLine);
-        }
+            => LogCommandLine(MessageImportance.Low, commandLine);
 
         /// <summary>
         /// Logs the command line for a task's underlying tool/executable/shell
@@ -615,22 +585,11 @@ namespace Microsoft.Build.Utilities
                 return;
             }
 
-            var e = new TaskCommandLineEventArgs(commandLine, TaskName, importance);
+            TaskCommandLineEventArgs e = new(commandLine, TaskName, importance);
 
-            // If BuildEngine is null, the task attempted to log before it was set on it,
-            // presumably in its constructor. This is not allowed, and all we can do is throw.
-            if (BuildEngine == null)
-            {
-                // Do not use Verify[...] as it would read e.Message ahead of time
-                ErrorUtilities.ThrowInvalidOperation("LoggingBeforeTaskInitialization", e.Message);
-            }
-
+            VerifyInitialized(e);
             BuildEngine.LogMessageEvent(e);
         }
-
-        #endregion
-
-        #region Error logging methods
 
         /// <summary>
         /// Logs an error using the specified string.
@@ -640,9 +599,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="messageArgs">Optional arguments for formatting the message string.</param>
         /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
         public void LogError([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message, params object[] messageArgs)
-        {
-            LogError(null, null, null, null, null, 0, 0, 0, 0, message, messageArgs);
-        }
+            => LogError(null, null, null, null, null, 0, 0, 0, 0, message, messageArgs);
 
         /// <summary>
         /// Logs an error using the specified string and other error details.
@@ -670,9 +627,7 @@ namespace Microsoft.Build.Utilities
             int endColumnNumber,
             [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             params object[] messageArgs)
-        {
-            LogError(subcategory, errorCode, helpKeyword, null, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, messageArgs);
-        }
+            => LogError(subcategory, errorCode, helpKeyword, helpLink: null, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, messageArgs);
 
         /// <summary>
         /// Logs an error using the specified string and other error details.
@@ -706,10 +661,7 @@ namespace Microsoft.Build.Utilities
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
             ArgumentNullException.ThrowIfNull(message);
 
-            // If BuildEngine is null, task attempted to log before it was set on it,
-            // presumably in its constructor. This is not allowed, and all
-            // we can do is throw.
-            ErrorUtilities.VerifyThrowInvalidOperation(BuildEngine != null, "LoggingBeforeTaskInitialization", message);
+            VerifyInitialized(message);
 
             // All of our errors should have an error code, so the user has something
             // to look up in the documentation. To help find errors without error codes,
@@ -719,22 +671,23 @@ namespace Microsoft.Build.Utilities
 
             // If the task has missed out all location information, add the location of the task invocation;
             // that gives the user something.
-            bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
+            bool fillInLocation = string.IsNullOrEmpty(file) && lineNumber == 0 && columnNumber == 0;
 
-            var e = new BuildErrorEventArgs(
-                    subcategory,
-                    errorCode,
-                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
-                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
-                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
-                    endLineNumber,
-                    endColumnNumber,
-                    message,
-                    helpKeyword,
-                    TaskName,
-                    helpLink,
-                    DateTime.UtcNow,
-                    messageArgs);
+            BuildErrorEventArgs e = new(
+                subcategory,
+                errorCode,
+                fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                endLineNumber,
+                endColumnNumber,
+                message,
+                helpKeyword,
+                TaskName,
+                helpLink,
+                DateTime.UtcNow,
+                messageArgs);
+
             BuildEngine.LogErrorEvent(e);
 
             HasLoggedErrors = true;
@@ -748,9 +701,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="messageArgs">Optional arguments for formatting the loaded string.</param>
         /// <exception cref="ArgumentNullException">Thrown when <c>messageResourceName</c> is null.</exception>
         public void LogErrorFromResources(string messageResourceName, params object[] messageArgs)
-        {
-            LogErrorFromResources(null, null, null, null, 0, 0, 0, 0, messageResourceName, messageArgs);
-        }
+            => LogErrorFromResources(null, null, null, null, 0, 0, 0, 0, messageResourceName, messageArgs);
 
         /// <summary>
         /// Logs an error using the specified resource string and other error details.
@@ -829,9 +780,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="messageArgs">Optional arguments for formatting the loaded string.</param>
         /// <exception cref="ArgumentNullException">Thrown when <c>messageResourceName</c> is null.</exception>
         public void LogErrorWithCodeFromResources(string messageResourceName, params object[] messageArgs)
-        {
-            LogErrorWithCodeFromResources(null, null, 0, 0, 0, 0, messageResourceName, messageArgs);
-        }
+            => LogErrorWithCodeFromResources(null, null, 0, 0, 0, 0, messageResourceName, messageArgs);
 
         /// <summary>
         /// Logs an error using the specified resource string and other error details.
@@ -908,9 +857,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="exception">Exception to log.</param>
         /// <exception cref="ArgumentNullException">Thrown when <c>e</c> is null.</exception>
         public void LogErrorFromException(Exception exception)
-        {
-            LogErrorFromException(exception, false);
-        }
+            => LogErrorFromException(exception, showStackTrace: false);
 
         /// <summary>
         /// Logs an error using the message (and optionally the stack-trace) from the given exception context.
@@ -920,9 +867,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="showStackTrace">If true, callstack will be appended to message.</param>
         /// <exception cref="ArgumentNullException">Thrown when <c>exception</c> is null.</exception>
         public void LogErrorFromException(Exception exception, bool showStackTrace)
-        {
-            LogErrorFromException(exception, showStackTrace, false, null);
-        }
+            => LogErrorFromException(exception, showStackTrace, showDetail: false, file: null);
 
         /// <summary>
         /// Logs an error using the message, and optionally the stack-trace from the given exception, and
@@ -956,10 +901,6 @@ namespace Microsoft.Build.Utilities
             LogError(null, null, null, file, 0, 0, 0, 0, message);
         }
 
-        #endregion
-
-        #region Warning logging methods
-
         /// <summary>
         /// Logs a warning using the specified string.
         /// Thread safe.
@@ -968,9 +909,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="messageArgs">Optional arguments for formatting the message string.</param>
         /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
         public void LogWarning([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message, params object[] messageArgs)
-        {
-            LogWarning(null, null, null, null, 0, 0, 0, 0, message, messageArgs);
-        }
+            => LogWarning(null, null, null, null, 0, 0, 0, 0, message, messageArgs);
 
         /// <summary>
         /// Logs a warning using the specified string and other warning details.
@@ -998,9 +937,7 @@ namespace Microsoft.Build.Utilities
             int endColumnNumber,
             [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             params object[] messageArgs)
-        {
-            LogWarning(subcategory, warningCode, helpKeyword, null, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, messageArgs);
-        }
+            => LogWarning(subcategory, warningCode, helpKeyword, null, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, messageArgs);
 
         /// <summary>
         /// Logs a warning using the specified string and other warning details.
@@ -1034,10 +971,7 @@ namespace Microsoft.Build.Utilities
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
             ArgumentNullException.ThrowIfNull(message);
 
-            // If BuildEngine is null, task attempted to log before it was set on it,
-            // presumably in its constructor. This is not allowed, and all
-            // we can do is throw.
-            ErrorUtilities.VerifyThrowInvalidOperation(BuildEngine != null, "LoggingBeforeTaskInitialization", message);
+            VerifyInitialized(message);
 
             // All of our warnings should have an error code, so the user has something
             // to look up in the documentation. To help find warnings without error codes,
@@ -1047,7 +981,7 @@ namespace Microsoft.Build.Utilities
 
             // If the task has missed out all location information, add the location of the task invocation;
             // that gives the user something.
-            bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
+            bool fillInLocation = string.IsNullOrEmpty(file) && lineNumber == 0 && columnNumber == 0;
 
             // This warning will be converted to an error if:
             // 1. Its code exists within WarningsAsErrors
@@ -1069,20 +1003,20 @@ namespace Microsoft.Build.Utilities
                 return;
             }
 
-            var e = new BuildWarningEventArgs(
-                    subcategory,
-                    warningCode,
-                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
-                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
-                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
-                    endLineNumber,
-                    endColumnNumber,
-                    message,
-                    helpKeyword,
-                    TaskName,
-                    helpLink,
-                    DateTime.UtcNow,
-                    messageArgs);
+            BuildWarningEventArgs e = new(
+                subcategory,
+                warningCode,
+                fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                endLineNumber,
+                endColumnNumber,
+                message,
+                helpKeyword,
+                TaskName,
+                helpLink,
+                DateTime.UtcNow,
+                messageArgs);
 
             BuildEngine.LogWarningEvent(e);
         }
@@ -1095,9 +1029,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="messageArgs">Optional arguments for formatting the loaded string.</param>
         /// <exception cref="ArgumentNullException">Thrown when <c>messageResourceName</c> is null.</exception>
         public void LogWarningFromResources(string messageResourceName, params object[] messageArgs)
-        {
-            LogWarningFromResources(null, null, null, null, 0, 0, 0, 0, messageResourceName, messageArgs);
-        }
+            => LogWarningFromResources(null, null, null, null, 0, 0, 0, 0, messageResourceName, messageArgs);
 
         /// <summary>
         /// Logs a warning using the specified resource string and other warning details.
@@ -1176,9 +1108,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="messageArgs">Optional arguments for formatting the loaded string.</param>
         /// <exception cref="ArgumentNullException">Thrown when <c>messageResourceName</c> is null.</exception>
         public void LogWarningWithCodeFromResources(string messageResourceName, params object[] messageArgs)
-        {
-            LogWarningWithCodeFromResources(null, null, 0, 0, 0, 0, messageResourceName, messageArgs);
-        }
+            => LogWarningWithCodeFromResources(null, null, 0, 0, 0, 0, messageResourceName, messageArgs);
 
         /// <summary>
         /// Logs a warning using the specified resource string and other warning details.
@@ -1254,9 +1184,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="exception">Exception to log.</param>
         /// <exception cref="ArgumentNullException">Thrown when <c>exception</c> is null.</exception>
         public void LogWarningFromException(Exception exception)
-        {
-            LogWarningFromException(exception, false);
-        }
+            => LogWarningFromException(exception, false);
 
         /// <summary>
         /// Logs a warning using the message (and optionally the stack-trace) from the given exception context.
@@ -1281,10 +1209,6 @@ namespace Microsoft.Build.Utilities
             LogWarning(message);
         }
 
-        #endregion
-
-        #region Bulk logging methods
-
         /// <summary>
         /// Logs errors/warnings/messages for each line of text in the given file. Errors/warnings are only logged for lines that
         /// fit a particular (canonical) format -- the remaining lines are treated as messages.
@@ -1294,9 +1218,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>true, if any errors were logged</returns>
         /// <exception cref="ArgumentNullException">Thrown when <c>filename</c> is null.</exception>
         public bool LogMessagesFromFile(string fileName)
-        {
-            return LogMessagesFromFile(fileName, MessageImportance.Low);
-        }
+            => LogMessagesFromFile(fileName, MessageImportance.Low);
 
         /// <summary>
         /// Logs errors/warnings/messages for each line of text in the given file. Errors/warnings are only logged for lines that
@@ -1313,16 +1235,10 @@ namespace Microsoft.Build.Utilities
             // global state.
             ArgumentNullException.ThrowIfNull(fileName);
 
-            bool errorsFound;
-
             // Command-line tools are generally going to emit their output using the current
             // codepage, so that it displays correctly in the console window.
-            using (StreamReader fileStream = FileUtilities.OpenRead(fileName, Encoding.GetEncoding(0))) // HIGHCHAR: Use ANSI for logging messages.
-            {
-                errorsFound = LogMessagesFromStream(fileStream, messageImportance);
-            }
-
-            return errorsFound;
+            using StreamReader fileStream = FileUtilities.OpenRead(fileName, Encoding.GetEncoding(0)); // HIGHCHAR: Use ANSI for logging messages.
+            return LogMessagesFromStream(fileStream, messageImportance);
         }
 
         /// <summary>
@@ -1391,37 +1307,33 @@ namespace Microsoft.Build.Utilities
                 switch (messageParts.category)
                 {
                     case CanonicalError.Parts.Category.Error:
-                        {
-                            LogError(
-                                messageParts.subcategory,
-                                messageParts.code,
-                                null,
-                                origin,
-                                messageParts.line,
-                                messageParts.column,
-                                messageParts.endLine,
-                                messageParts.endColumn,
-                                messageParts.text);
+                        LogError(
+                            messageParts.subcategory,
+                            messageParts.code,
+                            null,
+                            origin,
+                            messageParts.line,
+                            messageParts.column,
+                            messageParts.endLine,
+                            messageParts.endColumn,
+                            messageParts.text);
 
-                            isError = true;
-                            break;
-                        }
+                        isError = true;
+                        break;
 
                     case CanonicalError.Parts.Category.Warning:
-                        {
-                            LogWarning(
-                                messageParts.subcategory,
-                                messageParts.code,
-                                null,
-                                origin,
-                                messageParts.line,
-                                messageParts.column,
-                                messageParts.endLine,
-                                messageParts.endColumn,
-                                messageParts.text);
+                        LogWarning(
+                            messageParts.subcategory,
+                            messageParts.code,
+                            null,
+                            origin,
+                            messageParts.line,
+                            messageParts.column,
+                            messageParts.endLine,
+                            messageParts.endColumn,
+                            messageParts.text);
 
-                            break;
-                        }
+                        break;
 
                     default:
                         InternalError.Throw("Impossible canonical part.");
@@ -1432,25 +1344,15 @@ namespace Microsoft.Build.Utilities
             return isError;
         }
 
-        #endregion
-
-        #region Telemetry logging methods
-
         /// <summary>
         /// Logs telemetry with the specified event name and properties.
         /// </summary>
         /// <param name="eventName">The event name.</param>
         /// <param name="properties">The list of properties associated with the event.</param>
         public void LogTelemetry(string eventName, IDictionary<string, string> properties)
-        {
-            (BuildEngine as IBuildEngine5)?.LogTelemetry(eventName, properties);
-        }
-
-        #endregion
+            => (BuildEngine as IBuildEngine5)?.LogTelemetry(eventName, properties);
 
 #if FEATURE_APPDOMAIN
-        #region AppDomain Code
-
         /// <summary>
         /// InitializeLifetimeService is called when the remote object is activated.
         /// This method will determine how long the lifetime for the object will be.
@@ -1473,7 +1375,7 @@ namespace Microsoft.Build.Utilities
 
                 string initialLeaseTimeFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTASKLOGGINGHELPERINITIALLEASETIME");
 
-                if (!String.IsNullOrEmpty(initialLeaseTimeFromEnvironment))
+                if (!string.IsNullOrEmpty(initialLeaseTimeFromEnvironment))
                 {
                     if (int.TryParse(initialLeaseTimeFromEnvironment, out int leaseTimeFromEnvironment) && leaseTimeFromEnvironment > 0)
                     {
@@ -1492,7 +1394,7 @@ namespace Microsoft.Build.Utilities
                 int leaseExtensionTime = 1;
 
                 string leaseExtensionTimeFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTASKLOGGINGHELPERLEASEEXTENSIONTIME");
-                if (!String.IsNullOrEmpty(leaseExtensionTimeFromEnvironment))
+                if (!string.IsNullOrEmpty(leaseExtensionTimeFromEnvironment))
                 {
                     if (int.TryParse(leaseExtensionTimeFromEnvironment, out int leaseExtensionFromEnvironment) && leaseExtensionFromEnvironment > 0)
                     {
@@ -1534,8 +1436,6 @@ namespace Microsoft.Build.Utilities
                 }
             }
         }
-
-        #endregion
 #endif
 
         /// <summary>
@@ -1575,6 +1475,7 @@ namespace Microsoft.Build.Utilities
                 {
                     LogErrorWithCodeAndExceptionFromResources(innerException, showStackTrace, showDetail, subcategory, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, messageResourceName, messageArgs);
                 }
+
                 return;
             }
 
@@ -1610,9 +1511,7 @@ namespace Microsoft.Build.Utilities
             bool showDetail,
             string messageResourceName,
             params object[] messageArgs)
-        {
-            LogErrorWithCodeAndExceptionFromResources(exception, showStackTrace, showDetail, null, null, 0, 0, 0, 0, messageResourceName, messageArgs);
-        }
+            => LogErrorWithCodeAndExceptionFromResources(exception, showStackTrace, showDetail, null, null, 0, 0, 0, 0, messageResourceName, messageArgs);
 
         /// <summary>
         /// Logs an error using a resource string (with code extraction and help keyword) and appends exception details.
@@ -1631,9 +1530,7 @@ namespace Microsoft.Build.Utilities
             string file,
             string messageResourceName,
             params object[] messageArgs)
-        {
-            LogErrorWithCodeAndExceptionFromResources(exception, showStackTrace, showDetail, null, file, 0, 0, 0, 0, messageResourceName, messageArgs);
-        }
+            => LogErrorWithCodeAndExceptionFromResources(exception, showStackTrace, showDetail, null, file, 0, 0, 0, 0, messageResourceName, messageArgs);
 
         /// <summary>
         /// Formats exception details for logging.
@@ -1649,10 +1546,11 @@ namespace Microsoft.Build.Utilities
                 {
                     message += Environment.NewLine + exception.StackTrace;
                 }
+
                 return message;
             }
-            // The more comprehensive output, showing exception types
-            // and inner exceptions
+
+            // The more comprehensive output, showing exception types and inner exceptions
             var builder = new StringBuilder(200);
             Exception currentException = exception;
             do
@@ -1664,6 +1562,7 @@ namespace Microsoft.Build.Utilities
                 {
                     builder.AppendLine(currentException.StackTrace);
                 }
+
                 currentException = currentException.InnerException;
             }
             while (currentException != null);

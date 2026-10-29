@@ -7,6 +7,8 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Tasks.TaskLoggingHelperExtension))]
+
 // This is the assembly-level GUID, and the GUID for the TypeLib associated with
 // this assembly.  We should specify this explicitly, as opposed to letting
 // tlbexp just pick whatever it wants.
