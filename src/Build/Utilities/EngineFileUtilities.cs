@@ -100,7 +100,9 @@ namespace Microsoft.Build.Internal
         /// used after drive enumeration detection.</param>
         /// <param name="disableExcludeDriveEnumerationWarning">Flag used to detect when to properly log a warning
         /// for the Exclude attribute after detecting a drive enumerating wildcard.</param>
-        /// <param name="globbingMeasurement">Optional accumulator for evaluation glob searches, excluding cached results.</param>
+        /// <param name="globbingMeasurement">Optional accumulator for uncached evaluation glob-resolution calls classified as
+        /// <see cref="FileMatcher.SearchAction.RunSearch"/> or <see cref="FileMatcher.SearchAction.LogDriveEnumeratingWildcard"/>.
+        /// Measured work can short-circuit before directory enumeration.</param>
         /// <returns>Array of file paths, escaped.</returns>
         internal static string[] GetFileListEscaped(
             string? directoryEscaped,
@@ -174,7 +176,9 @@ namespace Microsoft.Build.Internal
         /// used after drive enumeration detection.</param>
         /// <param name="disableExcludeDriveEnumerationWarning">Flag used to detect when to properly log a warning
         /// for the Exclude attribute after detecting a drive enumerating wildcard.</param>
-        /// <param name="globbingMeasurement">Optional accumulator for evaluation glob searches, excluding cached results.</param>
+        /// <param name="globbingMeasurement">Optional accumulator for uncached evaluation glob-resolution calls classified as
+        /// <see cref="FileMatcher.SearchAction.RunSearch"/> or <see cref="FileMatcher.SearchAction.LogDriveEnumeratingWildcard"/>.
+        /// Measured work can short-circuit before directory enumeration.</param>
         /// <returns>Array of file paths.</returns>
         private static string[] GetFileList(
             string? directoryEscaped,
