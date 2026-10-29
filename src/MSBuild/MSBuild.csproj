@@ -55,9 +55,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs">
-      <Link>RegisteredTaskObjectCacheBase.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
