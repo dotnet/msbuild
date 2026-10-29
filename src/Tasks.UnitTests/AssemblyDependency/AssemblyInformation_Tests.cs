@@ -12,6 +12,9 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
+using System.Reflection.PortableExecutable;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -22,7 +25,7 @@ namespace Microsoft.Build.Tasks.UnitTests
     /// <summary>
     ///  Regression coverage for <see cref="AssemblyInformation"/> after #13853 migrated
     ///  the CLR metadata path from RCW + Marshal.ReleaseComObject to struct-based COM
-    ///  through AgileComPointer / GIT. Two distinct concerns covered here:
+    ///  through AgileComPointer / GIT. Three distinct concerns covered here:
     ///  <list type="number">
     ///   <item>
     ///    File-mapping lifetime — IMetaDataDispenser::OpenScope memory-maps the source
@@ -41,6 +44,11 @@ namespace Microsoft.Build.Tasks.UnitTests
     ///    CLR_E_SHIM_RUNTIMELOAD (0x80131700) in embedded-BuildManager hosts. The fix
     ///    calls clr.dll's exported DllGetClassObjectInternal directly via
     ///    <see cref="Windows.Win32.System.Com.ComClassFactory.TryCreateFromModule(string, System.Guid, string, out Windows.Win32.System.Com.ComClassFactory, out Windows.Win32.Foundation.HRESULT)"/>.
+    ///   </item>
+    ///   <item>
+    ///    Hash-blob validation — requesting otherwise unused GetAssemblyRefProps hash outputs
+    ///    preserves the legacy metadata-read failure for malformed references. Skipping those
+    ///    outputs exposes dependencies that RAR previously did not traverse.
     ///   </item>
     ///  </list>
     /// </summary>
@@ -64,6 +72,62 @@ namespace Microsoft.Build.Tasks.UnitTests
             TransientTestFile destFile = env.GetTempFile(".dll");
             File.Copy(source, destFile.Path, overwrite: true);
             return destFile.Path;
+        }
+
+        [WindowsOnlyFact]
+        public void Dependencies_RejectMalformedAssemblyReferenceHashBlob()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string path = CreateAssemblyReferenceHashRepro(env, invalidHash: true);
+            using AssemblyInformation info = new(path);
+
+            BadImageFormatException exception = Should.Throw<BadImageFormatException>(() => _ = info.Dependencies);
+            exception.HResult.ShouldBe(unchecked((int)0x80131124));
+        }
+
+        [WindowsOnlyFact]
+        public void Dependencies_PreserveMaximumVersionWithValidHash()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string path = CreateAssemblyReferenceHashRepro(env, invalidHash: false);
+            using AssemblyInformation info = new(path);
+
+            info.Dependencies.ShouldContain(dependency =>
+                dependency.Name == "mscorlib" &&
+                dependency.Version == new Version(ushort.MaxValue, ushort.MaxValue, ushort.MaxValue, ushort.MaxValue));
+        }
+
+        private static string CreateAssemblyReferenceHashRepro(TestEnvironment env, bool invalidHash)
+        {
+            MetadataBuilder metadata = new();
+            metadata.AddModule(0, metadata.GetOrAddString("AssemblyReferenceHashRepro.dll"),
+                metadata.GetOrAddGuid(Guid.NewGuid()), default, default);
+            metadata.AddAssembly(metadata.GetOrAddString("AssemblyReferenceHashRepro"), new Version(1, 0, 0, 0),
+                default, default, default, AssemblyHashAlgorithm.None);
+            byte[] publicKeyToken = [0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89];
+            BlobHandle token = metadata.GetOrAddBlob(publicKeyToken);
+            AssemblyReferenceHandle framework = metadata.AddAssemblyReference(
+                metadata.GetOrAddString("mscorlib"), new Version(4, 0, 0, 0), default, token, default, default);
+            metadata.AddAssemblyReference(metadata.GetOrAddString("mscorlib"),
+                new Version(ushort.MaxValue, ushort.MaxValue, ushort.MaxValue, ushort.MaxValue), default, token, default,
+                invalidHash ? MetadataTokens.BlobHandle(ushort.MaxValue) : default);
+            TypeReferenceHandle systemObject = metadata.AddTypeReference(
+                framework, metadata.GetOrAddString("System"), metadata.GetOrAddString("Object"));
+            metadata.AddTypeDefinition(default, default, metadata.GetOrAddString("<Module>"), default,
+                MetadataTokens.FieldDefinitionHandle(1), MetadataTokens.MethodDefinitionHandle(1));
+            metadata.AddTypeDefinition(TypeAttributes.Public | TypeAttributes.BeforeFieldInit,
+                metadata.GetOrAddString("Repro"), metadata.GetOrAddString("LegacyType"), systemObject,
+                MetadataTokens.FieldDefinitionHandle(1), MetadataTokens.MethodDefinitionHandle(1));
+            ManagedPEBuilder pe = new(
+                new PEHeaderBuilder(imageCharacteristics: Characteristics.ExecutableImage | Characteristics.Dll),
+                new MetadataRootBuilder(metadata, "v4.0.30319"), new BlobBuilder(), flags: CorFlags.ILOnly);
+            BlobBuilder image = new();
+            pe.Serialize(image);
+
+            string path = env.GetTempFile(".dll").Path;
+            using FileStream output = File.Create(path);
+            image.WriteContentTo(output);
+            return path;
         }
 
         [WindowsOnlyFact]

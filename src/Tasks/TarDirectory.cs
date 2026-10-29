@@ -120,33 +120,54 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            // Bridge from the synchronous ITask.Execute entrypoint to the asynchronous implementation with a
-            // single blocking call. The write pipeline is async so it can flow the cancellation token into the
-            // runtime's asynchronous I/O; keeping the only GetAwaiter().GetResult() here (rather than in the
-            // per-entry loop) avoids repeatedly blocking a thread-pool thread inside the loop.
-            return ExecuteAsync()
-                .ConfigureAwait(continueOnCapturedContext: false)
-                .GetAwaiter()
-                .GetResult();
+            // Evaluate all preconditions before yielding so that failures (which do no real work) don't
+            // pay the cost of yielding and reacquiring the build engine node.
+            if (!TryPrepare(out DateTimeOffset? deterministicTimestamp, out TarEntryFormat format, out TarCompression compression))
+            {
+                return false;
+            }
+
+            // Yield() and Reacquire() must be called on the same thread, so they bracket the blocking wait here
+            // rather than living inside the async method, whose continuations may resume on a thread-pool thread.
+            BuildEngine3.Yield();
+
+            try
+            {
+                // Bridge from the synchronous ITask.Execute entrypoint to the asynchronous implementation with a
+                // single blocking call. The write pipeline is async so it can flow the cancellation token into the
+                // runtime's asynchronous I/O; keeping the only GetAwaiter().GetResult() here (rather than in the
+                // per-entry loop) avoids repeatedly blocking a thread-pool thread inside the loop.
+                WriteArchiveAsync(deterministicTimestamp, format, compression)
+                    .ConfigureAwait(continueOnCapturedContext: false)
+                    .GetAwaiter()
+                    .GetResult();
+            }
+            finally
+            {
+                BuildEngine3.Reacquire();
+            }
+
+            return !_cancellationTokenSource.IsCancellationRequested && !Log.HasLoggedErrors;
         }
 
         /// <summary>
-        /// Asynchronously writes every source entry to the destination archive.
+        /// Resolves the task's paths and validates its parameters, logging an error for any failed precondition.
         /// </summary>
-        /// <returns>A <see cref="System.Threading.Tasks.Task{Boolean}"/> that resolves to <see langword="true"/> when the archive was written without errors or cancellation.</returns>
-        private async System.Threading.Tasks.Task<bool> ExecuteAsync()
+        /// <returns><see langword="true"/> when the archive can be written; otherwise <see langword="false"/>.</returns>
+        private bool TryPrepare(out DateTimeOffset? deterministicTimestamp, out TarEntryFormat format, out TarCompression compression)
         {
-            _sourceDirectory = new DirectoryInfo(TaskEnvironment.GetAbsolutePath(SourceDirectory.ItemSpec).Value);
-            _destinationFile = new FileInfo(TaskEnvironment.GetAbsolutePath(DestinationFile.ItemSpec).Value);
+            deterministicTimestamp = null;
+            format = default;
+            compression = default;
+
+            _sourceDirectory = new DirectoryInfo(TaskEnvironment.GetAbsolutePath(SourceDirectory.ItemSpec));
+            _destinationFile = new FileInfo(TaskEnvironment.GetAbsolutePath(DestinationFile.ItemSpec));
 
             if (!_sourceDirectory.Exists)
             {
                 Log.LogErrorWithCodeFromResources("TarDirectory.ErrorDirectoryDoesNotExist", _sourceDirectory.FullName);
                 return false;
             }
-
-            // Evaluate all preconditions before yielding so that failures (which do no real work) don't
-            // pay the cost of yielding and reacquiring the build engine node.
 
             // Check FailIfNotIncremental before the destination-exists handling below. In Question mode writing
             // the archive is itself the "not incremental" condition, so this must win over ErrorFileExists —
@@ -181,27 +202,33 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            if (!TryGetDeterministicTimestamp(out DateTimeOffset? deterministicTimestamp))
+            if (!TryGetDeterministicTimestamp(out deterministicTimestamp))
             {
                 return false;
             }
 
-            if (!TryGetEntryFormat(out TarEntryFormat format))
+            if (!TryGetEntryFormat(out format))
             {
                 Log.LogErrorWithCodeFromResources("TarDirectory.InvalidFormat", Format);
 
                 return false;
             }
 
-            if (!TryGetCompression(out TarCompression compression))
+            if (!TryGetCompression(out compression))
             {
                 Log.LogErrorWithCodeFromResources("TarDirectory.InvalidCompression", Compression);
 
                 return false;
             }
 
-            BuildEngine3.Yield();
+            return true;
+        }
 
+        /// <summary>
+        /// Asynchronously writes every source entry to the destination archive, logging an error on failure.
+        /// </summary>
+        private async System.Threading.Tasks.Task WriteArchiveAsync(DateTimeOffset? deterministicTimestamp, TarEntryFormat format, TarCompression compression)
+        {
             try
             {
                 Log.LogMessageFromResources(MessageImportance.High, "TarDirectory.Comment", _sourceDirectory.FullName, _destinationFile.FullName);
@@ -277,12 +304,6 @@ namespace Microsoft.Build.Tasks
                 // not fail with "already exists" on a corrupt, incomplete file.
                 TryDeletePartialArchive();
             }
-            finally
-            {
-                BuildEngine3.Reacquire();
-            }
-
-            return !_cancellationTokenSource.IsCancellationRequested && !Log.HasLoggedErrors;
         }
 
         /// <summary>

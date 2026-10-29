@@ -68,7 +68,7 @@
       </trans-unit>
       <trans-unit id="Binlog_FilteredLog">
         <source>This binary log is filtered. Excluded event kinds: {0}.</source>
-        <target state="new">This binary log is filtered. Excluded event kinds: {0}.</target>
+        <target state="translated">Este registro binario se filtra. Tipos de eventos excluidos: {0}.</target>
         <note>LOCALIZATION: {0} is a comma-separated list of binary log event kind names. Do not localize the event kind names.</note>
       </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
@@ -300,6 +300,16 @@
         <source>Downloads folder is untrusted for projects building.</source>
         <target state="translated">La carpeta descargas no es de confianza para la compilación de proyectos.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_MessageFmt">
+        <source>The 'WriteLinesToFile' task in project {0} does not specify the 'Overwrite' parameter. Set it explicitly to 'true' to overwrite the file or 'false' to append to it.</source>
+        <target state="translated">La tarea "WriteLinesToFile" del proyecto {0} no especifica el parámetro "Overwrite". Establézcalo explícitamente en "true" para sobrescribir el archivo o en "false" para anexarlo.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_Title">
+        <source>The 'Overwrite' parameter should be specified when using the 'WriteLinesToFile' task.</source>
+        <target state="translated">Es necesario especificar el parámetro "Overwrite" al usar la tarea "WriteLinesToFile".</target>
+        <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
@@ -3079,11 +3089,6 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
         <target state="translated">Compilación iniciada.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FileLocation">
-        <source>{0} ({1},{2})</source>
-        <target state="translated">{0} ({1},{2})</target>
-        <note>A file location to be embedded in a string.</note>
-      </trans-unit>
       <trans-unit id="MSBuild.CannotRebaseOutputItemPath">
         <source>MSB3203: The output path "{0}" cannot be rebased. {1}</source>
         <target state="translated">MSB3203: La ruta de acceso de salida "{0}" no puede fusionarse mediante cambio de base. {1}</target>
@@ -3496,14 +3501,6 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
         <source>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</source>
         <target state="translated">MSB5015: No se pudieron leer las propiedades de la sección WebsiteProperties del proyecto "{0}".</target>
         <note>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SubCategoryForSolutionParsingErrors">
-        <source>Solution file</source>
-        <target state="translated">Archivo de la solución</target>
-        <note>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
-      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
-      "MSBUILD : Solution file error MSB0000: This is an error."
-      LOCALIZATION: This fragment needs to be localized.</note>
       </trans-unit>
       <trans-unit id="UnrecognizedSolutionComment">
         <source>Unrecognized solution version "{0}", attempting to continue.</source>

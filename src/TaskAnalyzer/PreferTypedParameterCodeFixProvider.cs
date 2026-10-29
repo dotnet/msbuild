@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,8 +35,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// rewrite. Otherwise a leftover string-typed use (for example <c>File.Exists(InputPath)</c>) would no
     /// longer compile once the property is retyped. This guarantees the produced code compiles.
     /// </remarks>
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(PreferTypedParameterCodeFixProvider))]
-    [Shared]
     public sealed class PreferTypedParameterCodeFixProvider : CodeFixProvider
     {
         private const string EquivalenceKey = "PreferTypedParameter";

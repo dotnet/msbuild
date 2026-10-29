@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 #if !FEATURE_MSIOREDIST
@@ -13,6 +14,7 @@ using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation.Expander;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
@@ -366,6 +368,8 @@ internal partial class Expander<P, I>
             Justification = "_bindingFlags is masked to AllowedBindingFlags at construction, so it never carries BindingFlags.NonPublic; GetMethods(_bindingFlags) therefore binds only public methods of the property-function allowlist receiver, whose public members are preserved for trimming.")]
         internal object Execute(object objectInstance, IPropertyProvider<P> properties, ExpanderOptions options, IElementLocation elementLocation)
         {
+            Debug.Assert((options & ExpanderOptions.ExpandProperties) != 0, $"{ExpanderOptions.ExpandProperties} must be set.");
+
             object functionResult = String.Empty;
             object[] args = null;
 
@@ -407,7 +411,7 @@ internal partial class Expander<P, I>
                 // Assemble our arguments ready for passing to our method
                 for (int n = 0; n < _arguments.Length; n++)
                 {
-                    object argument = PropertyExpander.ExpandPropertiesLeaveTypedAndEscaped(
+                    object argument = PropertyExpander.ExpandFunctionArgumentProperties(
                         _arguments[n],
                         properties,
                         options,

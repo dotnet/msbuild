@@ -13,6 +13,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
@@ -149,6 +150,11 @@ namespace Microsoft.Build.BackEnd
         private bool _isExecuting;
 
         /// <summary>
+        /// Flag indicating whether at least one target bucket entered execution mode.
+        /// </summary>
+        private bool _wasExecuted;
+
+        /// <summary>
         /// The constructor.
         /// </summary>
         /// <param name="requestEntry">The build request entry for the target.</param>
@@ -248,6 +254,11 @@ namespace Microsoft.Build.BackEnd
                 return _targetResult;
             }
         }
+
+        /// <summary>
+        /// Gets whether this target entered execution mode.
+        /// </summary>
+        internal bool WasExecuted => _wasExecuted;
 
         /// <summary>
         /// Retrieves the Lookup this target was initialized with, including any modifications which have
@@ -430,6 +441,8 @@ namespace Microsoft.Build.BackEnd
                 WorkUnitResult aggregateResult = new WorkUnitResult();
                 TargetLoggingContext targetLoggingContext = null;
                 bool targetSuccess = false;
+                bool anyBucketUpToDate = false;
+                bool anyBucketOutOfDate = false;
                 int numberOfBuckets = buckets.Count;
                 string projectFullPath = requestEntry.RequestConfiguration.ProjectFullPath;
 
@@ -484,6 +497,9 @@ namespace Microsoft.Build.BackEnd
                             case DependencyAnalysisResult.FullBuild:
                             case DependencyAnalysisResult.IncrementalBuild:
                             case DependencyAnalysisResult.SkipUpToDate:
+                                anyBucketUpToDate |= dependencyResult == DependencyAnalysisResult.SkipUpToDate;
+                                anyBucketOutOfDate |= dependencyResult != DependencyAnalysisResult.SkipUpToDate;
+
                                 if (dependencyResult != DependencyAnalysisResult.SkipUpToDate && _host.BuildParameters.Question && !string.IsNullOrEmpty(_target.Inputs) && !string.IsNullOrEmpty(_target.Outputs))
                                 {
                                     targetSuccess = false;
@@ -519,6 +535,11 @@ namespace Microsoft.Build.BackEnd
                                     {
                                         lookupForExecution.PopulateWithItems(itemType, changedTargetInputs[itemType]);
                                     }
+                                }
+
+                                if (dependencyResult != DependencyAnalysisResult.SkipUpToDate)
+                                {
+                                    _wasExecuted = true;
                                 }
 
                                 // We either have some work to do or at least we need to infer outputs from inputs.
@@ -672,7 +693,13 @@ namespace Microsoft.Build.BackEnd
                     targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems.Length > 0 ? targetOutputItems : null);
                 }
 
-                _targetResult = new TargetResult(targetOutputItems, aggregateResult, targetLoggingContext?.BuildEventContext);
+                _targetResult = new TargetResult(
+                    targetOutputItems,
+                    aggregateResult,
+                    targetLoggingContext?.BuildEventContext,
+                    aggregateResult.ResultCode == WorkUnitResultCode.Success && anyBucketUpToDate && !anyBucketOutOfDate
+                        ? TargetSkipReason.OutputsUpToDate
+                        : TargetSkipReason.None);
 
                 if (aggregateResult.ResultCode == WorkUnitResultCode.Failed && aggregateResult.ActionCode == WorkUnitActionCode.Stop)
                 {

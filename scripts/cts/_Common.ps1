@@ -3,7 +3,7 @@
 # Shared helpers for Collect-Local.ps1, Run-Local.ps1, and the demo scripts.
 # Configuration lives in two JSON files alongside this script:
 #
-#   projects.json    - the registry of *.UnitTests.VSTest projects
+#   projects.json    - the registry of native *.UnitTests projects
 #   cts.config.json  - the CTS configuration (Modules/SourceCodeFiles/Filter/...)
 #
 # This file intentionally contains only paths and functions; nothing that you
@@ -26,7 +26,7 @@ $script:RepoRoot    = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $_dotnetFile        = if ($IsWindows -or $PSVersionTable.PSEdition -eq 'Desktop') { 'dotnet.exe' } else { 'dotnet' }
 $script:DotnetExe   = Join-Path (Join-Path $script:RepoRoot '.dotnet') $_dotnetFile
 $script:CtsRoot     = Join-Path $script:RepoRoot '.cts'
-$script:BaselineDir = Join-Path $script:CtsRoot 'baseline'
+$script:BaselineDir = Join-Path $script:CtsRoot 'mtp-baseline'
 $script:LogsDir     = Join-Path $script:CtsRoot 'logs'
 $script:ConfigPath  = Join-Path $PSScriptRoot 'cts.config.json'
 $script:ProjectsPath= Join-Path $PSScriptRoot 'projects.json'
@@ -44,7 +44,7 @@ function Get-Projects {
 
 function Ensure-Cli {
     if (-not (Get-Command cts -ErrorAction SilentlyContinue)) {
-        throw "'cts' is not on PATH. Install with: dotnet tool install cts --global --prerelease --add-source https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json"
+        throw "'cts' is not on PATH. Install with: dotnet tool install cts --global --version 2.13.0-alpha.26519.2 --add-source https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json"
     }
     if (-not (Test-Path $script:DotnetExe)) {
         throw "Local dotnet at '$script:DotnetExe' not found. Run .\build.cmd once to bootstrap."

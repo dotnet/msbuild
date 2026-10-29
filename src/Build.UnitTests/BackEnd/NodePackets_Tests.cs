@@ -53,8 +53,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskFinishedEventArgs taskFinished = new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true);
             TaskCommandLineEventArgs commandLine = new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low);
             TaskParameterEventArgs taskParameter = CreateTaskParameter();
-            BuildWarningEventArgs warning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
-            BuildErrorEventArgs error = new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+            BuildWarningEventArgs warning = new BuildWarningEventArgs("subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+            BuildErrorEventArgs error = new BuildErrorEventArgs("subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
             TargetStartedEventArgs targetStarted = new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile");
             TargetFinishedEventArgs targetFinished = new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true);
             TargetSkippedEventArgs targetSkipped = CreateTargetSkipped();
@@ -65,9 +65,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectEvaluationStartedEventArgs evaluationStarted = new ProjectEvaluationStartedEventArgs();
             ProjectEvaluationFinishedEventArgs evaluationFinished = new ProjectEvaluationFinishedEventArgs();
             AssemblyLoadBuildEventArgs assemblyLoad = new(AssemblyLoadingContext.Evaluation, null, null, "path", Guid.NewGuid(), null);
-            ExtendedBuildErrorEventArgs extError = new("extError", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
-            ExtendedBuildWarningEventArgs extWarning = new("extWarn", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
-            ExtendedBuildMessageEventArgs extMessage = new("extMsg", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", MessageImportance.Normal);
+            ExtendedBuildErrorEventArgs extError = new("extError", "subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+            ExtendedBuildWarningEventArgs extWarning = new("extWarn", "subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+            ExtendedBuildMessageEventArgs extMessage = new("extMsg", "subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", MessageImportance.Normal);
             ExtendedCustomBuildEventArgs extCustom = new("extCustom", "message", "help", "sender");
             CriticalBuildMessageEventArgs criticalMessage = new("Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1");
             ExtendedCriticalBuildMessageEventArgs extCriticalMessage = new("extCritMsg", "Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1");
@@ -286,8 +286,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true),
                     new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low),
                     CreateTaskParameter(),
-                    new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender"),
-                    new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender"),
+                    new BuildWarningEventArgs("subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender"),
+                    new BuildErrorEventArgs("subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender"),
                     new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile"),
                     new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true, targetOutputs),
                     new ProjectStartedEventArgs(-1, "message", "help", "ProjectFile", "targetNames", null, null, null),
@@ -298,19 +298,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     CreateProjectEvaluationFinished(),
                     new AssemblyLoadBuildEventArgs(AssemblyLoadingContext.Evaluation, "init", "aname", "path", Guid.NewGuid(), "domain", MessageImportance.Normal),
                     CreateTargetSkipped(),
-                    new ExtendedBuildErrorEventArgs("extError", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", DateTime.UtcNow, "arg1")
+                    new ExtendedBuildErrorEventArgs("extError", "subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
                         ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
-                    new ExtendedBuildWarningEventArgs("extWarn", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", DateTime.UtcNow, "arg1")
+                    new ExtendedBuildWarningEventArgs("extWarn", "subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
                         ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
-                    new ExtendedBuildMessageEventArgs("extWarn", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", MessageImportance.Normal, DateTime.UtcNow, "arg1")
+                    new ExtendedBuildMessageEventArgs("extWarn", "subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", MessageImportance.Normal, DateTime.UtcNow, "arg1")
                     {
                         ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },

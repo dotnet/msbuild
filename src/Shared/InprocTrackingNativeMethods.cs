@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 

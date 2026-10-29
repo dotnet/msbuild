@@ -11,6 +11,9 @@ namespace Microsoft.Build.Framework.Telemetry
 {
     internal static class TelemetryDataUtils
     {
+        internal const int CurrentBuildInsightsSchemaVersion = 2;
+        internal const string BuildInsightsSchemaVersionPropertyName = "BuildInsightsSchemaVersion";
+
         /// <summary>
         /// Known Microsoft task factory type names that should not be hashed.
         /// </summary>
@@ -23,6 +26,11 @@ namespace Microsoft.Build.Framework.Telemetry
             "XamlTaskFactory",
             "IntrinsicTaskFactory",
         };
+
+        /// <summary>
+        /// Namespace prefix of the types that are treated as Microsoft types, see <see cref="GetHashedUnlessMicrosoftType"/>.
+        /// </summary>
+        private const string MicrosoftNamespacePrefix = "Microsoft.";
 
         /// <summary>
         /// Transforms collected telemetry data to format recognized by the telemetry infrastructure.
@@ -44,7 +52,7 @@ namespace Microsoft.Build.Framework.Telemetry
             var tasksSummary = new TasksSummaryConverter();
             tasksSummary.Process(telemetryData.TasksExecutionData);
 
-            var incrementality = ComputeIncrementalityInfo(telemetryData.TargetsExecutionData);
+            var incrementality = ComputeIncrementalityInfo(telemetryData);
 
             var buildInsights = new BuildInsights(
                 includeTasksDetails ? GetTasksDetails(telemetryData.TasksExecutionData) : [],
@@ -93,6 +101,11 @@ namespace Microsoft.Build.Framework.Telemetry
 
             foreach (KeyValuePair<TaskOrTargetTelemetryKey, TaskExecutionStats> valuePair in tasksDetails)
             {
+                if (valuePair.Value.ExecutionsCount == 0)
+                {
+                    continue;
+                }
+
                 string taskName = valuePair.Key.IsCustom ? GetHashed(valuePair.Key.Name) : valuePair.Key.Name;
                 string? factoryName = GetFactoryNameForTelemetry(valuePair.Value.TaskFactoryName);
 
@@ -100,7 +113,7 @@ namespace Microsoft.Build.Framework.Telemetry
                     taskName,
                     valuePair.Value.CumulativeExecutionTime.TotalMilliseconds,
                     valuePair.Value.ExecutionsCount,
-                    valuePair.Value.TotalMemoryBytes,
+                    GetMemoryBytes(valuePair.Value),
                     valuePair.Key.IsCustom,
                     valuePair.Key.IsNuget,
                     factoryName,
@@ -109,6 +122,13 @@ namespace Microsoft.Build.Framework.Telemetry
 
             return result;
         }
+
+        private static long? GetMemoryBytes(TaskExecutionStats stats) =>
+#if NET
+            stats.TotalMemoryBytes;
+#else
+            null;
+#endif
 
         /// <summary>
         /// Gets the factory name for telemetry, hashing custom factory names.
@@ -127,6 +147,28 @@ namespace Microsoft.Build.Framework.Telemetry
         /// Depending on the platform, hash the value using an available mechanism.
         /// </summary>
         internal static string GetHashed(object value) => Sha256Hasher.Hash(value?.ToString() ?? "");
+
+        /// <summary>
+        /// Gets the full name of a type for telemetry. The name of a type in a <c>Microsoft.</c> namespace is reported as is,
+        /// which identifies the Microsoft components that are in use. Any other name can reveal customer data, so it is hashed.
+        /// </summary>
+        /// <remarks>
+        /// The prefix marks Microsoft types only by convention, so a custom type that is declared in a <c>Microsoft.</c> namespace is reported as is.
+        /// The comparison is ordinal: <c>MicrosoftFoo.Bar</c> and <c>microsoft.foo.Bar</c> are hashed.
+        /// The name of a constructed generic type is always hashed, because it lists the assembly-qualified names of its type arguments, and those can be custom.
+        /// </remarks>
+        /// <param name="typeName">The full name of the type, as returned by <see cref="Type.FullName"/>.</param>
+        internal static string GetHashedUnlessMicrosoftType(string? typeName)
+        {
+            if (typeName is not null
+                && typeName.StartsWith(MicrosoftNamespacePrefix, StringComparison.Ordinal)
+                && typeName.IndexOf('[') < 0)
+            {
+                return typeName;
+            }
+
+            return GetHashed(typeName ?? string.Empty);
+        }
 
         // https://github.com/dotnet/sdk/blob/8bd19a2390a6bba4aa80d1ac3b6c5385527cc311/src/Cli/Microsoft.DotNet.Cli.Utils/Sha256Hasher.cs + workaround for netstandard2.0
         private static class Sha256Hasher
@@ -164,7 +206,7 @@ namespace Microsoft.Build.Framework.Telemetry
             }
         }
 
-        internal record TaskDetailInfo(string Name, double TotalMilliseconds, int ExecutionsCount, long TotalMemoryBytes, bool IsCustom, bool IsNuget, string? FactoryName, string? TaskHostRuntime);
+        internal record TaskDetailInfo(string Name, double TotalMilliseconds, int ExecutionsCount, long? TotalMemoryBytes, bool IsCustom, bool IsNuget, string? FactoryName, string? TaskHostRuntime);
 
         /// <summary>
         /// Converts targets summary to a custom object for telemetry.
@@ -213,14 +255,14 @@ namespace Microsoft.Build.Framework.Telemetry
                     ? new TaskStatsInfo(
                         total.ExecutionsCount,
                         total.CumulativeExecutionTime.TotalMilliseconds,
-                        total.TotalMemoryBytes)
+                        GetMemoryBytes(total))
                     : null;
 
                 var nugetStats = fromNuget.ExecutionsCount > 0
                     ? new TaskStatsInfo(
                         fromNuget.ExecutionsCount,
                         fromNuget.CumulativeExecutionTime.TotalMilliseconds,
-                        fromNuget.TotalMemoryBytes)
+                        GetMemoryBytes(fromNuget))
                     : null;
 
                 return (totalStats != null || nugetStats != null)
@@ -321,47 +363,26 @@ namespace Microsoft.Build.Framework.Telemetry
         }
 
         /// <summary>
-        /// Threshold ratio above which a build is classified as incremental.
-        /// A build with more than 70% skipped targets is considered incremental.
+        /// Threshold ratio at or above which a build is classified as incremental:
+        /// at least 70% of the target instances with Inputs and Outputs were up to date.
         /// </summary>
         private const double IncrementalBuildThreshold = 0.70;
 
         /// <summary>
         /// Computes build incrementality information from target execution data.
         /// </summary>
-        private static BuildInsights.BuildIncrementalityInfo ComputeIncrementalityInfo(
-            Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> targetsExecutionData)
+        private static BuildInsights.BuildIncrementalityInfo ComputeIncrementalityInfo(IWorkerNodeTelemetryData telemetryData)
         {
-            int totalTargets = targetsExecutionData.Count;
-            int executedTargets = 0;
-            int skippedTargets = 0;
-            int skippedDueToUpToDate = 0;
-            int skippedDueToCondition = 0;
-            int skippedDueToPreviouslyBuilt = 0;
+            int executedTargets = telemetryData.ExecutedTargetsCount;
+            int skippedTargets = telemetryData.SkippedTargetsCount;
+            int totalTargets = executedTargets + skippedTargets;
 
-            foreach (var kv in targetsExecutionData)
-            {
-                if (kv.Value.WasExecuted)
-                {
-                    executedTargets++;
-                }
-                else
-                {
-                    skippedTargets++;
-                    _ = kv.Value.SkipReason switch
-                    {
-                        TargetSkipReason.OutputsUpToDate => skippedDueToUpToDate++,
-                        TargetSkipReason.ConditionWasFalse => skippedDueToCondition++,
-                        TargetSkipReason.PreviouslyBuiltSuccessfully or TargetSkipReason.PreviouslyBuiltUnsuccessfully => skippedDueToPreviouslyBuilt++,
-                        _ => 0
-                    };
-                }
-            }
+            int upToDateInputOutputTargets = telemetryData.UpToDateInputOutputTargetsCount;
+            int inputOutputTargets = upToDateInputOutputTargets + telemetryData.ExecutedInputOutputTargetsCount;
 
-            // Calculate incrementality ratio (0.0 = full build, 1.0 = fully incremental)
-            double incrementalityRatio = totalTargets > 0 ? (double)skippedTargets / totalTargets : 0.0;
+            double incrementalityRatio = inputOutputTargets > 0 ? (double)upToDateInputOutputTargets / inputOutputTargets : 0.0;
 
-            var classification = totalTargets == 0
+            var classification = inputOutputTargets == 0
                 ? BuildInsights.BuildType.Unknown
                 : incrementalityRatio >= IncrementalBuildThreshold
                     ? BuildInsights.BuildType.Incremental
@@ -372,18 +393,21 @@ namespace Microsoft.Build.Framework.Telemetry
                 TotalTargetsCount: totalTargets,
                 ExecutedTargetsCount: executedTargets,
                 SkippedTargetsCount: skippedTargets,
-                SkippedDueToUpToDateCount: skippedDueToUpToDate,
-                SkippedDueToConditionCount: skippedDueToCondition,
-                SkippedDueToPreviouslyBuiltCount: skippedDueToPreviouslyBuilt,
-                IncrementalityRatio: incrementalityRatio);
+                SkippedDueToUpToDateCount: telemetryData.SkippedDueToUpToDateCount,
+                SkippedDueToConditionCount: telemetryData.SkippedDueToConditionCount,
+                SkippedDueToPreviouslyBuiltCount: telemetryData.SkippedDueToPreviouslyBuiltCount,
+                IncrementalityRatio: incrementalityRatio,
+                UpToDateInputOutputTargetsCount: upToDateInputOutputTargets,
+                ExecutedInputOutputTargetsCount: telemetryData.ExecutedInputOutputTargetsCount);
         }
 
         private sealed class NodeTelemetry(BuildInsights insights) : IActivityTelemetryDataHolder
         {
             Dictionary<string, object> IActivityTelemetryDataHolder.GetActivityProperties()
             {
-                Dictionary<string, object> properties = new(5)
+                Dictionary<string, object> properties = new(6)
                 {
+                    [BuildInsightsSchemaVersionPropertyName] = CurrentBuildInsightsSchemaVersion,
                     [nameof(BuildInsights.TargetsSummary)] = insights.TargetsSummary,
                     [nameof(BuildInsights.TasksSummary)] = insights.TasksSummary,
                 };

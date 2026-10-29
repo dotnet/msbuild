@@ -118,7 +118,7 @@ public class ConditionEvaluator_Tests
         const string condition = "Exists('$(File)') And '$(Value)' == 'expected'";
         CachedCondition cached = new();
         ParsedCondition parsed = cached.GetOrParse(
-            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation, null);
+            condition, ParserOptions.AllowProperties, ElementLocation.Empty, null);
         string firstPath = Path.Combine(env.DefaultTestDirectory.Path, "first.file");
         string secondPath = Path.Combine(env.DefaultTestDirectory.Path, "second.file");
         MSBuildFileSystemBase fileSystem = A.Fake<MSBuildFileSystemBase>();
@@ -141,11 +141,11 @@ public class ConditionEvaluator_Tests
         ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> firstState = new(
             condition, CreateExpander(fileSystem, ("File", firstPath), ("Value", "expected")),
             ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
-            ElementLocation.EmptyLocation, fileSystem);
+            ElementLocation.Empty, fileSystem);
         ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> secondState = new(
             condition, CreateExpander(fileSystem, ("File", secondPath), ("Value", "different")),
             ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
-            ElementLocation.EmptyLocation, fileSystem);
+            ElementLocation.Empty, fileSystem);
         Task<bool> first = Task.Factory.StartNew(
             () => parsed.Evaluate(firstState),
             CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -157,7 +157,7 @@ public class ConditionEvaluator_Tests
             second = Task.Factory.StartNew(() =>
             {
                 ParsedCondition sameCondition = cached.GetOrParse(
-                    condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation, null);
+                    condition, ParserOptions.AllowProperties, ElementLocation.Empty, null);
                 sameCondition.Root.ShouldBeSameAs(parsed.Root);
                 return sameCondition.Evaluate(secondState);
             }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -194,7 +194,7 @@ public class ConditionEvaluator_Tests
         const string condition = "'$(Value)' != 'none' And Exists('$(File)') And '$(Value)' == 'first'";
         CachedCondition cached = new();
         ParsedCondition parsed = cached.GetOrParse(
-            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation, null);
+            condition, ParserOptions.AllowProperties, ElementLocation.Empty, null);
         string firstPath = Path.Combine(env.DefaultTestDirectory.Path, "first.file");
         string secondPath = Path.Combine(env.DefaultTestDirectory.Path, "second.file");
         MSBuildFileSystemBase fileSystem = A.Fake<MSBuildFileSystemBase>();
@@ -215,11 +215,11 @@ public class ConditionEvaluator_Tests
         ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> firstState = new(
             condition, CreateExpander(fileSystem, ("Value", "first"), ("File", firstPath)),
             ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
-            ElementLocation.EmptyLocation, fileSystem);
+            ElementLocation.Empty, fileSystem);
         ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> secondState = new(
             condition, CreateExpander(fileSystem, ("Value", "second"), ("File", secondPath)),
             ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
-            ElementLocation.EmptyLocation, fileSystem);
+            ElementLocation.Empty, fileSystem);
         Task<bool> first = Task.Factory.StartNew(
             () => parsed.Evaluate(firstState),
             CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -230,7 +230,7 @@ public class ConditionEvaluator_Tests
             second = Task.Factory.StartNew(() =>
             {
                 ParsedCondition sameCondition = cached.GetOrParse(
-                    condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation, null);
+                    condition, ParserOptions.AllowProperties, ElementLocation.Empty, null);
                 sameCondition.Root.ShouldBeSameAs(parsed.Root);
                 return sameCondition.Evaluate(secondState);
             }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -332,16 +332,16 @@ public class ConditionEvaluator_Tests
         string innerPath = Path.Combine(env.DefaultTestDirectory.Path, "inner.file");
         string condition = "'$(Value)' != 'none' And Exists('$(File)')";
         ParsedCondition parsed = new Parser().ParseForEvaluation(
-            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation);
+            condition, ParserOptions.AllowProperties, ElementLocation.Empty);
         MSBuildFileSystemBase fileSystem = A.Fake<MSBuildFileSystemBase>();
         ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> outerState = new(
             condition, CreateExpander(fileSystem, ("Value", "outer"), ("File", outerPath)),
             ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
-            ElementLocation.EmptyLocation, fileSystem);
+            ElementLocation.Empty, fileSystem);
         ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> innerState = new(
             condition, CreateExpander(fileSystem, ("Value", "inner"), ("File", innerPath)),
             ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
-            ElementLocation.EmptyLocation, fileSystem);
+            ElementLocation.Empty, fileSystem);
 
         A.CallTo(() => fileSystem.FileOrDirectoryExists(innerPath)).Returns(true);
         A.CallTo(() => fileSystem.FileOrDirectoryExists(outerPath)).ReturnsLazily(() =>
@@ -389,7 +389,7 @@ public class ConditionEvaluator_Tests
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         ParsedCondition parsed = new Parser().ParseForEvaluation(
-            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation);
+            condition, ParserOptions.AllowProperties, ElementLocation.Empty);
         (string Value, bool Expected)[] cases =
         [
             (MSBuildConstants.CurrentToolsVersion, true),
@@ -403,7 +403,7 @@ public class ConditionEvaluator_Tests
                     ("MSBuildToolsVersion", value),
                     ("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion)),
                 ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
-                ElementLocation.EmptyLocation, FileSystems.Default);
+                ElementLocation.Empty, FileSystems.Default);
 
             parsed.Evaluate(state).ShouldBe(expected);
         }
@@ -429,7 +429,7 @@ public class ConditionEvaluator_Tests
         using TestEnvironment env = TestEnvironment.Create(_output);
         const string condition = "'$(Configuration)' == '$(ExpectedConfiguration)' And '$(Platform)' != '$(OtherPlatform)'";
         ParsedCondition parsed = new Parser().ParseForEvaluation(
-            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation);
+            condition, ParserOptions.AllowProperties, ElementLocation.Empty);
         Dictionary<string, List<string>> firstTable = new();
         Dictionary<string, List<string>> secondTable = new();
         ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> first = CreateState(
@@ -458,7 +458,7 @@ public class ConditionEvaluator_Tests
                     ("Configuration", configuration), ("ExpectedConfiguration", configuration),
                     ("Platform", platform), ("OtherPlatform", "never")),
                 ExpanderOptions.ExpandProperties, table, env.DefaultTestDirectory.Path,
-                ElementLocation.EmptyLocation, FileSystems.Default);
+                ElementLocation.Empty, FileSystems.Default);
     }
 
     [Theory]
@@ -472,12 +472,12 @@ public class ConditionEvaluator_Tests
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         ParsedCondition parsed = new Parser().ParseForEvaluation(
-            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation);
+            condition, ParserOptions.AllowProperties, ElementLocation.Empty);
         parsed.StateLayout.StringSlotCount.ShouldBe(expectedSlots);
         ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> state = new(
             condition, CreateExpander(FileSystems.Default, ("Value", "value"), ("Other", "other")),
             ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
-            ElementLocation.EmptyLocation, FileSystems.Default);
+            ElementLocation.Empty, FileSystems.Default);
 
         parsed.Evaluate(state).ShouldBeTrue();
     }
@@ -494,11 +494,11 @@ public class ConditionEvaluator_Tests
         using TestEnvironment env = TestEnvironment.Create(_output);
         string condition = $"'{value}'";
         ParsedCondition parsed = new Parser().ParseForEvaluation(
-            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation);
+            condition, ParserOptions.AllowProperties, ElementLocation.Empty);
         StringExpressionNode node = parsed.Root.ShouldBeOfType<StringExpressionNode>();
         ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> state = new(
             condition, CreateExpander(FileSystems.Default), ExpanderOptions.ExpandProperties,
-            null, env.DefaultTestDirectory.Path, ElementLocation.EmptyLocation, FileSystems.Default);
+            null, env.DefaultTestDirectory.Path, ElementLocation.Empty, FileSystems.Default);
 
         node.StateSlot.ShouldBe(-1);
         node.GetExpandedValue(state).ShouldBe(value);
@@ -550,7 +550,7 @@ public class ConditionEvaluator_Tests
         params (string Name, string Value)[] properties) =>
         ConditionEvaluator.EvaluateCondition(
             condition, ParserOptions.AllowProperties, CreateExpander(fileSystem, properties),
-            ExpanderOptions.ExpandProperties, directory, ElementLocation.EmptyLocation, fileSystem, loggingContext);
+            ExpanderOptions.ExpandProperties, directory, ElementLocation.Empty, fileSystem, loggingContext);
 
     private static Expander<ProjectPropertyInstance, ProjectItemInstance> CreateExpander(
         IFileSystem fileSystem,

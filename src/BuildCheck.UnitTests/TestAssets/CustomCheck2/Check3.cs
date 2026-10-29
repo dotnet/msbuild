@@ -34,7 +34,7 @@ namespace CustomCheck2
         {
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,
-                ElementLocation.EmptyLocation,
+                ElementLocation.Empty,
                 "Argument for the message format"));
         }
     }

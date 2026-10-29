@@ -78,6 +78,7 @@ namespace Microsoft.Build.Tasks
                 using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     var xrs = new XmlReaderSettings { DtdProcessing = ProhibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore };
+                    // CodeQL [SM00404] False positive: XmlPoke edits arbitrary user XML files that do not have a fixed XSD schema; DTD processing is controlled above.
                     using (XmlReader sr = XmlReader.Create(fs, xrs))
                     {
                         xmlDoc.Load(sr);
