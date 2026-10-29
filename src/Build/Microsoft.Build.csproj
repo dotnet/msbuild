@@ -642,9 +642,6 @@
     <Compile Include="..\Shared\TypeLoader.cs">
       <Link>SharedUtilities\TypeLoader.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\VisualStudioConstants.cs">
-      <Link>VisualStudioConstants.cs</Link>
-    </Compile>
     <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
 
     <!-- Win32 RC Files -->
