@@ -3435,10 +3435,8 @@ namespace Microsoft.Build.Shared
         {
 #if NET
         if (NativeMethods.IsWindows
-            && !string.IsNullOrEmpty(directory)
-            && directory.Length >= 3
-            && directory[1] == Path.VolumeSeparatorChar
             && Path.IsPathFullyQualified(directory)
+            && directory[1] == Path.VolumeSeparatorChar
             && directory.AsSpan().IndexOfAny('*', '?') < 0)
         {
             try
@@ -3449,9 +3447,7 @@ namespace Microsoft.Build.Shared
                     return false;
                 }
             }
-            catch (IOException) { }
-            catch (ArgumentException) { }
-            catch (UnauthorizedAccessException) { }
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex)) { }
         }
 #endif
 
