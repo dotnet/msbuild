@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
+using System.Threading;
 
 #nullable enable
 
@@ -11,6 +13,10 @@ internal static class ThreadLocalNodeStateBuffer<TState> where TState : struct
 {
     // Do not retain exceptionally large condition buffers on every evaluator thread.
     private const int MaxCachedBufferLength = 256;
+    private const int MaxPooledBufferLength = 4096;
+
+    // Bound oversized retention across threads rather than keeping large per-thread buffers.
+    private static ArrayPool<TState>? s_oversizedPool;
 
     [ThreadStatic]
     private static TState[]? t_cachedBuffer;
@@ -26,14 +32,32 @@ internal static class ThreadLocalNodeStateBuffer<TState> where TState : struct
                 return buffer;
             }
         }
+        else if (minimumLength <= MaxPooledBufferLength)
+        {
+            ArrayPool<TState> pool = LazyInitializer.EnsureInitialized(
+                ref s_oversizedPool,
+                static () => ArrayPool<TState>.Create(MaxPooledBufferLength, maxArraysPerBucket: 4))!;
+            TState[] buffer = pool.Rent(minimumLength);
+            Array.Clear(buffer, 0, minimumLength);
+            return buffer;
+        }
 
         return new TState[minimumLength];
     }
 
     internal static void Release(TState[] buffer, int usedLength)
     {
-        if (buffer.Length > MaxCachedBufferLength ||
-            (t_cachedBuffer is not null && t_cachedBuffer.Length >= buffer.Length))
+        if (buffer.Length > MaxCachedBufferLength)
+        {
+            if (buffer.Length <= MaxPooledBufferLength)
+            {
+                s_oversizedPool!.Return(buffer, clearArray: true);
+            }
+
+            return;
+        }
+
+        if (t_cachedBuffer is not null && t_cachedBuffer.Length >= buffer.Length)
         {
             return;
         }

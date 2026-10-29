@@ -508,6 +508,50 @@ public class ConditionEvaluator_Tests
         node.TryVersionEvaluate(state, out _).ShouldBe(convertsToVersion);
     }
 
+    [Theory]
+    [InlineData(256)]
+    [InlineData(258)]
+    public void ConditionStateBuffersAreReusedAndIsolated(int slots)
+    {
+        StringExpressionNode.EvaluationState[] first =
+            ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(slots);
+        first[0].ExpandedValue = "first";
+        first[slots - 1].ExpandedValue = "last";
+        ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(first, slots);
+
+        StringExpressionNode.EvaluationState[] reused =
+            ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(slots);
+        StringExpressionNode.EvaluationState[]? nested = null;
+        try
+        {
+            reused.ShouldBeSameAs(first);
+            reused[0].ExpandedValue.ShouldBeNull();
+            reused[slots - 1].ExpandedValue.ShouldBeNull();
+            reused[0].ExpandedValue = "outer";
+            reused[slots - 1].ExpandedValue = "outer-last";
+
+            nested = ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(slots);
+            nested.ShouldNotBeSameAs(reused);
+            nested[0].ExpandedValue.ShouldBeNull();
+            nested[slots - 1].ExpandedValue.ShouldBeNull();
+            nested[0].ExpandedValue = "inner";
+            ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(nested, slots);
+            nested = null;
+
+            reused[0].ExpandedValue.ShouldBe("outer");
+            reused[slots - 1].ExpandedValue.ShouldBe("outer-last");
+        }
+        finally
+        {
+            if (nested is not null)
+            {
+                ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(nested, slots);
+            }
+
+            ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(reused, slots);
+        }
+    }
+
     [Fact]
     public void NodeStateAccessorValidatesSlotsAndClearsReusedBuffers()
     {
