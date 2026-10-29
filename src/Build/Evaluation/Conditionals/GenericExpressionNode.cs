@@ -48,7 +48,7 @@ namespace Microsoft.Build.Evaluation
         internal abstract bool IsUnexpandedValueEmpty();
 
         /// <summary>
-        /// Evaluates a tree using storage initialized by <see cref="ParsedCondition"/>.
+        /// Call <see cref="ParsedCondition.Evaluate"/>; direct calls skip state initialization and cleanup.
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>

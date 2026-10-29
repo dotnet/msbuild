@@ -29,16 +29,12 @@ namespace Microsoft.Build.Evaluation
     };
 
     /// <summary>
-    /// This class implements the grammar for complex conditionals.
-    ///
-    /// The usage is:
-    ///    Parser p = new Parser(CultureInfo);
-    ///    ExpressionTree t = p.Parse(expression, XmlNode);
-    ///
-    /// The expression tree can then be evaluated and re-evaluated as needed.
+    /// Parses MSBuild condition expressions.
     /// </summary>
     /// <remarks>
-    /// UNDONE: When we copied over the conditionals code, we didn't copy over the unit tests for scanner, parser, and expression tree.
+    /// Use <see cref="ParseForEvaluation"/> to obtain a <see cref="ParsedCondition"/> and evaluate it
+    /// through <see cref="ParsedCondition.Evaluate"/> so private state is initialized and released.
+    /// <see cref="Parse"/> returns only the syntax tree for inspection and parser tests.
     /// </remarks>
     internal sealed class Parser
     {
@@ -104,11 +100,9 @@ namespace Microsoft.Build.Evaluation
                 new NodeStateLayout(StringNodeStateCount));
         }
 
-        //
-        // Main entry point for parser.
-        // You pass in the expression you want to parse, and you get an
-        // ExpressionTree out the back end.
-        //
+        /// <summary>
+        /// Parses a syntax tree. Use <see cref="ParseForEvaluation"/> when evaluating the result.
+        /// </summary>
         internal GenericExpressionNode Parse(string expression, ParserOptions optionSettings, ElementLocation elementLocation)
         {
             // We currently have no support (and no scenarios) for disallowing property references
