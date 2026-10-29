@@ -269,18 +269,22 @@ public class ConditionEvaluator_Tests
     public void EvaluationStateDoesNotLeakAfterEvaluationThrows()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
-        string identity = Guid.NewGuid().ToString("N");
-        string condition = $"'$(Value)' > '1' And '{identity}' == '{identity}'";
+        const string condition = "'$(Value)' > '1'";
+        ParsedCondition parsed = new Parser().ParseForEvaluation(
+            condition, ParserOptions.AllowProperties, ElementLocation.Empty);
+        PropertyDictionary<ProjectPropertyInstance> properties = new();
+        properties.Set(ProjectPropertyInstance.Create("Value", "not-a-number"));
+        Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(properties, FileSystems.Default);
+        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> state = new(
+            condition, expander, ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
+            ElementLocation.Empty, FileSystems.Default);
 
-        Evaluate(condition, FileSystems.Default, env.DefaultTestDirectory.Path, null,
-            ("Value", "2")).ShouldBeTrue();
-        Should.Throw<InvalidProjectFileException>(() =>
-            Evaluate(condition, FileSystems.Default, env.DefaultTestDirectory.Path, null,
-                ("Value", "not-a-number")));
-        Evaluate(condition, FileSystems.Default, env.DefaultTestDirectory.Path, null,
-            ("Value", "0")).ShouldBeFalse();
-        Evaluate(condition, FileSystems.Default, env.DefaultTestDirectory.Path, null,
-            ("Value", "3")).ShouldBeTrue();
+        Should.Throw<InvalidProjectFileException>(() => parsed.Evaluate(state));
+
+        properties.Set(ProjectPropertyInstance.Create("Value", "0"));
+        parsed.Evaluate(state).ShouldBeFalse();
+        properties.Set(ProjectPropertyInstance.Create("Value", "3"));
+        parsed.Evaluate(state).ShouldBeTrue();
     }
 
     [Fact]
