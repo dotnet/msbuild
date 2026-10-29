@@ -17,9 +17,14 @@ Update this list when cutting or retiring a branch.
 | `vs18.9` | [SDK 10.0.4xx](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) | [November 14, 2028](https://dotnet.microsoft.com/platform/support/policy/dotnet-core) |
 | `vs18.11` | [VS Stable](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs#stable-channel-support) | Next Stable promotion, unless selected as an LTSC baseline |
 | `vs18.12` | [SDK 11.0.1xx](https://github.com/dotnet/dotnet/blob/release/11.0.1xx/src/msbuild/eng/Versions.props) | [November 9, 2028 (planned GA lifecycle)](https://github.com/dotnet/core/blob/main/release-notes/11.0/README.md) |
+| `vs18.13` | [SDK 11.0.2xx](https://github.com/dotnet/dotnet/blob/release/11.0.2xx/src/msbuild/eng/Versions.props) and VS release preparation | Retain while either SDK or VS support applies; confirm the SDK band's deadline when published |
 | `main` | [Development](../eng/Versions.props) | No fixed end date |
 
 Check Stable promotions and the published [LTSC baseline](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) at each audit; confirm planned SDK deadlines at GA.
+
+The `vs17.8`, `vs17.11`, and `vs17.12` branches remain in the repository, but have no routine dependency subscriptions or default-channel associations. Preserve that automation state; the SDK lifecycle alone is not a request to recreate subscriptions.
+
+The `vs18.10` VS-only branch was superseded by VS 18.11 Stable. Its remaining default-channel association and disabled F# outbound subscription are selected for automation retirement in the [18.13 release checklist](https://github.com/dotnet/msbuild/issues/15409); retain shared channels and the supported `vs18.9` SDK flows.
 
 ## How MSBuild releases flow into VS
 
