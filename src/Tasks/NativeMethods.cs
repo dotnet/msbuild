@@ -10,6 +10,11 @@ using Microsoft.Build.Tasks.Fusion;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Com;
 #endif
+#if NETFRAMEWORK && FEATURE_WINDOWSINTEROP
+using Microsoft.Win32.SafeHandles;
+using Windows.Win32.Storage.FileSystem;
+using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
+#endif
 
 #if !NET
 using System.Text;
@@ -92,6 +97,74 @@ namespace Microsoft.Build.Tasks
 
             return hardLinkCreated;
         }
+
+#if NETFRAMEWORK && FEATURE_WINDOWSINTEROP
+        /// <summary>
+        /// Sets the last access time of a file, without requiring write access to its content.
+        /// </summary>
+        /// <param name="path">The full path of the file.</param>
+        /// <param name="lastAccessTime">The new last access time.</param>
+        [SupportedOSPlatform("windows5.1.2600")]
+        internal static void SetLastAccessTime(string path, DateTime lastAccessTime)
+            => SetFileTime(path, lastAccessTime, isLastAccessTime: true);
+
+        /// <summary>
+        /// Sets the last write time of a file, without requiring write access to its content.
+        /// </summary>
+        /// <param name="path">The full path of the file.</param>
+        /// <param name="lastWriteTime">The new last write time.</param>
+        [SupportedOSPlatform("windows5.1.2600")]
+        internal static void SetLastWriteTime(string path, DateTime lastWriteTime)
+            => SetFileTime(path, lastWriteTime, isLastAccessTime: false);
+
+        /// <summary>
+        /// Sets a timestamp on a file by opening it with FILE_WRITE_ATTRIBUTES and full sharing.
+        /// </summary>
+        /// <remarks>
+        /// .NET Framework's <see cref="File.SetLastAccessTime(string, DateTime)"/> and
+        /// <see cref="File.SetLastWriteTime(string, DateTime)"/> open the file with GENERIC_WRITE, which Windows
+        /// denies when another handle to the file is open without FILE_SHARE_WRITE. Requesting only
+        /// FILE_WRITE_ATTRIBUTES, as .NET (Core) does, avoids those spurious sharing violations.
+        /// </remarks>
+        [SupportedOSPlatform("windows5.1.2600")]
+        private static unsafe void SetFileTime(string path, DateTime timestamp, bool isLastAccessTime)
+        {
+            long rawFileTime = timestamp.ToFileTime();
+            FILETIME fileTime = new()
+            {
+                dwLowDateTime = unchecked((int)rawFileTime),
+                dwHighDateTime = unchecked((int)(rawFileTime >> 32)),
+            };
+
+            HANDLE handle = Windows.Win32.PInvoke.CreateFile(
+                path,
+                (uint)FILE_ACCESS_RIGHTS.FILE_WRITE_ATTRIBUTES,
+                FILE_SHARE_MODE.FILE_SHARE_READ | FILE_SHARE_MODE.FILE_SHARE_WRITE | FILE_SHARE_MODE.FILE_SHARE_DELETE,
+                null,
+                FILE_CREATION_DISPOSITION.OPEN_EXISTING,
+                FILE_FLAGS_AND_ATTRIBUTES.FILE_FLAG_OPEN_REPARSE_POINT,
+                HANDLE.Null);
+            int errorCode = Marshal.GetLastWin32Error();
+
+            using SafeFileHandle fileHandle = new((IntPtr)handle.Value, ownsHandle: true);
+            if (fileHandle.IsInvalid)
+            {
+                NativeMethodsShared.ThrowExceptionForErrorCode(errorCode);
+                Assumed.Unreachable();
+            }
+
+            bool success = isLastAccessTime
+                ? Windows.Win32.PInvoke.SetFileTime((HANDLE)fileHandle.DangerousGetHandle(), null, fileTime, null)
+                : Windows.Win32.PInvoke.SetFileTime((HANDLE)fileHandle.DangerousGetHandle(), null, null, fileTime);
+            errorCode = Marshal.GetLastWin32Error();
+
+            if (!success)
+            {
+                NativeMethodsShared.ThrowExceptionForErrorCode(errorCode);
+                Assumed.Unreachable();
+            }
+        }
+#endif
 
         #endregion
 
