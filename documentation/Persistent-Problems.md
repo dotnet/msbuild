@@ -6,7 +6,7 @@ MSBuild-driven builds are no exception.
 
 ## Evaluation
 
-*Every* [batch build]() (absent a higher-order build system) must evaluate every project in the scope of the build. IDEs can cache evaluation and act as a higher-order builds sytem but important IDE scenarios like “first load after a repo clone” are dominated by evaluation.
+*Every* [batch build]() (absent a higher-order build system) must evaluate every project in the scope of the build. IDEs can cache evaluation and act as a higher-order builds system but important IDE scenarios like “first load after a repo clone” are dominated by evaluation.
 
 ## ResolveAssemblyReferences
 
