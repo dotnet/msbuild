@@ -161,6 +161,16 @@ namespace Microsoft.Build.Utilities
         private Encoding _encoding;
 
         /// <summary>
+        /// User-specified encoding for the captured task standard output stream, or <see langword="null"/> to use the default.
+        /// </summary>
+        private Encoding _standardOutputEncoding;
+
+        /// <summary>
+        /// User-specified encoding for the captured task standard error stream, or <see langword="null"/> to use the default.
+        /// </summary>
+        private Encoding _standardErrorEncoding;
+
+        /// <summary>
         /// Implemented by the derived class. Returns a string which is the name of the underlying .EXE to run e.g. "resgen.exe"
         /// Only used by the ToolExe getter.
         /// </summary>
@@ -202,6 +212,30 @@ namespace Microsoft.Build.Utilities
         /// the Command string. In that case, UTF-8 is used.
         /// </summary>
         public string UseUtf8Encoding { get; set; } = EncodingUtilities.UseUtf8Detect;
+
+        /// <summary>
+        /// Optionally specifies the encoding used to read the tool's captured standard output stream.
+        /// Set to the special value "ansi" to use the current system ANSI code page (GetACP), which some native
+        /// tools (e.g., MSVC link.exe/cl.exe) use for their output. When not set, the current system OEM code page is used.
+        /// The getter returns the effective encoding's web name, which should be compared case-insensitively.
+        /// </summary>
+        public virtual string StandardOutputEncodingName
+        {
+            get => StandardOutputEncoding.WebName;
+            set => _standardOutputEncoding = EncodingUtilities.GetEncodingFromName(value);
+        }
+
+        /// <summary>
+        /// Optionally specifies the encoding used to read the tool's captured standard error stream.
+        /// Set to the special value "ansi" to use the current system ANSI code page (GetACP), which some native
+        /// tools (e.g., MSVC link.exe/cl.exe) use for their output. When not set, the current system OEM code page is used.
+        /// The getter returns the effective encoding's web name, which should be compared case-insensitively.
+        /// </summary>
+        public virtual string StandardErrorEncodingName
+        {
+            get => StandardErrorEncoding.WebName;
+            set => _standardErrorEncoding = EncodingUtilities.GetEncodingFromName(value);
+        }
 
         /// <summary>
         /// Array of equals-separated pairs of environment
@@ -246,6 +280,12 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
+                // An explicitly-set StandardOutputEncodingName takes precedence over everything else.
+                if (_standardOutputEncoding != null)
+                {
+                    return _standardOutputEncoding;
+                }
+
                 if (_encoding != null)
                 {
                     // Keep the encoding of standard output & error consistent with the console code page.
@@ -268,6 +308,12 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
+                // An explicitly-set StandardErrorEncodingName takes precedence over everything else.
+                if (_standardErrorEncoding != null)
+                {
+                    return _standardErrorEncoding;
+                }
+
                 if (_encoding != null)
                 {
                     // Keep the encoding of standard output & error consistent with the console code page.
