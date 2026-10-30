@@ -37,6 +37,10 @@ Use `MockEngine` (`Microsoft.Build.UnitTests.MockEngine`) as an `IBuildEngine` i
 
 Use `ObjectModelHelpers.BuildProjectExpectSuccess`/`BuildProjectExpectFailure` (`Microsoft.Build.UnitTests.ObjectModelHelpers`) for quick in-memory builds that return a `MockLogger`. Use `ProjectFromString` (`Microsoft.Build.UnitTests.ProjectFromString`) — disposable, use with a `using` declaration — to create `Project` instances from XML for object model inspection.
 
+## Node Behaviour Tests
+
+Tests that start real node processes (worker nodes, TaskHosts and sidecars, the MSBuild server, node reuse) must use the `NodeScenario` harness (`Microsoft.Build.UnitTests.Shared.NodeScenario`) and be marked `[NodeScenarioFact]`/`[NodeScenarioTheory]`. Assert on the node lifecycle journal (`Await`, `AssertOrder`, `AssertNever`, `Gate`) instead of wall-clock waits, `WaitForExit(timeout)`, exact process ids or worker counts, and inject failures with `Fault` instead of `Process.Kill`. See [NodeScenario tests](../../documentation/wiki/NodeScenario-Tests.md).
+
 ## Platform-Conditional Tests
 
 Use existing custom attributes for platform-specific tests instead of runtime `if` checks that silently skip assertions. Available attributes include `WindowsOnlyFact`, `WindowsFullFrameworkOnlyFact`, `UnixOnlyFact`, `RequiresSymbolicLinksFactAttribute`, `LongPathSupportDisabledFactAttribute`, and `SkipOnPlatform`. Use `ConditionalFact(nameof(ConditionMethod))` for custom conditions.
