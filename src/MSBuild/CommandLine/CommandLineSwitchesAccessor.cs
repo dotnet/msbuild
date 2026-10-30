@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
 using static Microsoft.Build.CommandLine.Experimental.CommandLineSwitches;
 
 namespace Microsoft.Build.CommandLine.Experimental
@@ -8,11 +10,35 @@ namespace Microsoft.Build.CommandLine.Experimental
     internal readonly struct CommandLineSwitchesAccessor
     {
         private readonly CommandLineSwitches switches;
+        private readonly IReadOnlyList<string>? unrecognizedArguments;
+        private readonly IReadOnlyList<string>? unexpandedResponseFileArguments;
 
         internal CommandLineSwitchesAccessor(CommandLineSwitches switches)
+            : this(switches, null, null)
+        {
+        }
+
+        internal CommandLineSwitchesAccessor(
+            CommandLineSwitches switches,
+            IReadOnlyList<string>? unrecognizedArguments,
+            IReadOnlyList<string>? unexpandedResponseFileArguments)
         {
             this.switches = switches;
+            this.unrecognizedArguments = unrecognizedArguments;
+            this.unexpandedResponseFileArguments = unexpandedResponseFileArguments;
         }
+
+        /// <summary>
+        /// Gets unknown switch tokens in input order, with their original quoting and duplicates.
+        /// Includes tokens from response files when response-file reading is enabled.
+        /// </summary>
+        public IReadOnlyList<string> UnrecognizedArguments => unrecognizedArguments ?? Array.Empty<string>();
+
+        /// <summary>
+        /// Gets explicit response-file tokens that were not expanded, with their original quoting and duplicates.
+        /// The tokens are in input order.
+        /// </summary>
+        public IReadOnlyList<string> UnexpandedResponseFileArguments => unexpandedResponseFileArguments ?? Array.Empty<string>();
 
         // Parameterless switches
         public bool? Help => GetParameterlessSwitchValue(ParameterlessSwitch.Help);
