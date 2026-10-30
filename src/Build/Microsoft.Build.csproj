@@ -509,6 +509,7 @@
     <!-- #### EVALUATION ### -->
     <Compile Include="Evaluation\ConditionEvaluator.cs" />
     <Compile Include="Evaluation\Conditionals\AndExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\CachedCondition.cs" />
     <Compile Include="Evaluation\Conditionals\CharacterUtilities.cs" />
     <Compile Include="Evaluation\Conditionals\EqualExpressionNode.cs" />
     <Compile Include="Evaluation\Conditionals\FunctionCallExpressionNode.cs" />
@@ -518,6 +519,7 @@
     <Compile Include="Evaluation\Conditionals\LessThanExpressionNode.cs" />
     <Compile Include="Evaluation\Conditionals\LessThanOrEqualExpressionNode.cs" />
     <Compile Include="Evaluation\Conditionals\MultipleComparisonExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\NodeStateStore.cs" />
     <Compile Include="Evaluation\Conditionals\NotEqualExpressionNode.cs" />
     <Compile Include="Evaluation\Conditionals\NotExpressionNode.cs" />
     <Compile Include="Evaluation\Conditionals\NumericComparisonExpressionNode.cs" />
@@ -525,9 +527,11 @@
     <Compile Include="Evaluation\Conditionals\OperandExpressionNode.cs" />
     <Compile Include="Evaluation\Conditionals\OperatorExpressionNode.cs" />
     <Compile Include="Evaluation\Conditionals\OrExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\ParsedCondition.cs" />
     <Compile Include="Evaluation\Conditionals\Parser.cs" />
     <Compile Include="Evaluation\Conditionals\Scanner.cs" />
     <Compile Include="Evaluation\Conditionals\StringExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\ThreadLocalNodeStateBuffer.cs" />
     <Compile Include="Evaluation\Conditionals\Token.cs" />
     <Compile Include="Evaluation\EvaluatorMetadataTable.cs" />
     <Compile Include="Evaluation\IEvaluatorData.cs" />

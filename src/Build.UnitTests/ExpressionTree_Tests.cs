@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests
         public void FunctionTests()
         {
             Parser p = new Parser();
-            GenericExpressionNode tree;
+            ParsedCondition tree;
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), new ItemDictionary<ProjectItemInstance>(), FileSystems.Default, null);
             expander.Metadata = new StringMetadataTable(null);
             bool value;
@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
             string fileThatMustAlwaysExist = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(fileThatMustAlwaysExist, "foo");
             string command = "Exists('" + fileThatMustAlwaysExist + "')";
-            tree = p.Parse(command, ParserOptions.AllowAll, ElementLocation.Empty);
+            tree = p.ParseForEvaluation(command, ParserOptions.AllowAll, ElementLocation.Empty);
 
             ConditionEvaluator.IConditionEvaluationState state =
                             new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
@@ -435,7 +435,7 @@ namespace Microsoft.Build.UnitTests
                 expander.Metadata = new StringMetadataTable(null);
             }
 
-            GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, MockElementLocation.Instance);
+            ParsedCondition tree = p.ParseForEvaluation(expression, ParserOptions.AllowAll, MockElementLocation.Instance);
 
             if (state == null)
             {
@@ -472,7 +472,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 fExceptionCaught = false;
-                GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, MockElementLocation.Instance);
+                ParsedCondition tree = p.ParseForEvaluation(expression, ParserOptions.AllowAll, MockElementLocation.Instance);
                 if (state == null)
                 {
                     state =

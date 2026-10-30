@@ -103,6 +103,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Reset temporary state
         /// </summary>
+        /// <remarks>Used by the Wave 18.14 opt-out path.</remarks>
         internal override void ResetState()
         {
             base.ResetState();
@@ -114,27 +115,38 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void UpdateConditionedProperties(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (!_conditionedPropertiesUpdated && state.ConditionedPropertiesInProject != null)
+            if (state.ConditionedPropertiesInProject == null)
             {
-                string leftUnexpandedValue = LeftChild.GetUnexpandedValue(state);
-                string rightUnexpandedValue = RightChild.GetUnexpandedValue(state);
+                return;
+            }
 
-                if (leftUnexpandedValue != null)
-                {
-                    ConditionEvaluator.UpdateConditionedPropertiesTable(
-                        state.ConditionedPropertiesInProject,
-                         leftUnexpandedValue,
-                         RightChild.GetExpandedValue(state));
-                }
+            bool usePrivateState = state.NodeStates.IsInitialized;
+            if (!usePrivateState && _conditionedPropertiesUpdated)
+            {
+                return;
+            }
 
-                if (rightUnexpandedValue != null)
-                {
-                    ConditionEvaluator.UpdateConditionedPropertiesTable(
-                        state.ConditionedPropertiesInProject,
-                         rightUnexpandedValue,
-                         LeftChild.GetExpandedValue(state));
-                }
+            string leftUnexpandedValue = LeftChild.GetUnexpandedValue(state);
+            string rightUnexpandedValue = RightChild.GetUnexpandedValue(state);
 
+            if (leftUnexpandedValue != null)
+            {
+                ConditionEvaluator.UpdateConditionedPropertiesTable(
+                    state.ConditionedPropertiesInProject,
+                     leftUnexpandedValue,
+                     RightChild.GetExpandedValue(state));
+            }
+
+            if (rightUnexpandedValue != null)
+            {
+                ConditionEvaluator.UpdateConditionedPropertiesTable(
+                    state.ConditionedPropertiesInProject,
+                     rightUnexpandedValue,
+                     LeftChild.GetExpandedValue(state));
+            }
+
+            if (!usePrivateState)
+            {
                 _conditionedPropertiesUpdated = true;
             }
         }

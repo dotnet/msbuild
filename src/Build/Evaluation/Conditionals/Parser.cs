@@ -29,23 +29,23 @@ namespace Microsoft.Build.Evaluation
     };
 
     /// <summary>
-    /// This class implements the grammar for complex conditionals.
-    ///
-    /// The usage is:
-    ///    Parser p = new Parser(CultureInfo);
-    ///    ExpressionTree t = p.Parse(expression, XmlNode);
-    ///
-    /// The expression tree can then be evaluated and re-evaluated as needed.
+    /// Parses MSBuild condition expressions.
     /// </summary>
     /// <remarks>
-    /// UNDONE: When we copied over the conditionals code, we didn't copy over the unit tests for scanner, parser, and expression tree.
+    /// Use <see cref="ParseForEvaluation"/> to obtain a <see cref="ParsedCondition"/> and evaluate it
+    /// through <see cref="ParsedCondition.Evaluate"/> so private state is initialized and released.
+    /// <see cref="Parse"/> returns a mutable legacy tree that requires exclusive evaluation and reset.
     /// </remarks>
     internal sealed class Parser
     {
         private Scanner _lexer;
         private ParserOptions _options;
         private ElementLocation _elementLocation;
+        private bool _usePrivateState;
         internal int errorPosition = 0; // useful for unit tests
+
+        // Slots are local to a parsed condition.
+        internal int StringNodeStateCount { get; private set; }
 
         #region REMOVE_COMPAT_WARNING
 
@@ -90,12 +90,28 @@ namespace Microsoft.Build.Evaluation
             // nothing to see here, move along.
         }
 
-        //
-        // Main entry point for parser.
-        // You pass in the expression you want to parse, and you get an
-        // ExpressionTree out the back end.
-        //
+        internal ParsedCondition ParseForEvaluation(
+            string expression,
+            ParserOptions optionSettings,
+            ElementLocation elementLocation)
+        {
+            GenericExpressionNode root = ParseCore(expression, optionSettings, elementLocation, usePrivateState: true);
+            return new ParsedCondition(
+                root,
+                new NodeStateLayout(StringNodeStateCount));
+        }
+
+        /// <summary>
+        /// Parses a mutable legacy tree. Use <see cref="ParseForEvaluation"/> for shared trees.
+        /// </summary>
         internal GenericExpressionNode Parse(string expression, ParserOptions optionSettings, ElementLocation elementLocation)
+            => ParseCore(expression, optionSettings, elementLocation, usePrivateState: false);
+
+        private GenericExpressionNode ParseCore(
+            string expression,
+            ParserOptions optionSettings,
+            ElementLocation elementLocation,
+            bool usePrivateState)
         {
             // We currently have no support (and no scenarios) for disallowing property references
             // in Conditions.
@@ -103,6 +119,8 @@ namespace Microsoft.Build.Evaluation
 
             _options = optionSettings;
             _elementLocation = elementLocation;
+            _usePrivateState = usePrivateState;
+            StringNodeStateCount = 0;
 
             _lexer = new Scanner(expression, _options);
             if (!_lexer.Advance())
@@ -126,16 +144,18 @@ namespace Microsoft.Build.Evaluation
         //
         private GenericExpressionNode Expr(string expression)
         {
-            GenericExpressionNode node = BooleanTerm(expression);
+            bool hasAnd = false;
+            bool hasOr = false;
+            GenericExpressionNode node = BooleanTerm(expression, ref hasAnd);
             if (!_lexer.IsNext(Token.TokenType.EndOfInput))
             {
-                node = ExprPrime(expression, node);
+                node = ExprPrime(expression, node, ref hasAnd, ref hasOr);
             }
 
             #region REMOVE_COMPAT_WARNING
             // Check for potential change in behavior
             if (LoggingServices != null && !_warnedForExpression &&
-                node.PotentialAndOrConflict())
+                hasAnd && hasOr)
             {
                 // We only want to warn once even if there multiple () sub expressions
                 _warnedForExpression = true;
@@ -149,7 +169,7 @@ namespace Microsoft.Build.Evaluation
             return node;
         }
 
-        private GenericExpressionNode ExprPrime(string expression, GenericExpressionNode lhs)
+        private GenericExpressionNode ExprPrime(string expression, GenericExpressionNode lhs, ref bool hasAnd, ref bool hasOr)
         {
             if (Same(expression, Token.TokenType.EndOfInput))
             {
@@ -157,11 +177,12 @@ namespace Microsoft.Build.Evaluation
             }
             else if (Same(expression, Token.TokenType.Or))
             {
+                hasOr = true;
                 OperatorExpressionNode orNode = new OrExpressionNode();
-                GenericExpressionNode rhs = BooleanTerm(expression);
+                GenericExpressionNode rhs = BooleanTerm(expression, ref hasAnd);
                 orNode.LeftChild = lhs;
                 orNode.RightChild = rhs;
-                return ExprPrime(expression, orNode);
+                return ExprPrime(expression, orNode, ref hasAnd, ref hasOr);
             }
             else
             {
@@ -172,7 +193,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private GenericExpressionNode BooleanTerm(string expression)
+        private GenericExpressionNode BooleanTerm(string expression, ref bool hasAnd)
         {
             GenericExpressionNode node = RelationalExpr(expression);
             if (node == null)
@@ -183,12 +204,12 @@ namespace Microsoft.Build.Evaluation
 
             if (!_lexer.IsNext(Token.TokenType.EndOfInput))
             {
-                node = BooleanTermPrime(expression, node);
+                node = BooleanTermPrime(expression, node, ref hasAnd);
             }
             return node;
         }
 
-        private GenericExpressionNode BooleanTermPrime(string expression, GenericExpressionNode lhs)
+        private GenericExpressionNode BooleanTermPrime(string expression, GenericExpressionNode lhs, ref bool hasAnd)
         {
             if (_lexer.IsNext(Token.TokenType.EndOfInput))
             {
@@ -196,6 +217,7 @@ namespace Microsoft.Build.Evaluation
             }
             else if (Same(expression, Token.TokenType.And))
             {
+                hasAnd = true;
                 GenericExpressionNode rhs = RelationalExpr(expression);
                 if (rhs == null)
                 {
@@ -206,7 +228,7 @@ namespace Microsoft.Build.Evaluation
                 OperatorExpressionNode andNode = new AndExpressionNode();
                 andNode.LeftChild = lhs;
                 andNode.RightChild = rhs;
-                return BooleanTermPrime(expression, andNode);
+                return BooleanTermPrime(expression, andNode, ref hasAnd);
             }
             else
             {
@@ -354,7 +376,7 @@ namespace Microsoft.Build.Evaluation
             Token current = _lexer.CurrentToken;
             if (Same(expression, Token.TokenType.String))
             {
-                return new StringExpressionNode(current.String, current.Expandable);
+                return CreateStringNode(current.String, current.Expandable);
             }
             else if (Same(expression, Token.TokenType.Numeric))
             {
@@ -362,21 +384,27 @@ namespace Microsoft.Build.Evaluation
             }
             else if (Same(expression, Token.TokenType.Property))
             {
-                return new StringExpressionNode(current.String, true /* requires expansion */);
+                return CreateStringNode(current.String, expandable: true);
             }
             else if (Same(expression, Token.TokenType.ItemMetadata))
             {
-                return new StringExpressionNode(current.String, true /* requires expansion */);
+                return CreateStringNode(current.String, expandable: true);
             }
             else if (Same(expression, Token.TokenType.ItemList))
             {
-                return new StringExpressionNode(current.String, true /* requires expansion */);
+                return CreateStringNode(current.String, expandable: true);
             }
             else
             {
                 return null;
             }
         }
+
+        // Shared trees assign state slots only to expandable nodes; literals need no state (-1).
+        private StringExpressionNode CreateStringNode(string value, bool expandable) =>
+            _usePrivateState
+                ? new StringExpressionNode(value, expandable, expandable ? StringNodeStateCount++ : -1)
+                : new StringExpressionNode(value, expandable);
 
         private bool Same(string expression, Token.TokenType token)
         {

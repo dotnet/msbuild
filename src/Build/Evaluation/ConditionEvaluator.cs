@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
@@ -131,11 +132,47 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        private interface IExpressionTreeCache
+        {
+            int OptimisticSize { get; }
+        }
+
+        private struct ExpressionTreeForCurrentOptionsWithSize : IExpressionTreeCache
+        {
+            // condition string -> a single parsed expression tree and its immutable state layout
+            private readonly ConcurrentDictionary<string, CachedCondition> _expressions;
+            private int _mOptimisticSize;
+
+            public readonly int OptimisticSize => _mOptimisticSize;
+
+            public ExpressionTreeForCurrentOptionsWithSize(ConcurrentDictionary<string, CachedCondition> expressions)
+            {
+                _expressions = expressions;
+                _mOptimisticSize = expressions.Count;
+            }
+
+            public ParsedCondition GetOrParse(
+                string condition,
+                ParserOptions options,
+                ElementLocation elementLocation,
+                LoggingContext? loggingContext)
+            {
+                if (!_expressions.TryGetValue(condition, out CachedCondition? expression))
+                {
+                    Interlocked.Increment(ref _mOptimisticSize);
+                    expression = _expressions.GetOrAdd(condition, static _ => new CachedCondition());
+                }
+
+                return expression.GetOrParse(condition, options, elementLocation, loggingContext);
+            }
+        }
+
+        // Wave 18.14 opt-out: enabled evaluations use shared immutable trees instead.
         // Implements a pool of expression trees for each condition.
         // This is because an expression tree is a mutually exclusive resource (has non thread safe state while it evaluates).
         // During high demand when all expression trees are busy evaluating, a new expression tree is created and added to the pool.
         // The pool is represented by the ConcurrentStack.
-        private struct ExpressionTreeForCurrentOptionsWithSize
+        private struct LegacyExpressionTreeForCurrentOptionsWithSize : IExpressionTreeCache
         {
             // condition string -> pool of expression trees
             private readonly ConcurrentDictionary<string, Stack<GenericExpressionNode>> _conditionPools;
@@ -143,7 +180,7 @@ namespace Microsoft.Build.Evaluation
 
             public readonly int OptimisticSize => _mOptimisticSize;
 
-            public ExpressionTreeForCurrentOptionsWithSize(ConcurrentDictionary<string, Stack<GenericExpressionNode>> conditionPools)
+            public LegacyExpressionTreeForCurrentOptionsWithSize(ConcurrentDictionary<string, Stack<GenericExpressionNode>> conditionPools)
             {
                 _conditionPools = conditionPools;
                 _mOptimisticSize = conditionPools.Count;
@@ -165,6 +202,8 @@ namespace Microsoft.Build.Evaluation
 
         // Cached expression trees for all the combinations of condition strings and parser options
         private static readonly ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize> s_cachedExpressionTrees = new ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize>();
+        // Used only when Wave 18.14 is disabled; otherwise s_cachedExpressionTrees is used.
+        private static readonly ConcurrentDictionary<int, LegacyExpressionTreeForCurrentOptionsWithSize> s_cachedLegacyExpressionTrees = new ConcurrentDictionary<int, LegacyExpressionTreeForCurrentOptionsWithSize>();
 
         /// <summary>
         /// For debugging leaks, a way to disable caching expression trees, to reduce noise
@@ -237,12 +276,70 @@ namespace Microsoft.Build.Evaluation
             // If the condition wasn't empty, there must be a location for it
             ArgumentNullException.ThrowIfNull(elementLocation);
 
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14))
+            {
+                return EvaluateConditionLegacy(
+                    condition, options, expander, expanderOptions, conditionedPropertiesTable,
+                    evaluationDirectory, elementLocation, fileSystem, loggingContext, projectRootElementCache);
+            }
+
             // Get the expression tree cache for the current parsing options.
             var cachedExpressionTreesForCurrentOptions = s_cachedExpressionTrees.GetOrAdd(
                 (int)options,
-                _ => new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal)));
+                _ => new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, CachedCondition>(StringComparer.Ordinal)));
 
-            cachedExpressionTreesForCurrentOptions = FlushCacheIfLargerThanThreshold(options, cachedExpressionTreesForCurrentOptions);
+            cachedExpressionTreesForCurrentOptions = FlushCacheIfLargerThanThreshold(
+                options, cachedExpressionTreesForCurrentOptions, s_cachedExpressionTrees,
+                static () => new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, CachedCondition>(StringComparer.Ordinal)));
+
+            ParsedCondition parsedExpression = s_disableExpressionCaching
+                ? ParsedCondition.Parse(condition, options, elementLocation, loggingContext)
+                : cachedExpressionTreesForCurrentOptions.GetOrParse(condition, options, elementLocation, loggingContext);
+
+            var state = new ConditionEvaluationState<P, I>(
+                condition,
+                expander,
+                expanderOptions,
+                conditionedPropertiesTable,
+                evaluationDirectory,
+                elementLocation,
+                fileSystem,
+                projectRootElementCache);
+
+            expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
+            try
+            {
+                return parsedExpression.Evaluate(state);
+            }
+            finally
+            {
+                expander.PropertiesUseTracker.ResetPropertyReadContext();
+            }
+        }
+
+        // Wave 18.14 opt-out: pooled mutable trees with locks instead of shared trees with private state.
+        private static bool EvaluateConditionLegacy<P, I>(
+            string condition,
+            ParserOptions options,
+            Expander<P, I> expander,
+            ExpanderOptions expanderOptions,
+            Dictionary<string, List<string>>? conditionedPropertiesTable,
+            string evaluationDirectory,
+            ElementLocation elementLocation,
+            IFileSystem fileSystem,
+            LoggingContext? loggingContext,
+            ProjectRootElementCacheBase? projectRootElementCache)
+            where P : class, IProperty
+            where I : class, IItem
+        {
+            // Get the expression tree cache for the current parsing options.
+            var cachedExpressionTreesForCurrentOptions = s_cachedLegacyExpressionTrees.GetOrAdd(
+                (int)options,
+                _ => new LegacyExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal)));
+
+            cachedExpressionTreesForCurrentOptions = FlushCacheIfLargerThanThreshold(
+                options, cachedExpressionTreesForCurrentOptions, s_cachedLegacyExpressionTrees,
+                static () => new LegacyExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal)));
 
             // Get the pool of expressions for this condition.
             Stack<GenericExpressionNode> expressionPool = cachedExpressionTreesForCurrentOptions.GetOrAdd(condition, _ => new Stack<GenericExpressionNode>());
@@ -305,9 +402,12 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private static ExpressionTreeForCurrentOptionsWithSize FlushCacheIfLargerThanThreshold(
+        private static TCache FlushCacheIfLargerThanThreshold<TCache>(
             ParserOptions options,
-            ExpressionTreeForCurrentOptionsWithSize cachedExpressionTreesForCurrentOptions)
+            TCache cachedExpressionTreesForCurrentOptions,
+            ConcurrentDictionary<int, TCache> cache,
+            Func<TCache> createCache)
+            where TCache : struct, IExpressionTreeCache
         {
             if (cachedExpressionTreesForCurrentOptions.OptimisticSize > 3000)
             {
@@ -320,18 +420,16 @@ namespace Microsoft.Build.Evaluation
                 // the cost of reparsing expressions should the cache be cleared is not particularly large.
                 // Loading Australian Government in VS, there are 3 of these tables, two with about 50
                 // entries and one with about 650 entries. So 3000 seems large enough.
-                cachedExpressionTreesForCurrentOptions = s_cachedExpressionTrees.AddOrUpdate(
+                // Keep closure allocation on the cache-flush path.
+                Func<TCache> factory = createCache;
+                cachedExpressionTreesForCurrentOptions = cache.AddOrUpdate(
                     (int)options,
-                    _ =>
-                        new ExpressionTreeForCurrentOptionsWithSize(
-                            new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal)),
+                    _ => factory(),
                     (key, existing) =>
                     {
                         if (existing.OptimisticSize > 3000)
                         {
-                            return
-                                new ExpressionTreeForCurrentOptionsWithSize(
-                                    new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal));
+                            return factory();
                         }
                         else
                         {
@@ -345,6 +443,8 @@ namespace Microsoft.Build.Evaluation
 
         internal interface IConditionEvaluationState
         {
+            ref NodeStateStore NodeStates { get; }
+
             string Condition { get; }
 
             string EvaluationDirectory { get; }
@@ -395,6 +495,9 @@ namespace Microsoft.Build.Evaluation
         {
             private readonly Expander<P, I> _expander;
             private readonly ExpanderOptions _expanderOptions;
+            private NodeStateStore _nodeStates;
+
+            public ref NodeStateStore NodeStates => ref _nodeStates;
 
             /// <summary>
             /// Condition that was parsed. This does not belong here,

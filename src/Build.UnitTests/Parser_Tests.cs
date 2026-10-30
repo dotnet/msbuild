@@ -5,6 +5,8 @@ using System;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.UnitTests.BackEnd;
+using Shouldly;
 using Xunit;
 
 
@@ -526,6 +528,45 @@ namespace Microsoft.Build.UnitTests
 
             // Make sure the log contains the correct strings.
             Assert.DoesNotContain("MSB4130:", ml.FullLog); // "No need to warn for this expression - ($(a) == 1 or $(b) == 2) and $(c) == 3."
+        }
+
+        [Theory]
+        [InlineData("(true Or false) And (false Or true)", 0)]
+        [InlineData("((true And false) Or true) And false", 0)]
+        [InlineData("!(true Or false) And true", 0)]
+        [InlineData("true Or (false And true) And true", 1)]
+        [InlineData("(true Or false And true) And (false Or true And false)", 1)]
+        [InlineData("((true Or false And true))", 1)]
+        public void OperatorWarningsRespectParentheses(string expression, int expectedWarningCount)
+        {
+            VerifyWarnings(usePrivateState: false);
+            VerifyWarnings(usePrivateState: true);
+
+            void VerifyWarnings(bool usePrivateState)
+            {
+                int warningCount = 0;
+                Parser parser = new()
+                {
+                    LoggingServices = new MockLoggingService(message =>
+                    {
+                        if (message == "ConditionMaybeEvaluatedIncorrectly")
+                        {
+                            warningCount++;
+                        }
+                    })
+                };
+
+                if (usePrivateState)
+                {
+                    parser.ParseForEvaluation(expression, ParserOptions.AllowAll, _elementLocation);
+                }
+                else
+                {
+                    parser.Parse(expression, ParserOptions.AllowAll, _elementLocation);
+                }
+
+                warningCount.ShouldBe(expectedWarningCount);
+            }
         }
 
         // see https://github.com/dotnet/msbuild/issues/5436

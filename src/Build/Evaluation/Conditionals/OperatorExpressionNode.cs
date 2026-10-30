@@ -58,10 +58,11 @@ namespace Microsoft.Build.Evaluation
         /// If any expression nodes cache any state for the duration of evaluation,
         /// now's the time to clean it up
         /// </summary>
+        /// <remarks>Used by the Wave 18.14 opt-out path.</remarks>
         internal override void ResetState()
         {
             LeftChild?.ResetState();
-
+            
             RightChild?.ResetState();
         }
 
@@ -74,47 +75,5 @@ namespace Microsoft.Build.Evaluation
         /// Storage for the right child
         /// </summary>
         internal GenericExpressionNode RightChild { set; get; }
-
-        #region REMOVE_COMPAT_WARNING
-        internal override bool DetectAnd()
-        {
-            // Read the state of the current node
-            bool detectedAnd = this.PossibleAndCollision;
-            // Reset the flags on the current node
-            this.PossibleAndCollision = false;
-            // Process the children of the node if preset
-            bool detectAndRChild = false;
-            bool detectAndLChild = false;
-            if (RightChild != null)
-            {
-                detectAndRChild = RightChild.DetectAnd();
-            }
-            if (LeftChild != null)
-            {
-                detectAndLChild = LeftChild.DetectAnd();
-            }
-            return detectedAnd || detectAndRChild || detectAndLChild;
-        }
-
-        internal override bool DetectOr()
-        {
-            // Read the state of the current node
-            bool detectedOr = this.PossibleOrCollision;
-            // Reset the flags on the current node
-            this.PossibleOrCollision = false;
-            // Process the children of the node if preset
-            bool detectOrRChild = false;
-            bool detectOrLChild = false;
-            if (RightChild != null)
-            {
-                detectOrRChild = RightChild.DetectOr();
-            }
-            if (LeftChild != null)
-            {
-                detectOrLChild = LeftChild.DetectOr();
-            }
-            return detectedOr || detectOrRChild || detectOrLChild;
-        }
-        #endregion
     }
 }

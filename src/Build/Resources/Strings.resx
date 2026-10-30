@@ -306,6 +306,14 @@
     <value>MSB4113: Specified condition "{0}" evaluates to "{1}" instead of a boolean.</value>
     <comment>{StrBegin="MSB4113: "}</comment>
   </data>
+  <data name="ConditionNodeStateAlreadyInUse" xml:space="preserve">
+    <value>Condition node state storage is already in use.</value>
+    <comment>Indicates an internal condition-evaluation state-storage lifecycle error.</comment>
+  </data>
+  <data name="ConditionNodeStateNotInitialized" xml:space="preserve">
+    <value>Condition node state storage is not initialized.</value>
+    <comment>Indicates an internal condition-evaluation state-storage lifecycle error.</comment>
+  </data>
   <data name="ConfigFileReadError" xml:space="preserve">
     <value>MSB4136: Error reading the toolset information from the configuration file "{0}". {1}</value>
     <comment>{StrBegin="MSB4136: "}</comment>
