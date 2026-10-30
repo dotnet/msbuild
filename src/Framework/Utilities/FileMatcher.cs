@@ -3443,7 +3443,7 @@ namespace Microsoft.Build.Shared
             {
                 try
                 {
-                    // Query live attributes; an inconclusive probe still uses the original resolver.
+                    // Avoid link-target resolution when attributes confirm the directory is not a reparse point.
                     if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) == 0)
                     {
                         return false;
