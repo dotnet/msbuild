@@ -111,6 +111,10 @@ Read-only commands (`get-default-channels`, `get-subscriptions`, `get-channel`) 
 
 **Phase 2 — VMR backflow rotation.** Backflow (`dotnet/dotnet → msbuild`, source-enabled) keeps each MSBuild branch's dependencies aligned with its SDK band. When the new `vs{{THIS_RELEASE_VERSION}}` is paired with an SDK band, repoint the `→ main` backflow to the **next** SDK band channel and add backflow from the **outgoing** band channel into the release branch. Skip this for a VS-only release. See checklist steps 2.2b / 2.3f / 2.3g.
 
+### Arcade publishing prerequisite
+
+Before switching main's default channel in Phase 2, complete checklist step **1.2e**: resolve the destination channel ID with `darc get-channels`, verify its `TargetChannelConfig` in [Arcade's `PublishingConstants.ChannelInfos`](https://github.com/dotnet/arcade/blob/main/src/Microsoft.DotNet.Build.Tasks.Feed/src/model/PublishingConstants.cs), and confirm the entry is included in the published Arcade SDK pinned by [Arcade main's `global.json`](https://github.com/dotnet/arcade/blob/main/global.json). Maestro channel creation/ingestion and a merged Arcade source change are not sufficient: the promotion pipeline executes the pinned SDK. If support is missing, block channel reassignment and coordinate the Arcade change, SDK publication, and pin update with First Responders.
+
 ## Branch retirement (Phase 1.3)
 
 Audit every release branch to keep required SDK/VS servicing flows active and remove unused dependency automation.

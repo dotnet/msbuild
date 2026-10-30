@@ -11,6 +11,7 @@ Artifacts produced over the course of the release. Record each URL here as the c
 | Artifact | URL |
 |---|---|
 | Phase 1.2d — maestro-configuration PR (channels for `{{THIS_RELEASE_VERSION}}` / `{{NEXT_VERSION}}`) | {{URL_OF_PHASE1_DARC_PR}} |
+| Phase 1.2e — Arcade channel publishing configuration PR (if needed) | {{URL_OF_ARCADE_CHANNEL_PR}} |
 | Phase 2.3j — maestro-configuration PR (`main`-targeting subs + VMR backflow retargeted, retired-branch cleanup) | {{URL_OF_PHASE2_DARC_PR}} |
 | Phase 3.5 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
 | Phase 4.4 — VS insertion PR | {{URL_OF_VS_INSERTION}} |
@@ -86,6 +87,10 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
   - [ ] **1.2c** Pre-create default channel mapping for the **next** release branch (**last command — omit `--no-pr` to create the PR**). The `vs{{NEXT_VERSION}}` branch does not exist yet, so pass `-q` (non-interactive) to skip the "branch doesn't exist" prompt — otherwise the command blocks/aborts: \
   `darc add-default-channel --channel "VS {{NEXT_VERSION}}" --branch vs{{NEXT_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}} -q`
   - [ ] **1.2d** Get the maestro-configuration PR reviewed, merged, and ingested, then verify the live mappings using [DARC configuration PR verification](#darc-configuration-pr-verification): {{URL_OF_PHASE1_DARC_PR}}
+  - [ ] **1.2e** Verify `VS {{NEXT_VERSION}}` is configured for publishing in Arcade **before switching main to it**:
+    - [ ] Resolve the destination channel ID with `darc get-channels` and confirm it has a `TargetChannelConfig` entry in [Arcade's `PublishingConstants.ChannelInfos`](https://github.com/dotnet/arcade/blob/main/src/Microsoft.DotNet.Build.Tasks.Feed/src/model/PublishingConstants.cs), with the intended feeds, visibility, symbol targets, and publishing infrastructure version. Creating/ingesting the Maestro channel does **not** configure Arcade publishing.
+    - [ ] If missing, coordinate with First Responders to merge the Arcade configuration PR: {{URL_OF_ARCADE_CHANNEL_PR}}
+    - [ ] Confirm an Arcade SDK containing the entry has been published and is pinned by `msbuild-sdks.Microsoft.DotNet.Arcade.Sdk` in [Arcade main's `global.json`](https://github.com/dotnet/arcade/blob/main/global.json). The promotion pipeline runs that SDK, not the Feed task source from its checkout; merging the configuration PR alone is insufficient.
 - [ ] **1.3** **Audit _every_ live `vs*` branch for retirement.** Record the list here — Phase 2.3e uses it to clean up their DARC subscriptions. \
   Keep required servicing flows active and remove unused automation to reduce branch maintenance. \
   - [ ] **1.3a** Start with the [maintained-branch list](./release.md#maintained-branches), then reconcile default channels, both subscription directions, and the repo's real branches: \
@@ -120,6 +125,7 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
 ## Phase 2: DARC Subscription Updates
 
 > **Trigger**: `vs{{THIS_RELEASE_VERSION}}` branch exists (Phase 1 complete). \
+> **Precondition**: Step 1.2e confirmed that the promotion pipeline's pinned Arcade SDK supports `VS {{NEXT_VERSION}}`. Do not switch main's default channel until this is complete. \
 > **Why this runs before bumping `main`:** route the first next-version build to `VS {{NEXT_VERSION}}` so `main` consumers, including the VMR, receive the new version immediately.
 
 First, **gather information** (read-only queries — no PR needed):
