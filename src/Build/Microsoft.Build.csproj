@@ -97,7 +97,6 @@
 
   <ItemGroup>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
-    <Compile Include="..\Shared\TaskHostConfiguration.cs" />
 
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
