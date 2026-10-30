@@ -167,7 +167,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        // Wave 18.13 opt-out: enabled evaluations use shared immutable trees instead.
+        // Wave 18.14 opt-out: enabled evaluations use shared immutable trees instead.
         // Implements a pool of expression trees for each condition.
         // This is because an expression tree is a mutually exclusive resource (has non thread safe state while it evaluates).
         // During high demand when all expression trees are busy evaluating, a new expression tree is created and added to the pool.
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Evaluation
 
         // Cached expression trees for all the combinations of condition strings and parser options
         private static readonly ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize> s_cachedExpressionTrees = new ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize>();
-        // Used only when Wave 18.13 is disabled; otherwise s_cachedExpressionTrees is used.
+        // Used only when Wave 18.14 is disabled; otherwise s_cachedExpressionTrees is used.
         private static readonly ConcurrentDictionary<int, LegacyExpressionTreeForCurrentOptionsWithSize> s_cachedLegacyExpressionTrees = new ConcurrentDictionary<int, LegacyExpressionTreeForCurrentOptionsWithSize>();
 
         /// <summary>
@@ -276,7 +276,7 @@ namespace Microsoft.Build.Evaluation
             // If the condition wasn't empty, there must be a location for it
             ArgumentNullException.ThrowIfNull(elementLocation);
 
-            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14))
             {
                 return EvaluateConditionLegacy(
                     condition, options, expander, expanderOptions, conditionedPropertiesTable,
@@ -317,7 +317,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        // Wave 18.13 opt-out: pooled mutable trees with locks instead of shared trees with private state.
+        // Wave 18.14 opt-out: pooled mutable trees with locks instead of shared trees with private state.
         private static bool EvaluateConditionLegacy<P, I>(
             string condition,
             ParserOptions options,

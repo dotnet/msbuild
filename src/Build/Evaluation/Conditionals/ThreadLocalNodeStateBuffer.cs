@@ -3,7 +3,6 @@
 
 using System;
 using System.Buffers;
-using System.Threading;
 
 #nullable enable
 
@@ -14,9 +13,6 @@ internal static class ThreadLocalNodeStateBuffer<TState> where TState : struct
     // Do not retain exceptionally large condition buffers on every evaluator thread.
     private const int MaxCachedBufferLength = 256;
     private const int MaxPooledBufferLength = 4096;
-
-    // Bound oversized retention across threads rather than keeping large per-thread buffers.
-    private static ArrayPool<TState>? s_oversizedPool;
 
     [ThreadStatic]
     private static TState[]? t_cachedBuffer;
@@ -34,10 +30,7 @@ internal static class ThreadLocalNodeStateBuffer<TState> where TState : struct
         }
         else if (minimumLength <= MaxPooledBufferLength)
         {
-            ArrayPool<TState> pool = LazyInitializer.EnsureInitialized(
-                ref s_oversizedPool,
-                static () => ArrayPool<TState>.Create(MaxPooledBufferLength, maxArraysPerBucket: 4))!;
-            return pool.Rent(minimumLength);
+            return ArrayPool<TState>.Shared.Rent(minimumLength);
         }
 
         return new TState[minimumLength];
@@ -49,7 +42,7 @@ internal static class ThreadLocalNodeStateBuffer<TState> where TState : struct
         {
             if (buffer.Length <= MaxPooledBufferLength)
             {
-                s_oversizedPool!.Return(buffer, clearArray: true);
+                ArrayPool<TState>.Shared.Return(buffer, clearArray: true);
             }
 
             return;

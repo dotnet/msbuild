@@ -35,8 +35,10 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
-### 18.13
+### 18.14
 - [Condition evaluation shares immutable cached trees with private, thread-local evaluation state.](https://github.com/dotnet/msbuild/pull/15419) Opting out restores pooled mutable expression trees, evaluation locks, and recursive state resets.
+
+### 18.13
 - [Task hosts preserve ordinary task-environment variables while retaining Windows bitness adjustments.](https://github.com/dotnet/msbuild/pull/15032)
 - [ResolveAssemblyReference discovers redist and subset lists relative to the project directory when `TargetFrameworkDirectories` contains relative paths.](https://github.com/dotnet/msbuild/pull/15089)
 - [ClickOnce application manifest generation resolves relative sentinel assembly dependencies against the task project directory before reading their identities, preventing duplicate .NET Framework 3.0/3.5 prerequisite entries.](https://github.com/dotnet/msbuild/pull/15222)

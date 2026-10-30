@@ -103,7 +103,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Reset temporary state
         /// </summary>
-        /// <remarks>Used by the Wave 18.13 opt-out path.</remarks>
+        /// <remarks>Used by the Wave 18.14 opt-out path.</remarks>
         internal override void ResetState()
         {
             base.ResetState();

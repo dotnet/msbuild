@@ -44,6 +44,7 @@ public class ConditionEvaluator_Tests : IDisposable
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         SetChangeWave(disableWave, env);
+        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13).ShouldBeTrue();
         string identity = Guid.NewGuid().ToString("N");
         string condition = $"Exists('$(File)') And '$(Value)' == 'expected' And '$(MSBuildToolsVersion)' > '1.0' And '{identity}' == '{identity}'";
         string path = Path.Combine(env.DefaultTestDirectory.Path, "test.file");
@@ -656,7 +657,7 @@ public class ConditionEvaluator_Tests : IDisposable
     {
         env.SetEnvironmentVariable(
             "MSBUILDDISABLEFEATURESFROMVERSION",
-            disableWave ? ChangeWaves.Wave18_13.ToString() : null);
+            disableWave ? ChangeWaves.Wave18_14.ToString() : null);
         ChangeWaves.ResetStateForTests();
     }
 
