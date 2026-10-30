@@ -63,12 +63,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\UnitTests\XmakeAttributes_Tests.cs">
-      <Link>XmakeAttributes_Tests.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs">
-      <Link>AssemblyNameEx_Tests.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <None Include="..\Shared\UnitTests\App.config">
