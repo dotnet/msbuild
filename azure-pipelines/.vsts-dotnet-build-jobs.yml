@@ -12,6 +12,9 @@ parameters:
 - name: enableOptProf
   type: boolean
   default: false
+- name: publishVSSetup
+  type: boolean
+  default: false
 
 jobs:
 - job: Windows_NT
@@ -47,11 +50,12 @@ jobs:
       ArtifactName: logs
       condition: always()
 
-    # Publish test configuration for OptProf data collection
+    # Publish the VSSetup artifact. OptProf data collection consumes its test configuration, and
+    # publishVSSetup lets builds that do not run OptProf (ExpPerf) publish the VSIXes as well.
     - output: buildArtifacts
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\VSSetup\$(BuildConfiguration)'
       ArtifactName: VSSetup
-      condition: and(succeeded(), ${{ parameters.enableOptProf }})
+      condition: and(succeeded(), ${{ or(parameters.enableOptProf, parameters.publishVSSetup) }})
 
     # Archive NuGet packages to DevOps.
     # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the
@@ -208,6 +212,10 @@ jobs:
 
       if ("${{ parameters.enableOptProf }}" -eq "true") {
         $paths += "OptProf/$(BuildConfiguration)/Data"
+      }
+
+      # Keep in sync with the condition of the VSSetup output above.
+      if ("${{ or(parameters.enableOptProf, parameters.publishVSSetup) }}" -eq "true") {
         $paths += "VSSetup/$(BuildConfiguration)"
       }
 
