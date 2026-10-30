@@ -14,6 +14,8 @@ internal struct NodeStateStore
     private StringExpressionNode.EvaluationState[]? _stringStates;
     private bool _initialized;
 
+    internal readonly bool IsInitialized => _initialized;
+
     internal void Initialize(NodeStateLayout layout)
     {
         if (_initialized)

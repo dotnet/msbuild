@@ -14,6 +14,8 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal abstract class MultipleComparisonNode : OperatorExpressionNode
     {
+        private bool _conditionedPropertiesUpdated = false;
+
         /// <summary>
         /// Compare numbers
         /// </summary>
@@ -99,11 +101,27 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Updates the conditioned properties table for this comparison.
+        /// Reset temporary state
+        /// </summary>
+        /// <remarks>Used by the Wave 18.13 opt-out path.</remarks>
+        internal override void ResetState()
+        {
+            base.ResetState();
+            _conditionedPropertiesUpdated = false;
+        }
+
+        /// <summary>
+        /// Updates the conditioned properties table if it hasn't already been done.
         /// </summary>
         private void UpdateConditionedProperties(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (state.ConditionedPropertiesInProject is null)
+            if (state.ConditionedPropertiesInProject == null)
+            {
+                return;
+            }
+
+            bool usePrivateState = state.NodeStates.IsInitialized;
+            if (!usePrivateState && _conditionedPropertiesUpdated)
             {
                 return;
             }
@@ -111,7 +129,7 @@ namespace Microsoft.Build.Evaluation
             string leftUnexpandedValue = LeftChild.GetUnexpandedValue(state);
             string rightUnexpandedValue = RightChild.GetUnexpandedValue(state);
 
-            if (leftUnexpandedValue is not null)
+            if (leftUnexpandedValue != null)
             {
                 ConditionEvaluator.UpdateConditionedPropertiesTable(
                     state.ConditionedPropertiesInProject,
@@ -119,12 +137,17 @@ namespace Microsoft.Build.Evaluation
                      RightChild.GetExpandedValue(state));
             }
 
-            if (rightUnexpandedValue is not null)
+            if (rightUnexpandedValue != null)
             {
                 ConditionEvaluator.UpdateConditionedPropertiesTable(
                     state.ConditionedPropertiesInProject,
                      rightUnexpandedValue,
                      LeftChild.GetExpandedValue(state));
+            }
+
+            if (!usePrivateState)
+            {
+                _conditionedPropertiesUpdated = true;
             }
         }
     }

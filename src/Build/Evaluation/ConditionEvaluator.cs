@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.Threading;
 
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
+using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -130,7 +132,12 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private struct ExpressionTreeForCurrentOptionsWithSize
+        private interface IExpressionTreeCache
+        {
+            int OptimisticSize { get; }
+        }
+
+        private struct ExpressionTreeForCurrentOptionsWithSize : IExpressionTreeCache
         {
             // condition string -> a single parsed expression tree and its immutable state layout
             private readonly ConcurrentDictionary<string, CachedCondition> _expressions;
@@ -152,8 +159,6 @@ namespace Microsoft.Build.Evaluation
             {
                 if (!_expressions.TryGetValue(condition, out CachedCondition? expression))
                 {
-                    // Count how many conditions there are in the cache.
-                    // The condition evaluator will flush the cache when some threshold is exceeded.
                     Interlocked.Increment(ref _mOptimisticSize);
                     expression = _expressions.GetOrAdd(condition, static _ => new CachedCondition());
                 }
@@ -162,8 +167,43 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        // Wave 18.13 opt-out: enabled evaluations use shared immutable trees instead.
+        // Implements a pool of expression trees for each condition.
+        // This is because an expression tree is a mutually exclusive resource (has non thread safe state while it evaluates).
+        // During high demand when all expression trees are busy evaluating, a new expression tree is created and added to the pool.
+        // The pool is represented by the ConcurrentStack.
+        private struct LegacyExpressionTreeForCurrentOptionsWithSize : IExpressionTreeCache
+        {
+            // condition string -> pool of expression trees
+            private readonly ConcurrentDictionary<string, Stack<GenericExpressionNode>> _conditionPools;
+            private int _mOptimisticSize;
+
+            public readonly int OptimisticSize => _mOptimisticSize;
+
+            public LegacyExpressionTreeForCurrentOptionsWithSize(ConcurrentDictionary<string, Stack<GenericExpressionNode>> conditionPools)
+            {
+                _conditionPools = conditionPools;
+                _mOptimisticSize = conditionPools.Count;
+            }
+
+            public Stack<GenericExpressionNode> GetOrAdd(string condition, Func<string, Stack<GenericExpressionNode>> addFunc)
+            {
+                if (!_conditionPools.TryGetValue(condition, out Stack<GenericExpressionNode>? stack))
+                {
+                    // Count how many conditions there are in the cache.
+                    // The condition evaluator will flush the cache when some threshold is exceeded.
+                    Interlocked.Increment(ref _mOptimisticSize);
+                    stack = _conditionPools.GetOrAdd(condition, addFunc);
+                }
+
+                return stack;
+            }
+        }
+
         // Cached expression trees for all the combinations of condition strings and parser options
         private static readonly ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize> s_cachedExpressionTrees = new ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize>();
+        // Used only when Wave 18.13 is disabled; otherwise s_cachedExpressionTrees is used.
+        private static readonly ConcurrentDictionary<int, LegacyExpressionTreeForCurrentOptionsWithSize> s_cachedLegacyExpressionTrees = new ConcurrentDictionary<int, LegacyExpressionTreeForCurrentOptionsWithSize>();
 
         /// <summary>
         /// For debugging leaks, a way to disable caching expression trees, to reduce noise
@@ -236,12 +276,21 @@ namespace Microsoft.Build.Evaluation
             // If the condition wasn't empty, there must be a location for it
             ArgumentNullException.ThrowIfNull(elementLocation);
 
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+            {
+                return EvaluateConditionLegacy(
+                    condition, options, expander, expanderOptions, conditionedPropertiesTable,
+                    evaluationDirectory, elementLocation, fileSystem, loggingContext, projectRootElementCache);
+            }
+
             // Get the expression tree cache for the current parsing options.
             var cachedExpressionTreesForCurrentOptions = s_cachedExpressionTrees.GetOrAdd(
                 (int)options,
                 _ => new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, CachedCondition>(StringComparer.Ordinal)));
 
-            cachedExpressionTreesForCurrentOptions = FlushCacheIfLargerThanThreshold(options, cachedExpressionTreesForCurrentOptions);
+            cachedExpressionTreesForCurrentOptions = FlushCacheIfLargerThanThreshold(
+                options, cachedExpressionTreesForCurrentOptions, s_cachedExpressionTrees,
+                static () => new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, CachedCondition>(StringComparer.Ordinal)));
 
             ParsedCondition parsedExpression = s_disableExpressionCaching
                 ? ParsedCondition.Parse(condition, options, elementLocation, loggingContext)
@@ -268,9 +317,97 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private static ExpressionTreeForCurrentOptionsWithSize FlushCacheIfLargerThanThreshold(
+        // Wave 18.13 opt-out: pooled mutable trees with locks instead of shared trees with private state.
+        private static bool EvaluateConditionLegacy<P, I>(
+            string condition,
             ParserOptions options,
-            ExpressionTreeForCurrentOptionsWithSize cachedExpressionTreesForCurrentOptions)
+            Expander<P, I> expander,
+            ExpanderOptions expanderOptions,
+            Dictionary<string, List<string>>? conditionedPropertiesTable,
+            string evaluationDirectory,
+            ElementLocation elementLocation,
+            IFileSystem fileSystem,
+            LoggingContext? loggingContext,
+            ProjectRootElementCacheBase? projectRootElementCache)
+            where P : class, IProperty
+            where I : class, IItem
+        {
+            // Get the expression tree cache for the current parsing options.
+            var cachedExpressionTreesForCurrentOptions = s_cachedLegacyExpressionTrees.GetOrAdd(
+                (int)options,
+                _ => new LegacyExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal)));
+
+            cachedExpressionTreesForCurrentOptions = FlushCacheIfLargerThanThreshold(
+                options, cachedExpressionTreesForCurrentOptions, s_cachedLegacyExpressionTrees,
+                static () => new LegacyExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal)));
+
+            // Get the pool of expressions for this condition.
+            Stack<GenericExpressionNode> expressionPool = cachedExpressionTreesForCurrentOptions.GetOrAdd(condition, _ => new Stack<GenericExpressionNode>());
+
+            lock (expressionPool)
+            {
+                // Try and see if there's an available expression tree in the pool.
+                // If not, parse a new expression tree and add it back to the pool.
+                GenericExpressionNode parsedExpression;
+                if (expressionPool.Count == 0)
+                {
+                    var conditionParser = new Parser();
+
+                    #region REMOVE_COMPAT_WARNING
+                    conditionParser.LoggingServices = loggingContext?.LoggingService;
+                    conditionParser.LogBuildEventContext = loggingContext?.BuildEventContext ?? BuildEventContext.Invalid;
+                    #endregion
+
+                    parsedExpression = conditionParser.Parse(condition, options, elementLocation);
+                }
+                else
+                {
+                    parsedExpression = expressionPool.Pop();
+                }
+
+                bool result;
+
+                var state = new ConditionEvaluationState<P, I>(
+                    condition,
+                    expander,
+                    expanderOptions,
+                    conditionedPropertiesTable,
+                    evaluationDirectory,
+                    elementLocation,
+                    fileSystem,
+                    projectRootElementCache);
+
+                expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
+                // We are evaluating this expression now and it can cache some state for the duration,
+                // so we don't want multiple threads working on the same expression
+                lock (parsedExpression)
+                {
+                    try
+                    {
+                        result = parsedExpression.Evaluate(state);
+                    }
+                    finally
+                    {
+                        parsedExpression.ResetState();
+                        if (!s_disableExpressionCaching)
+                        {
+                            // Finished using the expression tree. Add it back to the pool so other threads can use it.
+                            expressionPool.Push(parsedExpression);
+                        }
+                        expander.PropertiesUseTracker.ResetPropertyReadContext();
+                    }
+                }
+
+                return result;
+            }
+        }
+
+        private static TCache FlushCacheIfLargerThanThreshold<TCache>(
+            ParserOptions options,
+            TCache cachedExpressionTreesForCurrentOptions,
+            ConcurrentDictionary<int, TCache> cache,
+            Func<TCache> createCache)
+            where TCache : struct, IExpressionTreeCache
         {
             if (cachedExpressionTreesForCurrentOptions.OptimisticSize > 3000)
             {
@@ -283,18 +420,16 @@ namespace Microsoft.Build.Evaluation
                 // the cost of reparsing expressions should the cache be cleared is not particularly large.
                 // Loading Australian Government in VS, there are 3 of these tables, two with about 50
                 // entries and one with about 650 entries. So 3000 seems large enough.
-                cachedExpressionTreesForCurrentOptions = s_cachedExpressionTrees.AddOrUpdate(
+                // Keep closure allocation on the cache-flush path.
+                Func<TCache> factory = createCache;
+                cachedExpressionTreesForCurrentOptions = cache.AddOrUpdate(
                     (int)options,
-                    _ =>
-                        new ExpressionTreeForCurrentOptionsWithSize(
-                            new ConcurrentDictionary<string, CachedCondition>(StringComparer.Ordinal)),
+                    _ => factory(),
                     (key, existing) =>
                     {
                         if (existing.OptimisticSize > 3000)
                         {
-                            return
-                                new ExpressionTreeForCurrentOptionsWithSize(
-                                    new ConcurrentDictionary<string, CachedCondition>(StringComparer.Ordinal));
+                            return factory();
                         }
                         else
                         {

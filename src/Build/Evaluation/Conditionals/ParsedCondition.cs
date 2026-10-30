@@ -34,7 +34,7 @@ internal readonly record struct ParsedCondition(GenericExpressionNode Root, Node
         state.NodeStates.Initialize(StateLayout);
         try
         {
-            return Root.EvaluateCore(state);
+            return Root.Evaluate(state);
         }
         finally
         {

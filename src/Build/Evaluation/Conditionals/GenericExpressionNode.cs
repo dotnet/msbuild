@@ -48,11 +48,18 @@ namespace Microsoft.Build.Evaluation
         internal abstract bool IsUnexpandedValueEmpty();
 
         /// <summary>
-        /// Call <see cref="ParsedCondition.Evaluate"/>; direct calls skip state initialization and cleanup.
+        /// If any expression nodes cache any state for the duration of evaluation,
+        /// now's the time to clean it up
+        /// </summary>
+        /// <remarks>Used by the Wave 18.13 opt-out path.</remarks>
+        internal abstract void ResetState();
+
+        /// <summary>
+        /// The main evaluate entry point for expression trees
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        internal bool EvaluateCore(ConditionEvaluator.IConditionEvaluationState state)
+        internal bool Evaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
             if (!TryBoolEvaluate(state, out bool boolValue))
             {

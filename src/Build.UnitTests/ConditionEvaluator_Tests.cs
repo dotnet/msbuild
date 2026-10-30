@@ -26,13 +26,88 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests;
 
-public class ConditionEvaluator_Tests
+public class ConditionEvaluator_Tests : IDisposable
 {
     private readonly ITestOutputHelper _output;
 
     public ConditionEvaluator_Tests(ITestOutputHelper output)
     {
         _output = output;
+    }
+
+    public void Dispose() => ChangeWaves.ResetStateForTests();
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ChangeWaveSelectsSharedOrLegacyConditionEvaluation(bool disableWave)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        SetChangeWave(disableWave, env);
+        string identity = Guid.NewGuid().ToString("N");
+        string condition = $"Exists('$(File)') And '$(Value)' == 'expected' And '$(MSBuildToolsVersion)' > '1.0' And '{identity}' == '{identity}'";
+        string path = Path.Combine(env.DefaultTestDirectory.Path, "test.file");
+        GenericExpressionNode? legacyTree = null;
+        MSBuildFileSystemBase fileSystem = A.Fake<MSBuildFileSystemBase>();
+        A.CallTo(() => fileSystem.FileOrDirectoryExists(A<string>._)).ReturnsLazily(() =>
+        {
+            object entry = GetConditionCacheEntry(condition, disableWave);
+            Monitor.IsEntered(entry).ShouldBe(disableWave);
+            if (disableWave)
+            {
+                entry.ShouldBeOfType<Stack<GenericExpressionNode>>().Count.ShouldBe(0);
+                if (legacyTree is not null)
+                {
+                    Monitor.IsEntered(legacyTree).ShouldBeTrue();
+                }
+            }
+            else
+            {
+                entry.ShouldBeOfType<CachedCondition>();
+            }
+
+            return true;
+        });
+
+        Check("expected", MSBuildConstants.CurrentToolsVersion).ShouldBeTrue();
+        object cached = GetConditionCacheEntry(condition, disableWave);
+        if (disableWave)
+        {
+            Stack<GenericExpressionNode> pool = cached.ShouldBeOfType<Stack<GenericExpressionNode>>();
+            pool.Count.ShouldBe(1);
+            legacyTree = pool.Peek();
+        }
+
+        Check("different", MSBuildConstants.CurrentToolsVersion).ShouldBeFalse();
+        Check("expected", "0.5").ShouldBeFalse();
+        Check("expected", MSBuildConstants.CurrentToolsVersion).ShouldBeTrue();
+        GetConditionCacheEntry(condition, disableWave).ShouldBeSameAs(cached);
+        if (disableWave)
+        {
+            cached.ShouldBeOfType<Stack<GenericExpressionNode>>().Peek().ShouldBeSameAs(legacyTree);
+        }
+
+        bool Check(string value, string toolsVersion) =>
+            Evaluate(condition, fileSystem, env.DefaultTestDirectory.Path, null,
+                ("File", path), ("Value", value), ("MSBuildToolsVersion", toolsVersion));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CachedConditionResetsAfterExceptionInEitherWave(bool disableWave)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        SetChangeWave(disableWave, env);
+        string identity = Guid.NewGuid().ToString("N");
+        string condition = $"'$(Value)' > '1' And '{identity}' == '{identity}'";
+
+        Should.Throw<InvalidProjectFileException>(() => Check("not-a-number"));
+        Check("0").ShouldBeFalse();
+        Check("3").ShouldBeTrue();
+
+        bool Check(string value) =>
+            Evaluate(condition, FileSystems.Default, env.DefaultTestDirectory.Path, null, ("Value", value));
     }
 
     [Fact]
@@ -427,23 +502,19 @@ public class ConditionEvaluator_Tests
                 ("MSBuildToolsVersion", toolsVersion), ("Other", "Current")));
     }
 
-    [Fact]
-    public void SharedConditionUpdatesEachConditionedPropertiesTable()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CachedConditionUpdatesEachConditionedPropertiesTable(bool disableWave)
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
+        SetChangeWave(disableWave, env);
         const string condition = "'$(Configuration)' == '$(ExpectedConfiguration)' And '$(Platform)' != '$(OtherPlatform)'";
-        ParsedCondition parsed = new Parser().ParseForEvaluation(
-            condition, ParserOptions.AllowProperties, ElementLocation.Empty);
         Dictionary<string, List<string>> firstTable = new();
         Dictionary<string, List<string>> secondTable = new();
-        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> first = CreateState(
-            "Debug", "AnyCPU", firstTable);
-        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> second = CreateState(
-            "Release", "x64", secondTable);
-
-        parsed.Evaluate(first).ShouldBeTrue();
-        parsed.Evaluate(second).ShouldBeTrue();
-        parsed.Evaluate(first).ShouldBeTrue();
+        Check("Debug", "AnyCPU", firstTable).ShouldBeTrue();
+        Check("Release", "x64", secondTable).ShouldBeTrue();
+        Check("Debug", "AnyCPU", firstTable).ShouldBeTrue();
 
         firstTable.Count.ShouldBe(4);
         firstTable["Configuration"].ShouldBe(["Debug"]);
@@ -456,13 +527,14 @@ public class ConditionEvaluator_Tests
         secondTable["Platform"].ShouldBe(["never"]);
         secondTable["OtherPlatform"].ShouldBe(["x64"]);
 
-        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> CreateState(
+        bool Check(
             string configuration, string platform, Dictionary<string, List<string>> table) =>
-            new(condition, CreateExpander(FileSystems.Default,
+            ConditionEvaluator.EvaluateConditionCollectingConditionedProperties(
+                condition, ParserOptions.AllowProperties, CreateExpander(FileSystems.Default,
                     ("Configuration", configuration), ("ExpectedConfiguration", configuration),
                     ("Platform", platform), ("OtherPlatform", "never")),
                 ExpanderOptions.ExpandProperties, table, env.DefaultTestDirectory.Path,
-                ElementLocation.Empty, FileSystems.Default);
+                ElementLocation.Empty, FileSystems.Default, null);
     }
 
     [Theory]
@@ -578,6 +650,28 @@ public class ConditionEvaluator_Tests
         {
             state.Release();
         }
+    }
+
+    private static void SetChangeWave(bool disableWave, TestEnvironment env)
+    {
+        env.SetEnvironmentVariable(
+            "MSBUILDDISABLEFEATURESFROMVERSION",
+            disableWave ? ChangeWaves.Wave18_13.ToString() : null);
+        ChangeWaves.ResetStateForTests();
+    }
+
+    private static object GetConditionCacheEntry(string condition, bool legacy)
+    {
+        string cacheName = legacy ? "s_cachedLegacyExpressionTrees" : "s_cachedExpressionTrees";
+        FieldInfo cacheField = typeof(ConditionEvaluator).GetField(
+            cacheName, BindingFlags.Static | BindingFlags.NonPublic).ShouldNotBeNull();
+        IDictionary cache = cacheField.GetValue(null).ShouldBeAssignableTo<IDictionary>().ShouldNotBeNull();
+        object options = cache[(int)ParserOptions.AllowProperties].ShouldNotBeNull();
+        FieldInfo expressionsField = options.GetType().GetField(
+            legacy ? "_conditionPools" : "_expressions",
+            BindingFlags.Instance | BindingFlags.NonPublic).ShouldNotBeNull();
+        IDictionary expressions = expressionsField.GetValue(options).ShouldBeAssignableTo<IDictionary>().ShouldNotBeNull();
+        return expressions[condition].ShouldNotBeNull();
     }
 
     private static Task<bool> StartEvaluation(
