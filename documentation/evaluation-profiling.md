@@ -1,5 +1,23 @@
 # MSBuild evaluation profiling
 
+## Temporary property-phase attribution
+
+This diagnostic branch enables exclusive pass-1 timing with
+`MSBUILD_TEMP_PROPERTY_PHASE_METRICS=1`. It records traversal, property elements,
+value expansion, assignment, condition acquisition/cache access, parsing, state
+setup, execution, cleanup, imports, import expansion/search, project loading, SDK
+resolution, finalization, and remaining work. Condition acquisition includes
+cache access and pool-lock acquisition; it is not a pure contention measurement.
+The PR's lazy private-state buffer acquisition and clearing are assigned to state
+setup and cleanup, respectively.
+
+The buckets partition `properties_detail_total`, which is slightly narrower than
+the existing properties pass. They use elapsed time, not CPU time, and can overlap
+across evaluating threads/projects. Aggregate events are emitted after stopping
+the pass clock. No per-condition events are emitted, and the feature is off by
+default. Compare only matching instrumented main/PR builds: timestamp reads and
+collector processing add overhead, including extra PR private-state scopes.
+
 MSBuild 15.6 and higher contains an evaluation profiler, which can help analyze which parts of a project (and any .targets/etc that it imports) are taking the most time to evaluate.
 
 The profiler is enabled when passing `/profileevaluation:<filename>` as a command-line argument to MSBuild. After the build, the specified file will contain a profiler report. If the specified filename does not end in `.md`, it will be a tab-separated value (TSV) table suitable for loading into a spreadsheet. If the filename ends in `.md`, it will be a Markdown file that looks like the following:

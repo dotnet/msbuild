@@ -113,6 +113,8 @@ namespace Microsoft.Build.Evaluation
             ElementLocation elementLocation,
             bool usePrivateState)
         {
+            using var parsingMetrics = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ConditionParsing);
+
             // We currently have no support (and no scenarios) for disallowing property references
             // in Conditions.
             Assumed.True((optionSettings & ParserOptions.AllowProperties) != 0, "Properties should always be allowed.");

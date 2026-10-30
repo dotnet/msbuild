@@ -556,6 +556,7 @@
     <Compile Include="Evaluation\StringMetadataTable.cs" />
     <Compile Include="Evaluation\ExpressionShredder.cs" />
     <Compile Include="Evaluation\Evaluator.cs" />
+    <Compile Include="Evaluation\PropertyPhaseMetrics.cs" />
     <Compile Include="Evaluation\GlobResultBuilder.cs" />
     <Compile Include="Evaluation\Expander.cs" />
     <Compile Include="Evaluation\ToolsetProvider.cs" />

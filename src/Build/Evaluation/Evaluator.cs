@@ -751,25 +751,40 @@ namespace Microsoft.Build.Evaluation
                 RecordEvaluationPass(pass0DurationSeconds, "initial_properties");
 
                 // Pass1: evaluate properties, load imports, and gather everything else
+                using PropertyPhaseMetrics.Context propertyMetrics = PropertyPhaseMetrics.Create();
                 MSBuildEventSource.Log.EvaluatePass1Start(projectFile);
                 long pass1MeasurementStart = EvaluationInstrumentation.StartMeasurement();
+                propertyMetrics?.Start();
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
                 {
                     PerformDepthFirstPass(_projectRootElement);
                 }
 
-                SetAllProjectsProperty();
-
-                List<string> initialTargets = new List<string>(_initialTargetsList.Count);
-                foreach (var initialTarget in _initialTargetsList)
+                using (PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.Finalization))
                 {
-                    initialTargets.Add(EscapingUtilities.UnescapeAll(initialTarget, trim: true));
+                    SetAllProjectsProperty();
+
+                    List<string> initialTargets = new List<string>(_initialTargetsList.Count);
+                    foreach (var initialTarget in _initialTargetsList)
+                    {
+                        initialTargets.Add(EscapingUtilities.UnescapeAll(initialTarget, trim: true));
+                    }
+
+                    _data.InitialTargets = initialTargets;
                 }
 
-                _data.InitialTargets = initialTargets;
+                propertyMetrics?.Stop();
                 double pass1DurationSeconds = EvaluationInstrumentation.EndPassMeasurement(pass1MeasurementStart);
                 MSBuildEventSource.Log.EvaluatePass1Stop(projectFile);
                 RecordEvaluationPass(pass1DurationSeconds, "properties");
+                if (propertyMetrics is not null)
+                {
+                    RecordEvaluationPass(propertyMetrics.TotalSeconds, "properties_detail_total");
+                    for (int bucket = 0; bucket < PropertyPhaseMetrics.PassNames.Length; bucket++)
+                    {
+                        RecordEvaluationPass(propertyMetrics.GetSeconds(bucket), PropertyPhaseMetrics.PassNames[bucket]);
+                    }
+                }
 
                 if (_evaluationStage <= ProjectEvaluationStage.Properties)
                 {
@@ -1020,6 +1035,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void PerformDepthFirstPass(ProjectRootElement currentProjectOrImport)
         {
+            using var propertyPhase = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.Traversal);
             using (_evaluationProfiler.TrackFile(currentProjectOrImport.FullPath))
             {
                 // We accumulate InitialTargets from the project and each import
@@ -1441,6 +1457,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void EvaluatePropertyElement(ProjectPropertyElement propertyElement)
         {
+            using var propertyPhase = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.Elements);
             using (_evaluationProfiler.TrackElement(propertyElement))
             {
                 // Global properties cannot be overridden.  We silently ignore them if we try.  Legacy behavior.
@@ -1466,11 +1483,17 @@ namespace Microsoft.Build.Evaluation
                 // it is the same as what we are setting the value on. Note: This needs to be set before we expand the property we are currently setting.
                 _expander.PropertiesUseTracker.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
 
-                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location);
+                string evaluatedValue;
+                using (PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.Expansion))
+                {
+                    evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location);
+                }
 
-                _expander.PropertiesUseTracker.CheckPreexistingUndefinedUsage(propertyElement, evaluatedValue, _evaluationLoggingContext);
-
-                _data.SetProperty(propertyElement, evaluatedValue, _evaluationLoggingContext);
+                using (PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.Assignment))
+                {
+                    _expander.PropertiesUseTracker.CheckPreexistingUndefinedUsage(propertyElement, evaluatedValue, _evaluationLoggingContext);
+                    _data.SetProperty(propertyElement, evaluatedValue, _evaluationLoggingContext);
+                }
             }
         }
 
@@ -1551,6 +1574,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         private void EvaluateImportElement(string directoryOfImportingFile, ProjectImportElement importElement)
         {
+            using var propertyPhase = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.Imports);
             using (_evaluationProfiler.TrackElement(importElement))
             {
                 List<ProjectRootElement> importedProjectRootElements = ExpandAndLoadImports(directoryOfImportingFile, importElement, out var sdkResult);
@@ -1954,6 +1978,7 @@ namespace Microsoft.Build.Evaluation
                 // Combine SDK path with the "project" relative path
                 try
                 {
+                    using var propertyPhase = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.SdkResolution);
                     using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(_evaluationLoggingContext, AssemblyLoadingContext.SdkResolution, _sdkResolverService.GetType());
 
                     sdkResult = _sdkResolverService.ResolveSdk(
@@ -2170,7 +2195,11 @@ namespace Microsoft.Build.Evaluation
         {
             imports = null;
 
-            string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
+            string importExpressionEscaped;
+            using (PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ImportExpansion))
+            {
+                importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
+            }
             ElementLocation importLocationInProject = importElement.Location;
 
             if (string.IsNullOrWhiteSpace(importExpressionEscaped))
@@ -2219,13 +2248,16 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Expand the wildcards and provide an alphabetical order list of import statements.
-                    importFilesEscaped = EngineFileUtilities.GetFileListEscaped(
-                        directoryOfImportingFile,
-                        importExpressionEscapedItem,
-                        forceEvaluate: true,
-                        fileMatcher: _evaluationContext.FileMatcher,
-                        loggingMechanism: _evaluationLoggingContext,
-                        importLocation: importLocationInProject);
+                    using (PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ImportSearch))
+                    {
+                        importFilesEscaped = EngineFileUtilities.GetFileListEscaped(
+                            directoryOfImportingFile,
+                            importExpressionEscapedItem,
+                            forceEvaluate: true,
+                            fileMatcher: _evaluationContext.FileMatcher,
+                            loggingMechanism: _evaluationLoggingContext,
+                            importLocation: importLocationInProject);
+                    }
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
@@ -2340,14 +2372,17 @@ namespace Microsoft.Build.Evaluation
                         // clearing the weak cache (and therefore setting explicitload=false) for projects the project system never
                         // was directly interested in (i.e. the ones that were reached for purposes of building a P2P.)
                         bool explicitlyLoaded = importElement.ContainingProject.IsExplicitlyLoaded;
-                        importedProjectElement = ProjectRootElement.OpenProjectOrSolution(
-                                    importFileUnescaped,
-                                    new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(
-                                        _data.GlobalPropertiesDictionary,
-                                        instance => ((IProperty)instance).EvaluatedValueEscaped),
-                                    _data.ExplicitToolsVersion,
-                                    _projectRootElementCache,
-                                    explicitlyLoaded);
+                        using (PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ProjectLoad))
+                        {
+                            importedProjectElement = ProjectRootElement.OpenProjectOrSolution(
+                                        importFileUnescaped,
+                                        new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(
+                                            _data.GlobalPropertiesDictionary,
+                                            instance => ((IProperty)instance).EvaluatedValueEscaped),
+                                        _data.ExplicitToolsVersion,
+                                        _projectRootElementCache,
+                                        explicitlyLoaded);
+                        }
 
                         if (duplicateImport)
                         {

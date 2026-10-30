@@ -31,13 +31,17 @@ internal readonly record struct ParsedCondition(GenericExpressionNode Root, Node
 
     internal bool Evaluate(ConditionEvaluator.IConditionEvaluationState state)
     {
-        state.NodeStates.Initialize(StateLayout);
+        using (PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ConditionState))
+        {
+            state.NodeStates.Initialize(StateLayout);
+        }
         try
         {
             return Root.Evaluate(state);
         }
         finally
         {
+            using var cleanupMetrics = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ConditionCleanup);
             state.NodeStates.Release();
         }
     }

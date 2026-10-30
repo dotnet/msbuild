@@ -276,6 +276,8 @@ namespace Microsoft.Build.Evaluation
             // If the condition wasn't empty, there must be a location for it
             ArgumentNullException.ThrowIfNull(elementLocation);
 
+            using var acquisitionMetrics = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ConditionAcquisition);
+
             if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14))
             {
                 return EvaluateConditionLegacy(
@@ -296,6 +298,8 @@ namespace Microsoft.Build.Evaluation
                 ? ParsedCondition.Parse(condition, options, elementLocation, loggingContext)
                 : cachedExpressionTreesForCurrentOptions.GetOrParse(condition, options, elementLocation, loggingContext);
 
+            using var stateMetrics = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ConditionState);
+
             var state = new ConditionEvaluationState<P, I>(
                 condition,
                 expander,
@@ -309,10 +313,12 @@ namespace Microsoft.Build.Evaluation
             expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
             try
             {
+                using var executionMetrics = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ConditionExecution);
                 return parsedExpression.Evaluate(state);
             }
             finally
             {
+                using var cleanupMetrics = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ConditionCleanup);
                 expander.PropertiesUseTracker.ResetPropertyReadContext();
             }
         }
@@ -346,6 +352,8 @@ namespace Microsoft.Build.Evaluation
 
             lock (expressionPool)
             {
+                using var stateMetrics = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ConditionState);
+
                 // Try and see if there's an available expression tree in the pool.
                 // If not, parse a new expression tree and add it back to the pool.
                 GenericExpressionNode parsedExpression;
@@ -384,10 +392,12 @@ namespace Microsoft.Build.Evaluation
                 {
                     try
                     {
+                        using var executionMetrics = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ConditionExecution);
                         result = parsedExpression.Evaluate(state);
                     }
                     finally
                     {
+                        using var cleanupMetrics = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ConditionCleanup);
                         parsedExpression.ResetState();
                         if (!s_disableExpressionCaching)
                         {

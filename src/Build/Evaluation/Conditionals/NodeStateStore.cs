@@ -54,8 +54,11 @@ internal struct NodeStateStore
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private StringExpressionNode.EvaluationState[] AcquireStringStates() =>
-        _stringStates = ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(_layout.StringSlotCount);
+    private StringExpressionNode.EvaluationState[] AcquireStringStates()
+    {
+        using var stateMetrics = PropertyPhaseMetrics.Enter(PropertyPhaseMetrics.Bucket.ConditionState);
+        return _stringStates = ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(_layout.StringSlotCount);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private readonly void VerifySlot(int slot, int count)
