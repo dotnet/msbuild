@@ -12,7 +12,7 @@ Artifacts produced over the course of the release. Record each URL here as the c
 |---|---|
 | Phase 1.2d — maestro-configuration PR (channels for `{{THIS_RELEASE_VERSION}}` / `{{NEXT_VERSION}}`) | {{URL_OF_PHASE1_DARC_PR}} |
 | Phase 2.3j — maestro-configuration PR (`main`-targeting subs + VMR backflow retargeted, retired-branch cleanup) | {{URL_OF_PHASE2_DARC_PR}} |
-| Phase 3.5 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
+| Phase 3.6 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
 | Phase 4.4 — VS insertion PR | {{URL_OF_VS_INSERTION}} |
 | Phase 5.1b — official build that produced `{{THIS_RELEASE_EXACT_VERSION}}` | {{URL_OF_SHIPPED_OFFICIAL_BUILD}} |
 | Phase 4.7 — Change Waves Learn page sync PR (visualstudio-docs-pr) | {{URL_OF_CHANGE_WAVES_DOCS_PR}} |
@@ -185,15 +185,16 @@ Verifications (**parallel** — read-only, no ordering dependency):
 Create **one PR in `main`** containing all of the following changes:
 
 - [ ] **3.1** `eng/Versions.props`: Update `VersionPrefix` to `{{NEXT_VERSION}}.0`
-- [ ] **3.2** `eng/Versions.props`: Update `PackageValidationBaselineVersion` to `{{PACKAGE_VALIDATION_BASELINE_VERSION}}`. \
+- [ ] **3.2** Create a new change wave matching `{{NEXT_VERSION}}`: add its static readonly `Version` field and include it in `AllWaves` in `src/Framework/ChangeWaves.cs`, and add an empty version section under **Current Rotation of Change Waves** in `documentation/wiki/ChangeWaves.md`
+- [ ] **3.3** `eng/Versions.props`: Update `PackageValidationBaselineVersion` to `{{PACKAGE_VALIDATION_BASELINE_VERSION}}`. \
 Resolve it deterministically with `pwsh ./scripts/Get-PackageValidationBaseline.ps1 -ThisReleaseVersion {{THIS_RELEASE_VERSION}}` (requires `az login` with devdiv access). See [How to determine `PACKAGE_VALIDATION_BASELINE_VERSION`](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version) in the release skill for the manual fallback.
-- [ ] **3.3** `.vsts-dotnet.yml`: Refresh the hardcoded OptProf baseline so the **next** `vs*` branch cut from `main` inherits valid OptProf data (this is what lets that branch's first official build succeed without the manual Phase 4.4 rerun). \
+- [ ] **3.4** `.vsts-dotnet.yml`: Refresh the hardcoded OptProf baseline so the **next** `vs*` branch cut from `main` inherits valid OptProf data (this is what lets that branch's first official build succeed without the manual Phase 4.4 rerun). \
 Resolve the current value with `pwsh ./scripts/Get-LatestOptProfDrop.ps1` (requires `az login` with devdiv access), then set it as `OptProfBaselineDrop`: \
 `<name: OptProfBaselineDrop` → `value: 'OptimizationData/DotNet-msbuild-Trusted/main/<NNNNNNNN.N>/<buildId>/1'`.
-- [ ] **3.4** If the build pipeline fails on API-compat (only then — this step is a fix-up, not a routine action), update `CompatibilitySuppressions.xml` files. Run: \
+- [ ] **3.5** If the build pipeline fails on API-compat (only then — this step is a fix-up, not a routine action), update `CompatibilitySuppressions.xml` files. Run: \
 `.\build.cmd -pack /p:ApiCompatGenerateSuppressionFile=true` \
 Before running, inspect `artifacts\packages` and move aside stale packages from the pre-bump version; mixed old/new packages can cause `Multiple packages of name 'Microsoft.Build' specified`. Review the generated suppressions rather than accepting compatibility breaks just to make the build pass. See [API compat documentation](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/overview) for details.
-- [ ] **3.5** After Phase 2 ingestion and live-map verification succeed, merge the main-bump PR: {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}}
+- [ ] **3.6** After Phase 2 ingestion and live-map verification succeed, merge the main-bump PR: {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}}
 
 ---
 
@@ -214,8 +215,8 @@ Steps are **sequential**.
 This is a human release check, not an official-build, artifact-publishing, or automated-promotion dependency.
 
 - [ ] **4.0** Before final branding and Insiders promotion, use the telemetry evidence procedure to confirm recent ordinary telemetry from relevant canary builds for each path shipping in this release: {{CANARY_TELEMETRY_EVIDENCE_AND_DECISION}}
-- [ ] **4.1** Review package API compatibility on `vs{{THIS_RELEASE_VERSION}}`. Resolve any API-compat failures using step 3.4 and review changes to `CompatibilitySuppressions.xml`. The repository no longer tracks `PublicAPI.Unshipped.txt` / `PublicAPI.Shipped.txt`, so there is no public-API file promotion step. See [release.md](./release.md#public-api) for details.
-- [ ] **4.2** Bootstrap OptProf for `vs{{THIS_RELEASE_VERSION}}`. **If the Phase 3.3 hardcoded `OptProfBaselineDrop` was kept current, the auto-triggered build should already pick it up (`.vsts-dotnet.yml` seeds `OptProfDrop` from it on `vs*` branches) and this step is a no-op.** Only if the official build still fails for lack of OptProf data (e.g. the baseline was stale/empty at branch-cut):
+- [ ] **4.1** Review package API compatibility on `vs{{THIS_RELEASE_VERSION}}`. Resolve any API-compat failures using step 3.5 and review changes to `CompatibilitySuppressions.xml`. The repository no longer tracks `PublicAPI.Unshipped.txt` / `PublicAPI.Shipped.txt`, so there is no public-API file promotion step. See [release.md](./release.md#public-api) for details.
+- [ ] **4.2** Bootstrap OptProf for `vs{{THIS_RELEASE_VERSION}}`. **If the Phase 3.4 hardcoded `OptProfBaselineDrop` was kept current, the auto-triggered build should already pick it up (`.vsts-dotnet.yml` seeds `OptProfDrop` from it on `vs*` branches) and this step is a no-op.** Only if the official build still fails for lack of OptProf data (e.g. the baseline was stale/empty at branch-cut):
   - [ ] **4.2a** **Cancel** the auto-triggered official build for `vs{{THIS_RELEASE_VERSION}}`.
   - [ ] **4.2b** **Re-run the official build manually** for `vs{{THIS_RELEASE_VERSION}}` with the OptProf override from `main` — set `Optional OptProfDrop Override` to `main`'s latest OptProf drop path (`pwsh ./scripts/Get-LatestOptProfDrop.ps1`).
 - [ ] **4.3** Get M2 or QB approval as necessary per the VS schedule. \
