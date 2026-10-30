@@ -3434,26 +3434,28 @@ namespace Microsoft.Build.Shared
         try
         {
 #if NET
-        if (NativeMethods.IsWindows
-            && Path.IsPathFullyQualified(directory)
-            && directory[1] == Path.VolumeSeparatorChar
-            && directory.AsSpan().IndexOfAny('*', '?') < 0)
-        {
-            try
+            // Use the cheaper attribute probe only for fully qualified Windows drive
+            // paths without wildcards. Keep other path forms on the existing resolver.
+            if (NativeMethods.IsWindows
+                && Path.IsPathFullyQualified(directory)
+                && directory[1] == Path.VolumeSeparatorChar
+                && directory.AsSpan().IndexOfAny('*', '?') < 0)
             {
-                // Query live attributes; an inconclusive probe still uses the original resolver.
-                if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) == 0)
+                try
                 {
-                    return false;
+                    // Query live attributes; an inconclusive probe still uses the original resolver.
+                    if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) == 0)
+                    {
+                        return false;
+                    }
                 }
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex)) { }
             }
-            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex)) { }
-        }
 #endif
 
-        FileSystemInfo? linkTarget = Directory.ResolveLinkTarget(directory, returnFinalTarget: true);
-        return linkTarget is not null
-            && IsSubdirectoryOf(directory, linkTarget.FullName, FileUtilities.PathComparison);
+            FileSystemInfo? linkTarget = Directory.ResolveLinkTarget(directory, returnFinalTarget: true);
+            return linkTarget is not null
+                && IsSubdirectoryOf(directory, linkTarget.FullName, FileUtilities.PathComparison);
         }
         catch (IOException) { }
         catch (ArgumentException) { }
