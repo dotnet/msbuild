@@ -315,8 +315,8 @@
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="Copy.NonWindowsLinkErrorMessage">
-        <source>The {0} library call failed with the following error code: {1}.</source>
-        <target state="translated">Kitaplık çağrısı {0} şu hata koduyla başarısız oldu: {1}.</target>
+        <source>The {0} library call failed with the following error: {1}.</source>
+        <target state="new">The {0} library call failed with the following error: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
