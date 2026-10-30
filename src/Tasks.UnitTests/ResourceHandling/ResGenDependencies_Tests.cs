@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
@@ -156,6 +157,33 @@ namespace Microsoft.Build.UnitTests
             resxFile.LinkedFiles.ShouldContain(byteFile.Path);
             resxFile.LinkedFiles.ShouldContain(memStreamFile.Path);
             resxFile.LinkedFiles.ShouldContain(bitmapPath);
+        }
+
+        [Fact]
+        public void PortableLibraryAppDomainSerializationPreservesAbsolutePath()
+        {
+            var project = _env.CreateFolder();
+            var input = project.CreateFile("input.dll");
+            ResGenDependencies.PortableLibraryFile library = new(new AbsolutePath(input.Path))
+            {
+                OutputFiles = ["first.resw", "second.resw"],
+                NeutralResourceLanguage = "en-US",
+                AssemblySimpleName = "Example"
+            };
+            using MemoryStream stream = new();
+            BinaryFormatter formatter = new();
+
+            formatter.Serialize(stream, library);
+            stream.Position = 0;
+            ResGenDependencies.PortableLibraryFile restored = formatter.Deserialize(stream).ShouldBeOfType<ResGenDependencies.PortableLibraryFile>();
+
+            restored.FileName.Value.ShouldBe(input.Path);
+            restored.LastModified.ShouldBe(library.LastModified);
+            restored.Exists.ShouldBeTrue();
+            restored.OutputFiles.ShouldBe(["first.resw", "second.resw"]);
+            restored.NeutralResourceLanguage.ShouldBe("en-US");
+            restored.AssemblySimpleName.ShouldBe("Example");
+            restored.HasFileChanged().ShouldBeFalse();
         }
 
         /// <summary>

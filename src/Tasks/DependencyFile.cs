@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -14,15 +15,12 @@ namespace Microsoft.Build.Tasks
     /// Represents a single input to a compilation-style task.
     /// Keeps track of timestamp for later comparison.
     ///
-    /// Must be serializable because instances may be marshaled cross-AppDomain, see <see cref="ProcessResourceFiles.PortableLibraryCacheInfo"/>.
+    /// Derived types marshaled across AppDomains must serialize their paths explicitly.
     /// </remarks>
-#if FEATURE_APPDOMAIN
-    [Serializable]
-#endif
     internal class DependencyFile
     {
         // Filename
-        internal string filename;
+        internal AbsolutePath filename;
 
         // Date and time the file was last modified
         internal DateTime lastModified;
@@ -33,7 +31,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The name of the file.
         /// </summary>
-        internal string FileName
+        internal AbsolutePath FileName
         {
             get { return filename; }
         }
@@ -60,7 +58,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="filename">The absolute file name.</param>
         internal DependencyFile(AbsolutePath filename)
         {
-            this.filename = FileUtilities.FixFilePath(filename);
+            this.filename = new AbsolutePath(FileUtilities.FixFilePath(filename), filename.OriginalValue, ignoreRootedCheck: true);
 
             if (FileSystems.Default.FileExists(filename))
             {
@@ -73,13 +71,23 @@ namespace Microsoft.Build.Tasks
         {
         }
 
+        protected void TranslateFileName(ITranslator translator)
+        {
+            string path = filename;
+            translator.Translate(ref path);
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                filename = new AbsolutePath(path);
+            }
+        }
+
         /// <summary>
         /// Checks whether the file has changed since the last time a timestamp was recorded.
         /// </summary>
         /// <returns></returns>
-        internal bool HasFileChanged(TaskEnvironment taskEnvironment)
+        internal bool HasFileChanged()
         {
-            FileInfo info = FileUtilities.GetFileInfoNoThrow(taskEnvironment.GetAbsolutePathOrEmpty(filename));
+            FileInfo info = FileUtilities.GetFileInfoNoThrow(filename);
 
             // Obviously if the file no longer exists then we are not up to date.
             if (info?.Exists != true)

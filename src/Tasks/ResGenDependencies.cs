@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+#if FEATURE_APPDOMAIN
+using System.Runtime.Serialization;
+#endif
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using System.Collections;
 using System.Resources;
@@ -136,7 +139,7 @@ namespace Microsoft.Build.Tasks
             {
                 // The file was there.  Is it up to date?  If not, then we'll have to refresh the file
                 // by removing it from the hashtable and readding it.
-                if (retVal.HasFileChanged(_taskEnvironment))
+                if (retVal.HasFileChanged())
                 {
                     resXFiles.Remove(resxFile);
                     _isDirty = true;
@@ -167,7 +170,7 @@ namespace Microsoft.Build.Tasks
 
             // The file is in our cache.  Make sure it's up to date.  If not, discard
             // this entry from the cache and rebuild all the state at a later point.
-            if (retVal?.HasFileChanged(_taskEnvironment) == true)
+            if (retVal?.HasFileChanged() == true)
             {
                 portableLibraries.Remove(libraryPath);
                 _isDirty = true;
@@ -249,7 +252,7 @@ namespace Microsoft.Build.Tasks
             public void Translate(ITranslator translator)
             {
                 translator.Translate(ref linkedFiles);
-                translator.Translate(ref filename);
+                TranslateFileName(translator);
                 translator.Translate(ref lastModified);
                 translator.Translate(ref exists);
             }
@@ -331,6 +334,9 @@ namespace Microsoft.Build.Tasks
         [Serializable]
 #endif
         internal sealed class PortableLibraryFile : DependencyFile, ITranslatable
+#if FEATURE_APPDOMAIN
+            , ISerializable
+#endif
         {
             internal string[] outputFiles;
             internal string neutralResourceLanguage;
@@ -340,12 +346,34 @@ namespace Microsoft.Build.Tasks
             {
             }
 
+#if FEATURE_APPDOMAIN
+            private PortableLibraryFile(SerializationInfo info, StreamingContext context)
+            {
+                filename = new AbsolutePath(info.GetString(nameof(filename)));
+                lastModified = info.GetDateTime(nameof(lastModified));
+                exists = info.GetBoolean(nameof(exists));
+                outputFiles = (string[])info.GetValue(nameof(outputFiles), typeof(string[]));
+                neutralResourceLanguage = info.GetString(nameof(neutralResourceLanguage));
+                assemblySimpleName = info.GetString(nameof(assemblySimpleName));
+            }
+
+            void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                info.AddValue(nameof(filename), filename.Value);
+                info.AddValue(nameof(lastModified), lastModified);
+                info.AddValue(nameof(exists), exists);
+                info.AddValue(nameof(outputFiles), outputFiles);
+                info.AddValue(nameof(neutralResourceLanguage), neutralResourceLanguage);
+                info.AddValue(nameof(assemblySimpleName), assemblySimpleName);
+            }
+#endif
+
             public void Translate(ITranslator translator)
             {
                 translator.Translate(ref assemblySimpleName);
                 translator.Translate(ref outputFiles);
                 translator.Translate(ref neutralResourceLanguage);
-                translator.Translate(ref filename);
+                TranslateFileName(translator);
                 translator.Translate(ref lastModified);
                 translator.Translate(ref exists);
             }

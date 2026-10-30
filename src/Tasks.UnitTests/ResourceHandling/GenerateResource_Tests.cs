@@ -313,8 +313,47 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             cache.SerializeCache(stateFile, task.Log);
 
             ResGenDependencies restored = ResGenDependencies.DeserializeCache(stateFile, false, task.Log, taskEnvironment);
-            restored.TryGetPortableLibraryInfo(input).ShouldNotBeNull().FileName.ShouldBe(Path.Combine(project.Path, "input.dll"));
+            ResGenDependencies.PortableLibraryFile restoredLibrary = restored.TryGetPortableLibraryInfo(input).ShouldNotBeNull();
+            restoredLibrary.FileName.Value.ShouldBe(Path.Combine(project.Path, "input.dll"));
+            restoredLibrary.FileName.OriginalValue.ShouldBe(input.Value);
+            restoredLibrary.HasFileChanged().ShouldBeFalse();
             restored.IsDirty.ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData(6)]
+        [InlineData(StateFileBase.CurrentSerializationVersion)]
+        public void RelativeDependencyCachesAreDiscarded(byte version)
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            var project = env.CreateFolder();
+            project.CreateFile("input.dll");
+            TaskEnvironment taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(project.Path);
+            MockEngine engine = new(output);
+            GenerateResource task = new() { BuildEngine = engine };
+            AbsolutePath stateFile = taskEnvironment.GetAbsolutePath("state.cache");
+            ResGenDependencies.PortableLibraryFile library = new(taskEnvironment.GetAbsolutePath("input.dll"));
+            // Model a dependency filename serialized before absolute paths were required.
+            library.filename = new AbsolutePath("input.dll", ignoreRootedCheck: true);
+            ResGenDependencies cache = new();
+            cache.portableLibraries.Add("input.dll", library);
+            cache.SerializeCache(stateFile, task.Log);
+            using (FileStream stream = File.OpenWrite(stateFile))
+            {
+                stream.WriteByte(version);
+            }
+
+            ResGenDependencies restored = ResGenDependencies.DeserializeCache(stateFile, true, task.Log, taskEnvironment);
+
+            restored.portableLibraries.ShouldBeEmpty();
+            restored.resXFiles.ShouldBeEmpty();
+            engine.Log.ShouldContain(stateFile.OriginalValue);
+            if (version == 6)
+            {
+                engine.Log.ShouldContain(task.Log.FormatResourceString("General.IncompatibleStateFileType"));
+            }
+            engine.Errors.ShouldBe(0);
+            engine.Warnings.ShouldBe(0);
         }
 
         private static string ReadGreeting(string projectDirectory)
