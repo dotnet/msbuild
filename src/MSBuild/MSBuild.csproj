@@ -57,8 +57,6 @@
     <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
-    <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
-    <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
 
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />

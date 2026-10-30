@@ -98,9 +98,7 @@
   <ItemGroup>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
-    <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
 
-    <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
@@ -168,12 +166,6 @@
     <Compile Include="Evaluation\PropertyFunctionReceiver.cs" />
     <Compile Include="Evaluation\ToolsetElement.cs" />
     <Compile Include="Expansion\PropertyValueConverter.cs" />
-    <Compile Include="FileAccess\DesiredAccess.cs" />
-    <Compile Include="FileAccess\FileAccessData.cs" />
-    <Compile Include="FileAccess\FlagsAndAttributes.cs" />
-    <Compile Include="FileAccess\ProcessData.cs" />
-    <Compile Include="FileAccess\ReportedFileOperation.cs" />
-    <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="IElementLocation.cs" />
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
