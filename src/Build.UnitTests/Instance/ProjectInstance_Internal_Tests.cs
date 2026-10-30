@@ -994,7 +994,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                         ProjectCollection = projectCollection,
                     });
 
-                projectInstance.GetPropertyValue(ReservedPropertyNames.interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
+                projectInstance.GetPropertyValue(ReservedPropertyNames.Interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
             }
         }
 
@@ -1022,7 +1022,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                         ProjectCollection = projectCollection,
                     });
 
-                projectInstance.GetPropertyValue(ReservedPropertyNames.interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
+                projectInstance.GetPropertyValue(ReservedPropertyNames.Interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
             }
         }
 

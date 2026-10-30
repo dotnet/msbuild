@@ -500,14 +500,14 @@ namespace Microsoft.Build.Internal
             // but on a 32 bit box this isn't set, and we should use "Program Files" instead.
             string programFiles32 = FrameworkLocationHelper.programFiles32;
             string extensionsPath32 = NativeMethodsShared.IsWindows
-                                          ? Path.Combine(programFiles32, ReservedPropertyNames.extensionsPathSuffix)
+                                          ? Path.Combine(programFiles32, ReservedPropertyNames.ExtensionsPathSuffix)
                                           : programFiles32;
 #endif
-            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath32, extensionsPath32, true));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.ExtensionsPath32, extensionsPath32, true));
 
 #if !FEATURE_INSTALLED_MSBUILD
             string extensionsPath64 = extensionsPath;
-            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.ExtensionsPath64, extensionsPath64, true));
 #else
             // "MSBuildExtensionsPath64". This points to whatever the value of "Program Files" environment variable is on a
             // 64-bit machine, and is empty on a 32-bit machine.
@@ -518,9 +518,9 @@ namespace Microsoft.Build.Internal
                 string extensionsPath64 = NativeMethodsShared.IsWindows
                                               ? Path.Combine(
                                                   FrameworkLocationHelper.programFiles64,
-                                                  ReservedPropertyNames.extensionsPathSuffix)
+                                                  ReservedPropertyNames.ExtensionsPathSuffix)
                                               : FrameworkLocationHelper.programFiles64;
-                envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
+                envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.ExtensionsPath64, extensionsPath64, true));
             }
 #endif
 
@@ -535,7 +535,7 @@ namespace Microsoft.Build.Internal
             string extensionsPath;
             if (useLegacyMSBuildExtensionsPathBehavior)
             {
-                extensionsPath = Path.Combine(programFiles, ReservedPropertyNames.extensionsPathSuffix);
+                extensionsPath = Path.Combine(programFiles, ReservedPropertyNames.ExtensionsPathSuffix);
             }
             else
             {
@@ -543,13 +543,13 @@ namespace Microsoft.Build.Internal
             }
 #endif
 
-            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath, extensionsPath, true));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.ExtensionsPath, extensionsPath, true));
 
             // Windows XP and Windows Server 2003 don't define LocalAppData in their environment.
             // We'll set it here if the environment doesn't have it so projects can reliably
             // depend on $(LocalAppData).
             string localAppData = String.Empty;
-            ProjectPropertyInstance localAppDataProp = envPropertiesHashSet.Get(ReservedPropertyNames.localAppData);
+            ProjectPropertyInstance localAppDataProp = envPropertiesHashSet.Get(ReservedPropertyNames.LocalAppData);
             if (localAppDataProp != null)
             {
                 localAppData = localAppDataProp.EvaluatedValue;
@@ -571,11 +571,11 @@ namespace Microsoft.Build.Internal
             }
 
 
-            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.localAppData, localAppData));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.LocalAppData, localAppData));
 
             // Add MSBuildUserExtensionsPath at $(LocalAppData)\Microsoft\MSBuild
-            string userExtensionsPath = Path.Combine(localAppData, ReservedPropertyNames.userExtensionsPathSuffix);
-            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.userExtensionsPath, userExtensionsPath));
+            string userExtensionsPath = Path.Combine(localAppData, ReservedPropertyNames.UserExtensionsPathSuffix);
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.UserExtensionsPath, userExtensionsPath));
 
             foreach (KeyValuePair<string, string> environmentVariable in environmentVariablesBag)
             {

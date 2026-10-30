@@ -68,7 +68,7 @@
       </trans-unit>
       <trans-unit id="Binlog_FilteredLog">
         <source>This binary log is filtered. Excluded event kinds: {0}.</source>
-        <target state="new">This binary log is filtered. Excluded event kinds: {0}.</target>
+        <target state="translated">Ce journal binaire est filtré. Types d’événements exclus : {0}.</target>
         <note>LOCALIZATION: {0} is a comma-separated list of binary log event kind names. Do not localize the event kind names.</note>
       </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
@@ -300,6 +300,16 @@
         <source>Downloads folder is untrusted for projects building.</source>
         <target state="translated">Le dossier des téléchargements n’est pas approuvé pour la génération de projets.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_MessageFmt">
+        <source>The 'WriteLinesToFile' task in project {0} does not specify the 'Overwrite' parameter. Set it explicitly to 'true' to overwrite the file or 'false' to append to it.</source>
+        <target state="translated">La tâche 'WriteLinesToFile' dans le projet {0} ne spécifie pas le paramètre 'Overwrite'. Définissez-le explicitement sur « true » pour remplacer le fichier ou sur « false » pour l’ajouter.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_Title">
+        <source>The 'Overwrite' parameter should be specified when using the 'WriteLinesToFile' task.</source>
+        <target state="translated">Le paramètre 'Overwrite' doit être spécifié lors de l’utilisation de la tâche 'WriteLinesToFile'.</target>
+        <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>

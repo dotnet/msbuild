@@ -89,9 +89,8 @@
   <!-- The MSBuild object model under test: this branch's AOT-enabled engine build.
        RuntimeIdentifier is removed for the reference so Microsoft.Build builds RID-agnostic managed
        IL (ILC compiles the whole closure to native during the harness's own AOT publish).
-       Microsoft.Build.Utilities.Core is referenced too because real SDK targets invoke
-       [Microsoft.Build.Utilities.ToolLocationHelper]::... property functions during evaluation, so its
-       assembly must be loadable (and linked into the AOT image); it is likewise IsAotCompatible. -->
+       Microsoft.Build.Utilities.Core is referenced because the harness directly exercises its public
+       Task, TaskItem, and task-registration APIs; it is likewise IsAotCompatible. -->
   <ItemGroup>
     <ProjectReference Include="..\Build\Microsoft.Build.csproj"
                       GlobalPropertiesToRemove="RuntimeIdentifier" />
@@ -120,18 +119,6 @@
   -->
   <ItemGroup>
     <PackageReference Include="NuGet.Frameworks" Version="7.9.0-rc.37" />
-  </ItemGroup>
-
-  <!--
-    The property-function allowlist registers cross-assembly receiver types (e.g.
-    Microsoft.Build.Utilities.ToolLocationHelper, which the SDK invokes during evaluation) by their
-    assembly-qualified name and resolves them at runtime via Type.GetType (Expander.Function.cs). Under
-    Native AOT that only succeeds if the type's reflection metadata is preserved, so root the whole
-    Microsoft.Build.Utilities.Core assembly. A real AOT host that wants these property functions to work
-    takes the same step; the assembly is IsAotCompatible, so rooting it keeps the publish warning-clean.
-  -->
-  <ItemGroup>
-    <TrimmerRootAssembly Include="Microsoft.Build.Utilities.Core" />
   </ItemGroup>
 
 </Project>

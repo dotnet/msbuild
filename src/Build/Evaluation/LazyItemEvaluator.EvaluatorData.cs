@@ -201,9 +201,9 @@ namespace Microsoft.Build.Evaluation
                 return _wrappedData.GetProperty(name);
             }
 
-            public P GetProperty(string name, int startIndex, int endIndex)
+            public P GetProperty(string name, int startIndex, int length)
             {
-                return _wrappedData.GetProperty(name, startIndex, endIndex);
+                return _wrappedData.GetProperty(name, startIndex, length);
             }
 
             public ProjectTargetInstance GetTarget(string targetName)
