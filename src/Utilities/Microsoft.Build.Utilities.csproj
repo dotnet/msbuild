@@ -41,9 +41,6 @@
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>Shared\ResourceUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Tracing.cs">
-      <Link>Shared\Tracing.cs</Link>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>

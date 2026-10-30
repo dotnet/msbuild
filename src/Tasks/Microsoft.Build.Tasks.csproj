@@ -40,7 +40,6 @@
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
     <Compile Include="ConvertToAbsolutePath.cs" />
-    <Compile Include="..\Shared\Tracing.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="AppConfig\*.cs" />
