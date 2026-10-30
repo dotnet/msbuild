@@ -272,7 +272,7 @@ namespace Microsoft.Build.Tasks
 
                 if (useMSBuildResXReader)
                 {
-                    foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, pathsRelativeToBasePath: baseLinkedFileDirectory == null, log, logWarningForBinaryFormatter, taskEnvironment))
+                    foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, pathsRelativeToBasePath: baseLinkedFileDirectory == null, log, logWarningForBinaryFormatter, taskEnvironment.ProjectDirectory))
                     {
                         if (resource is ILinkedFileResource linked)
                         {

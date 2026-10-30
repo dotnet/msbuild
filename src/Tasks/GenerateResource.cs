@@ -3118,7 +3118,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(TaskEnvironment.GetAbsolutePath(filename), shouldUseSourcePath, _logger, _logWarningForBinaryFormatter, TaskEnvironment))
+                                foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(TaskEnvironment.GetAbsolutePath(filename), shouldUseSourcePath, _logger, _logWarningForBinaryFormatter, TaskEnvironment.ProjectDirectory))
                                 {
                                     AddResource(reader, resource, filename, 0, 0);
                                 }
