@@ -76,7 +76,7 @@ namespace Microsoft.Build.Shared
     /// <summary>
     /// Functions for matching file names with patterns.
     /// </summary>
-    internal class FileMatcher
+    internal partial class FileMatcher
     {
         internal enum CacheDriverProfile : byte
         {
@@ -250,6 +250,11 @@ namespace Microsoft.Build.Shared
                                 "*",
                                 directory,
                                 false));
+                    if (!stripProjectDirectory && (pattern is null || IsAllFilesWildcard(pattern)))
+                    {
+                        return allEntriesForPath;
+                    }
+
                     IEnumerable<string> filteredEntriesForPath = (pattern != null && !IsAllFilesWildcard(pattern))
                         ? allEntriesForPath.Where(o => IsFileNameMatch(o, pattern))
                         : allEntriesForPath;
@@ -826,29 +831,25 @@ namespace Microsoft.Build.Shared
             bool directoryLastCharIsSeparator = IsDirectorySeparator(projectDirectory[projectDirectory.Length - 1]);
             foreach (string path in paths)
             {
-                if (path.StartsWith(projectDirectory, StringComparison.Ordinal))
-                {
-                    // If the project directory did not end in a slash we need to check to see if the next char in the path is a slash
-                    if (!directoryLastCharIsSeparator)
-                    {
-                        // If the next char after the project directory is not a slash, skip this path
-                        if (path.Length <= projectDirectory.Length || !IsDirectorySeparator(path[projectDirectory.Length]))
-                        {
-                            yield return path;
-                            continue;
-                        }
-                        yield return path.Substring(projectDirectory.Length + 1);
-                    }
-                    else
-                    {
-                        yield return path.Substring(projectDirectory.Length);
-                    }
-                }
-                else
-                {
-                    yield return path;
-                }
+                yield return RemoveProjectDirectory(path, projectDirectory, directoryLastCharIsSeparator);
             }
+        }
+
+        private static string RemoveProjectDirectory(string path, string projectDirectory, bool directoryLastCharIsSeparator)
+        {
+            if (!path.StartsWith(projectDirectory, StringComparison.Ordinal))
+            {
+                return path;
+            }
+
+            if (directoryLastCharIsSeparator)
+            {
+                return path.Substring(projectDirectory.Length);
+            }
+
+            return path.Length > projectDirectory.Length && IsDirectorySeparator(path[projectDirectory.Length])
+                ? path.Substring(projectDirectory.Length + 1)
+                : path;
         }
 
         private struct RecursiveStepResult
@@ -2060,11 +2061,13 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
+        /// <param name="globExpander">Optional expansion shared by sibling globs in one item operation.</param>
         /// <returns>The search action, array of files, Exclude file spec (if applicable), and glob failure message (if applicable) .</returns>
         internal (string[] FileList, SearchAction Action, string ExcludeFileSpec, string? GlobFailure) GetFiles(
             string? projectDirectoryUnescaped,
             string filespecUnescaped,
-            List<string>? excludeSpecsUnescaped = null)
+            List<string>? excludeSpecsUnescaped = null,
+            GlobExpander? globExpander = null)
         {
             // For performance. Short-circuit iff there is no wildcard.
             if (!HasWildcards(filespecUnescaped))
@@ -2090,7 +2093,8 @@ namespace Microsoft.Build.Shared
                     projectDirectoryUnescaped,
                     filespecUnescaped,
                     excludeSpecsUnescaped,
-                    selection);
+                    selection,
+                    globExpander);
             }
 
             var enumerationKey = ComputeFileEnumerationCacheKey(
@@ -2121,13 +2125,16 @@ namespace Microsoft.Build.Shared
                                         projectDirectoryUnescaped,
                                         filespecUnescaped,
                                         excludeSpecsUnescaped,
-                                        selection);
+                                        selection,
+                                        globExpander);
 
                                     return fileList;
                                 });
                     }
                 }
             }
+
+            globExpander?.NotifyCompleted(filespecUnescaped);
 
             // Copy the file enumerations to prevent outside modifications of the cache (e.g. sorting, escaping) and to maintain the original method contract that a new array is created on each call.
             var filesToReturn = files.ToArray();
@@ -2528,8 +2535,14 @@ namespace Microsoft.Build.Shared
             string? projectDirectoryUnescaped,
             string filespecUnescaped,
             List<string>? excludeSpecsUnescaped,
-            DriverSelection selection)
+            DriverSelection selection,
+            GlobExpander? globExpander = null)
         {
+            if (globExpander is not null)
+            {
+                return globExpander.GetFiles(filespecUnescaped, selection);
+            }
+
             return selection.Driver switch
             {
                 FileMatcherDriver.Legacy => GetFilesImplementation(
@@ -3001,7 +3014,8 @@ namespace Microsoft.Build.Shared
             string? projectDirectoryUnescaped,
             string filespecUnescaped,
             List<string>? excludeSpecsUnescaped,
-            FileMatcherDriver driver)
+            FileMatcherDriver driver,
+            Action<RecursionState, bool, MSBuildPathMatcher, List<OptimizedFileSearch>?, HashSet<string>?>? prepareSearch = null)
         {
             SearchAction action = GetFileSearchData(
                 projectDirectoryUnescaped,
@@ -3094,7 +3108,6 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            List<string> files = [];
             bool useDirectEnumeration = driver == FileMatcherDriver.OptimizedDirect;
 
             MSBuildPathMatcher includeMatcher = CreatePathMatcher(
@@ -3103,6 +3116,13 @@ namespace Microsoft.Build.Shared
                 matchForExclusion: false,
                 useCachedCallback: !useDirectEnumeration && _usesFileSystemEntryCache);
 
+            if (prepareSearch is not null)
+            {
+                prepareSearch(state, stripProjectDirectory, includeMatcher, excludesToMatch, literalExcludes);
+                return ([], trackedAction, trackedExcludeFileSpec, null);
+            }
+
+            List<string> files = [];
             try
             {
                 if (ShouldSkipRecursiveDirectory(state.BaseDirectory))
@@ -3375,42 +3395,41 @@ namespace Microsoft.Build.Shared
 
                 return false;
             }
+        }
 
-            static bool TryGetRelativeDirectory(
-                string baseDirectory,
-                string directory,
-                out ReadOnlySpan<char> relativeDirectory)
+        private static bool TryGetRelativeDirectory(
+            string baseDirectory,
+            ReadOnlySpan<char> directory,
+            out ReadOnlySpan<char> relativeDirectory)
+        {
+            ReadOnlySpan<char> baseSpan = baseDirectory.AsSpan();
+            while (baseSpan.Length > 1 && FileUtilities.IsSlash(baseSpan[^1]))
             {
-                ReadOnlySpan<char> baseSpan = baseDirectory.AsSpan();
-                while (baseSpan.Length > 1 && FileUtilities.IsSlash(baseSpan[^1]))
-                {
-                    baseSpan = baseSpan[..^1];
-                }
+                baseSpan = baseSpan[..^1];
+            }
 
-                ReadOnlySpan<char> directorySpan = directory.AsSpan();
-                if (directorySpan.Equals(baseSpan, StringComparison.OrdinalIgnoreCase))
-                {
-                    relativeDirectory = default;
-                    return true;
-                }
-
-                if (!directorySpan.StartsWith(baseSpan, StringComparison.OrdinalIgnoreCase)
-                    || directorySpan.Length <= baseSpan.Length
-                    || !FileUtilities.IsSlash(directorySpan[baseSpan.Length]))
-                {
-                    relativeDirectory = default;
-                    return false;
-                }
-
-                int relativeStart = baseSpan.Length;
-                while (relativeStart < directorySpan.Length && FileUtilities.IsSlash(directorySpan[relativeStart]))
-                {
-                    relativeStart++;
-                }
-
-                relativeDirectory = directorySpan[relativeStart..];
+            if (directory.Equals(baseSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                relativeDirectory = default;
                 return true;
             }
+
+            if (!directory.StartsWith(baseSpan, StringComparison.OrdinalIgnoreCase)
+                || directory.Length <= baseSpan.Length
+                || !FileUtilities.IsSlash(directory[baseSpan.Length]))
+            {
+                relativeDirectory = default;
+                return false;
+            }
+
+            int relativeStart = baseSpan.Length;
+            while (relativeStart < directory.Length && FileUtilities.IsSlash(directory[relativeStart]))
+            {
+                relativeStart++;
+            }
+
+            relativeDirectory = directory[relativeStart..];
+            return true;
         }
 
         private RegexOptions CaseInsensitiveRegexOptions => ResolvedCaseFolding == FileMatcherCaseFolding.InvariantCulture

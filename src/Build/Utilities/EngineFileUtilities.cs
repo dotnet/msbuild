@@ -98,6 +98,7 @@ namespace Microsoft.Build.Internal
         /// used after drive enumeration detection.</param>
         /// <param name="disableExcludeDriveEnumerationWarning">Flag used to detect when to properly log a warning
         /// for the Exclude attribute after detecting a drive enumerating wildcard.</param>
+        /// <param name="globExpander">Optional sibling-glob expansion shared by the item operation.</param>
         /// <returns>Array of file paths, escaped.</returns>
         internal static string[] GetFileListEscaped(
             string? directoryEscaped,
@@ -111,7 +112,8 @@ namespace Microsoft.Build.Internal
             IElementLocation? importLocation = null,
             BuildEventContext? buildEventContext = null,
             string? projectFilePath = null,
-            bool disableExcludeDriveEnumerationWarning = false)
+            bool disableExcludeDriveEnumerationWarning = false,
+            FileMatcher.GlobExpander? globExpander = null)
         {
             return GetFileList(
                 directoryEscaped,
@@ -126,7 +128,32 @@ namespace Microsoft.Build.Internal
                 importLocation: importLocation,
                 projectFilePath: projectFilePath,
                 buildEventContext: buildEventContext,
-                disableExcludeDriveEnumerationWarning: disableExcludeDriveEnumerationWarning);
+                disableExcludeDriveEnumerationWarning: disableExcludeDriveEnumerationWarning,
+                globExpander: globExpander);
+        }
+
+        internal static FileMatcher.GlobExpander? CreateGlobExpander(
+            string? directoryEscaped,
+            IReadOnlyList<string> filespecsEscaped,
+            IEnumerable<string>? excludeSpecsEscaped,
+            FileMatcher fileMatcher)
+        {
+            List<string> specifications = new(filespecsEscaped.Count);
+            foreach (string specification in filespecsEscaped)
+            {
+                if (FilespecHasWildcards(specification) && !FilespecMatchesLazyWildcard(specification, forceEvaluateWildCards: false))
+                {
+                    specifications.Add(EscapingUtilities.UnescapeAll(specification));
+                }
+            }
+
+            return specifications.Count > 1
+                ? new FileMatcher.GlobExpander(
+                    fileMatcher,
+                    EscapingUtilities.UnescapeAll(directoryEscaped),
+                    specifications,
+                    UnescapeExcludes(excludeSpecsEscaped))
+                : null;
         }
 
         internal static bool FilespecHasWildcards(string filespecEscaped)
@@ -170,6 +197,7 @@ namespace Microsoft.Build.Internal
         /// <param name="disableExcludeDriveEnumerationWarning">Flag used to detect when to properly log a warning
         /// for the Exclude attribute after detecting a drive enumerating wildcard.</param>
         /// <returns>Array of file paths.</returns>
+        /// <param name="globExpander">Optional sibling-glob expansion shared by the item operation.</param>
         private static string[] GetFileList(
             string? directoryEscaped,
             string? filespecEscaped,
@@ -183,7 +211,8 @@ namespace Microsoft.Build.Internal
             IElementLocation? importLocation = null,
             BuildEventContext? buildEventContext = null,
             string? projectFilePath = null,
-            bool disableExcludeDriveEnumerationWarning = false)
+            bool disableExcludeDriveEnumerationWarning = false,
+            FileMatcher.GlobExpander? globExpander = null)
         {
             Assumed.NotNullOrEmpty(filespecEscaped);
 
@@ -214,7 +243,7 @@ namespace Microsoft.Build.Internal
                 // Unescape before handing it to the filesystem.
                 var directoryUnescaped = EscapingUtilities.UnescapeAll(directoryEscaped);
                 var filespecUnescaped = EscapingUtilities.UnescapeAll(filespecEscaped);
-                var excludeSpecsUnescaped = excludeSpecsEscaped?.Where(IsValidExclude).Select(i => EscapingUtilities.UnescapeAll(i)).ToList();
+                var excludeSpecsUnescaped = UnescapeExcludes(excludeSpecsEscaped);
 
                 // Extract file spec information
                 FileMatcher.Default.GetFileSpecInfo(filespecUnescaped, out string directoryPart, out string wildcardPart, out string filenamePart, out bool needsRecursion, out bool isLegalFileSpec);
@@ -342,7 +371,8 @@ namespace Microsoft.Build.Internal
                     // as a relative path, we will get back a bunch of relative paths.
                     // If the filespec started out as an absolute path, we will get
                     // back a bunch of absolute paths
-                    (fileList, _, _, string? globFailure) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+                    (fileList, _, _, string? globFailure) = fileMatcher.GetFiles(
+                        directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped, globExpander);
 
                     // log globing failure with the present logging mechanism, skip if there is no logging mechanism
                     if (globFailure != null && loggingMechanism != null)
@@ -555,6 +585,9 @@ namespace Microsoft.Build.Internal
         {
             return Traits.Instance.UseLazyWildCardEvaluation && !forceEvaluateWildCards && MatchesLazyWildcard(filespecEscaped);
         }
+
+        private static List<string>? UnescapeExcludes(IEnumerable<string>? excludeSpecsEscaped) =>
+            excludeSpecsEscaped?.Where(IsValidExclude).Select(exclude => EscapingUtilities.UnescapeAll(exclude)).ToList();
 
         private static bool IsValidExclude(string exclude)
         {
