@@ -128,6 +128,8 @@ internal partial class FileMatcher
                         entry.Matcher = matcher;
                         entry.Excludes = wildcardExcludes;
                         entry.LiteralExcludes = literalExcludes;
+                        entry.RequiresLegacyPathMatching = selection.Driver == FileMatcherDriver.Legacy
+                            && state.SearchData.Filespec is null;
                     });
             }
 
@@ -183,13 +185,15 @@ internal partial class FileMatcher
 
             for (int index = 0; index < group.Count; index++)
             {
-                if (searches[index].RootReached && !HasAmbiguousSortOrder(searches[index].Files))
+                if (searches[index].RootReached
+                    && !searches[index].RequiresLegacyFallback
+                    && !HasAmbiguousSortOrder(searches[index].Files))
                 {
                     group[index].Files = [.. searches[index].Files];
                 }
                 else
                 {
-                    // Keep the original walk for unreached roots or case-insensitive sort ties.
+                    // Keep the original walk for unreached roots, legacy path matching, or case-insensitive sort ties.
                     group[index].Matcher = null;
                 }
             }
@@ -252,6 +256,7 @@ internal partial class FileMatcher
                     {
                         searches[index].Files.AddRange(partition[index].Files);
                         searches[index].RootReached |= partition[index].RootReached;
+                        searches[index].RequiresLegacyFallback |= partition[index].RequiresLegacyFallback;
                     }
                 }
             }
@@ -391,6 +396,7 @@ internal partial class FileMatcher
             internal MSBuildPathMatcher? Matcher;
             internal List<OptimizedFileSearch>? Excludes;
             internal HashSet<string>? LiteralExcludes;
+            internal bool RequiresLegacyPathMatching;
         }
 
         private sealed class Search(Entry entry, string projectDirectory)
@@ -409,6 +415,7 @@ internal partial class FileMatcher
             internal string ProjectDirectory { get; } = projectDirectory;
             internal List<string> Files { get; } = [];
             internal bool RootReached;
+            internal bool RequiresLegacyFallback;
 
             internal bool BeginDirectory(string directory, out bool canMatchDescendants)
             {
@@ -441,6 +448,13 @@ internal partial class FileMatcher
 
             internal void AddFile(string file)
             {
+                if (Entry.RequiresLegacyPathMatching && file.IndexOf('\n') >= 0)
+                {
+                    // The original whole-path predicate can treat newlines differently than segment matching.
+                    RequiresLegacyFallback = true;
+                    return;
+                }
+
                 if ((_filePattern is not null && !IsFileNameMatch(file, _filePattern))
                     || !_matcher.MatchesFileName(file))
                 {

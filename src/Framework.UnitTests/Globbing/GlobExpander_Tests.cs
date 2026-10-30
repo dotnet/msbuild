@@ -69,6 +69,56 @@ public sealed class GlobExpander_Tests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void NewlineAncestorPreservesLegacyMatchingAndCachedResults()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string root = env.CreateFolder().Path;
+        string normal = Path.Combine(root, "normal");
+        string normalSubdirectory = Path.Combine(normal, "sub");
+        // Model Unix names without validating or creating them on Windows.
+        string newline = root + Path.DirectorySeparatorChar + "line\nbreak";
+        string newlineSubdirectory = newline + Path.DirectorySeparatorChar + "sub";
+        string[] directories =
+        [
+            normal, newline,
+            .. Enumerable.Range(0, Math.Max(1, NativeMethods.GetLogicalCoreCount() / 2))
+                .Select(index => Path.Combine(root, $"empty{index}"))
+        ];
+        string[] specifications = [Normalize("**/sub/*.cs"), Normalize("**/sub/*.targets")];
+
+        IReadOnlyList<string> GetEntries(FileMatcher.FileSystemEntity type, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
+        {
+            path = path.TrimEnd(Path.DirectorySeparatorChar);
+            if (type == FileMatcher.FileSystemEntity.Directories)
+            {
+                return path == root ? directories
+                    : path == normal ? [normalSubdirectory]
+                    : path == newline ? [newlineSubdirectory]
+                    : [];
+            }
+
+            return path == normalSubdirectory
+                ? [Path.Combine(path, "source.cs"), Path.Combine(path, "build.targets")]
+                : path == newlineSubdirectory ? [path + Path.DirectorySeparatorChar + "source.cs"]
+                : [];
+        }
+
+        FileMatcher reference = new(FileSystems.Default, GetEntries, new(), allowDirectEnumeration: true);
+        FileMatcher matcher = new(FileSystems.Default, GetEntries, new(), allowDirectEnumeration: true);
+        FileMatcher.GlobExpander expander = new(matcher, root, specifications, null);
+        foreach (string glob in specifications)
+        {
+            string[] expected = reference.GetFiles(root, glob).FileList;
+            expected.ShouldHaveSingleItem();
+            string[] actual = matcher.GetFiles(root, glob, globExpander: expander).FileList;
+
+            actual.OrderBy(path => path, StringComparer.Ordinal).ShouldBe(
+                expected.OrderBy(path => path, StringComparer.Ordinal));
+            matcher.GetFiles(root, glob).FileList.ShouldBe(actual);
+        }
+    }
+
+    [Fact]
     public void CaseDistinctFixedRootsDoNotCrossMatchOrContaminateTheCache()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);

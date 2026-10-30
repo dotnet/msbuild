@@ -115,6 +115,40 @@ public sealed class SiblingGlobExpansion_Tests : IDisposable
             ["root.props", "lazy/**/*.props", Normalize("build/Common.targets")]);
     }
 
+    [UnixOnlyTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void NewlineAncestorPreservesItemsWithFusionEnabledOrDisabled(bool disableFusion)
+    {
+        _environment.SetEnvironmentVariable(
+            "MSBUILDDISABLEFEATURESFROMVERSION",
+            disableFusion ? ChangeWaves.Wave18_14.ToString() : null);
+        ChangeWaves.ResetStateForTests();
+        const string xml = """
+            <Project>
+              <ItemGroup>
+                <None Include="**/sub/*.cs;**/*.targets" />
+                <Independent Include="**/sub/*.cs" />
+              </ItemGroup>
+            </Project>
+            """;
+        TransientTestProjectWithFiles files = _environment.CreateTestProjectWithFiles(
+            xml,
+            [
+                Normalize("normal/sub/source.cs"),
+                Normalize("line\nbreak/sub/source.cs"),
+                Normalize("line\nbreak/build.targets")
+            ]);
+        using ProjectCollection collection = new();
+        collection.RegisterLogger(new MockLogger(_output));
+        Project project = new(files.ProjectFile, null, null, collection);
+
+        project.GetItems("None").Select(item => item.EvaluatedInclude).ShouldBe(
+            [Normalize("normal/sub/source.cs"), Normalize("line\nbreak/build.targets")]);
+        project.GetItems("Independent").Select(item => item.EvaluatedInclude).ShouldBe(
+            [Normalize("normal/sub/source.cs")]);
+    }
+
     [Fact]
     public void FalseConditionStillSkipsFilesystemWideSibling()
     {
