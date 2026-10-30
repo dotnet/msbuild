@@ -62,7 +62,7 @@ an assertion that every item needs a new analyzer rule.
 | --- | --- |
 | Task-side existence checks and timestamp probes, including sources, outputs, strongly typed files, references, additional inputs, and linked dependencies | No GenerateResource baseline finding covered `FileSystems.Default` or `NativeMethodsShared` calls. Wrapper, external-compilation, and virtual-dispatch boundaries require manual inspection. `RelativeTextAndStronglyTypedOutputsUseProjectDirectory`, `AdditionalInputsUseProjectDirectory`, and `LinkedResourcesAndCacheUseProjectDirectory` check actual files and incremental decisions outside process CWD. |
 | `DependencyFile.HasFileChanged` and text-output `FileUtilities.OpenWrite` | These wrapper-based I/O operations were not reported. They now receive resolved paths; resource transformation tests and incremental cache tests exercise the call sites. |
-| Output duplicate identity | `FullPath` metadata follows the engine's thread-local working directory, but may have been cached under a different directory than an injected task environment. `DuplicateOutputsAreCanonicalized` covers relative aliases and a relative/absolute pair identifying the same project output. |
+| Output duplicate identity | `FullPath` metadata already follows the engine's thread-local working directory and canonicalizes aliases. Duplicate detection uses it directly and retains the resolved path for timestamp checks while preserving the original item spelling. `DuplicateOutputsAreCanonicalized` covers relative aliases and a relative/absolute pair identifying the same project output. |
 | State-file reads/writes, absolute resource-cache keys, and dependency filenames | No GenerateResource baseline finding covered this context propagation. `RelativeTextAndStronglyTypedOutputsUseProjectDirectory`, `LinkedResourcesAndCacheUseProjectDirectory`, and `InstancesWithSharedCacheRemainIndependent` verify cache files, invalidation, and distinct projects using the same relative source name. `AbsolutePortableLibraryCacheRoundTrips` checks that portable-library insertion, lookup, and serialization use the same absolute identity. |
 | Linked byte-array and MemoryStream reads | `FileSystems.Default.ReadFileAllBytes` was not reported. `LinkedResourcesUseExplicitProjectDirectory` exercises both types using a project directory distinct from process CWD. |
 | Delayed `FileStreamResource.AddTo` reads | Analysis did not follow `IResource.AddTo` dispatch to its eventual `FileStream` constructor. The resource now retains an `AbsolutePath`; the same reader theory serializes a delayed resource and verifies its payload while retaining the original linked-file and originating-file strings. |
@@ -119,14 +119,14 @@ and task items, not `AbsolutePath`.
 The latest completed analyzer command was:
 
 ```powershell
-dotnet msbuild src\Tasks\Microsoft.Build.Tasks.csproj -t:Rebuild -p:TargetFramework=net11.0 -p:BuildAnalyzer=true -p:RunAnalyzersDuringBuild=true -p:TreatWarningsAsErrors=true -p:WarningsNotAsErrors= -v:quiet "-bl:artifacts\log\resource-reused-paths-analyzer-{}.binlog" "-flp:v=normal;LogFile=artifacts\log\generate-resource-path-reuse-analyzer.log"
+dotnet msbuild src\Tasks\Microsoft.Build.Tasks.csproj -t:Rebuild -p:TargetFramework=net11.0 -p:BuildAnalyzer=true -p:RunAnalyzersDuringBuild=true -p:TreatWarningsAsErrors=true -p:WarningsNotAsErrors= -noconsolelogger "-bl:artifacts\log\resource-fullpath-metadata-analyzer-{}.binlog" "-flp:v=normal;LogFile=artifacts\log\generate-resource-fullpath-analyzer.log"
 ```
 
 Result: the 48 unchanged, unrelated errors above; no GenerateResource findings,
-compiler errors, or warnings. This includes the explicit reader APIs and the
-path-reuse refactor.
+compiler errors, or warnings. This includes the explicit reader APIs,
+path-reuse refactor, and direct use of `FullPath` metadata.
 
-The final resource-and-cache test run used:
+The broader resource-and-cache test run used:
 
 ```powershell
 dotnet test (Resolve-Path src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj).Path -c Release --no-restore "-bl:artifacts\log\resource-reused-paths-final-{}.binlog" -- --filter-class "*GenerateResource_Tests*" --filter-class "*MSBuildResXReader_Tests*" --filter-class "*ResGenDependencies_Tests*" --filter-class "*ResolveAssemblyReferenceCacheSerialization*" --filter-not-method "*ResgenCommandLineExceedsAllowedLength"
@@ -134,6 +134,16 @@ dotnet test (Resolve-Path src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.cs
 
 Result: compilation succeeded without warnings or errors; 329 tests passed,
 14 were skipped, and none failed across net11.0 and .NET Framework.
+
+After duplicate detection switched to using `FullPath` metadata directly, the
+GenerateResource suite was rerun:
+
+```powershell
+dotnet test (Resolve-Path src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj).Path -c Release --no-restore "-bl:artifacts\log\resource-fullpath-metadata-{}.binlog" -- --filter-class "*GenerateResource_Tests*" --filter-not-method "*ResgenCommandLineExceedsAllowedLength"
+```
+
+Result: compilation succeeded without warnings or errors; 247 tests passed,
+14 were skipped, and none failed across both target frameworks.
 
 After both reader entry points switched to explicit `AbsolutePath` arguments,
 the focused reader suite was rerun:

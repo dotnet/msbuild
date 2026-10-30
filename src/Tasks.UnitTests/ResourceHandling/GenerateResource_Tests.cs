@@ -301,6 +301,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             task.Execute().ShouldBeFalse();
             engine.Errors.ShouldBe(1);
+            engine.Log.ShouldContain(task.Log.FormatResourceString("GenerateResource.DuplicateOutputFilenames", alias));
         }
 
         [Fact]

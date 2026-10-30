@@ -1563,13 +1563,8 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     // Get the fully qualified path, to ensure two file names don't end up pointing to the same directory.
-#if FEATURE_RESXREADER_LIVEDESERIALIZATION
                     string fullPath = item.GetMetadata("FullPath");
-                    paths[i] = TaskEnvironment.GetAbsolutePathOrEmpty(item.ItemSpec);
-#else
-                    paths[i] = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
-                    string fullPath = paths[i].GetCanonicalForm();
-#endif
+                    paths[i] = new AbsolutePath(fullPath, item.ItemSpec, ignoreRootedCheck: true);
                     if (!set.Add(fullPath))
                     {
                         Log.LogErrorWithCodeFromResources("GenerateResource.DuplicateOutputFilenames", item.ItemSpec);
