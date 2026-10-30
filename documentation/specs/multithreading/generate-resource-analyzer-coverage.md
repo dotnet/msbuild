@@ -40,7 +40,7 @@ All 16 GenerateResource baseline errors were `MSBuildTask0005`:
 | `PortableLibraryFile.AllOutputFilesAreUpToDate`: `FileInfo` | 1 | Accept and use the task environment. |
 | `ResGenDependencies.UseSourcePath`: `Directory.GetCurrentDirectory` | 1 | Use the task's project directory when `UseSourcePath` is false. |
 | Linked string resource: `StreamReader` | 1 | Resolve the linked file through the task environment. |
-| `MSBuildResXReader`: input `FileStream` | 1 | Change the file-reading entry point to require `AbsolutePath` and pass the task environment. |
+| `MSBuildResXReader`: input `FileStream` | 1 | Change the file-reading entry point to require an `AbsolutePath` filename and explicit absolute base directory. |
 
 The four `EnsurePathIsShortEnough` reports describe a path that cannot execute on
 net11.0: reading assembly resources is already rejected before the assembly
@@ -62,11 +62,11 @@ an assertion that every item needs a new analyzer rule.
 | --- | --- |
 | Task-side existence checks and timestamp probes, including sources, outputs, strongly typed files, references, additional inputs, and linked dependencies | No GenerateResource baseline finding covered `FileSystems.Default` or `NativeMethodsShared` calls. Wrapper, external-compilation, and virtual-dispatch boundaries require manual inspection. `RelativeTextAndStronglyTypedOutputsUseProjectDirectory`, `AdditionalInputsUseProjectDirectory`, and `LinkedResourcesAndCacheUseProjectDirectory` check actual files and incremental decisions outside process CWD. |
 | `DependencyFile.HasFileChanged` and text-output `FileUtilities.OpenWrite` | These wrapper-based I/O operations were not reported. They now receive resolved paths; resource transformation tests and incremental cache tests exercise the call sites. |
-| Output duplicate identity | `FullPath` metadata is trusted by the analyzer, but directly constructed `TaskItem` instances can compute it using process CWD rather than the injected environment. `DuplicateOutputsAreCanonicalized` covers relative aliases and a relative/absolute pair identifying the same project output. |
+| Output duplicate identity | `FullPath` metadata follows the engine's thread-local working directory, but may have been cached under a different directory than an injected task environment. `DuplicateOutputsAreCanonicalized` covers relative aliases and a relative/absolute pair identifying the same project output. |
 | State-file reads/writes, absolute resource-cache keys, and dependency filenames | No GenerateResource baseline finding covered this context propagation. `RelativeTextAndStronglyTypedOutputsUseProjectDirectory`, `LinkedResourcesAndCacheUseProjectDirectory`, and `InstancesWithSharedCacheRemainIndependent` verify cache files, invalidation, and distinct projects using the same relative source name. `AbsolutePortableLibraryCacheRoundTrips` checks that portable-library insertion, lookup, and serialization use the same absolute identity. |
 | Linked byte-array and MemoryStream reads | `FileSystems.Default.ReadFileAllBytes` was not reported. `LinkedResourcesUseExplicitProjectDirectory` exercises both types using a project directory distinct from process CWD. |
 | Delayed `FileStreamResource.AddTo` reads | Analysis did not follow `IResource.AddTo` dispatch to its eventual `FileStream` constructor. The resource now retains an `AbsolutePath`; the same reader theory serializes a delayed resource and verifies its payload while retaining the original linked-file and originating-file strings. |
-| Diagnostic file paths and cleanup existence checks | `FileUtilities.GetFullPathNoThrow` and filesystem-wrapper uses were not reported. `MalformedInputReportsProjectFile`, `MissingInputKeepsOriginalDiagnosticPath`, and `FailureCleanupUsesProjectDirectory` check reported paths and cleanup. The direct cleanup deletion was separately reported, as listed above. |
+| Diagnostic file paths and cleanup existence checks | `FileUtilities.GetFullPathNoThrow` and filesystem-wrapper uses were not reported. `MalformedInputReportsProjectFile`, `MalformedTextKeepsOriginalDiagnosticPath`, `MissingInputKeepsOriginalDiagnosticPath`, and `FailureCleanupUsesProjectDirectory` check reported paths and cleanup. The direct cleanup deletion was separately reported, as listed above. |
 | TaskEnvironment injection into GenerateResource and its processor | Plumbing needed to resolve the reported operations; not a separate baseline diagnostic. Processor injection is excluded from AppDomain builds because `TaskEnvironment` cannot be marshaled across AppDomains. .NET Framework resource tests exercise the retained behavior. |
 | Original output spelling, metadata, optional paths, and cache dirty-state reset | Compatibility obligations, not analyzer defects. Tests check relative `Sources`, `OutputResources`, `FilesWritten`, custom metadata, default/explicit strongly typed filenames, null/empty state-file inputs, and `AbsoluteStateFileResetsDirtyFlag`. The typed serialization override preserves the original dirty-state reset. |
 | Feature-dependent routing | `AttributeMatchesResourceReaderCapabilities` runs on both target frameworks. .NET Framework remains unannotated even when `UsePreserializedResources` is true. |
@@ -79,27 +79,72 @@ than suppressed.
 File-reading and cache helpers require `AbsolutePath` at their call boundaries;
 callers resolve paths with their task environment rather than using redundant
 string/fallback adapters. Environment-dependent helpers likewise require an
-explicit `TaskEnvironment`. Originating-file metadata and optional base paths
-for string-based resource parsing remain strings because they are not file I/O
-arguments.
+explicit `TaskEnvironment`. Both reader entry points require an explicit
+absolute linked-file base directory; the string reader also accepts an optional
+`AbsolutePath` filename. Parsing uses these paths directly, with no dependency
+on `TaskEnvironment`. File-reading callers pass `TaskEnvironment.ProjectDirectory`;
+string-reading tests supply their own absolute directory and optional filename.
+Resource metadata and diagnostics use `filename.OriginalValue`. The original
+source-relative versus project-relative resolution and delayed handling of empty
+linked paths are preserved.
+
+Dependency files retain `AbsolutePath` internally and check timestamps directly,
+without re-resolving their filenames through `TaskEnvironment`. Cache translation
+writes the absolute value as a string and validates it when reading. State-file
+serialization version 7 invalidates older version-6 caches, including resource
+entries that could contain relative filenames. This shared version bump also
+invalidates other task state files once. Current-version resource entries with
+relative filenames are rejected through the existing cache-read message path.
+On .NET Framework, portable-library entries explicitly serialize their fields
+and absolute filename for AppDomain transport; `AbsolutePath` itself does not
+need to become serializable.
+
+`RelativeDependencyCachesAreDiscarded` covers a version-6 cache containing a
+relative filename and a malformed current-version entry.
+`PortableLibraryAppDomainSerializationPreservesAbsolutePath` checks the .NET
+Framework transport serialization.
+
+GenerateResource reuses resolved paths within each processing stage. The state
+file is resolved once for reading and writing; output duplicate validation
+retains its paths for timestamp checks; and source existence, cache, timestamp,
+and strongly typed checks share a resolved source path. The processor resolves
+its input and output once and passes typed paths through readers, writers, and
+failure cleanup. Diagnostics and resource origins retain `OriginalValue`.
+Task-side checks and processor-side I/O remain separate resolution stages:
+their .NET Framework boundary must still accept AppDomain-serializable strings
+and task items, not `AbsolutePath`.
 
 ## Verification
 
-The final analyzer command was:
+The latest completed analyzer command was:
 
 ```powershell
-dotnet msbuild src\Tasks\Microsoft.Build.Tasks.csproj -t:Rebuild -p:TargetFramework=net11.0 -p:BuildAnalyzer=true -p:RunAnalyzersDuringBuild=true -p:TreatWarningsAsErrors=true -p:WarningsNotAsErrors= -v:quiet "-bl:artifacts\log\resource-path-analyzer-{}.binlog" "-flp:v=normal;LogFile=artifacts\log\generate-resource-analyzer-after.log"
+dotnet msbuild src\Tasks\Microsoft.Build.Tasks.csproj -t:Rebuild -p:TargetFramework=net11.0 -p:BuildAnalyzer=true -p:RunAnalyzersDuringBuild=true -p:TreatWarningsAsErrors=true -p:WarningsNotAsErrors= -v:quiet "-bl:artifacts\log\resource-reused-paths-analyzer-{}.binlog" "-flp:v=normal;LogFile=artifacts\log\generate-resource-path-reuse-analyzer.log"
 ```
 
-Result: the 48 unchanged, unrelated errors above; no GenerateResource findings
-or introduced compiler errors.
+Result: the 48 unchanged, unrelated errors above; no GenerateResource findings,
+compiler errors, or warnings. This includes the explicit reader APIs and the
+path-reuse refactor.
+
+The final resource-and-cache test run used:
 
 ```powershell
-dotnet test (Resolve-Path src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj).Path -c Release --no-restore "-bl:artifacts\log\resource-path-signatures-{}.binlog" -- --filter-class "*GenerateResource_Tests*" --filter-class "*MSBuildResXReader_Tests*" --filter-class "*ResGenDependencies_Tests*" --filter-not-method "*ResgenCommandLineExceedsAllowedLength"
+dotnet test (Resolve-Path src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj).Path -c Release --no-restore "-bl:artifacts\log\resource-reused-paths-final-{}.binlog" -- --filter-class "*GenerateResource_Tests*" --filter-class "*MSBuildResXReader_Tests*" --filter-class "*ResGenDependencies_Tests*" --filter-class "*ResolveAssemblyReferenceCacheSerialization*" --filter-not-method "*ResgenCommandLineExceedsAllowedLength"
 ```
 
-Result: compilation succeeded without warnings or errors; 293 tests passed,
+Result: compilation succeeded without warnings or errors; 329 tests passed,
 14 were skipped, and none failed across net11.0 and .NET Framework.
+
+After both reader entry points switched to explicit `AbsolutePath` arguments,
+the focused reader suite was rerun:
+
+```powershell
+dotnet test (Resolve-Path src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj).Path -c Release --no-restore "-bl:artifacts\log\resource-reader-explicit-paths-{}.binlog" -- --filter-class "*MSBuildResXReader_Tests*"
+```
+
+Result: compilation succeeded without warnings or errors; all 62 tests passed
+across net11.0 and .NET Framework, with none skipped or failed. The source-relative
+and project-relative cases exercise both the file and string entry points.
 
 An earlier temporary two-project resource build also ran through the already-built local
 CLI with `-m:2 -mt -nr:false` and MSB4286/MSB4287/MSB4288 promoted to errors.

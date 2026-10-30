@@ -229,6 +229,28 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             engine.ErrorEvents.ShouldHaveSingleItem().File.ShouldBe(Path.Combine(project.Path, "input.resx"));
         }
 
+        [Fact]
+        public void MalformedTextKeepsOriginalDiagnosticPath()
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            var project = env.CreateFolder();
+            project.CreateFile("input.txt", "Greeting\n");
+            MockEngine engine = new(output);
+            GenerateResource task = new()
+            {
+                BuildEngine = engine,
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(project.Path),
+                ExecuteAsTool = false,
+                Sources = [new TaskItem("input.txt")],
+                OutputResources = [new TaskItem("output.resources")]
+            };
+
+            task.Execute().ShouldBeFalse();
+            engine.ErrorEvents.ShouldHaveSingleItem().File.ShouldBe("input.txt");
+            task.OutputResources.ShouldBeEmpty();
+            task.Sources[0].GetMetadata("OutputResource").ShouldBeEmpty();
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]
