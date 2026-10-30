@@ -29,7 +29,25 @@
     BeforeTargets="Build"
     DependsOnTargets="SetBinPaths"
     Condition="'$(ExcludeFromBuild)' != 'true'">
+    <PropertyGroup>
+      <_TelemetryExperimentDirectory>$([MSBuild]::NormalizeDirectory('$(IntermediateOutputPath)', 'telemetry-reunification'))</_TelemetryExperimentDirectory>
+      <_DefaultVsSetupSwr Condition="'$(VsTelemetryExperimentSource)' == ''">$([MSBuild]::Escape($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)files.swr'))))</_DefaultVsSetupSwr>
+    </PropertyGroup>
+    <!-- A single timestamped SWR input prevents reusing the other variant's VSIX when opting in or out. -->
+    <MakeDir Directories="$(_TelemetryExperimentDirectory)" />
+    <WriteLinesToFile Condition="'$(VsTelemetryExperimentSource)' == ''"
+                      File="$(_TelemetryExperimentDirectory)files.swr"
+                      Lines="$(_DefaultVsSetupSwr)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+    <Error Condition="'$(VsTelemetryExperimentSource)' != '' and '$(VsTelemetryExperimentExpectedSnapshotHash)' == ''"
+           Text="The telemetry experiment requires VsTelemetryExperimentExpectedSnapshotHash. First generate and inspect the intended VS snapshot with Prepare-TelemetryReunification.ps1." />
+    <Exec Condition="'$(VsTelemetryExperimentSource)' != ''"
+          Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Prepare-TelemetryReunification.ps1&quot; -VsInstallPath &quot;$(VsTelemetryExperimentSource)&quot; -ExpectedSnapshotHash &quot;$(VsTelemetryExperimentExpectedSnapshotHash)&quot; -OutputDirectory &quot;$(_TelemetryExperimentDirectory).&quot; -X86Config &quot;$(X86BinPath)MSBuild.exe.config&quot; -X64Config &quot;$(X64BinPath)MSBuild.exe.config&quot; -CoordinatorConfig &quot;$(CoordinatorBinPath)MSBuild.Coordinator.exe.config&quot; -CoordinatorX64Config &quot;$(CoordinatorX64BinPath)MSBuild.Coordinator.exe.config&quot;" />
     <ItemGroup>
+      <SwrFile Remove="files.swr" />
+      <SwrFile Include="$(_TelemetryExperimentDirectory)files.swr" />
+      <FileWrites Include="$(_TelemetryExperimentDirectory)files.swr" />
       <SwrProperty Include="Version=$(VsixVersion)" />
       <SwrProperty Include="X86BinPath=$(X86BinPath)" />
       <SwrProperty Include="X64BinPath=$(X64BinPath)" />
