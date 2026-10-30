@@ -118,6 +118,30 @@ namespace Microsoft.Build.UnitTests
             Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, _alwaysRetry);
         }
 
+        [Theory]
+        [InlineData("1")]
+        [InlineData("16")]
+        public void CopyTaskParallelismEnvironmentVariableControlsChildProcessCopy(string parallelism)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
+            env.SetEnvironmentVariable("MSBUILDCOPYTASKPARALLELISM", parallelism);
+
+            env.CreateFile("source1.txt", "source1");
+            env.CreateFile("source2.txt", "source2");
+            TransientTestFile project = env.CreateFile("copy.proj",
+                @"<Project>
+  <Target Name=""CopyFiles"">
+    <Copy SourceFiles=""source1.txt;source2.txt"" DestinationFiles=""destination1.txt;destination2.txt"" />
+  </Target>
+</Project>");
+
+            string output = RunnerUtilities.ExecBootstrapedMSBuild($"\"{project.Path}\" -nologo -t:CopyFiles -v:diag -nr:false", out bool success, outputHelper: _testOutputHelper, timeoutMilliseconds: 120_000);
+
+            success.ShouldBeTrue(output);
+            // Verify the override took effect via the diagnostic log.
+            output.ShouldContain($"Copy parallelism = {parallelism} (overridden)");
+        }
+
         [Fact]
         public void CopyWithNoInput()
         {
