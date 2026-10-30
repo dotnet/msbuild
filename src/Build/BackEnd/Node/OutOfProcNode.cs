@@ -568,6 +568,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void CleanupCaches()
         {
+            _componentFactories.ShutdownComponent(BuildComponentType.TaskResultCacheFileDigestCache);
+
             if (_componentFactories.GetComponent(BuildComponentType.ConfigCache) is IConfigCache configCache)
             {
                 configCache.ClearConfigurations();
