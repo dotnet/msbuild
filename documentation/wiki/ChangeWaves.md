@@ -35,6 +35,9 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
+### 18.14
+- [Expose `DefiningProjectLineNumber` and `DefiningProjectColumnNumber` as built-in item metadata for the XML element that produced an item.](https://github.com/dotnet/msbuild/pull/14731) Together with `DefiningProjectFullPath`, these identify the source declaration without requiring a new task-item interface. Coordinates are invariant decimal strings, or empty when no XML location is available. True copies retain the location; new declarations and task outputs identify their producing element, not a full provenance chain. Coordinate strings are computed on demand. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.14` to disable the new metadata and its reserved names, preserving projects that previously used those names as custom metadata.
+
 ### 18.13
 - [Task hosts preserve ordinary task-environment variables while retaining Windows bitness adjustments.](https://github.com/dotnet/msbuild/pull/15032)
 - [ResolveAssemblyReference discovers redist and subset lists relative to the project directory when `TargetFrameworkDirectories` contains relative paths.](https://github.com/dotnet/msbuild/pull/15089)

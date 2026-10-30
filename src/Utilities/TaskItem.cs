@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
@@ -60,6 +61,10 @@ namespace Microsoft.Build.Utilities
         /// we simply don't know enough to set it properly, so it will stay null.
         /// </summary>
         private readonly string _definingProject;
+
+        private readonly int _sourceLineNumber;
+
+        private readonly int _sourceColumnNumber;
 
         #endregion
 
@@ -131,7 +136,19 @@ namespace Microsoft.Build.Utilities
                 {
                     // don't import metadata whose names clash with the names of reserved metadata
                     string key = (string)singleMetadata.Key;
-                    if (!ItemSpecModifiers.IsDerivableItemSpecModifier(key))
+                    if (ItemSpecModifiers.IsSourceLocationModifier(key))
+                    {
+                        int.TryParse((string)singleMetadata.Value, NumberStyles.None, CultureInfo.InvariantCulture, out int coordinate);
+                        if (MSBuildNameIgnoreCaseComparer.Default.Equals(key, ItemSpecModifiers.DefiningProjectLineNumber))
+                        {
+                            _sourceLineNumber = coordinate;
+                        }
+                        else
+                        {
+                            _sourceColumnNumber = coordinate;
+                        }
+                    }
+                    else if (!ItemSpecModifiers.IsDerivableItemSpecModifier(key))
                     {
                         builder[key] = (string)singleMetadata.Value ?? string.Empty;
                     }
@@ -161,6 +178,9 @@ namespace Microsoft.Build.Utilities
                 _itemSpec = sourceItemAsITaskItem2.EvaluatedIncludeEscaped;
                 _definingProject = sourceItemAsITaskItem2.GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath);
             }
+
+            int.TryParse(sourceItem.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber), NumberStyles.None, CultureInfo.InvariantCulture, out _sourceLineNumber);
+            int.TryParse(sourceItem.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber), NumberStyles.None, CultureInfo.InvariantCulture, out _sourceColumnNumber);
 
             sourceItem.CopyMetadataTo(this);
         }
@@ -364,7 +384,7 @@ namespace Microsoft.Build.Utilities
 
             // Non-derivable metadata can only be set at construction time.
             // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
-            ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName),
+            ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName) && !ItemSpecModifiers.IsSourceLocationModifier(metadataName),
                 "CannotChangeItemSpecModifiers", metadataName);
 
             _metadata ??= ImmutableDictionaryExtensions.EmptyMetadata;
@@ -564,6 +584,12 @@ namespace Microsoft.Build.Utilities
                 // FileUtilities.GetItemSpecModifier is expecting escaped data, which we assume we already are.
                 // Passing in a null for currentDirectory indicates we are already in the correct current directory
                 return ItemSpecModifiers.GetItemSpecModifier(_itemSpec, modifierKind, null, _definingProject, ref _cachedModifiers);
+            }
+
+            if (ItemSpecModifiers.TryGetModifierKind(metadataName, out modifierKind) &&
+                modifierKind is ItemSpecModifierKind.DefiningProjectLineNumber or ItemSpecModifierKind.DefiningProjectColumnNumber)
+            {
+                return ItemSpecModifiers.GetSourceLocationModifier(modifierKind, _sourceLineNumber, _sourceColumnNumber);
             }
 
             string metadataValue = null;
