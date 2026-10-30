@@ -266,15 +266,8 @@ Steps are **mostly parallel** unless noted.
     - **If SDK-coupled: the SDK is the source of truth** — look up the MSBuild version baked into the shipped SDK build of that band. It wins over VS `rel/stable`.
     - **Otherwise**, read the **authoritative GA'd value from VS `rel/stable`**: the `Microsoft.Build` component version in [`.corext/Configs/msbuild-components.json`](https://devdiv.visualstudio.com/DevDiv/_git/VS?path=/.corext/Configs/msbuild-components.json&version=GBrel/stable) (e.g. `18.7.1-servicing-NNNNN-NN+<sha>`). Extract just the **numeric `VersionPrefix`** from that string — drop the `-servicing-NNNNN-NN+<sha>` suffix — and use it as `{{THIS_RELEASE_EXACT_VERSION}}` (e.g. `18.7.1`). **Do not** rely solely on the VS insertion PR — that PR targets VS `main` and can be superseded by a later servicing insertion before GA, whereas `rel/stable` reflects what actually shipped.
   - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`). Take the latest build that produced the matching versioned artifacts.
-  - [ ] **5.1c** From that build, open the **Publish Artifacts** step and grab the link to the **`PackageArtifacts/Release`** drop. Verify the **Release** folder contains all of:
-    - `Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
-    - `Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
-    - `Microsoft.Build.Framework.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
-    - `Microsoft.Build.Runtime.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
-    - `Microsoft.Build.Tasks.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
-    - `Microsoft.NET.StringTools.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
-    - `Microsoft.Build.Templates.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
-  - [ ] **5.1d** Email the _.NET Release Team_ with the `Release` link from 5.1c and ask them to publish to nuget.org.
+  - [ ] **5.1c** From that build, open the **`ReleasePackages`** pipeline artifact. For older branch builds without this artifact, use **`PackageArtifacts/Release`** instead. Verify the build is nonexperimental and real-signed, **Validate final release package signing** ran successfully (not skipped), and its downstream signing-validation and publishing stages succeeded; artifact availability alone is not release approval. Compare package identities with the shipping packages in the same build's **`AssetManifests/Windows_NT.xml`** (exclude packages marked `NonShipping`): every shipping package must have a final-version counterpart at `{{THIS_RELEASE_EXACT_VERSION}}`, with no missing or unexpected packages. Do not use a fixed package-name list; shipping packages can be added between releases. Verify downloaded package paths and SHA-256 hashes against **`logs/ReleasePackages.sha256`**. Record the artifact URL, source SHA, BAR build ID (from `ReleaseConfigs`), and hashes in this tracking issue. See [the artifact contract](./release.md#official-build-artifact-contract).
+  - [ ] **5.1d** Email the _.NET Release Team_ with the artifact link and provenance from 5.1c and ask them to publish to nuget.org.
 
 - [ ] **5.2** Publish docs
 
