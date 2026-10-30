@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void SourceLocationMetadataCanBeOptedOut(bool optOut)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", optOut ? ChangeWaves.Wave18_13.ToString() : null);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", optOut ? ChangeWaves.Wave18_14.ToString() : null);
             ChangeWaves.ResetStateForTests();
             using ProjectRootElementFromString xml = new(
                 """

@@ -58,7 +58,7 @@ internal static class ItemSpecModifiers
     private static readonly ImmutableArray<string> s_modifiersWithSourceLocation =
         [.. s_legacyModifiers, DefiningProjectLineNumber, DefiningProjectColumnNumber];
 
-    public static ImmutableArray<string> All => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+    public static ImmutableArray<string> All => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)
         ? s_modifiersWithSourceLocation
         : s_legacyModifiers;
 
@@ -306,7 +306,7 @@ internal static class ItemSpecModifiers
 
             case 25:
                 if (string.Equals(name, DefiningProjectLineNumber, StringComparison.OrdinalIgnoreCase) &&
-                    ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+                    ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14))
                 {
                     kind = ItemSpecModifierKind.DefiningProjectLineNumber;
                     return true;
@@ -316,7 +316,7 @@ internal static class ItemSpecModifiers
 
             case 27:
                 if (string.Equals(name, DefiningProjectColumnNumber, StringComparison.OrdinalIgnoreCase) &&
-                    ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+                    ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14))
                 {
                     kind = ItemSpecModifierKind.DefiningProjectColumnNumber;
                     return true;
