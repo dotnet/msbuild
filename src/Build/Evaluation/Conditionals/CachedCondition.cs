@@ -15,11 +15,6 @@ internal sealed class CachedCondition
     private bool _initialized;
     private object? _initializationLock;
 
-    internal CachedCondition()
-    {
-        _initializationLock = this;
-    }
-
     internal ParsedCondition GetOrParse(
         string condition,
         ParserOptions options,
