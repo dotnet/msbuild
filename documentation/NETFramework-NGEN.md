@@ -33,30 +33,6 @@ The bad thing about this is that the system is fragile and adding a dependency o
 thing is that regressions, be it a failure to compile an NGEN image or a failure to use an NGEN image, are reliably detected
 by the VS PR gates so they are fixed before MSBuild is inserted into the product.
 
-### Standalone telemetry
-
-The private `Microsoft.VisualStudio.Telemetry.dll` shipped beside MSBuild must be registered for the
-standalone `Bin\MSBuild.exe` and `Bin\amd64\MSBuild.exe` application contexts. Visual Studio setup
-generates the native images using the dependency binding policy of each executable. Core MSBuild's
-registration is not sufficient: setup uses `/NoDependencies`, and the telemetry copy used inside
-devenv can be a different build from the private copy used by MSBuild.exe.
-
-The VS product version, telemetry package/file version, and assembly version are independent.
-Two telemetry builds can have the same assembly version while differing in module identity and
-dependencies, so the presence of a native image for VS's copy does not establish coverage for
-MSBuild's copy.
-
-When validating registration, keep the DLL bytes and executable configuration fixed, verify that
-the actual MSBuild process loads the matching telemetry native image, and compare the same build
-before and after registration. Use native-image binding diagnostics to investigate rejected images;
-do not infer successful use just from a setup registration or an image on disk.
-
-CLR Binding/Fusion diagnostics can distinguish a signature mismatch followed by "No matching native
-image found" from a successful native-image bind. Confirm the latter with the loader's native module
-path. Runtime-generated serialization methods may still require JIT compilation even when the SDK's
-native image is used. Measure both total process lifetime and the telemetry shutdown interval:
-reduced JIT work alone does not establish an end-to-end latency improvement.
-
 ## NGEN image loading rules
 
 The Common Language Runtime can be finicky about allowing a native image to load. We usually speak of "NGEN rejections" where a native
