@@ -12,7 +12,7 @@ using Microsoft.Build.Shared;
 namespace MSBuild.Benchmarks;
 
 /// <summary>
-/// Compares sibling-glob evaluation with Wave 18.13 disabled and enabled in the same binary.
+/// Compares sibling-glob evaluation with Wave 18.14 disabled and enabled in the same binary.
 /// Measures fusion together with its frontier scheduling; Wave 18.11 remains enabled in both cases.
 /// </summary>
 [MemoryDiagnoser]
@@ -200,12 +200,13 @@ public class SiblingGlobEvaluationBenchmark
     {
         Environment.SetEnvironmentVariable(
             "MSBUILDDISABLEFEATURESFROMVERSION",
-            enabled ? null : ChangeWaves.Wave18_13.ToString());
+            enabled ? null : ChangeWaves.Wave18_14.ToString());
         ChangeWaves.ResetStateForTests();
         if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
-            || ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13) != enabled)
+            || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+            || ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14) != enabled)
         {
-            throw new InvalidOperationException("The benchmark must toggle only Wave 18.13 while retaining Wave 18.11.");
+            throw new InvalidOperationException("The benchmark must toggle only Wave 18.14 while retaining earlier waves.");
         }
     }
 

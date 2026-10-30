@@ -54,7 +54,7 @@ namespace Microsoft.Build.Evaluation
                 ISet<string>? excludePatternsForGlobs = null;
                 FileSpecMatcherTester?[]? matchers = null;
                 FileMatcher.GlobExpander? globExpander = _itemSpec.Fragments.Count > 1
-                    && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+                    && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)
                         ? CreateGlobExpander(globsToIgnore, excludePatterns, ref excludePatternsForGlobs)
                         : null;
 

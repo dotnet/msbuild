@@ -37,8 +37,10 @@ public sealed class SiblingGlobExpansion_Tests : IDisposable
     {
         _environment.SetEnvironmentVariable(
             "MSBUILDDISABLEFEATURESFROMVERSION",
-            disableFusion ? ChangeWaves.Wave18_13.ToString() : null);
+            disableFusion ? ChangeWaves.Wave18_14.ToString() : null);
         ChangeWaves.ResetStateForTests();
+        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13).ShouldBeTrue();
+        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14).ShouldBe(!disableFusion);
         const string xml = """
             <Project>
               <ItemGroup>
