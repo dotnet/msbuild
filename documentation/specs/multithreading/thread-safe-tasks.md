@@ -8,6 +8,16 @@ To enable this multithreaded execution model, tasks will declare their capabilit
 
 Tasks that are not thread-safe can still participate in multithreaded builds. MSBuild will execute these tasks in separate TaskHost processes to provide process-level isolation.
 
+The built-in `GenerateResource` task opts into in-process multithreaded execution
+only when compiled without `FEATURE_RESXREADER_LIVEDESERIALIZATION` (currently the
+net11.0 implementation). Its file operations and linked-resource dependency cache
+use the task's project directory, while `UseSourcePath` still selects whether
+linked files are relative to the project or the resource file. The .NET Framework
+implementation remains unannotated, including when `UsePreserializedResources`
+is enabled; selecting that parameter does not change task routing.
+See the [migration analyzer coverage report](generate-resource-analyzer-coverage.md)
+for the findings and limitations observed while making this change.
+
 ## Thread-Safe Capability Indicators
 
 Thread-safe capability is declared by a single mechanism: the `[MSBuildMultiThreadableTask]` attribute. A task may *additionally* implement the `IMultiThreadableTask` interface to gain access to thread-safe APIs. The two do **different** jobs and are not alternatives:
