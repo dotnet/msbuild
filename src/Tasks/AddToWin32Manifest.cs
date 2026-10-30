@@ -183,11 +183,21 @@ namespace Microsoft.Build.Tasks
             string originalPath = Path.Combine(OutputDirectory, manifestName);
             AbsolutePath outputPath = TaskEnvironment.GetAbsolutePath(originalPath);
             ManifestPath = originalPath;
-            using (var xmlWriter = new XmlTextWriter(outputPath, Encoding.UTF8))
+
+            using var buffer = new MemoryStream();
+            using (var xmlWriter = new XmlTextWriter(buffer, Encoding.UTF8))
             {
                 xmlWriter.Formatting = Formatting.Indented;
                 xmlWriter.Indentation = 4;
                 document.Save(xmlWriter);
+            }
+
+            byte[] contents = buffer.ToArray();
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14) ||
+                !File.Exists(outputPath) ||
+                !contents.AsSpan().SequenceEqual(File.ReadAllBytes(outputPath).AsSpan()))
+            {
+                File.WriteAllBytes(outputPath, contents);
             }
         }
 

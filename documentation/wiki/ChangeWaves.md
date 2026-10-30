@@ -35,6 +35,9 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
+### 18.14
+- [AddToWin32Manifest preserves the generated manifest's timestamp when its contents are unchanged, allowing CoreCompile to skip unchanged builds with PreferNativeArm64 enabled.](https://github.com/dotnet/msbuild/issues/15417) Set `MSBUILDDISABLEFEATURESFROMVERSION=18.14` to retain unconditional manifest writes.
+
 ### 18.13
 - [ResolveAssemblyReference discovers redist and subset lists relative to the project directory when `TargetFrameworkDirectories` contains relative paths.](https://github.com/dotnet/msbuild/pull/15089)
 - [ClickOnce application manifest generation resolves relative sentinel assembly dependencies against the task project directory before reading their identities, preventing duplicate .NET Framework 3.0/3.5 prerequisite entries.](https://github.com/dotnet/msbuild/pull/15222)
