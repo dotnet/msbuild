@@ -77,34 +77,5 @@ namespace Microsoft.Build.Evaluation
         /// Get display string for this node for use in the debugger.
         /// </summary>
         internal virtual string DebuggerDisplay { get; }
-
-
-        #region REMOVE_COMPAT_WARNING
-        internal virtual bool PossibleAndCollision
-        {
-            set { /* do nothing */ }
-            get { return false; }
-        }
-
-        internal virtual bool PossibleOrCollision
-        {
-            set { /* do nothing */ }
-            get { return false; }
-        }
-
-        internal bool PotentialAndOrConflict()
-        {
-            // The values of the functions are assigned to boolean locals
-            // in order to force evaluation of the functions even when the
-            // first one returns false
-            bool detectOr = DetectOr();
-            bool detectAnd = DetectAnd();
-            return detectOr && detectAnd;
-        }
-
-        internal abstract bool DetectOr();
-        internal abstract bool DetectAnd();
-        #endregion
-
     }
 }

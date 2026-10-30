@@ -144,16 +144,18 @@ namespace Microsoft.Build.Evaluation
         //
         private GenericExpressionNode Expr(string expression)
         {
-            GenericExpressionNode node = BooleanTerm(expression);
+            bool hasAnd = false;
+            bool hasOr = false;
+            GenericExpressionNode node = BooleanTerm(expression, ref hasAnd);
             if (!_lexer.IsNext(Token.TokenType.EndOfInput))
             {
-                node = ExprPrime(expression, node);
+                node = ExprPrime(expression, node, ref hasAnd, ref hasOr);
             }
 
             #region REMOVE_COMPAT_WARNING
             // Check for potential change in behavior
             if (LoggingServices != null && !_warnedForExpression &&
-                node.PotentialAndOrConflict())
+                hasAnd && hasOr)
             {
                 // We only want to warn once even if there multiple () sub expressions
                 _warnedForExpression = true;
@@ -167,7 +169,7 @@ namespace Microsoft.Build.Evaluation
             return node;
         }
 
-        private GenericExpressionNode ExprPrime(string expression, GenericExpressionNode lhs)
+        private GenericExpressionNode ExprPrime(string expression, GenericExpressionNode lhs, ref bool hasAnd, ref bool hasOr)
         {
             if (Same(expression, Token.TokenType.EndOfInput))
             {
@@ -175,11 +177,12 @@ namespace Microsoft.Build.Evaluation
             }
             else if (Same(expression, Token.TokenType.Or))
             {
+                hasOr = true;
                 OperatorExpressionNode orNode = new OrExpressionNode();
-                GenericExpressionNode rhs = BooleanTerm(expression);
+                GenericExpressionNode rhs = BooleanTerm(expression, ref hasAnd);
                 orNode.LeftChild = lhs;
                 orNode.RightChild = rhs;
-                return ExprPrime(expression, orNode);
+                return ExprPrime(expression, orNode, ref hasAnd, ref hasOr);
             }
             else
             {
@@ -190,7 +193,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private GenericExpressionNode BooleanTerm(string expression)
+        private GenericExpressionNode BooleanTerm(string expression, ref bool hasAnd)
         {
             GenericExpressionNode node = RelationalExpr(expression);
             if (node == null)
@@ -201,12 +204,12 @@ namespace Microsoft.Build.Evaluation
 
             if (!_lexer.IsNext(Token.TokenType.EndOfInput))
             {
-                node = BooleanTermPrime(expression, node);
+                node = BooleanTermPrime(expression, node, ref hasAnd);
             }
             return node;
         }
 
-        private GenericExpressionNode BooleanTermPrime(string expression, GenericExpressionNode lhs)
+        private GenericExpressionNode BooleanTermPrime(string expression, GenericExpressionNode lhs, ref bool hasAnd)
         {
             if (_lexer.IsNext(Token.TokenType.EndOfInput))
             {
@@ -214,6 +217,7 @@ namespace Microsoft.Build.Evaluation
             }
             else if (Same(expression, Token.TokenType.And))
             {
+                hasAnd = true;
                 GenericExpressionNode rhs = RelationalExpr(expression);
                 if (rhs == null)
                 {
@@ -224,7 +228,7 @@ namespace Microsoft.Build.Evaluation
                 OperatorExpressionNode andNode = new AndExpressionNode();
                 andNode.LeftChild = lhs;
                 andNode.RightChild = rhs;
-                return BooleanTermPrime(expression, andNode);
+                return BooleanTermPrime(expression, andNode, ref hasAnd);
             }
             else
             {
