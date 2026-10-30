@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs" />
-    <Compile Include="..\Shared\StringExtensions.cs" />
 
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
