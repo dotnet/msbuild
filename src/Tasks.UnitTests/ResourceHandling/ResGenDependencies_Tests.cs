@@ -39,15 +39,15 @@ namespace Microsoft.Build.UnitTests
         public void DirtyCleanScenario(bool useMSBuildResXReader)
         {
             ResGenDependencies cache = new();
-            string resx = CreateSampleResx();
-            string stateFile = FileUtilities.GetTemporaryFile();
+            AbsolutePath resx = TaskEnvironment.Fallback.GetAbsolutePath(CreateSampleResx());
+            AbsolutePath stateFile = TaskEnvironment.Fallback.GetAbsolutePath(FileUtilities.GetTemporaryFile());
 
             try
             {
                 // A newly created cache is not dirty.
                 cache.IsDirty.ShouldBeFalse();
 
-                ResGenDependencies.PortableLibraryFile libFile = new("otherFileName");
+                ResGenDependencies.PortableLibraryFile libFile = new(TaskEnvironment.Fallback.GetAbsolutePath("otherFileName"));
                 libFile.outputFiles = new string[] { "first", "second" };
                 libFile.assemblySimpleName = "simpleName";
                 libFile.lastModified = DateTime.Now.Subtract(TimeSpan.FromSeconds(10));
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests
                 cache.IsDirty.ShouldBeFalse();
 
                 // Deserialize from disk. Result should not be dirty.
-                ResGenDependencies cache2 = ResGenDependencies.DeserializeCache(stateFile, true, /* Log */ null);
+                ResGenDependencies cache2 = ResGenDependencies.DeserializeCache(stateFile, true, /* Log */ null, TaskEnvironment.Fallback);
                 cache2.IsDirty.ShouldBeFalse();
 
                 // Validate that serialization worked
@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests
         "));
 
             var cache = new ResGenDependencies();
-            ResGenDependencies.ResXFile resxFile = cache.GetResXFileInfo(resxPath, useMSBuildResXReader: true, log: null, logWarningForBinaryFormatter: false);
+            ResGenDependencies.ResXFile resxFile = cache.GetResXFileInfo(TaskEnvironment.Fallback.GetAbsolutePath(resxPath), useMSBuildResXReader: true, log: null, logWarningForBinaryFormatter: false);
 
             resxFile.LinkedFiles.ShouldNotBeNull();
             resxFile.LinkedFiles.Length.ShouldBe(4);

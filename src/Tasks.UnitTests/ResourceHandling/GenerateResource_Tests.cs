@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -19,6 +20,314 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
+#if !FEATURE_RESXREADER_LIVEDESERIALIZATION
+    public sealed class MultithreadedCompatibility(ITestOutputHelper output)
+    {
+        [Theory]
+        [InlineData(null, "output.cs")]
+        [InlineData("custom.cs", "custom.cs")]
+        public void RelativeTextAndStronglyTypedOutputsUseProjectDirectory(string stronglyTypedFileName, string expectedCodeFile)
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            var project = env.CreateFolder();
+            project.CreateFile("input.txt", "Greeting=Hello");
+            TaskEnvironment taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(project.Path);
+
+            GenerateResource CreateTask() => new()
+            {
+                BuildEngine = new MockEngine(output),
+                TaskEnvironment = taskEnvironment,
+                ExecuteAsTool = false,
+                Sources = [new TaskItem("input.txt")],
+                OutputResources = [new TaskItem("output.resources")],
+                StateFile = new TaskItem("state.cache"),
+                StronglyTypedLanguage = "CSharp",
+                StronglyTypedFileName = stronglyTypedFileName
+            };
+
+            GenerateResource task = CreateTask();
+            task.Sources[0].SetMetadata("Custom", "value");
+            task.Execute().ShouldBeTrue();
+            task.Sources[0].ItemSpec.ShouldBe("input.txt");
+            task.Sources[0].GetMetadata("OutputResource").ShouldBe("output.resources");
+            task.OutputResources.ShouldHaveSingleItem().ItemSpec.ShouldBe("output.resources");
+            task.OutputResources[0].GetMetadata("Custom").ShouldBe("value");
+            task.StronglyTypedFileName.ShouldBe(expectedCodeFile);
+            task.StronglyTypedClassName.ShouldBe("output");
+            task.FilesWritten.Select(item => item.ItemSpec).ShouldBe(["output.resources", "state.cache", expectedCodeFile]);
+            File.Exists(Path.Combine(project.Path, expectedCodeFile)).ShouldBeTrue();
+            File.Exists(Path.Combine(project.Path, "state.cache")).ShouldBeTrue();
+            ReadGreeting(project.Path).ShouldBe("Hello");
+
+            DateTime lastWrite = File.GetLastWriteTimeUtc(Path.Combine(project.Path, "output.resources"));
+            GenerateResource incremental = CreateTask();
+            incremental.FailIfNotIncremental = true;
+            incremental.Execute().ShouldBeTrue();
+            File.GetLastWriteTimeUtc(Path.Combine(project.Path, "output.resources")).ShouldBe(lastWrite);
+        }
+
+        [Theory]
+        [InlineData(false, "project")]
+        [InlineData(true, "source")]
+        public void LinkedResourcesAndCacheUseProjectDirectory(bool useSourcePath, string expectedValue)
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            var project = env.CreateFolder();
+            var resources = project.CreateDirectory("resources");
+            project.CreateFile("linked.txt", "project");
+            resources.CreateFile("linked.txt", "source");
+            resources.CreateFile("input.resx", """
+                <root>
+                  <data name="Greeting" type="System.Resources.ResXFileRef, System.Windows.Forms">
+                    <value>linked.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+                  </data>
+                </root>
+                """);
+
+            GenerateResource CreateTask() => new()
+            {
+                BuildEngine = new MockEngine(output),
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(project.Path),
+                ExecuteAsTool = false,
+                UsePreserializedResources = true,
+                UseSourcePath = useSourcePath,
+                Sources = [new TaskItem(Path.Combine("resources", "input.resx"))],
+                OutputResources = [new TaskItem("output.resources")],
+                StateFile = new TaskItem("state.cache")
+            };
+
+            CreateTask().Execute().ShouldBeTrue();
+            ReadGreeting(project.Path).ShouldBe(expectedValue);
+            GenerateResource incremental = CreateTask();
+            incremental.FailIfNotIncremental = true;
+            incremental.Execute().ShouldBeTrue();
+
+            string linkedFile = Path.Combine(useSourcePath ? resources.Path : project.Path, "linked.txt");
+            File.SetLastWriteTimeUtc(linkedFile, File.GetLastWriteTimeUtc(Path.Combine(project.Path, "output.resources")).AddMinutes(1));
+            GenerateResource changed = CreateTask();
+            changed.FailIfNotIncremental = true;
+            changed.Execute().ShouldBeFalse();
+        }
+
+        [Fact]
+        public void AdditionalInputsUseProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            var project = env.CreateFolder();
+            project.CreateFile("input.txt", "Greeting=Hello");
+            var additional = project.CreateFile("additional.txt");
+
+            GenerateResource CreateTask() => new()
+            {
+                BuildEngine = new MockEngine(output),
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(project.Path),
+                ExecuteAsTool = false,
+                Sources = [new TaskItem("input.txt")],
+                AdditionalInputs = [new TaskItem("additional.txt")],
+                OutputResources = [new TaskItem("output.resources")]
+            };
+
+            CreateTask().Execute().ShouldBeTrue();
+            GenerateResource incremental = CreateTask();
+            incremental.FailIfNotIncremental = true;
+            incremental.Execute().ShouldBeTrue();
+            File.SetLastWriteTimeUtc(additional.Path, File.GetLastWriteTimeUtc(Path.Combine(project.Path, "output.resources")).AddMinutes(1));
+            GenerateResource changed = CreateTask();
+            changed.FailIfNotIncremental = true;
+            changed.Execute().ShouldBeFalse();
+        }
+
+        [Fact]
+        public void InstancesWithSharedCacheRemainIndependent()
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            var first = env.CreateFolder();
+            var second = env.CreateFolder();
+            string cachePath = Path.Combine(env.CreateFolder().Path, "shared.cache");
+            first.CreateFile("input.resx", """<root><data name="Greeting"><value>first</value></data></root>""");
+            second.CreateFile("input.resx", """<root><data name="Greeting"><value>second</value></data></root>""");
+
+            GenerateResource CreateTask(string projectDirectory) => new()
+            {
+                BuildEngine = new MockEngine(output),
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory),
+                ExecuteAsTool = false,
+                UseSourcePath = true,
+                UsePreserializedResources = true,
+                Sources = [new TaskItem("input.resx")],
+                OutputResources = [new TaskItem("output.resources")],
+                StateFile = new TaskItem(cachePath)
+            };
+
+            CreateTask(first.Path).Execute().ShouldBeTrue();
+            CreateTask(second.Path).Execute().ShouldBeTrue();
+            ReadGreeting(first.Path).ShouldBe("first");
+            ReadGreeting(second.Path).ShouldBe("second");
+            GenerateResource incremental = CreateTask(first.Path);
+            incremental.FailIfNotIncremental = true;
+            incremental.Execute().ShouldBeTrue();
+        }
+
+        [Fact]
+        public void FailureCleanupUsesProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            var project = env.CreateFolder();
+            project.CreateFile("input.txt", "Greeting=Hello");
+            GenerateResource task = new()
+            {
+                BuildEngine = new MockEngine(output),
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(project.Path),
+                ExecuteAsTool = false,
+                Sources = [new TaskItem("input.txt")],
+                OutputResources = [new TaskItem("output.resources")],
+                StronglyTypedLanguage = "CSharp",
+                StronglyTypedFileName = Path.Combine("missing", "output.cs")
+            };
+
+            task.Execute().ShouldBeFalse();
+            File.Exists(Path.Combine(project.Path, "output.resources")).ShouldBeFalse();
+            task.OutputResources.ShouldBeEmpty();
+            task.Sources[0].GetMetadata("OutputResource").ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void MissingInputKeepsOriginalDiagnosticPath()
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            var project = env.CreateFolder();
+            MockEngine engine = new(output);
+            GenerateResource task = new()
+            {
+                BuildEngine = engine,
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(project.Path),
+                Sources = [new TaskItem("missing.resx")]
+            };
+
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB3552");
+            engine.Log.ShouldContain("missing.resx");
+            engine.Log.ShouldNotContain(project.Path);
+        }
+
+        [Fact]
+        public void MalformedInputReportsProjectFile()
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            var project = env.CreateFolder();
+            project.CreateFile("input.resx", "<root>");
+            MockEngine engine = new(output);
+            GenerateResource task = new()
+            {
+                BuildEngine = engine,
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(project.Path),
+                ExecuteAsTool = false,
+                Sources = [new TaskItem("input.resx")]
+            };
+
+            task.Execute().ShouldBeFalse();
+            engine.ErrorEvents.ShouldHaveSingleItem().File.ShouldBe(Path.Combine(project.Path, "input.resx"));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void OptionalStateFileRemainsOptional(string stateFile)
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            var project = env.CreateFolder();
+            project.CreateFile("input.txt", "Greeting=Hello");
+            GenerateResource task = new()
+            {
+                BuildEngine = new MockEngine(output),
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(project.Path),
+                ExecuteAsTool = false,
+                Sources = [new TaskItem("input.txt")],
+                OutputResources = [new TaskItem("output.resources")],
+                StateFile = stateFile is null ? null : new TaskItem(stateFile)
+            };
+
+            task.Execute().ShouldBeTrue();
+            task.FilesWritten.ShouldHaveSingleItem().ItemSpec.ShouldBe("output.resources");
+            ReadGreeting(project.Path).ShouldBe("Hello");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void DuplicateOutputsAreCanonicalized(bool absoluteAlias)
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            var project = env.CreateFolder();
+            project.CreateFile("first.txt", "Greeting=first");
+            project.CreateFile("second.txt", "Greeting=second");
+            string alias = Path.Combine("sub", "..", "same.resources");
+            if (absoluteAlias)
+            {
+                alias = Path.Combine(project.Path, alias);
+            }
+
+            MockEngine engine = new(output);
+            GenerateResource task = new()
+            {
+                BuildEngine = engine,
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(project.Path),
+                ExecuteAsTool = false,
+                Sources = [new TaskItem("first.txt"), new TaskItem("second.txt")],
+                OutputResources = [new TaskItem("same.resources"), new TaskItem(alias)]
+            };
+
+            task.Execute().ShouldBeFalse();
+            engine.Errors.ShouldBe(1);
+        }
+
+        [Fact]
+        public void AbsoluteStateFileResetsDirtyFlag()
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            TaskEnvironment taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(env.CreateFolder().Path);
+            GenerateResource task = new() { BuildEngine = new MockEngine(output) };
+            AbsolutePath stateFile = taskEnvironment.GetAbsolutePath("state.cache");
+            ResGenDependencies cache = ResGenDependencies.DeserializeCache(stateFile, false, task.Log, taskEnvironment);
+            cache.IsDirty.ShouldBeTrue();
+            cache.SerializeCache(stateFile, task.Log);
+            cache.IsDirty.ShouldBeFalse();
+            ResGenDependencies.DeserializeCache(stateFile, false, task.Log, taskEnvironment).IsDirty.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void AbsolutePortableLibraryCacheRoundTrips()
+        {
+            using TestEnvironment env = TestEnvironment.Create(output);
+            var project = env.CreateFolder();
+            project.CreateFile("input.dll");
+            TaskEnvironment taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(project.Path);
+            GenerateResource task = new() { BuildEngine = new MockEngine(output) };
+            AbsolutePath stateFile = taskEnvironment.GetAbsolutePath("state.cache");
+            AbsolutePath input = taskEnvironment.GetAbsolutePath("input.dll");
+            ResGenDependencies cache = ResGenDependencies.DeserializeCache(stateFile, false, task.Log, taskEnvironment);
+            ResGenDependencies.PortableLibraryFile library = new(input) { OutputFiles = [] };
+
+            cache.UpdatePortableLibrary(library);
+            cache.TryGetPortableLibraryInfo(input).ShouldBeSameAs(library);
+            cache.SerializeCache(stateFile, task.Log);
+
+            ResGenDependencies restored = ResGenDependencies.DeserializeCache(stateFile, false, task.Log, taskEnvironment);
+            restored.TryGetPortableLibraryInfo(input).ShouldNotBeNull().FileName.ShouldBe(Path.Combine(project.Path, "input.dll"));
+            restored.IsDirty.ShouldBeFalse();
+        }
+
+        private static string ReadGreeting(string projectDirectory)
+        {
+            using System.Resources.ResourceReader reader = new(Path.Combine(projectDirectory, "output.resources"));
+            IDictionaryEnumerator resources = reader.GetEnumerator();
+            resources.MoveNext().ShouldBeTrue();
+            resources.Key.ShouldBe("Greeting");
+            return resources.Value.ShouldBeOfType<string>();
+        }
+    }
+#endif
+
     public sealed class RequiredTransformations : IDisposable
     {
         private readonly TestEnvironment _env;
@@ -33,6 +342,17 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         public void Dispose()
         {
             _env.Dispose();
+        }
+
+        [Fact]
+        public void AttributeMatchesResourceReaderCapabilities()
+        {
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
+            const bool expected = false;
+#else
+            const bool expected = true;
+#endif
+            typeof(GenerateResource).IsDefined(typeof(MSBuildMultiThreadableTaskAttribute), inherit: false).ShouldBe(expected);
         }
 
         /// <summary>

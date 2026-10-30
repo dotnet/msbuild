@@ -4,19 +4,22 @@
 using System.IO;
 using System.Resources;
 using System.Resources.Extensions;
+using Microsoft.Build.Framework;
 
 
 namespace Microsoft.Build.Tasks.ResourceHandling
 {
     internal class FileStreamResource : ILinkedFileResource
     {
+        private readonly AbsolutePath _filePath;
+
         public string Name { get; }
 
         public string TypeAssemblyQualifiedName { get; }
 
         public string OriginatingFile { get; }
 
-        public string LinkedFilePath { get; }
+        public string LinkedFilePath => _filePath.OriginalValue;
 
         public string TypeFullName => NameUtilities.FullNameFromAssemblyQualifiedName(TypeAssemblyQualifiedName);
 
@@ -27,11 +30,11 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         /// <param name="assemblyQualifiedTypeName">The assembly-qualified type name of the resource (at runtime).</param>
         /// <param name="fileName">The absolute path of the file to be embedded as a resource.</param>
         /// <param name="originatingFile">The absolute path of the file that defined the ResXFileRef to this resource.</param>
-        public FileStreamResource(string name, string assemblyQualifiedTypeName, string fileName, string originatingFile)
+        public FileStreamResource(string name, string assemblyQualifiedTypeName, AbsolutePath fileName, string originatingFile)
         {
             Name = name;
             TypeAssemblyQualifiedName = assemblyQualifiedTypeName;
-            LinkedFilePath = fileName;
+            _filePath = fileName;
             OriginatingFile = originatingFile;
         }
 
@@ -40,7 +43,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             if (writer is PreserializedResourceWriter preserializedResourceWriter)
             {
 #pragma warning disable CA2000 // Dispose objects before losing scope the stream is expected to be disposed by the PreserializedResourceWriter.ResourceDataRecord
-                FileStream fileStream = new FileStream(LinkedFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                FileStream fileStream = new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 #pragma warning restore CA2000 // Dispose objects before losing scope
 
                 preserializedResourceWriter.AddActivatorResource(Name, fileStream, TypeAssemblyQualifiedName, closeAfterWrite: true);

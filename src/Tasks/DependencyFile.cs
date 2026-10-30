@@ -57,19 +57,15 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        /// <param name="filename">The file name.</param>
-        internal DependencyFile(string filename)
+        /// <param name="filename">The absolute file name.</param>
+        internal DependencyFile(AbsolutePath filename)
         {
             this.filename = FileUtilities.FixFilePath(filename);
 
-            if (FileSystems.Default.FileExists(FileName))
+            if (FileSystems.Default.FileExists(filename))
             {
-                lastModified = File.GetLastWriteTime(FileName);
+                lastModified = File.GetLastWriteTime(filename);
                 exists = true;
-            }
-            else
-            {
-                exists = false;
             }
         }
 
@@ -81,9 +77,9 @@ namespace Microsoft.Build.Tasks
         /// Checks whether the file has changed since the last time a timestamp was recorded.
         /// </summary>
         /// <returns></returns>
-        internal bool HasFileChanged()
+        internal bool HasFileChanged(TaskEnvironment taskEnvironment)
         {
-            FileInfo info = FileUtilities.GetFileInfoNoThrow(filename);
+            FileInfo info = FileUtilities.GetFileInfoNoThrow(taskEnvironment.GetAbsolutePathOrEmpty(filename));
 
             // Obviously if the file no longer exists then we are not up to date.
             if (info?.Exists != true)

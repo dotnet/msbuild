@@ -59,7 +59,10 @@ namespace Microsoft.Build.Tasks
     /// to transform resource files.
     /// </summary>
     [RequiredRuntime("v2.0")]
-    public sealed partial class GenerateResource : TaskExtension, IIncrementalTask
+#if !FEATURE_RESXREADER_LIVEDESERIALIZATION
+    [MSBuildMultiThreadableTask]
+#endif
+    public sealed partial class GenerateResource : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
 
         #region Fields
@@ -173,6 +176,9 @@ namespace Microsoft.Build.Tasks
         #endregion  // fields
 
         #region Properties
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// The names of the items to be converted. The extension must be one of the
@@ -828,6 +834,9 @@ namespace Microsoft.Build.Tasks
 #endif
                             {
                                 process = new ProcessResourceFiles();
+#if !FEATURE_APPDOMAIN
+                                process.TaskEnvironment = TaskEnvironment;
+#endif
                             }
 
                             process.Run(Log,
@@ -1463,9 +1472,9 @@ namespace Microsoft.Build.Tasks
                     // We can't cheaply predict the output files, since that would require
                     // loading each assembly.  So don't even try guessing what they will be.
                     // However, our cache will sometimes record all the info we need (for incremental builds).
-                    string sourceFileName = Sources[i].ItemSpec;
+                    AbsolutePath sourceFileName = TaskEnvironment.GetAbsolutePathOrEmpty(Sources[i].ItemSpec);
                     ResGenDependencies.PortableLibraryFile library = _cache.TryGetPortableLibraryInfo(sourceFileName);
-                    if (library?.AllOutputFilesAreUpToDate() == true)
+                    if (library?.AllOutputFilesAreUpToDate(TaskEnvironment) == true)
                     {
                         AppendCachedOutputTaskItems(library, cachedOutputFiles);
                     }
@@ -1481,7 +1490,7 @@ namespace Microsoft.Build.Tasks
                 Sources[i].CopyMetadataTo(OutputResources[i]);
                 Sources[i].SetMetadata("OutputResource", OutputResources[i].ItemSpec);
 
-                if (!FileSystems.Default.FileExists(Sources[i].ItemSpec))
+                if (!FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePathOrEmpty(Sources[i].ItemSpec)))
                 {
                     // Error but continue with the files that do exist
                     Log.LogErrorWithCodeFromResources("GenerateResource.ResourceNotFound", Sources[i].ItemSpec);
@@ -1507,7 +1516,7 @@ namespace Microsoft.Build.Tasks
             {
                 // We're generating a STR class file, so there must be exactly one input resource file.
                 // If that resource file itself is out of date, the STR class file is going to get generated anyway.
-                if (nothingOutOfDate && FileSystems.Default.FileExists(Sources[0].ItemSpec))
+                if (nothingOutOfDate && FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePathOrEmpty(Sources[0].ItemSpec)))
                 {
                     GetStronglyTypedResourceToProcess(ref inputsToProcess, ref outputsToProcess);
                 }
@@ -1548,13 +1557,18 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     // Get the fully qualified path, to ensure two file names don't end up pointing to the same directory.
-                    if (!set.Add(item.GetMetadata("FullPath")))
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
+                    string fullPath = item.GetMetadata("FullPath");
+#else
+                    string fullPath = TaskEnvironment.GetAbsolutePath(item.ItemSpec).GetCanonicalForm();
+#endif
+                    if (!set.Add(fullPath))
                     {
                         Log.LogErrorWithCodeFromResources("GenerateResource.DuplicateOutputFilenames", item.ItemSpec);
                         return true;
                     }
                 }
-                catch (InvalidOperationException e)
+                catch (Exception e) when (e is InvalidOperationException || ExceptionHandling.IsIoRelatedException(e))
                 {
                     Log.LogErrorWithCodeFromResources("GenerateResource.InvalidFilename", item.ItemSpec, e.Message);
                     // Returning true causes us to not continue executing.
@@ -1585,7 +1599,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(outputFilePath);
+            DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(TaskEnvironment.GetAbsolutePathOrEmpty(outputFilePath));
 
             // Quick check to see if any uncorrelated input is newer in which case we can avoid checking source file timestamp
             if (_newestUncorrelatedInput != null && _newestUncorrelatedInputWriteTime > outputTime)
@@ -1595,7 +1609,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(sourceFilePath);
+            DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(TaskEnvironment.GetAbsolutePathOrEmpty(sourceFilePath));
 
             string extension = Path.GetExtension(sourceFilePath);
             if (!String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) &&
@@ -1618,7 +1632,7 @@ namespace Microsoft.Build.Tasks
             try
             {
                 // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
-                resxFileInfo = _cache.GetResXFileInfo(sourceFilePath, UsePreserializedResources, Log, WarnOnBinaryFormatterUse);
+                resxFileInfo = _cache.GetResXFileInfo(TaskEnvironment.GetAbsolutePathOrEmpty(sourceFilePath), UsePreserializedResources, Log, WarnOnBinaryFormatterUse);
             }
             catch (Exception e) when (!ExceptionHandling.NotExpectedIoOrXmlException(e) || e is MSBuildResXException)
             {
@@ -1642,7 +1656,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (string linkedFilePath in resxFileInfo.LinkedFiles)
                 {
-                    DateTime linkedFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(linkedFilePath);
+                    DateTime linkedFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(TaskEnvironment.GetAbsolutePathOrEmpty(linkedFilePath));
 
                     if (linkedFileTime == DateTime.MinValue)
                     {
@@ -1729,8 +1743,8 @@ namespace Microsoft.Build.Tasks
             }
 
             // Now we have the filename, check if it's up to date
-            DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(Sources[0].ItemSpec);
-            DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(StronglyTypedFileName);
+            DateTime sourceTime = NativeMethodsShared.GetLastWriteFileUtcTime(TaskEnvironment.GetAbsolutePathOrEmpty(Sources[0].ItemSpec));
+            DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(TaskEnvironment.GetAbsolutePathOrEmpty(StronglyTypedFileName));
 
             if (sourceTime == DateTime.MinValue)
             {
@@ -1788,7 +1802,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem input in inputs)
             {
-                DateTime time = NativeMethodsShared.GetLastWriteFileUtcTime(input.ItemSpec);
+                DateTime time = NativeMethodsShared.GetLastWriteFileUtcTime(TaskEnvironment.GetAbsolutePathOrEmpty(input.ItemSpec));
 
                 if (time == DateTime.MinValue)
                 {
@@ -2261,7 +2275,7 @@ namespace Microsoft.Build.Tasks
             // just doesn't exist, then this method will return a brand new cache object.
 
             // This method eats IO Exceptions
-            _cache = ResGenDependencies.DeserializeCache(StateFile?.ItemSpec, UseSourcePath, Log);
+            _cache = ResGenDependencies.DeserializeCache(TaskEnvironment.GetAbsolutePathOrEmpty(StateFile?.ItemSpec), UseSourcePath, Log, TaskEnvironment);
             Assumed.NotNull(_cache, "We did not create a cache!");
         }
 
@@ -2273,7 +2287,7 @@ namespace Microsoft.Build.Tasks
             if (_cache.IsDirty)
             {
                 // And now we serialize the cache to save our resgen linked file resolution for later use.
-                _cache.SerializeCache(StateFile?.ItemSpec, Log);
+                _cache.SerializeCache(TaskEnvironment.GetAbsolutePathOrEmpty(StateFile?.ItemSpec), Log);
             }
         }
     }
@@ -2288,6 +2302,8 @@ namespace Microsoft.Build.Tasks
         : MarshalByRefObject
 #endif
     {
+        internal TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
         #region fields
         /// <summary>
         /// List of readers used for input.
@@ -2601,7 +2617,7 @@ namespace Microsoft.Build.Tasks
                     ITaskItem assemblyFile = _assemblyFiles[i];
                     _assemblyNames[i] = null;
 
-                    if (assemblyFile.ItemSpec != null && FileSystems.Default.FileExists(assemblyFile.ItemSpec))
+                    if (assemblyFile.ItemSpec != null && FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePathOrEmpty(assemblyFile.ItemSpec)))
                     {
                         string fusionName = assemblyFile.GetMetadata(ItemMetadataNames.fusionName);
                         if (!String.IsNullOrEmpty(fusionName))
@@ -2670,13 +2686,13 @@ namespace Microsoft.Build.Tasks
             }
             catch (InputFormatNotSupportedException)
             {
-                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(inFile)), 0, 0, 0, 0,
                                                       "GenerateResource.CoreSupportsLimitedScenarios");
                 return false;
             }
             catch (MSBuildResXException msbuildResXException)
             {
-                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(inFile)), 0, 0, 0, 0,
                     "General.InvalidResxFile", msbuildResXException.InnerException.ToString());
                 return false;
             }
@@ -2684,12 +2700,12 @@ namespace Microsoft.Build.Tasks
             {
                 if (ae.InnerException is XmlException xe)
                 {
-                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber,
+                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(inFile)), xe.LineNumber,
                         xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
                 }
                 else
                 {
-                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                    _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(inFile)), 0, 0, 0, 0,
                         "General.InvalidResxFile", ae.Message);
                 }
                 return false;
@@ -2703,7 +2719,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (XmlException xe)
             {
-                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), xe.LineNumber,
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(inFile)), xe.LineNumber,
                     xe.LinePosition, 0, 0, "General.InvalidResxFile", xe.Message);
                 return false;
             }
@@ -2714,18 +2730,18 @@ namespace Microsoft.Build.Tasks
                 // DDB #9819
                 // SerializationException and TargetInvocationException can occur when trying to deserialize a type from a resource format (typically with other exceptions inside)
                 // This is a bug in the type being serialized, so the best we can do is dump diagnostic information and move on to the next input resource file.
-                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(inFile)), 0, 0, 0, 0,
                     "General.InvalidResxFile", e.Message);
 
                 // Log the stack, so the problem with the type in the .resx is diagnosable by the customer
                 _logger.LogErrorFromException(e, /* stack */ true, /* inner exceptions */ true,
-                    FileUtilities.GetFullPathNoThrow(inFile));
+                    FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(inFile)));
                 return false;
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 // Regular IO error
-                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(inFile), 0, 0, 0, 0,
+                _logger.LogErrorWithCodeFromResources(null, FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(inFile)), 0, 0, 0, 0,
                     "General.InvalidResxFile", e.Message);
                 return false;
             }
@@ -2737,10 +2753,11 @@ namespace Microsoft.Build.Tasks
 
             try
             {
+#if !FEATURE_ASSEMBLYLOADCONTEXT
                 if (GetFormat(inFile) == Format.Assembly)
                 {
                     // Prepare cache data
-                    ResGenDependencies.PortableLibraryFile library = new ResGenDependencies.PortableLibraryFile(inFile);
+                    ResGenDependencies.PortableLibraryFile library = new ResGenDependencies.PortableLibraryFile(TaskEnvironment.GetAbsolutePathOrEmpty(inFile));
                     List<string> resWFilesForThisAssembly = new List<string>();
 
                     foreach (ReaderInfo reader in _readers)
@@ -2794,6 +2811,7 @@ namespace Microsoft.Build.Tasks
                     _portableLibraryCacheInfo.Add(library);
                 }
                 else
+#endif
                 {
                     currentOutputFile = outFileOrDir;
                     Assumed.Equal(_readers.Count, 1, $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
@@ -2813,7 +2831,7 @@ namespace Microsoft.Build.Tasks
                         _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteSTRFile",
                             _stronglyTypedFilename, e.Message);
 
-                        if (FileSystems.Default.FileExists(outFileOrDir)
+                        if (FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePathOrEmpty(outFileOrDir))
                             && GetFormat(inFile) != Format.Assembly
                             // outFileOrDir is a directory when the input file is an assembly
                             && GetFormat(outFileOrDir) != Format.Assembly)
@@ -2834,8 +2852,8 @@ namespace Microsoft.Build.Tasks
                 if (currentOutputFile != null)
                 {
                     _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput",
-                        FileUtilities.GetFullPathNoThrow(currentOutputFile), io.Message);
-                    if (FileSystems.Default.FileExists(currentOutputFile))
+                        FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(currentOutputFile)), io.Message);
+                    if (FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePathOrEmpty(currentOutputFile)))
                     {
                         if (GetFormat(currentOutputFile) != Format.Assembly)
                         // Never delete an assembly since we don't ever actually write to assemblies.
@@ -2851,7 +2869,7 @@ namespace Microsoft.Build.Tasks
                     // Do not annoy the user by removing an empty directory we did not create.
                     try
                     {
-                        Directory.Delete(currentOutputDirectory); // Remove output directory if empty
+                        Directory.Delete(TaskEnvironment.GetAbsolutePath(currentOutputDirectory)); // Remove output directory if empty
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
@@ -2868,24 +2886,25 @@ namespace Microsoft.Build.Tasks
                 // SerializationException and TargetInvocationException can occur when trying to serialize a type into a resource format (typically with other exceptions inside)
                 // This is a bug in the type being serialized, so the best we can do is dump diagnostic information and move on to the next input resource file.
                 _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput",
-                    FileUtilities.GetFullPathNoThrow(inFile), e.Message); // Input file is more useful to log
+                    FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(inFile)), e.Message); // Input file is more useful to log
 
                 // Log the stack, so the problem with the type in the .resx is diagnosable by the customer
                 _logger.LogErrorFromException(e, /* stack */ true, /* inner exceptions */ true,
-                    FileUtilities.GetFullPathNoThrow(inFile));
+                    FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(inFile)));
                 return false;
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 // Regular IO error
                 _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput",
-                    FileUtilities.GetFullPathNoThrow(currentOutputFile), e.Message);
+                    FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(currentOutputFile)), e.Message);
                 return false;
             }
 
             return true;
         }
 
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// For very long resource names, the directory structure we generate may be too deep.
         /// If so, assume that the name is so long it will already uniquely distinguish itself.
@@ -2950,6 +2969,7 @@ namespace Microsoft.Build.Tasks
             }
             return currentOutputFile;
         }
+#endif
 
         /// <summary>
         /// Remove a corrupted file, with error handling and a warning if we fail.
@@ -2957,14 +2977,14 @@ namespace Microsoft.Build.Tasks
         /// <param name="filename">Full path to file to delete</param>
         private void RemoveCorruptedFile(string filename)
         {
-            _logger.LogMessageFromResources("GenerateResource.CorruptOutput", FileUtilities.GetFullPathNoThrow(filename));
+            _logger.LogMessageFromResources("GenerateResource.CorruptOutput", FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(filename)));
             try
             {
-                File.Delete(filename);
+                File.Delete(TaskEnvironment.GetAbsolutePathOrEmpty(filename));
             }
             catch (Exception deleteException)
             {
-                _logger.LogWarningWithCodeFromResources("GenerateResource.DeleteCorruptOutputFailed", FileUtilities.GetFullPathNoThrow(filename), deleteException.Message);
+                _logger.LogWarningWithCodeFromResources("GenerateResource.DeleteCorruptOutputFailed", FileUtilities.GetFullPathNoThrow(TaskEnvironment.GetAbsolutePathOrEmpty(filename)), deleteException.Message);
 
                 if (ExceptionHandling.NotExpectedException(deleteException))
                 {
@@ -3098,7 +3118,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, shouldUseSourcePath, _logger, _logWarningForBinaryFormatter))
+                                foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(TaskEnvironment.GetAbsolutePath(filename), shouldUseSourcePath, _logger, _logWarningForBinaryFormatter, TaskEnvironment))
                                 {
                                     AddResource(reader, resource, filename, 0, 0);
                                 }
@@ -3129,7 +3149,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void AddResourcesUsingMinimalCoreResxParsing(string filename, ReaderInfo reader)
         {
-            using (var xmlReader = new XmlTextReader(filename) { DtdProcessing = DtdProcessing.Ignore, XmlResolver = null })
+            using (var xmlReader = new XmlTextReader(TaskEnvironment.GetAbsolutePath(filename)) { DtdProcessing = DtdProcessing.Ignore, XmlResolver = null })
             {
                 xmlReader.WhitespaceHandling = WhitespaceHandling.None;
                 XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
@@ -3421,13 +3441,13 @@ namespace Microsoft.Build.Tasks
         {
             if (_usePreserializedResources && HaveSystemResourcesExtensionsReference)
             {
-                WriteResources(reader, new PreserializedResourceWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))); // closes writer for us
+                WriteResources(reader, new PreserializedResourceWriter(new FileStream(TaskEnvironment.GetAbsolutePath(filename), FileMode.Create, FileAccess.Write, FileShare.None))); // closes writer for us
                 return;
             }
 
             try
             {
-                WriteResources(reader, new ResourceWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))); // closes writer for us
+                WriteResources(reader, new ResourceWriter(new FileStream(TaskEnvironment.GetAbsolutePath(filename), FileMode.Create, FileAccess.Write, FileShare.None))); // closes writer for us
             }
             catch (PreserializedResourceWriterRequiredException)
             {
@@ -3537,7 +3557,7 @@ namespace Microsoft.Build.Tasks
                         out skippedResources);
 
                 CodeGeneratorOptions codeGenOptions = new CodeGeneratorOptions();
-                using (TextWriter output = new StreamWriter(_stronglyTypedFilename))
+                using (TextWriter output = new StreamWriter(TaskEnvironment.GetAbsolutePath(_stronglyTypedFilename)))
                 {
                     provider.GenerateCodeFromCompileUnit(ccu, output, codeGenOptions);
                 }
@@ -3555,7 +3575,7 @@ namespace Microsoft.Build.Tasks
                         StronglyTypedResourceBuilder.SkipReason.NameCollision => "GenerateResource.STRPropertySkippedNameCollision",
                         _ => throw new InvalidOperationException($"Unknown SkipReason {skipped.Reason}"),
                     };
-                    _logger.LogWarningWithCodeFromResources(null, Path.GetFullPath(inputFileName), 0, 0, 0, 0, messageKey, [skipped.Key, .. skipped.AdditionalMessageArgs]);
+                    _logger.LogWarningWithCodeFromResources(null, TaskEnvironment.GetAbsolutePath(inputFileName).GetCanonicalForm(), 0, 0, 0, 0, messageKey, [skipped.Key, .. skipped.AdditionalMessageArgs]);
                 }
 
                 _stronglyTypedResourceSuccessfullyCreated = true;
@@ -3646,7 +3666,7 @@ namespace Microsoft.Build.Tasks
         {
             // Check for byte order marks in the beginning of the input file, but
             // default to UTF-8.
-            using var fs = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var fs = File.Open(TaskEnvironment.GetAbsolutePath(fileName), FileMode.Open, FileAccess.Read, FileShare.Read);
             using (LineNumberStreamReader sr = new LineNumberStreamReader(fs, new UTF8Encoding(true), true))
             {
                 StringBuilder name = new StringBuilder(255);
@@ -3883,7 +3903,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="fileName">Output resources file</param>
         private void WriteTextResources(ReaderInfo reader, String fileName)
         {
-            using (StreamWriter writer = FileUtilities.OpenWrite(fileName, false, Encoding.UTF8))
+            using (StreamWriter writer = FileUtilities.OpenWrite(TaskEnvironment.GetAbsolutePath(fileName), false, Encoding.UTF8))
             {
                 foreach (IResource resource in reader.resources)
                 {

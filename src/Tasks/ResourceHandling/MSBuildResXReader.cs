@@ -19,7 +19,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 {
     internal class MSBuildResXReader
     {
-        public static IReadOnlyList<IResource> ReadResources(Stream s, string filename, bool pathsRelativeToBasePath, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
+        private static IReadOnlyList<IResource> ReadResources(Stream s, string filename, bool pathsRelativeToBasePath, TaskLoggingHelper log, bool logWarningForBinaryFormatter, TaskEnvironment taskEnvironment)
         {
             var resources = new List<IResource>();
             var aliases = new Dictionary<string, string>();
@@ -41,7 +41,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                             case "resheader":
                                 break;
                             case "data":
-                                ParseData(filename, pathsRelativeToBasePath, resources, aliases, elem, log, logWarningForBinaryFormatter);
+                                ParseData(filename, pathsRelativeToBasePath, resources, aliases, elem, log, logWarningForBinaryFormatter, taskEnvironment);
                                 break;
                         }
                     }
@@ -115,7 +115,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             Dictionary<string, string> aliases,
             XElement elem,
             TaskLoggingHelper log,
-            bool logWarningForBinaryFormatter)
+            bool logWarningForBinaryFormatter,
+            TaskEnvironment taskEnvironment)
         {
             string name = elem.Attribute("name").Value;
             string value;
@@ -161,7 +162,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             if (typename.StartsWith("System.Resources.ResXFileRef", StringComparison.Ordinal)) // TODO: is this too general? Should it be OrdinalIgnoreCase?
             {
-                AddLinkedResource(resxFilename, pathsRelativeToBasePath, resources, name, value);
+                AddLinkedResource(resxFilename, pathsRelativeToBasePath, resources, name, value, taskEnvironment);
                 return;
             }
 
@@ -225,7 +226,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             }
         }
 
-        private static void AddLinkedResource(string resxFilename, bool pathsRelativeToBasePath, List<IResource> resources, string name, string value)
+        private static void AddLinkedResource(string resxFilename, bool pathsRelativeToBasePath, List<IResource> resources, string name, string value, TaskEnvironment taskEnvironment)
         {
             string[] fileRefInfo = ParseResxFileRefString(value);
 
@@ -236,9 +237,11 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             {
                 fileName = Path.Combine(
                     FileUtilities.GetDirectory(
-                        FileUtilities.NormalizePath(resxFilename)),
+                        FileUtilities.NormalizePath(taskEnvironment.GetAbsolutePath(resxFilename))),
                     fileName);
             }
+
+            AbsolutePath linkedFile = taskEnvironment.GetAbsolutePathOrEmpty(fileName);
 
             if (IsString(fileRefType))
             {
@@ -258,7 +261,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 Encoding textFileEncoding = fileRefEncoding != null
                     ? Encoding.GetEncoding(fileRefEncoding)
                     : Encoding.Default;
-                using (StreamReader sr = new StreamReader(fileName, textFileEncoding))
+                using (StreamReader sr = new StreamReader(linkedFile, textFileEncoding))
                 {
                     resources.Add(new LinkedStringResource(name, sr.ReadToEnd(), resxFilename, fileName));
 
@@ -267,7 +270,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             }
             else if (IsByteArray(fileRefType))
             {
-                byte[] byteArray = FileSystems.Default.ReadFileAllBytes(fileName);
+                byte[] byteArray = FileSystems.Default.ReadFileAllBytes(linkedFile);
 
                 resources.Add(new LinkedLiveObjectResource(name, byteArray, fileName));
                 return;
@@ -276,13 +279,13 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             {
                 // See special-case handling in ResXFileRef
                 // https://github.com/dotnet/winforms/blob/689cd9c69e632997bc85bf421af221d79b12ddd4/src/System.Windows.Forms/src/System/Resources/ResXFileRef.cs#L293-L297
-                byte[] byteArray = FileSystems.Default.ReadFileAllBytes(fileName);
+                byte[] byteArray = FileSystems.Default.ReadFileAllBytes(linkedFile);
 
                 resources.Add(new LinkedLiveObjectResource(name, new MemoryStream(byteArray), fileName));
                 return;
             }
 
-            resources.Add(new FileStreamResource(name, fileRefType, fileName, resxFilename));
+            resources.Add(new FileStreamResource(name, fileRefType, linkedFile, resxFilename));
         }
 
         /// <summary>
@@ -312,11 +315,11 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         /// <summary>
         /// Extract <see cref="IResource"/>s from a given file on disk.
         /// </summary>
-        public static IReadOnlyList<IResource> GetResourcesFromFile(string filename, bool pathsRelativeToBasePath, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
+        public static IReadOnlyList<IResource> GetResourcesFromFile(AbsolutePath filename, bool pathsRelativeToBasePath, TaskLoggingHelper log, bool logWarningForBinaryFormatter, TaskEnvironment taskEnvironment)
         {
             using (var x = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return ReadResources(x, filename, pathsRelativeToBasePath, log, logWarningForBinaryFormatter);
+                return ReadResources(x, filename.OriginalValue, pathsRelativeToBasePath, log, logWarningForBinaryFormatter, taskEnvironment);
             }
         }
 
@@ -324,7 +327,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             using (var x = new MemoryStream(Encoding.UTF8.GetBytes(resxContent)))
             {
-                return ReadResources(x, basePath, useRelativePath.GetValueOrDefault(basePath != null), log, logWarningForBinaryFormatter);
+                return ReadResources(x, basePath, useRelativePath.GetValueOrDefault(basePath != null), log, logWarningForBinaryFormatter, TaskEnvironment.Fallback);
             }
         }
 

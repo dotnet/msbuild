@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Resources.Extensions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Tasks.UnitTests.ResourceHandling;
 using Microsoft.Build.UnitTests;
@@ -21,6 +23,56 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         public MSBuildResXReader_Tests(ITestOutputHelper output)
         {
             _output = output;
+        }
+
+        [Theory]
+        [InlineData("System.String")]
+        [InlineData("System.Byte[]")]
+        [InlineData("System.IO.MemoryStream")]
+        [InlineData("Example.Type")]
+        public void LinkedResourcesUseExplicitProjectDirectory(string typeName)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var project = env.CreateFolder();
+            project.CreateFile("linked.dat", "linked data");
+            project.CreateFile("input.resx", $$"""
+                <root>
+                  <data name="Resource" type="System.Resources.ResXFileRef, System.Windows.Forms">
+                    <value>linked.dat;{{typeName}}, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+                  </data>
+                </root>
+                """);
+            TaskEnvironment taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(project.Path);
+
+            IResource resource = MSBuildResXReader.GetResourcesFromFile(
+                taskEnvironment.GetAbsolutePath("input.resx"), false, null, false, taskEnvironment).ShouldHaveSingleItem();
+            resource.ShouldBeAssignableTo<ILinkedFileResource>().LinkedFilePath.ShouldBe("linked.dat");
+            switch (typeName)
+            {
+                case "System.String":
+                    resource.ShouldBeOfType<LinkedStringResource>().Value.ShouldBe("linked data");
+                    break;
+                case "System.Byte[]":
+                    resource.ShouldBeOfType<LinkedLiveObjectResource>().Value.ShouldBeOfType<byte[]>().ShouldBe(Encoding.UTF8.GetBytes("linked data"));
+                    break;
+                case "System.IO.MemoryStream":
+                    using (MemoryStream value = resource.ShouldBeOfType<LinkedLiveObjectResource>().Value.ShouldBeOfType<MemoryStream>())
+                    {
+                        value.ToArray().ShouldBe(Encoding.UTF8.GetBytes("linked data"));
+                    }
+                    break;
+                default:
+                    resource.ShouldBeOfType<FileStreamResource>().OriginatingFile.ShouldBe("input.resx");
+                    using (MemoryStream serialized = new())
+                    {
+                        using (PreserializedResourceWriter writer = new(serialized))
+                        {
+                            resource.AddTo(writer);
+                        }
+                        Encoding.UTF8.GetString(serialized.ToArray()).ShouldContain("linked data");
+                    }
+                    break;
+            }
         }
 
         [Fact]
