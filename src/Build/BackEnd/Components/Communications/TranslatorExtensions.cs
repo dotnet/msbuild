@@ -48,10 +48,11 @@ namespace Microsoft.Build.BackEnd
             }
             else // TranslationDirection.WriteToStream
             {
-                int count = value.Count;
+                ProjectPropertyInstance[] properties = value.GetSnapshot();
+                int count = properties.Length;
                 translator.Translate(ref count);
 
-                foreach (ProjectPropertyInstance instance in value)
+                foreach (ProjectPropertyInstance instance in properties)
                 {
                     ProjectPropertyInstance instanceForSerialization = instance;
                     translator.Translate(ref instanceForSerialization, ProjectPropertyInstance.FactoryForDeserialization);
