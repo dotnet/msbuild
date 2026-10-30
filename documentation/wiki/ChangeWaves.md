@@ -36,7 +36,7 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.14
-- [Sibling item Include globs share compatible directory traversals while preserving fragment order, duplicates, and original-glob metadata.](https://github.com/dotnet/msbuild/issues/14858) Set `MSBUILDDISABLEFEATURESFROMVERSION=18.14` to retain independent glob expansion.
+- [Sibling item Include globs share compatible directory traversals while preserving fragment order, duplicates, and original-glob metadata.](https://github.com/dotnet/msbuild/pull/15427) Set `MSBUILDDISABLEFEATURESFROMVERSION=18.14` to retain independent glob expansion.
 
 ### 18.13
 - [ResolveAssemblyReference discovers redist and subset lists relative to the project directory when `TargetFrameworkDirectories` contains relative paths.](https://github.com/dotnet/msbuild/pull/15089)
