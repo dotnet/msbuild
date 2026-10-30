@@ -192,12 +192,13 @@ namespace Microsoft.Build.Tasks
                 document.Save(xmlWriter);
             }
 
-            byte[] contents = buffer.ToArray();
+            buffer.TryGetBuffer(out ArraySegment<byte> contents);
             if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14) ||
                 !File.Exists(outputPath) ||
                 !contents.AsSpan().SequenceEqual(File.ReadAllBytes(outputPath).AsSpan()))
             {
-                File.WriteAllBytes(outputPath, contents);
+                using FileStream output = new(outputPath, FileMode.Create, FileAccess.Write, FileShare.Read, bufferSize: 1);
+                output.Write(contents.Array!, contents.Offset, contents.Count);
             }
         }
 
