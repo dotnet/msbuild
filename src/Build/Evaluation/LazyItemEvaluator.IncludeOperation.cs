@@ -53,6 +53,10 @@ namespace Microsoft.Build.Evaluation
 
                 ISet<string>? excludePatternsForGlobs = null;
                 FileSpecMatcherTester?[]? matchers = null;
+                FileMatcher.GlobExpander? globExpander = _itemSpec.Fragments.Count > 1
+                    && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)
+                        ? CreateGlobExpander(globsToIgnore, excludePatterns, ref excludePatternsForGlobs)
+                        : null;
 
                 foreach (var fragment in _itemSpec.Fragments)
                 {
@@ -102,7 +106,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // If this item is behind a false condition and represents a full drive/filesystem scan, expanding it is
                         // almost certainly undesired. It should be skipped to avoid evaluation taking an excessive amount of time.
-                        bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs;
+                        bool skipGlob = ShouldSkipGlob(globFragment);
                         if (!skipGlob)
                         {
                             string glob = globFragment.TextFragment;
@@ -127,7 +131,8 @@ namespace Microsoft.Build.Evaluation
                                     fileMatcher: FileMatcher,
                                     loggingMechanism: _lazyEvaluator?._loggingContext,
                                     includeLocation: _itemElement.IncludeLocation,
-                                    excludeLocation: _itemElement.ExcludeLocation);
+                                    excludeLocation: _itemElement.ExcludeLocation,
+                                    globExpander: globExpander);
                             }
 
                             if (MSBuildEventSource.Log.IsEnabled())
@@ -176,6 +181,32 @@ namespace Microsoft.Build.Evaluation
 
                     return found;
                 }
+            }
+
+            private bool ShouldSkipGlob(GlobFragment fragment) =>
+                !_conditionResult && fragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs;
+
+            private FileMatcher.GlobExpander? CreateGlobExpander(
+                ImmutableHashSet<string> globsToIgnore,
+                ImmutableList<string>.Builder excludePatterns,
+                ref ISet<string>? excludePatternsForGlobs)
+            {
+                List<string>? globs = null;
+                foreach (ItemSpecFragment fragment in _itemSpec.Fragments)
+                {
+                    if (fragment is GlobFragment glob && !ShouldSkipGlob(glob))
+                    {
+                        (globs ??= []).Add(glob.TextFragment);
+                    }
+                }
+
+                if (globs is null || globs.Count < 2)
+                {
+                    return null;
+                }
+
+                excludePatternsForGlobs = BuildExcludePatternsForGlobs(globsToIgnore, excludePatterns);
+                return EngineFileUtilities.CreateGlobExpander(_rootDirectory, globs, excludePatternsForGlobs, FileMatcher);
             }
 
             private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)
