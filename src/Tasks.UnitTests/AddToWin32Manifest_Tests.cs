@@ -8,6 +8,7 @@ using System.Runtime.Versioning;
 using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
@@ -94,10 +95,14 @@ namespace Microsoft.Build.Tasks.UnitTests
             ChangeWaves.ResetStateForTests();
 
             string outputDirectory = env.CreateFolder().Path;
+            MockEngine engine = new(_testOutput);
             AddToWin32Manifest task = CreateTask();
             task.Execute().ShouldBeTrue();
 
             string manifestPath = task.ManifestPath;
+            string skippedMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                "AddToWin32Manifest.SkippingUnchangedFile", manifestPath);
+            engine.MessageEvents.ShouldNotContain(message => message.Message == skippedMessage);
             byte[] originalContents = File.ReadAllBytes(manifestPath);
             File.SetLastWriteTimeUtc(manifestPath, new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc));
             DateTime originalTimestamp = File.GetLastWriteTimeUtc(manifestPath);
@@ -110,15 +115,18 @@ namespace Microsoft.Build.Tasks.UnitTests
             if (waveEnabled)
             {
                 File.GetLastWriteTimeUtc(manifestPath).ShouldBe(originalTimestamp);
+                engine.MessageEvents.ShouldContain(message =>
+                    message.Message == skippedMessage && message.Importance == MessageImportance.Low);
             }
             else
             {
                 File.GetLastWriteTimeUtc(manifestPath).ShouldNotBe(originalTimestamp);
+                engine.MessageEvents.ShouldNotContain(message => message.Message == skippedMessage);
             }
 
             AddToWin32Manifest CreateTask() => new()
             {
-                BuildEngine = new MockEngine(_testOutput),
+                BuildEngine = engine,
                 ApplicationManifest = manifestName is null ? null : new TaskItem(Path.Combine(TestAssetsRootPath, manifestName)),
                 OutputDirectory = outputDirectory,
                 SupportedArchitectures = "amd64 arm64",
@@ -138,9 +146,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                 </assembly>
                 """;
             string inputManifestPath = env.CreateFile("app.manifest", originalManifest).Path;
+            MockEngine engine = new(_testOutput);
             AddToWin32Manifest task = new()
             {
-                BuildEngine = new MockEngine(_testOutput),
+                BuildEngine = engine,
                 ApplicationManifest = new TaskItem(inputManifestPath),
                 OutputDirectory = env.CreateFolder().Path,
                 SupportedArchitectures = "amd64 arm64",
@@ -155,6 +164,9 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             File.ReadAllText(task.ManifestPath).ShouldContain("<description>Updated</description>");
             File.GetLastWriteTimeUtc(task.ManifestPath).ShouldNotBe(originalTimestamp);
+            string skippedMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                "AddToWin32Manifest.SkippingUnchangedFile", task.ManifestPath);
+            engine.MessageEvents.ShouldNotContain(message => message.Message == skippedMessage);
         }
 
         [SupportedOSPlatform("windows6.1")]

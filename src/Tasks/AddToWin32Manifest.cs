@@ -200,6 +200,10 @@ namespace Microsoft.Build.Tasks
                 using FileStream output = new(outputPath, FileMode.Create, FileAccess.Write, FileShare.Read, bufferSize: 1);
                 output.Write(contents.Array!, contents.Offset, contents.Count);
             }
+            else
+            {
+                Log.LogMessageFromResources(MessageImportance.Low, "AddToWin32Manifest.SkippingUnchangedFile", originalPath);
+            }
         }
 
         private ManifestValidationResult ValidateManifest(string? manifestPath, XmlDocument document, XmlNamespaceManager xmlNamespaceManager)
