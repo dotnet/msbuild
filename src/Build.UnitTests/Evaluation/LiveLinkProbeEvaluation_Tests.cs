@@ -12,10 +12,12 @@ namespace Microsoft.Build.UnitTests.Evaluation;
 
 public sealed class LiveLinkProbeEvaluation_Tests(ITestOutputHelper output)
 {
+    private readonly ITestOutputHelper _output = output;
+
     [Fact]
     public void BothModelsPreserveGlobObserversMetadataAndRemoval()
     {
-        using TestEnvironment environment = TestEnvironment.Create(output);
+        using TestEnvironment environment = TestEnvironment.Create(_output);
         string include = Path.Combine("**", "*.cs");
         string exclude = Path.Combine("**", "obj", "**");
         string child = Path.Combine("src", "child.cs");
@@ -42,7 +44,7 @@ public sealed class LiveLinkProbeEvaluation_Tests(ITestOutputHelper output)
         TransientTestProjectWithFiles fixture = environment.CreateTestProjectWithFiles(content,
             ["root.cs", child, Path.Combine("obj", "excluded.cs")]);
         using ProjectCollection collection = new();
-        collection.RegisterLogger(new MockLogger(output));
+        collection.RegisterLogger(new MockLogger(_output));
         Project project = new(fixture.ProjectFile, null, null, collection);
         Verify(project.GetItems("Before").Select(Read).ToArray(),
             project.GetItems("After").Select(Read).ToArray(), project.GetItems("Compile").Select(Read).ToArray());

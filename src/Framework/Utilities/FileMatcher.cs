@@ -3428,14 +3428,18 @@ namespace Microsoft.Build.Shared
 #endif
     }
 
-    internal static bool ShouldSkipRecursiveDirectory(string directory)
+    // Per-call operations let tests observe this production path; null keeps direct filesystem calls.
+    internal static bool ShouldSkipRecursiveDirectory(
+        string directory,
+        Func<string, System.IO.FileAttributes>? getAttributes = null,
+        Func<string, bool, FileSystemInfo?>? resolveLinkTarget = null)
     {
 #if FEATURE_SYMLINK_TARGET
         try
         {
 #if NET
-            // Use the cheaper attribute probe only for fully qualified Windows drive
-            // paths without wildcards. Keep other path forms on the existing resolver.
+            // Conservatively limit the probe to fully qualified Windows drive paths without wildcards.
+            // UNC, device and relative paths keep the resolver; a drive letter need not mean a local disk.
             if (NativeMethods.IsWindows
                 && Path.IsPathFullyQualified(directory)
                 && directory[1] == Path.VolumeSeparatorChar
@@ -3443,8 +3447,11 @@ namespace Microsoft.Build.Shared
             {
                 try
                 {
+                    // Windows reports this entry's own reparse flag, including when a parent is a link.
+                    // Use a fresh observation, not enumeration attributes; this is not an atomic traversal guarantee.
+                    FileAttributes attributes = getAttributes is null ? File.GetAttributes(directory) : getAttributes(directory);
                     // Avoid link-target resolution when attributes confirm the directory is not a reparse point.
-                    if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) == 0)
+                    if ((attributes & FileAttributes.ReparsePoint) == 0)
                     {
                         return false;
                     }
@@ -3453,7 +3460,9 @@ namespace Microsoft.Build.Shared
             }
 #endif
 
-            FileSystemInfo? linkTarget = Directory.ResolveLinkTarget(directory, returnFinalTarget: true);
+            FileSystemInfo? linkTarget = resolveLinkTarget is null
+                ? Directory.ResolveLinkTarget(directory, returnFinalTarget: true)
+                : resolveLinkTarget(directory, true);
             return linkTarget is not null
                 && IsSubdirectoryOf(directory, linkTarget.FullName, FileUtilities.PathComparison);
         }

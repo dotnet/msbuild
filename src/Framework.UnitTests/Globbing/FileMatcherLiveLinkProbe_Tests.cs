@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security;
 #if FEATURE_SYMLINK_TARGET
 using System.Reflection;
 using Microsoft.Build.Framework;
@@ -67,6 +68,242 @@ public sealed class FileMatcherLiveLinkProbe_Tests
     }
 
 #if NET
+#if FEATURE_SYMLINK_TARGET
+    [WindowsOnlyFact]
+    public void ShouldSkipRecursiveDirectory_OrdinaryDrivePath_QueriesAttributesWithoutResolving()
+    {
+        using TestEnvironment environment = TestEnvironment.Create(_output);
+        string root = environment.CreateFolder().Path;
+        string[] paths = [root, root + Path.DirectorySeparatorChar, root.Replace('\\', '/'), Path.GetPathRoot(root)!];
+        foreach (string directory in paths)
+        {
+            List<string> calls = [];
+            FileMatcher.ShouldSkipRecursiveDirectory(directory, GetAttributes, ResolveLinkTarget).ShouldBeFalse();
+            calls.ShouldBe(["attributes"], directory);
+
+            FileAttributes GetAttributes(string path)
+            {
+                path.ShouldBe(directory);
+                calls.Add("attributes");
+                FileAttributes attributes = File.GetAttributes(path);
+                (attributes & FileAttributes.ReparsePoint).ShouldBe((FileAttributes)0);
+                return attributes;
+            }
+
+            FileSystemInfo? ResolveLinkTarget(string path, bool returnFinalTarget)
+            {
+                calls.Add("resolver");
+                return Directory.ResolveLinkTarget(path, returnFinalTarget);
+            }
+        }
+    }
+
+    [WindowsOnlyFact]
+    public void ShouldSkipRecursiveDirectory_ReparsePoint_UsesFinalTargetResolver()
+    {
+        using TestEnvironment environment = TestEnvironment.Create(_output);
+        string root = environment.CreateFolder().Path;
+        string directory = Path.Combine(root, "child", "ancestor");
+        List<string> calls = [];
+        FileMatcher.ShouldSkipRecursiveDirectory(directory, GetAttributes, ResolveLinkTarget).ShouldBeTrue();
+        calls.ShouldBe(["attributes", "resolver"]);
+
+        FileAttributes GetAttributes(string path)
+        {
+            path.ShouldBe(directory);
+            calls.Add("attributes");
+            return FileAttributes.Directory | FileAttributes.ReparsePoint;
+        }
+
+        FileSystemInfo ResolveLinkTarget(string path, bool returnFinalTarget)
+        {
+            path.ShouldBe(directory);
+            returnFinalTarget.ShouldBeTrue();
+            calls.Add("resolver");
+            return new DirectoryInfo(root);
+        }
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData(typeof(IOException))]
+    [InlineData(typeof(ArgumentException))]
+    [InlineData(typeof(UnauthorizedAccessException))]
+    [InlineData(typeof(NotSupportedException))]
+    [InlineData(typeof(SecurityException))]
+    public void ShouldSkipRecursiveDirectory_InconclusiveProbe_UsesFinalTargetResolver(Type exceptionType)
+    {
+        using TestEnvironment environment = TestEnvironment.Create(_output);
+        string root = environment.CreateFolder().Path;
+        string directory = Path.Combine(root, "child", "ancestor");
+        Exception exception = (Exception)Activator.CreateInstance(exceptionType)!;
+        List<string> calls = [];
+        FileMatcher.ShouldSkipRecursiveDirectory(directory, GetAttributes, ResolveLinkTarget).ShouldBeTrue();
+        calls.ShouldBe(["attributes", "resolver"]);
+
+        FileAttributes GetAttributes(string path)
+        {
+            path.ShouldBe(directory);
+            calls.Add("attributes");
+            throw exception;
+        }
+
+        FileSystemInfo ResolveLinkTarget(string path, bool returnFinalTarget)
+        {
+            path.ShouldBe(directory);
+            returnFinalTarget.ShouldBeTrue();
+            calls.Add("resolver");
+            return new DirectoryInfo(root);
+        }
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData(typeof(IOException), true)]
+    [InlineData(typeof(ArgumentException), true)]
+    [InlineData(typeof(UnauthorizedAccessException), true)]
+    [InlineData(typeof(NotSupportedException), false)]
+    [InlineData(typeof(SecurityException), false)]
+    public void ShouldSkipRecursiveDirectory_ResolverFailure_PreservesExceptionBoundary(Type exceptionType, bool caught)
+    {
+        using TestEnvironment environment = TestEnvironment.Create(_output);
+        string directory = environment.CreateFolder().Path;
+        Exception exception = (Exception)Activator.CreateInstance(exceptionType)!;
+        List<string> calls = [];
+        if (caught)
+        {
+            FileMatcher.ShouldSkipRecursiveDirectory(directory, GetAttributes, ResolveLinkTarget).ShouldBeFalse();
+        }
+        else
+        {
+            Record.Exception(() => FileMatcher.ShouldSkipRecursiveDirectory(directory, GetAttributes, ResolveLinkTarget))
+                .ShouldBeSameAs(exception);
+        }
+        calls.ShouldBe(["attributes", "resolver"]);
+
+        FileAttributes GetAttributes(string path)
+        {
+            calls.Add("attributes");
+            return FileAttributes.Directory | FileAttributes.ReparsePoint;
+        }
+
+        FileSystemInfo ResolveLinkTarget(string path, bool returnFinalTarget)
+        {
+            calls.Add("resolver");
+            throw exception;
+        }
+    }
+
+    [WindowsOnlyFact]
+    public void ShouldSkipRecursiveDirectory_UnexpectedProbeFailure_DoesNotInvokeResolver()
+    {
+        using TestEnvironment environment = TestEnvironment.Create(_output);
+        string directory = environment.CreateFolder().Path;
+        List<string> calls = [];
+        Should.Throw<InvalidOperationException>(() =>
+            FileMatcher.ShouldSkipRecursiveDirectory(directory, GetAttributes, ResolveLinkTarget));
+        calls.ShouldBe(["attributes"]);
+
+        FileAttributes GetAttributes(string path)
+        {
+            calls.Add("attributes");
+            throw new InvalidOperationException();
+        }
+
+        FileSystemInfo? ResolveLinkTarget(string path, bool returnFinalTarget)
+        {
+            calls.Add("resolver");
+            return null;
+        }
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData("")]
+    [InlineData("directory")]
+    [InlineData(@"C:relative")]
+    [InlineData(@"\rooted")]
+    [InlineData(@"\\server\share\directory")]
+    [InlineData(@"\\?\C:\directory")]
+    [InlineData(@"\\.\C:\directory")]
+    [InlineData(@"C:\directory\*")]
+    [InlineData(@"C:\directory\?")]
+    public void ShouldSkipRecursiveDirectory_UnsupportedPathForm_OnlyInvokesResolver(string directory)
+    {
+        List<string> calls = [];
+        FileMatcher.ShouldSkipRecursiveDirectory(directory, GetAttributes, ResolveLinkTarget).ShouldBeFalse();
+        calls.ShouldBe(["resolver"]);
+
+        FileAttributes GetAttributes(string path)
+        {
+            calls.Add("attributes");
+            return FileAttributes.Directory;
+        }
+
+        FileSystemInfo? ResolveLinkTarget(string path, bool returnFinalTarget)
+        {
+            path.ShouldBe(directory);
+            returnFinalTarget.ShouldBeTrue();
+            calls.Add("resolver");
+            return null;
+        }
+    }
+
+    [UnixOnlyFact]
+    public void ShouldSkipRecursiveDirectory_NonWindows_OnlyInvokesResolver()
+    {
+        List<string> calls = [];
+        FileMatcher.ShouldSkipRecursiveDirectory("/ordinary/directory", GetAttributes, ResolveLinkTarget).ShouldBeFalse();
+        calls.ShouldBe(["resolver"]);
+
+        FileAttributes GetAttributes(string path)
+        {
+            calls.Add("attributes");
+            return FileAttributes.Directory;
+        }
+
+        FileSystemInfo? ResolveLinkTarget(string path, bool returnFinalTarget)
+        {
+            path.ShouldBe("/ordinary/directory");
+            returnFinalTarget.ShouldBeTrue();
+            calls.Add("resolver");
+            return null;
+        }
+    }
+
+    [RequiresSymbolicLinksFact]
+    public void ShouldSkipRecursiveDirectory_RealChildThroughParentLink_ObservesChildAttributes()
+    {
+        using TestEnvironment environment = TestEnvironment.Create(_output);
+        string root = environment.CreateFolder().Path;
+        string target = environment.CreateFolder().Path;
+        Directory.CreateDirectory(Path.Combine(target, "child"));
+        string link = Path.Combine(root, "parent-link");
+        environment.WithTransientTestState(new LinkCleanup(link));
+        Directory.CreateSymbolicLink(link, target);
+        string directory = Path.Combine(link, "child");
+        (File.GetAttributes(link) & FileAttributes.ReparsePoint).ShouldNotBe((FileAttributes)0);
+        (File.GetAttributes(directory) & FileAttributes.ReparsePoint).ShouldBe((FileAttributes)0);
+        Directory.ResolveLinkTarget(directory, returnFinalTarget: true).ShouldBeNull();
+        List<string> calls = [];
+        FileMatcher.ShouldSkipRecursiveDirectory(directory, GetAttributes, ResolveLinkTarget).ShouldBeFalse();
+        calls.ShouldBe(NativeMethodsShared.IsWindows ? ["attributes"] : ["resolver"]);
+        FileMatcher.ShouldSkipRecursiveDirectory(directory).ShouldBe(OriginalShouldSkip(directory));
+
+        FileAttributes GetAttributes(string path)
+        {
+            path.ShouldBe(directory);
+            calls.Add("attributes");
+            return File.GetAttributes(path);
+        }
+
+        FileSystemInfo? ResolveLinkTarget(string path, bool returnFinalTarget)
+        {
+            path.ShouldBe(directory);
+            returnFinalTarget.ShouldBeTrue();
+            calls.Add("resolver");
+            return Directory.ResolveLinkTarget(path, returnFinalTarget);
+        }
+    }
+#endif
+
     [WindowsOnlyFact]
     public void LongAndExtendedPathsRetainOriginalDisposition()
     {
