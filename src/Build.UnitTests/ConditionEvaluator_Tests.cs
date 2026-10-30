@@ -585,6 +585,47 @@ public class ConditionEvaluator_Tests : IDisposable
         node.TryVersionEvaluate(state, out _).ShouldBe(convertsToVersion);
     }
 
+    [Fact]
+    public async Task UndersizedConditionStateBufferRemainsAvailableForNestedEvaluation()
+    {
+        await Task.Factory.StartNew(() =>
+        {
+            StringExpressionNode.EvaluationState[] small =
+                ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(64);
+            ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(small, 64);
+
+            StringExpressionNode.EvaluationState[] large =
+                ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(128);
+            StringExpressionNode.EvaluationState[]? nested = null;
+            try
+            {
+                nested = ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(64);
+                nested.ShouldBeSameAs(small);
+                nested.ShouldNotBeSameAs(large);
+            }
+            finally
+            {
+                if (nested is not null)
+                {
+                    ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(nested, 64);
+                }
+
+                ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(large, 128);
+            }
+
+            StringExpressionNode.EvaluationState[] reused =
+                ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(128);
+            try
+            {
+                reused.ShouldBeSameAs(large);
+            }
+            finally
+            {
+                ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(reused, 128);
+            }
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+    }
+
     [Theory]
     [InlineData(256)]
     [InlineData(258)]
@@ -633,10 +674,13 @@ public class ConditionEvaluator_Tests : IDisposable
     public void NodeStateAccessorValidatesSlotsAndClearsReusedBuffers()
     {
         NodeStateStore state = new();
-        Should.Throw<InvalidOperationException>(() => state.GetString(0));
+        Should.Throw<InvalidOperationException>(() => state.GetString(0)).Message.ShouldBe(
+            ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ConditionNodeStateNotInitialized"));
         state.Initialize(new NodeStateLayout(1));
         try
         {
+            Should.Throw<InvalidOperationException>(() => state.Initialize(new NodeStateLayout(1))).Message.ShouldBe(
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ConditionNodeStateAlreadyInUse"));
             Should.Throw<ArgumentOutOfRangeException>(() => state.GetString(-1));
             Should.Throw<ArgumentOutOfRangeException>(() => state.GetString(1));
             state.GetString(0).ExpandedValue = "first";

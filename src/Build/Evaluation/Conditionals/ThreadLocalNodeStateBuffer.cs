@@ -22,9 +22,9 @@ internal static class ThreadLocalNodeStateBuffer<TState> where TState : struct
         if (minimumLength <= MaxCachedBufferLength)
         {
             TState[]? buffer = t_cachedBuffer;
-            t_cachedBuffer = null;
             if (buffer is not null && buffer.Length >= minimumLength)
             {
+                t_cachedBuffer = null;
                 return buffer;
             }
         }

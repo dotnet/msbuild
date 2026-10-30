@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using Microsoft.Build.Shared;
 
 #nullable enable
 
@@ -20,7 +21,7 @@ internal struct NodeStateStore
     {
         if (_initialized)
         {
-            throw new InvalidOperationException("Condition node state storage is already in use.");
+            ErrorUtilities.ThrowInvalidOperation("ConditionNodeStateAlreadyInUse");
         }
 
         if (layout.StringSlotCount < 0)
@@ -70,7 +71,7 @@ internal struct NodeStateStore
     {
         if (!_initialized)
         {
-            throw new InvalidOperationException("Condition node state storage is not initialized.");
+            ErrorUtilities.ThrowInvalidOperation("ConditionNodeStateNotInitialized");
         }
 
         throw new ArgumentOutOfRangeException(nameof(slot));
