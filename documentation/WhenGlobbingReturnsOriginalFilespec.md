@@ -1,5 +1,11 @@
 # When globbing returns original filespec
 
+File specifications are matched by the internal `GlobPattern` implementation, not regular
+expressions. File enumeration, item matching, and `MSBuildGlob` share the same matcher.
+It preserves historical casing, recursive-directory captures, and filename rules
+(including `*.*` and trailing dots). The legacy regex implementation is retained only
+in test and benchmark code as a compatibility oracle.
+
 Original itemspec is returned when:
 - illegal filespec contains
 	- both wildcards and escaped wildcards (`%2a`, `%3f`)
