@@ -946,26 +946,10 @@ namespace Microsoft.Build.Shared
             TaskOptions taskOptions)
         {
 #if FEATURE_SYMLINK_TARGET
-            // This is a pretty quick, simple check, but it misses some cases:
-            // symlink in folder A pointing to folder B and symlink in folder B pointing to folder A
-            // If folder C contains file Foo.cs and folder D, and folder D contains a symlink pointing to folder C, calling GetFilesRecursive and
-            // passing in folder D would currently find Foo.cs, whereas this would make us miss it.
-            // and most obviously, frameworks other than net6.0
-            // The solution I'd propose for the first two, if necessary, would be maintaining a set of symlinks and verifying, before following it,
-            // that we had not followed it previously. The third would require a more involved P/invoke-style fix.
-            // These issues should ideally be resolved as part of #703
-            try
+            if (ShouldSkipRecursiveDirectory(recursionState.BaseDirectory))
             {
-                FileSystemInfo linkTarget = Directory.ResolveLinkTarget(recursionState.BaseDirectory, returnFinalTarget: true);
-                if (linkTarget is not null && IsSubdirectoryOf(recursionState.BaseDirectory, linkTarget.FullName, FileUtilities.PathComparison))
-                {
-                    return;
-                }
+                return;
             }
-            // This fails in tests with the MockFileSystem when they don't have real paths.
-            catch (IOException) { }
-            catch (ArgumentException) { }
-            catch (UnauthorizedAccessException) { }
 #endif
 
             Assumed.True(
@@ -3431,12 +3415,26 @@ namespace Microsoft.Build.Shared
     private static bool ShouldSkipRecursiveDirectory(string directory)
     {
 #if FEATURE_SYMLINK_TARGET
+        if (NativeMethods.IsWindows && IsKnownNonReparseDirectory(directory))
+        {
+            return false;
+        }
+
+        // This is a pretty quick, simple check, but it misses some cases:
+        // symlink in folder A pointing to folder B and symlink in folder B pointing to folder A
+        // If folder C contains file Foo.cs and folder D, and folder D contains a symlink pointing to folder C, calling GetFilesRecursive and
+        // passing in folder D would currently find Foo.cs, whereas this would make us miss it.
+        // and most obviously, frameworks other than net6.0
+        // The solution I'd propose for the first two, if necessary, would be maintaining a set of symlinks and verifying, before following it,
+        // that we had not followed it previously. The third would require a more involved P/invoke-style fix.
+        // These issues should ideally be resolved as part of #703
         try
         {
-        FileSystemInfo? linkTarget = Directory.ResolveLinkTarget(directory, returnFinalTarget: true);
-        return linkTarget is not null
-            && IsSubdirectoryOf(directory, linkTarget.FullName, FileUtilities.PathComparison);
+            FileSystemInfo? linkTarget = Directory.ResolveLinkTarget(directory, returnFinalTarget: true);
+            return linkTarget is not null
+                && IsSubdirectoryOf(directory, linkTarget.FullName, FileUtilities.PathComparison);
         }
+        // This fails in tests with the MockFileSystem when they don't have real paths.
         catch (IOException) { }
         catch (ArgumentException) { }
         catch (UnauthorizedAccessException) { }
@@ -3444,6 +3442,21 @@ namespace Microsoft.Build.Shared
 
         return false;
     }
+
+#if FEATURE_SYMLINK_TARGET
+    private static bool IsKnownNonReparseDirectory(string directory)
+    {
+        try
+        {
+            return (File.GetAttributes(directory) & FileAttributes.ReparsePoint) == 0;
+        }
+        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e)
+            || e is ArgumentNullException or OperationCanceledException)
+        {
+            return false;
+        }
+    }
+#endif
 
         private sealed class OptimizedFileSearch
         {
