@@ -42,3 +42,9 @@ using System.Security.Permissions;
 [assembly: Dependency("BuildXL.Processes", LoadHint.Sometimes)]
 
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Execution.BuildRequestDataFlags))]
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Experimental.FileAccess.DesiredAccess))]
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Experimental.FileAccess.FileAccessData))]
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Experimental.FileAccess.FlagsAndAttributes))]
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Experimental.FileAccess.ProcessData))]
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Experimental.FileAccess.ReportedFileOperation))]
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Experimental.FileAccess.RequestedAccess))]

@@ -16,6 +16,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.TelemetryInfra;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
@@ -224,7 +225,7 @@ namespace Microsoft.Build.BackEnd
         {
             // Be careful moving these to Traits, changing the timing of reading environment variables has a breaking potential.
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpDirectory = FrameworkDebugUtils.DebugPath;
+            _debugDumpDirectory = DebugUtils.DebugPath;
             _schedulingUnlimitedVariable = Environment.GetEnvironmentVariable("MSBUILDSCHEDULINGUNLIMITED");
             _nodeLimitOffset = 0;
 

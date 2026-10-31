@@ -8,11 +8,8 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-
 using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
-
 
 namespace Microsoft.Build.Evaluation.Expander
 {

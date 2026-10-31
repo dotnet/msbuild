@@ -7,7 +7,7 @@ using System;
 using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 
 #nullable disable
 

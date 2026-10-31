@@ -1,7 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\DebuggingSources.proj" />
-
   <PropertyGroup>
     <TargetFrameworks>$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
@@ -35,8 +33,6 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
-
-    <PackageReference Include="System.Reflection.MetadataLoadContext" />
 
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
     <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
@@ -100,52 +96,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\CanonicalError.cs">
-      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\PropertyParser.cs">
-      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\StringExtensions.cs">
-      <Link>SharedUtilities\StringExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
-    <Compile Include="..\Shared\InvariantPayloadTransferMode.cs" />
-    <Compile Include="..\Shared\TaskHostConfiguration.cs" />
-    <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
-    <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
-    <Compile Include="..\Shared\ITaskHostCallbackPacket.cs" />
-    <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesRequest.cs" />
-    <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesResponse.cs" />
-    <Compile Include="..\Shared\TaskHostCoresRequest.cs" />
-    <Compile Include="..\Shared\TaskHostCoresResponse.cs" />
-    <Compile Include="..\Shared\TaskHostBuildRequest.cs" />
-    <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
 
-    <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
-    <Compile Include="..\Shared\TaskLoader.cs" />
-    <Compile Include="..\Shared\NodeEngineShutdownReason.cs" />
-    <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
-    <Compile Include="..\Shared\INodePacketFactory.cs" />
-    <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\LogMessagePacketBase.cs" />
-    <Compile Include="..\Shared\NodePacketFactory.cs" />
-    <Compile Include="..\Shared\NodeBuildComplete.cs" />
-    <Compile Include="..\Shared\NodeShutdown.cs" />
-    <Compile Include="..\Shared\PlatformNegotiation.cs">
-      <Link>PlatformNegotiation.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TaskLoggingHelper.cs">
-      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
-      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TaskParameter.cs" />
-    <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
-    <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
-    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
@@ -181,6 +133,7 @@
     <Compile Include="BackEnd\Components\FileAccesses\OutOfProcNodeFileAccessManager.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\ProcessReport.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverServiceException.cs" />
+    <Compile Include="BackEnd\Node\NodeEngineShutdownReason.cs" />
     <Compile Include="BackEnd\Shared\EventsCreatorHelper.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\AssemblyLoadsTracker.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
@@ -188,6 +141,7 @@
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="BackEnd\Shared\BuildResultBase.cs" />
     <Compile Include="BuildCheck\**\*.cs" />
+    <Compile Include="BackEnd\TaskExecutionHost\TaskEngineAssemblyResolver.cs" />
     <Compile Include="Collections\IKeyed.cs" />
     <Compile Include="Collections\IValueDictionaryConverter.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableUnescapedValuedEntryHashSet.cs" />
@@ -211,12 +165,6 @@
     <Compile Include="Evaluation\PropertyFunctionReceiver.cs" />
     <Compile Include="Evaluation\ToolsetElement.cs" />
     <Compile Include="Expansion\PropertyValueConverter.cs" />
-    <Compile Include="FileAccess\DesiredAccess.cs" />
-    <Compile Include="FileAccess\FileAccessData.cs" />
-    <Compile Include="FileAccess\FlagsAndAttributes.cs" />
-    <Compile Include="FileAccess\ProcessData.cs" />
-    <Compile Include="FileAccess\ReportedFileOperation.cs" />
-    <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="IElementLocation.cs" />
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
@@ -265,7 +213,6 @@
     <Compile Include="BackEnd\BuildManager\RequestedProjectState.cs" />
     <Compile Include="BackEnd\Components\BuildComponentFactoryCollection.cs" />
     <Compile Include="BackEnd\Components\Caching\IRegisteredTaskObjectCache.cs" />
-    <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs" />
     <Compile Include="BackEnd\Components\Caching\RegisteredTaskObjectCache.cs" />
     <Compile Include="BackEnd\Components\Logging\EvaluationLoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\BuildLoggingContext.cs" />
@@ -651,6 +598,7 @@
     <Compile Include="Utilities\RegistryKeyWrapper.cs" />
     <Compile Include="Utilities\Utilities.cs" />
     <Compile Include="Utilities\SimpleVersion.cs" />
+    <Compile Include="Utilities\Tracing.cs" />
     <Compile Include="Utilities\XmlUtilities.cs" />
     <Compile Include="Xml\ProjectXmlUtilities.XmlElementChildIterator.cs" />
     <Compile Include="Xml\ProjectXmlUtilities.cs" />
@@ -658,18 +606,8 @@
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Errors\ErrorUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
-      <Link>InprocTrackingNativeMethods.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>SharedUtilities\ResourceUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Tracing.cs" />
-    <Compile Include="..\Shared\TypeLoader.cs">
-      <Link>SharedUtilities\TypeLoader.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\VisualStudioConstants.cs">
-      <Link>VisualStudioConstants.cs</Link>
     </Compile>
     <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
 

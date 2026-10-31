@@ -13,7 +13,7 @@ namespace Microsoft.Build.UnitTests;
 public class TypeForwarders_Tests
 {
     [Fact]
-    public void ToolLocationHelperTypesAreForwardedFromUtilities()
+    public void TypesAreForwardedFromUtilities()
     {
         Type[] expectedTypes =
         [
@@ -27,6 +27,7 @@ public class TypeForwarders_Tests
             typeof(SDKType),
             typeof(TargetDotNetFrameworkVersion),
             typeof(TargetPlatformSDK),
+            typeof(TaskLoggingHelper),
             typeof(ToolLocationHelper),
             typeof(VisualStudioVersion),
         ];

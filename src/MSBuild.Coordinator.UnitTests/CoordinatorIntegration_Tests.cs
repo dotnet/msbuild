@@ -4,6 +4,7 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -259,12 +260,12 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             TestEnvironment.SetEnvironmentVariable(Constants.ShutdownTimeoutEnvVarName, "1000");
 
             // Coordinator tracing is enabled so integration failures include the server-side
-            // protocol trace. FrameworkDebugUtils caches this process-wide path.
+            // protocol trace. DebugUtils caches this process-wide path.
             _debugLogPath = Path.Combine(Path.GetTempPath(), $"msbuild-coordinator-test-debug-{Guid.NewGuid():N}");
             TestEnvironment.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
             TestEnvironment.SetEnvironmentVariable("MSBUILDDEBUGPATH", _debugLogPath);
 
-            FrameworkDebugUtils.SetDebugPath();
+            DebugUtils.SetDebugPath();
         }
 
         /// <summary>
@@ -285,9 +286,9 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             }
             finally
             {
-                // TestEnvironment restores MSBUILDDEBUGPATH, but FrameworkDebugUtils caches
+                // TestEnvironment restores MSBUILDDEBUGPATH, but DebugUtils caches
                 // the resolved value and must be refreshed before subsequent tests run.
-                FrameworkDebugUtils.SetDebugPath();
+                DebugUtils.SetDebugPath();
                 FileUtilities.DeleteDirectoryNoThrow(_debugLogPath, recursive: true);
             }
 

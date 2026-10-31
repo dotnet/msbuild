@@ -25,10 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\ResourceUtilities.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>

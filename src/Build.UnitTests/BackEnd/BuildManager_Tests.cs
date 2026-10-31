@@ -21,6 +21,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -5103,7 +5104,7 @@ $@"<Project InitialTargets=`Sleep`>
                 string debugPath = _env.CreateFolder().Path;
                 _env.SetEnvironmentVariable("MSBUILDDEBUGSCHEDULER", "1");
                 _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath);
-                FrameworkDebugUtils.SetDebugPath();
+                DebugUtils.SetDebugPath();
 
                 // Create a root project that builds several independent child projects in parallel.
                 // This forces multiple in-proc nodes to run concurrently, which triggers

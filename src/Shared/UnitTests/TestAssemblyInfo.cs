@@ -13,6 +13,7 @@ using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
@@ -260,8 +261,8 @@ namespace Microsoft.Build.UnitTests
                     "MSBUILDDEBUGPATH",
                     Path.Combine(ambientDebugPath, $"test_{EnvironmentUtilities.CurrentProcessId}"));
 
-                // Let's re-resolve FrameworkDebugUtils.DebugPath, which is cached, so it picks up new MSBUILDDEBUGPATH
-                FrameworkDebugUtils.SetDebugPath();
+                // Let's re-resolve DebugUtils.DebugPath, which is cached, so it picks up new MSBUILDDEBUGPATH
+                DebugUtils.SetDebugPath();
             }
 
             // Use a project-specific temporary path

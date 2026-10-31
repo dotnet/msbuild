@@ -4,6 +4,7 @@
 // Polyfills for Span<T> APIs that were added in newer .NET versions:
 //   - Span<char>.Replace(char, char) — .NET 8+
 //   - ReadOnlySpan<T>.IndexOfAnyExcept<T>(T) — .NET 7+
+//   - ReadOnlySpan<char>.CommonPrefixLength(ReadOnlySpan<char>)
 //
 // Lives in the System namespace alongside MemoryExtensions so callers can use
 // the methods without an extra using.
@@ -17,6 +18,22 @@ namespace System;
 
 internal static class SpanExtensions
 {
+    /// <summary>
+    ///  Computes the length of the common prefix of two character spans.
+    /// </summary>
+    public static int CommonPrefixLength(this ReadOnlySpan<char> span, ReadOnlySpan<char> other)
+    {
+        int commonPrefixLength = 0;
+        int length = Math.Min(span.Length, other.Length);
+
+        while (commonPrefixLength < length && span[commonPrefixLength] == other[commonPrefixLength])
+        {
+            commonPrefixLength++;
+        }
+
+        return commonPrefixLength;
+    }
+
     /// <summary>
     ///  Replaces all occurrences of <paramref name="oldValue"/> with <paramref name="newValue"/> in
     ///  <paramref name="span"/>.
