@@ -111,5 +111,133 @@ namespace Microsoft.Build.UnitTests
             t.AssignedFiles.Length.ShouldBe(1);
             t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe(targetPath);
         }
+
+        [Fact]
+        public void RelativePathWithForwardSlashOutsideCone()
+        {
+            AssignTargetPath t = new AssignTargetPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+            t.BuildEngine = new MockEngine();
+            t.Files = [new TaskItem("../outside/file.txt")];
+            t.RootFolder = t.TaskEnvironment.ProjectDirectory;
+
+            t.Execute().ShouldBeTrue();
+            t.AssignedFiles.Length.ShouldBe(1);
+            t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe("file.txt");
+        }
+
+        [Fact]
+        public void RelativePathWithForwardSlashInsideCone()
+        {
+            AssignTargetPath t = new AssignTargetPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+            t.BuildEngine = new MockEngine();
+            t.Files = [new TaskItem("./sub/file.txt")];
+            t.RootFolder = t.TaskEnvironment.ProjectDirectory;
+
+            t.Execute().ShouldBeTrue();
+            t.AssignedFiles.Length.ShouldBe(1);
+            string expected = NativeMethodsShared.IsWindows ? @"sub\file.txt" : "sub/file.txt";
+            t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe(expected);
+        }
+
+        [Fact]
+        public void RelativePathWithForwardSlashParentInsideCone()
+        {
+            AssignTargetPath t = new AssignTargetPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+            t.BuildEngine = new MockEngine();
+            t.Files = [new TaskItem("sub/../other/file.txt")];
+            t.RootFolder = t.TaskEnvironment.ProjectDirectory;
+
+            t.Execute().ShouldBeTrue();
+            t.AssignedFiles.Length.ShouldBe(1);
+            string expected = NativeMethodsShared.IsWindows ? @"other\file.txt" : "other/file.txt";
+            t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe(expected);
+        }
+
+        [Fact]
+        public void RelativePathWithForwardSlashNoRelativeSpecifiersPreservesPath()
+        {
+            AssignTargetPath t = new AssignTargetPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+            t.BuildEngine = new MockEngine();
+            t.Files = [new TaskItem("sub/file.txt")];
+            t.RootFolder = t.TaskEnvironment.ProjectDirectory;
+
+            t.Execute().ShouldBeTrue();
+            t.AssignedFiles.Length.ShouldBe(1);
+            t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe("sub/file.txt");
+        }
+
+        [Fact]
+        public void RelativePathEndingWithDotPreservesPath()
+        {
+            AssignTargetPath t = new AssignTargetPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+            t.BuildEngine = new MockEngine();
+            t.Files = [new TaskItem("path/filename.")];
+            t.RootFolder = t.TaskEnvironment.ProjectDirectory;
+
+            t.Execute().ShouldBeTrue();
+            t.AssignedFiles.Length.ShouldBe(1);
+            t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe("path/filename.");
+        }
+
+        [Theory]
+        [InlineData("../outside/file.txt", true)]
+        [InlineData(@"..\outside\file.txt", true)]
+        [InlineData("./sub/file.txt", true)]
+        [InlineData(@"sub\..\other\file.txt", true)]
+        [InlineData("sub/./file.txt", true)]
+        [InlineData(".", true)]
+        [InlineData("..", true)]
+        [InlineData("dir/.", true)]
+        [InlineData("dir/..", true)]
+        [InlineData(@"dir\.", true)]
+        [InlineData(@"dir\..", true)]
+        [InlineData("path/filename.", false)]
+        [InlineData(".gitignore", false)]
+        [InlineData("dir/.hidden/file", false)]
+        [InlineData("sub/file.txt", false)]
+        [InlineData("file.txt", false)]
+        [InlineData("dir.../file", false)]
+        [InlineData("", false)]
+        [InlineData(null, false)]
+        public void HasRelativePathSpecifiers_ReturnsExpected(string path, bool expected)
+        {
+            AssignTargetPath.HasRelativePathSpecifiers(path).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void ForwardSlashRelativePathRespectsChangeWaveOptOut()
+        {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return;
+            }
+
+            using TestEnvironment env = TestEnvironment.Create();
+            try
+            {
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_14.ToString());
+
+                AssignTargetPath t = new AssignTargetPath();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                t.BuildEngine = new MockEngine();
+                t.Files = [new TaskItem("../outside/file.txt")];
+                t.RootFolder = t.TaskEnvironment.ProjectDirectory;
+
+                t.Execute().ShouldBeTrue();
+                t.AssignedFiles.Length.ShouldBe(1);
+                // With Wave 18.14 disabled on Windows, the legacy check does not match forward slashes, keeping the item spec as-is
+                t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe("../outside/file.txt");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
     }
 }
