@@ -3033,6 +3033,10 @@
   <data name="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
     <value>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</value>
   </data>
+  <data name="AddToWin32Manifest.SkippingUnchangedFile">
+    <value>Skipping write to file "{0}" because content would not change.</value>
+    <comment>{0} is the path to the generated Win32 manifest file.</comment>
+  </data>
 
   <!--
         MSB4311 - MSB4320   Task: FormatUrl

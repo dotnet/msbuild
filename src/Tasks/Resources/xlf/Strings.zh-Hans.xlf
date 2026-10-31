@@ -12,6 +12,11 @@
         <target state="translated">清单文件打开失败，出现异常:“{0}”。请确保它存在并具有相关内容。</target>
         <note />
       </trans-unit>
+      <trans-unit id="AddToWin32Manifest.SkippingUnchangedFile">
+        <source>Skipping write to file "{0}" because content would not change.</source>
+        <target state="new">Skipping write to file "{0}" because content would not change.</target>
+        <note>{0} is the path to the generated Win32 manifest file.</note>
+      </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
         <source>BindingRedirect is missing required field 'oldVersion'.</source>
         <target state="translated">BindingRedirect 缺少必需的字段“oldVersion”。</target>

@@ -36,6 +36,7 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.14
+- [AddToWin32Manifest preserves the generated manifest's timestamp when its contents are unchanged, allowing CoreCompile to skip unchanged builds with PreferNativeArm64 enabled.](https://github.com/dotnet/msbuild/issues/15417) Set `MSBUILDDISABLEFEATURESFROMVERSION=18.14` to retain unconditional manifest writes.
 - [Condition evaluation shares immutable cached trees with private, thread-local evaluation state.](https://github.com/dotnet/msbuild/pull/15419) Opting out restores pooled mutable expression trees, evaluation locks, and recursive state resets.
 
 ### 18.13
