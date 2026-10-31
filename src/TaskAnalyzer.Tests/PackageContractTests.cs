@@ -8,6 +8,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.Diagnostics;
 using NuGet.Packaging;
 using Shouldly;
 using Xunit;
@@ -385,11 +387,10 @@ public sealed class PackageContractTests
         int expectedExitCode,
         params string[] arguments)
     {
-        string dotnetPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH") is { Length: > 0 } hostPath
-            ? hostPath
-            : Path.Combine(repositoryRoot, ".dotnet", OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet");
-        string dotnetRoot = Path.GetDirectoryName(dotnetPath)
-            ?? throw new InvalidOperationException($"The dotnet host path '{dotnetPath}' must include its installation directory.");
+        string dotnetRoot = Path.Combine(repositoryRoot, ".dotnet");
+        string dotnetPath = Path.Combine(
+            dotnetRoot,
+            OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet");
         var startInfo = new ProcessStartInfo(dotnetPath)
         {
             WorkingDirectory = workingDirectory,
@@ -398,7 +399,8 @@ public sealed class PackageContractTests
             UseShellExecute = false,
         };
 
-        // Recompute MSBuild paths from the selected host instead of inheriting the parent build's paths.
+        // The two-stage CI build launches tests with paths from the stage 1 bootstrap.
+        // Let this dotnet invocation recompute its MSBuild paths from the repository-local SDK.
         startInfo.Environment.Remove("MSBUILD_EXE_PATH");
         startInfo.Environment.Remove("MSBuildSDKsPath");
         startInfo.Environment.Remove("MSBuildExtensionsPath");

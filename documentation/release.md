@@ -17,6 +17,7 @@ Update this list when cutting or retiring a branch.
 | `vs18.9` | [SDK 10.0.4xx](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) | [November 14, 2028](https://dotnet.microsoft.com/platform/support/policy/dotnet-core) |
 | `vs18.11` | [VS Stable](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs#stable-channel-support) | Next Stable promotion, unless selected as an LTSC baseline |
 | `vs18.12` | [SDK 11.0.1xx](https://github.com/dotnet/dotnet/blob/release/11.0.1xx/src/msbuild/eng/Versions.props) | [November 9, 2028 (planned GA lifecycle)](https://github.com/dotnet/core/blob/main/release-notes/11.0/README.md) |
+| `vs18.13` | [Visual Studio 18.13](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs#stable-channel-support) | Next Stable promotion after 18.13, unless selected as an LTSC baseline |
 | `main` | [Development](../eng/Versions.props) | No fixed end date |
 
 Check Stable promotions and the published [LTSC baseline](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) at each audit; confirm planned SDK deadlines at GA.
@@ -53,7 +54,7 @@ In [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml), th
 
 MSBuild uses package API compatibility validation against `PackageValidationBaselineVersion` in [`eng/Versions.props`](../eng/Versions.props). Reviewed exceptions are recorded in the projects' `CompatibilitySuppressions.xml` files.
 
-The repository no longer contains `PublicAPI.Unshipped.txt` / `PublicAPI.Shipped.txt` files or a promotion step for them. If the build reports API-compat failures, follow step 3.4 of the [release checklist](./release-checklist.md#phase-3-bump-main--update-pipelines) to regenerate and review suppressions. Do not suppress a new compatibility regression merely to make the build pass.
+The repository no longer contains `PublicAPI.Unshipped.txt` / `PublicAPI.Shipped.txt` files or a promotion step for them. If the build reports API-compat failures, follow step 3.5 of the [release checklist](./release-checklist.md#phase-3-bump-main--update-pipelines) to regenerate and review suppressions. Do not suppress a new compatibility regression merely to make the build pass.
 
 ## Major version extra update steps
 
