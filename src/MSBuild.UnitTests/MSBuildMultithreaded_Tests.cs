@@ -396,6 +396,7 @@ namespace Microsoft.Build.Engine.UnitTests
             output.ShouldNotContain("EXPLICIT-TASKHOST-STDERR");
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/15433", TestPlatforms.Windows)]
         [Theory]
         [InlineData(false, false)]
         [InlineData(true, false)]
