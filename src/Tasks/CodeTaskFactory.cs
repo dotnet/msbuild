@@ -16,7 +16,6 @@ namespace Microsoft.Build.Tasks
     using System.CodeDom.Compiler;
     using System.Collections.Concurrent;
     using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Reflection;
