@@ -43,7 +43,7 @@
       <!-- NuGet.Build.Tasks.Console.exe will be in the None ItemGroup -->
       <_NuGetRuntimeDependencies Include="%(None.Identity)" Condition="'@(None->Contains('NuGet.'))' == 'true'" />
 
-      <_NuGetRuntimeDependencies Include="$(NetCoreSdkRoot)RuntimeIdentifierGraph.json" />
+      <_NuGetRuntimeDependencies Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\RuntimeIdentifierGraph.json" />
     </ItemGroup>
   </Target>
 
@@ -85,7 +85,7 @@
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\FileTracker*.dll" />
       <SdkResolverFiles Include="$(AvailableVsInstallPath)\MSBuild\Current\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\**\*.*" />
       <NuGetSdkResolverManifest Include="$(RepoRoot)src\MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml" />
-      <InstalledSdks Include="$(NetCoreSdkRoot)Sdks\**\*.*" />
+      <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
 
       <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
 
@@ -263,22 +263,6 @@
       InstallDir="$(InstallDir)"
       Version="$(BootstrapSdkVersion)" />
 
-    <PropertyGroup>
-      <_DotNetInstallScript>$(RepositoryEngineeringDir)common\dotnet-install.cmd</_DotNetInstallScript>
-      <_DotNetInstallScript Condition="'$(OS)' != 'Windows_NT'">$(RepositoryEngineeringDir)common\dotnet-install.sh</_DotNetInstallScript>
-    </PropertyGroup>
-
-    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="chmod +x &quot;$(_DotNetInstallScript)&quot;" />
-
-    <!-- Download additional runtimes if specified in global.json -->
-    <InstallDotNetCore
-      VersionsPropsPath="$(RepositoryEngineeringDir)Versions.props"
-      GlobalJsonPath="$(RepoRoot)global.json"
-      DotNetPath="$(InstallDir.TrimEnd('/\'))"
-      DotNetInstallScript="$(_DotNetInstallScript)"
-      Platform="$(Platform)"
-      RuntimeSourceFeed="$(DotNetRuntimeSourceFeed)"
-      RuntimeSourceFeedKey="$(DotNetRuntimeSourceFeedKey)"/>
   </Target>
 
   <Target Name="BootstrapNetCore" DependsOnTargets="AcquireSdk">
