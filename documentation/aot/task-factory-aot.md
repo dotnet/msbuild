@@ -1,6 +1,8 @@
 # ITaskFactory infrastructure and AOT/trimming safety
 
-**Status:** Implemented (honest RUC on the public task-factory contract); the AOT-safe replacement in §7 is a design proposal.
+**Status:** Upstream 18.11 design record. The public factory RUC/DAM contracts and engine AOT opt-in
+described here are excluded from the [.NET 10 servicing contract](README.md#net-10-servicing-boundary);
+the AOT-safe replacement in §7 is a design proposal.
 
 **Scope:** `Microsoft.Build` task creation/execution.
 
