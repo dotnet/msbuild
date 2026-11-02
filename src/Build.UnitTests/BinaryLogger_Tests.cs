@@ -73,11 +73,13 @@ namespace Microsoft.Build.UnitTests
             </Target>
         </Project>";
 
+        private readonly ITestOutputHelper _output;
         private readonly TestEnvironment _env;
         private string _logFile;
 
         public BinaryLoggerTests(ITestOutputHelper output)
         {
+            _output = output;
             _env = TestEnvironment.Create(output);
 
             // this is needed to ensure the binary logger does not pollute the environment
@@ -117,7 +119,7 @@ namespace Microsoft.Build.UnitTests
 
             binaryLogger.Parameters = _logFile;
 
-            var mockLogFromBuild = new MockLogger();
+            var mockLogFromBuild = new MockLogger(_output);
 
             var parallelFromBuildText = new StringBuilder();
             var parallelFromBuild = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromBuildText.Append(t), colorSet: null, colorReset: null);
@@ -126,9 +128,18 @@ namespace Microsoft.Build.UnitTests
             // build and log into binary logger, mock logger and parallel console loggers
             // no logging on evaluation
             using (ProjectCollection collection = new())
+            using (BuildManager manager = new())
             {
                 Project project = ObjectModelHelpers.CreateInMemoryProject(collection, projectText);
-                project.Build(new ILogger[] { binaryLogger, mockLogFromBuild, parallelFromBuild }).ShouldBeTrue();
+                BuildParameters parameters = new(collection)
+                {
+                    Loggers = [binaryLogger, mockLogFromBuild, parallelFromBuild],
+                    LogTaskInputs = true,
+                    EnableTargetOutputLogging = true,
+                    // Compare serialization, not logger reads racing execution-time item mutations.
+                    UseSynchronousLogging = true
+                };
+                manager.Build(parameters, new BuildRequestData(project.CreateProjectInstance(), [])).ShouldHaveSucceeded();
             }
 
             string fileToReplay;
