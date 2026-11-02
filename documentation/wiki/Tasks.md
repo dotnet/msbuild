@@ -29,6 +29,8 @@ A task is a class implementing [`ITask`](https://github.com/dotnet/msbuild/blob/
 
 - Tasks have the `Log` property set by the engine to log messages/errors/warnings.
 
+Typed path and item inputs use the same values in-process and in the matching out-of-process TaskHost. Paths are rooted before transport, and typed item arrays preserve custom metadata. The TaskHost reconstructs inputs from the task property's declared type; output values continue to use their canonical string or item representation.
+
 ## Internals
 
 - [`TaskRegistry`](https://github.com/dotnet/msbuild/blob/main/src/Build/Instance/TaskRegistry.cs) - has a list of all available tasks for the build, and resolves them.

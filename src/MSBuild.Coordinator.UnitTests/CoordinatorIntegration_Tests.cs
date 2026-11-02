@@ -143,7 +143,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             """
             <Project Sdk="Microsoft.NET.Sdk">
               <PropertyGroup>
-                <TargetFramework>net11.0</TargetFramework>
+                <TargetFramework>net10.0</TargetFramework>
               </PropertyGroup>
             </Project>
             """);
