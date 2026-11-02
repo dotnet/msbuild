@@ -2449,40 +2449,55 @@ namespace Microsoft.Build.Execution
             var projectGraph = submission.BuildRequestData.ProjectGraph;
             if (projectGraph == null)
             {
-                projectGraph = new ProjectGraph(
-                    submission.BuildRequestData.ProjectGraphEntryPoints,
-                    ProjectCollection.GlobalProjectCollection,
-                    (path, properties, collection) =>
+                string? previousThreadDirectory = FileUtilities.CurrentThreadWorkingDirectory;
+                try
+                {
+                    if (_multiThreadedStrictModeScope is not null)
                     {
-                        ProjectLoadSettings projectLoadSettings = _buildParameters!.ProjectLoadSettings;
-                        if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
-                        {
-                            projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
-                        }
+                        // Graph evaluation precedes request environments and historically resolves property-function
+                        // paths against the host directory. Flow it to graph workers without changing process CWD.
+                        FileUtilities.CurrentThreadWorkingDirectory = _multiThreadedStrictModeScope.BuildEntryDirectory;
+                    }
 
-                        if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.FailOnUnresolvedSdk))
+                    projectGraph = new ProjectGraph(
+                        submission.BuildRequestData.ProjectGraphEntryPoints,
+                        ProjectCollection.GlobalProjectCollection,
+                        (path, properties, collection) =>
                         {
-                            projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
-                        }
+                            ProjectLoadSettings projectLoadSettings = _buildParameters!.ProjectLoadSettings;
+                            if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
+                            {
+                                projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
+                            }
 
-                        return new ProjectInstance(
-                            path,
-                            properties,
-                            null,
-                            _buildParameters,
-                            ((IBuildComponentHost)this).LoggingService,
-                            new BuildEventContext(
+                            if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.FailOnUnresolvedSdk))
+                            {
+                                projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
+                            }
+
+                            return new ProjectInstance(
+                                path,
+                                properties,
+                                null,
+                                _buildParameters,
+                                ((IBuildComponentHost)this).LoggingService,
+                                new BuildEventContext(
+                                    submission.SubmissionId,
+                                    _buildParameters.NodeId,
+                                    BuildEventContext.InvalidEvaluationId,
+                                    BuildEventContext.InvalidProjectInstanceId,
+                                    BuildEventContext.InvalidProjectContextId,
+                                    BuildEventContext.InvalidTargetId,
+                                    BuildEventContext.InvalidTaskId),
+                                SdkResolverService,
                                 submission.SubmissionId,
-                                _buildParameters.NodeId,
-                                BuildEventContext.InvalidEvaluationId,
-                                BuildEventContext.InvalidProjectInstanceId,
-                                BuildEventContext.InvalidProjectContextId,
-                                BuildEventContext.InvalidTargetId,
-                                BuildEventContext.InvalidTaskId),
-                            SdkResolverService,
-                            submission.SubmissionId,
-                            projectLoadSettings);
-                    });
+                                projectLoadSettings);
+                        });
+                }
+                finally
+                {
+                    FileUtilities.CurrentThreadWorkingDirectory = previousThreadDirectory;
+                }
             }
 
             LogMessage(

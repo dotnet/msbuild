@@ -8,12 +8,14 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Logging;
@@ -131,6 +133,118 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION",
                     enabled ? ChangeWaves.Wave18_12.ToString() : null);
             }
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        public void GraphEvaluationPreservesHostRelativePaths(bool build, bool strict)
+        {
+            SetStrictMode(_env, enabled: strict);
+            var hostDirectory = _env.CreateFolder();
+            var projectDirectory = _env.CreateFolder();
+            var leftDirectory = _env.CreateFolder(Path.Combine(projectDirectory.Path, "left"));
+            var rightDirectory = _env.CreateFolder(Path.Combine(projectDirectory.Path, "right"));
+            _env.CreateFile(hostDirectory, "payload.txt", "host payload");
+            _env.SetCurrentDirectory(hostDirectory.Path);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            string? originalThreadDirectory = FileUtilities.CurrentThreadWorkingDirectory;
+            string expectedPath = Path.Combine(originalDirectory, "payload.txt");
+            string projectXml = $"""
+                <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <PayloadExists>$([System.IO.File]::Exists('payload.txt'))</PayloadExists>
+                    <Payload Condition="'$(PayloadExists)' == 'True'">$([System.IO.File]::ReadAllText('payload.txt'))</Payload>
+                    <FullPath>$([System.IO.Path]::GetFullPath('payload.txt'))</FullPath>
+                    <NormalizedPath>$([MSBuild]::NormalizePath('payload.txt'))</NormalizedPath>
+                    <AbsolutePayload>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)payload.txt'))</AbsolutePayload>
+                  </PropertyGroup>
+                  <ItemGroup Condition="'$(MSBuildProjectName)' == 'root'">
+                    <ProjectReference Include="{Path.Combine("left", "left.proj")};{Path.Combine("right", "right.proj")}"
+                                      Condition="'$(PayloadExists)' == 'True'" />
+                    <ProjectReferenceTargets Include="Build" Targets="Build" />
+                  </ItemGroup>
+                  <Target Name="Build">
+                    <Message Text="EXECUTION_PATH=$(MSBuildProjectName):$([System.IO.Path]::GetFullPath('payload.txt'))" Importance="high" />
+                  </Target>
+                </Project>
+                """;
+            (TransientTestFolder Directory, string Name)[] projects =
+                [(projectDirectory, "root"), (leftDirectory, "left"), (rightDirectory, "right")];
+            foreach (var (directory, name) in projects)
+            {
+                _env.CreateFile(directory, "payload.txt", "project payload");
+                _env.CreateFile(directory, $"{name}.proj", projectXml);
+            }
+
+            MockLogger logger = new(_output);
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                MaxNodeCount = 2,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            };
+            GraphBuildRequestData request = new(
+                [new ProjectGraphEntryPoint(Path.Combine(projectDirectory.Path, "root.proj"), new Dictionary<string, string>())],
+                ["Build"], null, BuildRequestDataFlags.None, new GraphBuildOptions { Build = build });
+            using BuildManager manager = new();
+            manager.BeginBuild(parameters);
+            try
+            {
+                string processDirectory = Directory.GetCurrentDirectory();
+                if (strict)
+                {
+                    Path.GetFileName(processDirectory).ShouldBe(MultiThreadedStrictModeScope.SentinelDirectoryName);
+                }
+
+                GraphBuildResult result = manager.BuildRequest(request);
+                result.OverallResult.ShouldBe(BuildResultCode.Success);
+                result.Exception.ShouldBeNull();
+                result.ResultsByNode.Count.ShouldBe(build ? 3 : 0);
+                if (strict)
+                {
+                    Directory.GetCurrentDirectory().ShouldBe(processDirectory);
+                }
+
+                FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalThreadDirectory);
+            }
+            finally
+            {
+                manager.EndBuild();
+            }
+
+            logger.EvaluationFinishedEvents.Count.ShouldBe(3);
+            foreach (var evaluation in logger.EvaluationFinishedEvents)
+            {
+                Dictionary<string, string> properties = new(MSBuildNameIgnoreCaseComparer.Default);
+                Internal.Utilities.EnumerateProperties(evaluation.Properties, properties,
+                    static (dictionary, property) => dictionary.Add(property.Key, property.Value));
+                properties["PayloadExists"].ShouldBe("True");
+                properties["Payload"].ShouldBe("host payload");
+                properties["FullPath"].ShouldBe(expectedPath);
+                properties["NormalizedPath"].ShouldBe(expectedPath);
+                properties["AbsolutePayload"].ShouldBe("project payload");
+            }
+
+            if (build)
+            {
+                foreach (var (directory, name) in projects)
+                {
+                    logger.AssertLogContains($"EXECUTION_PATH={name}:{Path.Combine(directory.Path, "payload.txt")}");
+                }
+            }
+
+            logger.AssertNoErrors();
+            logger.AssertNoWarnings();
+            if (strict)
+            {
+                Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+            }
+
+            FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalThreadDirectory);
         }
 
         [Fact]
