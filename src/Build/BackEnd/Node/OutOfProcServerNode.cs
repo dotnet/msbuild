@@ -91,7 +91,21 @@ namespace Microsoft.Build.Experimental
         /// </summary>
         private readonly string? _instanceId;
 
-        public OutOfProcServerNode(BuildCallback buildFunction, string? instanceId = null)
+        /// <summary>
+        /// Creates a resident MSBuild server node.
+        /// </summary>
+        /// <param name="buildFunction">The callback used to execute a build.</param>
+        public OutOfProcServerNode(BuildCallback buildFunction)
+            : this(buildFunction, instanceId: null)
+        {
+        }
+
+        /// <summary>
+        /// Creates an MSBuild server node with the specified transient identity.
+        /// </summary>
+        /// <param name="buildFunction">The callback used to execute a build.</param>
+        /// <param name="instanceId">The transient server identity, or null for a resident server.</param>
+        public OutOfProcServerNode(BuildCallback buildFunction, string? instanceId)
         {
             _buildFunction = buildFunction;
             _instanceId = instanceId;

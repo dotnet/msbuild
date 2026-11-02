@@ -27,6 +27,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _output = output;
         }
 
+        [Fact]
+        public void ServerNodeRetainsSingleParameterConstructor()
+        {
+            typeof(OutOfProcServerNode).GetConstructor([typeof(OutOfProcServerNode.BuildCallback)]).ShouldNotBeNull();
+        }
+
         /// <summary>
         /// When the configured msbuild executable does not exist, launching the server fails.
         /// <see cref="MSBuildClient.Execute"/> must return a recoverable exit type rather than
