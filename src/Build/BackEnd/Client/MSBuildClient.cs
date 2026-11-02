@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -20,18 +19,12 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Server
+namespace Microsoft.Build.Experimental
 {
     /// <summary>
     /// This class is the public entry point for executing builds in msbuild server.
     /// It processes command-line arguments and invokes the build engine.
     /// </summary>
-    /// <remarks>
-    /// This type is public only so that the MSBuild command-line application can host the MSBuild server;
-    /// third-party use is not expected or supported. It exists to wrap the MSBuild CLI and offers nothing
-    /// beyond it, so invoke the CLI instead.
-    /// </remarks>
-    [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class MSBuildClient
     {
         private const int NewServerConnectionTimeoutMilliseconds = 5_000;

@@ -1,20 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.ComponentModel;
-
-namespace Microsoft.Build.Server
+namespace Microsoft.Build.Experimental
 {
     /// <summary>
-    /// Describes how an <see cref="MSBuildClient"/> execution finished, and — when the build ran on
-    /// the server — the exit type the build itself produced.
+    /// Enumeration of the various ways in which the MSBuildClient execution can exit.
     /// </summary>
-    /// <remarks>
-    /// This type is public only so that the MSBuild command-line application can host the MSBuild server;
-    /// third-party use is not expected or supported. The server APIs only work to wrap the MSBuild CLI,
-    /// so invoke the CLI instead.
-    /// </remarks>
-    [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class MSBuildClientExitResult
     {
         /// <summary>
