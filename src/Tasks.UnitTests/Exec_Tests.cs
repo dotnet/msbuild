@@ -68,21 +68,39 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [UnixOnlyFact]
-        public void ExecDoesNotSetLocaleOnUnix()
+        [UnixOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExecSetsLocaleOnUnix(bool enableChangeWave)
         {
             using (var env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("LANG", null);
                 env.SetEnvironmentVariable("LC_ALL", null);
 
+                if (enableChangeWave)
+                {
+                    ChangeWaves.ResetStateForTests();
+                    // Important: use the version here
+                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+                }
+
                 Exec exec = PrepareExec("echo LANG=$LANG; echo LC_ALL=$LC_ALL;");
                 bool result = exec.Execute();
                 Assert.True(result);
 
                 MockEngine engine = (MockEngine)exec.BuildEngine;
-                engine.AssertLogDoesntContain("LANG=en_US.UTF-8");
-                engine.AssertLogDoesntContain("LC_ALL=en_US.UTF-8");
+                if (enableChangeWave)
+                {
+                    engine.AssertLogContains("LANG=en_US.UTF-8");
+                    engine.AssertLogContains("LC_ALL=en_US.UTF-8");
+                }
+                else
+                {
+                    engine.AssertLogDoesntContain("LANG=en_US.UTF-8");
+                    engine.AssertLogDoesntContain("LC_ALL=en_US.UTF-8");
+                }
             }
         }
 
