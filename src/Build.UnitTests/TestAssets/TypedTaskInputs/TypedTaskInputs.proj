@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TaskFactoryToUse Condition="'$(TaskFactoryToUse)' == ''">AssemblyTaskFactory</TaskFactoryToUse>
   </PropertyGroup>
-  <UsingTask TaskName="TypedTaskInputsTask" AssemblyFile="$(TaskAssembly)" TaskFactory="$(TaskFactoryToUse)" />
+  <UsingTask TaskName="TypedTaskInputs.TypedTaskInputsTask" AssemblyFile="$(TaskAssembly)" TaskFactory="$(TaskFactoryToUse)" />
   <ItemGroup>
     <_Files Include="$(MSBuildProjectFile);$(MSBuildProjectFile)" />
     <_FirstNumber Include="41">

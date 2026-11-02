@@ -6,6 +6,8 @@
 using System.IO;
 using Microsoft.Build.Framework;
 
+namespace TypedTaskInputs;
+
 public sealed class TypedTaskInputsTask : Microsoft.Build.Utilities.Task
 {
     public FileInfo File { get; set; } = null!;
