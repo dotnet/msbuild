@@ -1,0 +1,37 @@
+<Project DefaultTargets="Verify">
+  <PropertyGroup>
+    <TaskFactoryToUse Condition="'$(TaskFactoryToUse)' == ''">AssemblyTaskFactory</TaskFactoryToUse>
+  </PropertyGroup>
+  <UsingTask TaskName="TypedTaskInputsTask" AssemblyFile="$(TaskAssembly)" TaskFactory="$(TaskFactoryToUse)" />
+  <ItemGroup>
+    <_Files Include="$(MSBuildProjectFile);$(MSBuildProjectFile)" />
+    <_FirstNumber Include="41">
+      <Tag>scalar</Tag>
+    </_FirstNumber>
+    <_Numbers Include="41">
+      <Tag>first</Tag>
+    </_Numbers>
+    <_Numbers Include="42">
+      <Tag>second</Tag>
+    </_Numbers>
+  </ItemGroup>
+  <Target Name="Verify">
+    <TypedTaskInputsTask
+        File="$(MSBuildProjectFile)"
+        Files="@(_Files)"
+        Directory="."
+        Directories=".;."
+        Path="$(MSBuildProjectFile)"
+        Paths="@(_Files)"
+        NumberItem="@(_FirstNumber)"
+        NumberInterface="@(_FirstNumber)"
+        NumberItems="@(_Numbers)"
+        NumberInterfaces="@(_Numbers)"
+        ExpectedFile="$(MSBuildProjectFullPath)"
+        ExpectedDirectory="$(MSBuildProjectDirectory)">
+      <Output TaskParameter="Verified" PropertyName="TypedInputsVerified" />
+    </TypedTaskInputsTask>
+    <Error Condition="'$(TypedInputsVerified)' != 'True'" Text="The typed task input contract was not verified." />
+    <Message Importance="High" Text="TypedInputContractVerified=$(TypedInputsVerified)" />
+  </Target>
+</Project>

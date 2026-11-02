@@ -143,6 +143,7 @@
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
+    <Compile Include="..\Shared\TaskParameterValueConverter.cs" />
     <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />

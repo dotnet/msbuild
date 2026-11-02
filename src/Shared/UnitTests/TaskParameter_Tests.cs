@@ -294,6 +294,54 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(value[1].FullName, stringArray[1]);
         }
 
+        [Fact]
+        public void TypedTaskItemStructArrayPreservesMetadata()
+        {
+            TaskItem first = new("41");
+            first.SetMetadata("Tag", "first");
+            TaskItem second = new("42");
+            second.SetMetadata("Tag", "second");
+            Microsoft.Build.Framework.TaskItem<int>[] values = [new(first), new(second)];
+            TaskParameter parameter = new(values);
+
+            parameter.ParameterType.ShouldBe(TaskParameterType.ITaskItemArray);
+            ((ITranslatable)parameter).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter received = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            var items = received.WrappedParameter.ShouldBeOfType<ITaskItem[]>();
+            items.Length.ShouldBe(2);
+            items[0].GetMetadata("Tag").ShouldBe("first");
+            items[1].GetMetadata("Tag").ShouldBe("second");
+
+            var converted = TaskParameterValueConverter.ConvertToParameterType(
+                received.WrappedParameter,
+                typeof(Microsoft.Build.Framework.TaskItem<int>[])).ShouldBeOfType<Microsoft.Build.Framework.TaskItem<int>[]>();
+            converted[0].Value.ShouldBe(41);
+            converted[0].GetMetadata("Tag").ShouldBe("first");
+            converted[1].Value.ShouldBe(42);
+            converted[1].GetMetadata("Tag").ShouldBe("second");
+        }
+
+        [Fact]
+        public void EmptyTypedTaskItemStructArrayRoundTrips()
+        {
+            TaskParameter parameter = new(Array.Empty<Microsoft.Build.Framework.TaskItem<int>>());
+            ((ITranslatable)parameter).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter received = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            TaskParameterValueConverter.ConvertToParameterType(
+                received.WrappedParameter,
+                typeof(Microsoft.Build.Framework.TaskItem<int>[])).ShouldBeOfType<Microsoft.Build.Framework.TaskItem<int>[]>().ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void AssignableTaskInputValuesDoNotRequireConversion()
+        {
+            string[] values = ["one", "two"];
+
+            TaskParameterValueConverter.ConvertToParameterType(values, typeof(string[])).ShouldBeSameAs(values);
+            TaskParameterValueConverter.ConvertToParameterType(null, typeof(FileInfo)).ShouldBeNull();
+        }
+
         private enum TestEnumForParameter
         {
             Something,

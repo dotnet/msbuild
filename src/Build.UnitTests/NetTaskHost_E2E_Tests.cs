@@ -27,6 +27,43 @@ namespace Microsoft.Build.Engine.UnitTests
             _output = output;
         }
 
+        [Theory]
+        [InlineData("AssemblyTaskFactory", false)]
+        [InlineData("TaskHostFactory", false)]
+        [InlineData("AssemblyTaskFactory", true)]
+        public void TypedTaskInputsPreservePathsAndMetadata(string taskFactory, bool multiThreaded)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var taskOutput = env.CreateFolder();
+            string assetPath = Path.Combine(TestAssetsRootPath, "TypedTaskInputs");
+#if NET
+            string taskFramework = RunnerUtilities.LatestDotNetCoreForMSBuild;
+#else
+            string taskFramework = "net472";
+#endif
+            string buildOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{Path.Combine(assetPath, "TypedTaskInputs.csproj")}\" -restore -v:q"
+                + $" -p:TaskTargetFramework={taskFramework}"
+                + $" -p:BaseIntermediateOutputPath=\"{Path.Combine(taskOutput.Path, "obj")}\""
+                + $" -p:OutputPath=\"{Path.Combine(taskOutput.Path, "bin")}\""
+                + " -p:AppendTargetFrameworkToOutputPath=false"
+                + " -p:ImportDirectoryBuildProps=false -p:ImportDirectoryBuildTargets=false -p:ImportDirectoryPackagesProps=false",
+                out bool buildSucceeded,
+                outputHelper: _output);
+            buildSucceeded.ShouldBeTrue(buildOutput);
+
+            string taskAssembly = Path.Combine(taskOutput.Path, "bin", "TypedTaskInputs.dll");
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{Path.Combine(assetPath, "TypedTaskInputs.proj")}\" -v:n"
+                + $" -p:TaskAssembly=\"{taskAssembly}\" -p:TaskFactoryToUse={taskFactory}"
+                + (multiThreaded ? " -mt" : ""),
+                out bool succeeded,
+                outputHelper: _output);
+
+            succeeded.ShouldBeTrue(output);
+            output.ShouldContain("TypedInputContractVerified=True");
+        }
+
         [WindowsFullFrameworkOnlyFact]
         public void NetTaskHostTest_AppHostFromResolvedSdk()
         {

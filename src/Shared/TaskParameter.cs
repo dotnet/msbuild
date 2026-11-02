@@ -127,17 +127,21 @@ namespace Microsoft.Build.BackEnd
                     _parameterTypeCode = typeCode;
                     _wrappedParameter = wrappedParameter;
                 }
-                else if (typeof(ITaskItem[]).IsAssignableFrom(wrappedParameterType))
+                else if (typeof(ITaskItem).IsAssignableFrom(wrappedParameterType.GetElementType()))
                 {
                     _parameterType = TaskParameterType.ITaskItemArray;
-                    ITaskItem[] inputAsITaskItemArray = (ITaskItem[])wrappedParameter;
-                    ITaskItem[] taskItemArrayParameter = new ITaskItem[inputAsITaskItemArray.Length];
+                    ITaskItem[] inputAsITaskItemArray = wrappedParameter as ITaskItem[];
+                    Array inputArray = (Array)wrappedParameter;
+                    ITaskItem[] taskItemArrayParameter = new ITaskItem[inputArray.Length];
 
-                    for (int i = 0; i < inputAsITaskItemArray.Length; i++)
+                    for (int i = 0; i < inputArray.Length; i++)
                     {
-                        if (inputAsITaskItemArray[i] != null)
+                        ITaskItem item = inputAsITaskItemArray is not null
+                            ? inputAsITaskItemArray[i]
+                            : (ITaskItem)inputArray.GetValue(i);
+                        if (item is not null)
                         {
-                            taskItemArrayParameter[i] = new TaskParameterTaskItem(inputAsITaskItemArray[i]);
+                            taskItemArrayParameter[i] = new TaskParameterTaskItem(item);
                         }
                     }
 
@@ -484,8 +488,8 @@ namespace Microsoft.Build.BackEnd
         /// the same canonical conversion the in-process engine uses when gathering task outputs
         /// (see TaskExecutionHost.GetValueOutputs). This guarantees identical string output across the
         /// in-process and out-of-process task host paths. The value is not converted back to its original
-        /// type on the read side: this is fine because output task parameters are anyway converted to strings
-        /// by the engine and input task parameters of custom value types are not supported.
+        /// type during deserialization: outputs are consumed as strings, and the task host reconstructs
+        /// inputs from the receiving property's declared type.
         /// </remarks>
         private void TranslateValueType(ITranslator translator)
         {
