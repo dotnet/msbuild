@@ -411,6 +411,62 @@ namespace Microsoft.Build.UnitTests.BackEnd
             RunOutOfProcBuild(buildParameters => buildParameters.DisableInProcNode = true);
         }
 
+        [Fact]
+        public void OutOfProcRequestAffinityIsPreservedForChildBuilds()
+        {
+            _env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+
+            string parentPath = _env.CreateFile(".proj").Path;
+            string firstChildPath = _env.CreateFile(".proj").Path;
+            string secondChildPath = _env.CreateFile(".proj").Path;
+            string childContents = CleanupFileContents($$"""
+                <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+                  <Target Name='Build' Returns='@(ProcessIds)'>
+                    <ItemGroup>
+                      <ProcessIds Include='$([System.Diagnostics.Process]::GetCurrentProcess().Id)' />
+                    </ItemGroup>
+                    <Exec Command='{{Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(250))}}' />
+                  </Target>
+                </Project>
+                """);
+            File.WriteAllText(firstChildPath, childContents);
+            File.WriteAllText(secondChildPath, childContents);
+            File.WriteAllText(parentPath, CleanupFileContents($$"""
+                <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+                  <Target Name='Build' Returns='@(ProcessIds)'>
+                    <ItemGroup>
+                      <ProcessIds Include='$([System.Diagnostics.Process]::GetCurrentProcess().Id)' />
+                    </ItemGroup>
+                    <MSBuild Projects='{{firstChildPath}};{{secondChildPath}}' Targets='Build' BuildInParallel='true'>
+                      <Output TaskParameter='TargetOutputs' ItemName='ProcessIds' />
+                    </MSBuild>
+                  </Target>
+                </Project>
+                """));
+
+            HostServices hostServices = new();
+            hostServices.SetNodeAffinity(string.Empty, NodeAffinity.OutOfProc);
+            BuildParameters parameters = new(_projectCollection)
+            {
+                EnableNodeReuse = false,
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = [_logger],
+                MaxNodeCount = 2,
+                DisableInProcNode = false
+            };
+            BuildRequestData request = new(parentPath, new Dictionary<string, string>(), null, ["Build"], hostServices);
+
+            BuildResult result = _buildManager.Build(parameters, request);
+
+            Assert.Equal(BuildResultCode.Success, result.OverallResult);
+            ITaskItem[] processIds = result.ResultsByTarget["Build"].Items;
+            Assert.Equal(3, processIds.Length);
+            foreach (ITaskItem processId in processIds)
+            {
+                Assert.NotEqual(Process.GetCurrentProcess().Id, int.Parse(processId.ItemSpec, CultureInfo.InvariantCulture));
+            }
+        }
+
         /// <summary>
         /// Runs a build and verifies it happens out of proc by checking the process ID.
         /// </summary>
@@ -954,6 +1010,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
             _logger.AssertLogContains("[errormessage]");
+        }
+
+        [Fact]
+        public void DeferredMessagesAreClearedWhenBeginBuildThrows()
+        {
+            const string deferredMessage = "Message from a failed BeginBuild";
+
+            _buildManager.BeginBuild(_parameters);
+            Should.Throw<InvalidOperationException>(() => _buildManager.BeginBuild(
+                _parameters,
+                [new BuildManager.DeferredBuildMessage(deferredMessage, MessageImportance.High)]));
+            _buildManager.EndBuild();
+
+            BuildResult result = _buildManager.Build(
+                _parameters,
+                GetBuildRequestData("<Project><Target Name='test' /></Project>"));
+
+            result.ShouldHaveSucceeded();
+            _logger.AssertLogDoesntContain(deferredMessage);
         }
 
         [Fact]
@@ -2067,6 +2142,156 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.BuildRequest(data2);
             _buildManager.EndBuild();
             _logger.AssertLogContains("Value:FOO");
+        }
+
+        /// <summary>
+        /// A cache that reloads changed files from disk - the one the MSBuild Server entry node reuses across builds -
+        /// already notices whatever an implicit restore rewrote, so <see cref="BuildRequestDataFlags.ClearCachesAfterBuild"/>
+        /// must leave it populated. Discarding it would only force the build that follows restore to re-parse the
+        /// entire import closure. Opting out of the change wave restores the unconditional flush.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ClearCachesAfterBuildKeepsCacheThatReloadsFromDisk(bool changeWaveEnabled)
+        {
+            if (!changeWaveEnabled)
+            {
+                ChangeWaves.ResetStateForTests();
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+            }
+
+            // Matches how the MSBuild Server entry node configures its cache.
+            ProjectRootElementCache cache = RunSubmission(autoReloadFromDisk: true, BuildRequestDataFlags.ClearCachesAfterBuild, out string projectPath);
+
+            if (changeWaveEnabled)
+            {
+                cache.TryGet(projectPath).ShouldNotBeNull();
+            }
+            else
+            {
+                cache.TryGet(projectPath).ShouldBeNull();
+            }
+        }
+
+        /// <summary>
+        /// A cache that cannot notice that a file changed on disk has no way to pick up what restore rewrote, so it
+        /// must still be discarded even when the change wave is enabled.
+        /// </summary>
+        [Fact]
+        public void ClearCachesAfterBuildStillClearsCacheThatDoesNotReloadFromDisk()
+        {
+            // Control: the same submission without the flag leaves the project in the cache, so the assertion
+            // below fails if the entry ever stops being discarded, rather than passing because a build of this
+            // shape never populated the cache in the first place.
+            RunSubmission(autoReloadFromDisk: false, BuildRequestDataFlags.None, out string controlProjectPath)
+                .TryGet(controlProjectPath).ShouldNotBeNull();
+
+            ProjectRootElementCache cache = RunSubmission(autoReloadFromDisk: false, BuildRequestDataFlags.ClearCachesAfterBuild, out string projectPath);
+
+            cache.TryGet(projectPath).ShouldBeNull();
+        }
+
+        /// <summary>
+        /// Keeping the cache is only safe because the entries a restore can invalidate are reloaded from disk on the
+        /// next read. This is the invariant the optimization rests on: the build that follows a submission which
+        /// rewrote an imported file must observe the rewrite, even though the cache was never flushed.
+        /// </summary>
+        [Fact]
+        public void ClearCachesAfterBuildKeptCacheStillSeesRewrittenImport()
+        {
+            TransientTestFolder folder = _env.CreateFolder();
+            string importPath = Path.Combine(folder.Path, "generated.props");
+
+            File.WriteAllText(importPath, "<Project><PropertyGroup><PropertyFromImport>before</PropertyFromImport></PropertyGroup></Project>");
+
+            // Make sure the rewrite below lands on a different timestamp regardless of file system granularity.
+            File.SetLastWriteTime(importPath, DateTime.Now.AddMinutes(-1));
+
+            string rewrittenImport = "&lt;Project&gt;&lt;PropertyGroup&gt;&lt;PropertyFromImport&gt;after&lt;/PropertyFromImport&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;";
+            string projectPath = _env.CreateFile(folder, "test.proj", $@"
+<Project>
+  <Import Project=""{importPath}"" />
+  <Target Name=""Restore"">
+    <WriteLinesToFile File=""{importPath}"" Overwrite=""true"" Lines=""{rewrittenImport}"" />
+  </Target>
+  <Target Name=""Build"">
+    <Error Text=""Stale import: PropertyFromImport was '$(PropertyFromImport)'"" Condition=""'$(PropertyFromImport)' != 'after'"" />
+  </Target>
+</Project>").Path;
+
+            ProjectRootElementCache cache = new ProjectRootElementCache(autoReloadFromDisk: true);
+            _parameters.ProjectRootElementCache = cache;
+
+            // Restore runs in its own build session, the way MSBuild.exe sequences an implicit restore.
+            _buildManager.BeginBuild(_parameters);
+            _buildManager.BuildRequest(new BuildRequestData(
+                projectPath,
+                ReadOnlyEmptyDictionary<string, string>.Instance,
+                null,
+                new[] { "Restore" },
+                null,
+                BuildRequestDataFlags.ClearCachesAfterBuild)).OverallResult.ShouldBe(BuildResultCode.Success);
+            _buildManager.EndBuild();
+
+            // The cache survived the flush, which is the optimization. Reading the project file does not disturb
+            // the cache because the restore did not rewrite it.
+            cache.TryGet(projectPath).ShouldNotBeNull();
+
+            // The build that follows still sees what the restore rewrote.
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result = _buildManager.BuildRequest(new BuildRequestData(
+                projectPath,
+                ReadOnlyEmptyDictionary<string, string>.Instance,
+                null,
+                new[] { "Build" },
+                null,
+                BuildRequestDataFlags.None));
+            _buildManager.EndBuild();
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // It saw it because reading the rewritten file revalidated its timestamp, dropped the stale entry and
+            // reloaded from disk, so the cache now holds the rewritten content instead of what it read before the
+            // restore. That revalidation is what makes keeping the rest of the cache safe.
+            ProjectRootElement reloadedImport = cache.TryGet(importPath);
+            reloadedImport.ShouldNotBeNull();
+            reloadedImport.Properties.ShouldContain(property => property.Name == "PropertyFromImport" && property.Value == "after");
+        }
+
+        /// <summary>
+        /// Runs a single build request carrying <paramref name="flags"/> against a trivial project, and returns the
+        /// cache it used so the caller can assert on what survived.
+        /// </summary>
+        private ProjectRootElementCache RunSubmission(bool autoReloadFromDisk, BuildRequestDataFlags flags, out string projectPath)
+        {
+            string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='test' />
+</Project>
+");
+
+            projectPath = _env.CreateFile(".proj").Path;
+            File.WriteAllText(projectPath, contents);
+
+            ProjectRootElementCache cache = new ProjectRootElementCache(autoReloadFromDisk);
+            _parameters.ProjectRootElementCache = cache;
+
+            var data = new BuildRequestData(
+                projectPath,
+                ReadOnlyEmptyDictionary<string, string>.Instance,
+                null,
+                new[] { "test" },
+                null,
+                flags);
+
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result = _buildManager.BuildRequest(data);
+            _buildManager.EndBuild();
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            return cache;
         }
 
         /// <summary>
@@ -4342,6 +4567,140 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
+        public void GraphBuildPreservesTransitiveThenDirectTargetOrder()
+        {
+            TransientTestFile leaf = _env.CreateFile("leaf.proj", """
+                <Project DefaultTargets="LeafDefault">
+                  <PropertyGroup>
+                    <GeneratedInput>$(MSBuildProjectDirectory)/generated-input.txt</GeneratedInput>
+                  </PropertyGroup>
+                  <Target Name="LeafDefault">
+                    <WriteLinesToFile File="$(GeneratedInput)" Lines="generated" Overwrite="true" />
+                  </Target>
+                  <Target Name="LeafExplicit">
+                    <Error Condition="!Exists('$(GeneratedInput)')"
+                           Text="LeafDefault must run before LeafExplicit." />
+                  </Target>
+                </Project>
+                """.Cleanup());
+
+            TransientTestFile middle = _env.CreateFile("middle.proj", $"""
+                <Project DefaultTargets="MiddleDefault">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <ProjectReference Include="{leaf.Path}" />
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}" />
+                  </ItemGroup>
+                  <Target Name="MiddleDefault" />
+                </Project>
+                """.Cleanup());
+
+            TransientTestFile root = _env.CreateFile("root.proj", $"""
+                <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <ProjectReference Include="{middle.Path}" />
+                    <ProjectReference Include="{leaf.Path}" Targets="LeafExplicit" />
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}" />
+                  </ItemGroup>
+                  <Target Name="Build" />
+                </Project>
+                """.Cleanup());
+
+            string generatedInput = Path.Combine(_env.DefaultTestDirectory.Path, "generated-input.txt");
+            File.Exists(generatedInput).ShouldBeFalse();
+
+            var graph = new ProjectGraph(root.Path);
+            ProjectGraphNode leafNode = graph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == leaf.Path);
+            graph.GetTargetLists(["Build"])[leafNode].ShouldBe(["LeafDefault", "LeafExplicit"]);
+
+            var data = new GraphBuildRequestData(graph, ["Build"]);
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            File.Exists(generatedInput).ShouldBeTrue();
+            _logger.AssertNoErrors();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GraphBuildDoesNotRunArtificialDefaultTargetOnExplicitInnerReference(bool explicitReferenceFirst)
+        {
+            TransientTestFile child = _env.CreateFile("child.proj", """
+                <Project DefaultTargets="ChildDefault">
+                  <PropertyGroup>
+                    <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+                    <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+                    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+                  </PropertyGroup>
+                  <Target Name="ChildDefault">
+                    <Error Text="ChildDefault should not run." />
+                  </Target>
+                  <Target Name="OuterTarget" />
+                  <Target Name="ExplicitTarget" />
+                </Project>
+                """.Cleanup());
+
+            string outerReference = $"""<ProjectReference Include="{child.Path}" Targets="OuterTarget" />""";
+            string explicitReference = $"""
+                <ProjectReference Include="{child.Path}"
+                                  SetTargetFramework="TargetFramework=net8.0"
+                                  Targets="ExplicitTarget" />
+                """;
+            string projectReferences = explicitReferenceFirst
+                ? $"{explicitReference}{Environment.NewLine}{outerReference}"
+                : $"{outerReference}{Environment.NewLine}{explicitReference}";
+
+            TransientTestFile root = _env.CreateFile("root.proj", $"""
+                <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    {projectReferences}
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}"
+                                             OuterBuild="true" />
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}" />
+                  </ItemGroup>
+                  <Target Name="Build" />
+                </Project>
+                """.Cleanup());
+
+            var graph = new ProjectGraph(root.Path);
+            ProjectGraphNode outerBuild = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        !node.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework"));
+            ProjectGraphNode net8Build = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        node.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out string targetFramework) &&
+                        targetFramework == "net8.0");
+            ProjectGraphNode net9Build = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        node.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out string targetFramework) &&
+                        targetFramework == "net9.0");
+            var targetLists = graph.GetTargetLists(["Build"]);
+
+            targetLists[outerBuild].ShouldBe(["OuterTarget"]);
+            targetLists[net8Build].ShouldBe(["ExplicitTarget", "OuterTarget"]);
+            targetLists[net9Build].ShouldBe(["OuterTarget"]);
+
+            var data = new GraphBuildRequestData(graph, ["Build"]);
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            _logger.AssertNoErrors();
+        }
+
+        [Fact]
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void GraphBuildInvalid()
         {
@@ -4564,6 +4923,27 @@ $@"<Project InitialTargets=`Sleep`>
 
             _logger.AssertLogContains("MSB4040");
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Ensures programmatic callers receive an actionable failure for the unsupported combination from
+        /// https://github.com/dotnet/msbuild/issues/14825.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedAndReportFileAccessesAreRejectedBeforeBuildStarts()
+        {
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                ReportFileAccesses = true,
+            };
+
+            InvalidOperationException exception = Should.Throw<InvalidOperationException>(
+                () => _buildManager.BeginBuild(parameters));
+
+            exception.Message.ShouldContain("File-access reporting cannot be used with multi-threaded mode.");
+        }
+#endif
 
         /// <summary>
         /// Verifies that MT mode builds with multiple projects referencing the same dependency

@@ -23,7 +23,6 @@ namespace Company.CheckTemplate
             // configurationContext to be used only if check needs external configuration data.
         }
 
-
         public override void RegisterActions(IBuildCheckRegistrationContext registrationContext)
         {
             registrationContext.RegisterEvaluatedPropertiesAction(EvaluatedPropertiesAction);
@@ -33,7 +32,7 @@ namespace Company.CheckTemplate
         {
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,
-                ElementLocation.EmptyLocation,
+                ElementLocation.Empty,
                 "Argument for the message format"));
         }
     }

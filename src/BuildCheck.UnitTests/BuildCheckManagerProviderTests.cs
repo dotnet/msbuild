@@ -120,7 +120,7 @@ internal sealed class CheckRuleMock : Check
     {
         context.ReportResult(BuildCheckResult.Create(
             SupportedRule,
-            ElementLocation.EmptyLocation,
+            ElementLocation.Empty,
             "Argument for the message format"));
     }
 }

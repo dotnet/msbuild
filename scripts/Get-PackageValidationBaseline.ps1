@@ -3,16 +3,18 @@
     Deterministically resolves the PackageValidationBaselineVersion for a release's main-bump (Phase 3.2).
 
 .DESCRIPTION
-    The ApiCompat baseline for the bumped `main` is the latest `<THIS>.0-preview-NNNNN-NN` MSBuild
-    package that is BOTH reachable from `vs<THIS>` AND published on the public dotnet-tools feed.
+    The ApiCompat baseline for the bumped `main` is the latest `<THIS>.0-<label>.<shortDate>.<rev>`
+    MSBuild package that is BOTH reachable from `vs<THIS>` AND published on the public dotnet-tools
+    feed. `<label>` is `PreReleaseVersionLabel` from `eng/Versions.props` on the release branch
+    (currently `1`, e.g. `18.11.0-1.26426.2`).
 
     This script computes it without manual pipeline spelunking:
       1. Finds the branch point: `git merge-base <MainRef> <ReleaseRef>`.
       2. Queries the MSBuild official build pipeline (9434, devdiv) for the successful build at that
          commit (and any successful pre-stabilization preview builds on `vs<THIS>`).
       3. Derives each build's package version from its OfficialBuildId via the Arcade date encoding
-         `shortDate = (yy * 1000) + (month * 50) + day`, revision zero-padded to 2 digits.
-      4. Verifies the candidate is on the dotnet-tools feed; picks the latest verified `<THIS>.0-preview-*`.
+         `shortDate = (yy * 1000) + (month * 50) + day`.
+      4. Verifies the candidate is on the dotnet-tools feed; picks the latest verified candidate.
 
     Requires `az login` with access to the devdiv Azure DevOps organization (see release skill memory).
     See documentation/release-checklist.md (Phase 3.2) and the release skill SKILL.md.
@@ -27,8 +29,8 @@
     Git ref for the release branch. Default: origin/vs<ThisReleaseVersion>.
 
 .EXAMPLE
-    ./Get-PackageValidationBaseline.ps1 -ThisReleaseVersion 18.9
-    Prints e.g. 18.9.0-preview-26330-01
+    ./Get-PackageValidationBaseline.ps1 -ThisReleaseVersion 18.11
+    Prints e.g. 18.11.0-1.26426.2
 #>
 
 [CmdletBinding()]
@@ -60,7 +62,16 @@ if (-not $ThisReleaseVersion) {
 }
 if (-not $ReleaseRef) { $ReleaseRef = "origin/vs$ThisReleaseVersion" }
 
-Write-Info "Release: $ThisReleaseVersion   main=$MainRef   release=$ReleaseRef"
+# Arcade builds the prerelease version as '<VersionPrefix>-<PreReleaseVersionLabel>.<shortDate>.<rev>',
+# so read the label from the release branch rather than assuming one.
+$releaseProps = (& git show "${ReleaseRef}:eng/Versions.props") -join "`n"
+if ($releaseProps -match '<PreReleaseVersionLabel>([^<]+)</PreReleaseVersionLabel>') {
+    $PreReleaseLabel = $Matches[1]
+} else {
+    throw "Could not read PreReleaseVersionLabel from ${ReleaseRef}:eng/Versions.props."
+}
+
+Write-Info "Release: $ThisReleaseVersion   main=$MainRef   release=$ReleaseRef   label=$PreReleaseLabel"
 
 # 1. Branch point.
 $mergeBase = (& git merge-base $MainRef $ReleaseRef).Trim()
@@ -85,8 +96,7 @@ function Get-VersionFromBuildNumber([string]$buildNumber) {
     $dd = [int]$Matches[3]
     $rev = [int]$Matches[4]
     $shortDate = ($yy * 1000) + ($mm * 50) + $dd
-    $revStr = if ($rev -lt 100) { '{0:D2}' -f $rev } else { "$rev" }
-    return "$ThisReleaseVersion.0-preview-$shortDate-$revStr"
+    return "$ThisReleaseVersion.0-$PreReleaseLabel.$shortDate.$rev"
 }
 
 function Test-Succeeded($build) {
@@ -107,7 +117,7 @@ if ($mbBuild) {
 $relBuilds = Get-Builds "vs$ThisReleaseVersion"
 foreach ($b in ($relBuilds | Where-Object { Test-Succeeded $_ })) {
     $v = Get-VersionFromBuildNumber $b.buildNumber
-    if ($v -and $v -like "$ThisReleaseVersion.0-preview-*") {
+    if ($v -and $v -like "$ThisReleaseVersion.0-$PreReleaseLabel.*") {
         $candidates.Add([pscustomobject]@{ Source = "vs$ThisReleaseVersion"; BuildNumber = $b.buildNumber; Finish = $b.finishTime })
     }
 }
@@ -122,7 +132,7 @@ $pkgId = (Invoke-RestMethod -Uri "$ToolsFeedBase/packages?packageNameQuery=Micro
     Where-Object { $_.name -eq 'Microsoft.Build' } | Select-Object -First 1
 if (-not $pkgId) { throw "Microsoft.Build not found on the dotnet-tools feed." }
 $feedVersions = (Invoke-RestMethod -Uri "$ToolsFeedBase/packages/$($pkgId.id)/versions?api-version=7.1-preview.1" -Headers $headers).value |
-    Where-Object { $_.version -like "$ThisReleaseVersion.0-preview-*" } | Select-Object -ExpandProperty version
+    Where-Object { $_.version -like "$ThisReleaseVersion.0-$PreReleaseLabel.*" } | Select-Object -ExpandProperty version
 
 Write-Info "Candidate builds:"
 $candidates | Sort-Object Version | ForEach-Object {

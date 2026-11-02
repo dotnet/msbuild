@@ -77,6 +77,16 @@
         <target state="translated">Wystąpił błąd podczas próby wygenerowania ścieżki zestawu odwołania ze ścieżki „{0}” i monikera struktury „{1}”. {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRedistFile">
+        <source>There was an error reading the redist list file "{0}". {1}</source>
+        <target state="translated">Wystąpił błąd odczytu pliku listy redystrybucyjnej „{0}”. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotCreateChain">
+        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
+        <target state="translated">Właściwość Framework w ścieżce „{0}” próbowała uwzględnić właściwość framework w ścieżce „{1}” jako część jej ścieżek zestawu odwołania, ale wystąpił błąd. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">Ścieżka „{0}” używana w dziennikach debugowania jest za długa. Ustaw ją na krótszą wartość przy użyciu zmiennej środowiskowej MSBUILDEBUGPATH lub zmień konfigurację systemu, aby zezwolić na długie ścieżki.</target>
@@ -122,7 +132,17 @@
         <target state="translated">Ścieżka: {0} przekracza limit maksymalnej długości ścieżki w systemie operacyjnym. W pełni kwalifikowana nazwa pliku musi się składać z mniej niż {1} znaków.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformManifest_MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: nie można odnaleźć pliku manifestu platformy w lokalizacji „{0}”.</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany. Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper_UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany. Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
         <note />
@@ -146,6 +166,191 @@
         <source>'{0}' does not contain matching element.</source>
         <target state="translated">Wtyczka „{0}” nie zawiera pasującego elementu.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CollectionCopyToFailureProvidedArrayIsTooSmall">
+        <source>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</source>
+        <target state="translated">Liczba elementów w kolekcji jest większa niż dostępne miejsce w tablicy docelowej (zaczynając od określonego indeksu).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">Parametr „{0}” z przypisaną wartością „{1}” nie może mieć nieprawidłowej ścieżki ani zawierać nieprawidłowych znaków w pliku.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConflictingTaskAssembly">
+        <source>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</source>
+        <target state="translated">MSB4008: Zestaw, który wywołuje konflikt z zestawem zadania „{0}”, został znaleziony w „{1}”.</target>
+        <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
+      </trans-unit>
+      <trans-unit id="ExpectedEventToBeSerializable">
+        <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
+        <target state="translated">Oczekiwano, że zdarzenie typu „{0}” będzie uszeregowane przy użyciu serializatora platformy .NET. Zdarzenie nie może podlegać szeregowaniu, dlatego zostało zignorowane.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LoggingBeforeTaskInitialization">
+        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
+        <target state="translated">MSB6005: Zadanie podjęło próbę zarejestrowania przed zainicjowaniem. Pojawił się komunikat: {0}</target>
+        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
+      </trans-unit>
+      <trans-unit id="Message_InvalidImportance">
+        <source>MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</source>
+        <target state="translated">MSB3511: „{0}” jest nieprawidłową wartością parametru „Importance”. Prawidłowe wartości: High, Normal i Low.</target>
+        <note>{StrBegin="MSB3511: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
+            The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
+            LOCALIZATION: "Importance" should not be localized.
+            High should not be localized.
+            Normal should not be localized.
+            Low should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedToolsVersion">
+        <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
+        <target state="translated">MSB4132: Wersja narzędzi „{0}” nie została rozpoznana. Dostępne wersje narzędzi to {1}.</target>
+        <note>{StrBegin="MSB4132: "}LOCALIZATION: {1} contains a comma separated list.</note>
+      </trans-unit>
+      <trans-unit id="NameInvalid">
+        <source>MSB5016: The name "{0}" contains an invalid character "{1}".</source>
+        <target state="translated">MSB5016: Nazwa „{0}” zawiera nieprawidłowy znak „{1}”.</target>
+        <note>{StrBegin="MSB5016: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotChangeItemSpecModifiers">
+        <source>"{0}" is a reserved item metadata, and cannot be modified or deleted.</source>
+        <target state="translated">„{0}” jest zastrzeżonym elementem metadanych i nie może zostać zmodyfikowany ani usunięty.</target>
+        <note>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSchemaValidationErrors">
+        <source>Schema validation</source>
+        <target state="translated">Walidacja schematu</target>
+        <note>
+      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
+      "MSBUILD : Schema validation error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSolutionParsingErrors">
+        <source>Solution file</source>
+        <target state="translated">Plik rozwiązania</target>
+        <note>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
+      "MSBUILD : Solution file error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.</note>
+      </trans-unit>
+      <trans-unit id="TaskNotMarshalByRef">
+        <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
+        <target state="translated">MSB4077: Zadanie „{0}” zostało oznaczone atrybutem LoadInSeparateAppDomain, ale nie pochodzi od obiektu MarshalByRefObject. Sprawdź, czy zadanie pochodzi od obiektu MarshalByRefObject lub zadania AppDomainIsolatedTask.</target>
+        <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="TaskResourceNotFound">
+        <source>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</source>
+        <target state="translated">Nie można odnaleźć ciągu zasobu „{0}” dla zadania „{1}”. Upewnij się, że nazwa zasobu „{0}” ma poprawną pisownię i że zasób istnieje w zestawie zadania.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskResourcesNotRegistered">
+        <source>The "{0}" task has not registered its resources. In order to use the "TaskLoggingHelper.FormatResourceString()" method this task needs to register its resources either during construction, or via the "TaskResources" property.</source>
+        <target state="translated">Zadanie „{0}” nie zarejestrowało swoich zasobów. Aby było możliwe użycie metody „TaskLoggingHelper.FormatResourceString()”, to zadanie musi zarejestrować swoje zasoby podczas konstruowania lub przy użyciu właściwości „TaskResources”.</target>
+        <note>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="WildcardResultsInDriveEnumeration">
+        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
+        <target state="translated">MSB5029: Wartość „{0}” atrybutu „{1}” w elemencie &lt;{2}&gt; w pliku „{3}” jest symbolem wieloznacznym, który powoduje wyliczenie wszystkich plików na dysku, co prawdopodobnie nie było zamierzone. Sprawdź, czy przywoływane właściwości są zawsze zdefiniowane oraz czy projekt i bieżący katalog roboczy nie znajdują się w katalogu głównym dysku.</target>
+        <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
+      attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchPath">
+        <source>For SearchPath "{0}".</source>
+        <target state="translated">W przypadku ścieżki wyszukiwania SearchPath „{0}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly">
+        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
+        <target state="translated">Dla elementu SearchPath „{0}” (dodanego przez odwołanie do zestawu „{1}”).</target>
+        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx">
+        <source>Considered AssemblyFoldersEx locations.</source>
+        <target state="translated">Brane pod uwagę lokalizacje AssemblyFoldersEx.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch">
+        <source>Considered "{0}",
+			but its name "{1}"
+			didn't match the expected name "{2}".</source>
+        <target state="translated">Wybrano element „{0}”,
+			ale jego nazwa „{1}”
+			nie zgadza się z oczekiwaną nazwą „{2}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNoFile">
+        <source>Considered "{0}", but it didn't exist.</source>
+        <target state="translated">Wybrano element „{0}”, ale element nie istnieje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotAFileNameOnDisk">
+        <source>Considered treating "{0}" as a file name, but it didn't exist.</source>
+        <target state="translated">Potraktowano „{0}” jako nazwę pliku, ale plik nie istnieje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotInGac">
+        <source>Considered "{0}", which was not found in the GAC.</source>
+        <target state="translated">Wybrano element „{0}”, którego nie można odnaleźć w globalnej pamięci podręcznej zestawu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
+        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
+        <target state="translated">Brany pod uwagę element „{0}”, który istniał, ale nie był prawidłowym zestawem platformy .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch">
+        <source>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</source>
+        <target state="translated">Wybrano zestaw {0}, który istnieje, ale ma architekturę procesora {1}, która nie odpowiada architekturze procesora {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictFound">
+        <source>There was a conflict between "{0}" and "{1}".</source>
+        <target state="translated">Wystąpił konflikt między „{0}” a „{1}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictHigherVersionChosen">
+        <source>"{0}" was chosen because it had a higher version.</source>
+        <target state="translated">Wybrano „{0}”, ponieważ jest w nowszej wersji.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictPrimaryChosen">
+        <source>"{0}" was chosen because it was primary and "{1}" was not.</source>
+        <target state="translated">Wybrano parametr „{0}”, ponieważ jest parametrem podstawowym. Parametr „{1}” nie jest takim parametrem.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictUnsolvable">
+        <source>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</source>
+        <target state="translated">MSB3243: Nie ma sposobu na rozwiązanie konfliktu między „{0}” i „{1}”. Umownie zostanie wybrany parametr „{0}”.</target>
+        <note>{StrBegin="MSB3243: "}</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_FoundConflicts">
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="translated">MSB3277: Znaleziono konflikty między różnymi wersjami elementu „{0}”, których nie można rozstrzygnąć.
+{1}</target>
+        <note>{StrBegin="MSB3277: "}</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ReferenceDependsOn">
+        <source>References which depend on "{0}" [{1}].</source>
+        <target state="translated">Odwołania z zależnością od „{0}” [{1}].</target>
+        <note> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="translated">Odwołania, które są zależne lub zostały ujednolicone dla „{0}” [{1}].</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_UnResolvedPrimaryItemSpec">
+        <source>Unresolved primary reference with an item include of "{0}".</source>
+        <target state="translated">Nierozpoznane odwołanie podstawowe do zawartości elementu „{0}”.</target>
+        <note> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_PrimarySourceItemsForReference">
+        <source>Project file item includes which caused reference "{0}".</source>
+        <target state="translated">Element pliku projektu zawiera składnik powodujący odwołanie „{0}”.</target>
+        <note> This will look like, Project file item includes which caused reference "a.dll".</note>
       </trans-unit>
     </body>
   </file>

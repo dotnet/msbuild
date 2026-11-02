@@ -1,9 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if !NET
 using System;
-#endif
 using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Build;
@@ -18,8 +16,85 @@ internal static class StringExtensions
     public static bool IsNullOrWhiteSpace([NotNullWhen(false)] this string? value)
         => string.IsNullOrWhiteSpace(value);
 
+    /// <summary>
+    ///  Gets the bounds of a string after excluding leading and trailing whitespace.
+    /// </summary>
+    /// <param name="value">The string whose bounds are trimmed.</param>
+    /// <param name="startIndex">The zero-based start index after excluding leading whitespace.</param>
+    /// <param name="length">The length after excluding leading and trailing whitespace.</param>
+    /// <returns>
+    ///  <see langword="true"/> if the bounds exclude any whitespace; otherwise,
+    ///  <see langword="false"/>.
+    /// </returns>
+    public static bool GetTrimBounds(this string value, out int startIndex, out int length)
+    {
+        startIndex = 0;
+        length = value.Length;
+        return value.TrimBounds(ref startIndex, ref length);
+    }
+
+    /// <summary>
+    ///  Trims leading and trailing whitespace from the bounds of a string segment.
+    /// </summary>
+    /// <param name="value">The string containing the segment.</param>
+    /// <param name="startIndex">The zero-based start index, updated to exclude leading whitespace.</param>
+    /// <param name="length">The segment length, updated to exclude leading and trailing whitespace.</param>
+    /// <returns>
+    ///  <see langword="true"/> if the segment bounds changed; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool TrimBounds(this string value, ref int startIndex, ref int length)
+    {
+        int originalLength = length;
+        int endIndex = startIndex + length;
+
+        while (startIndex < endIndex && char.IsWhiteSpace(value[startIndex]))
+        {
+            startIndex++;
+        }
+
+        while (endIndex > startIndex && char.IsWhiteSpace(value[endIndex - 1]))
+        {
+            endIndex--;
+        }
+
+        length = endIndex - startIndex;
+        return length != originalLength;
+    }
+
     extension(string)
     {
+        /// <summary>
+        ///  Determines whether regions of two strings are equal using the specified comparison.
+        /// </summary>
+        /// <param name="strA">The first string to compare.</param>
+        /// <param name="indexA">The zero-based starting position of the region within <paramref name="strA"/>.</param>
+        /// <param name="strB">The second string to compare.</param>
+        /// <param name="indexB">The zero-based starting position of the region within <paramref name="strB"/>.</param>
+        /// <param name="length">The number of characters in each region to compare.</param>
+        /// <param name="comparisonType">The string comparison rules to use.</param>
+        /// <returns>
+        ///  <see langword="true"/> if the specified regions are equal; otherwise,
+        ///  <see langword="false"/>.
+        /// </returns>
+        public static bool Equals(string strA, int indexA, string strB, int indexB, int length, StringComparison comparisonType)
+            => string.Compare(strA, indexA, strB, indexB, length, comparisonType) == 0;
+
+        /// <summary>
+        ///  Determines whether the portion of one string beginning at a specified position is
+        ///  equal to another string using the specified comparison.
+        /// </summary>
+        /// <param name="strA">The string containing the region to compare.</param>
+        /// <param name="indexA">The zero-based starting position of the region within <paramref name="strA"/>.</param>
+        /// <param name="strB">The string to compare with the specified region.</param>
+        /// <param name="comparisonType">The string comparison rules to use.</param>
+        /// <returns>
+        ///  <see langword="true"/> if the characters beginning at <paramref name="indexA"/> equal
+        ///  <paramref name="strB"/>;
+        ///  otherwise, <see langword="false"/>.
+        /// </returns>
+        public static bool Equals(string strA, int indexA, string strB, StringComparison comparisonType)
+            => string.Compare(strA, indexA, strB, 0, strB.Length, comparisonType) == 0;
+
         /// <summary>
         ///  Allocates a string of the specified length filled with null characters.
         /// </summary>

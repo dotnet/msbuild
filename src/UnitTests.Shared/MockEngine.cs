@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -42,6 +43,8 @@ namespace Microsoft.Build.UnitTests
         private readonly ConcurrentDictionary<object, object> _objectCache = new ConcurrentDictionary<object, object>();
         private readonly ConcurrentQueue<BuildErrorEventArgs> _errorEvents = new ConcurrentQueue<BuildErrorEventArgs>();
         private readonly ConcurrentQueue<BuildWarningEventArgs> _warningEvents = new ConcurrentQueue<BuildWarningEventArgs>();
+        private readonly ConcurrentQueue<BuildMessageEventArgs> _messageEvents = new ConcurrentQueue<BuildMessageEventArgs>();
+        private int _yieldThreadId = -1;
 
         public MockEngine() : this(false)
         {
@@ -53,10 +56,13 @@ namespace Microsoft.Build.UnitTests
 
         public int Errors { get; set; }
 
+        public ISet<string> WarningsAsErrors { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         public bool AllowFailureWithoutError { get; set; } = false;
 
         public BuildErrorEventArgs[] ErrorEvents => _errorEvents.ToArray();
         public BuildWarningEventArgs[] WarningEvents => _warningEvents.ToArray();
+        public BuildMessageEventArgs[] MessageEvents => _messageEvents.ToArray();
 
         public Dictionary<string, string> GlobalProperties { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -160,6 +166,7 @@ namespace Microsoft.Build.UnitTests
         {
             lock (_lockObj)
             {
+                _messageEvents.Enqueue(eventArgs);
                 if (_logToConsole)
                 {
                     Console.WriteLine(eventArgs.Message);
@@ -357,10 +364,16 @@ namespace Microsoft.Build.UnitTests
 
         public void Yield()
         {
+            _yieldThreadId.ShouldBe(-1, "Cannot call Yield() while yielding.");
+            _yieldThreadId = Environment.CurrentManagedThreadId;
         }
 
         public void Reacquire()
         {
+            // Mirrors the real TaskHost, which requires Reacquire() on the same thread that called Yield().
+            _yieldThreadId.ShouldNotBe(-1, "Cannot call Reacquire() before Yield().");
+            Environment.CurrentManagedThreadId.ShouldBe(_yieldThreadId, "Reacquire() must be called on the thread that called Yield().");
+            _yieldThreadId = -1;
         }
 
         public bool BuildProjectFile(
@@ -478,7 +491,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Delegate which will get the resource from the correct resource manager
         /// </summary>
-        public delegate string GetStringDelegate(string resourceName);
+        public delegate string GetStringDelegate(string resourceName, CultureInfo culture = null);
 
         public object GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime)
         {
@@ -503,7 +516,7 @@ namespace Microsoft.Build.UnitTests
         {
         }
 
-        public bool ShouldTreatWarningAsError(string warningCode) => false;
+        public bool ShouldTreatWarningAsError(string warningCode) => WarningsAsErrors.Contains(warningCode);
 
         public override bool LogsMessagesOfImportance(MessageImportance importance)
             => importance <= MinimumMessageImportance;

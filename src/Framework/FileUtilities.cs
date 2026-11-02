@@ -193,11 +193,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Fixes backslashes to forward slashes on Unix. This allows to recognise windows style paths on Unix. 
         /// However, this leads to incorrect path on Linux if backslash was part of the file/directory name.
-        /// </summary>  
-        internal static string FixFilePath(string path)
-        {
-            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == WindowsDirectorySeparator ? path : path.Replace(WindowsDirectorySeparator, UnixDirectorySeparator);
-        }
+        /// </summary>
+        [return: NotNullIfNotNull(nameof(path))]
+        internal static string? FixFilePath(string? path)
+            => path.IsNullOrEmpty() || Path.DirectorySeparatorChar == WindowsDirectorySeparator
+                ? path
+                : path.Replace(WindowsDirectorySeparator, UnixDirectorySeparator);
 
         /// <summary>
         /// If the given path doesn't have a trailing slash then add one.
@@ -282,6 +283,22 @@ namespace Microsoft.Build.Framework
             }
 
             return new AbsolutePath(EnsureTrailingSlash(path.Value),
+                original: path.OriginalValue,
+                ignoreRootedCheck: true);
+        }
+
+        /// <summary>
+        /// Adds a trailing directory separator without changing existing path characters.
+        /// </summary>
+        internal static AbsolutePath EnsureTrailingSlashWithoutNormalization(AbsolutePath path)
+        {
+            if (string.IsNullOrEmpty(path.Value) || IsSlash(path.Value[path.Value.Length - 1]))
+            {
+                return path;
+            }
+
+            return new AbsolutePath(
+                path.Value + Path.DirectorySeparatorChar,
                 original: path.OriginalValue,
                 ignoreRootedCheck: true);
         }
@@ -654,6 +671,27 @@ namespace Microsoft.Build.Framework
         private static bool IsValidRelativePathBound(char? c)
         {
             return c == null || IsAnySlash(c.Value);
+        }
+
+        /// <summary>
+        /// Returns true if any path segment is exactly "..", without allocating.
+        /// </summary>
+        internal static bool ContainsParentTraversalSegment(ReadOnlySpan<char> path)
+        {
+            // Walk each segment; return true only for a segment that is exactly "..".
+            while (!path.IsEmpty)
+            {
+                int sep = path.IndexOfAny(Slashes);
+                ReadOnlySpan<char> segment = sep < 0 ? path : path.Slice(0, sep);
+                if (segment.SequenceEqual("..".AsSpan()))
+                {
+                    return true;
+                }
+
+                path = sep < 0 ? default : path.Slice(sep + 1);
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -1044,6 +1082,30 @@ namespace Microsoft.Build.Framework
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
+            }
+        }
+
+        /// <summary>
+        /// Attempts to delete a native file or directory path without retries, recursively for directories.
+        /// </summary>
+        internal static bool TryDeleteFileOrDirectory(string path)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    Directory.Delete(path, recursive: true);
+                }
+                else
+                {
+                    File.Delete(path);
+                }
+
+                return true;
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                return false;
             }
         }
 

@@ -50,6 +50,8 @@ namespace Microsoft.Build.Execution
         /// When this flag is present, caches including the "ProjectRootElementCacheBase" will be cleared
         /// after the build request completes.  This is used when the build request is known to modify a lot of
         /// state such as restoring packages or generating parts of the import graph.
+        /// A cache that can tell on its own which of its entries such a build invalidated may keep the rest
+        /// instead of discarding everything.
         /// </summary>
         ClearCachesAfterBuild = 1 << 3,
 

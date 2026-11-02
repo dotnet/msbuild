@@ -3,16 +3,16 @@
     Collects a CTS baseline for the given test project(s).
 
 .DESCRIPTION
-    Runs `cts collect vstest --coverage` against the *.UnitTests.VSTest
-    wrapper for each project, populating the local filesystem cache under
-    <repo>/.cts/baseline. The baseline is keyed by HEAD SHA, so this script
+    Runs `cts collect testingplatform --coverage` against the normal test
+    project, populating the local filesystem cache under
+    <repo>/.cts/mtp-baseline. The baseline is keyed by HEAD SHA, so this script
     requires a clean working tree.
 
 .PARAMETER Project
     Short key from projects.json (e.g. StringTools). Default: all projects.
 
 .PARAMETER SkipBuild
-    Reuse already-built VSTest DLLs.
+    Reuse already-built native MTP test DLLs.
 
 .PARAMETER TimeoutMinutes
     Per-project timeout. Default 15.
@@ -53,7 +53,7 @@ foreach ($p in $projects) {
     $errFile = Join-Path $script:LogsDir "collect-$($p.Key).err.log"
 
     $ctsArgs = @(
-        'collect','vstest',
+        'collect','testingplatform',
         '--rootPath',                    $script:RepoRoot,
         '--config',                      $script:ConfigPath,
         '--storage-type',                'filesystem',

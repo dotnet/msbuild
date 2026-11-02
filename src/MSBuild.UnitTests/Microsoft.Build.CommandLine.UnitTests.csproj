@@ -20,6 +20,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
+    <ProjectReference Include="..\MSBuild.Bootstrap.Utils\MSBuild.Bootstrap.Utils.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
@@ -29,13 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\RegistryDelegates.cs">
-      <Link>RegistryDelegates.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\RegistryHelper.cs">
-      <Link>RegistryHelper.cs</Link>
-    </Compile>
-
     <EmbeddedResource Include="..\MSBuild\MSBuild\Microsoft.Build.Core.xsd">
       <Link>Microsoft.Build.Core.xsd</Link>
       <SubType>

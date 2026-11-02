@@ -49,7 +49,7 @@ public sealed class ObjectModelAotTests
     public void Evaluation_InMemoryProject_PropertiesAndItems()
     {
         ProjectRootElement root = ProjectRootElement.Create();
-        root.AddProperty("TargetFramework", "net10.0");
+        root.AddProperty("TargetFramework", "net11.0");
         root.AddProperty("OutputType", "Exe");
         root.AddItem("Compile", "A.cs");
         root.AddItem("Compile", "B.cs");
@@ -57,7 +57,7 @@ public sealed class ObjectModelAotTests
         using var collection = new ProjectCollection();
         var project = new Project(root, globalProperties: null, toolsVersion: null, collection);
 
-        Assert.AreEqual("net10.0", project.GetPropertyValue("TargetFramework"));
+        Assert.AreEqual("net11.0", project.GetPropertyValue("TargetFramework"));
         Assert.AreEqual("Exe", project.GetPropertyValue("OutputType"));
         Assert.AreEqual(2, project.GetItems("Compile").Count);
     }
@@ -116,7 +116,7 @@ public sealed class ObjectModelAotTests
                 """
                 <Project>
                   <PropertyGroup>
-                    <TargetFramework>net10.0</TargetFramework>
+                    <TargetFramework>net11.0</TargetFramework>
                     <PublishRelease>true</PublishRelease>
                     <IsTestProject>true</IsTestProject>
                   </PropertyGroup>
@@ -129,7 +129,7 @@ public sealed class ObjectModelAotTests
             using var collection = new ProjectCollection();
             var instance = ProjectInstance.FromFile(proj, new ProjectOptions { ProjectCollection = collection });
 
-            Assert.AreEqual("net10.0", instance.GetPropertyValue("TargetFramework"));
+            Assert.AreEqual("net11.0", instance.GetPropertyValue("TargetFramework"));
             Assert.AreEqual("true", instance.GetPropertyValue("PublishRelease"));
             Assert.AreEqual("true", instance.GetPropertyValue("IsTestProject"));
             Assert.AreEqual(1, instance.GetItems("Compile").Count());

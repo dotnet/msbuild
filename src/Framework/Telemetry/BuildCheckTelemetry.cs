@@ -34,7 +34,8 @@ internal class BuildCheckTelemetry
         string? sanitizedMessage = CrashTelemetry.TruncateMessage(exception.Message);
         if (sanitizedMessage != null)
         {
-            properties["ExceptionMessage"] = sanitizedMessage;
+            // The message can still contain customer data after its paths are redacted, so only the hash is sent.
+            properties["ExceptionMessage"] = TelemetryDataUtils.GetHashed(sanitizedMessage);
         }
 
         return (FailedAcquisitionEventName, properties);

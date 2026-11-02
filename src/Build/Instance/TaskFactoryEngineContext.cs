@@ -3,9 +3,10 @@
 
 using System;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using System.Diagnostics;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using Microsoft.Build.Internal;
+
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
@@ -388,7 +389,7 @@ namespace Microsoft.Build.BackEnd
                 e is not GeneratedFileUsedEventArgs)
 #pragma warning restore SYSLIB0050
             {
-                _loggingContext.LogWarning(null, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);
+                _loggingContext.LogWarning(DiagnosticSubcategory.None, ElementLocation.Empty, "ExpectedEventToBeSerializable", e.GetType().Name);
                 return false;
             }
 

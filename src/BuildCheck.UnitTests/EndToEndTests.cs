@@ -66,6 +66,73 @@ public class EndToEndTests : IDisposable
         Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(2);
     }
 
+    [Fact]
+    public void PropertiesUsageCheck_RulesAreIndependentlyConfigurable()
+    {
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode: false,
+            out TransientTestFile projectFile,
+            out TransientTestFile editorconfigFile,
+            "PropsCheckTest.csproj");
+
+        // Turning BC0201 off must not turn BC0202 off - they are separately configurable rules
+        //  that happen to be implemented by a single check.
+        File.WriteAllText(
+            editorconfigFile.Path,
+            File.ReadAllText(editorconfigFile.Path)
+                .Replace("build_check.BC0201.Severity=warning", "build_check.BC0201.Severity=none"));
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+
+        output.ShouldNotContain("BC0201");
+        output.ShouldMatch(@"BC0202: .* Property: 'MyPropT2'");
+    }
+
+    [Theory]
+    [InlineData(false, null, 0)]
+    [InlineData(true, null, 0)]
+    [InlineData(false, "none", 0)]
+    [InlineData(true, "none", 0)]
+    [InlineData(false, "warning", 4)]
+    [InlineData(true, "warning", 4)]
+    public void WriteLinesToFileCheck_IsOptIn(bool buildInOutOfProcessNode, string? severity, int expectedWarnings)
+    {
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+        TransientTestFile projectFile = _env.CreateFile(workFolder, "WriteLinesToFile.proj", """
+            <Project>
+                <Target Name="Build">
+                    <WriteLinesToFile File="short.txt" Lines="content" />
+                    <Tasks.WriteLinesToFile File="partial.txt" Lines="content" />
+                    <Build.Tasks.WriteLinesToFile File="longer-partial.txt" Lines="content" />
+                    <Microsoft.Build.Tasks.WriteLinesToFile File="full.txt" Lines="content" />
+                    <Microsoft.Build.Tasks.WriteLinesToFile File="overwrite.txt" Lines="content" Overwrite="true" />
+                    <Tasks.WriteLinesToFile File="append.txt" Lines="content" Overwrite="false" />
+                </Target>
+            </Project>
+            """);
+        string editorConfigContent = "root = true";
+        if (severity is not null)
+        {
+            editorConfigContent += $"\n[*.proj]\nbuild_check.BC0303.severity = {severity}\n";
+        }
+
+        _env.CreateFile(workFolder, EditorConfigFileName, editorConfigContent);
+        _env.SetCurrentDirectory(workFolder.Path);
+        _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} -check -nr:false",
+            out bool success,
+            timeoutMilliseconds: timeoutInMilliseconds);
+        _env.Output.WriteLine(output);
+        success.ShouldBeTrue(output);
+        GetWarningsCount(output).ShouldBe(expectedWarnings);
+        Regex.Matches(output, "BC0303:").Count.ShouldBe(expectedWarnings * 2);
+    }
+
     [Theory]
     // The culture is not set explicitly, but the extension is a known culture
     //  - a buildcheck warning will occur, but otherwise works
@@ -451,6 +518,7 @@ public class EndToEndTests : IDisposable
     }
 
     // Windows only - due to targeting NetFx
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/14539")]
     [WindowsOnlyTheory]
     [MemberData(nameof(TFMinNonSdkCheckTestData))]
     public void TFMinNonSdkCheckTest(string projectContent, bool expectCheckTrigger)
@@ -938,6 +1006,7 @@ public class EndToEndTests : IDisposable
     }
 
 #if NET
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/14392")]
     [Fact]
     public void TestBuildCheckTemplate()
     {

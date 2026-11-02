@@ -85,6 +85,13 @@ namespace Microsoft.Build.BackEnd.Logging
         private const uint DefaultQueueCapacity = 200000;
 
         /// <summary>
+        /// The memory assumed to be held by each queued event when deciding whether the queue may grow.
+        /// An event takes about 144 bytes plus 2 bytes per character of its message, so this covers an average
+        /// message of about 900 characters, five times what real builds measure.
+        /// </summary>
+        internal const long AssumedBytesPerQueuedEvent = 2048;
+
+        /// <summary>
         /// Lock for the nextProjectId
         /// </summary>
         private readonly object _lockObject = new Object();
@@ -134,6 +141,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// A list of ILoggers registered with the LoggingService
         /// </summary>
         private List<ILogger> _loggers;
+
+        /// <summary>
+        /// Central loggers used by distributed registrations, tracked by reference identity.
+        /// </summary>
+        private List<ILogger> _distributedCentralLoggers;
 
         /// <summary>
         /// A list of LoggerDescriptions which describe how to create a forwarding logger on a node. These are
@@ -287,7 +299,24 @@ namespace Microsoft.Build.BackEnd.Logging
         /// It should also be low enough that we do not accumulate enough messages to cause
         /// virtual memory exhaustion in extremely large builds.
         /// </summary>
-        private uint _queueCapacity = DefaultQueueCapacity;
+        private long _queueCapacity = DefaultQueueCapacity;
+
+        /// <summary>
+        /// Whether a producer that finds the queue full may double its capacity, if the process has the memory for it,
+        /// instead of waiting for the consumer.
+        /// </summary>
+        private readonly bool _adaptiveQueueCapacity;
+
+        /// <summary>
+        /// The <see cref="System.Diagnostics.Stopwatch"/> timestamp before which a refused growth is not evaluated again.
+        /// </summary>
+        private long _nextQueueGrowthCheck;
+
+        /// <summary>
+        /// Serializes the decision to grow the queue, so that when several producers find it full together, one of them
+        /// looks at the memory and the others see what it decided.
+        /// </summary>
+        private readonly LockType _queueGrowthLock = new();
 
         /// <summary>
         /// By default our logMode is Asynchronous. We do this
@@ -312,6 +341,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _projectFileMap = new ConcurrentDictionary<int, string>();
             _logMode = loggerMode;
             _loggers = new List<ILogger>();
+            _distributedCentralLoggers = new List<ILogger>();
             _loggerDescriptions = new List<LoggerDescription>();
             _eventSinkDictionary = new Dictionary<int, IBuildEventSink>();
             _nodeId = nodeId;
@@ -330,6 +360,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 _queueCapacity = Math.Max(0, _queueCapacity);
+            }
+            else
+            {
+                _adaptiveQueueCapacity = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13);
             }
 
             if (_logMode == LoggerMode.Asynchronous)
@@ -606,23 +640,13 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>().ToList();
 
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
-                {
-                    // If any logger requested the data - we need to emit them
-                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
-                        sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
-                    // If any logger didn't request the data - hence it's likely legacy logger
-                    //  - we need to populate the data in legacy way
-                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
-                        sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
-                }
-                else
-                {
-                    bool allSinksIncludeEvalData = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
-
-                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = allSinksIncludeEvalData;
-                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !allSinksIncludeEvalData;
-                }
+                // If any logger requested the data - we need to emit them
+                IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
+                    sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
+                // If any logger didn't request the data - hence it's likely legacy logger
+                //  - we need to populate the data in legacy way
+                IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
+                    sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
             }
         }
 
@@ -669,6 +693,11 @@ namespace Microsoft.Build.BackEnd.Logging
             // Determine if any of the event sinks have logged an error with this submission ID
             return _buildSubmissionIdsThatHaveLoggedErrors?.Contains(submissionId) == true;
         }
+
+        /// <inheritdoc />
+        public bool ShouldTreatWarningAsError(BuildEventContext buildEventContext, string warningCode)
+            => !ShouldTreatWarningAsMessage(buildEventContext, warningCode)
+                && ShouldPromoteWarningToError(buildEventContext, warningCode);
 
         /// <summary>
         /// Populates build telemetry with error categorization data.
@@ -981,6 +1010,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     CleanLoggingEventProcessing();
 
                     _loggers = new List<ILogger>();
+                    _distributedCentralLoggers = new List<ILogger>();
                     _loggerDescriptions = null;
                     _eventSinkDictionary = null;
                     _filterEventSource = null;
@@ -1157,24 +1187,41 @@ namespace Microsoft.Build.BackEnd.Logging
                 centralLogger = new NullCentralLogger();
             }
 
-            // create an eventSourceSink which the central logger will register with to receive the events from the forwarding logger
-            EventSourceSink eventSourceSink = new EventSourceSink();
-
             // If the logger is already in the list it should not be registered again.
-            // Note here that we are checking for direct equivalence (fast)
-            // and if we're dealing with a reusable logger, we need to check its original logger (slower)
-            if (_loggers.Contains(centralLogger) || _loggers.Any(l => l is ReusableLogger rl && rl.OriginalLogger == centralLogger))
+            if (_loggers.Contains(centralLogger))
             {
                 return false;
             }
+
+            // A central logger can back only one distributed registration.
+            if (_distributedCentralLoggers.Any(existing => ReferenceEquals(existing, centralLogger)))
+            {
+                return false;
+            }
+
+            // Reuse a pre-registered wrapper without reinitializing its logger.
+            ReusableLogger existingReusableCentralLogger = _loggers
+                .OfType<ReusableLogger>()
+                .FirstOrDefault(rl => rl.OriginalLogger == centralLogger);
+
+            // Create the sink for events from this forwarding logger.
+            EventSourceSink eventSourceSink = new EventSourceSink();
 
             // Assign a unique logger Id to this distributed logger
             int sinkId = _nextSinkId++;
             forwardingLogger.LoggerId = sinkId;
             eventSourceSink.Name = $"Sink for forwarding logger \"{sinkId}\".";
 
-            // Initialize and register the central logger
-            InitializeLogger(centralLogger, eventSourceSink);
+            if (existingReusableCentralLogger is null)
+            {
+                InitializeLogger(centralLogger, eventSourceSink);
+            }
+            else
+            {
+                existingReusableCentralLogger.RerouteActiveEventSource(eventSourceSink);
+            }
+
+            _distributedCentralLoggers.Add(centralLogger);
 
             EventRedirectorToSink newRedirector = new EventRedirectorToSink(sinkId, eventSourceSink);
             localForwardingLogger.BuildEventRedirector = newRedirector;
@@ -1355,10 +1402,16 @@ namespace Microsoft.Build.BackEnd.Logging
                 try
                 {
                     // Block until queue is not full.
-                    while (eventQueue.Count >= _queueCapacity)
+                    long capacity;
+                    while (eventQueue.Count >= (capacity = Volatile.Read(ref _queueCapacity)))
                     {
-                        // Block and wait for dequeue event.
-                        dequeueEvent.WaitOne();
+                        // A full queue grows if there is memory for it, otherwise block and wait for dequeue event.
+                        // With a growing queue the wait is limited: nothing is dequeued while the logger is stuck, and
+                        // meanwhile the memory may recover or another producer may have grown the queue.
+                        if (!TryGrowQueueCapacity(capacity))
+                        {
+                            dequeueEvent.WaitOne(CanGrowQueue ? QueueGrowthRetryInterval : Timeout.InfiniteTimeSpan);
+                        }
                     }
 
                     eventQueue.Enqueue(buildEvent);
@@ -1378,6 +1431,116 @@ namespace Microsoft.Build.BackEnd.Logging
                     RouteBuildEvent(buildEvent);
                 }
             }
+        }
+
+        /// <summary>
+        /// Reports how many more bytes the process can use before the machine runs low on memory or the GC heap reaches its
+        /// hard limit, as the GC measured it when it last ran.
+        /// Replaceable so that tests do not depend on the memory of the machine they run on.
+        /// .NET Framework does not report the memory load, so there the capacity stays fixed unless a test provides the headroom.
+        /// </summary>
+#if NET
+        internal Func<long> MemoryHeadroomProvider { get; set; } = GetMemoryHeadroom;
+#else
+        internal Func<long> MemoryHeadroomProvider { get; set; }
+#endif
+
+        /// <summary>
+        /// Whether a producer that finds the queue full may grow it: its capacity is not configured, the change wave is enabled
+        /// and the memory can be measured.
+        /// </summary>
+        private bool CanGrowQueue => _adaptiveQueueCapacity && MemoryHeadroomProvider is not null;
+
+        /// <summary>
+        /// How long a refused growth is remembered, and how long a producer that waits for the consumer sleeps before it
+        /// looks at the capacity and the memory again.
+        /// </summary>
+        internal TimeSpan QueueGrowthRetryInterval { get; set; } = TimeSpan.FromSeconds(1);
+
+        /// <summary>
+        /// The current capacity of the asynchronous logging event queue.
+        /// </summary>
+        internal long QueueCapacity
+        {
+            get => Volatile.Read(ref _queueCapacity);
+            set => Volatile.Write(ref _queueCapacity, value);
+        }
+
+        /// <summary>
+        /// Called by a producer that found the queue full at <paramref name="observedCapacity"/>. Doubles the capacity
+        /// if the process has memory for the added capacity, so that a slow logger does not stall the producers
+        /// while there is room to buffer.
+        /// </summary>
+        /// <returns>
+        /// <see langword="true"/> if the capacity is no longer <paramref name="observedCapacity"/> and the producer should
+        /// check the queue again; <see langword="false"/> if the queue stays full and the producer should wait.
+        /// </returns>
+        internal bool TryGrowQueueCapacity(long observedCapacity)
+        {
+            long capacity = Volatile.Read(ref _queueCapacity);
+            if (capacity != observedCapacity)
+            {
+                return true;
+            }
+
+            // No fixed ceiling: each doubling is priced against the headroom left, so growth stops where the machine does.
+            long grown = capacity * 2;
+            if (!CanGrowQueue || grown <= capacity)
+            {
+                return false;
+            }
+
+            // Producers keep asking while the queue is full: a refusal is remembered for the retry interval.
+            if (System.Diagnostics.Stopwatch.GetTimestamp() < Volatile.Read(ref _nextQueueGrowthCheck))
+            {
+                return false;
+            }
+
+            lock (_queueGrowthLock)
+            {
+                // The producers that waited for the lock find what the one that held it decided.
+                if (Volatile.Read(ref _queueCapacity) != capacity)
+                {
+                    return true;
+                }
+
+                long now = System.Diagnostics.Stopwatch.GetTimestamp();
+                if (now < _nextQueueGrowthCheck)
+                {
+                    return false;
+                }
+
+                // The events queued when the GC last ran are part of what it measured: price only the capacity that is added.
+                if (MemoryHeadroomProvider() < (grown - capacity) * AssumedBytesPerQueuedEvent)
+                {
+                    Volatile.Write(ref _nextQueueGrowthCheck, now + (long)(QueueGrowthRetryInterval.TotalSeconds * System.Diagnostics.Stopwatch.Frequency));
+                    return false;
+                }
+
+                Volatile.Write(ref _queueCapacity, grown);
+            }
+
+            Microsoft.Build.Internal.CommunicationsUtilities.Trace($"The logging queue grew from {capacity} to {grown} events.");
+            return true;
+        }
+
+#if NET
+        private static long GetMemoryHeadroom()
+        {
+            GCMemoryInfo info = GC.GetGCMemoryInfo();
+            return info.Index == 0
+                ? 0
+                : ComputeMemoryHeadroom(info.HighMemoryLoadThresholdBytes, info.MemoryLoadBytes, info.TotalAvailableMemoryBytes, info.TotalCommittedBytes);
+        }
+#endif
+
+        /// <summary>
+        /// The threshold and the load that the GC reports for the machine do not account for a GC heap hard limit, which a container
+        /// gets by default and <c>DOTNET_GCHeapHardLimit</c> sets, so the room left below that limit bounds the headroom as well.
+        /// </summary>
+        internal static long ComputeMemoryHeadroom(long highMemoryLoadThresholdBytes, long memoryLoadBytes, long totalAvailableMemoryBytes, long totalCommittedBytes)
+        {
+            return Math.Max(0, Math.Min(highMemoryLoadThresholdBytes - memoryLoadBytes, totalAvailableMemoryBytes - totalCommittedBytes));
         }
 
         /// <summary>
@@ -1645,7 +1808,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (buildEventArgs is BuildWarningEventArgs warningEvent)
             {
-                if (ShouldTreatWarningAsMessage(warningEvent))
+                if (ShouldTreatWarningAsMessage(warningEvent.BuildEventContext, warningEvent.Code))
                 {
                     if (buildEventArgs is ExtendedBuildWarningEventArgs extWarningEvent)
                     {
@@ -1680,7 +1843,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             warningEvent.ColumnNumber,
                             warningEvent.EndLineNumber,
                             warningEvent.EndColumnNumber,
-                            warningEvent.Message,
+                            EventArgsFormatting.GetLocalizedMessage(warningEvent),
                             warningEvent.HelpKeyword,
                             warningEvent.SenderName,
                             MessageImportance.Low,
@@ -1691,7 +1854,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         };
                     }
                 }
-                else if (ShouldTreatWarningAsError(warningEvent))
+                else if (ShouldPromoteWarningToError(warningEvent.BuildEventContext, warningEvent.Code))
                 {
                     if (warningEvent is ExtendedBuildWarningEventArgs extWarningEvent)
                     {
@@ -1725,7 +1888,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             warningEvent.ColumnNumber,
                             warningEvent.EndLineNumber,
                             warningEvent.EndColumnNumber,
-                            warningEvent.Message,
+                            EventArgsFormatting.GetLocalizedMessage(warningEvent),
                             warningEvent.HelpKeyword,
                             warningEvent.SenderName,
                             warningEvent.Timestamp)
@@ -2034,47 +2197,49 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Determines if the specified warning should be treated as a low importance message.
         /// </summary>
-        /// <param name="warningEvent">A <see cref="BuildWarningEventArgs"/> that specifies the warning.</param>
+        /// <param name="buildEventContext">The context in which the warning is logged.</param>
+        /// <param name="warningCode">The warning code.</param>
         /// <returns><code>true</code> if the warning should be treated as a low importance message, otherwise <code>false</code>.</returns>
-        private bool ShouldTreatWarningAsMessage(BuildWarningEventArgs warningEvent)
+        private bool ShouldTreatWarningAsMessage(BuildEventContext buildEventContext, string warningCode)
         {
             // This only applies if the user specified /nowarn at the command-line or added the warning code through the object model
-            if (WarningsAsMessages?.Contains(warningEvent.Code) == true)
+            if (WarningsAsMessages?.Contains(warningCode) == true)
             {
                 return true;
             }
 
             // This only applies if the user specified <MSBuildWarningsAsMessages /> and there is a valid ProjectInstanceId
-            if (_warningsAsMessagesByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
+            if (_warningsAsMessagesByProject != null && buildEventContext != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
-                if (_warningsAsMessagesByProject.TryGetValue(GetWarningsConfigKey(warningEvent), out ISet<string> codesByProject))
+                if (_warningsAsMessagesByProject.TryGetValue(GetWarningsConfigKey(buildEventContext), out ISet<string> codesByProject))
                 {
-                    return codesByProject?.Contains(warningEvent.Code) == true;
+                    return codesByProject?.Contains(warningCode) == true;
                 }
             }
 
             return false;
         }
 
-        private bool WarningAsErrorNotOverriden(BuildWarningEventArgs warningEvent)
+        private bool WarningAsErrorNotOverriden(BuildEventContext buildEventContext, string warningCode)
         {
-            WarningsConfigKey key = GetWarningsConfigKey(warningEvent);
+            WarningsConfigKey key = GetWarningsConfigKey(buildEventContext);
 
-            return WarningsNotAsErrors?.Contains(warningEvent.Code) != true && !(_warningsNotAsErrorsByProject?.TryGetValue(key, out ISet<string> notToError) == true && notToError.Contains(warningEvent.Code));
+            return WarningsNotAsErrors?.Contains(warningCode) != true && !(_warningsNotAsErrorsByProject?.TryGetValue(key, out ISet<string> notToError) == true && notToError.Contains(warningCode));
         }
 
         /// <summary>
-        /// Determines if the specified warning should be treated as an error.
+        /// Determines if an unsuppressed warning should be treated as an error.
         /// </summary>
-        /// <param name="warningEvent">A <see cref="BuildWarningEventArgs"/> that specifies the warning.</param>
+        /// <param name="buildEventContext">The context in which the warning is logged.</param>
+        /// <param name="warningCode">The warning code.</param>
         /// <returns><code>true</code> if the warning should be treated as an error, otherwise <code>false</code>.</returns>
-        private bool ShouldTreatWarningAsError(BuildWarningEventArgs warningEvent)
+        private bool ShouldPromoteWarningToError(BuildEventContext buildEventContext, string warningCode)
         {
             // This only applies if the user specified /warnaserror from the command-line or added an empty set through the object model
             if (WarningsAsErrors != null)
             {
                 // Global warnings as errors apply to all projects.  If the list is empty or contains the code, the warning should be treated as an error
-                if ((WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningEvent)) || WarningsAsErrors.Contains(warningEvent.Code))
+                if ((WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(buildEventContext, warningCode)) || WarningsAsErrors.Contains(warningCode))
                 {
                     return true;
                 }
@@ -2082,10 +2247,10 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // This only applies if the user specified <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors or <MSBuildWarningsAsErrors />
             // and there is a valid ProjectInstanceId for the warning.
-            if (_warningsAsErrorsByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
+            if (_warningsAsErrorsByProject != null && buildEventContext != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
                 // Attempt to get the list of warnings to treat as errors for the current project
-                WarningsConfigKey key = GetWarningsConfigKey(warningEvent);
+                WarningsConfigKey key = GetWarningsConfigKey(buildEventContext);
                 if (_warningsAsErrorsByProject.TryGetValue(key, out ISet<string> codesByProject))
                 {
                     // We create an empty set if all warnings should be treated as errors so that should be checked first.
@@ -2093,8 +2258,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     ISet<string> codesToIgnoreByProject = null;
                     _warningsNotAsErrorsByProject?.TryGetValue(key, out codesToIgnoreByProject);
                     return codesByProject != null &&
-                        ((codesByProject.Count == 0 && (codesToIgnoreByProject is null || !codesToIgnoreByProject.Contains(warningEvent.Code)))
-                        || codesByProject.Contains(warningEvent.Code));
+                        ((codesByProject.Count == 0 && (codesToIgnoreByProject is null || !codesToIgnoreByProject.Contains(warningCode)))
+                        || codesByProject.Contains(warningCode));
                 }
             }
 

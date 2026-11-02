@@ -50,6 +50,12 @@ namespace Microsoft.Build.Framework.Telemetry
             return this;
         }
 
+        public IActivity SetUserFault()
+        {
+            _result = TelemetryResult.UserFault;
+            return this;
+        }
+
         public void Dispose()
         {
             if (_disposed)

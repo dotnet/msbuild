@@ -3,7 +3,7 @@
 # Shared helpers for Collect-Local.ps1, Run-Local.ps1, and the demo scripts.
 # Configuration lives in two JSON files alongside this script:
 #
-#   projects.json    - the registry of *.UnitTests.VSTest projects
+#   projects.json    - the registry of native *.UnitTests projects
 #   cts.config.json  - the CTS configuration (Modules/SourceCodeFiles/Filter/...)
 #
 # This file intentionally contains only paths and functions; nothing that you
@@ -26,7 +26,7 @@ $script:RepoRoot    = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $_dotnetFile        = if ($IsWindows -or $PSVersionTable.PSEdition -eq 'Desktop') { 'dotnet.exe' } else { 'dotnet' }
 $script:DotnetExe   = Join-Path (Join-Path $script:RepoRoot '.dotnet') $_dotnetFile
 $script:CtsRoot     = Join-Path $script:RepoRoot '.cts'
-$script:BaselineDir = Join-Path $script:CtsRoot 'baseline'
+$script:BaselineDir = Join-Path $script:CtsRoot 'mtp-baseline'
 $script:LogsDir     = Join-Path $script:CtsRoot 'logs'
 $script:ConfigPath  = Join-Path $PSScriptRoot 'cts.config.json'
 $script:ProjectsPath= Join-Path $PSScriptRoot 'projects.json'
@@ -44,7 +44,7 @@ function Get-Projects {
 
 function Ensure-Cli {
     if (-not (Get-Command cts -ErrorAction SilentlyContinue)) {
-        throw "'cts' is not on PATH. Install with: dotnet tool install cts --global --prerelease --add-source https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json"
+        throw "'cts' is not on PATH. Install with: dotnet tool install cts --global --version 2.13.0-alpha.26519.2 --add-source https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json"
     }
     if (-not (Test-Path $script:DotnetExe)) {
         throw "Local dotnet at '$script:DotnetExe' not found. Run .\build.cmd once to bootstrap."
@@ -56,7 +56,7 @@ function Build-Project {
     $csproj = Join-Path $script:RepoRoot $Project.CsProj
     Write-Host "  build $($Project.Key) ..." -ForegroundColor DarkGray -NoNewline
     $sw = [Diagnostics.Stopwatch]::StartNew()
-    $out = & $script:DotnetExe build -c Debug $csproj -f net10.0 -v:q -nologo 2>&1
+    $out = & $script:DotnetExe build -c Debug $csproj -f net11.0 -v:q -nologo 2>&1
     $sw.Stop()
     if ($LASTEXITCODE -ne 0) {
         Write-Host " FAIL ($([int]$sw.Elapsed.TotalSeconds)s)" -ForegroundColor Red
@@ -68,13 +68,13 @@ function Build-Project {
 
 function Get-ProjectDllPath {
     param([Parameter(Mandatory)] $Project)
-    return (Join-Path $script:RepoRoot ("artifacts/bin/{0}/Debug/net10.0/{1}" -f $Project.BinDir, $Project.Dll))
+    return (Join-Path $script:RepoRoot ("artifacts/bin/{0}/Debug/net11.0/{1}" -f $Project.BinDir, $Project.Dll))
 }
 
 function Get-ProjectDllFilter {
     param([Parameter(Mandatory)] $Project)
     # CTS --filter is a glob relative to --rootPath (repo root).
-    return "artifacts/bin/$($Project.BinDir)/Debug/net10.0/$($Project.Dll)"
+    return "artifacts/bin/$($Project.BinDir)/Debug/net11.0/$($Project.Dll)"
 }
 
 function Get-ProjectTag {

@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             const int beginUpdateRetryInterval = 100; // In milliseconds
             bool endUpdate = false; // Only call EndUpdateResource() if this is true
 
-            string filePath = filename.Value;
+            string filePath = filename;
 
             if (_stringResources.Count == 0 && _fileResources.Count == 0)
             {

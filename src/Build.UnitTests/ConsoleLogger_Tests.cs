@@ -625,6 +625,42 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Fact]
+        public void AssemblyResolutionSearchTraceUsesCurrentUICulture()
+        {
+            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+            try
+            {
+                CultureInfo frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
+                CultureInfo.CurrentUICulture = frenchCulture;
+
+                var console = new SimulatedConsole();
+                var eventSource = new EventSourceSink();
+                var logger = new ParallelConsoleLogger(LoggerVerbosity.Detailed, console.Write, null, null);
+                logger.Initialize(eventSource);
+
+                var searchEvent = new AssemblyResolutionSearchTraceEventArgs(
+                    "Requested, Version=1.0.0.0",
+                    targetProcessorArchitecture: null,
+                    [new("missing.dll", "path", null, null, AssemblyResolutionSearchResult.FileNotFound, null, false)],
+                    "ResolveAssemblyReference",
+                    MessageImportance.Low,
+                    eventTimestamp: default)
+                {
+                    BuildEventContext = new BuildEventContext(1, 2, 3, 4),
+                };
+
+                eventSource.Consume(searchEvent);
+
+                console.ToString().ShouldContain(searchEvent.FormatMessage(frenchCulture));
+                console.ToString().ShouldNotContain(searchEvent.Message.ShouldNotBeNull());
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = originalUICulture;
+            }
+        }
+
         [InlineData("error", "red")]
         [InlineData("warning", "yellow")]
         [InlineData("message", "darkgray")]
@@ -1716,11 +1752,11 @@ namespace Microsoft.Build.UnitTests
             L.Parameters = "Performancesummary";
             L.Initialize(es);
             // prjPerfString = Project Performance Summary:
-            string prjPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectPerformanceSummary", null);
+            string prjPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectPerformanceSummary");
             // targetPerfString = Target Performance Summary:
-            string targetPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetPerformanceSummary", null);
+            string targetPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetPerformanceSummary");
             // taskPerfString = Task Performance Summary:
-            string taskPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskPerformanceSummary", null);
+            string taskPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskPerformanceSummary");
 
             // BuildStarted Event
             es.Consume(new BuildStartedEventArgs("bs", null));

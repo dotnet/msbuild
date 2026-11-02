@@ -56,6 +56,21 @@
         <target state="translated">ArchiveFile을 가져왔지만 마지막으로 편집한 버전이 설정되지 않았습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrew">
+        <source>The binary log event filter threw an exception.</source>
+        <target state="translated">이진 로그 이벤트 필터에서 예외가 발생했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrewWithContext">
+        <source>The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</source>
+        <target state="translated">이진 로그 이벤트 필터가 레코드 {0}({1})에 대해 파일 형식 버전 {2}에서 예외를 발생시켰습니다. 빌드 컨텍스트: [{3}]. 원래 빌드 컨텍스트: [{4}]. 자세한 내용은 내부 예외를 참조하세요.</target>
+        <note>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</note>
+      </trans-unit>
+      <trans-unit id="Binlog_FilteredLog">
+        <source>This binary log is filtered. Excluded event kinds: {0}.</source>
+        <target state="translated">이 이진 로그는 필터링되었습니다. 제외된 이벤트 종류: {0}.</target>
+        <note>LOCALIZATION: {0} is a comma-separated list of binary log event kind names. Do not localize the event kind names.</note>
+      </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
         <target state="translated">파일 형식 버전 {0}에 대해 상위 호환 읽기가 지원되지 않습니다(18 이상 필요).</target>
@@ -285,6 +300,16 @@
         <source>Downloads folder is untrusted for projects building.</source>
         <target state="translated">프로젝트 빌드에 대해 다운로드 폴더를 신뢰할 수 없습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_MessageFmt">
+        <source>The 'WriteLinesToFile' task in project {0} does not specify the 'Overwrite' parameter. Set it explicitly to 'true' to overwrite the file or 'false' to append to it.</source>
+        <target state="translated">프로젝트 {0}의 'WriteLinesToFile' 작업에 'Overwrite' 매개 변수가 지정되지 않았습니다. 파일을 덮어쓰려면 'true'로 명시적으로 설정하고, 파일에 내용을 추가하려면 'false'로 설정하세요.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_Title">
+        <source>The 'Overwrite' parameter should be specified when using the 'WriteLinesToFile' task.</source>
+        <target state="translated">'WriteLinesToFile' 작업을 사용할 때는 'Overwrite' 매개 변수를 지정해야 합니다.</target>
+        <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
@@ -602,6 +627,11 @@
         <target state="translated">MSB4255: 다음 입력 결과 캐시 파일이 존재하지 않습니다. "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidBinaryLoggerEventFilter">
+        <source>MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</source>
+        <target state="translated">MSB4234: 잘못된 이진 로거 이벤트 필터: "{0}". 로거당 한 번씩 Exclude=를 지정하고 뒤에 쉼표로 구분된 이벤트 종류 이름을 지정하십시오. 비어 있음, 숫자, 알 수 없음, 보조 및 보호된 수명 주기 종류는 허용되지 않습니다. ProjectEvaluationStarted와 ProjectEvaluationFinished를 함께 제외하거나 둘 다 제외하지 마세요.</target>
+        <note>{StrBegin="MSB4234: "}Do not localize Exclude= or the event kind names.</note>
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">버전 문자열의 형식이 잘못되었습니다.</target>
@@ -653,6 +683,36 @@
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">메타프로젝트 "{0}"이(가) 생성되었습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeAlreadyActive">
+        <source>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</source>
+        <target state="translated">MSB4289: 다른 다중 스레드 엄격한 빌드가 이 프로세스에서 이미 활성화되어 있습니다. 다른 빌드를 시작하기 전에 완료하거나, 별도의 프로세스를 사용하거나, 프로세스를 시작하기 전에 MSBUILDDISABLEFEATURESFROMVERSION=18.12를 설정하여 엄격한 검사를 사용하지 않도록 설정합니다.</target>
+        <note>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
+        <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</source>
+        <target state="translated">MSB4286: 다중 스레드 엄격 모드에서 작업 "{1}"을(를) 확인한 결과, 프로세스의 현재 디렉터리가 "{2}"에 있었습니다. 현재 디렉터리는 "{0}"여야 합니다. 프로세스 디렉터리를 변경하는 대신 TaskEnvironment를 사용하세요. 이 변경은 다른 작업, 로거 또는 이 이벤트의 컨텍스트와 동시에 실행된 호스트 코드에서 발생했을 수 있습니다.</target>
+        <note>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeEnabled">
+        <source>Multi-threaded strict mode is enabled. Process current directory: "{0}".</source>
+        <target state="translated">다중 스레드 strict 모드를 사용할 수 있습니다. 프로세스 현재 디렉터리: "{0}".</target>
+        <note>{0} is the full path of the sentinel directory.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelMissing">
+        <source>MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</source>
+        <target state="translated">MSB4288: 디렉터리를 사용할 수 없게 된 후 다중 스레드 엄격 모드가 센티넬 디렉터리 "{0}"과(와) 프로세스의 현재 디렉터리를 복원했습니다. 활성 빌드에서 사용 중인 디렉터리는 제거하지 마세요.</target>
+        <note>{StrBegin="MSB4288: "}{0} is the sentinel directory. This warning is reported only after successful recovery.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelRecoveryFailed">
+        <source>MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</source>
+        <target state="translated">MSB4290: 다중 스레드 엄격 모드에서 sentinel 디렉터리 "{0}" 및 프로세스 현재 디렉터리를 복원할 수 없습니다. {1} 엔진 소유 디렉터리를 만들고 액세스할 수 있는지 확인하거나, 엄격한 검사를 일시적으로 사용하지 않도록 프로세스를 시작하기 전에 MSBUILDDISABLEFEATURESFROMVERSION=18.12를 설정합니다.</target>
+        <note>{StrBegin="MSB4290: "}{0} is the sentinel directory. {1} is the recovery failure message. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeUnresolvedPathWrite">
+        <source>MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</source>
+        <target state="translated">MSB4287: 프로젝트 또는 빌드가 완료될 때 센티넬 디렉터리 "{0}"에서 다중 스레드 엄격 모드가 "{1}"을(를) 발견했습니다. TaskEnvironment를 사용해 경로를 확인하세요. 쓰기 작업은 다른 프로젝트, 로거 또는 호스트 코드에서 수행되었을 수 있습니다.</target>
+        <note>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
@@ -731,7 +791,7 @@
       </trans-unit>
       <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
         <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
-        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
+        <target state="translated">프로젝트를 만들 때는 부분 평가("{0}" 평가 단계)를 지원하지 않습니다. 부분 평가를 수행하려면 ProjectInstance를 사용하세요. 프로젝트를 만들려면 전체 평가 단계(Full evaluation stage)를 사용하세요.</target>
         <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -942,6 +1002,11 @@
         <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
         <target state="translated">MSB4283: "{0}" 작업을 실행하려면 반영을 통해 작업 어셈블리와 형식을 로드해야 하므로 실행할 수 없습니다. 이는 이 트리밍된 호스트 또는 네이티브 AOT 호스트에서는 지원되지 않습니다. 작업을 실행하려면 JIT 기반 MSBuild로 빌드하세요.</target>
         <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</source>
+        <target state="translated">다중 스레드 모드에서는 파일 액세스 보고를 사용할 수 없습니다. 파일 액세스 보고에는 각 액세스를 하나의 프로젝트에 귀속할 수 있도록 프로세스 격리된 작업자 노드가 필요합니다. ReportFileAccesses 또는 MultiThreaded를 사용하지 않도록 설정합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
@@ -3024,11 +3089,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">빌드를 시작했습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FileLocation">
-        <source>{0} ({1},{2})</source>
-        <target state="translated">{0}({1},{2})</target>
-        <note>A file location to be embedded in a string.</note>
-      </trans-unit>
       <trans-unit id="MSBuild.CannotRebaseOutputItemPath">
         <source>MSB3203: The output path "{0}" cannot be rebased. {1}</source>
         <target state="translated">MSB3203: 출력 경로 "{0}"의 기준 주소를 다시 지정할 수 없습니다. {1}</target>
@@ -3181,8 +3241,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
-        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: 잘못된 이진 로거 매개 변수: "{0}". 예상 값: ProjectImports={{None,Embed,ZipFile}} 및/또는 [LogFile=]filePath.binlog(로그 파일 이름 또는 경로, 확장명이 ".binlog"여야 함).</target>
+        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
+        <target state="translated">MSB4234: 잘못된 이진 로거 매개 변수: "{0}". 예상 값: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...] 및/또는 [LogFile=]filePath.binlog(로그 파일 이름 또는 경로, 확장명이 ".binlog"여야 함).</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -3318,6 +3378,134 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
         <target state="translated">MSB4247: SDK 확인자를 로드할 수 없습니다. 매니페스트 파일이 있지만 SDK 확인자 DLL 파일에 대한 경로를 찾을 수 없습니다. 매니페스트 파일 경로 '{0}'. SDK 확인자 경로: {1}</target>
         <note>{StrBegin="MSB4247: "}</note>
+      </trans-unit>
+      <trans-unit id="BuildAborted">
+        <source>MSB4188: Build was canceled.</source>
+        <target state="translated">MSB4188: 빌드가 취소되었습니다.</target>
+        <note>{StrBegin="MSB4188: "} Error when the build stops suddenly for some reason. For example, because a child node died.</note>
+      </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="translated">사용자 지정 이벤트 유형 '{0}'은(는) 일부 사용자 지정 이벤트 형식이 더 이상 사용되지 않으므로 지원되지 않습니다. 대신 Extended*EventArgs를 사용하세요. 추가 정보: https://aka.ms/msbuild/eventargs</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProjectFile">
+        <source>MSB4025: The project file could not be loaded. {0}</source>
+        <target state="translated">MSB4025: 프로젝트 파일을 로드할 수 없습니다. {0}</target>
+        <note>{StrBegin="MSB4025: "}UE: This message is shown when the project file given to the engine cannot be loaded because the filename/path is
+    invalid, or due to lack of permissions, or incorrect XML. The project filename is not part of the message because it is
+    provided separately to loggers.
+    LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</note>
+      </trans-unit>
+      <trans-unit id="InvalidVerbosity">
+        <source>MSB4103: "{0}" is not a valid logger verbosity level.</source>
+        <target state="translated">MSB4103: "{0}"은(는) 로거의 세부 정보 표시로 알맞지 않습니다.</target>
+        <note>{StrBegin="MSB4103: "}</note>
+      </trans-unit>
+      <trans-unit id="OM_NotSupportedReadOnlyCollection">
+        <source>This collection is read-only.</source>
+        <target state="translated">이 컬렉션은 읽기 전용입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectFileIsMalformed">
+        <source>MSB5019: The project file is malformed: "{0}". {1}</source>
+        <target state="translated">MSB5019: 프로젝트 파일의 형식이 잘못되었습니다. "{0}". {1}</target>
+        <note>{StrBegin="MSB5019: "}</note>
+      </trans-unit>
+      <trans-unit id="ProjectFileCouldNotBeLoaded">
+        <source>MSB5020: Could not load the project file: "{0}". {1}</source>
+        <target state="translated">MSB5020: 프로젝트 파일을 로드할 수 없습니다. "{0}". {1}</target>
+        <note>{StrBegin="MSB5020: "}</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
+        <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
+        <target state="translated">MSB5028: "{0}"의 솔루션 필터 파일에 "{2}"의 솔루션 파일에 없는 "{1}" 프로젝트가 포함되어 있습니다.</target>
+        <note>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterJsonParsingError">
+        <source>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</source>
+        <target state="translated">MSB5025: 솔루션 필터 파일 "{0}"의 Json 형식이 잘못되었습니다.</target>
+        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterMissingSolutionError">
+        <source>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</source>
+        <target state="translated">MSB5026: "{0}"의 솔루션 필터 파일이 "{1}"에 솔루션 파일이 있도록 지정하지만, 해당 파일이 없습니다.</target>
+        <note>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseDuplicateProject">
+        <source>MSB5004: The solution file has two projects named "{0}".</source>
+        <target state="translated">MSB5004: 솔루션 파일에 이름이 "{0}"인 프로젝트가 두 개 있습니다.</target>
+        <note>{StrBegin="MSB5004: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectFileNameCharacters">
+        <source>MSB5005: Error parsing project section for project "{0}". The project file name "{1}" contains invalid characters.</source>
+        <target state="translated">MSB5005: "{0}" 프로젝트의 프로젝트 섹션을 구문 분석하는 동안 오류가 발생했습니다. 프로젝트 파일 이름 "{1}"에 잘못된 문자가 있습니다.</target>
+        <note>{StrBegin="MSB5005: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectFileNameEmpty">
+        <source>MSB5006: Error parsing project section for project "{0}". The project file name is empty.</source>
+        <target state="translated">MSB5006: "{0}" 프로젝트의 프로젝트 섹션을 구문 분석하는 동안 오류가 발생했습니다. 프로젝트 파일 이름이 비어 있습니다.</target>
+        <note>{StrBegin="MSB5006: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectSolutionConfigurationEntry">
+        <source>MSB5007: Error parsing the project configuration section in solution file. The entry "{0}" is invalid.</source>
+        <target state="translated">MSB5007: 솔루션 파일의 프로젝트 구성 섹션을 구문 분석하는 동안 오류가 발생했습니다. "{0}" 항목이 잘못되었습니다.</target>
+        <note>{StrBegin="MSB5007: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidSolutionConfigurationEntry">
+        <source>MSB5008: Error parsing the solution configuration section in solution file. The entry "{0}" is invalid.</source>
+        <target state="translated">MSB5008: 솔루션 파일의 솔루션 구성 섹션을 구문 분석하는 동안 오류가 발생했습니다. "{0}" 항목이 잘못되었습니다.</target>
+        <note>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectError">
+        <source>MSB5009: Error parsing the nested project section in solution file.</source>
+        <target state="translated">MSB5009: 솔루션 파일의 중첩된 프로젝트 섹션을 구문 분석하는 동안 오류가 발생했습니다.</target>
+        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectErrorWithNameAndGuid">
+        <source>MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</source>
+        <target state="translated">MSB5009: GUID가 "{1}"인 프로젝트 "{0}" 섹션을 구문 분석하는 동안 오류가 발생했습니다. "{2}" 아래에 중첩되지만 해당 프로젝트를 솔루션에서 찾을 수 없습니다.</target>
+        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectUndefinedError">
+        <source>MSB5023: Error parsing the nested project section in solution file. A project with the GUID "{0}" is listed as being nested under project "{1}", but does not exist in the solution.</source>
+        <target state="translated">MSB5023: 솔루션 파일의 중첩된 프로젝트 섹션을 구문 분석하는 동안 오류가 발생했습니다. GUID가 "{0}"인 프로젝트는 "{1}" 프로젝트 아래에 중첩되고 있는 것으로 나열되지만 솔루션에 없습니다.</target>
+        <note>{StrBegin="MSB5023: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNoHeaderError">
+        <source>MSB5010: No file format header found.</source>
+        <target state="translated">MSB5010: 파일 형식 헤더가 없습니다.</target>
+        <note>{StrBegin="MSB5010: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectDepGuidError">
+        <source>MSB5011: Parent project GUID not found in "{0}" project dependency section.</source>
+        <target state="translated">MSB5011: "{0}" 프로젝트 종속성 섹션에 부모 프로젝트 GUID가 없습니다.</target>
+        <note>{StrBegin="MSB5011: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectEofError">
+        <source>MSB5012: Unexpected end-of-file reached inside "{0}" project section.</source>
+        <target state="translated">MSB5012: "{0}" 프로젝트 섹션에서 예기치 않은 파일 끝에 도달했습니다.</target>
+        <note>{StrBegin="MSB5012: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectError">
+        <source>MSB5013: Error parsing a project section.</source>
+        <target state="translated">MSB5013: 프로젝트 섹션을 구문 분석하는 동안 오류가 발생했습니다.</target>
+        <note>{StrBegin="MSB5013: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseVersionMismatchError">
+        <source>MSB5014: File format version is not recognized.  MSBuild can only read solution files between versions {0}.0 and {1}.0, inclusive.</source>
+        <target state="translated">MSB5014: 파일 형식 버전을 인식할 수 없습니다.  MSBuild는 {0}.0 버전에서 {1}.0 버전까지의 솔루션 파일만 읽을 수 있습니다.</target>
+        <note>{StrBegin="MSB5014: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseWebProjectPropertiesError">
+        <source>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</source>
+        <target state="translated">MSB5015: "{0}" 프로젝트의 WebsiteProperties 섹션에서 속성을 읽을 수 없습니다.</target>
+        <note>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedSolutionComment">
+        <source>Unrecognized solution version "{0}", attempting to continue.</source>
+        <target state="translated">인식할 수 없는 솔루션 버전 "{0}"입니다. 작업을 계속하려고 합니다.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -1,0 +1,48 @@
+name: Team Work Item
+description: Plan a maintainer-owned delivery outcome or a bounded experiment.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for team-planned work. For customer bug reports or feature requests, use the corresponding form.
+        Keep assignee, sprint, priority and current status in the project board rather than duplicating them here.
+  - type: dropdown
+    id: work-kind
+    attributes:
+      label: Work kind
+      options:
+        - Delivery
+        - Experiment
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: Who benefits, and what will become possible? For an experiment, state the question this work will answer.
+    validations:
+      required: true
+  - type: textarea
+    id: completion-criteria
+    attributes:
+      label: Completion criteria
+      description: |
+        What observable evidence is needed to close this issue?
+        For delivery, distinguish implementation from any required publication, downstream integration or partner acceptance.
+        For experiments, include the comparison/baseline, time budget and proceed/stop criteria.
+        State unknown criteria explicitly, including who will resolve them.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and non-goals
+      description: Identify the supported scenarios and what this work deliberately does not cover.
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and handoff
+      description: |
+        Link blocking or companion work and any required merge/integration order.
+        Identify who must provide a decision or accept the result, and the next action needed from them.
+        Write "None" if there are no dependencies.

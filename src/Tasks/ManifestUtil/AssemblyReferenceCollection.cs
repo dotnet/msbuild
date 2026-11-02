@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -99,6 +100,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>The found assembly reference.</returns>
         public AssemblyReference Find(AssemblyIdentity identity)
         {
+            return Find(identity, taskEnvironment: null);
+        }
+
+        internal AssemblyReference Find(AssemblyIdentity identity, TaskEnvironment taskEnvironment)
+        {
             if (identity == null)
             {
                 return null;
@@ -133,7 +139,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     a.ReferenceType == AssemblyReferenceType.ManagedAssembly &&
                     String.Equals(identity.Name, System.IO.Path.GetFileNameWithoutExtension(a.SourcePath), StringComparison.OrdinalIgnoreCase))
                 {
-                    listItemIdentity = AssemblyIdentity.FromManagedAssembly(a.SourcePath);
+                    string sourcePath = taskEnvironment == null || String.IsNullOrEmpty(a.SourcePath)
+                        ? a.SourcePath
+                        : taskEnvironment.GetAbsolutePath(a.SourcePath);
+                    listItemIdentity = AssemblyIdentity.FromManagedAssembly(sourcePath);
                 }
 
                 if (AssemblyIdentity.IsEqual(listItemIdentity, identity))

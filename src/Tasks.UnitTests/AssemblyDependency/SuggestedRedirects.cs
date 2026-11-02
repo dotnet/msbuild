@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
@@ -200,9 +201,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // Check that we have a message identifying conflicts with "D"
             string warningMessage = e.WarningEvents[0].Message;
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.FoundConflicts", "D", string.Empty));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
+            warningMessage.ShouldContain(FormatInvariant(() => ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AssemblyConflict_FoundConflicts", "D", string.Empty)));
+            warningMessage.ShouldContain(FormatInvariant(() => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("AssemblyConflict_ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")));
+            warningMessage.ShouldContain(FormatInvariant(() => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("AssemblyConflict_ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll")))));
 
             Assert.Empty(t.SuggestedRedirects);
             Assert.Equal(3, t.ResolvedFiles.Length);
@@ -245,9 +246,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // Check that we have a message identifying conflicts with "D"
             string warningMessage = e.WarningEvents[0].Message;
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.FoundConflicts", "D", string.Empty));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
+            warningMessage.ShouldContain(FormatInvariant(() => ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AssemblyConflict_FoundConflicts", "D", string.Empty)));
+            warningMessage.ShouldContain(FormatInvariant(() => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("AssemblyConflict_ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")));
+            warningMessage.ShouldContain(FormatInvariant(() => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("AssemblyConflict_ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll")))));
 
             Assert.Empty(t.SuggestedRedirects);
             Assert.Equal(3, t.ResolvedFiles.Length);
@@ -473,6 +474,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 {
                     Assert.Contains("Culture=neutral", dependency.ToString());
                 }
+            }
+        }
+
+        private static string FormatInvariant(Func<string> formatter)
+        {
+            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+            try
+            {
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+                return formatter();
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = originalUICulture;
             }
         }
     }

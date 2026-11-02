@@ -105,6 +105,8 @@ ImmutableDictionary<string, int> lookup = ...;
 
 ## Building
 
+Most development can use `dotnet build`. For the most complete possible build, use `MSBuild.exe` from Visual Studio 2026. See the [Windows build prerequisites](README.md#building-msbuild-with-visual-studio-2026-on-windows).
+
 NEVER pipe MSBuild output to a file. If you want a list of errors, add `-flp:"v=q;LogFile=ErrorsAndWarnings.log"` to the arguments.
 
 When considering a subset of build errors, always look at the BEGINNING of the set, not the end.
@@ -152,6 +154,10 @@ dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 ```
 
 You can run a single unit test with `-- --filter-method "*{methodname}*"`, for example `dotnet test src/Framework.UnitTests/ -- --filter-method "*ExerciseBuildEventContext*"`.
+
+For local Unix runs, exclude `LogUnixWarningUponBuildingProjectWithDriveEnumeration` and
+`LogUnixWarningUponItemCreationWithDriveEnumeration` using `--filter-not-method`.
+These tests can hang while enumerating the filesystem root; do not run them unfiltered.
 
 ### Test Verification
 
@@ -251,3 +257,5 @@ For most development tasks, following these instructions should be sufficient to
 ## Updating these instructions
 
 When working on a task, if user input is required to complete the task or feedback is provided for guidance around a specific area of the code, evaluate that feedback/guidance and update this document to incorporate that feedback if it's missing.  This document should be a live, evolving set of instructions.
+
+When a skill or agent validator reports a size warning, consolidate existing guidance before appending more; keep task instructions focused and avoid duplicating repo-wide rules.

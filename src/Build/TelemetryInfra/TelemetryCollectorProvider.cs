@@ -10,16 +10,15 @@ using Microsoft.Build.Framework.Telemetry;
 namespace Microsoft.Build.TelemetryInfra;
 
 /// <summary>
-/// Build component that creates per-BuildRequestEngine <see cref="ITelemetryCollector"/> instances.
-/// Registered as a singleton, but holds no mutable state — each BuildRequestEngine gets its own
-/// collector via <see cref="CreateCollector"/>.
+/// Build component that creates isolated <see cref="ITelemetryCollector"/> instances.
+/// Registered as a singleton, but holds no mutable collection state.
 /// </summary>
 internal class TelemetryCollectorProvider : IBuildComponent
 {
     private bool _telemetryEnabled;
 
     /// <summary>
-    /// Creates a new <see cref="ITelemetryCollector"/> scoped to one <see cref="BuildRequestEngine"/>'s build lifetime.
+    /// Creates a new isolated <see cref="ITelemetryCollector"/>.
     /// Returns a no-op collector when telemetry is disabled.
     /// </summary>
     internal ITelemetryCollector CreateCollector()
@@ -42,8 +41,7 @@ internal class TelemetryCollectorProvider : IBuildComponent
     }
 
     /// <summary>
-    /// Collects task/target telemetry for one BuildRequestEngine. Not thread-safe —
-    /// only one RequestBuilder is active at a time per BuildRequestEngine.
+    /// Collects task/target telemetry for one processing scope. Not thread-safe.
     /// </summary>
     internal class TelemetryCollector : ITelemetryCollector
     {
@@ -56,7 +54,14 @@ internal class TelemetryCollectorProvider : IBuildComponent
             _data.AddTarget(key, wasExecuted, skipReason);
         }
 
-        public void AddTask(TaskOrTargetTelemetryKey key, TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumed, string? taskFactoryName, string? taskHostRuntime)
+        public void AddTargetResult(bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None)
+        {
+            _data.AddTargetResult(wasExecuted, skipReason);
+        }
+
+        public void AddInputOutputTarget(bool upToDate) => _data.AddInputOutputTarget(upToDate);
+
+        public void AddTask(TaskOrTargetTelemetryKey key, TimeSpan cumulativeExecutionTime, int executionsCount, long? totalMemoryConsumed, string? taskFactoryName, string? taskHostRuntime)
         {
             _data.AddTask(key, cumulativeExecutionTime, executionsCount, totalMemoryConsumed, taskFactoryName, taskHostRuntime);
         }
@@ -85,7 +90,11 @@ internal class TelemetryCollectorProvider : IBuildComponent
 
         public void AddTarget(TaskOrTargetTelemetryKey key, bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None) { }
 
-        public void AddTask(TaskOrTargetTelemetryKey key, TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumed, string? taskFactoryName, string? taskHostRuntime) { }
+        public void AddTargetResult(bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None) { }
+
+        public void AddInputOutputTarget(bool upToDate) { }
+
+        public void AddTask(TaskOrTargetTelemetryKey key, TimeSpan cumulativeExecutionTime, int executionsCount, long? totalMemoryConsumed, string? taskFactoryName, string? taskHostRuntime) { }
 
         public void FinalizeProcessing(LoggingContext loggingContext) { }
     }

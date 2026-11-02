@@ -3,12 +3,20 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
+using System.Reflection.PortableExecutable;
+using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using ManifestAssemblyReference = Microsoft.Build.Tasks.Deployment.ManifestUtilities.AssemblyReference;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -206,6 +214,62 @@ namespace Microsoft.Build.Tasks.UnitTests
             result.ShouldBeTrue();
         }
 
+        [WindowsOnlyTheory]
+        [InlineData(true, 1)]
+        [InlineData(false, 2)]
+        [SupportedOSPlatform("windows")]
+        public void GenerateApplicationManifest_ResolvesRelativeSentinelDependencyAgainstProjectDirectory(bool waveEnabled, int expectedReferenceCount)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", waveEnabled ? null : ChangeWaves.Wave18_13.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            string projectDirectory = env.CreateFolder().Path;
+            string relativeDependencyPath = Path.Combine("sub", "System.Core.dll");
+            string dependencyPath = Path.Combine(projectDirectory, relativeDependencyPath);
+            string outputManifestPath = Path.Combine(projectDirectory, "app.manifest");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(dependencyPath)!);
+            WriteSystemCoreAssembly(dependencyPath);
+            env.SetCurrentDirectory(env.CreateFolder().Path);
+            Environment.CurrentDirectory.ShouldNotBe(projectDirectory);
+
+            var dependency = new TaskItem(relativeDependencyPath);
+            dependency.SetMetadata("AssemblyType", "Managed");
+
+            try
+            {
+                var task = new GenerateApplicationManifest
+                {
+                    AssemblyName = "TestApplication",
+                    AssemblyVersion = "1.0.0.0",
+                    BuildEngine = new MockEngine(_output),
+                    Dependencies = [dependency],
+                    OutputManifest = new TaskItem(outputManifestPath),
+                    TargetFrameworkVersion = "v3.5",
+                    TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory),
+                };
+
+                task.Execute().ShouldBeTrue();
+
+                var manifest = (ApplicationManifest)ManifestReader.ReadManifest(outputManifestPath, preserveStream: false);
+                ManifestAssemblyReference[] systemCoreReferences = manifest.AssemblyReferences
+                    .Cast<ManifestAssemblyReference>()
+                    .Where(reference => reference.AssemblyIdentity?.Name == "System.Core")
+                    .ToArray();
+
+                systemCoreReferences.Length.ShouldBe(expectedReferenceCount);
+                if (waveEnabled)
+                {
+                    systemCoreReferences[0].IsPrerequisite.ShouldBeFalse();
+                }
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
         // Test 8: Path with spaces - tests no issues with space handling
         [Fact]
         public void CreateManifestResourceName_PathWithSpaces_ShouldWork()
@@ -227,6 +291,52 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             bool result = task.Execute();
             result.ShouldBeTrue();
+        }
+
+        private static void WriteSystemCoreAssembly(string path)
+        {
+            var metadata = new MetadataBuilder();
+            metadata.AddModule(
+                generation: 0,
+                metadata.GetOrAddString(Path.GetFileName(path)),
+                metadata.GetOrAddGuid(Guid.NewGuid()),
+                encId: default,
+                encBaseId: default);
+            metadata.AddAssembly(
+                metadata.GetOrAddString("System.Core"),
+                new Version(3, 5, 0, 0),
+                culture: default,
+                metadata.GetOrAddBlob(ParseHex(AssemblyRef.EcmaPublicKeyFull)),
+                AssemblyFlags.PublicKey,
+                System.Reflection.AssemblyHashAlgorithm.Sha1);
+            metadata.AddTypeDefinition(
+                TypeAttributes.NotPublic,
+                @namespace: default,
+                metadata.GetOrAddString("<Module>"),
+                baseType: default,
+                MetadataTokens.FieldDefinitionHandle(1),
+                MetadataTokens.MethodDefinitionHandle(1));
+
+            var peBuilder = new ManagedPEBuilder(
+                PEHeaderBuilder.CreateLibraryHeader(),
+                new MetadataRootBuilder(metadata),
+                new BlobBuilder());
+            var peImage = new BlobBuilder();
+            peBuilder.Serialize(peImage);
+
+            using FileStream stream = File.Create(path);
+            peImage.WriteContentTo(stream);
+        }
+
+        private static byte[] ParseHex(string value)
+        {
+            var bytes = new byte[value.Length / 2];
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                bytes[i] = Convert.ToByte(value.Substring(i * 2, 2), 16);
+            }
+
+            return bytes;
         }
     }
 }

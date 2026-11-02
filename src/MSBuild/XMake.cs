@@ -25,7 +25,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
@@ -33,6 +32,7 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
+using Microsoft.Build.Server;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
@@ -301,8 +301,50 @@ namespace Microsoft.Build.CommandLine
             // Initialize new build telemetry and record start of this build.
             KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow, IsStandaloneExecution = true };
 
-            TelemetryManager.Instance.Initialize(isStandalone: true);
+            // This process may create and own a telemetry session. It does so lazily, right before it builds
+            // (see InitializeTelemetryForInProcessBuild), or when it crashes (see CrashTelemetryRecorder).
+            TelemetryManager.IsStandaloneProcess = true;
 
+            try
+            {
+                return RunMain(args);
+            }
+            finally
+            {
+                // No-op if no session was created.
+                TelemetryManager.Instance.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Only the entry process and the server node report builds, so worker, task host and RAR nodes don't create a session for builds.
+        /// </summary>
+        /// <remarks>
+        /// The node mode comes from the command line (see <see cref="FrameworkDebugUtils.GetProcessNodeMode"/>),
+        /// so a node mode that is supplied only through a response file is not detected and the process is treated as an entry process.
+        /// MSBuild itself always launches nodes with <c>/nodemode:N</c> on the command line.
+        /// </remarks>
+        internal static bool OwnsProcessTelemetrySession(NodeMode? nodeMode) => nodeMode is null or NodeMode.OutOfProcServerNode;
+
+        /// <summary>
+        /// Creates this process's telemetry session right before it runs a build in-process, unless the process doesn't report builds.
+        /// </summary>
+        /// <remarks>
+        /// Creating a session takes about 200 ms and, in automated environments, shutting it down can wait for the network.
+        /// So a process that doesn't report a build doesn't create one: worker, task host and RAR nodes (see <see cref="OwnsProcessTelemetrySession"/>),
+        /// and the thin client while the MSBuild server runs the build. The client creates its session only if it falls back to building in-process.
+        /// This is not done in <see cref="Execute(string[])"/> because tests call it in-process without wanting a session.
+        /// </remarks>
+        internal static void InitializeTelemetryForInProcessBuild()
+        {
+            if (OwnsProcessTelemetrySession(FrameworkDebugUtils.GetProcessNodeMode()))
+            {
+                TelemetryManager.Instance.Initialize(isStandalone: true);
+            }
+        }
+
+        private static int RunMain(string[] args)
+        {
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
@@ -313,7 +355,7 @@ namespace Microsoft.Build.CommandLine
             // Perform the single authoritative command-line parse for this process. It yields:
             //   - canRunServer: whether the command line is compatible with hosting the build on the server;
             //   - multiThreaded: the response-file-aware /mt determination (includes the auto-response file,
-            //     any project Directory.Build.rsp, @response files, and MSBUILDFORCEMULTITHREADED);
+            //     any project Directory.Build.rsp, @response files, and the multi-threading environment variables);
             //   - shutdownServerAfterBuild: whether the server must tear itself down after this build;
             //   - the gathered switches, which the in-proc build path below reuses so it does not re-parse.
             bool canRunServer = CanRunServerBasedOnCommandLineSwitches(
@@ -360,6 +402,9 @@ namespace Microsoft.Build.CommandLine
                         : serverDisabled;
                 }
 
+                // This process builds, so (unless it is a worker, task host or RAR node) it reports the build and needs a telemetry session.
+                InitializeTelemetryForInProcessBuild();
+
                 // return 0 on success, non-zero on failure. Reuse the switches already gathered above (when the
                 // parse succeeded) so the command line is not parsed a second time; on parse failure they are null
                 // and Execute re-parses to surface the error.
@@ -370,8 +415,6 @@ namespace Microsoft.Build.CommandLine
             {
                 DumpCounters(false /* log to console */);
             }
-
-            TelemetryManager.Instance.Dispose();
 
             return exitCode;
         }
@@ -388,7 +431,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="commandLine">Raw command-line arguments.</param>
         /// <param name="multiThreaded">Set to whether this is a multithreaded (/mt) build, determined from
         /// the fully-parsed switches (which expand response files - including any project <c>Directory.Build.rsp</c> -
-        /// and honor MSBUILDFORCEMULTITHREADED) using the same logic as the in-proc build path.</param>
+        /// and honor the multi-threading environment variables) using the same logic as the in-proc build path.</param>
         /// <param name="shutdownServerAfterBuild">Set to <see langword="true"/> when the server should tear itself
         /// down after this build instead of staying resident for reuse.</param>
         /// <param name="switchesFromAutoResponseFile">The gathered response-file switches (auto-response file plus any
@@ -429,16 +472,27 @@ namespace Microsoft.Build.CommandLine
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 }
 
+                UpdateResponseFileTelemetry();
+
                 // From here the switches are fully gathered (including any project Directory.Build.rsp), so the
                 // in-proc build path can safely reuse them - and the gather's response-file bookkeeping
                 // (commandLineParser.IncludedResponseFiles) stays intact - even if a validation step below throws.
+                // ProcessProjectSwitch only resolves/validates the project path (it can throw on an ambiguous or
+                // missing project) and reads no further response files, so the flag is set before it runs to keep
+                // the gathered switches on those error paths instead of forcing Execute to re-read response files.
                 switchesFullyGathered = true;
 
+                string projectFile = ResolveProjectPathAgainstLogicalCurrentDirectory(
+                    ProcessProjectSwitch(
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions],
+                        Directory.GetFiles));
+
+                // Determine multithreaded mode from the fully-parsed switches (which include any
+                // response-file-provided switches) using the same logic as the in-proc build path.
                 multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
                 bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-
-                string projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
 
                 // These switches are fundamentally incompatible with hosting the build in a separate server
                 // process (help/version produce immediate output, -nodeMode is itself a node, and a binary-log
@@ -784,6 +838,7 @@ namespace Microsoft.Build.CommandLine
             {
 #if FEATURE_DEBUG_LAUNCH
                 case "1":
+                case "4" when s_isServerNode:
                     Debugger.Launch();
                     break;
                 case "3":
@@ -799,6 +854,16 @@ namespace Microsoft.Build.CommandLine
                     Console.WriteLine($"Waiting for debugger to attach ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId}).  Press enter to continue...");
                     Console.ReadLine();
 
+                    break;
+
+                case "5" when s_isServerNode:
+                    // The server has connected and redirected its output, but cannot read the client's stdin.
+                    Console.WriteLine($"Waiting for debugger to attach ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId}).");
+                    Console.Out.Flush();
+                    while (!Debugger.IsAttached)
+                    {
+                        Thread.Sleep(100);
+                    }
                     break;
             }
         }
@@ -922,6 +987,7 @@ namespace Microsoft.Build.CommandLine
                 string[] getTargetResult = [];
                 string getResultOutputFile = string.Empty;
                 BuildResult result = null;
+                FilteredBinlogReplay filteredReplay = null;
 #if FEATURE_REPORTFILEACCESSES
                 bool reportFileAccesses = false;
 #endif
@@ -987,10 +1053,12 @@ namespace Microsoft.Build.CommandLine
                                             ref getItem,
                                             ref getTargetResult,
                                             ref getResultOutputFile,
+                                            ref filteredReplay,
                                             recursing: false,
                                             string.Join(" ", commandLine),
                                             switchesAlreadyGathered);
 
+                UpdateResponseFileTelemetry();
                 CommandLineSwitches.SwitchesFromResponseFiles = null;
 
                 if (buildCanBeInvoked)
@@ -1021,7 +1089,18 @@ namespace Microsoft.Build.CommandLine
 
                     // If the primary file passed to MSBuild is a .binlog file, play it back into passed loggers
                     // as if a build is happening
-                    if (FileUtilities.IsBinaryLogFilename(projectFile))
+                    if (filteredReplay is not null)
+                    {
+                        ILogger[] replayLoggers = distributedLoggerRecords
+                            .Select(record => record.CentralLogger)
+                            .Where(logger => logger is not null)
+                            .Concat(loggers)
+                            .ToArray();
+                        exitType = filteredReplay.Replay(replayLoggers, cpuCount, s_buildCancellationSource.Token)
+                            ? ExitType.Success
+                            : ExitType.BuildError;
+                    }
+                    else if (FileUtilities.IsBinaryLogFilename(projectFile))
                     {
                         ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount, isBuildCheckEnabled);
                     }
@@ -1161,7 +1240,7 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(timerOutputFilename))
+                    if (filteredReplay is null && !string.IsNullOrEmpty(timerOutputFilename))
                     {
                         AppendOutputFile(timerOutputFilename, (long)elapsedTime.TotalMilliseconds);
                     }
@@ -1487,6 +1566,10 @@ namespace Microsoft.Build.CommandLine
                     // Server node shall terminate after it received CancelKey press.
                     if (s_isServerNode)
                     {
+                        // Environment.Exit skips the finally block of Main, so the server saves or uploads its telemetry here.
+                        // This is bounded by the shutdown budget, and a second call from Main waits for this one instead of repeating it.
+                        TelemetryManager.Instance.Dispose();
+
                         Environment.Exit(0); // the process can now be terminated as everything has already been gracefully cancelled.
                     }
                 }
@@ -1502,6 +1585,27 @@ namespace Microsoft.Build.CommandLine
         private static void ResetBuildState()
         {
             commandLineParser.ResetGatheringSwitchesState();
+            s_globalMessagesToLogInBuildLoggers.Clear();
+
+            if (s_originalProcessPriority is { } originalProcessPriority)
+            {
+                try
+                {
+                    using Process currentProcess = Process.GetCurrentProcess();
+                    currentProcess.PriorityClass = originalProcessPriority;
+                    s_originalProcessPriority = null;
+                }
+                // Restoring priority can fail due to platform permissions; priority changes are best effort.
+                catch (Win32Exception) { }
+            }
+        }
+
+        private static void UpdateResponseFileTelemetry()
+        {
+            if (KnownTelemetry.PartialBuildTelemetry is not null)
+            {
+                KnownTelemetry.PartialBuildTelemetry.ResponseFileUsed = commandLineParser.IncludedResponseFiles.Count > 0;
+            }
         }
 
         /// <summary>
@@ -1526,6 +1630,11 @@ namespace Microsoft.Build.CommandLine
         /// List of messages to be sent to the logger when it is attached
         /// </summary>
         private static readonly List<BuildManager.DeferredBuildMessage> s_globalMessagesToLogInBuildLoggers = new();
+
+        /// <summary>
+        /// The process priority to restore after a low-priority build.
+        /// </summary>
+        private static ProcessPriorityClass? s_originalProcessPriority;
 
         /// <summary>
         /// The original console output mode if we changed it as part of initialization.
@@ -1581,6 +1690,12 @@ namespace Microsoft.Build.CommandLine
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
             {
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);
+            }
+
+            if (multiThreaded && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
+            {
+                // Requests are created after BeginBuild enters the sentinel, so resolve the project path now.
+                projectFile = FileUtilities.NormalizePath(projectFile);
             }
 
             bool success = true;
@@ -1676,7 +1791,8 @@ namespace Microsoft.Build.CommandLine
                     enableTargetOutputLogging: isTaskAndTargetItemLoggingRequired,
                     loadProjectsReadOnly: !isPreprocess,
                     useAsynchronousLogging: true,
-                    reuseProjectRootElementCache: s_isServerNode);
+                    reuseProjectRootElementCache: s_isServerNode,
+                    parseConfigDirectory: Path.GetDirectoryName(Path.GetFullPath(projectFile)));
 
                 // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
                 projectCollection.PropertiesFromCommandLine = [.. globalProperties.Keys];
@@ -2420,6 +2536,7 @@ namespace Microsoft.Build.CommandLine
             ref string[] getItem,
             ref string[] getTargetResult,
             ref string getResultOutputFile,
+            ref FilteredBinlogReplay filteredReplay,
             bool recursing,
             string commandLine,
             bool switchesAlreadyGathered = false)
@@ -2474,6 +2591,7 @@ namespace Microsoft.Build.CommandLine
                     using Process currentProcess = Process.GetCurrentProcess();
                     if (currentProcess.PriorityClass != ProcessPriorityClass.Idle)
                     {
+                        s_originalProcessPriority ??= currentProcess.PriorityClass;
                         currentProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
                     }
                 }
@@ -2578,11 +2696,28 @@ namespace Microsoft.Build.CommandLine
                                                            ref getItem,
                                                            ref getTargetResult,
                                                            ref getResultOutputFile,
+                                                           ref filteredReplay,
                                                            recursing: true,
                                                            commandLine);
                     }
 
-                    projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+                    projectFile = ResolveProjectPathAgainstLogicalCurrentDirectory(
+                        ProcessProjectSwitch(
+                            commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project],
+                            commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions],
+                            Directory.GetFiles));
+
+                    if (FilteredBinlogReplay.IsRequested(projectFile, commandLineSwitches))
+                    {
+                        filteredReplay = FilteredBinlogReplay.Create(projectFile, commandLineSwitches);
+                        string terminalLoggerArgument = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.TerminalLogger].LastOrDefault();
+                        CommandLineSwitchException.VerifyThrow(
+                            !string.Equals(terminalLoggerArgument, "true", StringComparison.OrdinalIgnoreCase)
+                                && !string.Equals(terminalLoggerArgument, "on", StringComparison.OrdinalIgnoreCase),
+                            "ReplayFilterUnsupportedSwitch",
+                            "-terminalLogger");
+                        useTerminalLogger = false;
+                    }
 
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
@@ -2659,6 +2794,10 @@ namespace Microsoft.Build.CommandLine
                         graphBuild = ProcessGraphBuildSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild]);
                     }
 
+#if FEATURE_REPORTFILEACCESSES
+                    VerifyBuildModeCompatibility(multiThreaded, reportFileAccesses);
+#endif
+
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
 
                     isBuildCheckEnabled = IsBuildCheckEnabled(commandLineSwitches);
@@ -2678,7 +2817,8 @@ namespace Microsoft.Build.CommandLine
                         cpuCount,
                         out profilerLogger,
                         out enableProfiler,
-                        ref detailedSummary);
+                        ref detailedSummary,
+                        filteredReplay is not null);
 
                     var isLoggerThatRequiresTaskInputsConfigured = loggers.Any(l => l is TerminalLogger || l is BinaryLogger);
                     isTaskInputLoggingRequired = isTaskInputLoggingRequired || isLoggerThatRequiresTaskInputsConfigured || isBuildCheckEnabled;
@@ -2730,15 +2870,34 @@ namespace Microsoft.Build.CommandLine
 
         internal static bool IsMultiThreadedEnabled(CommandLineSwitches commandLineSwitches)
         {
-            // Allow forcing multi-threaded mode via an environment variable, for example to opt in
-            // without modifying command lines (parallel to MSBUILDDISABLENODEREUSE for /nodeReuse).
+            // MSBUILDFORCEMULTITHREADED is authoritative: it wins over an explicit -mt:false.
             if (Traits.Instance.ForceMultiThreaded)
             {
                 return true;
             }
 
-            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded);
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded))
+            {
+                return ProcessBooleanSwitch(
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded],
+                    defaultValue: true,
+                    resourceName: "InvalidMultiThreadedValue");
+            }
+
+            return Traits.Instance.EnableMultiThreaded;
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        internal static void VerifyBuildModeCompatibility(bool multiThreaded, bool reportFileAccesses)
+        {
+            if (multiThreaded && reportFileAccesses)
+            {
+                CommandLineSwitchException.Throw(
+                    "ReportFileAccessesIncompatibleWithMultiThreaded",
+                    "-reportFileAccesses");
+            }
+        }
+#endif
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
         {
@@ -2764,7 +2923,7 @@ namespace Microsoft.Build.CommandLine
             static bool CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes()
             {
                 // TerminalLogger is not used in automated environments (CI, GitHub Actions, GitHub Copilot, etc.)
-                if (IsAutomatedEnvironment())
+                if (BuildEnvironmentState.IsAutomatedEnvironment())
                 {
                     s_globalMessagesToLogInBuildLoggers.Add(
                         new BuildManager.DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedAutomated"), MessageImportance.Low));
@@ -2945,40 +3104,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        /// <summary>
-        /// Determines if the current environment is an automated environment where terminal logger should be disabled.
-        /// This includes CI systems, GitHub Actions, GitHub Copilot, and other automated build environments.
-        /// </summary>
-        /// <returns>True if running in an automated environment, false otherwise.</returns>
-        private static bool IsAutomatedEnvironment()
-        {
-            // Check for common CI environment indicators that use boolean values
-            if (EnvironmentUtilities.IsValueOneOrTrue("CI") ||
-                EnvironmentUtilities.IsValueOneOrTrue("GITHUB_ACTIONS"))
-            {
-                return true;
-            }
-
-            // Check for environment variables that indicate automated environments
-            string[] automatedEnvironmentVariables =
-            {
-                "COPILOT_API_URL",    // GitHub Copilot
-                "BUILD_ID",           // Jenkins, Google Cloud Build
-                "BUILDKITE",          // Buildkite
-                "CIRCLECI",           // CircleCI
-                "TEAMCITY_VERSION",   // TeamCity
-                "TF_BUILD",           // Azure DevOps
-                "APPVEYOR",           // AppVeyor
-                "TRAVIS",             // Travis CI
-                "GITLAB_CI",          // GitLab CI
-                "JENKINS_URL",        // Jenkins
-                "BAMBOO_BUILD_NUMBER" // Atlassian Bamboo
-            };
-
-            return automatedEnvironmentVariables.Any(envVar => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envVar)));
-        }
-
-        private static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
+        internal static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
         {
             // combine the auto-response file switches with the command line switches in a left-to-right manner, where the
             // auto-response file switches are on the left (default options), and the command line switches are on the
@@ -3111,6 +3237,18 @@ namespace Microsoft.Build.CommandLine
 
             return parentPacketVersion;
         }
+
+        /// <summary>
+        /// Processes the server instance id switch, which a client passes to the transient server it
+        /// launches for its own exclusive use. Both sides fold it into the pipe and mutex names, so a
+        /// transient server is unreachable by anyone else.
+        /// </summary>
+        /// <param name="parameters">The command line parameters for the switch.</param>
+        /// <returns>The instance id, or null for the resident server.</returns>
+        internal static string ProcessServerInstanceIdSwitch(string[] parameters)
+            => parameters.Length > 0 && !string.IsNullOrEmpty(parameters[parameters.Length - 1])
+                ? parameters[parameters.Length - 1]
+                : null;
 
         /// <summary>
         /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
@@ -3402,7 +3540,7 @@ namespace Microsoft.Build.CommandLine
                             return (exitCode, exitType.ToString());
                         };
 
-                        OutOfProcServerNode serverNode = new(buildFunction);
+                        OutOfProcServerNode serverNode = new(buildFunction, ProcessServerInstanceIdSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ServerInstanceId]));
 
                         s_isServerNode = true;
                         shutdownReason = serverNode.Run(out nodeException);
@@ -3601,6 +3739,52 @@ namespace Microsoft.Build.CommandLine
             return projectFile;
         }
 
+        /// <summary>
+        /// On Unix, rebases a relative project path onto <c>$PWD</c> when <c>$PWD</c> physically resolves
+        /// to the same directory as <see cref="Directory.GetCurrentDirectory"/>, keeping
+        /// <c>$(MSBuildProjectFullPath)</c> stable across symlinked working directories.
+        /// No-op on Windows, for absolute paths or paths containing <c>..</c>, when <c>PWD</c> is
+        /// unset/relative/stale, or when change wave 18.10 is disabled.
+        /// </summary>
+        internal static string ResolveProjectPathAgainstLogicalCurrentDirectory(string projectFile)
+        {
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
+                || NativeMethodsShared.IsWindows
+                || string.IsNullOrEmpty(projectFile)
+                || Path.IsPathRooted(projectFile)
+                // Bail on ".." segments: lexical normalization can escape the shared physical prefix,
+                // so the logical and physical resolutions can end up pointing at different files.
+                || FileUtilities.ContainsParentTraversalSegment(projectFile))
+            {
+                return projectFile;
+            }
+
+            string logicalCurrentDirectory = Environment.GetEnvironmentVariable("PWD");
+            if (string.IsNullOrEmpty(logicalCurrentDirectory) || !Path.IsPathRooted(logicalCurrentDirectory))
+            {
+                return projectFile;
+            }
+
+            // Confirm $PWD physically resolves to the same directory as getcwd(); otherwise PWD is stale.
+            string physicalPwd = NativeMethodsShared.RealPath(logicalCurrentDirectory);
+            string physicalCwd = NativeMethodsShared.RealPath(Directory.GetCurrentDirectory());
+            if (physicalPwd is null || physicalCwd is null
+                || !string.Equals(physicalPwd, physicalCwd, StringComparison.Ordinal))
+            {
+                return projectFile;
+            }
+
+            string rebasedProjectFile = Path.GetFullPath(Path.Combine(logicalCurrentDirectory, projectFile));
+
+            // This runs during command-line parsing before any build logger exists, so we cannot emit a
+            // build message. Trace it via comm tracing (MSBUILDDEBUGCOMM) so the rebase is visible when
+            // diagnosing path discrepancies, including MSBuild Server scenarios where the decision is
+            // made client-side. The interpolated handler is a no-op unless comm tracing is enabled.
+            CommunicationsUtilities.Trace($"ResolveProjectPathAgainstLogicalCurrentDirectory: rebased '{projectFile}' to '{rebasedProjectFile}' via $PWD='{logicalCurrentDirectory}'.");
+
+            return rebasedProjectFile;
+        }
+
         private static void ValidateExtensions(string[] projectExtensionsToIgnore)
         {
             if (projectExtensionsToIgnore?.Length > 0)
@@ -3708,7 +3892,8 @@ namespace Microsoft.Build.CommandLine
             int cpuCount,
             out ProfilerLogger profilerLogger,
             out bool enableProfiler,
-            ref bool detailedSummary)
+            ref bool detailedSummary,
+            bool filteredReplay)
         {
             string[] loggerSwitchParameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Logger];
             string[] distributedLoggerSwitchParameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DistributedLogger];
@@ -3742,7 +3927,7 @@ namespace Microsoft.Build.CommandLine
             var loggers = new List<ILogger>();
 
             var binlogVerbosity = verbosity;
-            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref binlogVerbosity);
+            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref binlogVerbosity, disableCopies: filteredReplay);
 
             // When returning the result of evaluation from the command line, do not use custom loggers.
             if (!useSimpleErrorLogger)
@@ -3751,7 +3936,12 @@ namespace Microsoft.Build.CommandLine
             }
 
             // Add any loggers which have been specified on the command line
-            distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
+            // Replay does not run a build for dotnet's injected logger to track.
+            distributedLoggerRecords = ProcessDistributedLoggerSwitch(
+                filteredReplay
+                    ? distributedLoggerSwitchParameters.Where(parameter => !FilteredBinlogReplay.IsSdkLogger([parameter])).ToArray()
+                    : distributedLoggerSwitchParameters,
+                verbosity);
 
             // Otherwise choose default console logger: None, TerminalLogger, or the older ConsoleLogger
             if (useSimpleErrorLogger)
@@ -3872,7 +4062,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity)
+        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity, bool disableCopies)
         {
             if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
             {
@@ -3898,7 +4088,7 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("DuplicateBinaryLoggerPathsIgnored", string.Join(", ", processedParams.DuplicateFilePaths)));
             }
 
-            if (processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
+            if (!disableCopies && processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
             {
                 // Optimized approach: single logger writing to one file, then copy to additional locations
                 BinaryLogger logger = new() { Parameters = processedParams.DistinctParameterSets[0], AdditionalFilePaths = processedParams.AdditionalFilePaths };
@@ -4610,15 +4800,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ShowVersion()
         {
-            // Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-            {
-                Console.WriteLine(ProjectCollection.Version.ToString());
-            }
-            else
-            {
-                Console.Write(ProjectCollection.Version.ToString());
-            }
+            Console.WriteLine(ProjectCollection.Version.ToString());
         }
 
         private static void ShowFeatureAvailability(string[] features)

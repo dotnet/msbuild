@@ -5,30 +5,280 @@
       "tests": [
         {
           "container": "VSPE",
-          "testCases": [
-            "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
-            "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+          "filteredTestCases": [
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.Build.dll",
+              "testCases": [
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.dll",
+              "testCases": [
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.Build.Framework.dll",
+              "testCases": [
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.Framework.dll",
+              "testCases": [
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.Build.Tasks.Core.dll",
+              "testCases": [
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.Tasks.Core.dll",
+              "testCases": [
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.Build.Utilities.Core.dll",
+              "testCases": [
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.Utilities.Core.dll",
+              "testCases": [
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.NET.StringTools.dll",
+              "testCases": [
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.NET.StringTools.dll",
+              "testCases": [
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/MSBuild.exe",
+              "testCases": [
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/MSBuild.exe",
+              "testCases": [
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
+                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
+              ]
+            }
           ]
         },
         {
           "container": "MSBuild",
-          "testCases": [
-            "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
-            "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc",
+          "filteredTestCases": [
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.Build.Utilities.Core.dll",
+              "testCases": [
+                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
+                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.Utilities.Core.dll",
+              "testCases": [
+                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
+                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.NET.StringTools.dll",
+              "testCases": [
+                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
+                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.NET.StringTools.dll",
+              "testCases": [
+                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
+                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/MSBuild.exe",
+              "testCases": [
+                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
+                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/MSBuild.exe",
+              "testCases": [
+                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
+                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc"
+              ]
+            }
           ]
         },
         {
           "container": "ManagedLangs",
-          "testCases": [
-            "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+          "filteredTestCases": [
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.Build.dll",
+              "testCases": [
+                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.dll",
+              "testCases": [
+                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.Build.Framework.dll",
+              "testCases": [
+                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.Framework.dll",
+              "testCases": [
+                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.Build.Tasks.Core.dll",
+              "testCases": [
+                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.Tasks.Core.dll",
+              "testCases": [
+                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.Build.Utilities.Core.dll",
+              "testCases": [
+                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.Utilities.Core.dll",
+              "testCases": [
+                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.NET.StringTools.dll",
+              "testCases": [
+                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.NET.StringTools.dll",
+              "testCases": [
+                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/MSBuild.exe",
+              "testCases": [
+                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/MSBuild.exe",
+              "testCases": [
+                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
+              ]
+            }
           ]
         },
         {
           "container": "Microsoft.VisualStudio.ProjectSystem.DDRIT",
-          "testCases": [
-            "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
+          "filteredTestCases": [
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.Build.dll",
+              "testCases": [
+                "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.dll",
+              "testCases": [
+                "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.Build.Framework.dll",
+              "testCases": [
+                "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.Framework.dll",
+              "testCases": [
+                "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.Build.Utilities.Core.dll",
+              "testCases": [
+                "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.Utilities.Core.dll",
+              "testCases": [
+                "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.NET.StringTools.dll",
+              "testCases": [
+                "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.NET.StringTools.dll",
+              "testCases": [
+                "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/MSBuild.exe",
+              "testCases": [
+                "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
+              ]
+            },
+            {
+              "fileName": "/Contents/MSBuild/Current/Bin/amd64/MSBuild.exe",
+              "testCases": [
+                "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
+              ]
+            }
           ]
-        }  
+        }
       ]
     }
   ],

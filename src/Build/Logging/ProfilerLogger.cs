@@ -293,6 +293,7 @@ namespace Microsoft.Build.Logging
                     ? ProfilerResultPrettyPrinter.GetMarkdownContent(GetAggregatedResult())
                     : ProfilerResultPrettyPrinter.GetTsvContent(GetAggregatedResult());
 
+                // CodeQL [SM04881] False positive: FileToLog is a trusted local file path configured via the MSBuild /profileevaluation switch.
                 File.WriteAllText(FileToLog, content);
 
                 Console.WriteLine(ResourceUtilities.GetResourceString("WritingProfilerReportDone"));

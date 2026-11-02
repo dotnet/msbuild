@@ -7,9 +7,50 @@ namespace Microsoft.Build.Framework.Telemetry;
 
 internal interface IWorkerNodeTelemetryData
 {
+    /// <summary>
+    /// Gets task execution details keyed by task identity.
+    /// </summary>
     Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> TasksExecutionData { get; }
 
+    /// <summary>
+    /// Gets target details keyed by target identity.
+    /// </summary>
     Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> TargetsExecutionData { get; }
+
+    /// <summary>
+    /// Gets the number of target instances that ran.
+    /// </summary>
+    int ExecutedTargetsCount { get; }
+
+    /// <summary>
+    /// Gets the number of target instances that were skipped.
+    /// </summary>
+    int SkippedTargetsCount { get; }
+
+    /// <summary>
+    /// Gets the number of target instances skipped because their outputs were up to date.
+    /// </summary>
+    int SkippedDueToUpToDateCount { get; }
+
+    /// <summary>
+    /// Gets the number of target instances skipped because their condition was false.
+    /// </summary>
+    int SkippedDueToConditionCount { get; }
+
+    /// <summary>
+    /// Gets the number of target instances skipped because they were already built.
+    /// </summary>
+    int SkippedDueToPreviouslyBuiltCount { get; }
+
+    /// <summary>
+    /// Gets the number of target instances with Inputs and Outputs whose outputs were up to date.
+    /// </summary>
+    int UpToDateInputOutputTargetsCount { get; }
+
+    /// <summary>
+    /// Gets the number of target instances with Inputs and Outputs that ran.
+    /// </summary>
+    int ExecutedInputOutputTargetsCount { get; }
 }
 
 /// <summary>

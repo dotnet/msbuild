@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -181,7 +181,7 @@ namespace Microsoft.Build.Construction
 
             XmlDocumentWithLocation document = LoadDocument(xmlReader, preserveFormatting);
 
-            ProjectParser.Parse(document, this);
+            ProjectParser.Parse(document, this, ProjectRootElementCache.ParserIgnoreConfiguration);
         }
 
         private readonly bool _isEphemeral = false;
@@ -217,7 +217,7 @@ namespace Microsoft.Build.Construction
                 document.Load(xr);
             }
 
-            ProjectParser.Parse(document, this);
+            ProjectParser.Parse(document, this, ProjectRootElementCache.ParserIgnoreConfiguration);
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace Microsoft.Build.Construction
 
             XmlDocumentWithLocation document = LoadDocument(path, preserveFormatting, projectRootElementCache.LoadProjectsReadOnly);
 
-            ProjectParser.Parse(document, this);
+            ProjectParser.Parse(document, this, ProjectRootElementCache.ParserIgnoreConfiguration);
         }
 
         /// <summary>
@@ -261,7 +261,7 @@ namespace Microsoft.Build.Construction
             _directory = Environment.CurrentDirectory;
             IncrementVersion();
 
-            ProjectParser.Parse(document, this);
+            ProjectParser.Parse(document, this, ProjectRootElementCache.ParserIgnoreConfiguration);
         }
 
         /// <summary>
@@ -273,7 +273,9 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         private ProjectRootElement(XmlDocumentWithLocation document)
         {
-            ProjectParser.Parse(document, this);
+            // This constructor is only used by ThrowIfDocumentHasParsingErrors to check whether a document
+            // parses; it deliberately has no cache, so there is no configuration to apply.
+            ProjectParser.Parse(document, this, ProjectRootElementCache?.ParserIgnoreConfiguration);
         }
 
         /// <summary>
@@ -651,7 +653,7 @@ namespace Microsoft.Build.Construction
         /// If the file has not been given a name, returns an empty location.
         /// This is a case where it is legitimate to "not have a location".
         /// </summary>
-        public ElementLocation ProjectFileLocation => Link != null ? RootLink.ProjectFileLocation : _projectFileLocation ?? ElementLocation.EmptyLocation;
+        public ElementLocation ProjectFileLocation => Link != null ? RootLink.ProjectFileLocation : _projectFileLocation ?? ElementLocation.Empty;
 
         /// <summary>
         /// Location of the toolsversion attribute, if any
@@ -1721,7 +1723,7 @@ namespace Microsoft.Build.Construction
 
             RemoveAllChildren();
 
-            ProjectParser.Parse(newDocument, this);
+            ProjectParser.Parse(newDocument, this, ProjectRootElementCache.ParserIgnoreConfiguration);
 
             MarkDirty("Project reloaded", null);
         }
@@ -2052,7 +2054,7 @@ namespace Microsoft.Build.Construction
             {
                 if (FileUtilities.IsVCProjFilename(projectFile))
                 {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(projectFile), "ProjectUpgradeNeededToVcxProj", projectFile);
+                    ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.Create(projectFile), "ProjectUpgradeNeededToVcxProj", projectFile);
                 }
 
                 // OK it's a regular project file, load it normally.
@@ -2064,7 +2066,7 @@ namespace Microsoft.Build.Construction
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(projectFile), ex, "InvalidProjectFile", ex.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.Create(projectFile), ex, "InvalidProjectFile", ex.Message);
                 throw; // Without this there's a spurious CS0161 because csc 1.2.0.60317 can't see that the above is an unconditional throw.
             }
         }
@@ -2115,11 +2117,11 @@ namespace Microsoft.Build.Construction
             }
             catch (Exception ex) when (!ExceptionHandling.NotExpectedIoOrXmlException(ex))
             {
-                BuildEventFileInfo fileInfo = ex is XmlException xmlException
-                    ? new BuildEventFileInfo(fullPath, xmlException)
-                    : new BuildEventFileInfo(fullPath);
+                ElementLocation location = ex is XmlException xmlException
+                    ? ElementLocation.CreateFrom(fullPath, xmlException)
+                    : ElementLocation.Create(fullPath);
 
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, ex, "InvalidProjectFile", ex.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(location, ex, "InvalidProjectFile", ex.Message);
             }
             MSBuildEventSource.Log.LoadDocumentStop(fullPath);
 
@@ -2141,9 +2143,9 @@ namespace Microsoft.Build.Construction
             }
             catch (XmlException ex)
             {
-                BuildEventFileInfo fileInfo = new BuildEventFileInfo(ex);
+                ElementLocation location = ElementLocation.CreateFrom(ex);
 
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, "InvalidProjectFile", ex.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(location, "InvalidProjectFile", ex.Message);
             }
 
             return document;
@@ -2162,7 +2164,7 @@ namespace Microsoft.Build.Construction
         {
             if (HasUnsavedChanges && throwIfUnsavedChanges)
             {
-                ErrorUtilities.ThrowInvalidOperation("NoReloadOnUnsavedChanges", null);
+                ErrorUtilities.ThrowInvalidOperation("NoReloadOnUnsavedChanges");
             }
         }
     }

@@ -231,5 +231,4 @@ The primary design has been implemented:
 - **Tests.** Four tests in
   [`SdkResolverService_Tests.cs`](../../src/Build.UnitTests/BackEnd/SdkResolverService_Tests.cs) cover the
   null-argument throw, idempotent re-registration, `Priority`-ordered inclusion in
-  `GetDefaultResolvers()`, and an end-to-end resolve through `SdkResolverService`. They run on both
-  `net10.0` and `net472`.
+  `GetDefaultResolvers()`, and an end-to-end resolve through `SdkResolverService`. They run on both TFMs.

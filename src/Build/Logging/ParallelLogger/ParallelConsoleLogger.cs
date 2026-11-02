@@ -1281,7 +1281,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             else
             {
-                nonNullMessage ??= e.Message ?? string.Empty;
+                nonNullMessage ??= EventArgsFormatting.GetLocalizedMessage(e) ?? string.Empty;
             }
 
             int prefixAdjustment = 0;

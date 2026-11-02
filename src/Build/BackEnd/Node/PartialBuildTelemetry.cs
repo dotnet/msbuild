@@ -15,13 +15,15 @@ internal sealed class PartialBuildTelemetry : ITranslatable
     private string? _initialServerState = default;
     private string? _serverFallbackReason = default;
     private string? _serverEnableReason = default;
+    private bool _responseFileUsed;
 
-    public PartialBuildTelemetry(DateTime startedAt, string? initialServerState, string? serverFallbackReason, string? serverEnableReason)
+    public PartialBuildTelemetry(DateTime startedAt, string? initialServerState, string? serverFallbackReason, string? serverEnableReason, bool responseFileUsed)
     {
         _startedAt = startedAt;
         _initialServerState = initialServerState;
         _serverFallbackReason = serverFallbackReason;
         _serverEnableReason = serverEnableReason;
+        _responseFileUsed = responseFileUsed;
     }
 
     /// <summary>
@@ -39,12 +41,15 @@ internal sealed class PartialBuildTelemetry : ITranslatable
 
     public string? ServerEnableReason => _serverEnableReason;
 
+    public bool ResponseFileUsed => _responseFileUsed;
+
     public void Translate(ITranslator translator)
     {
         translator.Translate(ref _startedAt);
         translator.Translate(ref _initialServerState);
         translator.Translate(ref _serverFallbackReason);
         translator.Translate(ref _serverEnableReason);
+        translator.Translate(ref _responseFileUsed);
     }
 
     internal static PartialBuildTelemetry FactoryForDeserialization(ITranslator translator)

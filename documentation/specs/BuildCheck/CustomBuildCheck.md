@@ -81,7 +81,7 @@ public sealed class MaxVersionCheck : Check
                 {
                     context.ReportResult(BuildCheckResult.Create(
                         SupportedRule,
-                        ElementLocation.EmptyLocation,
+                        ElementLocation.Empty,
                         value,
                         property.Key,
                         property.Value.ToString()));

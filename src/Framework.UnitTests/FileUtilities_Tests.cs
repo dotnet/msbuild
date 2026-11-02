@@ -332,6 +332,29 @@ public class FileUtilities_Tests
         Assert.Equal(FileUtilities.FixFilePath(@"foo\bar/"), FileUtilities.EnsureTrailingSlash(@"foo\bar/")); // "test 5"
     }
 
+    [Theory]
+    [InlineData("", false)]
+    [InlineData(".", false)]
+    [InlineData("...", false)]
+    [InlineData("foo..", false)]
+    [InlineData("..foo", false)]
+    [InlineData("foo/.../bar", false)]
+    [InlineData("foo/..bar/bar", false)]
+    [InlineData("/\\/", false)]
+    [InlineData("..", true)]
+    [InlineData("../foo", true)]
+    [InlineData(@"..\foo", true)]
+    [InlineData("foo/..", true)]
+    [InlineData(@"foo\..", true)]
+    [InlineData("foo/../bar", true)]
+    [InlineData(@"foo\..\bar", true)]
+    [InlineData(@"foo/\../bar", true)]
+    [InlineData("foo//../bar", true)]
+    public void ContainsParentTraversalSegmentDetectsOnlyCompleteSegments(string path, bool expected)
+    {
+        FileUtilities.ContainsParentTraversalSegment(path).ShouldBe(expected);
+    }
+
     /// <summary>
     /// Exercises ItemSpecModifiers.IsItemSpecModifier
     /// </summary>
@@ -482,6 +505,38 @@ public class FileUtilities_Tests
 
         Assert.NotEqual("C:\\work\\sdk3\\artifacts\\tmp\\Debug\\SimpleNamesWi---6143883E\\NETFrameworkLibrary\\bin\\Debug\\net462\\NETFrameworkLibrary.dll", FileUtilities.NormalizePath(filePath));
     }
+
+    [Fact]
+    public void PathIsInvalid_RejectsInvalidPathCharacters()
+    {
+        FileUtilities.PathIsInvalid(@"c:\foo\|||").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void PathIsInvalid_DoesNotRejectLongPaths()
+    {
+        string longSegment = new string('a', 300);
+        FileUtilities.PathIsInvalid($@"c:\{longSegment}\file.txt").ShouldBeFalse();
+    }
+
+    [Fact]
+    public void PathIsInvalid_DoesNotRejectLeadingOrTrailingWhitespace()
+    {
+        FileUtilities.PathIsInvalid("  c:\\temp\\file.txt  ").ShouldBeFalse();
+    }
+
+#if NETFRAMEWORK
+    [WindowsOnlyFact]
+    public void NormalizePath_OnNetFramework_UsesMicrosoftIoGetFullPath()
+    {
+        // System.IO.Path.GetFullPath on .NET Framework rejects a ':' outside the volume separator
+        // position (e.g. alternate data streams), while Microsoft.IO.Path.GetFullPath accepts it.
+        // Using such a path ensures the test fails if NormalizePath falls back to System.IO.Path.
+        string path = @"c:\temp\subdir\..\file.txt:stream";
+        Should.Throw<NotSupportedException>(() => System.IO.Path.GetFullPath(path));
+        FileUtilities.NormalizePath(path).ShouldBe(Microsoft.IO.Path.GetFullPath(path));
+    }
+#endif
 
     [Fact]
     public void FileOrDirectoryExistsNoThrow()

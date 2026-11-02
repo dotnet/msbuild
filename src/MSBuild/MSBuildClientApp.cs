@@ -4,8 +4,8 @@
 using System;
 using System.Globalization;
 using System.Threading;
-using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Server;
 using Microsoft.Build.Shared;
 
 #if RUNTIME_TYPE_NETCORE
@@ -96,6 +96,8 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // Server is busy / unavailable, fallback to old behavior.
+                // The build runs in this process after all, so this process reports it and needs a telemetry session.
+                MSBuildApp.InitializeTelemetryForInProcessBuild();
                 return MSBuildApp.Execute(commandLineArgs);
             }
 

@@ -45,6 +45,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int _nextNodeId;
 
+        internal const int FirstMultiThreadedNodeId = Scheduler.InProcNodeId + 1;
+
         /// <summary>
         /// The nodeID for the inproc node.
         /// </summary>
@@ -76,7 +78,7 @@ namespace Microsoft.Build.BackEnd
         {
             _nodeIdToProvider = new Dictionary<int, INodeProvider>();
             _packetFactory = new NodePacketFactory();
-            _nextNodeId = _inprocNodeId + 1;
+            _nextNodeId = FirstMultiThreadedNodeId;
         }
 
         #region INodeManager Members

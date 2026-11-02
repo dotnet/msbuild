@@ -26,7 +26,11 @@ parameters:
       - main
       - rel/insiders
       - rel/stable
-      
+  - name: InsertionReviewers
+    type: string
+    default: ''
+    displayName: 'Insertion PR reviewers (comma-separated aliases/teams; defaults to {alias} from an exp/{alias}/{branchname} branch)'
+
 variables:
   - name: TeamName
     value: msbuild
@@ -89,7 +93,7 @@ extends:
         steps:
         - task: Powershell@2
           name: SetSourceBranch
-          displayName: Set source branch name
+          displayName: Set source branch name and insertion reviewers
           inputs:
             targetType: inline
             script: |
@@ -101,6 +105,24 @@ extends:
               Write-Host "##vso[task.setvariable variable=SourceBranchName]$branch"
               Write-Host "updating build number with build commit"
               Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber).$(MSBuild_CI_SourceVersion)"
+
+              # Reviewers come from the queue-time parameter when specified. Otherwise fall back to the
+              # owner of the experimental branch, which by convention is exp/{alias}/{branchname}.
+              $reviewers = ("$env:INSERTION_REVIEWERS_PARAMETER".Trim()) -replace '[\r\n]', ''
+              if ($reviewers) {
+                Write-Host "Using insertion reviewers from pipeline parameter: '$reviewers'"
+              }
+              elseif (($fullBranch -replace '^refs/heads/', '') -match '^exp/([^/]+)/.+') {
+                $reviewers = $Matches[1]
+                Write-Host "Using insertion reviewer '$reviewers' derived from branch '$fullBranch'"
+              }
+              else {
+                Write-Host "##vso[task.logissue type=warning]Branch '$fullBranch' does not follow the exp/{alias}/{branchname} convention and no InsertionReviewers parameter was specified, so the insertion PR will not have reviewers assigned."
+              }
+
+              Write-Host "##vso[task.setvariable variable=FinalInsertionReviewers]$reviewers"
+          env:
+            INSERTION_REVIEWERS_PARAMETER: ${{ parameters.InsertionReviewers }}
 
         - task: Powershell@2
           name: DetermineTargetBranch
@@ -153,7 +175,7 @@ extends:
             InsertionDescription: $(InsertDescription)
             ComponentJsonValues: $(InsertJsonValues)
             DefaultConfigValues: $(InsertConfigValues)
-            InsertionReviewers: MSBuild
+            InsertionReviewers: $(FinalInsertionReviewers)
             CustomScriptExecutionCommand: $(InsertCustomScriptExecutionCommand)
             InsertionBuildPolicies: 'Request Perf DDRITs,Request Speedometer Perf Run'
             ConnectedVSDropServiceName: 'VSEng-VSDrop-MI'

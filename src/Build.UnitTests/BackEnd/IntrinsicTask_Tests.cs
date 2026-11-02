@@ -1879,6 +1879,49 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void RemoveWithPathLikeMatchOnMetadataResolvesRelativeMetadataAgainstThreadWorkingDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+            TransientTestFolder decoyFolder = env.CreateFolder(createFolder: true);
+
+            // In -mt mode each project gets a thread-local working directory while the process current
+            // directory keeps pointing at whoever launched the build, so it must not influence matching.
+            env.SetCurrentDirectory(decoyFolder.Path);
+            string originalThreadWorkingDirectory = FileUtilities.CurrentThreadWorkingDirectory;
+            FileUtilities.CurrentThreadWorkingDirectory = projectFolder.Path;
+
+            try
+            {
+                string content = ObjectModelHelpers.CleanupFileContents(
+                    $@"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <I1 Include='a1' M1='{projectFolder.Path}\sub\file.txt'/>
+
+                            <I2 Include='a2' M1='sub\file.txt'/>
+                            <I2 Include='b2' M1='other\file.txt'/>
+
+                            <I2 Remove='@(I1)' MatchOnMetadata='M1' MatchOnMetadataOptions='PathLike' />
+                        </ItemGroup>
+                    </Target></Project>");
+
+                IntrinsicTask task = CreateIntrinsicTask(content);
+                Lookup lookup = LookupHelpers.CreateEmptyLookup();
+                ExecuteTask(task, lookup);
+
+                // Resolved against the thread working directory, 'a2' denotes the same file as I1 and is
+                // removed. 'b2' denotes a different file and survives regardless of the base directory.
+                lookup.GetItems("I2").Select(i => i.EvaluatedInclude).ShouldBe(new[] { "b2" });
+            }
+            finally
+            {
+                FileUtilities.CurrentThreadWorkingDirectory = originalThreadWorkingDirectory;
+            }
+        }
+
+        [Fact]
         public void RemoveWithItemReferenceOnIntrinsicMatchingMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(

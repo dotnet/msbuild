@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests.Shared
         // The dotnet host that ships inside the bootstrap layout. When we launch the bootstrapped MSBuild we must
         // point DOTNET_HOST_PATH at this host (rather than an ambient dotnet on PATH such as the repo-local .dotnet)
         // so that any task hosts it spawns resolve their runtime from the bootstrap. The bootstrap can target an
-        // earlier runtime (e.g. net10.0) than the SDK overlaid into .dotnet, so a task host resolving .dotnet would
+        // earlier runtime than the SDK overlaid into .dotnet, so a task host resolving .dotnet would
         // fail to find its runtime. See eng/BootStrapMsBuild.targets.
         private static readonly string s_bootstrapDotnetHostPath = EnvironmentProvider.GetDotnetExePathFromFolder(BootstrapMsBuildBinaryLocation);
 
@@ -75,6 +75,15 @@ namespace Microsoft.Build.UnitTests.Shared
             // Built msbuild.dll executed by dotnet.exe needs this environment variable for msbuild tasks such as RoslynCodeTaskFactory.
             testEnvironment.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, s_dotnetExePath);
         }
+
+        /// <summary>
+        /// The dotnet host inside the bootstrap layout, for tests that must drive the bootstrap
+        /// installation directly rather than through MSBuild (for example <c>dotnet build-server
+        /// shutdown</c>). Pair it with <see cref="GetBootstrapMSBuildEnvironmentVariables"/> so the
+        /// command targets the same installation, and therefore the same server, that
+        /// <see cref="ExecBootstrapedMSBuild(string, out bool, bool, ITestOutputHelper, bool, int)"/> built with.
+        /// </summary>
+        public static string BootstrapDotnetHostPath => s_bootstrapDotnetHostPath;
 #endif
 
         /// <summary>
@@ -132,7 +141,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// exports DOTNET_ROOT/DOTNET_HOST_PATH/DOTNET_INSTALL_DIR pointing at the stage 1 bootstrap (it is the build tool
         /// for stage 2). Without this override those leak into the stage 2 test run, so the launched stage 2 bootstrapped
         /// MSBuild would resolve the stage 1 SDK/runtime and spawn a mismatched task host, failing with MSB4216. The
-        /// bootstrap can also target an earlier runtime (e.g. net10.0) than the SDK overlaid into .dotnet, so an ambient
+        /// bootstrap can also target an earlier runtime than the SDK overlaid into .dotnet, so an ambient
         /// dotnet (e.g. the repo-local .dotnet) may not contain the runtime the bootstrap targets.
         /// </param>
         private static Dictionary<string, string> GetMSBuildEnvironmentVariables(bool useBootstrapHost)

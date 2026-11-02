@@ -22,6 +22,16 @@ internal interface ITerminal : IDisposable
     int Height { get; }
 
     /// <summary>
+    /// Reads the width and the height of the terminal buffer in a single query.
+    /// </summary>
+    /// <remarks>
+    /// This is called on every render frame, so implementations should avoid querying the underlying
+    /// console more than once. On Windows, reading <see cref="Width"/> and <see cref="Height"/>
+    /// separately costs two serialized round-trips to the console host.
+    /// </remarks>
+    (int Width, int Height) GetSize();
+
+    /// <summary>
     /// <see langword="true"/> if the terminal emulator supports progress reporting.
     /// </summary>
     bool SupportsProgressReporting { get; }

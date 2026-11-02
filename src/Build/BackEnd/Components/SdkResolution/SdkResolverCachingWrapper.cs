@@ -66,7 +66,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 !SdkResolverService.IsReferenceSameVersion(sdk, result.Version))
             {
                 // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.
-                loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, result.Version, result.ElementLocation, sdk.Version);
+                loggingContext.LogWarning(null, sdkReferenceLocation, "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, result.Version, result.ElementLocation, sdk.Version);
             }
 
             return result;

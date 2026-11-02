@@ -94,6 +94,19 @@ namespace Microsoft.Build.Shared
                     return value;
                 }
 
+                // Enums bind by their (case-insensitive) member name, and values that do not map to a
+                // defined member are rejected so the engine surfaces a clear parameter-binding error.
+                if (targetType.IsEnum)
+                {
+                    object result = Enum.Parse(targetType, value, ignoreCase: true);
+                    if (!Enum.IsDefined(targetType, result))
+                    {
+                        throw new ArgumentException($"'{value}' is not a defined value of enum type {targetType.Name}.", nameof(value));
+                    }
+
+                    return result;
+                }
+
                 // Everything else (numeric types, char, etc.) is converted via Convert.ChangeType, pinned
                 // to InvariantCulture. This is deliberately permissive: a future analyzer is expected to
                 // steer authors toward the first-class supported types above and away from relying on this

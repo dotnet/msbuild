@@ -134,7 +134,7 @@ Apply the catalog with this loop:
    localize unavoidable DAM suppressions to the smallest member, and update the tracker when a row
    moves or disappears.
 5. **Verify the touched slice.** A change that affects the analyzed engine must keep
-   `Microsoft.Build` at 0 warnings / 0 errors on both `net10.0` and `net472`, publish and run the
+   `Microsoft.Build` at 0 warnings / 0 errors on all TFMs, publish and run the
    AOT harness when the closure changes, and run the targeted tests for the switch/path being moved.
 
 ---
@@ -169,7 +169,7 @@ the reference shape for "reachable incompatible path."
 
 | Switch (in [`src/Framework/FeatureSwitches.cs`](../../src/Framework/FeatureSwitches.cs)) | Gated path | Disabled-branch failure |
 | --- | --- | --- |
-| `EnableSdkResolverDynamicLoading` (`[FeatureSwitchDefinition]`+`[FeatureGuard(RUC)]`) | `SdkResolverService.GetResolvers` — plugin SDK-resolver assembly load | `ProjectFileErrorUtilities.ThrowInvalidProjectFile("SdkResolverDynamicLoadingNotSupported")` → **MSB4282** |
+| `EnableSdkResolverDynamicLoading` (`[FeatureSwitchDefinition]`+`[FeatureGuard(RUC)]`) | `SdkResolverService.GetResolvers` — plugin SDK-resolver assembly load | `ProjectErrorUtilities.ThrowInvalidProject("SdkResolverDynamicLoadingNotSupported")` → **MSB4282** |
 | `EnableConfigurationFileToolsets` (`[FeatureSwitchDefinition]`) | `ToolsetReader.ReadAllToolsets` — `ToolsetConfigurationReader` / `System.Configuration` | `ErrorUtilities.ThrowArgument("OM_ConfigurationFileToolsetsNotSupported")` (and the whole `System.Configuration` dependency drops out of the trimmed closure) |
 | `EnableCustomPluginProbing` (BuildCheck path) | `BuildCheckBuildEventHandler.HandleBuildCheckAcquisitionEvent` — custom-check load | `checkContext.DispatchAsErrorFromText(...)` — a reported build error instead of a silent skip |
 | `EnableReflectiveTaskExecution` (`[FeatureSwitchDefinition]`+`[FeatureGuard(RUC)]`) | `TaskExecutionHost.FindTask` / `InitializeForBatch` / `SetTaskParameters` — the reflective task load/instantiate/bind leaves | `ProjectErrorUtilities.ThrowInvalidProject("ReflectiveTaskExecutionNotSupported")` → **MSB4283**. Gating the leaf freed the whole build-execution chain (nodes, `BuildRequestEngine`, `RequestBuilder`/`TargetBuilder`/`TaskBuilder`, `TaskHost`, their interfaces) of `[RequiresUnreferencedCode]`, removing 5 boundary suppressions — see [aot-trim-suppressions.md - Group A](aot-trim-suppressions.md#group-a--the-il2026-build-execution-boundary) |

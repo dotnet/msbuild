@@ -12,6 +12,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -58,12 +59,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
         /// </summary>
         /// <remarks>
-        /// Unless the 17.10 changewave is disabled, we use a singleton instance because the set of SDK resolvers
-        /// is not expected to change during the lifetime of the process.
+        /// We use a singleton instance because the set of SDK resolvers is not expected to change
+        /// during the lifetime of the process.
         /// </remarks>
-        protected SdkResolverLoader _sdkResolverLoader = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
-            ? CachingSdkResolverLoader.Instance
-            : new SdkResolverLoader();
+        protected SdkResolverLoader _sdkResolverLoader = CachingSdkResolverLoader.Instance;
 
         public SdkResolverService()
         {
@@ -139,24 +138,21 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Overall, while Sdk resolvers look like a general plug-in system, there are good reasons why some of the logic is hard-coded.
             // It's not really meant to be modified outside of very special/internal scenarios.
 #if NET
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            if (TryResolveSdkUsingSpecifiedResolvers(
+                _sdkResolverLoader.GetDefaultResolvers(),
+                BuildEventContext.InvalidSubmissionId, // disables GetResolverState/SetResolverState
+                sdk,
+                loggingContext,
+                sdkReferenceLocation,
+                solutionPath,
+                projectPath,
+                interactive,
+                isRunningInVisualStudio,
+                out SdkResult sdkResult,
+                out _,
+                out _))
             {
-                if (TryResolveSdkUsingSpecifiedResolvers(
-                    _sdkResolverLoader.GetDefaultResolvers(),
-                    BuildEventContext.InvalidSubmissionId, // disables GetResolverState/SetResolverState
-                    sdk,
-                    loggingContext,
-                    sdkReferenceLocation,
-                    solutionPath,
-                    projectPath,
-                    interactive,
-                    isRunningInVisualStudio,
-                    out SdkResult sdkResult,
-                    out _,
-                    out _))
-                {
-                    return sdkResult;
-                }
+                return sdkResult;
             }
 #endif
 
@@ -256,12 +252,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 if (resolvers.Count == 1) // Check if only one resolver was used
                 {
                     // Log the single resolver's error message directly
-                    loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "SingleResolverFailedToResolveSDK", sdk.Name, resolvers[0].Name, string.Join(Environment.NewLine, errors));
+                    loggingContext.LogError(sdkReferenceLocation, "SingleResolverFailedToResolveSDK", sdk.Name, resolvers[0].Name, string.Join(Environment.NewLine, errors));
                 }
                 else
                 {
                     // Log the error with the MSBuild wrapper
-                    loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
+                    loggingContext.LogError(sdkReferenceLocation, "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
                 }
             }
 
@@ -294,8 +290,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                             // reaches here genuinely needs a dynamically loaded resolver. Fail observably with a
                             // reported project error (so a host such as the AOT dotnet CLI can detect it and fall
                             // back to a JIT MSBuild) rather than attempting an Assembly.LoadFrom that cannot work here.
-                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
-                                new BuildEventFileInfo(sdkReferenceLocation),
+                            ProjectErrorUtilities.ThrowInvalidProject(
+                                sdkReferenceLocation,
                                 "SdkResolverDynamicLoadingNotSupported",
                                 sdk.Name,
                                 resolverManifest.DisplayName);
@@ -388,7 +384,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     if (!IsReferenceSameVersion(sdk, result.Version))
                     {
                         // MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.
-                        loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, result.Version);
+                        loggingContext.LogWarning(DiagnosticSubcategory.None, sdkReferenceLocation, "SdkResultVersionDifferentThanReference", sdk.Name, sdk.Version, result.Version);
                     }
 
                     // Associate the element location of the resolved SDK reference
@@ -467,7 +463,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 // Do not fail on returned null messages
                 if (!string.IsNullOrWhiteSpace(warning))
                 {
-                    loggingContext.LogWarningFromText(null, null, null, new BuildEventFileInfo(location), warning);
+                    loggingContext.LogWarningFromText(DiagnosticSubcategory.None, null, null, location, warning);
                 }
             }
         }
@@ -506,18 +502,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
 
                 SdkResolverManifest sdkDefaultResolversManifest = null;
-#if NET
-                if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-#endif
+#if !NET
+                // Load and add the manifest for the default resolvers, located directly in this dll.
+                IReadOnlyList<SdkResolver> defaultResolvers = _sdkResolverLoader.GetDefaultResolvers();
+                if (defaultResolvers.Count > 0)
                 {
-                    // Load and add the manifest for the default resolvers, located directly in this dll.
-                    IReadOnlyList<SdkResolver> defaultResolvers = _sdkResolverLoader.GetDefaultResolvers();
-                    if (defaultResolvers.Count > 0)
-                    {
-                        sdkDefaultResolversManifest = new SdkResolverManifest(DisplayName: "DefaultResolversManifest", Path: null, ResolvableSdkRegex: null);
-                        _manifestToResolvers[sdkDefaultResolversManifest] = defaultResolvers;
-                    }
+                    sdkDefaultResolversManifest = new SdkResolverManifest(DisplayName: "DefaultResolversManifest", Path: null, ResolvableSdkRegex: null);
+                    _manifestToResolvers[sdkDefaultResolversManifest] = defaultResolvers;
                 }
+#endif
 
                 var specificResolversManifestsRegistry = new List<SdkResolverManifest>();
                 var generalResolversManifestsRegistry = new List<SdkResolverManifest>();

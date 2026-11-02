@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <!-- Not a standard MSBuild unit test — uses Roslyn analyzer testing infra.
@@ -29,5 +29,27 @@
   <ItemGroup>
     <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" />
   </ItemGroup>
+
+  <Target Name="AddGeneratedFile" BeforeTargets="BeforeCompile;CoreCompile" Inputs="$(MSBuildAllProjects)" Outputs="$(IntermediateOutputPath)TaskAnalyzerTestsConstants.cs">
+    <PropertyGroup>
+      <GeneratedText>
+        <![CDATA[
+namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests
+{
+    internal static class TaskAnalyzerTestsConstants
+    {
+        public const string RepoRoot = @"$(RepoRoot)"%3B
+    }
+}
+      ]]>
+      </GeneratedText>
+      <GeneratedFilePath>$(IntermediateOutputPath)TaskAnalyzerTestsConstants.cs</GeneratedFilePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <Compile Include="$(GeneratedFilePath)" />
+      <FileWrites Include="$(GeneratedFilePath)" />
+    </ItemGroup>
+    <WriteLinesToFile Lines="$(GeneratedText)" File="$(GeneratedFilePath)" WriteOnlyWhenDifferent="true" Overwrite="true" />
+  </Target>
 
 </Project>

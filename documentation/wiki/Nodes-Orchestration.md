@@ -33,6 +33,8 @@ Endpoints (nodes) communicate via named pipes (Windows or named pipes API implem
 
 The validation of transport is done via [proprietary handshake](https://github.com/dotnet/msbuild/blob/main/src/Build/BackEnd/Components/Communications/NodeProviderOutOfProcBase.cs#L501-L508).
 
+`NodeEndpointOutOfProcBase` combines queued logging packet frames into pipe writes up to a configurable byte budget. `MSBUILDLOGPACKETBATCHSIZE` sets that budget in bytes: the default is 64 KiB, zero disables batching, and values from zero through 1 MiB are accepted inclusively. Invalid values use the default. Each packet is serialized independently with its existing type, length, payload, and negotiated version; batching does not change the wire format or binary log contents. Pending frames are written when the queue drains, before control packets, and before shutdown, without waiting for more packets. Frames at least as large as a configured positive limit bypass the batch buffer. This setting controls user-space logging writes independently of `MSBUILDNODECONNECTIONBUFFERSIZE`, which controls the kernel pipe buffer size.
+
 
 ## Orchestration
 
@@ -44,7 +46,7 @@ Node is described by [`NodeInfo`](https://github.com/dotnet/msbuild/blob/main/sr
 
 MSBuild can be started from existing process via API, or via MSBuild.exe - in both cases this process becomes a `scheduler node` and may or may not run other work in-process. By default the main process has as well a `worker node` (project build node). This can be tweaked by API and/or [environment variables](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-environment-variables#configure-msbuild-in-the-net-cli).
 
-When MSBuild start building a project it can eventually start processing MSBuild task that has [`BuildInParallel`](https://learn.microsoft.com/en-us/visualstudio/msbuild/building-multiple-projects-in-parallel-with-msbuild?view=vs-2022) set to `true` (which is a default) and multiple projects to build (e.g. a project with multiple `ProjectReference` elements) at that point `scheduler` orchestrates multiple `worker nodes` via `NodeManager` (upper limited via maximum parallelization - configurable via API or CLI (`-maxcpucount|-m`)) .
+When MSBuild starts building a project, it can eventually start processing an MSBuild task that has [`BuildInParallel`](https://learn.microsoft.com/en-us/visualstudio/msbuild/building-multiple-projects-in-parallel-with-msbuild) set to `true` (the default) and multiple projects to build (for example, a project with multiple `ProjectReference` elements). At that point, the `scheduler` orchestrates multiple `worker nodes` via `NodeManager` (upper limited via maximum parallelization - configurable via API or CLI (`-maxcpucount|-m`)).
 
 Bugs in node communication layer can manifest as a slow build - otherwise fully functional. As `NodeManager` is trying to setup new nodes (and failing) and `scheduler` is working with only a single (in-proc) node that it has.
 
@@ -68,5 +70,4 @@ Once a `project instance` is assigned to a worker node - it is locked to that no
 Scheduler can (opt-in) dump a graph of dependencies from last build into a text file and then use it in the next build (with option of [various scheduling algorithms](https://github.com/dotnet/msbuild/blob/7cfb36cb90d1c9cc34bc4e0910d0c9ef42ee47b6/src/Build/BackEnd/Components/Scheduler/Scheduler.cs#L833))
 
 Another mode of building is `graph build` - where project is build only once all its dependencies are resolved (so the build graph needs to be known and unchanged upfront).
-
 

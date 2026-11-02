@@ -40,7 +40,7 @@ Key source files:
 When adding a new `BuildEventArgs` subclass:
 
 1. **Define the new event class** inheriting from the appropriate base (`BuildMessageEventArgs`, `BuildWarningEventArgs`, etc.)
-2. **Add serialization support** — implement `WriteToStream` and `CreateFromStream` methods
+2. **Add serialization and forwarding support** — implement `WriteToStream` and `CreateFromStream`, then trace the event through every dispatcher and transport (including task-host forwarding) without making unknown event types fatal
 3. **Increment the binary log version** if the new event type changes the format
 4. **Add a new record type constant** in the binary logger's record type enum
 5. **Handle the unknown-type case** in the replay source — older readers must skip gracefully

@@ -10,12 +10,13 @@ This document covers **MSBuild tracing via `EventSource`**, not MSBuild's logger
 
 MSBuild's tracing provider is `Microsoft-Build`, implemented by `Microsoft.Build.Eventing.MSBuildEventSource`.
 
-MSBuild defines two keywords:
+MSBuild defines three keywords:
 
 | Keyword | Value | Meaning |
 | --- | --- | --- |
-| `All` | `0x1` | Applied to every MSBuild EventSource event. |
+| `All` | `0x1` | Applied to general MSBuild tracing events. |
 | `PerformanceLog` | `0x2` | Subset of low-volume events that MSBuild can also mirror to its text performance log. |
+| `EvaluationMeasurements` | `0x4` | Opt-in project evaluation totals and completed-pass measurements. These events are not included by `All`. |
 
 ### How traces are collected
 
@@ -35,6 +36,20 @@ Example:
 ```text
 ..\PerfView /OnlyProviders=*Microsoft-Build run .\MSBuild.exe .\MSBuild.slnx
 ```
+
+To collect only the opt-in evaluation measurements with PerfView:
+
+```text
+PerfView /OnlyProviders=*Microsoft-Build:0x4:Informational run MSBuild.exe <project-or-solution>
+```
+
+The equivalent `dotnet-trace` provider selection is:
+
+```text
+dotnet-trace collect --providers Microsoft-Build:0x4:Informational -- dotnet build <project-or-solution>
+```
+
+`EvaluationMeasurements` is intentionally separate from `All`; include both keyword masks when both event families are needed.
 
 ## How to read an MSBuild trace quickly
 
@@ -80,7 +95,7 @@ MSBuild mostly models traceable work as **`Start` / `Stop` event pairs**. Treat 
 
 Important details:
 
-* MSBuild does **not** define custom `EventTask` values, explicit `EventOpcode` values, or custom related-activity IDs in its source.
+* MSBuild does **not** define custom `EventTask` values or custom related-activity IDs. Most paired events rely on their names rather than explicit opcodes; evaluation measurement events 113 and 114 explicitly use the `Info` opcode.
 * Correlation is therefore mostly by **paired event names**, **thread/process context**, and **payload identity** such as project path, target name, task ID, submission ID, node ID, or plugin name.
 * Parent/child relationships are the code-flow relationships you see in the trace. For example, `Evaluate*` usually appears inside `BuildProject*`, and `ExecuteTask*` usually appears inside `Target*`.
 * Not every `Stop` event implies success. Some stop events only mean "scope ended." Success is only explicit when there is a payload such as `result`, `success`, `succeeded`, `wasUpToDate`, `wasResultCached`, or `cacheResultType`.
@@ -137,6 +152,8 @@ Only rows marked **PerfLog = Yes** are included in the `DOTNET_PERFLOG_DIR` text
 | `EvaluatePass3Start` (19)<br/>`EvaluatePass3Stop` (20) | No | Pass 3 of evaluation: evaluate project items, then realize deferred/lazy item work. | `projectFile`: evaluated project file path. |
 | `EvaluatePass4Start` (21)<br/>`EvaluatePass4Stop` (22) | No | Pass 4 of evaluation: evaluate `UsingTask` declarations and finalize default-target bookkeeping. | `projectFile`: evaluated project file path. |
 | `EvaluatePass5Start` (23)<br/>`EvaluatePass5Stop` (24) | No | Pass 5 of evaluation: read targets and before/after-target mappings. Target bodies are not executed here. | `projectFile`: evaluated project file path. |
+| `ProjectEvaluationCompleted` (113) | No | One event per completed evaluator invocation while `EvaluationMeasurements` is enabled at completion, including failed or partial evaluations. If collection began after evaluation started, the event still contributes to the total count but its duration is `NaN`. | `durationSeconds` (`double`): elapsed wall-clock seconds, or `NaN` when the start was not observed.<br/>`stage` (`string`): `properties`, `item_definitions`, `items`, `using_tasks`, or `full`.<br/>`origin` (`string`): `build_submission` or `outside_build_submission`.<br/>`succeeded` (`bool`): whether evaluation completed without an error.<br/>`projectFile` (`string`): full project path, or empty for an unnamed in-memory project.<br/>`evaluationId` (`int`): ID assigned by the evaluation's `LoggingService`, or `-1` (`BuildEventContext.InvalidEvaluationId`) if evaluation failed before its logging context was created. |
+| `ProjectEvaluationPassCompleted` (114) | No | One event for each evaluation pass that completed while its measurement was active. A pass that failed or began before measurement was enabled is omitted. | `durationSeconds` (`double`): elapsed wall-clock seconds.<br/>`stage` (`string`): `properties`, `item_definitions`, `items`, `using_tasks`, or `full`.<br/>`pass` (`string`): `initial_properties`, `properties`, `item_definitions`, `items`, `using_tasks`, or `targets`.<br/>`origin` (`string`): `build_submission` or `outside_build_submission`.<br/>`projectFile` (`string`): full project path, or empty for an unnamed in-memory project.<br/>`evaluationId` (`int`): ID assigned by the evaluation's `LoggingService`. |
 | `EvaluateConditionStart` (9)<br/>`EvaluateConditionStop` (10) | No | Around evaluation of a single MSBuild condition in the lazy item evaluator. This can be high-volume in large evaluations. | `condition`: condition text being evaluated.<br/>`result`: Boolean outcome. |
 | `ApplyLazyItemOperationsStart` (1)<br/>`ApplyLazyItemOperationsStop` (2) | No | Around a lazy item operation applying selection/mutation/save work for one item type. | `itemType`: item type being materialized or updated. |
 | `ExpandGlobStart` (41)<br/>`ExpandGlobStop` (42) | No | Around wildcard expansion for a single glob fragment in item evaluation. | `rootDirectory`: root directory used for the file search.<br/>`glob`: wildcard pattern being expanded.<br/>`excludedPatterns`: comma-separated exclude patterns applied to the glob. |
@@ -241,6 +258,7 @@ Only rows marked **PerfLog = Yes** are included in the `DOTNET_PERFLOG_DIR` text
 This document is intentionally about tracing, not logging, but a few payloads line up well with build-log concepts:
 
 * `taskID` in `ExecuteTask*` matches `BuildEventContext.TaskId`.
+* A nonnegative `evaluationId` in events 113 and 114 matches `BuildEventContext.EvaluationId` for that evaluation. Event 113 uses `-1` (`BuildEventContext.InvalidEvaluationId`) if evaluation fails before its logging context is created. Assigned IDs are allocated by a `LoggingService` instance and may repeat across project collections, builds, or after the logging service is recreated, including by `ProjectCollection.UnregisterAllLoggers()`. They are not project-configuration IDs and are not globally, process-, or node-unique. Use an assigned ID with `projectFile` and event ordering only to associate total/pass events within a trace segment where the logging-service lifetime is clear; nested evaluations, ID reuse, or missing trace events can otherwise make the association ambiguous.
 * `projectPath`, `targetName`, `taskName`, and `submissionId` are the main join keys when you compare traces with binlogs or logger output.
 * `TargetStop.result`, `TaskHostDispatchStop.succeeded`, `TaskExecuteInHostStop.succeeded`, `SdkResolverResolveSdkStop.success`, `CopyUpToDateStop.wasUpToDate`, and similar payloads are the places where the trace directly exposes an outcome.
 

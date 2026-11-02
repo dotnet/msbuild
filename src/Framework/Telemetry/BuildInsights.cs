@@ -42,7 +42,7 @@ internal sealed class BuildInsights
 
     internal record TaskCategoryStats(TaskStatsInfo? Total, TaskStatsInfo? FromNuget);
 
-    internal record TaskStatsInfo(int ExecutionsCount, double TotalMilliseconds, long TotalMemoryBytes);
+    internal record TaskStatsInfo(int ExecutionsCount, double TotalMilliseconds, long? TotalMemoryBytes);
 
     internal record ErrorCountsInfo(
         int? Compiler,
@@ -93,7 +93,9 @@ internal sealed class BuildInsights
     /// <param name="SkippedDueToUpToDateCount">Number of targets skipped because outputs were up-to-date.</param>
     /// <param name="SkippedDueToConditionCount">Number of targets skipped due to false conditions.</param>
     /// <param name="SkippedDueToPreviouslyBuiltCount">Number of targets skipped because they were previously built.</param>
-    /// <param name="IncrementalityRatio">Ratio of skipped targets to total targets (0.0 to 1.0). Higher values indicate more incremental builds.</param>
+    /// <param name="IncrementalityRatio">Share of target instances with Inputs and Outputs that were up to date (0.0 to 1.0). Higher values indicate more incremental builds.</param>
+    /// <param name="UpToDateInputOutputTargetsCount">Number of target instances with Inputs and Outputs that were skipped because their outputs were up to date.</param>
+    /// <param name="ExecutedInputOutputTargetsCount">Number of target instances with Inputs and Outputs that ran.</param>
     internal record BuildIncrementalityInfo(
         BuildType Classification,
         int TotalTargetsCount,
@@ -102,5 +104,7 @@ internal sealed class BuildInsights
         int SkippedDueToUpToDateCount,
         int SkippedDueToConditionCount,
         int SkippedDueToPreviouslyBuiltCount,
-        double IncrementalityRatio);
+        double IncrementalityRatio,
+        int UpToDateInputOutputTargetsCount,
+        int ExecutedInputOutputTargetsCount);
 }

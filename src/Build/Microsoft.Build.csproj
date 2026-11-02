@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\DebuggingSources.proj" />
 
@@ -157,9 +157,11 @@
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.cs" />
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.DefaultDebugOutput.cs" />
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.GrantOwnership.cs" />
+    <Compile Include="BackEnd\BuildManager\CoordinatorClient.HeartbeatTimer.cs" />
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.TestAccessor.cs" />
     <Compile Include="BackEnd\BuildManager\EnvironmentVariableValidator.cs" />
     <Compile Include="BackEnd\BuildManager\GlobalPropertiesLookup.cs" />
+    <Compile Include="BackEnd\BuildManager\MultiThreadedStrictModeScope.cs" />
     <Compile Include="BackEnd\BuildManager\ProjectIsolationMode.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientPacketPump.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientExitType.cs" />
@@ -192,6 +194,7 @@
     <Compile Include="Evaluation\Expander.Function.cs" />
     <Compile Include="Evaluation\Expander.FunctionBuilder.cs" />
     <Compile Include="Evaluation\Expander.ItemExpander.cs" />
+    <Compile Include="Evaluation\Expander.PropertyExpander.PropertyReferenceFlags.cs" />
     <Compile Include="Evaluation\Expander.TransformEntry.cs" />
     <Compile Include="Evaluation\Expander.ItemExpander.Transforms.cs" />
     <Compile Include="Evaluation\Expander.ItemExpander.Transforms.MetadataMatch.cs" />
@@ -207,6 +210,7 @@
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="Evaluation\PropertyFunctionReceiver.cs" />
     <Compile Include="Evaluation\ToolsetElement.cs" />
+    <Compile Include="Expansion\PropertyValueConverter.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />
     <Compile Include="FileAccess\FlagsAndAttributes.cs" />
@@ -218,18 +222,20 @@
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
     <Compile Include="Logging\TerminalLogger\**\*.cs" />
     <Compile Include="Logging\ReusableLogger.cs" />
+    <Compile Include="ReservedPropertyKind.cs" />
+    <Compile Include="ReservedPropertyNames.cs" />
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryCollector.cs" />
+    <Compile Include="TelemetryInfra\EvaluationInstrumentation.cs" />
+    <Compile Include="TelemetryInfra\TasksDetailsTelemetry.cs" />
     <Compile Include="TelemetryInfra\TelemetryCollectorProvider.cs" />
     <Compile Include="Utilities\AwaitExtensions.cs" />
     <Compile Include="Utilities\EncodingStringWriter.cs" />
     <Compile Include="Utilities\ProjectWriter.cs" />
-    <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
     <Compile Include="BackEnd\Node\ServerNamedMutex.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildCancel.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildCommand.cs" />
-    <Compile Include="BackEnd\Node\ServerNodeConsoleWrite.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildResult.cs" />
     <Compile Include="BackEnd\Node\OutOfProcServerNode.cs" />
     <Compile Include="Logging\ConsoleConfiguration.cs" />
@@ -425,7 +431,6 @@
     <Compile Include="Collections\CopyOnReadEnumerable.cs" />
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
-    <Compile Include="Collections\IConstrainableDictionary.cs" />
     <Compile Include="Collections\ICopyOnWritePropertyDictionary.cs" />
     <Compile Include="Collections\IItemDictionary.cs" />
     <Compile Include="Collections\IMultiDictionary.cs" />
@@ -499,6 +504,7 @@
     <Compile Include="Errors\InternalLoggerException.cs" />
     <Compile Include="Errors\InvalidProjectFileException.cs" />
     <Compile Include="Errors\InvalidToolsetDefinitionException.cs" />
+    <Compile Include="Errors\ProjectErrorUtilities.cs" />
     <Compile Include="Errors\RegistryException.cs" />
     <!-- #### EVALUATION ### -->
     <Compile Include="Evaluation\ConditionEvaluator.cs" />
@@ -542,9 +548,11 @@
     <Compile Include="Evaluation\ProjectRootElementCache.cs" />
     <Compile Include="Evaluation\SimpleProjectRootElementCache.cs" />
     <Compile Include="Evaluation\SemiColonTokenizer.cs" />
+    <Compile Include="Evaluation\ParserIgnoreConfiguration.cs" />
     <Compile Include="Evaluation\StringMetadataTable.cs" />
     <Compile Include="Evaluation\ExpressionShredder.cs" />
     <Compile Include="Evaluation\Evaluator.cs" />
+    <Compile Include="Evaluation\GlobResultBuilder.cs" />
     <Compile Include="Evaluation\Expander.cs" />
     <Compile Include="Evaluation\ToolsetProvider.cs" />
     <Compile Include="Evaluation\Expander\ArgumentParser.cs" />
@@ -590,10 +598,12 @@
     <Compile Include="Instance\TaskFactoryEngineContext.cs" />
     <Compile Include="Instance\TaskFactoryWrapper.cs" />
     <Compile Include="Instance\TaskRegistry.cs" />
+    <Compile Include="Instance\TaskRegistry.UsingTaskInfo.cs" />
     <!-- ######################## -->
     <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.cs" />
     <Compile Include="Logging\BaseConsoleLogger.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogger.cs" />
+    <Compile Include="Logging\BinaryLogger\BinaryLogEventFilter.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogRecordKind.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogReplayEventSource.cs" />
     <Compile Include="Logging\BinaryLogger\EventArgsDispatcher.cs" />
@@ -645,20 +655,11 @@
     <Compile Include="Xml\ProjectXmlUtilities.XmlElementChildIterator.cs" />
     <Compile Include="Xml\ProjectXmlUtilities.cs" />
     <Compile Include="Xml\XmlReaderExtension.cs" />
-    <Compile Include="..\Shared\BuildEventFileInfo.cs">
-      <Link>SharedUtilities\BuildEventFileInfo.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Errors\ErrorUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>InprocTrackingNativeMethods.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ProjectErrorUtilities.cs">
-      <Link>Errors\ProjectErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ProjectFileErrorUtilities.cs">
-      <Link>Errors\ProjectFileErrorUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>SharedUtilities\ResourceUtilities.cs</Link>
@@ -678,11 +679,6 @@
     <EmbeddedResource Include="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
-      <Link>Resources\Strings.shared.resx</Link>
-      <SubType>Designer</SubType>
-      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 

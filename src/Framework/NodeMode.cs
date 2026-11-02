@@ -118,6 +118,8 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Extracts the NodeMode from a command line string using regex pattern matching.
+        /// It recognizes the spellings the command line parser accepts for the switch, such as <c>/nodemode:1</c>, <c>-nodemode:1</c>, <c>--nodemode:1</c> and <c>/nmode:1</c>,
+        /// but not a node mode that is only supplied through a response file.
         /// </summary>
         /// <param name="commandLine">The command line to parse. Note that this can't be a span because generated regex don't have a Span Match overload</param>
         /// <returns>The NodeMode if found, otherwise null</returns>
@@ -147,7 +149,9 @@ namespace Microsoft.Build.Framework
             return null;
         }
 
-        private const string CommandLineNodeModePattern = @"/nodemode:(?<nodemode>[a-zA-Z0-9]+)(?:\s|$)";
+        // A whole argument: the switch indicator (/, - or --) and the name (nodemode or nmode) as the command line parser accepts them,
+        // with the value optionally quoted, so that a path or property value that merely contains the text is not mistaken for the switch.
+        private const string CommandLineNodeModePattern = @"(?:^|\s)""?(?:--?|/)(?:nodemode|nmode):""?(?<nodemode>[a-zA-Z0-9]+)""?(?:\s|$)";
 
 #if NET
         [System.Text.RegularExpressions.GeneratedRegex(CommandLineNodeModePattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase)]

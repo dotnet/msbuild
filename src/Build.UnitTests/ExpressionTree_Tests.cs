@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
             string fileThatMustAlwaysExist = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(fileThatMustAlwaysExist, "foo");
             string command = "Exists('" + fileThatMustAlwaysExist + "')";
-            tree = p.Parse(command, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+            tree = p.Parse(command, ParserOptions.AllowAll, ElementLocation.Empty);
 
             ConditionEvaluator.IConditionEvaluationState state =
                             new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests
                                     ExpanderOptions.ExpandAll,
                                     null,
                                     Directory.GetCurrentDirectory(),
-                                    ElementLocation.EmptyLocation,
+                                    ElementLocation.Empty,
                                     FileSystems.Default);
 
             value = tree.Evaluate(state);
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests
                                        ExpanderOptions.ExpandAll,
                                        conditionedProperties,
                                        Directory.GetCurrentDirectory(),
-                                       ElementLocation.EmptyLocation,
+                                       ElementLocation.Empty,
                                        FileSystems.Default);
             AssertParseEvaluate(p, "'0' == '1'", expander, false, state);
             Assert.Empty(conditionedProperties);
@@ -446,7 +446,7 @@ namespace Microsoft.Build.UnitTests
                         ExpanderOptions.ExpandAll,
                         null,
                         Directory.GetCurrentDirectory(),
-                        ElementLocation.EmptyLocation,
+                        ElementLocation.Empty,
                         FileSystems.Default);
             }
 
@@ -482,7 +482,7 @@ namespace Microsoft.Build.UnitTests
                             ExpanderOptions.ExpandAll,
                             null,
                             Directory.GetCurrentDirectory(),
-                            ElementLocation.EmptyLocation,
+                            ElementLocation.Empty,
                             FileSystems.Default);
                 }
                 tree.Evaluate(state);

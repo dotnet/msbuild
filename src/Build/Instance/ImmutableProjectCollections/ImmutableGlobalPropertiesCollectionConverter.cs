@@ -104,6 +104,7 @@ namespace Microsoft.Build.Instance.ImmutableProjectCollections
             return this[key];
         }
 
+        /// <inheritdoc />
         public ProjectPropertyInstance Get(string key, int index, int length)
         {
             // The PropertyDictionary containing all of the properties can efficiently

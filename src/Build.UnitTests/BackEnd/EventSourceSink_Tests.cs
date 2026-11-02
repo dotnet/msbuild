@@ -754,7 +754,7 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Build Warning Event
             /// </summary>
-            private static BuildWarningEventArgs s_buildWarning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender")
+            private static BuildWarningEventArgs s_buildWarning = new BuildWarningEventArgs("subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender")
             {
                 BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6)
             };
@@ -762,7 +762,7 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Build Error Event
             /// </summary>
-            private static BuildErrorEventArgs s_buildError = new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+            private static BuildErrorEventArgs s_buildError = new BuildErrorEventArgs("subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
 
             /// <summary>
             /// Target Started Event

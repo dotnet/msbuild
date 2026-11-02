@@ -28,11 +28,11 @@ From the repository root, using the repo's pinned SDK (`.dotnet\dotnet.exe`):
 ```powershell
 # Fast JIT pass (build + run the MTP test host)
 .\.dotnet\dotnet.exe build src\aot-validation\Microsoft.Build.AotValidation.csproj
-.\src\aot-validation\bin\Debug\net10.0\win-x64\Microsoft.Build.AotValidation.exe
+.\src\aot-validation\bin\Debug\net11.0\win-x64\Microsoft.Build.AotValidation.exe
 
 # Native AOT pass (the real validation): publish, then run the native exe
 .\.dotnet\dotnet.exe publish src\aot-validation\Microsoft.Build.AotValidation.csproj -r win-x64 -c Release
-.\src\aot-validation\bin\Release\net10.0\win-x64\publish\Microsoft.Build.AotValidation.exe
+.\src\aot-validation\bin\Release\net11.0\win-x64\publish\Microsoft.Build.AotValidation.exe
 ```
 
 Native AOT publishing requires the Visual Studio C++ toolchain (the MSVC linker). A run prints the
@@ -143,7 +143,7 @@ static-reachability false positive and no special-casing is warranted.
 [DotnetTemplateAotTests.cs](DotnetTemplateAotTests.cs) goes past synthetic projects: it shells out to the
 bootstrap `dotnet new` to create the stock `console` and `classlib` templates, then opens each real
 `Microsoft.NET.Sdk` project with `new Project(...)`. Getting a full SDK project to evaluate under Native
-AOT surfaced three host responsibilities a real AOT MSBuild host must take on - each mirrored in the `.csproj`:
+AOT surfaced two host responsibilities a real AOT MSBuild host must take on - each mirrored in the `.csproj`:
 
 - **Disable workload resolution.** `Microsoft.NET.Sdk` unconditionally imports the workload-locator SDKs
   (`Microsoft.NET.SDK.WorkloadAutoImportPropsLocator` / `...WorkloadManifestTargetsLocator`), resolved by the
@@ -155,11 +155,6 @@ AOT surfaced three host responsibilities a real AOT MSBuild host must take on - 
   (`[MSBuild]::GetTargetFrameworkIdentifier` and friends). `Microsoft.Build` references `NuGet.Frameworks`
   with `PrivateAssets="all"` (in a real SDK it loads the copy next to `MSBuild.dll`), so it does not flow to
   the harness transitively; the harness adds its own reference to put it in the output and the AOT image.
-- **Root `Microsoft.Build.Utilities.Core`.** The SDK invokes
-  `[Microsoft.Build.Utilities.ToolLocationHelper]::...` property functions, and the allowlist resolves such
-  cross-assembly receivers by assembly-qualified name via `Type.GetType` - which under AOT only succeeds if
-  the type's metadata is preserved. The harness references the (`IsAotCompatible`) assembly and roots it with
-  `TrimmerRootAssembly`.
 
 With those in place both templates evaluate end to end under Native AOT, and the tests read back the derived
 properties a host cares about: `OutputType`, the `bin`/`obj` output directories, `TargetFramework`, and

@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
@@ -82,6 +83,31 @@ namespace Microsoft.Build.Collections
             }
 
             list.AddRange(items);
+        }
+
+        /// <summary>
+        /// Gets the item list for the given type, creating it if needed, with room for at least
+        /// <paramref name="additionalCapacity"/> more items than it currently holds.
+        /// </summary>
+        internal List<ProjectItemInstance> GetOrCreateListWithRoomFor(string itemType, int additionalCapacity)
+        {
+            if (!_itemLists.TryGetValue(itemType, out List<ProjectItemInstance>? list))
+            {
+                list = new List<ProjectItemInstance>(additionalCapacity);
+                _itemLists[itemType] = list;
+            }
+            else
+            {
+                int required = list.Count + additionalCapacity;
+                if (required > list.Capacity)
+                {
+                    // Grow geometrically, as List<T>.Add would; an exact fit would reallocate on
+                    // every call when many small batches append to the same list.
+                    list.Capacity = Math.Max(required, list.Capacity * 2);
+                }
+            }
+
+            return list;
         }
 
         /// <summary>

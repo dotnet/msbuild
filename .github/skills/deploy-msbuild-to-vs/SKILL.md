@@ -19,7 +19,8 @@ This skill guides you through replacing Visual Studio's bundled MSBuild with you
 ## Prerequisites
 
 - Windows (the deploy script targets VS on Windows).
-- Visual Studio installed (2022 or later, including 2026 and preview versions).
+- The latest Visual Studio 2026 installed with the components listed in [`.vsconfig`](../../../.vsconfig).
+- .NET Framework 3.5 installed on the Windows machine.
 - An **administrator** PowerShell prompt (required to write into `Program Files`).
 - The MSBuild repo cloned and buildable.
 
@@ -51,15 +52,14 @@ The general pattern is:
 C:\Program Files\Microsoft Visual Studio\{version}\{edition}\MSBuild\Current\Bin
 ```
 
-Where `{version}` is the year (e.g. `2022`, `2026`) or a numeric version for previews (e.g. `18`), and `{edition}` is `Enterprise`, `Professional`, `Community`, or `Preview`.
+For Visual Studio 2026, `{version}` is `18` (not `2026`). Common `{edition}` folders include `Enterprise`, `Professional`, and `Community`; this is customizable, so use `vswhere` below to confirm the path.
 
 Example paths:
 
 | VS Version | Edition | Typical Path |
 | ---------- | ------- | ------------ |
-| 2026 | Enterprise | `C:\Program Files\Microsoft Visual Studio\2026\Enterprise\MSBuild\Current\Bin` |
-| 2022 | Community | `C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin` |
-| Preview (v18) | Preview | `C:\Program Files\Microsoft Visual Studio\18\Preview\MSBuild\Current\Bin` |
+| 2026 | Enterprise | `C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin` |
+| 2026 | Community | `C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin` |
 
 ### Finding the path automatically
 
@@ -67,10 +67,10 @@ The most reliable way to locate your VS installation is with `vswhere`:
 
 ```powershell
 # List all VS installations with their paths
-& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -all -format table
+& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -all -prerelease -format table
 
 # Get the MSBuild Bin path for the latest installation
-$vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+$vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -property installationPath
 "$vsPath\MSBuild\Current\Bin"
 ```
 
@@ -87,7 +87,7 @@ Use the directory containing that `MSBuild.exe`.
 From an **administrator** PowerShell, run:
 
 ```powershell
-.\scripts\Deploy-MSBuild.ps1 -destination "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin"
+.\scripts\Deploy-MSBuild.ps1 -destination "C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin"
 ```
 
 ### Script Parameters
@@ -123,11 +123,11 @@ To restore:
 
 ```powershell
 # Find the backup folder
-Get-ChildItem "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Backup-*"
+Get-ChildItem "C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\Backup-*"
 
 # Copy everything back
-Copy-Item "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Backup-{timestamp}\*" `
-          "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\" -Recurse -Force
+Copy-Item "C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\Backup-{timestamp}\*" `
+          "C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\" -Recurse -Force
 ```
 
 Alternatively, run **Visual Studio Installer → Modify → Repair** to fully restore the original binaries.

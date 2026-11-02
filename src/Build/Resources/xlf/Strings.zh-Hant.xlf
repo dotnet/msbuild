@@ -56,6 +56,21 @@
         <target state="translated">已取得 ArchiveFile，但未設定最終編輯的版本。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrew">
+        <source>The binary log event filter threw an exception.</source>
+        <target state="translated">二進位記錄事件篩選器擲回例外狀況。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrewWithContext">
+        <source>The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</source>
+        <target state="translated">二進位記錄事件篩選器對檔案格式版本 {2} 的記錄 {0} ({1}) 擲回例外狀況。建置內容： [{3}]。原始組建內容： [{4}]。如需詳細資訊，請參閱內部例外狀況。</target>
+        <note>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</note>
+      </trans-unit>
+      <trans-unit id="Binlog_FilteredLog">
+        <source>This binary log is filtered. Excluded event kinds: {0}.</source>
+        <target state="translated">此二進位記錄已經過篩選。排除的事件種類: {0}。</target>
+        <note>LOCALIZATION: {0} is a comma-separated list of binary log event kind names. Do not localize the event kind names.</note>
+      </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
         <target state="translated">檔案格式版本 {0} 不支援正向相容讀取 (需要 &gt;= 18)。</target>
@@ -285,6 +300,16 @@
         <source>Downloads folder is untrusted for projects building.</source>
         <target state="translated">專案建置不受信任的下載資料夾。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_MessageFmt">
+        <source>The 'WriteLinesToFile' task in project {0} does not specify the 'Overwrite' parameter. Set it explicitly to 'true' to overwrite the file or 'false' to append to it.</source>
+        <target state="translated">專案 {0} 中的 'WriteLinesToFile' 工作未指定 'Overwrite' 參數。將它明確設定為 'true' 以覆寫檔案，或設定為 'false' 以附加至檔案。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_Title">
+        <source>The 'Overwrite' parameter should be specified when using the 'WriteLinesToFile' task.</source>
+        <target state="translated">使用 'WriteLinesToFile' 工作時，應該指定 'Overwrite' 參數。</target>
+        <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
@@ -602,6 +627,11 @@
         <target state="translated">MSB4255: 下列輸入結果快取檔案不存在: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidBinaryLoggerEventFilter">
+        <source>MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</source>
+        <target state="translated">MSB4234: 二進位記錄器事件篩選器無效: "{0}"。每個記錄器只能指定一次 Exclude=，後面接以逗號分隔的事件類型名稱。不允許空白、數字、未知、輔助或受保護的生命週期事件類型。ProjectEvaluationStarted 和 ProjectEvaluationFinished 必須同時排除，或都不排除。</target>
+        <note>{StrBegin="MSB4234: "}Do not localize Exclude= or the event kind names.</note>
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">版本字串格式不正確。</target>
@@ -653,6 +683,36 @@
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">已產生中繼專案 "{0}"。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeAlreadyActive">
+        <source>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</source>
+        <target state="translated">MSB4289: 此處理程序中已經有另一個多執行緒嚴格組建正在執行。請先完成該組建，再開始另一個組建；使用個別的處理程序或者在啟動處理程序前設定 MSBUILDDISABLEFEATURESFROMVERSION=18.12，以停用嚴格檢查。</target>
+        <note>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
+        <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</source>
+        <target state="translated">MSB4286: 多執行緒嚴格模式在工作「{0}」完成後，發現處理序目前目錄為「{1}」，而非「{2}」。請使用 TaskEnvironment，不要變更處理序目錄。這項變更可能來自另一個工作、記錄器，或與此事件內容同時執行的主機程式碼。</target>
+        <note>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeEnabled">
+        <source>Multi-threaded strict mode is enabled. Process current directory: "{0}".</source>
+        <target state="translated">已啟用多執行緒嚴格模式。處理程序目前目錄:「{0}」。</target>
+        <note>{0} is the full path of the sentinel directory.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelMissing">
+        <source>MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</source>
+        <target state="translated">MSB4288: 某個目錄變得無法使用後，多執行緒嚴格模式已還原哨兵目錄「{0}」和處理程序的目前目錄。請勿移除使用中的組建所需的目錄。</target>
+        <note>{StrBegin="MSB4288: "}{0} is the sentinel directory. This warning is reported only after successful recovery.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelRecoveryFailed">
+        <source>MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</source>
+        <target state="translated">MSB4290: 多執行緒嚴格模式無法還原哨兵目錄「{0}」和處理序目前目錄:: {1} 請確保引擎擁有的目錄可以建立並存取，或在啟動處理序前設定 MSBUILDDISABLEFEATURESFROMVERSION=18.12，以暫時停用嚴格檢查。</target>
+        <note>{StrBegin="MSB4290: "}{0} is the sentinel directory. {1} is the recovery failure message. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeUnresolvedPathWrite">
+        <source>MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</source>
+        <target state="translated">MSB4287: 在專案或組建完成時，多執行緒嚴格模式在哨兵目錄「{1}」中找到「{0}」。請使用 TaskEnvironment 解析路徑。寫入可能來自其他專案、記錄器或主機程式碼。</target>
+        <note>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
@@ -731,7 +791,7 @@
       </trans-unit>
       <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
         <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
-        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
+        <target state="translated">建立專案時不支援部分評估 ("{0}" 評估階段)。使用 ProjectInstance 來執行部分評估，或使用完整評估階段來建立專案。</target>
         <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -942,6 +1002,11 @@
         <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
         <target state="translated">MSB4283: 無法執行 "{0}" 工作，因為執行工作需要透過反映載入工作組件和類型，而此修剪或原生 AOT 主機不支援這項作業。請使用以 JIT 為基礎的 MSBuild 來建置，以便執行工作。</target>
         <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</source>
+        <target state="translated">檔案存取報告無法與多執行緒模式一起使用。檔案存取報告需要處理序隔離的背景工作節點，因此每個存取都可以歸類到一個專案。停用 ReportFileAccesses 或 MultiThreaded。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
@@ -3024,11 +3089,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">已經開始建置。</target>
         <note />
       </trans-unit>
-      <trans-unit id="FileLocation">
-        <source>{0} ({1},{2})</source>
-        <target state="translated">{0} ({1},{2})</target>
-        <note>A file location to be embedded in a string.</note>
-      </trans-unit>
       <trans-unit id="MSBuild.CannotRebaseOutputItemPath">
         <source>MSB3203: The output path "{0}" cannot be rebased. {1}</source>
         <target state="translated">MSB3203: 無法為輸出路徑 "{0}" 重定基底。{1}</target>
@@ -3181,8 +3241,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
-        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: 二進位記錄器參數無效: "{0}"。應為 ProjectImports={{None,Embed,ZipFile}} 及/或 [LogFile=]filePath.binlog (記錄檔名稱或路徑，必須有 ".binlog" 副檔名)。</target>
+        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
+        <target state="translated">MSB4234: 二進位記錄器參數無效: "{0}"。應為 ProjectImports={{None,Embed,ZipFile}}、OmitInitialInfo、Exclude=kind[,kind...] 及/或 [LogFile=]filePath.binlog (記錄檔名稱或路徑，必須有 ".binlog" 副檔名)。</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -3318,6 +3378,134 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
         <target state="translated">MSB4247: 無法載入 SDK 解析程式。資訊清單檔案存在，但找不到 SDK 解析程式 DLL 檔案的路徑。資訊清單檔案路徑 '{0}'。SDK 解析程式路徑: {1}</target>
         <note>{StrBegin="MSB4247: "}</note>
+      </trans-unit>
+      <trans-unit id="BuildAborted">
+        <source>MSB4188: Build was canceled.</source>
+        <target state="translated">MSB4188: 建置已取消。</target>
+        <note>{StrBegin="MSB4188: "} Error when the build stops suddenly for some reason. For example, because a child node died.</note>
+      </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="translated">不支援自訂事件類型 '{0}'，因為所有自訂事件類型都已淘汰。請改為使用 Extended*EventArgs。詳細資訊: https://aka.ms/msbuild/eventargs</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProjectFile">
+        <source>MSB4025: The project file could not be loaded. {0}</source>
+        <target state="translated">MSB4025: 無法載入專案檔。{0}</target>
+        <note>{StrBegin="MSB4025: "}UE: This message is shown when the project file given to the engine cannot be loaded because the filename/path is
+    invalid, or due to lack of permissions, or incorrect XML. The project filename is not part of the message because it is
+    provided separately to loggers.
+    LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</note>
+      </trans-unit>
+      <trans-unit id="InvalidVerbosity">
+        <source>MSB4103: "{0}" is not a valid logger verbosity level.</source>
+        <target state="translated">MSB4103: "{0}" 不是有效的記錄器詳細程度等級。</target>
+        <note>{StrBegin="MSB4103: "}</note>
+      </trans-unit>
+      <trans-unit id="OM_NotSupportedReadOnlyCollection">
+        <source>This collection is read-only.</source>
+        <target state="translated">這是一個唯讀集合。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectFileIsMalformed">
+        <source>MSB5019: The project file is malformed: "{0}". {1}</source>
+        <target state="translated">MSB5019: 專案檔格式不正確: "{0}"。{1}</target>
+        <note>{StrBegin="MSB5019: "}</note>
+      </trans-unit>
+      <trans-unit id="ProjectFileCouldNotBeLoaded">
+        <source>MSB5020: Could not load the project file: "{0}". {1}</source>
+        <target state="translated">MSB5020: 無法載入專案檔: "{0}"。{1}</target>
+        <note>{StrBegin="MSB5020: "}</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
+        <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
+        <target state="translated">MSB5028: 位於 "{0}" 的解決方案篩選檔案包含專案 "{1}"，該專案不在位於 "{2}" 的解決方案檔案中。</target>
+        <note>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterJsonParsingError">
+        <source>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</source>
+        <target state="translated">MSB5025: 解決方案篩選檔案 "{0}" 中的 Json 格式不正確。</target>
+        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterMissingSolutionError">
+        <source>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</source>
+        <target state="translated">MSB5026: 位於 "{0}" 的解決方案篩選檔案指定將會有位於 "{1}" 的解決方案檔案，但該檔案並不存在。</target>
+        <note>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseDuplicateProject">
+        <source>MSB5004: The solution file has two projects named "{0}".</source>
+        <target state="translated">MSB5004: 方案檔有兩個名為 "{0}" 的專案。</target>
+        <note>{StrBegin="MSB5004: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectFileNameCharacters">
+        <source>MSB5005: Error parsing project section for project "{0}". The project file name "{1}" contains invalid characters.</source>
+        <target state="translated">MSB5005: 剖析專案 "{0}" 的專案區段時發生錯誤。專案檔名稱 "{1}" 包含無效的字元。</target>
+        <note>{StrBegin="MSB5005: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectFileNameEmpty">
+        <source>MSB5006: Error parsing project section for project "{0}". The project file name is empty.</source>
+        <target state="translated">MSB5006: 剖析專案 "{0}" 的專案區段時發生錯誤。專案檔名稱為空白。</target>
+        <note>{StrBegin="MSB5006: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectSolutionConfigurationEntry">
+        <source>MSB5007: Error parsing the project configuration section in solution file. The entry "{0}" is invalid.</source>
+        <target state="translated">MSB5007: 剖析方案檔中的專案組態區段時發生錯誤。項目 "{0}" 無效。</target>
+        <note>{StrBegin="MSB5007: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidSolutionConfigurationEntry">
+        <source>MSB5008: Error parsing the solution configuration section in solution file. The entry "{0}" is invalid.</source>
+        <target state="translated">MSB5008: 剖析方案檔中的方案組態區段時發生錯誤。項目 "{0}" 無效。</target>
+        <note>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectError">
+        <source>MSB5009: Error parsing the nested project section in solution file.</source>
+        <target state="translated">MSB5009: 剖析方案檔中的巢狀專案區段時發生錯誤。</target>
+        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectErrorWithNameAndGuid">
+        <source>MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</source>
+        <target state="translated">MSB5009: 剖析 GUID 為 "{1}" 的專案 "{0}" 區段時發生錯誤。其為 "{2}" 下方的巢狀專案，但在解決方案中找不到該專案。</target>
+        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectUndefinedError">
+        <source>MSB5023: Error parsing the nested project section in solution file. A project with the GUID "{0}" is listed as being nested under project "{1}", but does not exist in the solution.</source>
+        <target state="translated">MSB5023: 剖析方案檔中的巢狀專案區段時發生錯誤。GUID 為 "{0}" 的專案列為專案 "{1}" 下的巢狀專案，但不存在於解決方案中。</target>
+        <note>{StrBegin="MSB5023: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNoHeaderError">
+        <source>MSB5010: No file format header found.</source>
+        <target state="translated">MSB5010: 找不到檔案格式標頭。</target>
+        <note>{StrBegin="MSB5010: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectDepGuidError">
+        <source>MSB5011: Parent project GUID not found in "{0}" project dependency section.</source>
+        <target state="translated">MSB5011: 在 "{0}" 專案相依性區段中找不到父專案 GUID。</target>
+        <note>{StrBegin="MSB5011: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectEofError">
+        <source>MSB5012: Unexpected end-of-file reached inside "{0}" project section.</source>
+        <target state="translated">MSB5012: 在 "{0}" 專案區段內部發現未預期的檔案結尾。</target>
+        <note>{StrBegin="MSB5012: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectError">
+        <source>MSB5013: Error parsing a project section.</source>
+        <target state="translated">MSB5013: 剖析專案區段時發生錯誤。</target>
+        <note>{StrBegin="MSB5013: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseVersionMismatchError">
+        <source>MSB5014: File format version is not recognized.  MSBuild can only read solution files between versions {0}.0 and {1}.0, inclusive.</source>
+        <target state="translated">MSB5014: 無法識別檔案格式版本。MSBuild 只能讀取版本 {0}.0 到 {1}.0 (含) 的方案檔。</target>
+        <note>{StrBegin="MSB5014: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseWebProjectPropertiesError">
+        <source>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</source>
+        <target state="translated">MSB5015: 無法從 "{0}" 專案的 WebsiteProperties 區段讀取屬性。</target>
+        <note>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedSolutionComment">
+        <source>Unrecognized solution version "{0}", attempting to continue.</source>
+        <target state="translated">無法辨認的方案版本 "{0}"，正在嘗試繼續處理。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

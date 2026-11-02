@@ -6,7 +6,7 @@
 # on PR or push. The published artifacts are consumed by cts-apply.yml.
 #
 # Storage: cts writes a snapshot directory locally; we publish it as a
-# pipeline artifact named `cts-baseline-<osTag>` (one slot per OS,
+# pipeline artifact named `cts-mtp-baseline-<osTag>` (one slot per OS,
 # overwritten daily). The collect metadata (SHA, timestamp) lives in a
 # sibling `cts-collect-metrics-<osTag>` artifact whose contents follow
 # scripts/cts/METRICS.md.
@@ -25,7 +25,7 @@ trigger: none
 pr: none
 
 # Daily baseline collection at 03:00 UTC against main. The artifacts this
-# produces (cts-baseline-<os> + cts-collect-metrics-<os>) are consumed by
+# produces (cts-mtp-baseline-<os> + cts-collect-metrics-<os>) are consumed by
 # cts-apply.yml on every PR.
 schedules:
 - cron: '0 3 * * *'
@@ -41,12 +41,12 @@ parameters:
 - name: ctsFeed
   type: string
   default: https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json
-# Explicit `cts` tool version to install. Empty => latest prerelease. Pin this
-# to the same value in cts-apply.yml so the daily baseline and the per-PR apply
+# Explicit `cts` tool version to install. Keep this
+# at the same value in cts-apply.yml so the daily baseline and the per-PR apply
 # run stay on the same tool build (baseline format compatibility).
 - name: ctsToolVersion
   type: string
-  default: ''
+  default: '2.13.0-alpha.26519.2'
 
 variables:
   BuildConfiguration: Debug

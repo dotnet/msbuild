@@ -4,6 +4,7 @@
 using System;
 using System.Xml;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Internal;
 
 #nullable disable
 

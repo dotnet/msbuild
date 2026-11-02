@@ -70,8 +70,15 @@ namespace Microsoft.Build.Framework
         /// <summary>Returns the FullPath metadata value if non-empty, otherwise falls back to itemSpec.</summary>
         private static string GetFullPathOrItemSpec(ITaskItem item, string itemSpec)
         {
-            string fullPath = item.GetMetadata("FullPath");
-            return !string.IsNullOrEmpty(fullPath) ? fullPath : itemSpec;
+            try
+            {
+                string fullPath = item.GetMetadata("FullPath");
+                return !string.IsNullOrEmpty(fullPath) ? fullPath : itemSpec;
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new ArgumentException($"Cannot create TaskItem<{typeof(T).Name}> from the provided item.", nameof(item), ex);
+            }
         }
 
         /// <summary>

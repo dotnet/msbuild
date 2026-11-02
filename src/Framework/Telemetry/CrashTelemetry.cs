@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -173,13 +175,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         RegexOptions.Compiled);
 
     /// <summary>
-    /// A prefix of the exception message, truncated and sanitized to avoid PII.
-    /// Particularly useful for <c>InternalErrorException</c> where the message text
-    /// identifies the specific assertion that failed.
-    /// </summary>
-    public string? ExceptionMessage { get; set; }
-
-    /// <summary>
     /// The HResult from the exception, if available.
     /// </summary>
     public int? HResult { get; set; }
@@ -227,13 +222,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     /// Truncated to <see cref="MaxStackTraceLength"/> characters.
     /// </summary>
     public string? InnerExceptionStackTrace { get; set; }
-
-    /// <summary>
-    /// A prefix of the inner exception's message, truncated and sanitized to avoid PII.
-    /// For <c>ObjectDisposedException</c>, this includes the disposed object name
-    /// which identifies the specific component that was prematurely disposed.
-    /// </summary>
-    public string? InnerExceptionMessage { get; set; }
 
     /// <summary>
     /// The type name of the build event that was being logged when a logger exception occurred.
@@ -332,8 +320,9 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     public string? SubmissionDetails { get; set; }
 
     /// <summary>
-    /// Semicolon-separated list of registered logger type names.
-    /// Identifies which loggers could be blocking the logging pipeline.
+    /// Semicolon-separated list of the registered logger type names, see <see cref="FormatRegisteredLoggerTypeNames"/>.
+    /// The name of a logger type in a <c>Microsoft.</c> namespace is reported as is and any other name as its SHA-256 hash.
+    /// Identifies which loggers could be blocking the logging pipeline without revealing the names of custom loggers.
     /// </summary>
     public string? RegisteredLoggerTypeNames { get; set; }
 
@@ -351,8 +340,8 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
 
     /// <summary>
     /// Per-node diagnostic summary for active nodes.
-    /// Format: "nodeId:configurationId:projectFile" separated by semicolons.
-    /// Shows what each stuck node was last working on.
+    /// Format: "nodeId:configurationId:projectFileHash" separated by semicolons, see <see cref="FormatActiveNodeDetail"/>.
+    /// Shows what each stuck node was last working on without revealing the project file name.
     /// </summary>
     public string? ActiveNodeDetails { get; set; }
 
@@ -401,7 +390,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         InnerExceptionType = exception.InnerException?.GetType().FullName;
         InnermostExceptionType = GetInnermostException(exception)?.GetType().FullName;
         HResult = exception.HResult;
-        ExceptionMessage = TruncateMessage(exception.Message);
         StackHash = ComputeStackHash(exception);
         StackTop = ExtractStackTop(exception);
         StackCaller = ExtractStackCaller(exception);
@@ -425,7 +413,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         if (inner is not null)
         {
             InnerExceptionStackTrace = ExtractFullStackTrace(inner);
-            InnerExceptionMessage = TruncateMessage(inner.Message);
         }
 
         // InternalLoggerException (in Microsoft.Build) carries the type name of the BuildEventArgs
@@ -507,7 +494,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(StackTop);
         AddIfNotNull(StackCaller);
         AddIfNotNull(FullStackTrace);
-        AddIfNotNull(ExceptionMessage);
         AddIfNotNull(HResult);
         AddIfNotNull(BuildEngineVersion);
         AddIfNotNull(BuildEngineFrameworkName);
@@ -520,7 +506,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(CrashThreadName);
         AddIfNotNull(InnermostExceptionType);
         AddIfNotNull(InnerExceptionStackTrace);
-        AddIfNotNull(InnerExceptionMessage);
         AddIfNotNull(LoggerEventType);
         AddIfNotNull(ProcessWorkingSetMB);
         AddIfNotNull(MemoryLoadPercent);
@@ -577,7 +562,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(StackTop);
         AddIfNotNull(StackCaller);
         AddIfNotNull(FullStackTrace);
-        AddIfNotNull(ExceptionMessage);
         AddIfNotNull(HResult?.ToString(), nameof(HResult));
         AddIfNotNull(BuildEngineVersion);
         AddIfNotNull(BuildEngineFrameworkName);
@@ -590,7 +574,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(CrashThreadName);
         AddIfNotNull(InnermostExceptionType);
         AddIfNotNull(InnerExceptionStackTrace);
-        AddIfNotNull(InnerExceptionMessage);
         AddIfNotNull(LoggerEventType);
         AddIfNotNull(ProcessWorkingSetMB?.ToString(), nameof(ProcessWorkingSetMB));
         AddIfNotNull(MemoryLoadPercent?.ToString(), nameof(MemoryLoadPercent));
@@ -852,6 +835,27 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         const int maxLength = 256;
         return message.Length <= maxLength ? message : message.Substring(0, maxLength);
     }
+
+    /// <summary>
+    /// Formats one entry of <see cref="ActiveNodeDetails"/>: what a node that has not shut down was last executing.
+    /// The name of a project file can reveal customer data, so only its SHA-256 hash is reported, in the same way as other custom names.
+    /// </summary>
+    /// <param name="nodeId">The node that is executing the request.</param>
+    /// <param name="configurationId">The configuration of the request.</param>
+    /// <param name="projectFile">The project file of the configuration, or <c>null</c> when it is not known.</param>
+    internal static string FormatActiveNodeDetail(int nodeId, int configurationId, string? projectFile)
+    {
+        string project = projectFile is null ? "?" : TelemetryDataUtils.GetHashed(Path.GetFileName(projectFile));
+        return $"{nodeId}:{configurationId}:{project}";
+    }
+
+    /// <summary>
+    /// Formats <see cref="RegisteredLoggerTypeNames"/>. The type name of a custom logger can reveal customer data, so it is reported
+    /// as its SHA-256 hash, in the same way as other custom names. The name of a logger type in a <c>Microsoft.</c> namespace is reported as is,
+    /// which identifies the Microsoft loggers that are registered, see <see cref="TelemetryDataUtils.GetHashedUnlessMicrosoftType"/>.
+    /// </summary>
+    internal static string FormatRegisteredLoggerTypeNames(IEnumerable<string> loggerTypeNames)
+        => string.Join(";", loggerTypeNames.Select(TelemetryDataUtils.GetHashedUnlessMicrosoftType));
 
     /// <summary>
     /// Known throw-helper method suffixes. When the top stack frame ends with one of

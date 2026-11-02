@@ -125,7 +125,7 @@ namespace Microsoft.Build.Tasks
                 {
                     AbsolutePath outputDirectoryPath = TaskEnvironment.GetAbsolutePath(OutputDirectory.ItemSpec);
                     outputFilePath = new AbsolutePath(FileUtilities.GetTemporaryFile(outputDirectoryPath, null, extension));
-                    OutputFile = new TaskItem(Path.Combine(OutputDirectory.ItemSpec, Path.GetFileName(outputFilePath.Value)));
+                    OutputFile = new TaskItem(Path.Combine(OutputDirectory.ItemSpec, Path.GetFileName(outputFilePath)));
                 }
 
                 FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(outputFilePath));
@@ -185,7 +185,7 @@ namespace Microsoft.Build.Tasks
                 unit.Namespaces.Add(globalNamespace);
 
                 // Declare authorship. Unfortunately CodeDOM puts this comment after the attributes.
-                string comment = AssemblyResources.GetInvariantString("WriteCodeFragment.Comment");
+                string comment = AssemblyResources.GetString("WriteCodeFragment.Comment", CultureInfo.InvariantCulture);
                 globalNamespace.Comments.Add(new CodeCommentStatement(comment));
 
                 if (AssemblyAttributes == null)

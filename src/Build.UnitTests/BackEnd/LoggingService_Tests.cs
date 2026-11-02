@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -593,6 +594,92 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Single(_initializedService.RegisteredSinkNames);
             Assert.Single(_initializedService.LoggerDescriptions);
         }
+
+        [Fact]
+        public void RegisterDistributedLogger_WhenCentralLoggerAlreadyWrappedInReusableLogger_ForwardingLoggerIsRegistered()
+        {
+            string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
+            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
+
+            RegularILogger centralLogger = new RegularILogger();
+            ReusableLogger reusableWrapper = new ReusableLogger(centralLogger);
+            _initializedService.RegisterLogger(reusableWrapper);
+
+            bool result = _initializedService.RegisterDistributedLogger(centralLogger, description);
+
+            result.ShouldBeTrue("RegisterDistributedLogger should return true when the central logger is already registered only as a ReusableLogger wrapper, not as a direct registration.");
+
+            _initializedService.LoggerDescriptions.ShouldNotBeEmpty("The forwarding logger description must be present so it is propagated to out-of-proc nodes.");
+            _initializedService.RegisteredLoggerTypeNames.ShouldContain(
+                "Microsoft.Build.Logging.ConfigurableForwardingLogger",
+                "The forwarding logger must have been initialized.");
+        }
+
+        [Fact]
+        public void RegisterDistributedLogger_WhenCentralLoggerAlreadyWrapped_HonorsForwardingLoggerFiltering()
+        {
+            string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
+
+            LoggerDescription description = new LoggerDescription(
+                className,
+                typeof(ProjectCollection).Assembly.FullName,
+                null,
+                "ErrorEvent",
+                LoggerVerbosity.Diagnostic);
+
+            RegularILogger centralLogger = new RegularILogger();
+            ReusableLogger reusableWrapper = new ReusableLogger(centralLogger);
+            _initializedService.RegisterLogger(reusableWrapper);
+
+            _initializedService.RegisterDistributedLogger(centralLogger, description).ShouldBeTrue();
+
+            BuildEventContext context = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidProjectContextId, 5, 6);
+
+            BuildMessageEventArgs messageArgs = new("message text", null, "sender", MessageImportance.High)
+            {
+                BuildEventContext = context,
+            };
+            BuildErrorEventArgs errorArgs = new("subcategory", "ERR001", "file", 0, 0, 0, 0, "error message", null, "sender")
+            {
+                BuildEventContext = context,
+            };
+
+            _initializedService.LogBuildEvent(messageArgs);
+            _initializedService.LogBuildEvent(errorArgs);
+
+            centralLogger.ErrorCount.ShouldBe(1, "The central logger should receive the forwarded error exactly once (no duplicate delivery).");
+            centralLogger.MessageCount.ShouldBe(0, "The central logger must not receive events the forwarding logger filtered out.");
+        }
+
+        [Fact]
+        public void RegisterDistributedLogger_DuplicateCentralViaReusableWrapper_SecondRegistrationRejected()
+        {
+            string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
+
+            LoggerDescription firstForwarder = new LoggerDescription(
+                className, typeof(ProjectCollection).Assembly.FullName, null, "ErrorEvent", LoggerVerbosity.Diagnostic);
+            LoggerDescription secondForwarder = new LoggerDescription(
+                className, typeof(ProjectCollection).Assembly.FullName, null, "ErrorEvent", LoggerVerbosity.Diagnostic);
+
+            RegularILogger centralLogger = new RegularILogger();
+            ReusableLogger reusableWrapper = new ReusableLogger(centralLogger);
+            _initializedService.RegisterLogger(reusableWrapper);
+
+            _initializedService.RegisterDistributedLogger(centralLogger, firstForwarder).ShouldBeTrue();
+
+            _initializedService.RegisterDistributedLogger(centralLogger, secondForwarder).ShouldBeFalse(
+                "A central logger already backing a distributed registration must not be registered again, even when reached through a ReusableLogger wrapper.");
+
+            BuildEventContext context = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidProjectContextId, 5, 6);
+            BuildErrorEventArgs errorArgs = new("subcategory", "ERR001", "file", 0, 0, 0, 0, "error message", null, "sender")
+            {
+                BuildEventContext = context,
+            };
+
+            _initializedService.LogBuildEvent(errorArgs);
+
+            centralLogger.ErrorCount.ShouldBe(1, "The first forwarding logger's sink must still deliver the forwarded error to the central logger exactly once; it must not have been orphaned by the rejected second registration.");
+        }
         #endregion
 
         #region Test Properties
@@ -799,6 +886,35 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Timestamp, actualBuildEvent.Timestamp);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void StructuredConflictWarningTransformationUsesCurrentUICulture(bool treatAsError)
+        {
+            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+            try
+            {
+                CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
+                AssemblyConflictWarningEventArgs warning = AssemblyConflictLogger_Tests.CreateEvents().Item2;
+                var warnings = new HashSet<string> { warning.Code };
+
+                MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(
+                    warning,
+                    warningsAsErrors: treatAsError ? warnings : null,
+                    warningsAsMessages: treatAsError ? null : warnings);
+
+                BuildEventArgs transformedEvent = treatAsError
+                    ? logger.Errors.ShouldHaveSingleItem()
+                    : logger.BuildMessageEvents.ShouldHaveSingleItem();
+                transformedEvent.Message.ShouldStartWith("détection de conflits non résolus");
+                warning.IsMessageMaterialized.ShouldBeFalse();
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = originalUICulture;
+            }
+        }
+
         /// <summary>
         /// Verifies that a warning is not treated as a low importance message when other warning codes are specified.
         /// </summary>
@@ -956,6 +1072,8 @@ namespace Microsoft.Build.UnitTests.Logging
 
             buildEvent.BuildEventContext = projectStarted;
 
+            bool shouldTreatWarningAsError = buildEvent is BuildWarningEventArgs warning
+                && loggingService.ShouldTreatWarningAsError(projectStarted, warning.Code);
             loggingService.LogBuildEvent(buildEvent);
 
             loggingService.LogProjectFinished(projectStarted, "projectFile", true);
@@ -967,6 +1085,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
             ((IBuildComponent)loggingService).ShutdownComponent();
 
+            logger.Errors.Count.ShouldBe(shouldTreatWarningAsError ? 1 : 0);
             return logger;
         }
 
@@ -1506,6 +1625,24 @@ namespace Microsoft.Build.UnitTests.Logging
             }
 
             /// <summary>
+            /// Number of error events received.
+            /// </summary>
+            internal int ErrorCount
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
+            /// Number of message events received.
+            /// </summary>
+            internal int MessageCount
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
             /// Initialize
             /// </summary>
             public void Initialize(IEventSource eventSource)
@@ -1535,6 +1672,16 @@ namespace Microsoft.Build.UnitTests.Logging
                 if (eventArgs is BuildFinishedEventArgs)
                 {
                     ++BuildFinishedCount;
+                }
+
+                if (eventArgs is BuildErrorEventArgs)
+                {
+                    ++ErrorCount;
+                }
+
+                if (eventArgs is BuildMessageEventArgs)
+                {
+                    ++MessageCount;
                 }
             }
         }

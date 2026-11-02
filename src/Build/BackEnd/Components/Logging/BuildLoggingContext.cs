@@ -52,13 +52,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log an error based on an exception during the execution of a task
         /// </summary>
-        /// <param name="exception">The exception wich is to be logged</param>
-        /// <param name="file">The file in which the error occurred</param>
+        /// <param name="exception">The exception which is to be logged</param>
+        /// <param name="location">The location where the error occurred</param>
         /// <param name="taskName">The task in which the error occurred</param>
-        internal void LogFatalTaskError(Exception exception, BuildEventFileInfo file, string taskName)
+        internal void LogFatalTaskError(Exception exception, IElementLocation location, string taskName)
         {
             CheckValidity();
-            LoggingService.LogFatalTaskError(BuildEventContext, exception, file, taskName);
+            LoggingService.LogFatalTaskError(BuildEventContext, exception, location, taskName);
             _hasLoggedErrors = true;
         }
     }

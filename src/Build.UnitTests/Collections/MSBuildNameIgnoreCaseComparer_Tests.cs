@@ -5,6 +5,7 @@ using System;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -48,11 +49,12 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dictionary.Set(p);
 
             string s = "$(foo)";
-            ProjectPropertyInstance value = dictionary.GetProperty(s, 2, 4);
+            ProjectPropertyInstance value = dictionary.GetProperty(s, 2, 3);
 
-            Assert.True(Object.ReferenceEquals(p, value)); // "Should have returned the same object as was inserted"
+            value.ShouldBeSameAs(p, "Should have returned the same object as was inserted");
+            dictionary.Get(s, 2, 3).ShouldBeSameAs(p, "Should have returned the same object as was inserted");
 
-            Assert.Equal(MSBuildNameIgnoreCaseComparer.Default.GetHashCode("foo"), comparer.GetHashCode(s, 2, 3));
+            comparer.GetHashCode(s, 2, 3).ShouldBe(MSBuildNameIgnoreCaseComparer.Default.GetHashCode("foo"));
         }
 
         /// <summary>

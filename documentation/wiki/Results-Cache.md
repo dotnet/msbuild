@@ -31,7 +31,6 @@ MSBuild uses caching to speed up builds. It does this by remembering the outcome
 ### How `BuildRequestDataFlags` Affect Caching
 
 When MSBuild decides to build something, the request (`BuildRequest`) carries special instructions called `BuildRequestDataFlags`. These flags tell MSBuild *how* to perform the build and *what kind of result* is expected. The `ResultsCache` pays close attention to these flags because they are crucial for determining if a cached outcome is truly a match for a new request.
-It's an out-in feature that can be disabled with change wave `17.12`. See more details in [ChangeWaves.md](ChangeWaves.md)
 
 Here's how some important flags interact with caching:
 

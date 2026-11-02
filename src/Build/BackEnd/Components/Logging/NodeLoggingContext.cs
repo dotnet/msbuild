@@ -105,18 +105,22 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 var targetResult = result[target.name];
                 bool isFailure = targetResult.ResultCode == TargetResultCode.Failure;
+                TargetSkipReason skipReason = isFailure
+                    ? TargetSkipReason.PreviouslyBuiltUnsuccessfully
+                    : TargetSkipReason.PreviouslyBuiltSuccessfully;
 
                 var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
                 {
                     BuildEventContext = projectLoggingContext.BuildEventContext,
                     TargetName = target.name,
                     BuildReason = target.reason,
-                    SkipReason = isFailure ? TargetSkipReason.PreviouslyBuiltUnsuccessfully : TargetSkipReason.PreviouslyBuiltSuccessfully,
+                    SkipReason = skipReason,
                     OriginallySucceeded = !isFailure,
                     OriginalBuildEventContext = (targetResult as TargetResult)?.OriginalBuildEventContext
                 };
 
                 projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);
+                TelemetryCollector?.AddTargetResult(wasExecuted: false, skipReason);
 
                 if (targetResult.ResultCode == TargetResultCode.Failure)
                 {

@@ -39,6 +39,8 @@ namespace Microsoft.Build.Shared.FileSystem
 
         private WindowsFileSystem() { }
 
+        public override bool SupportsDirectEnumeration => false;
+
         public override IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
         {
             return EnumerateFileOrDirectories(path, FileArtifactType.File, searchPattern, searchOption);
@@ -72,6 +74,7 @@ namespace Microsoft.Build.Shared.FileSystem
 #if NETFRAMEWORK
             return Microsoft.IO.File.Exists(path);
 #else
+            // CodeQL [SM00414] False positive: MSBuild file system abstraction operates on trusted build/SDK paths.
             return File.Exists(path);
 #endif
         }

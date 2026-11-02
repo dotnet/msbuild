@@ -11,6 +11,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
@@ -274,7 +275,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (question)
                     {
-                        _loggingService.LogError(_buildEventContext, new BuildEventFileInfo(String.Empty), "BuildTargetCompletely", _targetToAnalyze.Name);
+                        _loggingService.LogError(
+                            _buildEventContext,
+                            ElementLocation.Empty,
+                            "BuildTargetCompletely",
+                            _targetToAnalyze.Name);
                     }
                     else
                     {
@@ -292,7 +297,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (question)
                     {
-                        _loggingService.LogError(_buildEventContext, new BuildEventFileInfo(String.Empty), "BuildTargetPartially", _targetToAnalyze.Name);
+                        _loggingService.LogError(
+                            _buildEventContext,
+                            ElementLocation.Empty,
+                            "BuildTargetPartially",
+                            _targetToAnalyze.Name);
                     }
                     else
                     {

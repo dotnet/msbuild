@@ -9,23 +9,40 @@ using Microsoft.Build.Framework.Telemetry;
 namespace Microsoft.Build.TelemetryInfra;
 
 /// <summary>
-/// Collects task and target telemetry for a single BuildRequestEngine's lifetime.
-/// Not thread-safe: only one RequestBuilder is active at a time per
-/// BuildRequestEngine, so <see cref="AddTarget"/> and <see cref="AddTask"/>
-/// are always called from a single thread.
-/// Created per BuildRequestEngine by <see cref="TelemetryCollectorProvider.CreateCollector"/>.
+/// Collects task and target telemetry for an isolated processing scope.
+/// Not thread-safe: each collector must be used from a single execution path.
+/// Created by <see cref="TelemetryCollectorProvider.CreateCollector"/>.
 /// </summary>
 internal interface ITelemetryCollector
 {
+    /// <summary>
+    /// Gets whether this collector records telemetry.
+    /// </summary>
     bool IsTelemetryCollected { get; }
 
+    /// <summary>
+    /// Adds target detail information.
+    /// </summary>
     void AddTarget(TaskOrTargetTelemetryKey key, bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None);
 
+    /// <summary>
+    /// Adds one target outcome to the aggregate target counters.
+    /// </summary>
+    void AddTargetResult(bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None);
+
+    /// <summary>
+    /// Adds one target with both Inputs and Outputs to the incrementality counters.
+    /// </summary>
+    void AddInputOutputTarget(bool upToDate);
+
+    /// <summary>
+    /// Adds task execution statistics.
+    /// </summary>
     void AddTask(
         TaskOrTargetTelemetryKey key,
         TimeSpan cumulativeExecutionTime,
         int executionsCount,
-        long totalMemoryConsumed,
+        long? totalMemoryConsumed,
         string? taskFactoryName,
         string? taskHostRuntime);
 

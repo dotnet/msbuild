@@ -17,6 +17,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.Engine.UnitTests.Evaluation;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
@@ -248,6 +249,27 @@ namespace Microsoft.Build.UnitTests.Evaluation
             IList<ProjectItemInstance> itemsEmpty = expander.ExpandIntoItemsLeaveEscaped("@(unsetItem->AnyHaveMetadataValue('Metadatum', 'value'))", itemFactory, ExpanderOptions.ExpandItems, MockElementLocation.Instance);
             ProjectItemInstance pii = itemsEmpty.ShouldHaveSingleItem<ProjectItemInstance>();
             pii.EvaluatedInclude.ShouldBe("false");
+        }
+
+        [Theory]
+        [InlineData("@(unsetItem)", false)]
+        [InlineData("@(unsetItem->Distinct())", true)]
+        public void EmptyItemVectorReportsWhetherExpressionIsTransform(string expression, bool expected)
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateItemFunctionExpander();
+            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(project, "i");
+
+            IList<ProjectItemInstance> items = expander.ExpandSingleItemVectorExpressionIntoItems(
+                expression,
+                itemFactory,
+                ExpanderOptions.ExpandItems,
+                includeNullItems: false,
+                out bool isTransformExpression,
+                MockElementLocation.Instance);
+
+            items.ShouldBeEmpty();
+            isTransformExpression.ShouldBe(expected);
         }
 
         /// <summary>
@@ -1502,6 +1524,100 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 expander.ExpandIntoStringAndUnescape(xmlattribute.Value, ExpanderOptions.ExpandAll, MockElementLocation.Instance));
         }
 
+        [Theory]
+        // These modifiers do not require project context.
+        [InlineData(ItemSpecModifiers.Filename, false, false)]
+        [InlineData(ItemSpecModifiers.Extension, false, false)]
+        [InlineData(ItemSpecModifiers.RelativeDir, false, false)]
+        [InlineData(ItemSpecModifiers.Identity, false, false)]
+        [InlineData(ItemSpecModifiers.ModifiedTime, false, false)]
+        [InlineData(ItemSpecModifiers.CreatedTime, false, false)]
+        [InlineData(ItemSpecModifiers.AccessedTime, false, false)]
+        // These modifiers require the project directory.
+        [InlineData(ItemSpecModifiers.FullPath, true, false)]
+        [InlineData(ItemSpecModifiers.RootDir, true, false)]
+        [InlineData(ItemSpecModifiers.Directory, true, false)]
+        // These modifiers require both the project directory and defining-project metadata.
+        [InlineData(ItemSpecModifiers.DefiningProjectFullPath, true, true)]
+        [InlineData(ItemSpecModifiers.DefiningProjectDirectory, true, true)]
+        [InlineData(ItemSpecModifiers.DefiningProjectName, true, true)]
+        [InlineData(ItemSpecModifiers.DefiningProjectExtension, true, true)]
+        public void QuotedTransformDerivableItemSpecModifierUsesRequiredContext(
+            string modifier,
+            bool usesProjectDirectory,
+            bool usesDefiningProject)
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            string itemSpec = Path.Combine("src", "directory", "File.cs");
+            string definingProject = Path.Combine(project.Directory, "Imported.targets");
+            var item = new ContextTrackingItem("Compile", itemSpec, project.Directory, definingProject);
+            var items = new ItemDictionary<ContextTrackingItem> { item };
+            var properties = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ContextTrackingItem>(
+                properties,
+                items,
+                FileSystems.Default,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+
+            string expected = ItemSpecModifiers.GetItemSpecModifier(itemSpec, modifier, project.Directory, definingProject);
+            string actual = expander.ExpandIntoStringLeaveEscaped(
+                $"@(Compile->'%({modifier})')",
+                ExpanderOptions.ExpandItems,
+                MockElementLocation.Instance);
+
+            actual.ShouldBe(expected);
+            item.ProjectDirectoryAccessCount.ShouldBe(usesProjectDirectory ? 1 : 0);
+            item.DefiningProjectAccessCount.ShouldBe(usesDefiningProject ? 1 : 0);
+        }
+
+        private sealed class ContextTrackingItem : IItem
+        {
+            private readonly string _itemSpec;
+            private readonly string _projectDirectory;
+            private readonly string _definingProject;
+
+            public ContextTrackingItem(string itemType, string itemSpec, string projectDirectory, string definingProject)
+            {
+                Key = itemType;
+                _itemSpec = itemSpec;
+                _projectDirectory = projectDirectory;
+                _definingProject = definingProject;
+            }
+
+            public string Key { get; }
+
+            public string EvaluatedInclude => _itemSpec;
+
+            public string EvaluatedIncludeEscaped => _itemSpec;
+
+            public string ProjectDirectory
+            {
+                get
+                {
+                    ProjectDirectoryAccessCount++;
+                    return _projectDirectory;
+                }
+            }
+
+            public int ProjectDirectoryAccessCount { get; private set; }
+
+            public int DefiningProjectAccessCount { get; private set; }
+
+            public string GetMetadataValue(string name)
+                => GetMetadataValueEscaped(name);
+
+            public string GetMetadataValueEscaped(string name)
+            {
+                if (name.Equals(ItemSpecModifiers.DefiningProjectFullPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    DefiningProjectAccessCount++;
+                    return _definingProject;
+                }
+
+                return string.Empty;
+            }
+        }
+
         /// <summary>
         /// Exercises ExpandAllIntoString with a complex set of data.
         /// </summary>
@@ -1711,6 +1827,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expander.ExpandIntoStringLeaveEscaped(input, ExpanderOptions.ExpandMetadata, MockElementLocation.Instance)
                 .ShouldBe(expected);
+        }
+
+        [Theory]
+        [InlineData("%(", ExpanderOptions.ExpandMetadata)]
+        [InlineData("%(Culture)", ExpanderOptions.ExpandBuiltInMetadata)]
+        [InlineData("%(Filename)", ExpanderOptions.ExpandCustomMetadata)]
+        internal void ExpandMetadata_NoExpansionReturnsOriginalString(string input, ExpanderOptions options)
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateMetadataExpander();
+            string expression = new(input.ToCharArray());
+
+            expander.ExpandIntoStringLeaveEscaped(expression, options, MockElementLocation.Instance)
+                .ShouldBeSameAs(expression);
         }
 
         /// <summary>
@@ -2366,6 +2495,42 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        ///  Verifies conversion of property-function results across scalar, collection, and nested collection values.
+        /// </summary>
+        /// <param name="scenario">The property-value conversion scenario to exercise.</param>
+        /// <param name="expected">The expected escaped string representation.</param>
+        [Theory]
+        [InlineData("Null", "")]
+        [InlineData("EmptyString", "")]
+        [InlineData("String", "a%3bb")]
+        [InlineData("Scalar", "42")]
+        [InlineData("EmptyDictionary", "")]
+        [InlineData("EmptyArray", "")]
+        [InlineData("EmptyEnumerable", "")]
+        [InlineData("Dictionary", "a%3bb=c%25d")]
+        [InlineData("EnumerableWithEmptyElements", "a;;b%3bc")]
+        [InlineData("NonzeroLowerBoundArray", "a;b")]
+        [InlineData("MultidimensionalArray", "a;b;c;d")]
+        [InlineData("NestedEnumerable", "a%25253bb%253bc")]
+        [InlineData("NestedDictionary", "key=a%253bb%3bc")]
+        public void PropertyFunctionConvertsComplexValues(string scenario, string expected)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
+
+            PropertyDictionary<ProjectPropertyInstance> properties = new();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(properties, FileSystems.Default);
+            string typeName = typeof(PropertyValueConversionTestData).AssemblyQualifiedName;
+
+            string result = expander.ExpandIntoStringLeaveEscaped(
+                $"$([{typeName}]::GetValue(`{scenario}`))",
+                ExpanderOptions.ExpandProperties,
+                MockElementLocation.Instance);
+
+            result.ShouldBe(expected);
+        }
+
+        /// <summary>
         /// Expand property function that returns an array
         /// </summary>
         [Fact]
@@ -2651,26 +2816,22 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand property function that creates an instance of a type
+        /// Expand a typed property-function result as an argument to another property function.
         /// </summary>
         [Fact]
-        public void PropertyFunctionConstructor1()
+        public void PropertyFunctionConstructorResultIsPreservedAsTypedArgument()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
             pg.Set(ProjectPropertyInstance.Create("ver1", @"1.2.3.4"));
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            object result = expander.ExpandPropertiesLeaveTypedAndEscaped(@"$([System.Version]::new($(ver1)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            string result = expander.ExpandIntoStringLeaveEscaped(
+                @"$([System.Version]::new($(ver1)).Equals($([System.Version]::new($(ver1)))))",
+                ExpanderOptions.ExpandProperties,
+                MockElementLocation.Instance);
 
-            Assert.IsType<Version>(result);
-
-            Version v = (Version)result;
-
-            Assert.Equal(1, v.Major);
-            Assert.Equal(2, v.Minor);
-            Assert.Equal(3, v.Build);
-            Assert.Equal(4, v.Revision);
+            result.ShouldBe(bool.TrueString);
         }
 
         /// <summary>
@@ -3488,23 +3649,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         private void AssertThrows(Expander<ProjectPropertyInstance, ProjectItemInstance> expander, string expression, string expectedMessage)
         {
-            var ex = Assert.Throws<InvalidProjectFileException>(
-                () => expander.ExpandPropertiesLeaveTypedAndEscaped(
+            InvalidProjectFileException ex = Should.Throw<InvalidProjectFileException>(
+                () => expander.ExpandIntoStringLeaveEscaped(
                     expression,
                     ExpanderOptions.ExpandProperties,
                     MockElementLocation.Instance));
 
-            Assert.Contains(expectedMessage, ex.Message);
+            ex.Message.ShouldContain(expectedMessage);
         }
 
         private void AssertSuccess(Expander<ProjectPropertyInstance, ProjectItemInstance> expander, object expected, string expression)
         {
-            var actual = expander.ExpandPropertiesLeaveTypedAndEscaped(
+            string actual = expander.ExpandIntoStringLeaveEscaped(
                 expression,
                 ExpanderOptions.ExpandProperties,
                 MockElementLocation.Instance);
 
-            Assert.Equal(expected, actual);
+            actual.ShouldBe(expected.ToString());
         }
 
         /// <summary>
@@ -4112,8 +4273,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 "cat1s"
             };
             string hashTypeString = hashType == null ? "" : $", '{hashType}'";
-            object[] hashes = stringsToHash.Select(toHash =>
-                expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('{toHash}'{hashTypeString}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance))
+            string[] hashes = stringsToHash.Select(toHash =>
+                expander.ExpandIntoStringLeaveEscaped(
+                    $"$([MSBuild]::StableStringHash('{toHash}'{hashTypeString}))",
+                    ExpanderOptions.ExpandProperties,
+                    MockElementLocation.Instance))
                 .ToArray();
             for (int a = 0; a < hashes.Length; a++)
             {
@@ -4133,13 +4297,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [Theory]
         [MemberData(nameof(GetHashAlgoTypes))]
-        public void PropertyFunctionHashCodeReturnsExpectedType(string hashType)
+        public void StableStringHashReturnsExpectedType(string hashType)
         {
-            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
-            Type expectedType;
-
-            expectedType = hashType switch
+            Type expectedType = hashType switch
             {
                 null => typeof(int),
                 "Legacy" => typeof(int),
@@ -4148,14 +4308,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 "Fnv1a64bit" => typeof(long),
                 "Fnv1a64bitFast" => typeof(long),
                 "Sha256" => typeof(string),
-                _ => throw new ArgumentOutOfRangeException(nameof(hashType))
+
+                _ => Assumed.Unreachable<Type>(),
             };
 
-
-            string hashTypeString = hashType == null ? "" : $", '{hashType}'";
-            object hashValue = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('FooBar'{hashTypeString}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            object hashValue = hashType is null
+                ? IntrinsicFunctions.StableStringHash("FooBar")
+                : IntrinsicFunctions.StableStringHash("FooBar", ParseHashType(hashType));
 
             hashValue.ShouldBeOfType(expectedType);
+
+            static IntrinsicFunctions.StringHashingAlgorithm ParseHashType(string hashType)
+                => (IntrinsicFunctions.StringHashingAlgorithm)Enum.Parse(typeof(IntrinsicFunctions.StringHashingAlgorithm), hashType);
         }
 
         [Theory]
@@ -4166,9 +4330,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new();
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
-            string intermediate = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertToBase64('{testCase}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            string intermediate = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::ConvertToBase64('{testCase}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             intermediate.Trim('=').All(c => char.IsLetterOrDigit(c) || c == '+' || c == '/').ShouldBeTrue();
-            string original = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertFromBase64('{intermediate}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            string original = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::ConvertFromBase64('{intermediate}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             original.ShouldBe(testCase);
         }
 
@@ -4180,7 +4344,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new();
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
-            string intermediate = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertToBase64('{plaintext}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            string intermediate = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::ConvertToBase64('{plaintext}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             intermediate.ShouldBe(base64);
         }
 
@@ -4192,7 +4356,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new();
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(pg, FileSystems.Default);
-            string original = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::ConvertFromBase64('{base64}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance) as string;
+            string original = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::ConvertFromBase64('{base64}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             original.ShouldBe(plaintext);
         }
 
@@ -5190,53 +5354,6 @@ $(
             }
         }
 
-        [Fact]
-        public void ExpandItem_ConvertToStringUsingInvariantCultureForNumberData_RespectingChangeWave()
-        {
-            // Note: Skipping the test since it is not a valid scenario when ICU mode is not used.
-            if (!ICUModeAvailable())
-            {
-                return;
-            }
-
-            var currentThread = Thread.CurrentThread;
-            var originalCulture = currentThread.CurrentCulture;
-            var originalUICulture = currentThread.CurrentUICulture;
-
-            try
-            {
-                var svSECultureInfo = new CultureInfo("sv-SE");
-                using (var env = TestEnvironment.Create())
-                {
-                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_12.ToString());
-                    ChangeWaves.ResetStateForTests();
-                    currentThread.CurrentCulture = svSECultureInfo;
-                    currentThread.CurrentUICulture = svSECultureInfo;
-                    var root = env.CreateFolder();
-
-                    var projectFile = env.CreateFile(root, ".proj",
-                        @"<Project>
-
-  <PropertyGroup>
-    <_value>$([MSBuild]::Subtract(0, 1))</_value>
-    <_otherValue Condition=""'$(_value)' &gt;= -1"">test-value</_otherValue>
-  </PropertyGroup>
-  <Target Name=""Build"" />
-</Project>");
-                    var exception = Should.Throw<InvalidProjectFileException>(() =>
-                    {
-                        new ProjectInstance(projectFile.Path);
-                    });
-                    exception.BaseMessage.ShouldContain("A numeric comparison was attempted on \"$(_value)\"");
-                }
-            }
-            finally
-            {
-                currentThread.CurrentCulture = originalCulture;
-                currentThread.CurrentUICulture = originalUICulture;
-            }
-        }
-
         [Theory]
         [InlineData("getType")]
         [InlineData("GetType")]
@@ -5344,18 +5461,6 @@ $(
                 // the fast path was successfully resolved without reflection.
                 File.Exists(reflectionInfoPath).ShouldBeFalse();
             }
-        }
-
-        /// <summary>
-        /// Determines if ICU mode is enabled.
-        /// Copied from: https://learn.microsoft.com/en-us/dotnet/core/extensions/globalization-icu#determine-if-your-app-is-using-icu
-        /// </summary>
-        private static bool ICUModeAvailable()
-        {
-            SortVersion sortVersion = CultureInfo.InvariantCulture.CompareInfo.Version;
-            byte[] bytes = sortVersion.SortId.ToByteArray();
-            int version = bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0];
-            return version != 0 && version == sortVersion.FullVersion;
         }
 
         [Fact]
@@ -5491,9 +5596,293 @@ $(
             return expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
         }
 
+        /// <summary>
+        /// Helper: set the process current directory and return it as the OS reports it. On macOS the test
+        /// temp folder is reached through a symlink (/var -> /private/var), and only the reported form matches
+        /// what resolution against the process current directory produces, so tests that compare -mt output
+        /// against non-mt output must build both sides from this rather than from the TestEnvironment path.
+        /// </summary>
+        private static string SetCurrentDirectoryCanonical(TestEnvironment env, string path)
+        {
+            env.SetCurrentDirectory(path);
+            return Directory.GetCurrentDirectory();
+        }
+
         // =====================================================================
         // Category A: -mt mode tests for default-allowed File methods
         // =====================================================================
+
+        [Fact]
+        public void NormalizePath_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::NormalizePath('obj', 'file.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "obj", "file.txt"));
+        }
+
+        [Fact]
+        public void NormalizePath_ParentSegment_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::NormalizePath('obj', '..', 'file.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "file.txt"));
+        }
+
+        [UnixOnlyFact]
+        public void NormalizePath_BackslashRootedPath_MatchesNonMultithreadedResult()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var projectDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            // Baseline: non-mt mode, where the process current directory is the project directory.
+            string projectDirPath = SetCurrentDirectoryCanonical(env, projectDir.Path);
+            string expected = IntrinsicFunctions.NormalizePath(@"\tmp\file.txt");
+
+            // -mt mode must agree: on Unix a backslash is an ordinary filename character, so resolution
+            // must not normalize separators or it would silently point at a different file.
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([MSBuild]::NormalizePath('\tmp\file.txt'))", projectDirPath, wrongDir.Path);
+
+            result.ShouldBe(expected);
+        }
+
+        [Fact]
+        public void NormalizePath_BackslashSeparatedPath_MatchesNonMultithreadedResult()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var projectDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string projectDirPath = SetCurrentDirectoryCanonical(env, projectDir.Path);
+            string expected = IntrinsicFunctions.NormalizePath(@"obj\..\file.txt");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([MSBuild]::NormalizePath('obj\..\file.txt'))", projectDirPath, wrongDir.Path);
+
+            result.ShouldBe(expected);
+        }
+
+        [Fact]
+        public void MSBuildFileExists_BackslashSeparatedPath_MatchesNonMultithreadedResult()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var projectDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            Directory.CreateDirectory(Path.Combine(projectDir.Path, "sub"));
+            File.WriteAllText(Path.Combine(projectDir.Path, "sub", "marker.txt"), "x");
+
+            // FileExistsNoThrow normalizes separators internally, so both non-mt and -mt must agree.
+            env.SetCurrentDirectory(projectDir.Path);
+            string expected = IntrinsicFunctions.FileExists(@"sub\marker.txt").ToString();
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([MSBuild]::FileExists('sub\marker.txt'))", projectDir.Path, wrongDir.Path);
+
+            result.ShouldBe(expected);
+        }
+
+        [WindowsOnlyFact]
+        public void NormalizePath_DriveRelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+            string drive = Path.GetPathRoot(correctDir.Path).Substring(0, 2);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([MSBuild]::NormalizePath('{drive}obj', 'file.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "obj", "file.txt"));
+        }
+
+        [Fact]
+        public void NormalizePath_AbsolutePath_IgnoresThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var absoluteDir = env.CreateFolder(createFolder: true);
+
+            string absolutePath = Path.Combine(absoluteDir.Path, "file.txt");
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([MSBuild]::NormalizePath('{absolutePath}'))", correctDir.Path);
+
+            result.ShouldBe(absolutePath);
+        }
+
+        [Fact]
+        public void NormalizePath_WithoutThreadWorkingDirectory_UsesProcessWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var processDir = env.CreateFolder(createFolder: true);
+            string processDirPath = SetCurrentDirectoryCanonical(env, processDir.Path);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::NormalizePath('obj', 'file.txt'))", null);
+
+            result.ShouldBe(Path.Combine(processDirPath, "obj", "file.txt"));
+        }
+
+        [Fact]
+        public void NormalizePath_EmptyPath_ThrowsArgumentException()
+        {
+            Should.Throw<ArgumentException>(() => IntrinsicFunctions.NormalizePath([]));
+        }
+
+        [Fact]
+        public void NormalizePath_NullPathArray_ThrowsArgumentNullException()
+        {
+            Should.Throw<ArgumentNullException>(() => IntrinsicFunctions.NormalizePath((string[])null));
+        }
+
+        [Fact]
+        public void NormalizePath_IllegalPath_ThrowsArgumentException()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            env.WithTransientTestState(new TransientThreadWorkingDirectory(correctDir.Path));
+
+            // Resolution against the thread working directory intentionally swallows the invalid-path
+            // exception (so that non-throwing intrinsics such as FileExists keep working); NormalizePath
+            // is still expected to surface it, matching non-mt behavior.
+            Should.Throw<ArgumentException>(() => IntrinsicFunctions.NormalizePath("bad\0path"));
+        }
+
+        [Fact]
+        public void NormalizeDirectory_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::NormalizeDirectory('obj'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "obj") + Path.DirectorySeparatorChar);
+        }
+
+        [Fact]
+        public void MSBuildFileExists_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "marker.txt"), "x");
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::FileExists('marker.txt'))", correctDir.Path, wrongDir.Path)
+                .ShouldBe("True");
+            ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::FileExists('absent.txt'))", correctDir.Path, wrongDir.Path)
+                .ShouldBe("False");
+        }
+
+        [UnixOnlyFact]
+        public void MSBuildFileExists_BackslashRootedPath_MatchesNonMultithreadedResult()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var projectDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            // FileExistsNoThrow normalizes separators internally, so on Unix '\tmp\x' is rooted by the
+            // time the probe happens. Resolution must not treat it as relative to the project directory.
+            Directory.CreateDirectory(Path.Combine(projectDir.Path, "tmp"));
+            File.WriteAllText(Path.Combine(projectDir.Path, "tmp", "decoy.txt"), "x");
+
+            env.SetCurrentDirectory(projectDir.Path);
+            string expected = IntrinsicFunctions.FileExists(@"\tmp\decoy.txt").ToString();
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([MSBuild]::FileExists('\tmp\decoy.txt'))", projectDir.Path, wrongDir.Path);
+
+            result.ShouldBe(expected);
+        }
+
+        [Fact]
+        public void MSBuildDirectoryExists_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            Directory.CreateDirectory(Path.Combine(correctDir.Path, "obj"));
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::DirectoryExists('obj'))", correctDir.Path, wrongDir.Path)
+                .ShouldBe("True");
+            ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::DirectoryExists('absent'))", correctDir.Path, wrongDir.Path)
+                .ShouldBe("False");
+        }
+
+        [Fact]
+        public void GetDirectoryNameOfFileAbove_RelativeStartingDirectory_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "marker.txt"), "x");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::GetDirectoryNameOfFileAbove('.', 'marker.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(correctDir.Path);
+        }
+
+        [Fact]
+        public void GetPathOfFileAbove_RelativeStartingDirectory_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "marker.txt"), "x");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::GetPathOfFileAbove('marker.txt', '.'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "marker.txt"));
+        }
+
+        [Fact]
+        public void RegisterBuildCheck_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+            File.WriteAllText(Path.Combine(correctDir.Path, "check.dll"), string.Empty);
+
+            var logger = new MockLogger();
+            ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            loggingService.RegisterLogger(logger);
+            var loggingContext = new MockLoggingContext(
+                loggingService,
+                new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
+
+            env.WithTransientTestState(new TransientThreadWorkingDirectory(correctDir.Path));
+            env.SetCurrentDirectory(wrongDir.Path);
+
+            string result = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                    new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default, loggingContext)
+                .ExpandIntoStringLeaveEscaped("$([MSBuild]::RegisterBuildCheck('check.dll'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            result.ShouldBe(bool.TrueString);
+            var acquisition = logger.AllBuildEvents.ShouldHaveSingleItem().ShouldBeOfType<BuildCheckAcquisitionEventArgs>();
+            acquisition.AcquisitionPath.ShouldBe(Path.Combine(correctDir.Path, "check.dll"));
+        }
 
         [Fact]
         public void FileReadAllText_RelativePath_ResolvesFromThreadWorkingDirectory()

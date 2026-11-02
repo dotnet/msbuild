@@ -7,6 +7,10 @@ MSBuild Server nodes accept build requests from clients and use worker nodes in 
 The primary ways to use MSBuild are via Visual Studio and via the CLI using the `dotnet build`/`dotnet msbuild` commands. MSBuild Server is not supported in Visual Studio because Visual Studio itself works like MSBuild Server. For the CLI, the server functionality is enabled by default and can be disabled by setting the `DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER` environment variable to value `1`.
 To re-enable MSBuild Server, remove the variable or set its value to `0`.
 
+The public entry points for hosting the server live in the `Microsoft.Build.Server` namespace (`MSBuildClient`, `MSBuildClientExitResult`, `MSBuildClientExitType`, and `OutOfProcServerNode`). These were previously in `Microsoft.Build.Experimental`.
+
+These types are public only because `MSBuild.exe` lives in a separate assembly from `Microsoft.Build` and there is no `InternalsVisibleTo` between them. Third-party use is not expected or supported: they only work to wrap the MSBuild CLI and offer nothing beyond it, so invoke the CLI instead. They are marked `[EditorBrowsable(EditorBrowsableState.Never)]` so they do not surface in IntelliSense.
+
 ## Garbage collection
 
 When a build is multithreaded (`/mt`), the server node is launched with [Server GC](https://learn.microsoft.com/dotnet/standard/garbage-collection/workstation-server-gc) enabled. Under `/mt` the server runs all project work on threads in this single process, so Server GC's higher throughput is beneficial; without `/mt` the server only orchestrates and delegates project work to separate worker nodes, so it keeps the default Workstation GC. GC mode is fixed at CLR startup, so it is set via the `DOTNET_gcServer` environment variable in the server's launch environment (decided from the launching invocation's command line). An explicit user-set `DOTNET_gcServer` is honored (e.g. set `DOTNET_gcServer=0` to keep Workstation GC in a memory-constrained environment). This is scoped to the server process only: sidecar TaskHosts and worker nodes keep the default Workstation GC.
@@ -35,7 +39,7 @@ The server node uses same IPC approach as current worker nodes - named pipes. Th
 2. Initiate handshake
 2. Issue build command with `ServerNodeBuildCommand` packet
 3. Read packets from pipe
-   - Write content to the appropriate output stream (respecting coloring) with the `ServerNodeConsoleWrite` packet
+   - Write content to the appropriate output stream (respecting coloring) with the `ConsoleWritePacket` packet
    - After the build completes, the `ServerNodeBuildResult` packet indicates the exit code
 
 ### Pipe name convention & handshake
@@ -59,12 +63,14 @@ Server requires to introduce new packet types for IPC.
 | UICulture                | CultureInfo                  | The UI culture value for current build |
 | ConsoleConfiguration     | TargetConsoleConfiguration   | Console configuration of target Console at which the output will be rendered |
 
-`ServerNodeConsoleWrite` contains information for console output.
+`ConsoleWritePacket` contains information for console output. It is shared with `-mt` task hosts, which use it to forward console output to their connected node.
 
 | Property name            | Type          | Description |
 |---|---|---|
 | Text                     | String        | The text that is written to the output stream. It includes ANSI escape codes for formatting. |
 | OutputType               | Byte          | Identification of the output stream (1 = standard output, 2 = error output) |
+
+Task-host console forwarding requires protocol v7. Owned sidecars can retain their connection across builds using the lifetime protocol introduced in v6, but console writers are disposed during per-build cleanup and forwarding is enabled again for the next build. Writers cached by a previous build remain inert. Legacy pooling is best-effort: a later build may receive a new task-host process instead.
 
 `ServerNodeBuildResult` indicates how the build finished.
 

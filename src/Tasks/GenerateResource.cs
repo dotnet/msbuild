@@ -1491,6 +1491,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // check to see if the output resources file (and, if it is a .resx, any linked files)
                     // is up to date compared to the input file
+                    // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                     if (ShouldRebuildResgenOutputFile(Sources[i].ItemSpec, OutputResources[i].ItemSpec))
                     {
                         nothingOutOfDate = false;
@@ -1616,6 +1617,7 @@ namespace Microsoft.Build.Tasks
             ResGenDependencies.ResXFile resxFileInfo;
             try
             {
+                // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                 resxFileInfo = _cache.GetResXFileInfo(sourceFilePath, UsePreserializedResources, Log, WarnOnBinaryFormatterUse);
             }
             catch (Exception e) when (!ExceptionHandling.NotExpectedIoOrXmlException(e) || e is MSBuildResXException)
@@ -2513,6 +2515,7 @@ namespace Microsoft.Build.Tasks
                 for (int i = 0; i < _inFiles.Count; ++i)
                 {
                     string outputSpec = _extractResWFiles ? resWOutputDirectory : _outFiles[i].ItemSpec;
+                    // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                     if (!ProcessFile(_inFiles[i].ItemSpec, outputSpec))
                     {
                         // Since we failed, remove items from OutputResources.  Note when extracting ResW
@@ -2662,6 +2665,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
+                // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                 ReadResources(inFile, _useSourcePath, outFileOrDir);
             }
             catch (InputFormatNotSupportedException)
@@ -3068,10 +3072,12 @@ namespace Microsoft.Build.Tasks
                             ResXResourceReader resXReader = null;
                             if (_typeResolver != null)
                             {
+                                // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                                 resXReader = new ResXResourceReader(filename, _typeResolver);
                             }
                             else
                             {
+                                // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                                 resXReader = new ResXResourceReader(filename);
                             }
 
@@ -3102,6 +3108,7 @@ namespace Microsoft.Build.Tasks
 
                     case Format.Binary:
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
+                        // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
                         break;
 #else

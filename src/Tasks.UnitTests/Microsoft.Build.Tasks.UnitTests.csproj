@@ -33,6 +33,7 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="System.Security.Principal.Windows" />
+    <PackageReference Include="System.Threading.Channels" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
@@ -49,7 +50,6 @@
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs">
       <Link>NativeMethodsShared_Tests.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <EmbeddedResource Include="SampleResx" />

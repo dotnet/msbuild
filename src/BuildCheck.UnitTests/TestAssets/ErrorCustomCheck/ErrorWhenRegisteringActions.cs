@@ -36,7 +36,7 @@ namespace ErrorCustomCheck
         {
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,
-                ElementLocation.EmptyLocation,
+                ElementLocation.Empty,
                 "This check should have been disabled"));
         }
     }

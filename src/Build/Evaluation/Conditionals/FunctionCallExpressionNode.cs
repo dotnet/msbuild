@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Internal;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
@@ -76,6 +77,7 @@ namespace Microsoft.Build.Tasks
                 // Search each searchpath.
                 foreach (Resolver resolver in resolvers)
                 {
+                    resolver.CancellationToken.ThrowIfCancellationRequested();
                     if
                     (
                         resolver.Resolve(
@@ -121,6 +123,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyPathInGac"></param>
         /// <param name="log"></param>
         /// <param name="taskEnvironment">TaskEnvironment for thread-safe environment variable access.</param>
+        /// <param name="cancellationToken">Token used to stop assembly resolution.</param>
         /// <returns></returns>
 #else
         /// <summary>
@@ -139,6 +142,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyPathInGac"></param>
         /// <param name="log"></param>
         /// <param name="taskEnvironment">TaskEnvironment for thread-safe environment variable access.</param>
+        /// <param name="cancellationToken">Token used to stop assembly resolution.</param>
         /// <returns></returns>
 #endif
         public static Resolver[] CompileSearchPaths(
@@ -159,12 +163,14 @@ namespace Microsoft.Build.Tasks
             Version targetedRuntimeVersion,
             GetAssemblyPathInGac getAssemblyPathInGac,
             TaskLoggingHelper log,
-            TaskEnvironment taskEnvironment)
+            TaskEnvironment taskEnvironment,
+            CancellationToken cancellationToken = default)
         {
             var resolvers = new Resolver[searchPaths.Length];
 
             for (int p = 0; p < searchPaths.Length; ++p)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 string basePath = searchPaths[p];
 
                 // Was {HintPathFromItem} specified? If so, take the Item's
@@ -210,6 +216,8 @@ namespace Microsoft.Build.Tasks
                 {
                     resolvers[p] = new DirectoryResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, null, taskEnvironment);
                 }
+
+                resolvers[p].CancellationToken = cancellationToken;
             }
             return resolvers;
         }
@@ -223,12 +231,17 @@ namespace Microsoft.Build.Tasks
             GetAssemblyName getAssemblyName,
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVersion,
-            TaskEnvironment taskEnvironment)
+            TaskEnvironment taskEnvironment,
+            CancellationToken cancellationToken = default)
         {
             var resolvers = new Resolver[parentReferenceDirectories.Count];
             for (int i = 0; i < parentReferenceDirectories.Count; i++)
             {
-                resolvers[i] = new DirectoryResolver(parentReferenceDirectories[i].Directory, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, parentReferenceDirectories[i].ParentAssembly, taskEnvironment);
+                cancellationToken.ThrowIfCancellationRequested();
+                resolvers[i] = new DirectoryResolver(parentReferenceDirectories[i].Directory, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, parentReferenceDirectories[i].ParentAssembly, taskEnvironment)
+                {
+                    CancellationToken = cancellationToken
+                };
             }
 
             return resolvers;

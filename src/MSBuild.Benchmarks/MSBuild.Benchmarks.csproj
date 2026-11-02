@@ -5,14 +5,15 @@
     <UseAppHost>false</UseAppHost>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
-
+    <!-- BenchmarkDotNet requires a newer Microsoft.CodeAnalysis.CSharp than the centrally pinned version used by repo analyzers. -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <IsPackable>false</IsPackable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" />
-    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" />
+    <PackageReference Include="BenchmarkDotNet" VersionOverride="0.16.0-preview.1" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" VersionOverride="0.16.0-preview.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -21,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\UnitTests.Shared\GlobbingRegex.cs" Link="GlobbingRegex.cs" />
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />

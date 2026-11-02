@@ -32,11 +32,14 @@ internal static class NodePacketTypeExtensions
     /// 5: Added delta transfer for the invariant payloads in TaskHostConfiguration / TaskHostTaskComplete:
     ///    the build process environment and the CurrentSolutionConfigurationContents solution-level configuration
     ///    blob are each sent once per connection, then only an "unchanged" marker per task.
+    /// 6: Added explicit TaskHost lifetime actions and retained-connection cleanup acknowledgment.
+    /// 7: Added console output forwarding from OOP TaskHost.
+    /// 8: Added deferred task parameter conversion in .NET task hosts.
     /// 
     /// When incrementing this version, ensure compatibility with existing
     /// task hosts and update the corresponding deserialization logic.
     /// </summary>
-    public const byte PacketVersion = 5;
+    public const byte PacketVersion = 8;
 
     /// <summary>
     /// The minimum negotiated packet version that supports delta transfer of the invariant
@@ -44,6 +47,18 @@ internal static class NodePacketTypeExtensions
     /// payloads (the build process environment and the CurrentSolutionConfigurationContents blob).
     /// </summary>
     public const byte EnvironmentDeltaMinVersion = 5;
+
+    public const byte TaskHostOwnershipMinVersion = 6;
+
+    /// <summary>
+    /// The minimum negotiated packet version that supports console output forwarding from OOP TaskHost.
+    /// </summary>
+    public const byte ConsoleOutputForwardingMinVersion = 7;
+
+    /// <summary>
+    /// Minimum packet version at which task hosts can convert deferred parameter values.
+    /// </summary>
+    public const byte TaskParameterConversionMinVersion = 8;
 
     // Flag bits in upper 2 bits
     private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000
@@ -64,15 +79,19 @@ internal static class NodePacketTypeExtensions
     public static NodePacketType GetNodePacketType(byte rawType) => (NodePacketType)(rawType & (byte)NodePacketType.TypeMask);
 
     /// <summary>
-    /// Create a packet type byte with extended header flag for net task host packets.
+    /// Create a packet type byte with an extended header for versioned task-host packets.
     /// </summary>
     /// <param name="handshakeOptions">Handshake options to check.</param>
     /// <param name="type">Base packet type.</param>
     /// <param name="extendedheader">Output byte with flag set if applicable.</param>
+    /// <param name="negotiatedVersion">Version negotiated with the child TaskHost.</param>
     /// <returns>True if extended header flag was set, false otherwise.</returns>
-    public static bool TryCreateExtendedHeaderType(HandshakeOptions handshakeOptions, NodePacketType type, out byte extendedheader)
+    public static bool TryCreateExtendedHeaderType(HandshakeOptions handshakeOptions, NodePacketType type, out byte extendedheader, byte negotiatedVersion = 0)
     {
-        if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.TaskHost) && Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NET))
+        if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.TaskHost)
+            && (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NET)
+                || (type == NodePacketType.NodeBuildComplete && negotiatedVersion >= TaskHostOwnershipMinVersion)
+                || (type == NodePacketType.TaskHostConsoleConfiguration && negotiatedVersion >= ConsoleOutputForwardingMinVersion)))
         {
             extendedheader = (byte)((byte)type | ExtendedHeaderFlag);
             return true;

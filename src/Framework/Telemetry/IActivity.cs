@@ -24,5 +24,11 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <param name="value">The tag value.</param>
         /// <returns>The activity instance for method chaining.</returns>
         IActivity SetTag(string key, object? value);
+
+        /// <summary>
+        /// Marks the operation as failed because of user input, such as a build error, rather than a product fault.
+        /// </summary>
+        /// <returns>The activity instance for method chaining.</returns>
+        IActivity SetUserFault();
     }
 }

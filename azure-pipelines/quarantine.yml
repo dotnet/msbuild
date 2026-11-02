@@ -64,12 +64,16 @@ jobs:
     demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
   timeoutInMinutes: 120
   steps:
-  - template: azure-pipelines/check-documentation-only-change.yml
+  # The definition defaults to a shallow (depth 1) fetch, but
+  # check-documentation-only-change.yml diffs HEAD against HEAD~1, so fetch the parent too.
+  - checkout: self
+    fetchDepth: 2
+  - template: check-documentation-only-change.yml
   - task: BatchScript@1
     displayName: Build (quarantined tests only)
     inputs:
       filename: 'build.cmd'
-      arguments: "-ci -test -stage2Arguments '/p:RunQuarantinedTests=true'"
+      arguments: "-ci -test -stage2Argument '/p:RunQuarantinedTests=true'"
     condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
@@ -115,10 +119,14 @@ jobs:
     demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
   timeoutInMinutes: 120
   steps:
-  - template: azure-pipelines/check-documentation-only-change.yml
+  # The definition defaults to a shallow (depth 1) fetch, but
+  # check-documentation-only-change.yml diffs HEAD against HEAD~1, so fetch the parent too.
+  - checkout: self
+    fetchDepth: 2
+  - template: check-documentation-only-change.yml
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
-  - bash: . 'build.sh' --ci --test --stage2Arguments '/p:RunQuarantinedTests=true'
+  - bash: . 'build.sh' --ci --test --stage2Argument '/p:RunQuarantinedTests=true'
     displayName: Build (quarantined tests only)
     condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
     env:
@@ -156,8 +164,12 @@ jobs:
     vmImage: 'macOS-latest'
   timeoutInMinutes: 120
   steps:
-  - template: azure-pipelines/check-documentation-only-change.yml
-  - bash: . 'build.sh' --ci --test --stage2Arguments '/p:RunQuarantinedTests=true'
+  # The definition defaults to a shallow (depth 1) fetch, but
+  # check-documentation-only-change.yml diffs HEAD against HEAD~1, so fetch the parent too.
+  - checkout: self
+    fetchDepth: 2
+  - template: check-documentation-only-change.yml
+  - bash: . 'build.sh' --ci --test --stage2Argument '/p:RunQuarantinedTests=true'
     displayName: Build (quarantined tests only)
     condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
     env:
