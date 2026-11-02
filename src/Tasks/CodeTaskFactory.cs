@@ -16,6 +16,7 @@ namespace Microsoft.Build.Tasks
     using System.CodeDom.Compiler;
     using System.Collections.Concurrent;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Reflection;
@@ -1121,8 +1122,6 @@ namespace Microsoft.Build.Tasks
         }
     }
 #else
-    using System.Diagnostics.CodeAnalysis;
-
     /// <summary>
     /// A task factory which can take code dom supported languages and create a task out of it
     /// </summary>

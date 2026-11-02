@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
 using System.Collections.Concurrent;
