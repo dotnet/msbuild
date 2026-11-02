@@ -37,6 +37,7 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.14
 - [Expose `DefiningProjectLineNumber` and `DefiningProjectColumnNumber` as built-in item metadata for the XML element that produced an item.](https://github.com/dotnet/msbuild/pull/14731) Together with `DefiningProjectFullPath`, these identify the source declaration without requiring a new task-item interface. Coordinates are invariant decimal strings, or empty when no XML location is available. True copies retain the location; new declarations and task outputs identify their producing element, not a full provenance chain. Coordinate strings are computed on demand. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.14` to disable the new metadata and its reserved names, preserving projects that previously used those names as custom metadata.
+- [AddToWin32Manifest preserves the generated manifest's timestamp when its contents are unchanged, allowing CoreCompile to skip unchanged builds with PreferNativeArm64 enabled.](https://github.com/dotnet/msbuild/issues/15417) Set `MSBUILDDISABLEFEATURESFROMVERSION=18.14` to retain unconditional manifest writes.
 
 ### 18.13
 - [Task hosts preserve ordinary task-environment variables while retaining Windows bitness adjustments.](https://github.com/dotnet/msbuild/pull/15032)

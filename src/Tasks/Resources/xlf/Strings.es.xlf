@@ -12,6 +12,11 @@
         <target state="translated">Error al abrir el archivo de manifiesto con la excepción: '{0}'. Asegúrese de que existe y de que tiene contenido relevante.</target>
         <note />
       </trans-unit>
+      <trans-unit id="AddToWin32Manifest.SkippingUnchangedFile">
+        <source>Skipping write to file "{0}" because content would not change.</source>
+        <target state="new">Skipping write to file "{0}" because content would not change.</target>
+        <note>{0} is the path to the generated Win32 manifest file.</note>
+      </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
         <source>BindingRedirect is missing required field 'oldVersion'.</source>
         <target state="translated">Falta el campo obligatorio 'oldVersion' en BindingRedirect.</target>
