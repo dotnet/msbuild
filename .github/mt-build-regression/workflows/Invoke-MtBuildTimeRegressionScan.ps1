@@ -45,16 +45,14 @@ if (-not (Test-Path -LiteralPath $QueryPath))
     throw "Kusto query file not found: $QueryPath"
 }
 
-# Execute the detector and turn its tabular result into the stable candidate contract.
+# Discover all production runs before selecting the latest pair or calculating any baselines.
 $client = New-KustoClient -ClusterUri $ClusterUri -Database $Database -AccessToken $accessToken
 $query = Get-Content -LiteralPath $QueryPath -Raw
-$detected = @(Invoke-KustoQuery -Client $client -Query $query -MaximumAttempts 4 -RequirePrimaryTable $true)
+$runs = @(Invoke-KustoQuery -Client $client -Query "$query`nproductionRows() | distinct BuildId, Backend" -MaximumAttempts 4 -RequirePrimaryTable $true)
 
-# PerfStarDataRaw is ingested while a run executes, so the detector can select a build that has not
-# finished and therefore reported only part of its scenarios. Resolve each run's real state here, so
-# that the candidate set, its identity key, and this job's outputs all describe usable runs only.
-# Azure DevOps lookup failures propagate: a transient error must fail the scan rather than silently
-# suppress candidates.
+# Raw data can include running or canceled builds. Resolve the entire input set, not just
+# candidates: otherwise a newer unusable run can hide a regression or pollute its baseline.
+# Lookup failures propagate rather than silently suppressing candidates.
 $azureDevOpsClient = New-AzureDevOpsClient `
     -OrganizationUri $OrganizationUri `
     -Project $Project `
@@ -62,83 +60,34 @@ $azureDevOpsClient = New-AzureDevOpsClient `
 $runCache = New-PerfStarRunCache
 $excluded = [System.Collections.Generic.List[object]]::new()
 
-$candidates = @(
-    foreach ($candidate in $detected)
+$eligibleBuildIds = @(
+    foreach ($run in $runs)
     {
-        $currentRun = Get-PerfStarRunMetadata `
+        $metadata = Get-PerfStarRunMetadata `
             -AzureDevOpsClient $azureDevOpsClient `
             -RunCache $runCache `
-            -BuildId ([string]$candidate.CurrentBuildId) `
-            -Backend ([string]$candidate.Backend)
+            -BuildId ([string]$run.BuildId) `
+            -Backend ([string]$run.Backend)
 
-        if (-not (Test-PerfStarRunUsable -Run $currentRun))
+        if (-not (Test-PerfStarRunUsable -Run $metadata))
         {
-            Write-Warning ("Excluding {0}/{1} '{2}': current PerfStar run {3} is not usable (state '{4}', result '{5}')." -f `
-                $candidate.Backend,
-                $candidate.Os,
-                $candidate.ScenarioPair,
-                $currentRun.perfStarBuildNumber,
-                $currentRun.perfStarBuildState,
-                $currentRun.perfStarBuildResult)
             $excluded.Add([pscustomobject][ordered]@{
-                backend = [string]$candidate.Backend
-                os = [string]$candidate.Os
-                scenarioPair = [string]$candidate.ScenarioPair
-                run = 'current'
-                perfStarBuildNumber = $currentRun.perfStarBuildNumber
-                perfStarBuildState = $currentRun.perfStarBuildState
-                perfStarBuildResult = $currentRun.perfStarBuildResult
+                backend = [string]$run.Backend
+                os = 'all'
+                scenarioPair = 'all'
+                run = 'input'
+                perfStarBuildNumber = $metadata.perfStarBuildNumber
+                perfStarBuildState = $metadata.perfStarBuildState
+                perfStarBuildResult = $metadata.perfStarBuildResult
             })
             continue
         }
 
-        # An unusable last-healthy run only invalidates the comparison, not the candidate. Drop the
-        # reference so the evidence step reports the candidate without a healthy baseline.
-        if (-not [string]::IsNullOrWhiteSpace([string]$candidate.HealthyBuildId))
-        {
-            $healthyRun = Get-PerfStarRunMetadata `
-                -AzureDevOpsClient $azureDevOpsClient `
-                -RunCache $runCache `
-                -BuildId ([string]$candidate.HealthyBuildId) `
-                -Backend ([string]$candidate.Backend)
-
-            if (-not (Test-PerfStarRunUsable -Run $healthyRun))
-            {
-                Write-Warning ("Dropping the last-healthy comparison for {0}/{1} '{2}': run {3} is not usable (state '{4}', result '{5}')." -f `
-                    $candidate.Backend,
-                    $candidate.Os,
-                    $candidate.ScenarioPair,
-                    $healthyRun.perfStarBuildNumber,
-                    $healthyRun.perfStarBuildState,
-                    $healthyRun.perfStarBuildResult)
-                $excluded.Add([pscustomobject][ordered]@{
-                    backend = [string]$candidate.Backend
-                    os = [string]$candidate.Os
-                    scenarioPair = [string]$candidate.ScenarioPair
-                    run = 'healthy'
-                    perfStarBuildNumber = $healthyRun.perfStarBuildNumber
-                    perfStarBuildState = $healthyRun.perfStarBuildState
-                    perfStarBuildResult = $healthyRun.perfStarBuildResult
-                })
-                $candidate.HealthyBuildId = ''
-                foreach ($healthyField in @(
-                    'HealthyBuildNumber',
-                    'HealthyTimestamp',
-                    'HealthyMtMedianMs',
-                    'HealthyNonMtMedianMs',
-                    'HealthyMtVsNonMtDeltaMs'))
-                {
-                    if ($null -ne $candidate.PSObject.Properties[$healthyField])
-                    {
-                        $candidate.$healthyField = $null
-                    }
-                }
-            }
-        }
-
-        $candidate
+        [string]$run.BuildId
     })
 
+$eligibleJson = ConvertTo-Json -InputObject $eligibleBuildIds -Compress
+$candidates = @(Invoke-KustoQuery -Client $client -Query "$query`ndetectRegressions(dynamic($eligibleJson))" -MaximumAttempts 4 -RequirePrimaryTable $true)
 $report = New-RegressionDetectionReport -Candidates $candidates -GeneratedAtUtc ([DateTimeOffset]::UtcNow)
 $report.excludedRuns = $excluded.ToArray()
 
@@ -153,9 +102,9 @@ if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_OUTPUT))
 }
 
 # A scheduled run is read after the fact, so record how the detector reached this candidate set.
-Write-Host "Detector returned $($detected.Count) pair(s) from $Database on $ClusterUri."
+Write-Host "Detector returned $($candidates.Count) pair(s) from $Database on $ClusterUri."
 Write-Host "Resolved $($runCache.Count) PerfStar run(s) through $OrganizationUri/$Project."
-Write-Host "Excluded $($excluded.Count) unusable run reference(s); $($candidates.Count) candidate(s) remain."
+Write-Host "Excluded $($excluded.Count) of $($runs.Count) production run(s) before detection; $($eligibleBuildIds.Count) run(s) were eligible."
 foreach ($entry in $excluded)
 {
     Write-Host "  excluded $($entry.run) run $($entry.perfStarBuildNumber) for $($entry.backend)/$($entry.os) '$($entry.scenarioPair)' (state '$($entry.perfStarBuildState)', result '$($entry.perfStarBuildResult)')."

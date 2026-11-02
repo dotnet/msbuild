@@ -218,6 +218,8 @@ Assert-True ($kql.Contains('| where MtMedianMs > BaselineMtP90Ms')) 'The executa
 Assert-True ($kql.Contains('MtVsNonMtDeltaMs > BaselineDeltaP90Ms')) 'The executable detector must require differential above baseline p90.'
 Assert-True ($kql.Contains('| where MsbuildBranch == "refs/heads/main"')) 'Experimental MSBuild branches must not enter current or baseline production comparisons.'
 Assert-True ($kql.Contains('| where BinlogCollected == false and TraceCollected == false')) 'Instrumented rows must not enter clean production comparisons.'
+$eligibilityPosition = $kql.IndexOf('| where tostring(BuildId) in (eligibleBuildIds)')
+Assert-True ($eligibilityPosition -ge 0 -and $eligibilityPosition -lt $kql.IndexOf('RunMedianMs = percentile')) 'Run eligibility must restrict measurements before aggregation and current/baseline selection.'
 
 Assert-True (Test-SafeMetricName -Name 'build-time') 'build-time must be allowlisted.'
 Assert-True (Test-SafeMetricName -Name 'evaluation-time-pass3') 'Evaluation pass metrics must be allowlisted.'
@@ -525,6 +527,64 @@ $tempRoot = Join-Path ([IO.Path]::GetTempPath()) "mt-regression-tests-$([Guid]::
 try
 {
     New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+    $scan = [scriptblock]::Create((
+        (Get-Content (Join-Path $featureRoot 'workflows\Invoke-MtBuildTimeRegressionScan.ps1') -Raw) -replace '(?m)^Import-Module[^\r\n]*', ''))
+    $savedEnvironment = @{}
+    foreach ($name in @('KUSTO_ACCESS_TOKEN', 'AZDO_ACCESS_TOKEN', 'GITHUB_OUTPUT'))
+    {
+        $savedEnvironment[$name] = [Environment]::GetEnvironmentVariable($name)
+    }
+    try
+    {
+        $env:KUSTO_ACCESS_TOKEN = 'offline-test'
+        $env:AZDO_ACCESS_TOKEN = 'offline-test'
+        foreach ($newerState in @('inProgress', 'canceled', 'noneEligible'))
+        {
+            $scanOutput = Join-Path $tempRoot $newerState
+            $env:GITHUB_OUTPUT = Join-Path $tempRoot "$newerState.outputs"
+            & {
+                $resolved = [System.Collections.Generic.List[string]]::new()
+                function New-KustoClient { [pscustomobject]@{} }
+                function New-AzureDevOpsClient { [pscustomobject]@{} }
+                function Get-PerfStarRunMetadata
+                {
+                    param($AzureDevOpsClient, $RunCache, $BuildId, $Backend)
+                    $resolved.Add($BuildId)
+                    [pscustomobject]@{
+                        perfStarBuildNumber = $BuildId
+                        perfStarBuildState = if ($BuildId -eq '6' -and $newerState -eq 'inProgress') { 'inProgress' } else { 'completed' }
+                        perfStarBuildResult = if ($BuildId -eq '6' -and $newerState -eq 'inProgress') { '' } elseif ($newerState -eq 'noneEligible' -or $BuildId -in @('6', '7')) { 'canceled' } elseif ($BuildId -eq '5') { 'failed' } else { 'succeeded' }
+                    }
+                }
+                function Invoke-KustoQuery
+                {
+                    param($Client, $Query, $MaximumAttempts, $RequirePrimaryTable)
+                    if ($Query.TrimEnd().EndsWith('productionRows() | distinct BuildId, Backend'))
+                    {
+                        return 1..7 | ForEach-Object { [pscustomobject]@{ BuildId = $_; Backend = 'Gold' } }
+                    }
+                    Assert-Equal 7 $resolved.Count 'All input runs must be resolved before invoking the detector.'
+                    Assert-True ($Query -match 'detectRegressions\(dynamic\((\[[^\r\n]*\])\)\)\s*$') 'The detector must receive an explicit eligible-ID set.'
+                    $ids = @($Matches[1] | ConvertFrom-Json)
+                    Assert-Equal $(if ($newerState -eq 'noneEligible') { '' } else { '1,2,3,4,5' }) ($ids -join ',') 'Only four completed baselines and completed regression A may reach detection; newer unusable B and historical canceled run 7 must not.'
+                    if ($ids.Count -gt 0)
+                    {
+                        [pscustomobject]@{ Backend = 'Gold'; Os = 'Windows'; ScenarioPair = 'alpha'
+                            CurrentBuildId = '5'; BaselineRunCount = 4 }
+                    }
+                }
+                & $scan -ClusterUri 'https://unused.invalid' -Database test `
+                    -QueryPath (Join-Path $featureRoot 'queries\Get-MtBuildTimeRegressions.kql') -OutputDirectory $scanOutput 6>$null
+            }
+            $scanReport = Get-Content (Join-Path $scanOutput 'mt-regressions.json') -Raw | ConvertFrom-Json
+            Assert-Equal $(if ($newerState -eq 'noneEligible') { 0 } else { 1 }) $scanReport.candidateCount 'An unusable newer run must not erase completed regression A; no eligible runs must produce no candidates.'
+            Assert-Equal $(if ($newerState -eq 'noneEligible') { 7 } else { 2 }) $scanReport.excludedRuns.Count 'Input exclusions must cover unusable current and historical runs.'
+        }
+    }
+    finally
+    {
+        foreach ($name in $savedEnvironment.Keys) { [Environment]::SetEnvironmentVariable($name, $savedEnvironment[$name]) }
+    }
     $metricsPath = Join-Path $tempRoot 'scenario.metrics.txt'
     @(
         '##METRIC## build-time=1500',

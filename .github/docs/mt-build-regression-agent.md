@@ -80,8 +80,8 @@ flowchart TD
    carrying pull-request `aw_context` are rejected.
 2. The job uses GitHub OIDC to authenticate as `msbuild-azdo-reader`.
 3. `queries/Get-MtBuildTimeRegressions.kql` queries `perfstar-dev/PerfStarDataRaw`.
-4. `workflows/Invoke-MtBuildTimeRegressionScan.ps1` resolves each candidate's PerfStar run, discards
-   candidates whose current run did not finish normally, and writes bounded JSON and Markdown
+4. `workflows/Invoke-MtBuildTimeRegressionScan.ps1` resolves all production PerfStar runs before
+   selecting current/healthy runs or calculating baselines, then writes bounded JSON and Markdown
    statistical evidence.
 5. `workflows/Add-MtBuildTimeRegressionEvidence.ps1` resolves the exact current and last-healthy MSBuild
    revisions, downloads only candidate-specific artifacts, extracts allowlisted metrics plus safe
@@ -171,12 +171,14 @@ selections remain unavailable rather than attributing the resource build to anot
 
 `PerfStarDataRaw` is ingested while a run executes, so the newest rows can belong to a build that has
 not finished and has therefore reported only part of its scenarios. Those scenarios are also measured
-while the remaining ones still compete for the same machine. The scan step resolves every candidate's
-run through Azure DevOps and keeps only runs that reached state `completed` with result `succeeded`
-or `failed`; in-progress and canceled runs are excluded and recorded in `excludedRuns`. Run-level
+while the remaining ones still compete for the same machine. The scan first discovers all production
+build IDs in the lookback window and resolves them through Azure DevOps. Only runs that reached state
+`completed` with result `succeeded` or `failed` enter the detector, before aggregation, latest-run
+selection, baseline statistics, or healthy-run selection. Other runs are recorded in `excludedRuns`
+as whole-run `input` exclusions. Run-level
 failure is retained because it is the most common outcome for these pipelines and the scenarios that
-did report may still be complete. An unusable last-healthy run drops only the comparison, not the
-candidate.
+did report may still be complete. `productionRows()` and `detectRegressions(eligibleBuildIds)` in the
+KQL file share the same production filters; an empty eligible-ID set selects no measurements.
 
 ## Required setup
 

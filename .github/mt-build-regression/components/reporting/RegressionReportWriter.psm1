@@ -31,8 +31,7 @@ function Write-RegressionDetectionReport
     [void]$markdown.AppendLine("Candidate count: **$($candidates.Count)**")
     [void]$markdown.AppendLine("Candidate-set key: ``$($Report.candidateSetKey)``")
 
-    # Exclusions are part of the detection result: without them the candidate count looks
-    # unexplained, and a dropped last-healthy comparison is invisible to the reader. The report is an
+    # Exclusions explain which production runs were removed before detection. The report is an
     # ordered dictionary when written by this job and a plain object when round-tripped through JSON.
     $excluded = @()
     if ($Report -is [System.Collections.IDictionary])
@@ -52,7 +51,7 @@ function Write-RegressionDetectionReport
         [void]$markdown.AppendLine()
         [void]$markdown.AppendLine("## Excluded runs")
         [void]$markdown.AppendLine()
-        [void]$markdown.AppendLine('A PerfStar run is used only when it reached state `completed` with result `succeeded` or `failed`. `PerfStarDataRaw` is ingested while a run executes, so an unfinished or canceled run reports only part of its scenarios and measures them while the remaining ones still compete for the same machine. Excluding the `current` run drops the candidate; excluding the `healthy` run drops only the last-healthy comparison.')
+        [void]$markdown.AppendLine('Only runs that reached state `completed` with result `succeeded` or `failed` enter the detector. Unfinished, canceled, or unknown runs are excluded before per-run aggregation, latest-run selection, baseline statistics, and healthy-run selection. An `input` exclusion applies to all scenarios and operating systems in that run.')
         [void]$markdown.AppendLine()
         [void]$markdown.AppendLine('| Backend | OS | Scenario pair | Run | Build | State | Result |')
         [void]$markdown.AppendLine('| --- | --- | --- | --- | --- | --- | --- |')
