@@ -35,7 +35,7 @@
       <_DefaultVsSetupSwr Condition="'$(VsTelemetryExperiment)' == 'false'">$([MSBuild]::Escape($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)files.swr'))))</_DefaultVsSetupSwr>
     </PropertyGroup>
     <Message Condition="'$(VsTelemetryExperiment)' == 'true' or '$(_AutomaticTelemetryExperiment)' == 'true'"
-             Importance="high" Text="VS telemetry reunification: $(VsTelemetryExperiment). Source branch: $(BUILD_SOURCEBRANCH). An active experiment must produce the newer SDK or fail." />
+             Importance="high" Text="VS telemetry destination routing: $(VsTelemetryExperiment). Source branch: $(BUILD_SOURCEBRANCH). An active candidate requires the matching VS-owned companion provider at setup." />
     <!-- A single timestamped SWR input prevents reusing the other variant's VSIX when opting in or out. -->
     <MakeDir Directories="$(_TelemetryExperimentDirectory)" />
     <WriteLinesToFile Condition="'$(VsTelemetryExperiment)' == 'false'"
@@ -44,7 +44,7 @@
                       Overwrite="true"
                       WriteOnlyWhenDifferent="true" />
     <Exec Condition="'$(VsTelemetryExperiment)' == 'true'"
-          Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Prepare-TelemetryReunification.ps1&quot; -VsInstallPath &quot;$(VsTelemetryExperimentSource)&quot; -ExpectedSnapshotHash &quot;$(VsTelemetryExperimentExpectedSnapshotHash)&quot; -ExpectedTelemetryHash &quot;$(VsTelemetryExperimentExpectedTelemetryHash)&quot; -OutputDirectory &quot;$(_TelemetryExperimentDirectory).&quot; -X86Config &quot;$(X86BinPath)MSBuild.exe.config&quot; -X64Config &quot;$(X64BinPath)MSBuild.exe.config&quot; -CoordinatorConfig &quot;$(CoordinatorBinPath)MSBuild.Coordinator.exe.config&quot; -CoordinatorX64Config &quot;$(CoordinatorX64BinPath)MSBuild.Coordinator.exe.config&quot;" />
+          Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Prepare-TelemetryReunification.ps1&quot; -OutputDirectory &quot;$(_TelemetryExperimentDirectory).&quot; -X86Config &quot;$(X86BinPath)MSBuild.exe.config&quot; -X64Config &quot;$(X64BinPath)MSBuild.exe.config&quot; -CoordinatorConfig &quot;$(CoordinatorBinPath)MSBuild.Coordinator.exe.config&quot; -CoordinatorX64Config &quot;$(CoordinatorX64BinPath)MSBuild.Coordinator.exe.config&quot;" />
     <ItemGroup>
       <SwrFile Remove="files.swr" />
       <SwrFile Include="$(_TelemetryExperimentDirectory)files.swr" />

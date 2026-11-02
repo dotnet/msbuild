@@ -5,10 +5,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][string] $VsixPath,
-    [string] $VsInstallPath,
-    [string] $ExpectedSnapshotHash,
-    [string] $SourceReceiptPath,
-    [string] $ExpectedTelemetryHash
+    [string] $VsInstallPath
 )
 
 Set-StrictMode -Version Latest
@@ -19,196 +16,133 @@ if ($PSVersionTable.PSEdition -eq 'Desktop')
     Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Management\Microsoft.PowerShell.Management.psd1')
 }
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-if ($SourceReceiptPath)
-{
-    $receipt = Get-Content -LiteralPath $SourceReceiptPath -Raw | ConvertFrom-Json
-    if (!$VsInstallPath)
-    {
-        $VsInstallPath = $receipt.VsInstallPath
-    }
-    if (!$ExpectedSnapshotHash)
-    {
-        $ExpectedSnapshotHash = $receipt.SnapshotHash
-    }
-    if (!$ExpectedTelemetryHash)
-    {
-        $ExpectedTelemetryHash = $receipt.ExpectedTelemetryHash
-    }
-}
-if (!$VsInstallPath -or $ExpectedSnapshotHash -notmatch '^[0-9a-fA-F]{64}$')
-{
-    throw 'Telemetry package verification requires the generated source receipt or an explicit destination VS path and SHA-256 snapshot pin. Do not skip verification for an active experiment.'
-}
-$vs = [IO.Path]::GetFullPath($VsInstallPath).TrimEnd('\') + '\'
 $zip = [IO.Compression.ZipFile]::OpenRead([IO.Path]::GetFullPath($VsixPath))
+$group = 'msbuild-telemetry-experiment'
+$provider = 'Microsoft.VisualStudio.MSBuild.TelemetryBinding.Experimental'
+$root = 'Contents/MSBuild/Current/Bin/'
 
-function Get-Entry([string] $Name)
+function Get-EntryText([string] $Name)
 {
     $entry = $zip.GetEntry($Name)
     if (!$entry)
     {
-        throw "Missing VSIX entry: $Name"
+        throw "The active destination telemetry candidate lacks required package entry '$Name'. Rebuild it; do not publish a control as the experiment."
     }
-    return $entry
-}
-
-function Get-EntryText([string] $Name)
-{
-    $reader = [IO.StreamReader]::new((Get-Entry $Name).Open())
-    try
-    {
-        return $reader.ReadToEnd()
-    }
-    finally
-    {
-        $reader.Dispose()
-    }
-}
-
-function Get-EntryHash([string] $Name)
-{
-    $stream = (Get-Entry $Name).Open()
-    $sha = [Security.Cryptography.SHA256]::Create()
-    try
-    {
-        return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '')
-    }
-    finally
-    {
-        $sha.Dispose()
-        $stream.Dispose()
-    }
-}
-
-function Get-FileMetadata([string] $Name)
-{
-    $matches = @($setup.files | Where-Object fileName -eq ('/' + $Name))
-    if ($matches.Count -ne 1)
-    {
-        throw "Missing or duplicate setup file metadata: $Name"
-    }
-    return $matches[0]
+    $reader = [IO.StreamReader]::new($entry.Open())
+    try { return $reader.ReadToEnd() }
+    finally { $reader.Dispose() }
 }
 
 try
 {
-    $root = 'Contents/MSBuild/Current/Bin/'
-    $snapshotName = $root + 'TelemetryReunification.json'
-    if ((Get-EntryHash $snapshotName) -ne $ExpectedSnapshotHash)
-    {
-        throw 'The packaged snapshot differs from the explicitly selected producer snapshot.'
-    }
-    $snapshot = Get-EntryText $snapshotName | ConvertFrom-Json
+    $contract = Get-EntryText ($root + 'TelemetryReunification.json') | ConvertFrom-Json
     $setup = Get-EntryText 'manifest.json' | ConvertFrom-Json
-    foreach ($required in 'Microsoft.VisualStudio.Telemetry', 'Microsoft.VisualStudio.OpenTelemetry', 'OpenTelemetry.Consolidated')
+    if ($contract.BindingGroup -ne $group -or $contract.ProviderPackage -ne $provider -or
+        !$setup.dependencies.PSObject.Properties[$provider])
     {
-        $assemblies = @($snapshot.Assemblies | Where-Object Name -eq $required)
-        if ($assemblies.Count -ne 1 -or $assemblies[0].Delivery -ne 'payload' -or
-            $assemblies[0].PublicKeyToken -ne 'b03f5f7f11d50a3a')
+        throw 'The active experiment must require the VS-owned companion provider and select its single combined group. Rebuild with destination routing enabled.'
+    }
+    $fallback = @($setup.files | Where-Object fileName -eq ('/' + $root + 'Microsoft.VisualStudio.Telemetry.dll'))
+    if ($fallback.Count -ne 1 -or $fallback[0].PSObject.Properties['ngenApplications'] -or
+        $fallback[0].PSObject.Properties['ngenArchitecture'])
+    {
+        throw 'The legacy ARM64 fallback must not register unused unified-host telemetry NGEN roots.'
+    }
+    foreach ($entry in $zip.Entries)
+    {
+        if ($entry.FullName -match '^Contents/MSBuild/Current/Bin/(Microsoft\.VisualStudio\.OpenTelemetry|OpenTelemetry\.Consolidated|Microsoft\.Extensions\.)')
         {
-            throw "The active experiment package lacks its required newer SDK/closure member: $required"
+            throw "The MSBuild candidate must not duplicate destination-owned SDK closure payload '$($entry.FullName)'."
         }
     }
-    $telemetry = @($snapshot.Assemblies | Where-Object Name -eq 'Microsoft.VisualStudio.Telemetry')[0]
-    if ([version] $telemetry.FileVersion -lt [version] '18.4.50.0' -or
-        ($ExpectedTelemetryHash -and $telemetry.Hash -ne $ExpectedTelemetryHash))
+    $contexts = @('MSBuild.exe', 'amd64/MSBuild.exe', 'MSBuild.Coordinator.exe', 'amd64/MSBuild.Coordinator.exe')
+    foreach ($context in $contexts)
     {
-        throw 'The active experiment package contains a different/older telemetry SDK. Do not publish the control as the experiment.'
-    }
-    $devenv = Join-Path $vs 'Common7\IDE\devenv.exe'
-    if ([Diagnostics.FileVersionInfo]::GetVersionInfo($devenv).FileVersion -ne $snapshot.VsVersion -or
-        (Get-FileHash -LiteralPath ($devenv + '.config') -Algorithm SHA256).Hash -ne $snapshot.DevenvConfigHash -or
-        (Get-FileHash -LiteralPath (Join-Path $vs 'SharedAssemblies\Configs\devenv.csv') -Algorithm SHA256).Hash -ne $snapshot.SacConfigHash)
-    {
-        throw 'Destination VS version/config/SAC differs from the snapshot producer. Re-snapshot; do not deploy.'
-    }
-
-    $applications = @(
-        'MSBuild.exe', 'amd64\MSBuild.exe',
-        'MSBuild.Coordinator.exe', 'amd64\MSBuild.Coordinator.exe'
-    ) | ForEach-Object { '[installDir]\MSBuild\Current\Bin\' + $_ }
-    $payloadBytes = 0L
-    foreach ($assembly in $snapshot.Assemblies)
-    {
-        $source = Join-Path $vs $assembly.Source
-        if ((Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash -ne $assembly.Hash)
+        $name = $root + $context + '.config.template'
+        $metadata = @($setup.files | Where-Object fileName -eq ('/' + $name))
+        if ($metadata.Count -ne 1 -or $metadata[0].useGroupConfig -ne $group -or !$metadata[0].overwriteBindingRedirects)
         {
-            throw "Destination SDK dependency differs from the snapshot producer: $source"
-        }
-        if ($assembly.Delivery -eq 'payload')
-        {
-            $name = $root + $assembly.Name + '.dll'
-            $metadata = Get-FileMetadata $name
-            if ((Get-EntryHash $name) -ne $assembly.Hash -or $metadata.sha256 -ne $assembly.Hash)
-            {
-                throw "Incorrect experimental payload: $name"
-            }
-            if ($metadata.ngenArchitecture -ne 'All' -or $metadata.ngenPriority -ne 2 -or
-                @($metadata.ngenApplications).Count -ne 4 -or
-                @(Compare-Object $applications @($metadata.ngenApplications)).Count)
-            {
-                throw "Incomplete NGEN setup roots: $name"
-            }
-            $payloadBytes += (Get-Entry $name).Length
-        }
-        elseif ($assembly.Delivery -ne 'devenv-sac')
-        {
-            throw "Unknown dependency delivery: $($assembly.Delivery)"
-        }
-    }
-
-    foreach ($relative in 'MSBuild.exe.config.template', 'amd64/MSBuild.exe.config.template',
-        'MSBuild.Coordinator.exe.config.template', 'amd64/MSBuild.Coordinator.exe.config.template')
-    {
-        $name = $root + $relative
-        $metadata = Get-FileMetadata $name
-        if ($metadata.useGroupConfig -ne 'devenv' -or !$metadata.overwriteBindingRedirects)
-        {
-            throw "The existing devenv group-config integration was not preserved: $name"
+            throw "Incomplete destination group-finalizer metadata: $name"
         }
         [xml] $config = Get-EntryText $name
-        $directory = Join-Path $vs 'MSBuild\Current\Bin'
-        if ($relative.StartsWith('amd64/'))
+        $entries = @($config.SelectNodes('//*[local-name()="dependentAssembly"]') | Where-Object {
+            $_.SelectSingleNode('*[local-name()="assemblyIdentity"]').GetAttribute('name') -eq 'Microsoft.VisualStudio.Telemetry'
+        })
+        $prefix = '..\..\..\'
+        if ($context.StartsWith('amd64/')) { $prefix = '..\..\..\..\' }
+        if ($entries.Count -ne 1 -or
+            $entries[0].SelectSingleNode('*[local-name()="codeBase"]').GetAttribute('href') -ne ($prefix + 'Common7\IDE\PrivateAssemblies\Microsoft.VisualStudio.Telemetry.dll'))
         {
-            $directory = Join-Path $directory 'amd64'
+            throw "The template must route telemetry to the destination IDE, not a private MSBuild copy: $name"
         }
-        foreach ($assembly in $snapshot.Assemblies)
+        $facades = @($config.SelectNodes('//*[local-name()="dependentAssembly"]') | Where-Object {
+            $_.SelectSingleNode('*[local-name()="assemblyIdentity"]').GetAttribute('name') -eq 'System.ValueTuple'
+        })
+        if ($facades.Count -ne 1 -or $facades[0].SelectSingleNode('*[local-name()="bindingRedirect"]').GetAttribute('newVersion') -ne '4.0.0.0')
         {
-            $bindings = @($config.SelectNodes('//*[local-name()="dependentAssembly"]') | Where-Object {
-                $identity = $_.SelectSingleNode('*[local-name()="assemblyIdentity"]')
-                $identity.GetAttribute('name') -eq $assembly.Name -and
-                $identity.GetAttribute('publicKeyToken') -eq $assembly.PublicKeyToken
-            })
-            if ($bindings.Count -ne 1)
-            {
-                throw "Missing or ambiguous $($assembly.Name) binding in $name."
-            }
-            $redirect = $bindings[0].SelectSingleNode('*[local-name()="bindingRedirect"]')
-            $codeBase = $bindings[0].SelectSingleNode('*[local-name()="codeBase"]')
-            $expected = Join-Path $vs $assembly.Source
-            if ($assembly.Delivery -eq 'payload')
-            {
-                $expected = Join-Path (Join-Path $vs 'MSBuild\Current\Bin') ($assembly.Name + '.dll')
-            }
-            if (!$redirect -or !$codeBase -or $redirect.GetAttribute('newVersion') -ne $assembly.Version -or
-                $codeBase.GetAttribute('version') -ne $assembly.Version -or
-                [IO.Path]::GetFullPath((Join-Path $directory $codeBase.GetAttribute('href'))) -ne $expected)
-            {
-                throw "Incorrect $($assembly.Name) binding in $name."
-            }
+            throw "The destination SDK's framework facade redirect is missing: $name"
         }
     }
-    Write-Host "Verified active telemetry experiment VSIX: SDK $($telemetry.FileVersion), snapshot $ExpectedSnapshotHash, $(@($snapshot.Assemblies).Count) selected dependencies, four complete configs."
+    $status = 'destination-consumer-package-verified; VS companion integration still required'
+    if ($VsInstallPath)
+    {
+        $vs = [IO.Path]::GetFullPath($VsInstallPath).TrimEnd('\') + '\'
+        $configs = Join-Path $vs 'SharedAssemblies\Configs'
+        $policyPath = Join-Path $configs 'DestinationTelemetryBinding.json'
+        $csv = Join-Path $configs ($group + '.csv')
+        foreach ($required in $policyPath, $csv, (Join-Path $vs 'Common7\IDE\devenv.exe.config'))
+        {
+            if (!(Test-Path -LiteralPath $required -PathType Leaf))
+            {
+                throw "Destination requirement '$required' is missing. Install the matching VS IDE companion provider and finalize the four configs before running the experiment; no old-policy fallback is supported."
+            }
+        }
+        $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
+        if ($policy.BindingGroup -ne $group -or $policy.ProviderPackage -ne $provider -or
+            (Get-FileHash -LiteralPath $csv -Algorithm SHA256).Hash -ne $policy.GroupConfigHash -or
+            (Get-FileHash -LiteralPath (Join-Path $vs 'Common7\IDE\devenv.exe.config') -Algorithm SHA256).Hash -ne $policy.DevenvConfigHash -or
+            (Get-FileHash -LiteralPath (Join-Path $configs 'devenv.csv') -Algorithm SHA256).Hash -ne $policy.SacConfigHash)
+        {
+            throw 'The VS-owned provider does not match the destination host/SAC policy. Regenerate it with that VS build before finalizing MSBuild.'
+        }
+        foreach ($assembly in $policy.Assemblies)
+        {
+            $path = Join-Path $vs $assembly.Source
+            if ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ne $assembly.Hash)
+            {
+                throw "Destination-owned dependency bytes differ from the provider: $path"
+            }
+            foreach ($context in $contexts)
+            {
+                $configPath = Join-Path (Join-Path $vs 'MSBuild\Current\Bin') ($context.Replace('/', '\') + '.config')
+                [xml] $final = Get-Content -LiteralPath $configPath -Raw
+                $bindings = @($final.SelectNodes('//*[local-name()="dependentAssembly"]') | Where-Object {
+                    $_.SelectSingleNode('*[local-name()="assemblyIdentity"]').GetAttribute('name') -eq $assembly.Name -and
+                    $_.SelectSingleNode('*[local-name()="assemblyIdentity"]').GetAttribute('publicKeyToken') -eq $assembly.PublicKeyToken
+                })
+                $codeBases = @($bindings | ForEach-Object { $_.SelectNodes('*[local-name()="codeBase"]') } | Where-Object {
+                    $_.GetAttribute('version') -eq $assembly.Version
+                })
+                $redirects = @($bindings | ForEach-Object { $_.SelectNodes('*[local-name()="bindingRedirect"]') } | Where-Object {
+                    $_.GetAttribute('newVersion') -eq $assembly.Version
+                })
+                if ($codeBases.Count -ne 1 -or $redirects.Count -ne 1 -or
+                    [IO.Path]::GetFullPath((Join-Path (Split-Path $configPath) $codeBases[0].GetAttribute('href'))) -ne [IO.Path]::GetFullPath($path))
+                {
+                    throw "Finalized $context does not bind $($assembly.Name) to the destination-owned dependency. Run the matching single-group VS finalizer before testing."
+                }
+            }
+        }
+        $status = 'destination-owner-policy-and-four-finalized-configs-verified'
+    }
+    Write-Host "Verified telemetry destination route: $group; four templates; no producer SDK dependency or copied OTel closure."
     [pscustomobject] @{
-        Status = 'package-and-destination-verified'
+        Status = $status
         Vsix = [IO.Path]::GetFullPath($VsixPath)
-        VsVersion = $snapshot.VsVersion
-        SnapshotHash = $ExpectedSnapshotHash
-        PayloadCount = @($snapshot.Assemblies | Where-Object Delivery -eq 'payload').Count
-        PayloadBytes = $payloadBytes
-        SharedAssemblyCount = @($snapshot.Assemblies | Where-Object Delivery -eq 'devenv-sac').Count
+        BindingGroup = $group
+        ProviderPackage = $provider
         ConfigCount = 4
-        NativeImageAcceptance = 'Requires separate runtime loader evidence; not established by this package check.'
+        RuntimeAndNgenAcceptance = 'Requires actual loader/session evidence; this package check is not a performance result.'
     }
 }
 finally
