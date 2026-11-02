@@ -24,10 +24,10 @@ variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
     value: ''
-  # Fixed legacy release baseline: an independently verified MSBuild-owned OptimizationData drop.
-  # A freshly-cut vs* release branch has no OptProf data of its own, so it inherits this value
-  # (see the vs* block below) and its first official build succeeds without a manual bootstrap.
-  # Reverify this baseline for each release using documentation/release-checklist.md, Phase 3.
+  # Branch-cut release baseline: before creating a vs* branch, validate and record this exact
+  # MSBuild-owned OptimizationData drop and retention evidence covering support and rebuild needs.
+  # The new branch inherits this literal value and keeps it fixed throughout servicing.
+  # A later main change may prepare a future branch cut, but does not update existing release pins.
   - name: OptProfBaselineDrop
     value: 'OptimizationData/DotNet-msbuild-Trusted/main/20261020.2/15759981/1'
   - name: requireDefaultChannels

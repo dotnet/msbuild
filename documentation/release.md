@@ -33,7 +33,7 @@ MSBuild is a **component** inserted into Visual Studio. VS ships monthly; MSBuil
 * Insertion → VS main
   - vs* builds auto-insert into VS main
 * Before INSIDERS_SNAP_DATE — Phase 4
-  - OptProf bootstrap
+  - Verify the frozen OptProf pin and retention
   - Release branch bits land in VS main
 * VS snaps
   - VS snaps main → rel/insiders
@@ -56,13 +56,17 @@ Official `main` builds float to the current supported VS `main` central profiles
 
 Floating lets `main` consume updated profiles without a repository pin refresh, including profiles newer than the MSBuild commit that produced them. An explicit `OptProfDropName` remains the highest-priority override, and disabling OptProf skips both central lookup and profile application.
 
-Release branches continue to use the fixed `OptProfBaselineDrop`; their routing and pointer automation need a separate follow-up. The legacy scheduled `main` collection is retired, while release recovery continues to require an independently verified, unexpired, branch-compatible MSBuild-owned baseline.
+Before a `vs*` branch is created, validate and record the exact compatible `OptProfBaselineDrop` and retention evidence covering that branch's support lifetime and rebuild needs. The branch inherits that literal pin and keeps it fixed throughout servicing: it is not automatically refreshed and does not fall back to the latest legacy output or the VS `main` central profiles. Later changes on `main` apply only to future branch cuts and never mutate existing servicing pins. This policy requires no central VS release registration, backport, or pointer automation.
+
+Pinning a drop name does not extend its expiry, and the existing release pins have not been certified here for their full support and rebuild lifetimes. Missing compatibility or retention evidence requires an explicit release-owner decision as described in the release checklist.
+
+The `.opt-prof.yml` definition on `main` is retained as a manual-only workflow with repository, PR, schedule, and pipeline-resource triggers disabled. Existing release-branch copies and the enabled external pipeline definition require separately authorized cleanup; this `main` change does not retire them retroactively.
 
 ## Public API
 
 MSBuild uses package API compatibility validation against `PackageValidationBaselineVersion` in [`eng/Versions.props`](../eng/Versions.props). Reviewed exceptions are recorded in the projects' `CompatibilitySuppressions.xml` files.
 
-The repository no longer contains `PublicAPI.Unshipped.txt` / `PublicAPI.Shipped.txt` files or a promotion step for them. If the build reports API-compat failures, follow step 3.4 of the [release checklist](./release-checklist.md#phase-3-bump-main--update-pipelines) to regenerate and review suppressions. Do not suppress a new compatibility regression merely to make the build pass.
+The repository no longer contains `PublicAPI.Unshipped.txt` / `PublicAPI.Shipped.txt` files or a promotion step for them. If the build reports API-compat failures, follow step 3.5 of the [release checklist](./release-checklist.md#phase-3-bump-main--update-pipelines) to regenerate and review suppressions. Do not suppress a new compatibility regression merely to make the build pass.
 
 ## Major version extra update steps
 

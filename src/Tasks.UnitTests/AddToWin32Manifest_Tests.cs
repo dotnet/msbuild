@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Xml;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
@@ -81,6 +83,92 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [Theory]
+        [InlineData(null, true)]
+        [InlineData("testManifestWithApplicationDefined.manifest", true)]
+        [InlineData(null, false)]
+        [InlineData("testManifestWithApplicationDefined.manifest", false)]
+        public void UnchangedManifestTimestampRespectsChangeWave(string? manifestName, bool waveEnabled)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", waveEnabled ? null : ChangeWaves.Wave18_14.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            string outputDirectory = env.CreateFolder().Path;
+            MockEngine engine = new(_testOutput);
+            AddToWin32Manifest task = CreateTask();
+            task.Execute().ShouldBeTrue();
+
+            string manifestPath = task.ManifestPath;
+            string skippedMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                "AddToWin32Manifest.SkippingUnchangedFile", manifestPath);
+            engine.MessageEvents.ShouldNotContain(message => message.Message == skippedMessage);
+            byte[] originalContents = File.ReadAllBytes(manifestPath);
+            File.SetLastWriteTimeUtc(manifestPath, new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+            DateTime originalTimestamp = File.GetLastWriteTimeUtc(manifestPath);
+
+            AddToWin32Manifest subsequentTask = CreateTask();
+            subsequentTask.Execute().ShouldBeTrue();
+            subsequentTask.ManifestPath.ShouldBe(manifestPath);
+            File.ReadAllBytes(manifestPath).ShouldBe(originalContents);
+
+            if (waveEnabled)
+            {
+                File.GetLastWriteTimeUtc(manifestPath).ShouldBe(originalTimestamp);
+                engine.MessageEvents.ShouldContain(message =>
+                    message.Message == skippedMessage && message.Importance == MessageImportance.Low);
+            }
+            else
+            {
+                File.GetLastWriteTimeUtc(manifestPath).ShouldNotBe(originalTimestamp);
+                engine.MessageEvents.ShouldNotContain(message => message.Message == skippedMessage);
+            }
+
+            AddToWin32Manifest CreateTask() => new()
+            {
+                BuildEngine = engine,
+                ApplicationManifest = manifestName is null ? null : new TaskItem(Path.Combine(TestAssetsRootPath, manifestName)),
+                OutputDirectory = outputDirectory,
+                SupportedArchitectures = "amd64 arm64",
+            };
+        }
+
+        [Fact]
+        public void ChangedSourceManifestIsRewritten()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+
+            const string originalManifest = """
+                <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+                    <description>Original</description>
+                </assembly>
+                """;
+            string inputManifestPath = env.CreateFile("app.manifest", originalManifest).Path;
+            MockEngine engine = new(_testOutput);
+            AddToWin32Manifest task = new()
+            {
+                BuildEngine = engine,
+                ApplicationManifest = new TaskItem(inputManifestPath),
+                OutputDirectory = env.CreateFolder().Path,
+                SupportedArchitectures = "amd64 arm64",
+            };
+
+            task.Execute().ShouldBeTrue();
+            File.SetLastWriteTimeUtc(task.ManifestPath, new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+            DateTime originalTimestamp = File.GetLastWriteTimeUtc(task.ManifestPath);
+
+            File.WriteAllText(inputManifestPath, originalManifest.Replace("Original", "Updated"));
+            task.Execute().ShouldBeTrue();
+
+            File.ReadAllText(task.ManifestPath).ShouldContain("<description>Updated</description>");
+            File.GetLastWriteTimeUtc(task.ManifestPath).ShouldNotBe(originalTimestamp);
+            string skippedMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                "AddToWin32Manifest.SkippingUnchangedFile", task.ManifestPath);
+            engine.MessageEvents.ShouldNotContain(message => message.Message == skippedMessage);
+        }
+
         [SupportedOSPlatform("windows6.1")]
         [WindowsOnlyTheory]
         [InlineData(null, true)]
@@ -88,8 +176,11 @@ namespace Microsoft.Build.Tasks.UnitTests
         [InlineData("testManifestWithValidSupportedArchs.manifest", true)]
         public void E2EScenarioTests(string? manifestName, bool expectedResult)
         {
-            using (TestEnvironment env = TestEnvironment.Create())
+            using (TestEnvironment env = TestEnvironment.Create(_testOutput))
             {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+                ChangeWaves.ResetStateForTests();
+
                 var outputPath = env.CreateFolder().Path;
                 string projectContent = @$"
                 <Project DefaultTargets=""Build"">
@@ -122,8 +213,14 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(projectFile, touchProject: false);
 
-                bool result = project.Build(new MockLogger(_testOutput));
+                MockLogger logger = new(_testOutput);
+                bool result = project.Build(logger);
                 result.ShouldBe(expectedResult);
+                logger.TaskStartedEvents.ShouldContain(task => task.TaskName == "Csc");
+
+                MockLogger incrementalLogger = new(_testOutput);
+                project.Build(incrementalLogger).ShouldBeTrue();
+                incrementalLogger.TaskStartedEvents.ShouldNotContain(task => task.TaskName == "Csc");
 
                 // #2 - represents the name for native resource (Win 32 resource), #24 - the type (Manifest) 
                 byte[]? actualManifestBytes = AssemblyNativeResourceManager.GetResourceFromExecutable(Path.Combine(outputPath, "test.dll"), "#2", "#24");

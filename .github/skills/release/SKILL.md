@@ -85,10 +85,10 @@ It computes `git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}`, find
 | Phase | Trigger | Key Actions |
 |---|---|---|
 | **0: Instantiate** | User-initiated | Validate inputs, create GitHub tracking issue |
-| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), **audit all `vs*` branches for retirement** |
+| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Verify and freeze the release OptProf pin, create `vs*` branch, DARC setup, **audit all `vs*` branches for retirement** |
 | **2: DARC Subscription Updates** | Phase 1 branch exists (`vs*` created) | Retarget `main`-targeting subs + VMR backflow to next channel, retired-branch cleanup (batched PR), Arcade verify |
-| **3: Bump Main** | Phase 2 ingested and verified | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, verify fixed release OptProf baseline) |
-| **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Telemetry evidence checks, package API compatibility review, OptProf bootstrap, VS insertion before Insiders snap |
+| **3: Bump Main** | Phase 2 ingested and verified | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, verify future-cut OptProf baseline) |
+| **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Telemetry, API compatibility, frozen OptProf coverage, VS insertion before Insiders snap |
 | **5: Post-GA** | VS shipped (`VS_SHIP_DATE`) | Resolve the exact shipped version (SDK-coupled? SDK wins over VS `rel/stable`), nuget.org publish, docs, GitHub release, Change Waves Learn sync, retro |
 
 ## DARC Batching
@@ -161,9 +161,9 @@ When asked to execute a specific phase:
 | [`eng/Versions.props`](../../../eng/Versions.props) | `VersionPrefix`, `PackageValidationBaselineVersion`, `BootstrapSdkVersion` |
 | [`azure-pipelines/vs-insertion.yml`](../../../azure-pipelines/vs-insertion.yml) | VS insertion pipeline — `TargetBranch` parameter and `InsertTargetBranch` routing |
 | [`azure-pipelines/vs-insertion-experimental.yml`](../../../azure-pipelines/vs-insertion-experimental.yml) | Experimental insertion — `TargetBranch` parameter values |
-| [`scripts/Get-PackageValidationBaseline.ps1`](../../../scripts/Get-PackageValidationBaseline.ps1) | Phase 3.2 — resolves `PackageValidationBaselineVersion` deterministically (merge-base → pipeline 9434 → dotnet-tools feed) |
-| [`scripts/Get-LatestOptProfDrop.ps1`](../../../scripts/Get-LatestOptProfDrop.ps1) | Phase 3.3 discovery aid — reports the previous input consumed by an MSBuild-OptProf run; independently verify any release-baseline candidate |
-| [`.vsts-dotnet.yml`](../../../.vsts-dotnet.yml) | Build pipeline entry point — `OptProfBaselineDrop` (hardcoded OptProf seed for new `vs*` branches) |
+| [`scripts/Get-PackageValidationBaseline.ps1`](../../../scripts/Get-PackageValidationBaseline.ps1) | Phase 3.3 — resolves `PackageValidationBaselineVersion` deterministically (merge-base → pipeline 9434 → dotnet-tools feed) |
+| [`scripts/Get-LatestOptProfDrop.ps1`](../../../scripts/Get-LatestOptProfDrop.ps1) | Phase 3.4 discovery aid — reports a historical consumed input that may be stale; never a fresh-production dependency |
+| [`.vsts-dotnet.yml`](../../../.vsts-dotnet.yml) | Build entry point — future cuts inherit `OptProfBaselineDrop`; each release branch keeps its exact pin fixed through servicing |
 | [`azure-pipelines/.vsts-dotnet-build-jobs.yml`](../../../azure-pipelines/.vsts-dotnet-build-jobs.yml) | Build jobs — `VisualStudio.ChannelName` is release-agnostic (`int.main`); no per-release edit |
 
 ## Validation
@@ -182,7 +182,7 @@ After completing all phases, verify:
 
 - **Branch already exists**: Release was partially started — check the tracking issue for progress
 - **DARC channel already exists**: Safe to continue — `add-channel` is idempotent
-- **OptProf fails on first build**: Follow checklist 4.2 and recover with an independently verified, unexpired, branch-compatible MSBuild-owned baseline
+- **OptProf pin unavailable or expired**: Follow checklist 4.2; pause for a reviewed release-owner exception, restore the same data where possible, and record any queue-time override without changing the servicing default
 - **DARC configuration PR conflicts**: Rebase the configuration branch on `production` and force-push
 
 ## Major Version Releases

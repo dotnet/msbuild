@@ -1,7 +1,8 @@
-# Runs OptProf for MSBuild binaries based on an insertion build
+# Manual-only OptProf workflow for MSBuild binaries based on an insertion build.
+# Retiring the enabled pipeline definition and release-branch copies requires separate authorization.
 
-trigger: none # Prevents this pipeline from triggering on check-ins
-pr: none # don't run this on PR as well, this should only trigger off on MSBuild runs
+trigger: none
+pr: none
 
 resources:
   pipelines:
@@ -9,11 +10,7 @@ resources:
     source: MSBuild\MSBuild # The name of the pipeline that produces the artifact
     tags:
       - ready-for-training
-    trigger:
-      branches:
-        - vs*
-      tags:
-        - ready-for-training
+    trigger: none
   - pipeline: DartLab
     project: DevDiv
     source: DartLab
