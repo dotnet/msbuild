@@ -6,7 +6,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Xml;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
+using Microsoft.Build.Engine.UnitTests.InstanceFromRemote;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -370,6 +376,132 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        public void ExactMetadataCapturePreservesEmptyAttributeAndElementMetadataInBothObjectModels()
+        {
+            const string projectContent = """
+                <Project>
+                  <ItemGroup>
+                    <Empty Include="empty" />
+                    <Mixed Include="include" AttributeMetadata="attribute">
+                      <ElementMetadata>element</ElementMetadata>
+                    </Mixed>
+                    <Mixed Update="include" AttributeUpdate="updated">
+                      <ElementUpdate>updated element</ElementUpdate>
+                    </Mixed>
+                  </ItemGroup>
+                </Project>
+                """;
+
+            using XmlReader projectReader = XmlReader.Create(new StringReader(projectContent));
+            var project = new Project(projectReader);
+            ProjectItem empty = project.GetItems("Empty").ShouldHaveSingleItem();
+            empty.DirectMetadata.ShouldBeEmpty();
+            ProjectItem mixed = project.GetItems("Mixed").ShouldHaveSingleItem();
+            mixed.GetMetadataValue("AttributeMetadata").ShouldBe("attribute");
+            mixed.GetMetadataValue("ElementMetadata").ShouldBe("element");
+            mixed.GetMetadataValue("AttributeUpdate").ShouldBe("updated");
+            mixed.GetMetadataValue("ElementUpdate").ShouldBe("updated element");
+
+            using XmlReader instanceReader = XmlReader.Create(new StringReader(projectContent));
+            ProjectRootElement root = ProjectRootElement.Create(instanceReader);
+            ProjectInstance instance = ProjectInstance.FromProjectRootElement(root, new ProjectOptions());
+            ProjectItemInstance emptyInstance = instance.GetItems("Empty").ShouldHaveSingleItem();
+            emptyInstance.GetMetadataValue("AttributeMetadata").ShouldBeEmpty();
+            emptyInstance.GetMetadataValue("ElementMetadata").ShouldBeEmpty();
+            ProjectItemInstance mixedInstance = instance.GetItems("Mixed").ShouldHaveSingleItem();
+            mixedInstance.GetMetadataValue("AttributeMetadata").ShouldBe("attribute");
+            mixedInstance.GetMetadataValue("ElementMetadata").ShouldBe("element");
+            mixedInstance.GetMetadataValue("AttributeUpdate").ShouldBe("updated");
+            mixedInstance.GetMetadataValue("ElementUpdate").ShouldBe("updated element");
+        }
+
+        [Fact]
+        public void ExactMetadataCaptureUsesLocalCountWithoutReadingLinkedCount()
+        {
+            ProjectRootElement root = ProjectRootElement.Create();
+            ProjectItemElement localItem = root.AddItemGroup().AddItem("Local", "item");
+            localItem.AddMetadata("First", "one");
+            localItem.AddMetadata("Second", "two");
+
+            LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>
+                .GetInitialMetadataCapacity(localItem)
+                .ShouldBe(2);
+
+            var linkedItem = new ProjectItemElement(new FakeProjectItemElementLink("Linked", "linked.proj"));
+            LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>
+                .GetInitialMetadataCapacity(linkedItem)
+                .ShouldBe(0);
+        }
+
+        [Theory]
+        [InlineData(MetadataMutationKind.Grow, 3, 6)]
+        [InlineData(MetadataMutationKind.Underfill, 2, 4)]
+        public void ExactMetadataCaptureHandlesXmlMutationDuringPropertyExpansion(
+            MetadataMutationKind mutationKind,
+            int expectedMetadataCount,
+            int expectedPropertyFunctionCalls)
+        {
+            const string enableAllPropertyFunctionsSwitch = "Microsoft.Build.EnableAllPropertyFunctions";
+            bool switchWasSet = AppContext.TryGetSwitch(enableAllPropertyFunctionsSwitch, out bool enableAllPropertyFunctions);
+            AppContext.SetSwitch(enableAllPropertyFunctionsSwitch, true);
+
+            try
+            {
+                ProjectRootElement root = ProjectRootElement.Create();
+                ProjectItemElement item = root.AddItemGroup().AddItem("I", "item");
+                string propertyFunction = $"$([{typeof(MetadataMutationPropertyFunction).AssemblyQualifiedName}]::Mutate())";
+                item.AddMetadata("First", propertyFunction);
+                item.AddMetadata("Second", propertyFunction);
+
+                if (mutationKind == MetadataMutationKind.Underfill)
+                {
+                    item.AddMetadata("Third", propertyFunction);
+                }
+
+                using MetadataMutationPropertyFunction.Scope mutation =
+                    MetadataMutationPropertyFunction.Begin(item, mutationKind, propertyFunction);
+                ProjectInstance project = ProjectInstance.FromProjectRootElement(root, new ProjectOptions());
+                ProjectItemInstance evaluatedItem = project.GetItems("I").ShouldHaveSingleItem();
+
+                mutation.CallCount.ShouldBe(expectedPropertyFunctionCalls);
+                evaluatedItem.GetMetadataValue("First").ShouldBe("value");
+                evaluatedItem.GetMetadataValue("Second").ShouldBe("value");
+                (evaluatedItem.GetMetadataValue("Added").Length > 0 ? 3 : 2).ShouldBe(expectedMetadataCount);
+                evaluatedItem.GetMetadataValue("Third").ShouldBeEmpty();
+            }
+            finally
+            {
+                MetadataMutationPropertyFunction.End();
+                RestoreAppContextSwitch(enableAllPropertyFunctionsSwitch, switchWasSet, enableAllPropertyFunctions);
+            }
+        }
+
+        private static void RestoreAppContextSwitch(string switchName, bool wasSet, bool value)
+        {
+            if (wasSet)
+            {
+                AppContext.SetSwitch(switchName, value);
+                return;
+            }
+
+            foreach (System.Reflection.FieldInfo field in typeof(AppContext).GetFields(
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
+            {
+                if (field.GetValue(null) is System.Collections.IDictionary switches)
+                {
+                    lock (switches)
+                    {
+                        if (switches.Contains(switchName))
+                        {
+                            switches.Remove(switchName);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        [Fact]
         public void OnlyPropertyReferencesGetExpandedInPropertyFunctionArgumentsInsideIncludeAttributes()
         {
             var projectContent =
@@ -724,6 +856,78 @@ namespace Microsoft.Build.UnitTests.Evaluation
             };
 
             ObjectModelHelpers.AssertItems(new[] { $"{prefix}foo" }, items, expectedMetadata);
+        }
+    }
+
+    public enum MetadataMutationKind
+    {
+        Grow,
+        Underfill,
+    }
+
+    public static class MetadataMutationPropertyFunction
+    {
+        private static readonly AsyncLocal<Scope> s_scope = new();
+
+        internal static Scope Begin(ProjectItemElement item, MetadataMutationKind mutationKind, string propertyFunction)
+        {
+            var scope = new Scope(item, mutationKind, propertyFunction);
+            s_scope.Value = scope;
+            return scope;
+        }
+
+        public static string Mutate()
+        {
+            Scope scope = s_scope.Value ?? throw new InvalidOperationException("No metadata mutation scope is active.");
+            scope.Mutate();
+            return "value";
+        }
+
+        internal static void End()
+        {
+            s_scope.Value = null;
+        }
+
+        internal sealed class Scope : IDisposable
+        {
+            private readonly ProjectItemElement _item;
+            private readonly MetadataMutationKind _mutationKind;
+            private readonly string _propertyFunction;
+            private bool _mutated;
+
+            internal Scope(ProjectItemElement item, MetadataMutationKind mutationKind, string propertyFunction)
+            {
+                _item = item;
+                _mutationKind = mutationKind;
+                _propertyFunction = propertyFunction;
+            }
+
+            internal int CallCount { get; private set; }
+
+            internal void Mutate()
+            {
+                CallCount++;
+
+                if (_mutated)
+                {
+                    return;
+                }
+
+                _mutated = true;
+                if (_mutationKind == MetadataMutationKind.Grow)
+                {
+                    _item.AddMetadata("Added", _propertyFunction);
+                }
+                else
+                {
+                    _item.RemoveChild(_item.LastChild);
+                }
+            }
+
+            public void Dispose()
+            {
+                End();
+            }
         }
     }
 }

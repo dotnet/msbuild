@@ -24,7 +24,7 @@ namespace Microsoft.Build.Evaluation
             public UpdateOperation(OperationBuilderWithMetadata builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)
             {
-                _metadata = builder.Metadata.ToImmutable();
+                _metadata = builder.ConsumeMetadata();
             }
 
             private readonly struct MatchResult

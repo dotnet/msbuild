@@ -31,7 +31,7 @@ namespace Microsoft.Build.Evaluation
                 _rootDirectory = builder.RootDirectory;
 
                 _excludes = builder.Excludes.ToImmutable();
-                _metadata = builder.Metadata.ToImmutable();
+                _metadata = builder.ConsumeMetadata();
             }
 
             [SuppressMessage("Microsoft.Dispose", "CA2000:Dispose objects before losing scope", Justification = "_lazyEvaluator._evaluationProfiler has own dipose logic.")]

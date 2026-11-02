@@ -481,10 +481,35 @@ namespace Microsoft.Build.Evaluation
 
         private class OperationBuilderWithMetadata : OperationBuilder
         {
-            public readonly ImmutableArray<ProjectMetadataElement>.Builder Metadata = ImmutableArray.CreateBuilder<ProjectMetadataElement>();
+            private ImmutableArray<ProjectMetadataElement>.Builder Metadata { get; set; }
 
             public OperationBuilderWithMetadata(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {
+            }
+
+            public void InitializeMetadata(int capacity)
+            {
+                Metadata = ImmutableArray.CreateBuilder<ProjectMetadataElement>(capacity);
+            }
+
+            public void AddMetadata(ProjectMetadataElement metadatum)
+            {
+                Metadata.Add(metadatum);
+            }
+
+            public ImmutableArray<ProjectMetadataElement> ConsumeMetadata()
+            {
+                ImmutableArray<ProjectMetadataElement>.Builder metadata = Metadata;
+                Metadata = null;
+
+                if (metadata is null)
+                {
+                    return ImmutableArray<ProjectMetadataElement>.Empty;
+                }
+
+                return metadata.Count == metadata.Capacity
+                    ? metadata.MoveToImmutable()
+                    : metadata.ToImmutable();
             }
         }
 
@@ -629,6 +654,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (itemElement.HasMetadata)
             {
+                operationBuilder.InitializeMetadata(GetInitialMetadataCapacity(itemElement));
                 ItemsAndMetadataPair itemsAndMetadataFound = new ItemsAndMetadataPair(null, null);
 
                 // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
@@ -637,7 +663,7 @@ namespace Microsoft.Build.Evaluation
                 const ExpanderOptions expanderOptions = ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError;
                 foreach (var metadatumElement in itemElement.MetadataEnumerable)
                 {
-                    operationBuilder.Metadata.Add(metadatumElement);
+                    operationBuilder.AddMetadata(metadatumElement);
 
                     string expression = _expander.ExpandIntoStringLeaveEscaped(
                         metadatumElement.Value,
@@ -662,6 +688,11 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
+        }
+
+        internal static int GetInitialMetadataCapacity(ProjectItemElement itemElement)
+        {
+            return itemElement.Link is null ? itemElement.Count : 0;
         }
 
         private void AddItemReferences(string expression, OperationBuilder operationBuilder, IElementLocation elementLocation)
