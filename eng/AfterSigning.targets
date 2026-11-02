@@ -1,4 +1,6 @@
 <Project>
+    <Import Project="$(RepoRoot)src\Package\MSBuild.VSSetup\TelemetryReunification.targets" />
+
     <!-- Don't attempt to copy the PDBs at all when building on core on non-windows platforms. -->
     <Target Name="CopyAMD64Symbols" Condition="'$(OfficialBuild)' == 'true' AND $([MSBuild]::IsOSPlatform('windows'))" BeforeTargets="Build">
         <Copy

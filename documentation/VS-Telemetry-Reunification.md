@@ -1,7 +1,9 @@
 # Experimental VS telemetry SDK reunification
 
-This is an **opt-in investigation**, stacked on the private telemetry NGEN registration fix.
-It is not a proposed default SDK upgrade. Normal builds, NuGet packages, .NET hosts and
+This is an **isolated branch investigation**, stacked on the private telemetry NGEN registration fix.
+The experimental official build of `exp/janprovaznik/telemetry-reunification-2` activates it
+automatically; it must produce the newer SDK **or fail**, never silently publish the control.
+It is not a proposed default SDK upgrade. Normal main/public builds, NuGet packages, .NET hosts and
 MSBuild outside VS keep the public `Microsoft.VisualStudio.Telemetry` 17.14.18 dependency.
 Consent, session ownership, pending-event persistence and shutdown budgets are unchanged.
 
@@ -34,51 +36,66 @@ part of this x86/x64 experiment.
 
 ## Build and setup
 
-Use the VS instance whose SDK/configuration is to be measured; finish setup and close it first.
-The source installation is read-only. Inspect a snapshot before opting into packaging:
+`TelemetryReunification.targets` owns activation for the full-framework experimental official
+build of `refs/heads/exp/janprovaznik/telemetry-reunification-2`. No source path or snapshot-hash
+run parameters are required. Other branches, public CI and non-VS builds keep their defaults.
+For a local experimental build, one explicit property suffices:
 
 ```powershell
-$vs = 'C:\Program Files\Microsoft Visual Studio\18\IntPreview'
-$bin = Join-Path $vs 'MSBuild\Current\Bin'
-& powershell.exe -NoProfile -File .\src\Package\MSBuild.VSSetup\Prepare-TelemetryReunification.ps1 `
-  -VsInstallPath $vs -OutputDirectory "$env:TEMP\MSBuildTelemetrySnapshot" `
-  -X86Config "$bin\MSBuild.exe.config" -X64Config "$bin\amd64\MSBuild.exe.config" `
-  -CoordinatorConfig "$bin\MSBuild.Coordinator.exe.config" `
-  -CoordinatorX64Config "$bin\amd64\MSBuild.Coordinator.exe.config"
-```
-
-The tool reports the SHA-256 of `TelemetryReunification.json`. Inspect its SDK, dependency and
-host version/hash records, then explicitly pin that producer snapshot for the build. Environment
-properties avoid nested command-line quoting of a VS path containing spaces:
-
-```powershell
-$env:VsTelemetryExperimentSource = $vs
-$env:VsTelemetryExperimentExpectedSnapshotHash = '<inspected snapshot SHA-256>'
+$env:VsTelemetryExperiment = 'true'
 .\build.cmd -msbuildEngine vs -c Release -v quiet -bl
-Remove-Item Env:\VsTelemetryExperimentSource, Env:\VsTelemetryExperimentExpectedSnapshotHash
+Remove-Item Env:\VsTelemetryExperiment
 ```
 
-Only `MSBuild.VSSetup.csproj` consumes these opt-in properties. Its generated SWR replaces the old
-private telemetry payload with the selected VS bytes and adds all required non-SAC assemblies.
+The generator uses VS Installer `vswhere` to select the latest complete, launchable VS 18.6+
+installation with MSBuild and CoreEditor. There is **no hardcoded IntPreview/agent path**.
+The intended telemetry SDK is pinned in source to SHA-256
+`E6059126F51A01EB6B20D0452D3138BC2E6F6295EA0E86E4829CAA9583AFBA75`
+(file 18.4.50.56123). A missing/older/different SDK, missing OTel dependency, incomplete SAC
+binding, or unavailable source is an error with provisioning guidance, not a control fallback.
+It never downloads a private SDK or provisions VS implicitly.
+
+The selected host's actual config/SAC/dependency hashes are captured in the packaged
+`TelemetryReunification.json`. The sibling **build receipt** `TelemetryReunificationSource.json`
+records the discovered source path, selection rule, SDK pin, snapshot hash, and CI source
+branch/commit. The receipt pins subsequent package checks to this exact generated snapshot.
+This is dynamic, recorded producer provenance, **not an assertion that the destination VS
+has the same host/dependency snapshot**. Destination verification below remains mandatory.
+
+Optional reproduction overrides remain MSBuild properties (or environment properties):
+
+| Property | Purpose |
+|---|---|
+| `VsTelemetryExperimentSource` | Explicit fully installed source VS path instead of discovery; an unsuitable override fails rather than falling back |
+| `VsTelemetryExperimentExpectedTelemetryHash` | Explicit alternative newer-SDK pin; the 18.4.50+ and complete closure checks still apply |
+| `VsTelemetryExperimentExpectedSnapshotHash` | Require a previously inspected whole host/closure snapshot; a different snapshot is rejected |
+| `VsTelemetryExperiment=false` | Explicitly select the optimized old-SDK control |
+
+`MSBuild.VSSetup.csproj` consumes the selection and generates the SWR, replacing the old
+private telemetry payload with the selected VS bytes and adding all required non-SAC assemblies.
 Other build outputs, including `MSBuild.exe.config` outside the VSIX, are not rewritten.
-Omit the properties and rebuild to obtain the optimized old-SDK control package. The build
-rejects an absent pin or a source snapshot that differs from the pin.
+The same timestamped SWR input is used for both modes, preventing a mode switch from reusing
+the other variant's cached VSIX.
 
 The experimental official pipeline is `azure-pipelines\.vsts-dotnet-exp-perf.yml`, not the
-main/vs-only official pipeline. Its explicit runtime parameters are:
+main/vs-only official pipeline. Its only experiment-specific run parameter is
+`telemetryReunificationControl`: default **false** leaves the branch's automatic experiment
+active; **true** passes the explicit old-SDK control opt-out. Keep `enableOptProf` and
+`OptProfDropName` identical across comparison runs. The shared build job now explicitly defines
+`SkipApplyOptimizationDataArg` for both OptProf states, so a disabled run receives
+`/p:EnableNgenOptimization=false` rather than an unexpanded PowerShell expression.
 
-| Parameter | Unified-SDK run | Old-SDK native control |
-|---|---|---|
-| `vsTelemetryExperimentSource` | Fully installed source VS path on the Windows build agent | `disabled` |
-| `vsTelemetryExperimentSnapshotHash` | Inspected snapshot SHA-256 from the intended destination host | `disabled` |
-| `enableOptProf` | Match the control | Match the experiment |
-| `OptProfDropName` | Match the control | Match the experiment |
+`VerifyTelemetryReunificationPackage` is mandatory after SWIX (including incremental builds),
+again in the post-signing phase **before insertion manifest generation**, and before artifact
+publication. It requires the experiment manifest, newer telemetry/OTel payload, all recorded
+dependency hashes/bindings, and NGEN/group-config metadata. Missing/old/corrupted packages fail
+even when compilation/signing otherwise succeeds. No successful active experiment can publish
+an old-SDK control through a stale package cache.
 
-Select `refs/heads/exp/janprovaznik/telemetry-reunification` explicitly. The source instance must
-be provisioned to match the intended destination snapshot; do not use whichever SDK happens to
-be on the build agent. These parameters are wired into the Windows build as environment
-properties and a mismatched producer fails the package build. Default/automatic branch CI has
-the experiment **disabled**; pushing this ref alone does not produce a unified-SDK insertion.
+The original `exp/janprovaznik/telemetry-reunification` and draft #15429 remain unchanged
+evidence: MSBuild-ExpPerf 15875635 (20261030.5) published the old SDK because both former run
+parameters were disabled. VS insertion 801748 therefore did **not** test SDK reunification.
+The separate `-2` branch corrects that activation error without rewriting the earlier evidence.
 This investigation does not queue that pipeline or a downstream VS/perf run.
 
 The four config templates retain `vs.file.useGroupConfig="devenv"` and
@@ -104,7 +121,8 @@ Before deployment, run the package/destination preflight against the actual targ
 ```powershell
 & .\src\Package\MSBuild.VSSetup\Test-TelemetryReunification.ps1 `
   -VsixPath .\artifacts\VSSetup\Release\Insertion\Microsoft.Build.vsix `
-  -VsInstallPath $vs -ExpectedSnapshotHash '<inspected snapshot SHA-256>'
+  -VsInstallPath '<actual destination VS installation>' `
+  -ExpectedSnapshotHash '<published producer snapshot SHA-256>'
 ```
 
 It verifies every selected payload hash and NGEN root, every required binding in all four
@@ -113,12 +131,18 @@ exact host/config/SAC/dependency hashes. A mismatch is an error, not a fallback.
 preflight as a required deployment gate: the VS setup engine does not understand the experiment's
 snapshot manifest and cannot enforce this producer/destination constraint by itself.
 
+For a local producer check, use `-SourceReceiptPath` pointing at
+`artifacts\obj\MSBuild.VSSetup\Release\net472\telemetry-reunification\TelemetryReunificationSource.json`
+instead of supplying the source path and snapshot pin manually. Passing a destination path
+with that receipt still verifies the **destination**, not the recorded source.
+
 ## Untimed diagnostic probe
 
 `eng\experiments\TelemetryReunification\TelemetryReunificationProbe.cs` is deliberately not in a
 shipping project. Compile it into a scratch directory with the selected VS compiler and framework:
 
 ```powershell
+$bin = Join-Path '<selected VS installation>' 'MSBuild\Current\Bin'
 & "$bin\Roslyn\csc.exe" /nologo /target:library /langversion:preview /nullable:enable /warnaserror+ `
   "/out:$env:TEMP\TelemetryReunificationProbe.dll" `
   "/reference:$bin\Microsoft.Build.Framework.dll" `
@@ -212,3 +236,37 @@ versus unified-native comparison still requires setup/elevated registration cove
 cores and SDK closures, then independent Binding/Fusion/JIT confirmation and observer-free
 timing. Coordinator runtime, ARM64, naturally activated OpenTelemetry, and a fresh VS/perf
 insertion remain separate follow-up coverage.
+
+## Automatic activation correction (2026-11-02)
+
+The source-owned `-2` activation and gate checks were exercised with the production
+`SetVsixProperties`, SWIX compiler and verification targets, using already-built architecture
+inputs rather than recompiling another architecture. The scratch wrapper overrides only
+`SetBinPaths`; the complete VSIX generation and postpackage checks are the repository's targets.
+
+The local discovered producer is now VS **18.13.12330.35**, still with the pinned telemetry
+**18.4.50.56123**. Its actual updated dependency/config snapshot is
+`7585D1BB44BA7042EFDF192D2B00D3F885D9F3A87D97B52589E16D2B9CBA5799`:
+13 private payloads (**3,191,456 bytes**), 14 existing SAC members and four complete configs.
+This is a recorded new producer snapshot, not a claim that insertion 801748 has matching
+dependencies or that CI has been provisioned.
+
+The regression matrix passed **29 checks**, covering automatic activation without either
+former run parameter, original/main/public defaults, explicit control, automatic/control/automatic
+package round trips, incremental verification, missing discovery/source, old SDK, wrong SDK
+and host snapshot pins, and missing/corrupted experiment payloads. Old controls and changed
+payloads were blocked before post-signing Build, insertion manifest generation and publication
+sentinels. Those sentinels replace only the final side effects in scratch imports of the actual
+phase projects: **no real signing, network publication or pipeline run was performed**.
+A separate Core/MSBuild query also confirmed `VsTelemetryExperiment=false` and
+`ExcludeFromBuild=true` under the experimental branch context.
+
+The initial individual-project build attempts could not use the existing x64 reference-output
+layout, so a new full compilation was not claimed. The packaging-only harness avoids that
+unrelated prerequisite and verifies the requested configuration/payload correction directly.
+The prior runtime/lifecycle evidence above remains historical; no new runtime timing is claimed.
+
+Normal experimental CI on `exp/janprovaznik/telemetry-reunification-2` will now discover the
+specified SDK and validate the full generated/signed package, **or fail with provisioning/payload
+errors**. Availability of that SDK on the actual CI agent, a matching destination VS setup,
+native-image acceptance on both sides and fair timing remain unverified downstream work.

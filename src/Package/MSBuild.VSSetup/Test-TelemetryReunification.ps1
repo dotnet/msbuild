@@ -5,8 +5,10 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][string] $VsixPath,
-    [Parameter(Mandatory = $true)][string] $VsInstallPath,
-    [Parameter(Mandatory = $true)][string] $ExpectedSnapshotHash
+    [string] $VsInstallPath,
+    [string] $ExpectedSnapshotHash,
+    [string] $SourceReceiptPath,
+    [string] $ExpectedTelemetryHash
 )
 
 Set-StrictMode -Version Latest
@@ -17,6 +19,26 @@ if ($PSVersionTable.PSEdition -eq 'Desktop')
     Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Management\Microsoft.PowerShell.Management.psd1')
 }
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+if ($SourceReceiptPath)
+{
+    $receipt = Get-Content -LiteralPath $SourceReceiptPath -Raw | ConvertFrom-Json
+    if (!$VsInstallPath)
+    {
+        $VsInstallPath = $receipt.VsInstallPath
+    }
+    if (!$ExpectedSnapshotHash)
+    {
+        $ExpectedSnapshotHash = $receipt.SnapshotHash
+    }
+    if (!$ExpectedTelemetryHash)
+    {
+        $ExpectedTelemetryHash = $receipt.ExpectedTelemetryHash
+    }
+}
+if (!$VsInstallPath -or $ExpectedSnapshotHash -notmatch '^[0-9a-fA-F]{64}$')
+{
+    throw 'Telemetry package verification requires the generated source receipt or an explicit destination VS path and SHA-256 snapshot pin. Do not skip verification for an active experiment.'
+}
 $vs = [IO.Path]::GetFullPath($VsInstallPath).TrimEnd('\') + '\'
 $zip = [IO.Compression.ZipFile]::OpenRead([IO.Path]::GetFullPath($VsixPath))
 
@@ -78,6 +100,21 @@ try
     }
     $snapshot = Get-EntryText $snapshotName | ConvertFrom-Json
     $setup = Get-EntryText 'manifest.json' | ConvertFrom-Json
+    foreach ($required in 'Microsoft.VisualStudio.Telemetry', 'Microsoft.VisualStudio.OpenTelemetry', 'OpenTelemetry.Consolidated')
+    {
+        $assemblies = @($snapshot.Assemblies | Where-Object Name -eq $required)
+        if ($assemblies.Count -ne 1 -or $assemblies[0].Delivery -ne 'payload' -or
+            $assemblies[0].PublicKeyToken -ne 'b03f5f7f11d50a3a')
+        {
+            throw "The active experiment package lacks its required newer SDK/closure member: $required"
+        }
+    }
+    $telemetry = @($snapshot.Assemblies | Where-Object Name -eq 'Microsoft.VisualStudio.Telemetry')[0]
+    if ([version] $telemetry.FileVersion -lt [version] '18.4.50.0' -or
+        ($ExpectedTelemetryHash -and $telemetry.Hash -ne $ExpectedTelemetryHash))
+    {
+        throw 'The active experiment package contains a different/older telemetry SDK. Do not publish the control as the experiment.'
+    }
     $devenv = Join-Path $vs 'Common7\IDE\devenv.exe'
     if ([Diagnostics.FileVersionInfo]::GetVersionInfo($devenv).FileVersion -ne $snapshot.VsVersion -or
         (Get-FileHash -LiteralPath ($devenv + '.config') -Algorithm SHA256).Hash -ne $snapshot.DevenvConfigHash -or
@@ -161,6 +198,7 @@ try
             }
         }
     }
+    Write-Host "Verified active telemetry experiment VSIX: SDK $($telemetry.FileVersion), snapshot $ExpectedSnapshotHash, $(@($snapshot.Assemblies).Count) selected dependencies, four complete configs."
     [pscustomobject] @{
         Status = 'package-and-destination-verified'
         Vsix = [IO.Path]::GetFullPath($VsixPath)

@@ -19,14 +19,10 @@ parameters:
   displayName: Enable OptProf data collection for this build
   type: boolean
   default: false
-- name: vsTelemetryExperimentSource
-  displayName: Telemetry experiment source VS installation (disabled by default)
-  type: string
-  default: 'disabled'
-- name: vsTelemetryExperimentSnapshotHash
-  displayName: Required SHA-256 of the intended TelemetryReunification.json snapshot
-  type: string
-  default: 'disabled'
+- name: telemetryReunificationControl
+  displayName: Explicit old-SDK control (reunification-2 otherwise activates automatically)
+  type: boolean
+  default: false
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
@@ -95,8 +91,7 @@ extends:
           enableComponentGovernance: false
           signTypeParameter: ${{ parameters.signTypeParameter }}
           enableOptProf: ${{ parameters.enableOptProf }}
-          vsTelemetryExperimentSource: ${{ parameters.vsTelemetryExperimentSource }}
-          vsTelemetryExperimentSnapshotHash: ${{ parameters.vsTelemetryExperimentSnapshotHash }}
+          telemetryReunificationControl: ${{ parameters.telemetryReunificationControl }}
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:

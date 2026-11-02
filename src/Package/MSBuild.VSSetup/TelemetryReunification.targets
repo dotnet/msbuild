@@ -1,0 +1,27 @@
+<Project>
+
+  <PropertyGroup>
+    <_AutomaticTelemetryExperiment Condition="'$(MSBuildRuntimeType)' == 'Full' and '$(IsExperimental)' == 'true' and '$(BUILD_SOURCEBRANCH)' == 'refs/heads/exp/janprovaznik/telemetry-reunification-2'">true</_AutomaticTelemetryExperiment>
+    <VsTelemetryExperiment Condition="'$(VsTelemetryExperiment)' == '' and '$(_AutomaticTelemetryExperiment)' == 'true'">true</VsTelemetryExperiment>
+    <VsTelemetryExperiment Condition="'$(VsTelemetryExperiment)' == '' and '$(VsTelemetryExperimentSource)' != ''">true</VsTelemetryExperiment>
+    <VsTelemetryExperiment Condition="'$(VsTelemetryExperiment)' == ''">false</VsTelemetryExperiment>
+    <_TelemetryExperimentDirectory>$([MSBuild]::NormalizeDirectory('$(ArtifactsObjDir)', 'MSBuild.VSSetup', '$(Configuration)', '$(FullFrameworkTFM)', 'telemetry-reunification'))</_TelemetryExperimentDirectory>
+  </PropertyGroup>
+
+  <Target Name="VerifyTelemetryReunificationPackage"
+          Condition="'$(VsTelemetryExperiment)' == 'true' and '$(MSBuildRuntimeType)' == 'Full'">
+    <Exec Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Test-TelemetryReunification.ps1&quot; -VsixPath &quot;$(VisualStudioSetupInsertionPath)Microsoft.Build.vsix&quot; -SourceReceiptPath &quot;$(_TelemetryExperimentDirectory)TelemetryReunificationSource.json&quot; -VsInstallPath &quot;$(VsTelemetryExperimentSource)&quot; -ExpectedSnapshotHash &quot;$(VsTelemetryExperimentExpectedSnapshotHash)&quot; -ExpectedTelemetryHash &quot;$(VsTelemetryExperimentExpectedTelemetryHash)&quot;" />
+  </Target>
+
+  <Target Name="_VerifyTelemetryReunificationAfterSwix"
+          AfterTargets="SwixBuild"
+          DependsOnTargets="VerifyTelemetryReunificationPackage"
+          Condition="'$(MSBuildProjectName)' == 'MSBuild.VSSetup'" />
+
+  <!-- Recheck signed/cached insertion bytes before manifest generation and any artifact publication. -->
+  <Target Name="_VerifyTelemetryReunificationBeforePublication"
+          BeforeTargets="Build;Pack;GenerateVisualStudioInsertionManifests;PublishToAzureDevOpsArtifacts"
+          DependsOnTargets="VerifyTelemetryReunificationPackage"
+          Condition="'$(MSBuildProjectName)' == 'AfterSigning' or '$(MSBuildProjectName)' == 'Publish'" />
+
+</Project>

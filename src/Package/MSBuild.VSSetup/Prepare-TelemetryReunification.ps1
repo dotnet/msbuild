@@ -4,13 +4,14 @@
 #requires -Version 5.1
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true)][string] $VsInstallPath,
+    [string] $VsInstallPath,
     [Parameter(Mandatory = $true)][string] $OutputDirectory,
     [Parameter(Mandatory = $true)][string] $X86Config,
     [Parameter(Mandatory = $true)][string] $X64Config,
     [Parameter(Mandatory = $true)][string] $CoordinatorConfig,
     [Parameter(Mandatory = $true)][string] $CoordinatorX64Config,
-    [string] $ExpectedSnapshotHash
+    [string] $ExpectedSnapshotHash,
+    [string] $ExpectedTelemetryHash
 )
 
 Set-StrictMode -Version Latest
@@ -24,6 +25,38 @@ if ($PSVersionTable.PSEdition -ne 'Desktop')
 Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1')
 Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Management\Microsoft.PowerShell.Management.psd1')
 
+if (!$ExpectedTelemetryHash)
+{
+    # Pin the investigated SDK, not the build agent's older public MSBuild SDK.
+    $ExpectedTelemetryHash = 'E6059126F51A01EB6B20D0452D3138BC2E6F6295EA0E86E4829CAA9583AFBA75'
+}
+if ($ExpectedTelemetryHash -notmatch '^[0-9a-fA-F]{64}$' -or
+    ($ExpectedSnapshotHash -and $ExpectedSnapshotHash -notmatch '^[0-9a-fA-F]{64}$'))
+{
+    throw 'Telemetry experiment hashes must be SHA-256 values. Remove optional overrides to use the source-owned SDK pin and automatic provenance.'
+}
+$selection = 'explicit source override'
+if (!$VsInstallPath)
+{
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+    if (!(Test-Path -LiteralPath $vswhere))
+    {
+        throw 'Telemetry reunification cannot discover a source: VS Installer vswhere.exe is missing. Provision a complete VS 18.6+ installation on this agent; do not publish an old-SDK control as the experiment.'
+    }
+    $instancesJson = & $vswhere -latest -prerelease -products '*' -requires Microsoft.Component.MSBuild Microsoft.VisualStudio.Component.CoreEditor -version '[18.6,19.0)' -format json
+    if ($LASTEXITCODE -ne 0)
+    {
+        throw "Telemetry reunification VS discovery failed (vswhere exit $LASTEXITCODE). Provision a complete VS 18.6+ source on this agent."
+    }
+    $instances = @($instancesJson | ConvertFrom-Json)
+    if ($instances.Count -ne 1 -or !$instances[0].isComplete -or !$instances[0].isLaunchable)
+    {
+        throw 'Telemetry reunification requires a complete, launchable VS 18.6+ instance with the investigated SDK. None was discovered on this agent. Provision it or explicitly select VsTelemetryExperiment=false for a labeled control.'
+    }
+    $VsInstallPath = $instances[0].installationPath
+    $selection = 'vswhere latest complete VS 18.6+ with MSBuild and CoreEditor'
+}
+
 $vs = [IO.Path]::GetFullPath($VsInstallPath).TrimEnd('\') + '\'
 $output = [IO.Path]::GetFullPath($OutputDirectory).TrimEnd('\') + '\'
 if ($output.StartsWith($vs, [StringComparison]::OrdinalIgnoreCase) -or $vs.StartsWith($output, [StringComparison]::OrdinalIgnoreCase))
@@ -34,6 +67,21 @@ if ($output.StartsWith($vs, [StringComparison]::OrdinalIgnoreCase) -or $vs.Start
 $ide = Join-Path $vs 'Common7\IDE'
 $devenvConfig = Join-Path $ide 'devenv.exe.config'
 $sacConfig = Join-Path $vs 'SharedAssemblies\Configs\devenv.csv'
+$telemetryPath = Join-Path $ide 'PrivateAssemblies\Microsoft.VisualStudio.Telemetry.dll'
+foreach ($required in $devenvConfig, $sacConfig, $telemetryPath, (Join-Path $ide 'devenv.exe'))
+{
+    if (!(Test-Path -LiteralPath $required -PathType Leaf))
+    {
+        throw "Telemetry reunification source '$vs' is unsuitable: required file '$required' is missing. Provision the complete intended VS source or correct VsTelemetryExperimentSource; no control fallback is allowed."
+    }
+}
+$telemetryVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($telemetryPath).FileVersion
+$telemetryHash = (Get-FileHash -LiteralPath $telemetryPath -Algorithm SHA256).Hash
+if ([version] $telemetryVersion -lt [version] '18.4.50.0' -or $telemetryHash -ne $ExpectedTelemetryHash)
+{
+    throw "Telemetry reunification source '$vs' has SDK $telemetryVersion, SHA-256 $telemetryHash; expected the investigated newer SDK SHA-256 $ExpectedTelemetryHash (18.4.50+). Provision that SDK on this agent or explicitly select a control; do not silently substitute another SDK."
+}
+Write-Output "Telemetry reunification source: $vs ($selection); SDK $telemetryVersion, SHA-256 $telemetryHash."
 $sourceConfigHash = (Get-FileHash -LiteralPath $devenvConfig -Algorithm SHA256).Hash
 $sourceSacHash = (Get-FileHash -LiteralPath $sacConfig -Algorithm SHA256).Hash
 [xml] $hostConfig = Get-Content -LiteralPath $devenvConfig -Raw
@@ -192,7 +240,7 @@ function Add-Assembly([string] $Path)
     }
 }
 
-Add-Assembly (Join-Path $ide 'PrivateAssemblies\Microsoft.VisualStudio.Telemetry.dll')
+Add-Assembly $telemetryPath
 if (!@($assemblies.Values | Where-Object Name -eq 'Microsoft.VisualStudio.OpenTelemetry').Count -or
     !@($assemblies.Values | Where-Object Name -eq 'OpenTelemetry.Consolidated').Count)
 {
@@ -349,5 +397,15 @@ if ($ExpectedSnapshotHash -and $snapshotHash -ne $ExpectedSnapshotHash)
     throw "VS snapshot mismatch. Expected $ExpectedSnapshotHash; generated $snapshotHash. Do not substitute the build agent's SDK for the intended test host."
 }
 $swr | Set-Content -LiteralPath (Join-Path $output 'files.swr') -Encoding UTF8
+$receipt = [ordered] @{
+    VsInstallPath = $vs
+    Selection = $selection
+    SnapshotHash = $snapshotHash
+    ExpectedTelemetryHash = $ExpectedTelemetryHash
+    TelemetryFileVersion = $telemetryVersion
+    SourceBranch = $env:BUILD_SOURCEBRANCH
+    SourceCommit = $env:BUILD_SOURCEVERSION
+}
+[IO.File]::WriteAllText((Join-Path $output 'TelemetryReunificationSource.json'), ($receipt | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
 Write-Output "Experimental VS telemetry snapshot: $($payload.Count) payload assemblies; $($orderedAssemblies.Count - $payload.Count) existing devenv SAC assemblies; four executable configs."
 Write-Output "VsTelemetryExperimentExpectedSnapshotHash=$snapshotHash"

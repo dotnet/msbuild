@@ -29,21 +29,22 @@
     BeforeTargets="Build"
     DependsOnTargets="SetBinPaths"
     Condition="'$(ExcludeFromBuild)' != 'true'">
+    <Error Condition="'$(VsTelemetryExperiment)' != 'true' and '$(VsTelemetryExperiment)' != 'false'"
+           Text="VsTelemetryExperiment must be true or false. Use false only for an explicitly labeled old-SDK control." />
     <PropertyGroup>
-      <_TelemetryExperimentDirectory>$([MSBuild]::NormalizeDirectory('$(IntermediateOutputPath)', 'telemetry-reunification'))</_TelemetryExperimentDirectory>
-      <_DefaultVsSetupSwr Condition="'$(VsTelemetryExperimentSource)' == ''">$([MSBuild]::Escape($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)files.swr'))))</_DefaultVsSetupSwr>
+      <_DefaultVsSetupSwr Condition="'$(VsTelemetryExperiment)' == 'false'">$([MSBuild]::Escape($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)files.swr'))))</_DefaultVsSetupSwr>
     </PropertyGroup>
+    <Message Condition="'$(VsTelemetryExperiment)' == 'true' or '$(_AutomaticTelemetryExperiment)' == 'true'"
+             Importance="high" Text="VS telemetry reunification: $(VsTelemetryExperiment). Source branch: $(BUILD_SOURCEBRANCH). An active experiment must produce the newer SDK or fail." />
     <!-- A single timestamped SWR input prevents reusing the other variant's VSIX when opting in or out. -->
     <MakeDir Directories="$(_TelemetryExperimentDirectory)" />
-    <WriteLinesToFile Condition="'$(VsTelemetryExperimentSource)' == ''"
+    <WriteLinesToFile Condition="'$(VsTelemetryExperiment)' == 'false'"
                       File="$(_TelemetryExperimentDirectory)files.swr"
                       Lines="$(_DefaultVsSetupSwr)"
                       Overwrite="true"
                       WriteOnlyWhenDifferent="true" />
-    <Error Condition="'$(VsTelemetryExperimentSource)' != '' and '$(VsTelemetryExperimentExpectedSnapshotHash)' == ''"
-           Text="The telemetry experiment requires VsTelemetryExperimentExpectedSnapshotHash. First generate and inspect the intended VS snapshot with Prepare-TelemetryReunification.ps1." />
-    <Exec Condition="'$(VsTelemetryExperimentSource)' != ''"
-          Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Prepare-TelemetryReunification.ps1&quot; -VsInstallPath &quot;$(VsTelemetryExperimentSource)&quot; -ExpectedSnapshotHash &quot;$(VsTelemetryExperimentExpectedSnapshotHash)&quot; -OutputDirectory &quot;$(_TelemetryExperimentDirectory).&quot; -X86Config &quot;$(X86BinPath)MSBuild.exe.config&quot; -X64Config &quot;$(X64BinPath)MSBuild.exe.config&quot; -CoordinatorConfig &quot;$(CoordinatorBinPath)MSBuild.Coordinator.exe.config&quot; -CoordinatorX64Config &quot;$(CoordinatorX64BinPath)MSBuild.Coordinator.exe.config&quot;" />
+    <Exec Condition="'$(VsTelemetryExperiment)' == 'true'"
+          Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Prepare-TelemetryReunification.ps1&quot; -VsInstallPath &quot;$(VsTelemetryExperimentSource)&quot; -ExpectedSnapshotHash &quot;$(VsTelemetryExperimentExpectedSnapshotHash)&quot; -ExpectedTelemetryHash &quot;$(VsTelemetryExperimentExpectedTelemetryHash)&quot; -OutputDirectory &quot;$(_TelemetryExperimentDirectory).&quot; -X86Config &quot;$(X86BinPath)MSBuild.exe.config&quot; -X64Config &quot;$(X64BinPath)MSBuild.exe.config&quot; -CoordinatorConfig &quot;$(CoordinatorBinPath)MSBuild.Coordinator.exe.config&quot; -CoordinatorX64Config &quot;$(CoordinatorX64BinPath)MSBuild.Coordinator.exe.config&quot;" />
     <ItemGroup>
       <SwrFile Remove="files.swr" />
       <SwrFile Include="$(_TelemetryExperimentDirectory)files.swr" />
@@ -58,5 +59,7 @@
       <SwrProperty Include="CoordinatorX64BinPath=$(CoordinatorX64BinPath)" />
     </ItemGroup>
   </Target>
+
+  <Import Project="TelemetryReunification.targets" />
 
 </Project>
