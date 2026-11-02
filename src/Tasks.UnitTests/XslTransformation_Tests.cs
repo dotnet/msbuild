@@ -1151,8 +1151,11 @@ namespace Microsoft.Build.UnitTests
 
             task.ProhibitDtd.ShouldBeFalse();
             task.Execute().ShouldBeTrue();
-            XmlDocument result = new();
-            result.Load(outputPath.Path);
+            using XmlReader reader = XmlReader.Create(
+                outputPath.Path,
+                new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null });
+            XmlDocument result = new() { XmlResolver = null };
+            result.Load(reader);
             result.DocumentElement.Name.ShouldBe("root");
         }
 
