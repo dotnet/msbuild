@@ -1,14 +1,19 @@
 {
   "entries": {
-    "github/gh-aw-actions/setup-cli@v0.82.9": {
-      "repo": "github/gh-aw-actions/setup-cli",
-      "version": "v0.82.9",
-      "sha": "ca8678ca22a7aab577514482576720da641e5661"
+    "actions/download-artifact@v8.0.1": {
+      "repo": "actions/download-artifact",
+      "version": "v8.0.1",
+      "sha": "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"
     },
-    "github/gh-aw-actions/setup@v0.82.9": {
+    "actions/upload-artifact@v7.0.1": {
+      "repo": "actions/upload-artifact",
+      "version": "v7.0.1",
+      "sha": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+    },
+    "github/gh-aw-actions/setup@v0.92.3": {
       "repo": "github/gh-aw-actions/setup",
-      "version": "v0.82.9",
-      "sha": "ca8678ca22a7aab577514482576720da641e5661"
+      "version": "v0.92.3",
+      "sha": "26e5d7e7d2345ae4c8dfa3d9017ca2ff9bbf2c82"
     }
   }
 }

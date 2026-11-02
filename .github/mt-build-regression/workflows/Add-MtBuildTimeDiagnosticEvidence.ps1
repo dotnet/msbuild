@@ -17,8 +17,8 @@ param(
     [string]$Project = 'DevDiv',
     [string]$ClusterUri = 'https://perfstar-experimental.swedencentral.kusto.windows.net',
     [string]$Database = 'perfstar-dev',
-    [int]$DiagnosticPipelineId = 28394,
-    [int]$MaximumRunsToInspect = 24
+    [int]$DiagnosticPipelineId = 25429,
+    [ValidateRange(1, 100)][int]$MaximumRunsToInspect = 24
 )
 
 $ErrorActionPreference = 'Stop'

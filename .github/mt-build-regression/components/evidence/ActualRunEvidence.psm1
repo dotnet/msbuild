@@ -57,12 +57,12 @@ function Get-ArtifactDirectory
 
     try
     {
-        Save-AzureDevOpsArtifact `
+        $downloaded = Save-AzureDevOpsArtifact `
             -Client $Context.AzureDevOpsClient `
             -DownloadUrl $downloadUrl `
             -DestinationPath $zipPath
 
-        if (-not (Expand-BoundedArchive -ArchivePath $zipPath -DestinationPath $extractPath))
+        if (-not $downloaded -or -not (Expand-BoundedArchive -ArchivePath $zipPath -DestinationPath $extractPath))
         {
             Remove-Item -LiteralPath $extractPath -Recurse -Force -ErrorAction SilentlyContinue
             $Context.ArtifactCache[$cacheKey] = $null
@@ -125,7 +125,7 @@ function Get-GoldScenarioEvidence
     )
 
     $agentName = if ($Os -eq 'Windows') { 'GOLDWIN' } else { 'GOLDLIN' }
-    $artifactName = "CrankAssetsThinned$agentName"
+    $artifactName = "CrankAssets$agentName"
     $artifactDirectory = Get-ArtifactDirectory -Context $Context -BuildId $BuildId -ArtifactName $artifactName
     if ($null -eq $artifactDirectory)
     {
@@ -136,24 +136,55 @@ function Get-GoldScenarioEvidence
         }
     }
 
-    $resultFile = Get-ChildItem -LiteralPath $artifactDirectory -Recurse -File |
-        Where-Object Name -eq "$Scenario.json" |
-        Select-Object -First 1
-    if ($null -eq $resultFile)
+    $resultFiles = @(
+        Get-ChildItem -LiteralPath $artifactDirectory -Recurse -File |
+            Where-Object Name -eq "$Scenario.json")
+    # A diagnostic worker can publish multiple arms with identical scenario filenames.
+    # Only an unambiguous clean result can describe the detector's clean measurement.
+    $cleanFiles = @($resultFiles | Where-Object {
+        $relativePath = [IO.Path]::GetRelativePath($artifactDirectory, $_.FullName)
+        $relativePath -notmatch '(^|[\\/])(baseline|diagnostic)([\\/]|$)'
+    })
+    if ($cleanFiles.Count -ne 1)
     {
         return [pscustomobject][ordered]@{
             available = $false
             artifactName = $artifactName
-            message = "Scenario result '$Scenario.json' was not present."
+            message = 'A unique clean scenario result was not available.'
         }
     }
 
-    $result = Get-Content -LiteralPath $resultFile.FullName -Raw | ConvertFrom-Json
+    if ($cleanFiles[0].Length -gt 16MB)
+    {
+        return [pscustomobject][ordered]@{
+            available = $false
+            artifactName = $artifactName
+            message = 'Scenario result exceeds the 16 MiB JSON-size limit.'
+        }
+    }
+
+    $result = Get-Content -LiteralPath $cleanFiles[0].FullName -Raw | ConvertFrom-Json
+    $results = Get-OptionalValue -InputObject $result -Path 'jobResults', 'jobs', 'application', 'results'
+    if ($null -eq $results)
+    {
+        $results = Get-OptionalValue -InputObject $result -Path 'jobs', 'application', 'results'
+    }
+    $exitCode = Get-OptionalValue -InputObject $results -Path 'exit-code'
+    $failure = [string](Get-OptionalValue -InputObject $results -Path 'failure-description')
+    if ($null -eq $results -or [string]$exitCode -cne '0' -or -not [string]::IsNullOrWhiteSpace($failure))
+    {
+        return [pscustomobject][ordered]@{
+            available = $false
+            artifactName = $artifactName
+            message = 'The clean scenario result did not contain successful application metrics.'
+        }
+    }
+
     [pscustomobject][ordered]@{
         available = $true
         artifactName = $artifactName
-        timestamp = [string]$result.timestamp
-        metrics = ConvertTo-AllowlistedMetrics -Properties $result.results.PSObject.Properties
+        timestamp = [string](Get-OptionalValue -InputObject $result -Path 'timestamp')
+        metrics = ConvertTo-AllowlistedMetrics -Properties $results.PSObject.Properties
         logExcerpt = ''
     }
 }

@@ -33,11 +33,11 @@ flowchart TD
 
     subgraph sources["External data sources (credentialed access only)"]
         direction TB
-        kusto[("Kusto perfstar-dev<br/>PerfStarDataRaw +<br/>task_wallclock / target_wallclock /<br/>eval_pass / task_inventory")]
+        kusto[("Kusto perfstar-dev<br/>PerfStarDataRaw +<br/>gold_runs / gold_task_runs / gold_target_runs /<br/>gold_project_evaluations / gold_task_inventory")]
         azdoGold[["Azure DevOps 25429<br/>PerfStar-Scheduled (Gold)"]]
         azdoHosted[["Azure DevOps 28338<br/>PerfStar-DevOpsHosted-Worker (Hosted)"]]
-        azdoMsbuild[["Azure DevOps 9434<br/>MSBuild (component source SHA)"]]
-        azdoDiag[["Azure DevOps 28394<br/>PerfStar-DevOpsHosted-Diagnostics"]]
+        azdoMsbuild[["Azure DevOps 9434<br/>MSBuild (selected build source SHA)"]]
+        azdoDiag[["Azure DevOps 25429<br/>GOLD paired diagnostics"]]
     end
 
     subgraph scan["Job: mt_regression_scan (trusted, has secrets)"]
@@ -86,9 +86,10 @@ flowchart TD
 5. `workflows/Add-MtBuildTimeRegressionEvidence.ps1` resolves the exact current and last-healthy MSBuild
    revisions, downloads only candidate-specific artifacts, extracts allowlisted metrics plus safe
    Hosted timing/completion lines, then deletes the raw files.
-6. `workflows/Add-MtBuildTimeDiagnosticEvidence.ps1` finds scheduled diagnostic runs from definition 28394
-   that use the exact current or last-healthy MSBuild source SHA, then queries Kusto task, target,
-   evaluation-pass, and task-migration data.
+6. `workflows/Add-MtBuildTimeDiagnosticEvidence.ps1` discovers recent qualified GOLD diagnostics in
+   `gold_runs()` from worker definition 25429. It matches the exact selected current or last-healthy
+   MSBuild source SHA and queries completed, deduplicated task, target, evaluation-pass, and
+   task-migration partitions. It never joins partition metadata on `run_key` alone.
 7. `workflows/Add-MtBuildTimeExistingWork.ps1` lists only open items authored by
    `github-actions[bot]`, validates the workflow and candidate-set markers in their descriptions,
    and writes only item type, number, and URL. It does not request comments or reviews.
@@ -129,7 +130,8 @@ The detector uses production `build-time` rows from:
 - `Backend == "Gold"` with `RunKind == "Gold"`
 - `Backend == "Hosted"` with `RunKind == "Hosted"`
 - Windows and Linux
-- `SourceBranch == "refs/heads/main"`
+- `SourceBranch == "refs/heads/main"` and `MsbuildBranch == "refs/heads/main"`
+- `BinlogCollected == false` and `TraceCollected == false`
 
 MT and non-MT scenarios are paired by removing the `-mt-` infix or trailing `-mt`. Per-build medians
 are used so runs with more iterations do not receive extra weight.
@@ -144,6 +146,28 @@ A pair is emitted only when:
 
 The output remains a possible-regression signal. The agent must still evaluate measurement noise,
 shared infrastructure, SDK or asset changes, and recent source changes.
+
+The Hosted definitions (28338 clean and 28394 diagnostics) are disabled as of November 2026.
+Their historical clean data remains supported but cannot satisfy the two-day freshness gate.
+The GOLD orchestrator (28436) schedules worker 25429 at 01:00 UTC for clean measurements and
+09:00 UTC for paired diagnostics; the detector deliberately excludes both diagnostic arms.
+
+Actual GOLD metrics come from `CrankAssetsGOLDWIN` / `CrankAssetsGOLDLIN`, not the retired thinned
+artifacts. Full `jobResults.jobs.application.results` (or historical `jobs.application.results`)
+is reduced to the existing scalar metric allowlist; per-iteration arrays and raw files never
+reach the agent. Baseline/diagnostic result roots are excluded and duplicate clean results are
+reported as unavailable.
+Downloads are streamed with a 100 MiB limit, including responses without a length header, and
+a 600-second per-attempt deadline covering headers and body. Partial downloads are deleted.
+The existing 500 MiB expanded-size and 10,000-entry archive limits remain; individual GOLD scenario
+JSON files over 16 MiB are rejected before reading or parsing and reported as unavailable.
+
+MSBuild identity follows `MSBuildBuildIDOverride`: an explicit build ID selects that build;
+`default` can identify the pipeline resource only when its version matches the resolved successful
+mainline build number, as in the current scheduled worker's pinned selection. Bundled, deleted,
+missing, unsupported, or unverifiable
+selections remain unavailable rather than attributing the resource build to another MSBuild.
+`gold_runs().source_version` is the PerfStar revision, not the measured MSBuild revision.
 
 `PerfStarDataRaw` is ingested while a run executes, so the newest rows can belong to a build that has
 not finished and has therefore reported only part of its scenarios. Those scenarios are also measured
@@ -174,13 +198,16 @@ It also needs Azure DevOps `View builds` access to:
 
 - PerfStar-Scheduled, definition 25429;
 - PerfStar-DevOpsHosted-Worker, definition 28338; and
-- MSBuild, definition 9434, to resolve the component source revision.
-- PerfStar-DevOpsHosted-Diagnostics, definition 28394, to match scheduled binlog runs by source SHA.
+- MSBuild, definition 9434, to resolve the selected build's source revision.
 
 No Azure DevOps queue permission is required for the initial workflow.
 
 The workflow reuses the repository's existing `copilot-pat-pool` environment and PAT rotation
 mechanism used by the other Agentic Workflows.
+The engine explicitly selects `gpt-6.1-sol` with `xhigh` reasoning. The PAT-pool import accepts
+the run ID as a string seed so its optional input resolves to a valid Actions expression.
+Regenerate the lock file with the repository-matching
+gh-aw compiler (v0.92.3, Copilot 1.0.98): `gh aw compile mt-build-regression.agent --validate`.
 
 ## Issue deduplication
 
@@ -206,8 +233,9 @@ unreachable.
 - The source comparison narrows the candidate commit range but does not prove causality.
 - The agent receives allowlisted metrics and bounded timing/completion excerpts, not raw logs or
   binlogs.
-- Scheduled binlog evidence is direct for Hosted candidates and supporting corroboration only for
-  Gold candidates.
+- GOLD scheduled binlog evidence is same-backend supporting evidence for Gold candidates and
+  cross-backend corroboration for Hosted. Exact-source evidence is unavailable when either mode
+  lacks a qualified partition or the SDK hash, MSBuild version, or expected iteration counts differ.
 - Task and target wall-clock totals can include nested or repeated work; migrated task controls are
   included as the contention/noise floor.
 - The workflow creates candidate fixes but does not run PerfStar against them.

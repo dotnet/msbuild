@@ -3,6 +3,7 @@
 Set-StrictMode -Version Latest
 
 Import-Module (Join-Path $PSScriptRoot '..\clients\AzureDevOpsClient.psm1')
+Import-Module (Join-Path $PSScriptRoot '..\clients\HttpRetry.psm1')
 
 function Get-PerfStarPipelineDefinitionId
 {
@@ -70,7 +71,7 @@ function Get-PerfStarRunMetadata
 {
     <#
     .SYNOPSIS
-    Resolves a PerfStar run and the MSBuild component build it consumed.
+    Resolves a PerfStar run and its selected MSBuild build, without guessing bundled identities.
 
     .DESCRIPTION
     Candidates in a single scan usually share one PerfStar build, so results are cached by
@@ -81,24 +82,83 @@ function Get-PerfStarRunMetadata
         [Parameter(Mandatory)]$AzureDevOpsClient,
         [Parameter(Mandatory)][hashtable]$RunCache,
         [Parameter(Mandatory)][string]$BuildId,
-        [Parameter(Mandatory)][string]$Backend
+        [Parameter(Mandatory)][string]$Backend,
+        [int]$DefinitionId = 0
     )
 
-    $cacheKey = "$Backend/$BuildId"
+    if ($DefinitionId -eq 0)
+    {
+        $DefinitionId = Get-PerfStarPipelineDefinitionId -Backend $Backend
+    }
+
+    $cacheKey = "$DefinitionId/$BuildId"
     if ($RunCache.ContainsKey($cacheKey))
     {
         return $RunCache[$cacheKey]
     }
 
-    $definitionId = Get-PerfStarPipelineDefinitionId -Backend $Backend
-    $run = Get-AzureDevOpsPipelineRun -Client $AzureDevOpsClient -DefinitionId $definitionId -BuildId $BuildId
+    $run = Get-AzureDevOpsPipelineRun -Client $AzureDevOpsClient -DefinitionId $DefinitionId -BuildId $BuildId
     $component = Get-OptionalValue -InputObject $run -Path 'resources', 'pipelines', 'ComponentBuildUnderTest'
-    $componentPipelineId = Get-OptionalValue -InputObject $component -Path 'pipeline', 'id'
+    $selection = [string](Get-OptionalValue -InputObject $run -Path 'templateParameters', 'MSBuildBuildIDOverride')
+    $selectedBuildId = ''
+    $identityMessage = ''
+    if ($selection -match '^[1-9][0-9]*\z')
+    {
+        $selectedBuildId = $selection
+    }
+    elseif ($selection -eq 'default')
+    {
+        # The Pipelines REST payload embeds the resource run ID here, unlike YAML's pipeline ID.
+        # Cross-check its version below instead of trusting an unrelated build with the same ID.
+        $selectedBuildId = [string](Get-OptionalValue -InputObject $component -Path 'pipeline', 'id')
+        $identityMessage = 'The default resource does not establish the selected mainline MSBuild build.'
+    }
+    elseif ($selection -eq 'bundled')
+    {
+        $identityMessage = 'Bundled SDK MSBuild has no independently resolved source identity.'
+    }
+    else
+    {
+        $identityMessage = 'The measured MSBuild selection is missing or unsupported.'
+    }
 
     $componentBuild = $null
-    if ($null -ne $componentPipelineId)
+    if ($selectedBuildId -match '^[1-9][0-9]*\z')
     {
-        $componentBuild = Get-AzureDevOpsBuild -Client $AzureDevOpsClient -BuildId ([string]$componentPipelineId)
+        $selectedBuild = $null
+        try
+        {
+            $selectedBuild = Get-AzureDevOpsBuild -Client $AzureDevOpsClient -BuildId $selectedBuildId
+        }
+        catch
+        {
+            if ((Get-HttpExceptionStatusCode -Exception $_.Exception) -ne 404)
+            {
+                throw
+            }
+        }
+
+        $resourceVersion = [string](Get-OptionalValue -InputObject $component -Path 'version')
+        $resourceMatches = $selection -ne 'default' -or
+            (-not [string]::IsNullOrWhiteSpace($resourceVersion) -and
+                $resourceVersion -eq [string](Get-OptionalValue -InputObject $selectedBuild -Path 'buildNumber'))
+        if ($null -eq $selectedBuild)
+        {
+            $identityMessage = 'The selected MSBuild build is no longer available.'
+        }
+        elseif ($resourceMatches -and
+            [string](Get-OptionalValue -InputObject $selectedBuild -Path 'id') -eq $selectedBuildId -and
+            [string](Get-OptionalValue -InputObject $selectedBuild -Path 'sourceBranch') -eq 'refs/heads/main' -and
+            [string](Get-OptionalValue -InputObject $selectedBuild -Path 'sourceVersion') -match '^[0-9a-fA-F]{40}\z' -and
+            [string](Get-OptionalValue -InputObject $selectedBuild -Path 'result') -eq 'succeeded')
+        {
+            $componentBuild = $selectedBuild
+            $identityMessage = ''
+        }
+        else
+        {
+            $identityMessage = 'The selected build does not establish a successful mainline MSBuild source identity.'
+        }
     }
 
     $metadata = [pscustomobject][ordered]@{
@@ -108,18 +168,12 @@ function Get-PerfStarRunMetadata
         perfStarBuildResult = [string](Get-OptionalValue -InputObject $run -Path 'result')
         perfStarBuildUrl = [string](Get-OptionalValue -InputObject $run -Path '_links', 'web', 'href')
         componentBuildId = [string](Get-OptionalValue -InputObject $componentBuild -Path 'id')
-        componentBuildNumber = if ($null -ne $componentBuild)
-        {
-            [string](Get-OptionalValue -InputObject $componentBuild -Path 'buildNumber')
-        }
-        else
-        {
-            [string](Get-OptionalValue -InputObject $component -Path 'version')
-        }
+        componentBuildNumber = [string](Get-OptionalValue -InputObject $componentBuild -Path 'buildNumber')
         componentSourceBranch = [string](Get-OptionalValue -InputObject $componentBuild -Path 'sourceBranch')
         componentSourceVersion = [string](Get-OptionalValue -InputObject $componentBuild -Path 'sourceVersion')
         componentBuildResult = [string](Get-OptionalValue -InputObject $componentBuild -Path 'result')
         componentBuildUrl = [string](Get-OptionalValue -InputObject $componentBuild -Path '_links', 'web', 'href')
+        componentIdentityMessage = $identityMessage
     }
 
     $RunCache[$cacheKey] = $metadata
@@ -162,6 +216,7 @@ function Test-PerfStarRunUsable
 
 Export-ModuleMember -Function @(
     'Get-PerfStarPipelineDefinitionId',
+    'Get-OptionalValue',
     'New-PerfStarRunCache',
     'Get-PerfStarRunMetadata',
     'Test-PerfStarRunUsable'

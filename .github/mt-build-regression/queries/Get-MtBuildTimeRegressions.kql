@@ -7,7 +7,9 @@ let productionRuns =
     PerfStarDataRaw
     | where Timestamp >= ago(lookback)
     | where SourceBranch == "refs/heads/main"
+    | where MsbuildBranch == "refs/heads/main"
     | where RunKind in ("Gold", "Hosted")
+    | where BinlogCollected == false and TraceCollected == false
     | where Backend in ("Gold", "Hosted") and Os in ("Windows", "Linux")
     | where Backend == RunKind
     | where Stage == "build-time" and isfinite(ValueMs) and ValueMs > 0

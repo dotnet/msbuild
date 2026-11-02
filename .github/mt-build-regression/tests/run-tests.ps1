@@ -216,6 +216,8 @@ Assert-Equal ([double]$detector.minimumMtRegressionPercent).ToString('0.0', [Glo
 Assert-Equal ([double]$detector.minimumMtRegressionMs).ToString('0.0', [Globalization.CultureInfo]::InvariantCulture) (Get-KqlLetLiteral -Text $kql -Name 'minRegressionMs') 'Detector millisecond metadata must match Kusto.'
 Assert-True ($kql.Contains('| where MtMedianMs > BaselineMtP90Ms')) 'The executable detector must require MT above baseline p90.'
 Assert-True ($kql.Contains('MtVsNonMtDeltaMs > BaselineDeltaP90Ms')) 'The executable detector must require differential above baseline p90.'
+Assert-True ($kql.Contains('| where MsbuildBranch == "refs/heads/main"')) 'Experimental MSBuild branches must not enter current or baseline production comparisons.'
+Assert-True ($kql.Contains('| where BinlogCollected == false and TraceCollected == false')) 'Instrumented rows must not enter clean production comparisons.'
 
 Assert-True (Test-SafeMetricName -Name 'build-time') 'build-time must be allowlisted.'
 Assert-True (Test-SafeMetricName -Name 'evaluation-time-pass3') 'Evaluation pass metrics must be allowlisted.'
@@ -227,6 +229,36 @@ $transportException = [System.Net.Http.HttpRequestException]::new('Transient tra
 Assert-Equal 0 (Get-HttpExceptionStatusCode -Exception $transportException) 'Transport failures without Response must map to status 0.'
 Assert-True (Test-RetryableHttpStatusCode -StatusCode 0) 'Transport failures must remain retryable.'
 Assert-True (-not (Test-RetryableHttpStatusCode -StatusCode 401)) 'Authentication failures must not be retried.'
+foreach ($code in @(401, 429, 503))
+{
+    $httpError = [Net.Http.HttpRequestException]::new('HTTP failure', $null, [Net.HttpStatusCode]$code)
+    Assert-Equal $code (Get-HttpExceptionStatusCode -Exception $httpError) 'Streaming HTTP failures must retain their status for retry classification.'
+    $wrapped = [Management.Automation.MethodInvocationException]::new('Wrapped HTTP failure', $httpError)
+    Assert-Equal $code (Get-HttpExceptionStatusCode -Exception $wrapped) 'PowerShell method wrappers must not hide HTTP status codes.'
+}
+
+$azureModule = Get-Module AzureDevOpsClient
+foreach ($case in @(@(0, 8), @(8, 8), @(9, 8), @(65537, 65536), @(65537, 65537)))
+{
+    $source = [IO.MemoryStream]::new([byte[]]::new($case[0]))
+    $destination = [IO.MemoryStream]::new()
+    try
+    {
+        $copied = & $azureModule {
+            param($Source, $Destination, $Limit)
+            Copy-BoundedArtifactStream -Source $Source -Destination $Destination -MaximumBytes $Limit
+        } $source $destination $case[1]
+        Assert-Equal ($case[0] -le $case[1]) $copied 'Streaming must accept the exact limit and reject an extra byte without relying on headers.'
+        Assert-True ($destination.Length -le $case[1]) 'Streaming must never write beyond the byte limit.'
+        Assert-True ($source.Position -le $case[1] + 1) 'Streaming must stop reading at the first byte over the limit.'
+        if ($copied) { Assert-Equal $case[0] $destination.Length 'A successful streamed copy must preserve all bytes.' }
+    }
+    finally
+    {
+        $source.Dispose()
+        $destination.Dispose()
+    }
+}
 
 $metricSource = [pscustomobject]@{
     'build-time' = 123
@@ -316,7 +348,162 @@ else
         Assert-Equal '' $sparseMetadata.componentSourceVersion 'An omitted component resource must become an empty string.'
         Assert-True (-not (Test-PerfStarRunUsable -Run $sparseMetadata)) 'A sparse in-progress run must be rejected rather than throw.'
     }
+
+    $selections = & $runSelectionModule {
+        function Get-AzureDevOpsPipelineRun
+        {
+            [pscustomobject]@{
+                id = 1; name = 'run'; state = 'completed'; result = 'succeeded'
+                templateParameters = [pscustomobject]@{ MSBuildBuildIDOverride = $selection }
+                resources = [pscustomobject]@{
+                    pipelines = [pscustomobject]@{
+                        ComponentBuildUnderTest = [pscustomobject]@{
+                            pipeline = [pscustomobject]@{ id = 10 }
+                            version = $resourceVersion
+                        }
+                    }
+                }
+            }
+        }
+        function Get-AzureDevOpsBuild
+        {
+            param($Client, $BuildId)
+            [pscustomobject]@{
+                id = $BuildId; buildNumber = "build-$BuildId"; result = 'succeeded'
+                sourceBranch = $branch; sourceVersion = ('a' * 40)
+            }
+        }
+        $branch = 'refs/heads/main'
+        $resourceVersion = 'build-10'
+        foreach ($selection in @('default', '20', 'bundled', '', 'unsupported'))
+        {
+            Get-PerfStarRunMetadata -AzureDevOpsClient ([pscustomobject]@{}) -RunCache @{} -BuildId '1' -Backend Gold
+        }
+        $branch = 'refs/heads/main'
+        $selection = 'default'
+        $resourceVersion = 'different-resource-build'
+        Get-PerfStarRunMetadata -AzureDevOpsClient ([pscustomobject]@{}) -RunCache @{} -BuildId '1' -Backend Gold
+        $branch = 'refs/heads/perf/experiment'
+        $resourceVersion = 'build-10'
+        foreach ($selection in @('default', '20'))
+        {
+            Get-PerfStarRunMetadata -AzureDevOpsClient ([pscustomobject]@{}) -RunCache @{} -BuildId '1' -Backend Gold
+        }
+    }
+    Assert-Equal '10' $selections[0].componentBuildId 'Default mainline selection must resolve the resource build.'
+    Assert-Equal '20' $selections[1].componentBuildId 'An override must resolve the selected build, not the resource.'
+    foreach ($selection in $selections[2..7])
+    {
+        Assert-Equal '' $selection.componentSourceVersion 'Bundled, unknown, mismatched-resource, and non-main selections must not claim a source revision.'
+        Assert-Equal '' $selection.componentBuildNumber 'Unavailable identity must not retain the unrelated resource build number.'
+        Assert-True (-not [string]::IsNullOrWhiteSpace($selection.componentIdentityMessage)) 'Unavailable identity must have an explicit explanation.'
+    }
+
+    $absentBuild = & $runSelectionModule {
+        function Get-AzureDevOpsPipelineRun
+        {
+            [pscustomobject]@{ id = 1; state = 'completed'; result = 'succeeded'
+                templateParameters = [pscustomobject]@{ MSBuildBuildIDOverride = '20' } }
+        }
+        function Get-AzureDevOpsBuild
+        {
+            throw [Microsoft.PowerShell.Commands.HttpResponseException]::new(
+                'Not found', [System.Net.Http.HttpResponseMessage]::new([System.Net.HttpStatusCode]::NotFound))
+        }
+        Get-PerfStarRunMetadata -AzureDevOpsClient ([pscustomobject]@{}) -RunCache @{} -BuildId '1' -Backend Gold
+    }
+    Assert-Equal '' $absentBuild.componentSourceVersion 'A deleted selected build must leave source identity unavailable rather than abort the scan.'
+    Assert-True ($absentBuild.componentIdentityMessage.Contains('no longer available')) 'A deleted selected build must have an explicit unavailable explanation.'
+    $serviceFailure = & $runSelectionModule {
+        function Get-AzureDevOpsPipelineRun
+        {
+            [pscustomobject]@{ templateParameters = [pscustomobject]@{ MSBuildBuildIDOverride = '20' } }
+        }
+        function Get-AzureDevOpsBuild
+        {
+            throw [Microsoft.PowerShell.Commands.HttpResponseException]::new(
+                'Service unavailable', [System.Net.Http.HttpResponseMessage]::new([System.Net.HttpStatusCode]::ServiceUnavailable))
+        }
+        try
+        {
+            Get-PerfStarRunMetadata -AzureDevOpsClient ([pscustomobject]@{}) -RunCache @{} -BuildId '1' -Backend Gold
+        }
+        catch
+        {
+            'service-failure-propagated'
+        }
+    }
+    Assert-Equal 'service-failure-propagated' $serviceFailure 'Transient selected-build lookup errors must still fail explicitly.'
 }
+
+$diagnosticModule = Get-Module DiagnosticEvidence
+$diagnosticQueries = [System.Collections.Generic.List[string]]::new()
+$diagnosticCandidates = & $diagnosticModule {
+    param($Queries)
+    function Invoke-KustoQuery
+    {
+        param($Client, $Query, $MaximumAttempts, $RequirePrimaryTable)
+        $Queries.Add($Query)
+        if ($Query.StartsWith('gold_runs()'))
+        {
+            return [pscustomobject]@{ build_id = '1'; run_key = 'main-Gold-GoldPairedDiagnostic-1' }
+        }
+        foreach ($index in 1..25)
+        {
+            [pscustomobject]@{
+                evidence_kind = 'task'; item_name = "Task$index"; item_full_name = "Tasks.Task$index"
+                non_mt_ms = 10; mt_ms = 20; delta_ms = 10; absolute_delta_ms = 10; migration_state = 'migrated'
+            }
+        }
+    }
+    function Get-PerfStarRunMetadata
+    {
+        [pscustomobject]@{
+            perfStarBuildId = '1'; perfStarBuildNumber = 'diagnostic'; perfStarBuildState = 'completed'
+            perfStarBuildResult = 'failed'; perfStarBuildUrl = ''
+            componentSourceVersion = ('a' * 40); componentBuildId = '20'; componentBuildNumber = 'selected'
+            componentBuildUrl = ''
+        }
+    }
+    $evidence = [pscustomobject]@{ candidates = @(
+        foreach ($backend in @('Gold', 'Hosted'))
+        {
+            [pscustomobject]@{
+                Backend = $backend; ScenarioPair = 'alpha'; Os = 'Windows'
+                currentRun = [pscustomobject]@{ componentSourceVersion = ('a' * 40) }
+                healthyRun = $null
+            }
+        }
+    ) }
+    Get-DiagnosticEvidenceCandidates -Evidence $evidence -AzureDevOpsClient ([pscustomobject]@{}) `
+        -KustoClient ([pscustomobject]@{}) -DiagnosticPipelineId 25429 -MaximumRunsToInspect 24
+} $diagnosticQueries
+Assert-Equal 2 $diagnosticQueries.Count 'Diagnostic detail queries must be cached across candidates sharing a run/scenario/OS.'
+Assert-True ($diagnosticQueries[0].Contains('| take 24')) 'Diagnostic discovery must stay bounded.'
+Assert-True ($diagnosticQueries[0].Contains('| order by last_ingested_at desc, build_id desc, run_key asc')) 'Bounded discovery must use stable recency ordering.'
+Assert-True ($diagnosticQueries[0].Contains('by run_key, build_id')) 'Partition-level run metadata must be collapsed before source resolution.'
+Assert-True ($diagnosticQueries[1].Contains('join kind=leftsemi paired on run_key, scenario_pair, os')) 'Diagnostic qualification must use full partition keys without multiplying rows.'
+Assert-True ($diagnosticQueries[1].Contains('array_length(modes) == 2')) 'Both completed MT modes must qualify before any diagnostic evidence is read.'
+Assert-True ($diagnosticQueries[1].Contains('sdk_count == 1 and version_count == 1 and iteration_count == 1')) 'Diagnostic pairs must share toolchain and iteration counts.'
+foreach ($view in @('gold_task_runs()', 'gold_target_runs()', 'gold_project_evaluations()', 'gold_task_inventory()'))
+{
+    Assert-True ($diagnosticQueries[1].Contains($view)) "Diagnostics must use qualified deduplicated $view."
+}
+Assert-True (-not $diagnosticQueries[1].Contains('endswith')) 'Diagnostic rows must pin the exact run key rather than a build-ID suffix.'
+Assert-Equal 'same-backend-gold' $diagnosticCandidates[0].currentDiagnostic.relationship 'GOLD candidates must describe GOLD evidence truthfully.'
+Assert-Equal 'gold-corroboration-for-hosted' $diagnosticCandidates[1].currentDiagnostic.relationship 'Hosted candidates must label GOLD evidence as cross-backend corroboration.'
+Assert-Equal 15 $diagnosticCandidates[0].currentDiagnostic.topTaskDeltas.Count 'Task evidence must retain its existing bound.'
+Assert-Equal 5 $diagnosticCandidates[0].currentDiagnostic.migratedTaskControls.Count 'Migrated controls must retain their existing bound.'
+$unknownDiagnostic = & $diagnosticModule {
+    function Invoke-KustoQuery { throw 'Unknown identities must not trigger diagnostic queries.' }
+    $evidence = [pscustomobject]@{ candidates = @([pscustomobject]@{
+        Backend = 'Gold'; ScenarioPair = 'alpha'; Os = 'Linux'
+        currentRun = [pscustomobject]@{ componentSourceVersion = '' }; healthyRun = $null
+    }) }
+    Get-DiagnosticEvidenceCandidates -Evidence $evidence -AzureDevOpsClient ([pscustomobject]@{}) `
+        -KustoClient ([pscustomobject]@{}) -DiagnosticPipelineId 25429 -MaximumRunsToInspect 24
+}
+Assert-True ($null -eq $unknownDiagnostic.currentDiagnostic) 'Unknown measured identity must gracefully leave diagnostics unavailable.'
 Assert-True (Test-SafeKustoDimension -Value 'Scenario-1_mt' -Name 'test') 'Expected diagnostic dimensions must be accepted.'
 Assert-True (-not (Test-SafeKustoDimension -Value 'Scenario"; drop' -Name 'test' -WarningAction SilentlyContinue)) 'Unsafe Kusto dimensions must be rejected.'
 Assert-True (-not (Test-SafeKustoDimension -Value "Scenario`n" -Name 'test' -WarningAction SilentlyContinue)) 'Kusto dimensions with trailing newlines must be rejected.'
@@ -392,6 +579,62 @@ try
     }
     else
     {
+        $goldRoot = Join-Path $tempRoot 'gold-results'
+        New-Item -ItemType Directory -Force -Path (Join-Path $goldRoot 'clean'), (Join-Path $goldRoot 'diagnostic') | Out-Null
+        $fullResult = @{
+            jobResults = @{ jobs = @{ application = @{ results = @{
+                'build-time' = 1500; 'exit-code' = 0.0; 'build-time-jsonlist' = @(1400, 1600)
+                'secret-environment' = 'discard'
+            } } } }
+        } | ConvertTo-Json -Depth 8
+        $cleanPath = Join-Path $goldRoot 'clean\alpha.json'
+        $fullResult | Set-Content -LiteralPath $cleanPath
+        $fullResult | Set-Content -LiteralPath (Join-Path $goldRoot 'diagnostic\alpha.json')
+        $readGold = {
+            param($Directory)
+            function Get-ArtifactDirectory { $Directory }
+            Get-GoldScenarioEvidence -Context ([pscustomobject]@{}) -BuildId '1' -Os Windows -Scenario alpha
+        }
+        $gold = & $actualRunEvidenceModule $readGold $goldRoot
+        Assert-True $gold.available 'A full Crank clean result must be readable even alongside a diagnostic arm.'
+        Assert-Equal 'CrankAssetsGOLDWIN' $gold.artifactName 'GOLD evidence must use the current full artifact name.'
+        Assert-Equal 1500 $gold.metrics['build-time'] 'Full Crank application metrics must be retained.'
+        Assert-Equal 2 $gold.metrics.Count 'Only allowlisted scalar metrics may leave a full Crank result.'
+        New-Item -ItemType Directory -Force -Path (Join-Path $goldRoot 'clean\retry') | Out-Null
+        $fullResult | Set-Content -LiteralPath (Join-Path $goldRoot 'clean\retry\alpha.json')
+        $ambiguousGold = & $actualRunEvidenceModule $readGold $goldRoot
+        Assert-True (-not $ambiguousGold.available) 'Multiple clean results must be unavailable rather than taking the first file.'
+        Remove-Item -LiteralPath (Join-Path $goldRoot 'clean\retry\alpha.json'), $cleanPath
+        $diagnosticOnly = & $actualRunEvidenceModule $readGold $goldRoot
+        Assert-True (-not $diagnosticOnly.available) 'A diagnostic-only result must never substitute for clean evidence.'
+        $flatResult = @{ jobs = @{ application = @{ results = @{ 'build-time' = 1200; 'exit-code' = '0' } } } }
+        $flatPath = Join-Path $goldRoot 'alpha.json'
+        $flatResult | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $flatPath
+        Assert-True ((& $actualRunEvidenceModule $readGold $goldRoot).available) 'Historical flat full exports must remain supported.'
+        $flatResult.jobs.application.results['exit-code'] = 1
+        $flatResult | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $flatPath
+        Assert-True (-not (& $actualRunEvidenceModule $readGold $goldRoot).available) 'Failed clean scenario results must be explicitly unavailable.'
+        $flatResult.jobs.application.results['exit-code'] = 0
+        $exactJson = ($flatResult | ConvertTo-Json -Depth 6 -Compress).PadRight(16MB)
+        [IO.File]::WriteAllText($flatPath, $exactJson, [Text.UTF8Encoding]::new($false))
+        Assert-True ((& $actualRunEvidenceModule $readGold $goldRoot).available) 'A valid JSON file exactly at the 16 MiB limit must remain readable.'
+        $oversizedJson = [IO.File]::OpenWrite($flatPath)
+        try { $oversizedJson.SetLength(16MB + 1) } finally { $oversizedJson.Dispose() }
+        $oversizedGold = & $actualRunEvidenceModule $readGold $goldRoot
+        Assert-True (-not $oversizedGold.available) 'An oversized JSON file must be rejected before attempting to parse its invalid contents.'
+        Assert-True ($oversizedGold.message.Contains('16 MiB')) 'Oversized JSON evidence must explain the limit.'
+
+        $downloadRejected = & $actualRunEvidenceModule {
+            param($Raw)
+            function Get-AzureDevOpsArtifact { [pscustomobject]@{ resource = [pscustomobject]@{ downloadUrl = 'https://dev.azure.com/devdiv/artifact' } } }
+            function Save-AzureDevOpsArtifact { return $false }
+            function Expand-BoundedArchive { throw 'Rejected downloads must not be extracted.' }
+            $context = New-ActualRunEvidenceContext -AzureDevOpsClient ([pscustomobject]@{}) -RawDirectory $Raw
+            Get-ArtifactDirectory -Context $context -BuildId '1' -ArtifactName 'rejected'
+        } $tempRoot
+        Assert-True ($null -eq $downloadRejected) 'A rejected download must remain unavailable without leaking a Boolean into the path result.'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $tempRoot '1-rejected'))) 'A rejected download must remove its extraction directory.'
+
         $unusableReport = [pscustomobject]@{
             candidates = @([pscustomobject]@{
                 Backend = 'Hosted'
@@ -447,7 +690,7 @@ try
     $report.detector.lookbackDays = 33
     Write-RegressionDetectionReport -Report $report -OutputDirectory $reportDirectory
     Write-ActualRunEvidenceReport -Candidates @() -OutputDirectory $reportDirectory
-    Write-DiagnosticEvidenceReport -Candidates @() -DiagnosticPipelineId 28394 -MaximumRunsToInspect 24 -OutputDirectory $reportDirectory
+    Write-DiagnosticEvidenceReport -Candidates @() -DiagnosticPipelineId 25429 -MaximumRunsToInspect 24 -OutputDirectory $reportDirectory
     Write-ExistingWorkReport `
         -Report (New-ExistingWorkReport -Items @() -CandidateSetKey $report.candidateSetKey -Repository 'dotnet/msbuild') `
         -OutputDirectory $reportDirectory
@@ -558,12 +801,15 @@ $agentWorkflowPath = Join-Path (Split-Path $featureRoot -Parent) 'workflows\mt-b
 $agentWorkflow = Get-Content -LiteralPath $agentWorkflowPath -Raw
 Assert-True ($agentWorkflow.Contains('-Repository "$env:GITHUB_REPOSITORY"')) 'The existing-work step must pass the repository through PowerShell environment syntax.'
 Assert-True (-not $agentWorkflow.Contains("-Repository '`${{ github.repository }}'")) 'The existing-work step must not embed a GitHub expression that gh-aw rewrites to incompatible shell syntax.'
+Assert-True ($agentWorkflow.Contains('model: gpt-6.1-sol')) 'The investigation engine must explicitly select the current Sol model.'
 
 $lockWorkflowPath = Join-Path (Split-Path $featureRoot -Parent) 'workflows\mt-build-regression.agent.lock.yml'
 if (Test-Path -LiteralPath $lockWorkflowPath)
 {
     $lockWorkflow = Get-Content -LiteralPath $lockWorkflowPath -Raw
     Assert-True ($lockWorkflow.Contains('-Repository "$env:GITHUB_REPOSITORY"')) 'The compiled workflow must preserve PowerShell repository environment syntax.'
+    Assert-True (-not $lockWorkflow.Contains('github.aw.import-inputs')) 'All shared workflow import inputs must resolve before GitHub Actions sees the lock.'
+    Assert-True ($lockWorkflow.Contains('"agent_model":"gpt-6.1-sol"')) 'The compiled workflow must preserve the explicit engine model.'
 }
 
 if ($failures.Count -gt 0)

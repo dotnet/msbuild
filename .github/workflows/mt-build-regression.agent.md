@@ -48,7 +48,7 @@ safe-outputs:
     max: 1
     auto-close-issue: false
     # Performance fixes may touch C#, targets, tasks, or resources, but never files outside src/.
-    # gh-aw v0.82.9 compiles this directory glob into the generated safe-output allowlist.
+    # Keep the generated safe-output allowlist limited to source changes.
     allowed-files:
       - "src/**"
     # Redundant with the allowlist by design: keep workflow definitions explicitly forbidden.
@@ -221,11 +221,14 @@ imports:
   - uses: shared/pat_pool.md
     with:
       environment: copilot-pat-pool
+      random_seed: ${{ github.run_id }}
 
 environment: copilot-pat-pool
 
 engine:
   id: copilot
+  model: gpt-6.1-sol
+  args: ["--reasoning-effort", "xhigh"]
   env:
     COPILOT_GITHUB_TOKEN: "${{ case( needs.pat_pool.outputs.pat_number == '0', secrets.COPILOT_PAT_0, needs.pat_pool.outputs.pat_number == '1', secrets.COPILOT_PAT_1, needs.pat_pool.outputs.pat_number == '2', secrets.COPILOT_PAT_2, needs.pat_pool.outputs.pat_number == '3', secrets.COPILOT_PAT_3, needs.pat_pool.outputs.pat_number == '4', secrets.COPILOT_PAT_4, needs.pat_pool.outputs.pat_number == '5', secrets.COPILOT_PAT_5, needs.pat_pool.outputs.pat_number == '6', secrets.COPILOT_PAT_6, needs.pat_pool.outputs.pat_number == '7', secrets.COPILOT_PAT_7, needs.pat_pool.outputs.pat_number == '8', secrets.COPILOT_PAT_8, needs.pat_pool.outputs.pat_number == '9', secrets.COPILOT_PAT_9, 'NO COPILOT PAT AVAILABLE') }}"
 ---
@@ -254,11 +257,13 @@ and completion lines, and Gold scenario result metrics. Raw artifacts are downlo
 trusted scan job, reduced to an explicit allowlist, bounded, and deleted before the evidence is
 uploaded.
 
-When definition 28394 has a scheduled binlog run for the exact current or last-healthy MSBuild
-source SHA, the diagnostic evidence also includes task, target, and evaluation-pass MT/non-MT
-deltas from Kusto plus task migration markers. Overall diagnostic pipeline failure does not
-invalidate scenario evidence when the affected scenario and OS have paired task data. For Gold
-candidates, this Hosted diagnostic data is corroboration rather than direct backend evidence.
+When GOLD worker definition 25429 has a scheduled binlog run for the exact selected current or
+last-healthy MSBuild source SHA, the diagnostic evidence includes task, target, and evaluation-pass
+MT/non-MT deltas from completed, deduplicated Kusto partitions plus task migration markers. Overall
+pipeline failure does not invalidate completed paired scenario evidence. This is same-backend
+supporting evidence for Gold and cross-backend corroboration for Hosted. Bundled, unknown, or
+unmatched source identities remain explicitly unavailable; never substitute the pipeline resource
+or the PerfStar source revision for the measured MSBuild revision.
 
 The workflow intentionally does **not** give you Azure, Kusto, or Azure DevOps credentials.
 Existing-work discovery and trust validation are deterministic. Do not search for, fetch, or use

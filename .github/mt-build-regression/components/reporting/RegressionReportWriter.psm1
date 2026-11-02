@@ -186,12 +186,20 @@ function Write-ActualRunEvidenceReport
         [void]$markdown.AppendLine("- Current PerfStar run: [$($candidate.currentRun.perfStarBuildNumber)]($($candidate.currentRun.perfStarBuildUrl))")
         [void]$markdown.AppendLine("- Current MSBuild build: [$($candidate.currentRun.componentBuildNumber)]($($candidate.currentRun.componentBuildUrl))")
         [void]$markdown.AppendLine("- Current MSBuild source: ``$($candidate.currentRun.componentSourceVersion)``")
+        if (-not [string]::IsNullOrWhiteSpace([string]$candidate.currentRun.componentIdentityMessage))
+        {
+            [void]$markdown.AppendLine("- Current MSBuild identity unavailable: $($candidate.currentRun.componentIdentityMessage)")
+        }
 
         if ($null -ne $candidate.healthyRun)
         {
             [void]$markdown.AppendLine("- Last healthy PerfStar run: [$($candidate.healthyRun.perfStarBuildNumber)]($($candidate.healthyRun.perfStarBuildUrl))")
             [void]$markdown.AppendLine("- Last healthy MSBuild build: [$($candidate.healthyRun.componentBuildNumber)]($($candidate.healthyRun.componentBuildUrl))")
             [void]$markdown.AppendLine("- Last healthy MSBuild source: ``$($candidate.healthyRun.componentSourceVersion)``")
+            if (-not [string]::IsNullOrWhiteSpace([string]$candidate.healthyRun.componentIdentityMessage))
+            {
+                [void]$markdown.AppendLine("- Last healthy MSBuild identity unavailable: $($candidate.healthyRun.componentIdentityMessage)")
+            }
             $compareUrl = Get-CompareUrl -HealthyRun $candidate.healthyRun -CurrentRun $candidate.currentRun
             if (-not [string]::IsNullOrWhiteSpace($compareUrl))
             {
@@ -209,8 +217,14 @@ function Write-ActualRunEvidenceReport
 
         foreach ($entry in @(
             @{ Name = 'Current MT log excerpt'; Evidence = $candidate.currentMtEvidence },
-            @{ Name = 'Current non-MT log excerpt'; Evidence = $candidate.currentNonMtEvidence }))
+            @{ Name = 'Current non-MT log excerpt'; Evidence = $candidate.currentNonMtEvidence },
+            @{ Name = 'Healthy MT evidence'; Evidence = $candidate.healthyMtEvidence },
+            @{ Name = 'Healthy non-MT evidence'; Evidence = $candidate.healthyNonMtEvidence }))
         {
+            if ($null -ne $entry.Evidence -and -not $entry.Evidence.available)
+            {
+                [void]$markdown.AppendLine("- $($entry.Name) unavailable: $($entry.Evidence.message)")
+            }
             if ($null -ne $entry.Evidence -and -not [string]::IsNullOrWhiteSpace([string]$entry.Evidence.logExcerpt))
             {
                 [void]$markdown.AppendLine()
@@ -290,7 +304,7 @@ function Add-DiagnosticSection
     }
 
     [void]$Builder.AppendLine("- Diagnostic run: [$($Diagnostic.diagnosticBuildNumber)]($($Diagnostic.diagnosticBuildUrl))")
-    [void]$Builder.AppendLine("- Result: ``$($Diagnostic.diagnosticResult)`` (partial scenario data is accepted)")
+    [void]$Builder.AppendLine("- Result: ``$($Diagnostic.diagnosticResult)`` (only completed, qualified MT/non-MT partitions are accepted)")
     [void]$Builder.AppendLine("- Relationship: ``$($Diagnostic.relationship)``")
     [void]$Builder.AppendLine("- MSBuild source: ``$($Diagnostic.componentSourceVersion)``")
     [void]$Builder.AppendLine()
@@ -328,7 +342,7 @@ function Write-DiagnosticEvidenceReport
     [void]$markdown.AppendLine()
     [void]$markdown.AppendLine("Diagnostic pipeline: [definition $DiagnosticPipelineId](https://dev.azure.com/devdiv/DevDiv/_build?definitionId=$DiagnosticPipelineId)")
     [void]$markdown.AppendLine()
-    [void]$markdown.AppendLine('Diagnostic runs are matched by exact MSBuild source SHA. A failed overall diagnostic run is usable when the affected scenario/OS has task-level Kusto data. Hosted evidence is direct; for Gold candidates it is corroboration from the Hosted backend.')
+    [void]$markdown.AppendLine('GOLD diagnostic runs are matched by exact selected MSBuild source SHA. A failed overall run is usable only when the affected scenario/OS has completed, qualified, deduplicated MT/non-MT partitions with matching toolchain and iteration counts. This is same-backend supporting evidence for Gold and cross-backend corroboration for Hosted; unknown source identity or missing exact-source pairs remain unavailable.')
 
     foreach ($candidate in $Candidates)
     {

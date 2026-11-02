@@ -7,15 +7,23 @@ function Get-HttpExceptionStatusCode
     [OutputType([int])]
     param([Parameter(Mandatory)][Exception]$Exception)
 
-    # Transport exceptions have no Response property. Preserve the original status 0 retry path
-    # without triggering StrictMode's missing-property error.
-    $responseProperty = $Exception.PSObject.Properties['Response']
-    if ($null -eq $responseProperty -or $null -eq $responseProperty.Value)
+    # PowerShell can wrap .NET HTTP failures in a method-invocation exception.
+    while ($null -ne $Exception)
     {
-        return 0
+        $responseProperty = $Exception.PSObject.Properties['Response']
+        if ($null -ne $responseProperty -and $null -ne $responseProperty.Value)
+        {
+            return [int]$responseProperty.Value.StatusCode
+        }
+        $statusProperty = $Exception.PSObject.Properties['StatusCode']
+        if ($null -ne $statusProperty -and $null -ne $statusProperty.Value)
+        {
+            return [int]$statusProperty.Value
+        }
+        $Exception = $Exception.InnerException
     }
 
-    [int]$responseProperty.Value.StatusCode
+    0
 }
 
 function Test-RetryableHttpStatusCode

@@ -128,12 +128,45 @@ function Test-AzureDevOpsArtifactUrl
             $uri.Host.EndsWith('.artifacts.visualstudio.com', [StringComparison]::OrdinalIgnoreCase))
 }
 
+function Copy-BoundedArtifactStream
+{
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)][IO.Stream]$Source,
+        [Parameter(Mandatory)][IO.Stream]$Destination,
+        [Parameter(Mandatory)][long]$MaximumBytes,
+        [Threading.CancellationToken]$CancellationToken = [Threading.CancellationToken]::None
+    )
+
+    $buffer = [byte[]]::new(64KB)
+    $totalBytes = 0L
+    while ($true)
+    {
+        $count = [int][Math]::Min($buffer.Length, $MaximumBytes - $totalBytes)
+        if ($count -eq 0) { $count = 1 }
+        $read = $Source.ReadAsync($buffer, 0, $count, $CancellationToken).GetAwaiter().GetResult()
+        if ($read -eq 0)
+        {
+            return $true
+        }
+        if ($read -gt $MaximumBytes - $totalBytes)
+        {
+            return $false
+        }
+
+        $Destination.Write($buffer, 0, $read)
+        $totalBytes += $read
+    }
+}
+
 function Save-AzureDevOpsArtifact
 {
+    [OutputType([bool])]
     param(
         [Parameter(Mandatory)]$Client,
         [Parameter(Mandatory)][string]$DownloadUrl,
-        [Parameter(Mandatory)][string]$DestinationPath
+        [Parameter(Mandatory)][string]$DestinationPath,
+        [ValidateRange(1, [long]::MaxValue)][long]$MaximumBytes = 100MB
     )
 
     if (-not (Test-AzureDevOpsArtifactUrl -Url $DownloadUrl))
@@ -143,16 +176,45 @@ function Save-AzureDevOpsArtifact
 
     for ($attempt = 1; $attempt -le 4; $attempt++)
     {
+        $handler = [Net.Http.HttpClientHandler]::new()
+        $handler.MaxAutomaticRedirections = 5
+        $httpClient = [Net.Http.HttpClient]::new($handler)
+        $httpClient.Timeout = [Threading.Timeout]::InfiniteTimeSpan
+        $deadline = [Threading.CancellationTokenSource]::new([TimeSpan]::FromSeconds(600))
+        $request = [Net.Http.HttpRequestMessage]::new([Net.Http.HttpMethod]::Get, $DownloadUrl)
+        $response = $null
+        $source = $null
+        $destination = $null
+        $saved = $false
         try
         {
-            # PowerShell strips Authorization on redirects unless
-            # -PreserveAuthorizationOnRedirect is explicitly requested.
-            Invoke-WebRequest `
-                -Uri $DownloadUrl `
-                -Headers $Client.Headers `
-                -TimeoutSec 600 `
-                -OutFile $DestinationPath
-            return
+            foreach ($header in $Client.Headers.GetEnumerator())
+            {
+                [void]$request.Headers.TryAddWithoutValidation($header.Key, [string]$header.Value)
+            }
+
+            # HttpClientHandler clears Authorization on redirects. Do not buffer the response body.
+            $response = $httpClient.SendAsync(
+                $request, [Net.Http.HttpCompletionOption]::ResponseHeadersRead, $deadline.Token).GetAwaiter().GetResult()
+            [void]$response.EnsureSuccessStatusCode()
+            if ($response.Content.Headers.ContentLength -gt $MaximumBytes)
+            {
+                Write-Warning 'Artifact archive exceeds the download-size limit.'
+                return $false
+            }
+
+            $source = $response.Content.ReadAsStreamAsync($deadline.Token).GetAwaiter().GetResult()
+            $destination = [IO.File]::Open($DestinationPath, [IO.FileMode]::Create, [IO.FileAccess]::Write, [IO.FileShare]::None)
+            $copied = Copy-BoundedArtifactStream -Source $source -Destination $destination `
+                -MaximumBytes $MaximumBytes -CancellationToken $deadline.Token
+            if (-not $copied)
+            {
+                Write-Warning 'Artifact archive exceeds the download-size limit.'
+                return $false
+            }
+            $destination.Flush()
+            $saved = $true
+            return $true
         }
         catch
         {
@@ -162,9 +224,21 @@ function Save-AzureDevOpsArtifact
             {
                 throw
             }
-
-            Start-Sleep -Seconds ([Math]::Pow(2, $attempt))
         }
+        finally
+        {
+            if ($null -ne $destination) { $destination.Dispose() }
+            if ($null -ne $source) { $source.Dispose() }
+            if ($null -ne $response) { $response.Dispose() }
+            $request.Dispose()
+            $deadline.Dispose()
+            $httpClient.Dispose()
+            if (-not $saved -and $null -ne $destination)
+            {
+                Remove-Item -LiteralPath $DestinationPath -Force -ErrorAction Stop
+            }
+        }
+        Start-Sleep -Seconds ([Math]::Pow(2, $attempt))
     }
 }
 

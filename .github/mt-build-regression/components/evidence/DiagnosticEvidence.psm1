@@ -2,6 +2,7 @@
 
 Import-Module (Join-Path $PSScriptRoot '..\clients\AzureDevOpsClient.psm1')
 Import-Module (Join-Path $PSScriptRoot '..\clients\KustoClient.psm1')
+Import-Module (Join-Path $PSScriptRoot 'RunSelection.psm1')
 
 function Get-RequiredSourceVersions
 {
@@ -24,93 +25,80 @@ function Get-RequiredSourceVersions
     return ,$versions
 }
 
-function Get-CachedComponentBuild
-{
-    [OutputType([pscustomobject])]
-    param(
-        [Parameter(Mandatory)]$AzureDevOpsClient,
-        [Parameter(Mandatory)][string]$BuildId,
-        [Parameter(Mandatory)][hashtable]$Cache
-    )
-
-    if ($Cache.ContainsKey($BuildId))
-    {
-        return $Cache[$BuildId]
-    }
-
-    $build = Get-AzureDevOpsBuild -Client $AzureDevOpsClient -BuildId $BuildId
-    $metadata = [pscustomobject][ordered]@{
-        buildId = [string]$build.id
-        buildNumber = [string]$build.buildNumber
-        sourceVersion = [string]$build.sourceVersion
-        sourceBranch = [string]$build.sourceBranch
-        buildUrl = [string]$build._links.web.href
-    }
-    $Cache[$BuildId] = $metadata
-    $metadata
-}
-
 function Find-DiagnosticRuns
 {
     [OutputType([hashtable])]
     param(
         [Parameter(Mandatory)]$AzureDevOpsClient,
-        [Parameter(Mandatory)][System.Collections.Generic.HashSet[string]]$RequiredSourceVersions,
+        [Parameter(Mandatory)]$KustoClient,
+        [Parameter(Mandatory)][AllowEmptyCollection()][System.Collections.Generic.HashSet[string]]$RequiredSourceVersions,
         [Parameter(Mandatory)][int]$DiagnosticPipelineId,
-        [Parameter(Mandatory)][int]$MaximumRunsToInspect
+        [Parameter(Mandatory)][ValidateRange(1, 100)][int]$MaximumRunsToInspect
     )
 
-    $matches = @{}
+    $runsBySource = @{}
     foreach ($sourceVersion in $RequiredSourceVersions)
     {
-        $matches[$sourceVersion] = [System.Collections.Generic.List[object]]::new()
+        $runsBySource[$sourceVersion] = [System.Collections.Generic.List[object]]::new()
     }
 
-    $componentBuildCache = @{}
-    $runs = Get-AzureDevOpsPipelineRuns -Client $AzureDevOpsClient -DefinitionId $DiagnosticPipelineId
-    foreach ($runSummary in @(
-        $runs.value |
-            Sort-Object id -Descending |
-            Select-Object -First $MaximumRunsToInspect))
+    if ($RequiredSourceVersions.Count -eq 0)
     {
-        if ([string]$runSummary.state -ne 'completed')
+        return $runsBySource
+    }
+
+    # GOLD source_version is the PerfStar revision, not the measured MSBuild revision.
+    # Collapse partition-level metadata before resolving the selected MSBuild build through AzDO.
+    $query = @"
+gold_runs()
+| where ingested_at >= ago(21d)
+| where source_branch == "refs/heads/main" and msbuild_branch == "refs/heads/main"
+| where run_kind in ("GoldDiagnostic", "GoldPairedDiagnostic")
+| summarize last_ingested_at = max(ingested_at) by run_key, build_id
+| order by last_ingested_at desc, build_id desc, run_key asc
+| take $MaximumRunsToInspect
+"@
+    $runCache = New-PerfStarRunCache
+    $runs = @(Invoke-KustoQuery -Client $KustoClient -Query $query -MaximumAttempts 4 -RequirePrimaryTable $true)
+    foreach ($runSummary in $runs)
+    {
+        if ([string]$runSummary.build_id -notmatch '^[1-9][0-9]*\z')
         {
+            Write-Warning 'Skipping a GOLD diagnostic with an invalid build ID.'
             continue
         }
 
-        $run = Get-AzureDevOpsPipelineRun `
-            -Client $AzureDevOpsClient `
-            -DefinitionId $DiagnosticPipelineId `
-            -BuildId ([string]$runSummary.id)
-        $component = $run.resources.pipelines.ComponentBuildUnderTest
-        if ($null -eq $component -or $null -eq $component.pipeline.id)
-        {
-            continue
-        }
-
-        $componentBuild = Get-CachedComponentBuild `
+        $run = Get-PerfStarRunMetadata `
             -AzureDevOpsClient $AzureDevOpsClient `
-            -BuildId ([string]$component.pipeline.id) `
-            -Cache $componentBuildCache
-        if (-not $RequiredSourceVersions.Contains($componentBuild.sourceVersion))
+            -RunCache $runCache `
+            -DefinitionId $DiagnosticPipelineId `
+            -BuildId ([string]$runSummary.build_id) `
+            -Backend 'Gold'
+        if (-not (Test-PerfStarRunUsable -Run $run))
         {
             continue
         }
 
-        $matches[$componentBuild.sourceVersion].Add(
+        if (-not $RequiredSourceVersions.Contains($run.componentSourceVersion))
+        {
+            continue
+        }
+
+        $runsBySource[$run.componentSourceVersion].Add(
             [pscustomobject][ordered]@{
-                diagnosticBuildId = [string]$run.id
-                diagnosticBuildNumber = [string]$run.name
-                diagnosticResult = [string]$run.result
-                diagnosticBuildUrl = [string]$run._links.web.href
-                componentBuildId = $componentBuild.buildId
-                componentBuildNumber = $componentBuild.buildNumber
-                componentSourceVersion = $componentBuild.sourceVersion
-                componentBuildUrl = $componentBuild.buildUrl
+                diagnosticBuildId = $run.perfStarBuildId
+                diagnosticBuildNumber = $run.perfStarBuildNumber
+                diagnosticResult = $run.perfStarBuildResult
+                diagnosticBuildUrl = $run.perfStarBuildUrl
+                diagnosticRunKey = [string]$runSummary.run_key
+                componentBuildId = $run.componentBuildId
+                componentBuildNumber = $run.componentBuildNumber
+                componentSourceVersion = $run.componentSourceVersion
+                componentBuildUrl = $run.componentBuildUrl
             })
     }
 
-    $matches
+    $runsBySource
 }
 
 function Test-SafeKustoDimension
@@ -135,20 +123,20 @@ function Get-DiagnosticRows
     [OutputType([object[]])]
     param(
         [Parameter(Mandatory)]$KustoClient,
-        [Parameter(Mandatory)][string]$DiagnosticBuildId,
+        [Parameter(Mandatory)][string]$DiagnosticRunKey,
         [Parameter(Mandatory)][string]$ScenarioPair,
         [Parameter(Mandatory)][string]$Os,
         [Parameter(Mandatory)][hashtable]$Cache
     )
 
-    if (-not (Test-SafeKustoDimension -Value $DiagnosticBuildId -Name 'diagnostic build ID') -or
+    if (-not (Test-SafeKustoDimension -Value $DiagnosticRunKey -Name 'diagnostic run key') -or
         -not (Test-SafeKustoDimension -Value $ScenarioPair -Name 'scenario pair') -or
         -not (Test-SafeKustoDimension -Value $Os -Name 'OS'))
     {
         return @()
     }
 
-    $cacheKey = "$DiagnosticBuildId/$Os/$ScenarioPair"
+    $cacheKey = "$DiagnosticRunKey/$Os/$ScenarioPair"
     if ($Cache.ContainsKey($cacheKey))
     {
         return $Cache[$cacheKey]
@@ -156,12 +144,27 @@ function Get-DiagnosticRows
 
     # Values are interpolated only after the strict dimension validation above.
     $query = @"
-let runSuffix = "-$DiagnosticBuildId";
+let runKey = "$DiagnosticRunKey";
 let scenarioName = "$ScenarioPair";
 let osName = "$Os";
+let partitions =
+    gold_runs()
+    | where run_key == runKey and scenario_pair == scenarioName and os == osName
+    | where source_branch == "refs/heads/main" and msbuild_branch == "refs/heads/main"
+    | where run_kind in ("GoldDiagnostic", "GoldPairedDiagnostic");
+let paired =
+    partitions
+    | summarize modes = make_set(mt_flag), sdk_count = dcount(sdk_sha256),
+        version_count = dcount(msbuild_version), iteration_count = dcount(expected_iterations)
+      by run_key, scenario_pair, os
+    | where array_length(modes) == 2 and sdk_count == 1 and version_count == 1 and iteration_count == 1;
+let publications =
+    partitions
+    | join kind=leftsemi paired on run_key, scenario_pair, os
+    | project publication_id;
 let taskMigrationData =
-    task_inventory
-    | where run_key endswith runSuffix and scenario_pair == scenarioName and os == osName
+    gold_task_inventory()
+    | where publication_id in (publications)
     | extend short_task_name = tostring(split(task_full_name, ".")[-1])
     | summarize
         migrated = take_any(marker_attribute),
@@ -169,14 +172,12 @@ let taskMigrationData =
         task_full_name = take_any(task_full_name)
       by short_task_name;
 let taskEvidence =
-    task_wallclock()
-    | where run_key endswith runSuffix and scenario_pair == scenarioName and os == osName
+    gold_task_runs()
+    | where publication_id in (publications)
     | where not(task_name startswith "Message:")
     | summarize
-        non_mt_ms = sumif(total_ms, not(mt_flag)),
-        mt_ms = sumif(total_ms, mt_flag),
-        non_mt_instances = sumif(instances, not(mt_flag)),
-        mt_instances = sumif(instances, mt_flag)
+        non_mt_ms = sumif(duration_ms, not(mt_flag)),
+        mt_ms = sumif(duration_ms, mt_flag)
       by task_name
     | extend
         delta_ms = mt_ms - non_mt_ms,
@@ -197,11 +198,11 @@ let taskEvidence =
         absolute_delta_ms,
         migration_state;
 let targetEvidence =
-    target_wallclock()
-    | where run_key endswith runSuffix and scenario_pair == scenarioName and os == osName
+    gold_target_runs()
+    | where publication_id in (publications)
     | summarize
-        non_mt_ms = sumif(total_ms, not(mt_flag)),
-        mt_ms = sumif(total_ms, mt_flag)
+        non_mt_ms = sumif(duration_ms, not(mt_flag)),
+        mt_ms = sumif(duration_ms, mt_flag)
       by target_name
     | extend
         delta_ms = mt_ms - non_mt_ms,
@@ -216,12 +217,12 @@ let targetEvidence =
         absolute_delta_ms,
         migration_state = "";
 let evaluationEvidence =
-    eval_pass()
-    | where run_key endswith runSuffix and scenario_pair == scenarioName and os == osName
+    gold_project_evaluations()
+    | where publication_id in (publications)
     | summarize
-        non_mt_ms = sumif(total_ms, not(mt_flag)),
-        mt_ms = sumif(total_ms, mt_flag)
-      by pass_name
+        non_mt_ms = sumif(duration_ms, not(mt_flag)),
+        mt_ms = sumif(duration_ms, mt_flag)
+      by pass_name = pass
     | extend
         delta_ms = mt_ms - non_mt_ms,
         absolute_delta_ms = abs(mt_ms - non_mt_ms)
@@ -247,7 +248,7 @@ function Select-DiagnosticEvidence
 {
     [OutputType([pscustomobject])]
     param(
-        [Parameter(Mandatory)][string]$SourceVersion,
+        [Parameter(Mandatory)][AllowEmptyString()][string]$SourceVersion,
         [Parameter(Mandatory)][string]$ScenarioPair,
         [Parameter(Mandatory)][string]$Os,
         [Parameter(Mandatory)]$DiagnosticRuns,
@@ -264,7 +265,7 @@ function Select-DiagnosticEvidence
     {
         $rows = @(Get-DiagnosticRows `
             -KustoClient $KustoClient `
-            -DiagnosticBuildId $run.diagnosticBuildId `
+            -DiagnosticRunKey $run.diagnosticRunKey `
             -ScenarioPair $ScenarioPair `
             -Os $Os `
             -Cache $QueryCache)
@@ -290,6 +291,7 @@ function Select-DiagnosticEvidence
             diagnosticBuildNumber = $run.diagnosticBuildNumber
             diagnosticResult = $run.diagnosticResult
             diagnosticBuildUrl = $run.diagnosticBuildUrl
+            diagnosticRunKey = $run.diagnosticRunKey
             componentBuildId = $run.componentBuildId
             componentBuildNumber = $run.componentBuildNumber
             componentSourceVersion = $run.componentSourceVersion
@@ -323,7 +325,7 @@ function Add-DiagnosticProperties
         $properties[$property.Name] = $property.Value
     }
 
-    $relationship = if ($Candidate.Backend -eq 'Hosted') { 'direct-hosted' } else { 'hosted-corroboration-for-gold' }
+    $relationship = if ($Candidate.Backend -eq 'Gold') { 'same-backend-gold' } else { 'gold-corroboration-for-hosted' }
     if ($null -ne $CurrentDiagnostic)
     {
         $CurrentDiagnostic.relationship = $relationship
@@ -352,6 +354,7 @@ function Get-DiagnosticEvidenceCandidates
     $requiredSourceVersions = Get-RequiredSourceVersions -Evidence $Evidence
     $diagnosticRuns = Find-DiagnosticRuns `
         -AzureDevOpsClient $AzureDevOpsClient `
+        -KustoClient $KustoClient `
         -RequiredSourceVersions $requiredSourceVersions `
         -DiagnosticPipelineId $DiagnosticPipelineId `
         -MaximumRunsToInspect $MaximumRunsToInspect
