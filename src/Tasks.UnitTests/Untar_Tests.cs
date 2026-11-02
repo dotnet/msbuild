@@ -49,6 +49,36 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/15331: Yield() and Reacquire() must be called on
+        /// the same thread even when the asynchronous extraction resumes on a thread-pool thread.
+        /// </summary>
+        [Fact]
+        public void YieldAndReacquireOnSameThread()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+
+            TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+            File.WriteAllBytes(Path.Combine(sourceFolder.Path, "large.bin"), new byte[1024 * 1024]);
+
+            string tarFilePath = CreateTar(testEnvironment, sourceFolder);
+
+            TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+
+            Untar untar = new Untar
+            {
+                BuildEngine = _mockEngine,
+                DestinationFolder = new TaskItem(destination.Path),
+                SkipUnchangedFiles = false,
+                SourceFiles = [new TaskItem(tarFilePath)],
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+            };
+
+            TarDirectory_Tests.ExecuteOnDedicatedThread(untar).ShouldBeTrue(_mockEngine.Log);
+
+            new FileInfo(Path.Combine(destination.Path, "large.bin")).Length.ShouldBe(1024 * 1024);
+        }
+
         [Fact]
         public void CanUntarWithIncludeFilter()
         {
