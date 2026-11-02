@@ -7,7 +7,6 @@ using System.IO;
 #if NETFRAMEWORK
 using System.Linq;
 #endif
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Cryptography;
@@ -427,19 +426,8 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Legacy implementation that doesn't lead to JIT pulling the new functions from StringTools (so those must not be referenced anywhere in the function body)
-        ///  - for cases where the calling code would erroneously load old version of StringTools alongside of the new version of Microsoft.Build.
-        /// Should be removed once Wave17_10 is removed.
-        /// </summary>
-        public static object StableStringHashLegacy(string toHash)
-            => CommunicationsUtilities.GetHashCode(toHash);
-
-        /// <summary>
         /// Hash the string independent of bitness, target framework and default codepage of the environment.
-        /// We do not want this to be inlined, as then the Expander would call directly the new overload, and hence
-        ///  JIT load the functions from StringTools - so we would not be able to prevent their loading with ChangeWave as we do now.
         /// </summary>
-        [MethodImpl(MethodImplOptions.NoInlining)]
         public static object StableStringHash(string toHash)
             => StableStringHash(toHash, StringHashingAlgorithm.Legacy);
 

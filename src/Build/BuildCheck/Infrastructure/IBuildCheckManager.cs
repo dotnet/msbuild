@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Framework;
@@ -57,6 +58,7 @@ internal interface IBuildCheckManager
 
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
+    [RequiresUnreferencedCode("Loads custom build check assemblies from disk and reflects over their types, which is incompatible with trimming.")]
     void ProcessCheckAcquisition(CheckAcquisitionData acquisitionData, ICheckContext checksContext);
 
     void ProcessProjectImportedEventArgs(ICheckContext checkContext, ProjectImportedEventArgs projectImportedEventArgs);

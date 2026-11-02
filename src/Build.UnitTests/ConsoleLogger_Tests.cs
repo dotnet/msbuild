@@ -1716,11 +1716,11 @@ namespace Microsoft.Build.UnitTests
             L.Parameters = "Performancesummary";
             L.Initialize(es);
             // prjPerfString = Project Performance Summary:
-            string prjPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectPerformanceSummary", null);
+            string prjPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectPerformanceSummary");
             // targetPerfString = Target Performance Summary:
-            string targetPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetPerformanceSummary", null);
+            string targetPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetPerformanceSummary");
             // taskPerfString = Task Performance Summary:
-            string taskPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskPerformanceSummary", null);
+            string taskPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskPerformanceSummary");
 
             // BuildStarted Event
             es.Consume(new BuildStartedEventArgs("bs", null));

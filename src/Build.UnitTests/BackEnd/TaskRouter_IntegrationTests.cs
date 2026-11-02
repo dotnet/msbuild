@@ -3,11 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Text.RegularExpressions;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -384,255 +381,70 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             logger.FullLog.ShouldContain("TaskWithAttribute executed");
         }
 
-        [Fact]
-        public void RequiresTransientTaskHost_ReturnsTrueForRestoreTask()
+        /// <summary>
+        /// Regression test: a task routed to a TaskHost must not log <c>TaskAssemblyLocationMismatch</c>.
+        /// <c>TaskHostTask</c> is only an in-proc proxy for a task that is loaded in a separate process, so
+        /// its own assembly location (Microsoft.Build.dll) can never match the resolved task assembly path
+        /// and the diagnostic carries no information. In multi-threaded mode this is the common path, so a
+        /// stale check produced one spurious message per task execution.
+        /// The registered path deliberately contains a redundant "." segment so that it is not byte-identical
+        /// to <c>Assembly.Location</c> - the same normalization difference real builds hit.
+        /// </summary>
+        [Theory]
+        [InlineData(true, "")] // Routed to the sidecar TaskHost because multi-threaded mode is on.
+        [InlineData(false, @" TaskFactory=""TaskHostFactory""")] // Routed to a TaskHost by explicit request.
+        public void TaskHostRoutedTask_DoesNotLogAssemblyLocationMismatch(bool multiThreaded, string taskFactoryAttribute)
         {
-            TaskRouter.RequiresTransientTaskHost(typeof(NuGet.Build.Tasks.RestoreTask)).ShouldBeTrue();
-        }
+            // Arrange
+            string assemblyPath = Assembly.GetExecutingAssembly().Location;
+            string nonNormalizedAssemblyPath = Path.Combine(Path.GetDirectoryName(assemblyPath), ".", Path.GetFileName(assemblyPath));
 
-        [Fact]
-        public void RequiresTransientTaskHost_ReturnsFalseForRegularTask()
-        {
-            TaskRouter.RequiresTransientTaskHost(typeof(NonEnlightenedTestTask)).ShouldBeFalse();
-            TaskRouter.RequiresTransientTaskHost(typeof(AttributeTestTask)).ShouldBeFalse();
-        }
-
-        [Fact]
-        public void RequiresTransientTaskHost_RoutedToTaskHost_InMultiThreadedMode()
-        {
             string projectContent = $@"
 <Project>
-    <UsingTask TaskName=""RestoreTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
-    
+    <UsingTask TaskName=""NonEnlightenedTestTask"" AssemblyFile=""{nonNormalizedAssemblyPath}""{taskFactoryAttribute} />
+
     <Target Name=""TestTarget"">
-        <RestoreTask />
+        <NonEnlightenedTestTask />
     </Target>
 </Project>";
 
-            string projectFile = Path.Combine(_testProjectsDir, "RestoreTaskMT.proj");
+            string projectFile = Path.Combine(_testProjectsDir, $"NoAssemblyLocationMismatch_{multiThreaded}.proj");
             File.WriteAllText(projectFile, projectContent);
 
             var logger = new MockLogger(_output);
             var buildParameters = new BuildParameters
             {
-                MultiThreaded = true,
-                Loggers = [logger],
+                MultiThreaded = multiThreaded,
+                Loggers = new[] { logger },
                 DisableInProcNode = false,
-                EnableNodeReuse = false,
+                EnableNodeReuse = false
             };
 
             var buildRequestData = new BuildRequestData(
                 projectFile,
                 new Dictionary<string, string>(),
                 null,
-                ["TestTarget"],
+                new[] { "TestTarget" },
                 null);
 
-            BuildManager buildManager = BuildManager.DefaultBuildManager;
-            BuildResult result = buildManager.Build(buildParameters, buildRequestData);
+            // Act
+            var result = BuildManager.DefaultBuildManager.Build(buildParameters, buildRequestData);
 
+            // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
-            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "RestoreTask");
-            logger.FullLog.ShouldContain("RestoreTask executed");
-        }
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "NonEnlightenedTestTask");
+            logger.FullLog.ShouldContain("NonEnlightenedTask executed");
 
-        [Fact]
-        public void RequiresTransientTaskHost_RoutedToTaskHost_InServerMode()
-        {
-            string projectContent = $@"
-<Project>
-    <UsingTask TaskName=""RestoreTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
-    
-    <Target Name=""TestTarget"">
-        <RestoreTask />
-    </Target>
-</Project>";
+            // Assert on the localized text preceding the first format argument so the test is locale-safe
+            // and does not depend on the exact paths that would have been reported.
+            const string ArgumentSentinel = "<<arg>>";
+            string mismatchMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                "TaskAssemblyLocationMismatch",
+                ArgumentSentinel,
+                ArgumentSentinel);
+            string mismatchMessagePrefix = mismatchMessage.Substring(0, mismatchMessage.IndexOf(ArgumentSentinel, StringComparison.Ordinal));
 
-            string projectFile = Path.Combine(_testProjectsDir, "RestoreTaskServer.proj");
-            File.WriteAllText(projectFile, projectContent);
-
-            var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = false,
-                Loggers = [logger],
-                DisableInProcNode = false,
-                EnableNodeReuse = false,
-
-                // Simulate running under the MSBuild Server. In production this flag is
-                // set process-wide by OutOfProcServerNode via BuildParameters.MarkProcessAsLongLivedHost.
-                IsLongLivedHost = true,
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                ["TestTarget"],
-                null);
-
-            BuildManager buildManager = BuildManager.DefaultBuildManager;
-            BuildResult result = buildManager.Build(buildParameters, buildRequestData);
-
-            result.OverallResult.ShouldBe(BuildResultCode.Success);
-            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "RestoreTask");
-            logger.FullLog.ShouldContain("RestoreTask executed");
-        }
-
-        [Fact]
-        public void RequiresTransientTaskHost_GetsFreshProcess_OnEachInvocation_InMultiThreadedMode()
-        {
-            string projectContent = $@"
-<Project>
-    <UsingTask TaskName=""RestoreTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
-
-    <Target Name=""TestTarget"">
-        <RestoreTask />
-    </Target>
-</Project>";
-
-            string projectFile = Path.Combine(_testProjectsDir, "RestoreTaskFreshProcess.proj");
-            File.WriteAllText(projectFile, projectContent);
-
-            var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = true,
-                Loggers = [logger],
-                DisableInProcNode = false,
-
-                // Reuse must stay ON so we test the workaround, not natural process death.
-                // With reuse off the test cannot distinguish "transient TaskHost (workaround)"
-                // from "sidecar TaskHost that happened to die between builds".
-                EnableNodeReuse = true,
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                ["TestTarget"],
-                null);
-
-            // Two separate Build cycles. The workaround forces nodeReuse=false on the spawned
-            // TaskHost so it dies at EndBuild, giving the next Build a fresh process.
-            BuildManager buildManager = BuildManager.DefaultBuildManager;
-            BuildResult result1 = buildManager.Build(buildParameters, buildRequestData);
-            BuildResult result2 = buildManager.Build(buildParameters, buildRequestData);
-
-            result1.OverallResult.ShouldBe(BuildResultCode.Success);
-            result2.OverallResult.ShouldBe(BuildResultCode.Success);
-            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "RestoreTask");
-
-            int[] pids = ExtractReportedPids(logger.FullLog);
-
-            pids.Length.ShouldBe(2, $"Expected two RestoreTask invocations to log a PID. Log:{Environment.NewLine}{logger.FullLog}");
-            pids[0].ShouldNotBe(pids[1], "Each build must spawn a fresh TaskHost so NuGet static state cannot leak across builds.");
-            pids.ShouldNotContain(Process.GetCurrentProcess().Id, "TaskHost should be out-of-process from the test runner.");
-        }
-
-        [Fact]
-        public void RequiresTransientTaskHost_GetsFreshProcess_OnEachInvocation_InServerMode()
-        {
-            string projectContent = $@"
-<Project>
-    <UsingTask TaskName=""RestoreTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
-
-    <Target Name=""TestTarget"">
-        <RestoreTask />
-    </Target>
-</Project>";
-
-            string projectFile = Path.Combine(_testProjectsDir, "RestoreTaskFreshProcessServer.proj");
-            File.WriteAllText(projectFile, projectContent);
-
-            var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = false,
-                Loggers = [logger],
-                DisableInProcNode = false,
-
-                // Reuse must stay ON so we test the workaround, not natural process death.
-                EnableNodeReuse = true,
-
-                // Simulate running under the MSBuild Server.
-                IsLongLivedHost = true,
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                ["TestTarget"],
-                null);
-
-            // Two separate Build cycles. The workaround forces nodeReuse=false on the spawned
-            // TaskHost so it dies at EndBuild, giving the next Build a fresh process.
-            BuildManager buildManager = BuildManager.DefaultBuildManager;
-            BuildResult result1 = buildManager.Build(buildParameters, buildRequestData);
-            BuildResult result2 = buildManager.Build(buildParameters, buildRequestData);
-
-            result1.OverallResult.ShouldBe(BuildResultCode.Success);
-            result2.OverallResult.ShouldBe(BuildResultCode.Success);
-            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "RestoreTask");
-
-            int[] pids = ExtractReportedPids(logger.FullLog);
-
-            pids.Length.ShouldBe(2, $"Expected two RestoreTask invocations to log a PID. Log:{Environment.NewLine}{logger.FullLog}");
-            pids[0].ShouldNotBe(pids[1], "Each build must spawn a fresh TaskHost so NuGet static state cannot leak across builds.");
-            pids.ShouldNotContain(Process.GetCurrentProcess().Id, "TaskHost should be out-of-process from the test runner.");
-        }
-
-        private static int[] ExtractReportedPids(string log)
-        {
-            var pids = new List<int>();
-            foreach (Match m in Regex.Matches(log, @"RestoreTask executed in PID=(\d+)"))
-            {
-                pids.Add(int.Parse(m.Groups[1].Value));
-            }
-
-            return pids.ToArray();
-        }
-
-        [Fact]
-        public void RequiresTransientTaskHost_RunsInProcess_WhenNoMTOrServer()
-        {
-            string projectContent = $@"
-<Project>
-    <UsingTask TaskName=""RestoreTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
-    
-    <Target Name=""TestTarget"">
-        <RestoreTask />
-    </Target>
-</Project>";
-
-            string projectFile = Path.Combine(_testProjectsDir, "RestoreTaskNoMT.proj");
-            File.WriteAllText(projectFile, projectContent);
-
-            var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = false,
-                Loggers = [logger],
-                DisableInProcNode = false,
-                EnableNodeReuse = false,
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                ["TestTarget"],
-                null);
-
-            BuildManager buildManager = BuildManager.DefaultBuildManager;
-            BuildResult result = buildManager.Build(buildParameters, buildRequestData);
-
-            result.OverallResult.ShouldBe(BuildResultCode.Success);
-
-            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "RestoreTask");
-            logger.FullLog.ShouldContain("RestoreTask executed");
+            logger.FullLog.ShouldNotContain(mismatchMessagePrefix);
         }
 
         private string CreateTestProject(string taskName, string taskClass)
@@ -733,25 +545,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     }
 
     #endregion
-}
-
-// Test task in the NuGet.Build.Tasks namespace to simulate the real RestoreTask for routing tests.
-namespace NuGet.Build.Tasks
-{
-    /// <summary>
-    /// Simulates the NuGet RestoreTask for testing task routing workaround.
-    /// Has the same full name (NuGet.Build.Tasks.RestoreTask) that TaskRouter checks.
-    /// </summary>
-    public class RestoreTask : Task
-    {
-        public override bool Execute()
-        {
-            // Include the OS PID so tests can verify each invocation runs in a fresh
-            // TaskHost process
-            Log.LogMessage(MessageImportance.High, $"RestoreTask executed in PID={Process.GetCurrentProcess().Id}");
-            return true;
-        }
-    }
 }
 
 // Custom attribute definition in Microsoft.Build.Framework namespace to match what TaskRouter expects

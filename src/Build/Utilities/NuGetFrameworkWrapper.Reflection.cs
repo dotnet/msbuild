@@ -169,8 +169,7 @@ namespace Microsoft.Build.Evaluation
 
             NuGetFrameworkWrapper instance = null;
             AssemblyName assemblyName = null;
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) &&
-                (BuildEnvironmentHelper.Instance.RunningInMSBuildExe || BuildEnvironmentHelper.Instance.RunningInVisualStudio))
+            if (BuildEnvironmentHelper.Instance.RunningInMSBuildExe || BuildEnvironmentHelper.Instance.RunningInVisualStudio)
             {
                 // If we are running in MSBuild.exe or VS, we can load the assembly with Assembly.Load, which enables
                 // the runtime to bind to the native image, eliminating some non-trivial JITting cost. Devenv.exe knows how to

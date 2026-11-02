@@ -8,8 +8,8 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// </summary>
 internal static class Capabilities
 {
-    // Currently empty — capabilities will be added as features are implemented.
-    // Examples of future capabilities:
-    //   public const string Priority = "priority";
-    //   public const string DynamicGrants = "dynamic-grants";
+    /// <summary>
+    ///  Supports flowing coordinator grant tokens to nested clients.
+    /// </summary>
+    public const string NestedGrants = "nested-grants";
 }

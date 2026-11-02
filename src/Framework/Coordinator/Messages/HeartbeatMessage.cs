@@ -10,9 +10,8 @@ internal sealed record HeartbeatMessage : ClientMessage
 {
     public static HeartbeatMessage Instance { get; } = new();
 
-    public override ClientMessageType MessageType => ClientMessageType.Heartbeat;
-
     private HeartbeatMessage()
+        : base(ClientMessageType.Heartbeat)
     {
     }
 }

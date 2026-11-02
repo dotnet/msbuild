@@ -593,6 +593,92 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Single(_initializedService.RegisteredSinkNames);
             Assert.Single(_initializedService.LoggerDescriptions);
         }
+
+        [Fact]
+        public void RegisterDistributedLogger_WhenCentralLoggerAlreadyWrappedInReusableLogger_ForwardingLoggerIsRegistered()
+        {
+            string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
+            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
+
+            RegularILogger centralLogger = new RegularILogger();
+            ReusableLogger reusableWrapper = new ReusableLogger(centralLogger);
+            _initializedService.RegisterLogger(reusableWrapper);
+
+            bool result = _initializedService.RegisterDistributedLogger(centralLogger, description);
+
+            result.ShouldBeTrue("RegisterDistributedLogger should return true when the central logger is already registered only as a ReusableLogger wrapper, not as a direct registration.");
+
+            _initializedService.LoggerDescriptions.ShouldNotBeEmpty("The forwarding logger description must be present so it is propagated to out-of-proc nodes.");
+            _initializedService.RegisteredLoggerTypeNames.ShouldContain(
+                "Microsoft.Build.Logging.ConfigurableForwardingLogger",
+                "The forwarding logger must have been initialized.");
+        }
+
+        [Fact]
+        public void RegisterDistributedLogger_WhenCentralLoggerAlreadyWrapped_HonorsForwardingLoggerFiltering()
+        {
+            string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
+
+            LoggerDescription description = new LoggerDescription(
+                className,
+                typeof(ProjectCollection).Assembly.FullName,
+                null,
+                "ErrorEvent",
+                LoggerVerbosity.Diagnostic);
+
+            RegularILogger centralLogger = new RegularILogger();
+            ReusableLogger reusableWrapper = new ReusableLogger(centralLogger);
+            _initializedService.RegisterLogger(reusableWrapper);
+
+            _initializedService.RegisterDistributedLogger(centralLogger, description).ShouldBeTrue();
+
+            BuildEventContext context = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidProjectContextId, 5, 6);
+
+            BuildMessageEventArgs messageArgs = new("message text", null, "sender", MessageImportance.High)
+            {
+                BuildEventContext = context,
+            };
+            BuildErrorEventArgs errorArgs = new("subcategory", "ERR001", "file", 0, 0, 0, 0, "error message", null, "sender")
+            {
+                BuildEventContext = context,
+            };
+
+            _initializedService.LogBuildEvent(messageArgs);
+            _initializedService.LogBuildEvent(errorArgs);
+
+            centralLogger.ErrorCount.ShouldBe(1, "The central logger should receive the forwarded error exactly once (no duplicate delivery).");
+            centralLogger.MessageCount.ShouldBe(0, "The central logger must not receive events the forwarding logger filtered out.");
+        }
+
+        [Fact]
+        public void RegisterDistributedLogger_DuplicateCentralViaReusableWrapper_SecondRegistrationRejected()
+        {
+            string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
+
+            LoggerDescription firstForwarder = new LoggerDescription(
+                className, typeof(ProjectCollection).Assembly.FullName, null, "ErrorEvent", LoggerVerbosity.Diagnostic);
+            LoggerDescription secondForwarder = new LoggerDescription(
+                className, typeof(ProjectCollection).Assembly.FullName, null, "ErrorEvent", LoggerVerbosity.Diagnostic);
+
+            RegularILogger centralLogger = new RegularILogger();
+            ReusableLogger reusableWrapper = new ReusableLogger(centralLogger);
+            _initializedService.RegisterLogger(reusableWrapper);
+
+            _initializedService.RegisterDistributedLogger(centralLogger, firstForwarder).ShouldBeTrue();
+
+            _initializedService.RegisterDistributedLogger(centralLogger, secondForwarder).ShouldBeFalse(
+                "A central logger already backing a distributed registration must not be registered again, even when reached through a ReusableLogger wrapper.");
+
+            BuildEventContext context = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidProjectContextId, 5, 6);
+            BuildErrorEventArgs errorArgs = new("subcategory", "ERR001", "file", 0, 0, 0, 0, "error message", null, "sender")
+            {
+                BuildEventContext = context,
+            };
+
+            _initializedService.LogBuildEvent(errorArgs);
+
+            centralLogger.ErrorCount.ShouldBe(1, "The first forwarding logger's sink must still deliver the forwarded error to the central logger exactly once; it must not have been orphaned by the rejected second registration.");
+        }
         #endregion
 
         #region Test Properties
@@ -1506,6 +1592,24 @@ namespace Microsoft.Build.UnitTests.Logging
             }
 
             /// <summary>
+            /// Number of error events received.
+            /// </summary>
+            internal int ErrorCount
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
+            /// Number of message events received.
+            /// </summary>
+            internal int MessageCount
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
             /// Initialize
             /// </summary>
             public void Initialize(IEventSource eventSource)
@@ -1535,6 +1639,16 @@ namespace Microsoft.Build.UnitTests.Logging
                 if (eventArgs is BuildFinishedEventArgs)
                 {
                     ++BuildFinishedCount;
+                }
+
+                if (eventArgs is BuildErrorEventArgs)
+                {
+                    ++ErrorCount;
+                }
+
+                if (eventArgs is BuildMessageEventArgs)
+                {
+                    ++MessageCount;
                 }
             }
         }

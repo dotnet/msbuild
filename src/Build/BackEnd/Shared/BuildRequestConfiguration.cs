@@ -126,6 +126,11 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<string, int> _activelyBuildingTargets;
 
         /// <summary>
+        /// The number of operations currently using the in-memory project state.
+        /// </summary>
+        private int _projectInstanceUsageCount;
+
+        /// <summary>
         /// The node where this configuration's master results are stored.
         /// </summary>
         private int _resultsNodeId = Scheduler.InvalidNodeId;
@@ -640,6 +645,48 @@ namespace Microsoft.Build.BackEnd
                                                                       new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase));
 
         /// <summary>
+        /// Keeps the <see cref="ProjectInstance"/> in memory while the caller uses it, preventing a concurrent
+        /// memory-pressure cache sweep. Retrieves the project first if it was already cached.
+        /// </summary>
+        /// <remarks>
+        /// The usage count belongs to this configuration. A shallow clone that shares the same
+        /// <see cref="ProjectInstance"/> has independent synchronization and usage tracking.
+        /// </remarks>
+        internal ProjectInstanceUsageScope AcquireProjectInstanceUsage() => new(this);
+
+        /// <summary>
+        /// Tracks one active <see cref="ProjectInstance"/> consumer. Consume with <see langword="using"/>;
+        /// do not dispose copies.
+        /// </summary>
+        internal readonly struct ProjectInstanceUsageScope : IDisposable
+        {
+            private readonly BuildRequestConfiguration _configuration;
+
+            internal ProjectInstanceUsageScope(BuildRequestConfiguration configuration)
+            {
+                _configuration = configuration;
+
+                lock (_configuration._syncLock)
+                {
+                    _configuration.RetrieveFromCache();
+                    Assumed.False(_configuration.IsCached, "Configuration could not be retrieved before accessing the project.");
+                    _configuration._projectInstanceUsageCount++;
+                }
+            }
+
+            public void Dispose()
+            {
+                Assumed.NotNull(_configuration, "ProjectInstance usage scope was not initialized.");
+
+                lock (_configuration._syncLock)
+                {
+                    Assumed.True(_configuration._projectInstanceUsageCount > 0, "No active ProjectInstance usage to complete.");
+                    _configuration._projectInstanceUsageCount--;
+                }
+            }
+        }
+
+        /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
         public FrozenDictionary<string, string> SavedEnvironmentVariables
@@ -725,7 +772,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_syncLock)
             {
-                if (IsActivelyBuilding || IsCached || !IsLoaded || !IsCacheable)
+                if (_projectInstanceUsageCount > 0 || IsActivelyBuilding || IsCached || !IsLoaded || !IsCacheable)
                 {
                     return;
                 }

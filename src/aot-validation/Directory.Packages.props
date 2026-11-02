@@ -1,0 +1,11 @@
+<Project>
+
+  <!-- Local, empty central-package-management file. Its presence stops the SDK from walking up
+       and importing the repository-root Directory.Packages.props (which pulls in Arcade/dependabot
+       version files). This harness pins its few package versions inline in the .csproj instead. -->
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+</Project>

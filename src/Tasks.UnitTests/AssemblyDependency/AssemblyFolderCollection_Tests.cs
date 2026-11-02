@@ -13,8 +13,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 {
     /// <summary>
     /// Direct tests for the streaming <see cref="AssemblyFolderCollection.Load"/> parser. These run on
-    /// every target framework (unlike the RAR-driven AssemblyFoldersFromConfig_Tests, which are net472
-    /// only), so they guard the parser - including under the trim/AOT analyzers on net10.0.
+    /// every target framework (unlike the RAR-driven AssemblyFoldersFromConfig_Tests, which are .NETFramework
+    /// only), so they guard the parser - including under the trim/AOT analyzers on .NETCoreApp.
     /// </summary>
     public class AssemblyFolderCollection_Tests
     {

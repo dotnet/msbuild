@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -63,12 +63,6 @@ namespace Microsoft.Build.Execution
         /// The startup directory.
         /// </summary>
         private static string s_startupDirectory = Environment.CurrentDirectory;
-
-        /// <summary>
-        /// Process-wide flag indicating that the engine is hosted in a long-lived process
-        /// (e.g., the MSBuild Server) that persists across multiple build invocations.
-        /// </summary>
-        private static bool s_isLongLivedHost;
 
         /// <summary>
         /// Indicates whether we should warn when a property is uninitialized when it is used.
@@ -243,6 +237,12 @@ namespace Microsoft.Build.Execution
         private bool _reportFileAccesses;
 
         /// <summary>
+        /// The configuration for allowed unknown attributes/elements during parsing.
+        /// Loaded on the main node and serialized to worker nodes.
+        /// </summary>
+        private ParserIgnoreConfiguration _ParserIgnoreConfiguration = ParserIgnoreConfiguration.Empty;
+
+        /// <summary>
         /// Constructor for those who intend to set all properties themselves.
         /// </summary>
         public BuildParameters()
@@ -268,6 +268,7 @@ namespace Microsoft.Build.Execution
 
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(projectCollection.GlobalPropertiesCollection);
             _propertiesFromCommandLine = projectCollection.PropertiesFromCommandLine;
+            _ParserIgnoreConfiguration = projectCollection.ParserIgnoreConfiguration;
         }
 
         /// <summary>
@@ -334,9 +335,9 @@ namespace Microsoft.Build.Execution
             Question = other.Question;
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
             IsTelemetryEnabled = other.IsTelemetryEnabled;
-            IsLongLivedHost = other.IsLongLivedHost;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
             _enableTargetOutputLogging = other.EnableTargetOutputLogging;
+            _ParserIgnoreConfiguration = other._ParserIgnoreConfiguration;
         }
 
         /// <summary>
@@ -368,6 +369,22 @@ namespace Microsoft.Build.Execution
         /// Gets the environment variables which were set when this build was created.
         /// </summary>
         public IDictionary<string, string> BuildProcessEnvironment => BuildProcessEnvironmentInternal;
+
+        internal void SetBuildProcessEnvironmentVariable(string name, string value)
+        {
+            Dictionary<string, string> environment = new(BuildProcessEnvironmentInternal, CommunicationsUtilities.EnvironmentVariableComparer);
+
+            if (value is null)
+            {
+                environment.Remove(name);
+            }
+            else
+            {
+                environment[name] = value;
+            }
+
+            _buildProcessEnvironment = environment.ToFrozenDictionary(CommunicationsUtilities.EnvironmentVariableComparer);
+        }
 
         /// <summary>
         /// The name of the culture to use during the build.
@@ -806,30 +823,21 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal bool IsOutOfProc { get; set; }
 
-        /// <summary>
-        /// True when the engine is hosted in a long-lived process (e.g., MSBuild Server)
-        /// that persists across multiple build invocations. Used to opt tasks whose static
-        /// singleton state would leak across invocations out of sidecar TaskHost reuse.
-        /// See https://github.com/dotnet/msbuild/issues/13315.
-        /// </summary>
-        internal bool IsLongLivedHost
-        {
-            get => _isLongLivedHost;
-            set => _isLongLivedHost = value;
-        }
-
-        private bool _isLongLivedHost = s_isLongLivedHost;
-
-        /// <summary>
-        /// Marks the current process as a long-lived host.
-        /// </summary>
-        internal static void MarkProcessAsLongLivedHost() => s_isLongLivedHost = true;
-
         /// <nodoc/>
         public ProjectLoadSettings ProjectLoadSettings
         {
             get => _projectLoadSettings;
             set => _projectLoadSettings = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the configuration for allowed unknown attributes/elements during parsing.
+        /// When set, this configuration is used for parsing and evaluation.
+        /// </summary>
+        internal ParserIgnoreConfiguration ParserIgnoreConfiguration
+        {
+            get => _ParserIgnoreConfiguration;
+            set => _ParserIgnoreConfiguration = value;
         }
 
         /// <summary>
@@ -1004,7 +1012,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
             translator.Translate(ref _multiThreaded);
-            translator.Translate(ref _isLongLivedHost);
+            translator.Translate(ref _ParserIgnoreConfiguration, ParserIgnoreConfiguration.FactoryForDeserialization);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

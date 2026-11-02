@@ -48,11 +48,17 @@ internal static class TestHelpers
                 public System.Diagnostics.ProcessStartInfo GetProcessStartInfo() => new();
             }
 
-            public struct AbsolutePath
+            public struct AbsolutePath : System.IEquatable<AbsolutePath>
             {
+                public AbsolutePath(string path) { Value = path; OriginalValue = path; }
                 public string Value { get; }
                 public string OriginalValue { get; }
                 public static implicit operator string(AbsolutePath p) => p.Value;
+                public bool Equals(AbsolutePath other) => Value == other.Value;
+                public override bool Equals(object? obj) => obj is AbsolutePath other && Equals(other);
+                public override int GetHashCode() => Value is null ? 0 : Value.GetHashCode();
+                public static bool operator ==(AbsolutePath left, AbsolutePath right) => left.Equals(right);
+                public static bool operator !=(AbsolutePath left, AbsolutePath right) => !left.Equals(right);
             }
 
             public interface ITaskItem
@@ -61,12 +67,24 @@ internal static class TestHelpers
                 string GetMetadata(string metadataName);
             }
 
+            public interface ITaskItem2 : ITaskItem
+            {
+            }
+
+            public interface ITaskItem<T> : ITaskItem2
+            {
+                T Value { get; }
+            }
+
             public class TaskItem : ITaskItem
             {
                 public string ItemSpec { get; set; } = string.Empty;
                 public string GetMetadata(string metadataName) => string.Empty;
                 public string GetMetadataValue(string metadataName) => string.Empty;
             }
+
+            [System.AttributeUsage(System.AttributeTargets.Property)]
+            public sealed class OutputAttribute : System.Attribute { }
 
             [System.AttributeUsage(System.AttributeTargets.Class)]
             public class MSBuildMultiThreadableTaskAnalyzedAttribute : System.Attribute { }
@@ -101,6 +119,18 @@ internal static class TestHelpers
         """;
 
     private static readonly MetadataReference[] s_coreReferences = CreateCoreReferences();
+
+    /// <summary>
+    /// Returns a fully-qualified path literal that is absolute on the OS the tests are running on: a
+    /// drive-rooted path on Windows (<c>C:/…</c>) and a leading-slash path on Unix (<c>/…</c>). Use this when
+    /// analyzer test source needs a default value that must classify as fully-qualified regardless of OS —
+    /// a single hard-coded literal cannot satisfy both, since <c>C:/x</c> is relative on Unix and <c>/x</c> is
+    /// not fully-qualified on Windows.
+    /// </summary>
+    public static string FullyQualifiedPath(string tail) =>
+        System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)
+            ? "C:/" + tail
+            : "/" + tail;
 
     /// <summary>
     /// Returns the core runtime references used by test compilations.
@@ -159,6 +189,36 @@ internal static class TestHelpers
         return allDiagnostics
             .Where(d => d.Location.SourceTree?.FilePath == "Test.cs")
             .ToImmutableArray();
+    }
+
+    /// <summary>
+    /// Runs the PreferTypedParameterAnalyzer on the given source code and returns analyzer diagnostics.
+    /// Source is combined with framework stubs automatically.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetTypedParameterDiagnosticsAsync(string source)
+    {
+        var compilation = CreateCompilation(source);
+        var analyzer = new PreferTypedParameterAnalyzer();
+        var compilationWithAnalyzers = compilation.WithAnalyzers(
+            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
+
+        var allDiags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        return allDiags;
+    }
+
+    /// <summary>
+    /// Runs the UnsupportedTaskItemTypeAnalyzer on the given source code and returns analyzer diagnostics.
+    /// Source is combined with framework stubs automatically.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetUnsupportedTaskItemTypeDiagnosticsAsync(string source)
+    {
+        var compilation = CreateCompilation(source);
+        var analyzer = new UnsupportedTaskItemTypeAnalyzer();
+        var compilationWithAnalyzers = compilation.WithAnalyzers(
+            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
+
+        var allDiags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        return allDiags;
     }
 
     /// <summary>

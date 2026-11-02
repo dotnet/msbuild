@@ -1947,6 +1947,11 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="MSBuildProvideImportedProjects" _locComment="" -->When set to 'true', the engine synthesizes MSBuildImportedProject items representing the import tree of the project. Each item's identity is the full path of an imported file, with ImportingProjectPath and Sdk metadata.</xs:documentation>
         </xs:annotation>
     </xs:element>
+    <xs:element name="MSBuildProvideItemGlobs" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="MSBuildProvideItemGlobs" _locComment="" -->A semicolon-separated list of item types (e.g. 'Compile;Content'). For each listed item type, the engine synthesizes MSBuildItemGlob items exposing the unevaluated include/exclude/remove glob patterns of that item type. Do not use generated MSBuildItemGlob items to influence the build process.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="MSBuildTreatWarningsAsErrors" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="MSBuildTreatWarningsAsErrors" _locComment="" -->Indicates whether to treat all warnings as errors when building a project.</xs:documentation>

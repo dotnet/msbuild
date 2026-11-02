@@ -260,18 +260,6 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             {
                 Assert.Equal(test.Value, DependencyTableCache.FormatNormalizedTlogRootingMarker(test.Key)); // "Incorrectly formatted rooting marker"
             }
-
-            bool exceptionCaught = false;
-            try
-            {
-                DependencyTableCache.FormatNormalizedTlogRootingMarker(new ITaskItem[] { new TaskItem("\\\\") });
-            }
-            catch (ArgumentException)
-            {
-                exceptionCaught = true;
-            }
-
-            Assert.True(exceptionCaught); // "Should have failed to format a rooting marker from a malformed UNC path"
         }
 
         [Fact]
@@ -376,34 +364,6 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             Assert.Single(outofdate);
             Assert.Equal(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
-        }
-
-        [Fact]
-        public void InvalidReadTLogName()
-        {
-            Console.WriteLine("Test: InvalidReadTLogName");
-
-            // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.tlog", "");
-
-            MockTask task = DependencyTestHelper.MockTask;
-
-            CanonicalTrackedInputFiles d = new CanonicalTrackedInputFiles(
-                    task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\|one|.tlog")),
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.cpp")),
-                    null,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\one.obj")),
-                    false, /* no minimal rebuild optimization */
-                    false); /* shred composite rooting markers */
-
-            d.ComputeSourcesNeedingCompilation();
-
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have an error."
-            Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -535,21 +495,6 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false); /* shred composite rooting markers */
 
             Assert.NotEmpty(d.DependencyTable); // "Dependency Table should not be empty."
-        }
-
-        [Fact]
-        public void InvalidWriteTLogName()
-        {
-            Console.WriteLine("Test: InvalidWriteTLogName");
-
-            MockTask task = DependencyTestHelper.MockTask;
-
-            CanonicalTrackedOutputFiles d = new CanonicalTrackedOutputFiles(
-                    task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\|one|.write.tlog")));
-
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have an error."
-            Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -2968,27 +2913,6 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // dependencies should include the three .h files written into the .tlogs + the two rooting marker files
             Assert.True(d2.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Values.Count == 4);
-        }
-
-        [Fact]
-        public void InvalidFlatTrackingTLogName()
-        {
-            Console.WriteLine("Test: InvalidFlatTrackingTLogName");
-
-            // Prepare files
-            DependencyTestHelper.WriteAll("TestFiles\\one.h", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.cpp", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.obj", "");
-            DependencyTestHelper.WriteAll("TestFiles\\one.tlog", "");
-
-            MockTask task = DependencyTestHelper.MockTask;
-            FlatTrackingData data = new FlatTrackingData(
-                    task,
-                    DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\|one|.write.tlog")),
-                    false); /* don't skip missing files */
-
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(data.DependencyTable); // "DependencyTable should be empty."
         }
 
         [Fact]

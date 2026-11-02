@@ -28,4 +28,9 @@ internal static class Constants
     ///  Name of environment variable that overrides coordinator pipe name.
     /// </summary>
     public const string PipeNameEnvVarName = "MSBUILDCOORDINATORPIPENAME";
+
+    /// <summary>
+    ///  Name of environment variable used to flow an active coordinator grant token to child processes.
+    /// </summary>
+    public const string GrantIdEnvVarName = "MSBUILDCOORDINATORGRANTID";
 }

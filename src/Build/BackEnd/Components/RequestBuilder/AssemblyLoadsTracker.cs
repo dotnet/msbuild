@@ -5,6 +5,9 @@ using System;
 #if FEATURE_APPDOMAIN
 #endif
 using System.Reflection;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 #if FEATURE_ASSEMBLYLOADCONTEXT
 using System.Runtime.Loader;
 #endif
@@ -81,6 +84,17 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
             string? initiatorName,
             AppDomain? appDomain)
         {
+#if NET
+            // Native AOT has no runtime assembly loading, so AppDomain.AssemblyLoad never fires and there
+            // is nothing to track. Returning early also lets the trimmer prove AssemblyLoadsTracker is never
+            // instantiated under Native AOT and remove CurrentDomainOnAssemblyLoad along with its
+            // Assembly.Location read, so the single-file/AOT build produces no IL3000 for it.
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                return EmptyDisposable.Instance;
+            }
+#endif
+
             if (// We do not want to load all assembly loads (including those triggered by builtin types)
                 !Traits.Instance.LogAllAssemblyLoads &&
                 (

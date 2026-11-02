@@ -25,7 +25,7 @@ The feature implements specialized event handling for four tracking scenarios (p
 1. `PropertyReassignmentEventArgs`
    - Triggered when a property value is changed
    - `set MsBuildLogPropertyTracking=1`
-   - **Note:** Property reassignment tracking is automatically enabled with ChangeWaves.Wave17_10, even when `MsBuildLogPropertyTracking=0`
+   - **Note:** Property reassignment tracking is enabled by default, even when `MsBuildLogPropertyTracking=0`
 
 2. `PropertyInitialValueSetEventArgs`
    - Triggered when a property is first initialized
@@ -49,6 +49,6 @@ If you want to enable all these events reporting, enable it by `set MsBuildLogPr
 
 Property reassignment tracking has special enabling logic. It is enabled when:
 - `PropertyReassignment` flag is explicitly set (value includes `1`), OR
-- `MsBuildLogPropertyTracking=0` AND ChangeWaves.Wave17_10 features are enabled
+- `MsBuildLogPropertyTracking=0`
 
-This means that in projects with Wave17_10 enabled, property reassignments will be tracked even when property tracking appears to be disabled.
+This means that property reassignments will be tracked even when property tracking appears to be disabled.

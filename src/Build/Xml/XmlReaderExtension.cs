@@ -87,9 +87,12 @@ namespace Microsoft.Build.Internal
             string uri = new UriBuilder(Uri.UriSchemeFile, string.Empty) { Path = file }.ToString();
 
 
-            // Ignore loadAsReadOnly for now; using XmlReader.Create results in whitespace changes
-            // of attribute text, specifically newline removal.
-            // https://github.com/dotnet/msbuild/issues/4210
+            // loadAsReadOnly is currently ignored.
+            // Compatibility note: XmlReader.Create normalizes whitespace/newlines in ways that changed
+            // observed project values (for example, multiline Exec commands and metadata), breaking
+            // existing builds. We intentionally keep XmlTextReader behavior here to preserve those
+            // established semantics until a non-reflection, compatibility-safe replacement exists.
+            // Related history: #4210, #4213, #4083, #6232, #6669.
             XmlReader reader = new XmlTextReader(uri, input) { DtdProcessing = DtdProcessing.Ignore };
 
             reader.Read();

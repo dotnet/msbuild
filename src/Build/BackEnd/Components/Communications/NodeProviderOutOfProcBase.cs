@@ -862,7 +862,7 @@ namespace Microsoft.Build.BackEnd
         /// Connect to named pipe stream and ensure validate handshake and security.
         /// </summary>
         /// <remarks>
-        /// Reused by MSBuild server client <see cref="Experimental.MSBuildClient"/>.
+        /// Reused by MSBuild server client <see cref="Microsoft.Build.Server.MSBuildClient"/>.
         /// </remarks>
         internal static bool TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout, out HandshakeResult result)
         {
@@ -926,6 +926,13 @@ namespace Microsoft.Build.BackEnd
 
             // The pipe(s) used to communicate with the node.
             private readonly Stream _pipeStream;
+
+#if !FEATURE_APM
+            /// <summary>
+            /// Stream used for async packet reads.
+            /// </summary>
+            private readonly Stream _readStream;
+#endif
 
             /// <summary>
             /// The factory used to create packets from data read off the pipe.
@@ -1011,6 +1018,25 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private readonly byte _negotiatedPacketVersion;
 
+            /// <summary>
+            /// A snapshot of the build process environment most recently sent in full to this task-host connection.
+            /// Used to avoid re-transmitting the (invariant) environment in every <see cref="TaskHostConfiguration"/>:
+            /// when an outgoing configuration's environment matches this baseline it is sent as
+            /// <see cref="InvariantPayloadTransferMode.Identical"/> instead.
+            /// </summary>
+            private Dictionary<string, string> _forwardEnvironmentBaseline;
+
+            /// <summary>
+            /// A snapshot of the global properties most recently sent in full to this task-host connection.
+            /// Used to avoid re-transmitting the (largely invariant) global properties in every
+            /// <see cref="TaskHostConfiguration"/>: when an outgoing configuration's global properties match this
+            /// baseline they are sent as <see cref="InvariantPayloadTransferMode.Identical"/> instead. Held as a defensive
+            /// copy for robustness and for consistency with <see cref="_forwardEnvironmentBaseline"/>; unlike the
+            /// environment, the configuration's global-properties dictionary is freshly allocated per configuration
+            /// today, so it is not actually aliased to a mutated-in-place source.
+            /// </summary>
+            private Dictionary<string, string> _forwardGlobalParametersBaseline;
+
 
 #if FEATURE_APM
             // used in BodyReadComplete callback to avoid allocations due to passing state through BeginRead
@@ -1032,6 +1058,11 @@ namespace Microsoft.Build.BackEnd
                 _nodeId = nodeId;
                 _process = process;
                 _pipeStream = nodePipe;
+#if !FEATURE_APM
+                _readStream = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
+                    ? new BufferedReadStream(nodePipe, 64 * 1024)
+                    : nodePipe;
+#endif
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _readBufferMemoryStream = new MemoryStream();
@@ -1086,7 +1117,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        int bytesRead = await _pipeStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
+                        int bytesRead = await _readStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;
@@ -1111,7 +1142,7 @@ namespace Microsoft.Build.BackEnd
                         int totalBytesRead = 0;
                         while (totalBytesRead < packetLength)
                         {
-                            int bytesRead = await _pipeStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
+                            int bytesRead = await _readStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
                             if (bytesRead == 0)
                             {
                                 break;
@@ -1167,6 +1198,52 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Marks an outgoing config <see cref="InvariantPayloadTransferMode.Identical"/> when its
+            /// environment matches the connection baseline (leaving the dictionary off the wire); otherwise sends
+            /// it in full and updates the baseline. Only <see cref="DrainPacketQueue"/> calls this, in wire order,
+            /// and the child applies the same updates in the same order, so the baselines never drift and no
+            /// locking is needed.
+            /// </summary>
+            private void MarkEnvironmentTransferMode(TaskHostConfiguration configuration)
+            {
+                Dictionary<string, string> environment = configuration.BuildProcessEnvironment;
+
+                if (_forwardEnvironmentBaseline != null && CommunicationsUtilities.AreDictionariesEquivalent(environment, _forwardEnvironmentBaseline))
+                {
+                    configuration.EnvironmentMode = InvariantPayloadTransferMode.Identical;
+                }
+                else
+                {
+                    configuration.EnvironmentMode = InvariantPayloadTransferMode.Full;
+                    _forwardEnvironmentBaseline = new Dictionary<string, string>(environment, CommunicationsUtilities.EnvironmentVariableComparer);
+                }
+            }
+
+            /// <summary>
+            /// Marks an outgoing config <see cref="InvariantPayloadTransferMode.Identical"/> when its global properties
+            /// match the connection baseline (leaving the dictionary off the wire); otherwise sends them in full and
+            /// snapshots them as the new baseline. As in <see cref="MarkEnvironmentTransferMode"/>, only
+            /// <see cref="DrainPacketQueue"/> calls this in wire order, so the baselines never drift and no locking
+            /// is needed.
+            /// </summary>
+            private void MarkGlobalParametersTransferMode(TaskHostConfiguration configuration)
+            {
+                Dictionary<string, string> globalParameters = configuration.GlobalProperties;
+
+                if (_forwardGlobalParametersBaseline != null && CommunicationsUtilities.AreDictionariesEquivalent(globalParameters, _forwardGlobalParametersBaseline))
+                {
+                    configuration.GlobalParametersMode = InvariantPayloadTransferMode.Identical;
+                }
+                else
+                {
+                    configuration.GlobalParametersMode = InvariantPayloadTransferMode.Full;
+                    _forwardGlobalParametersBaseline = globalParameters == null
+                        ? null
+                        : new Dictionary<string, string>(globalParameters, StringComparer.OrdinalIgnoreCase);
+                }
+            }
+
+            /// <summary>
             /// We use a dedicated thread to avoid blocking a threadpool thread.
             /// </summary>
             /// <remarks>Usually there'll be a single packet in the queue, but sometimes
@@ -1209,6 +1286,15 @@ namespace Microsoft.Build.BackEnd
                                 // CLR4 task hosts: set version to 0 to enable version-dependent fields.
                                 // CLR2 task hosts: leave as null (default) to skip version-dependent fields.
                                 writeTranslator.NegotiatedPacketVersion = 0;
+                            }
+
+                            // When the negotiated wire format supports it, send the (invariant) build process
+                            // environment and global properties only when they changed; otherwise mark them
+                            // as unchanged on the wire.
+                            if (packet is TaskHostConfiguration taskHostConfiguration && writeTranslator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
+                            {
+                                context.MarkEnvironmentTransferMode(taskHostConfiguration);
+                                context.MarkGlobalParametersTransferMode(taskHostConfiguration);
                             }
 
                             packet.Translate(writeTranslator);
@@ -1435,6 +1521,8 @@ namespace Microsoft.Build.BackEnd
                 try
                 {
                     _readBufferMemoryStream.Position = 0;
+
+                    _readTranslator.NegotiatedPacketVersion = _negotiatedPacketVersion;
                     _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, _readTranslator);
                 }
                 catch (IOException e)

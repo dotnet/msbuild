@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -51,19 +52,20 @@ namespace Microsoft.Build.Shared
         private const string VersioningNamespaceName = "System.Runtime.Versioning";
 
         /// <summary>
-        /// Cache to keep track of the assemblyLoadInfos based on a given type filter.
+        /// Cache to keep track of the assemblyLoadInfos based on the desired interface.
         /// </summary>
-        private static readonly ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfLoadedTypesByFilter = new ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
+        private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfLoadedTypesByFilter = new ConcurrentDictionary<Type, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
 
         /// <summary>
-        /// Cache to keep track of the assemblyLoadInfos based on a given type filter for assemblies which are to be loaded for reflectionOnlyLoads.
+        /// Cache to keep track of the assemblyLoadInfos based on the desired interface for assemblies which are to be loaded for reflectionOnlyLoads.
         /// </summary>
-        private static readonly ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfReflectionOnlyLoadedTypesByFilter = new ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
+        private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfReflectionOnlyLoadedTypesByFilter = new ConcurrentDictionary<Type, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
 
         /// <summary>
-        /// Type filter for this typeloader.
+        /// The interface that loaded types must implement. Stored as a <see cref="Type"/> so that construction is
+        /// trim-safe; the actual interface lookup happens by name inside the [RequiresUnreferencedCode] load methods.
         /// </summary>
-        private Func<Type, object, bool> _isDesiredType;
+        private readonly Type _desiredInterface;
 
         private static readonly string[] runtimeAssemblies = findRuntimeAssembliesWithMicrosoftBuildFramework();
 
@@ -114,12 +116,23 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Constructor.
         /// </summary>
-        internal TypeLoader(Func<Type, object, bool> isDesiredType)
+        private TypeLoader(Type desiredInterface)
         {
-            Assumed.NotNull(isDesiredType, "need a type filter");
-
-            _isDesiredType = isDesiredType;
+            _desiredInterface = desiredInterface;
         }
+
+        /// <summary>
+        /// Creates a <see cref="TypeLoader"/> that selects concrete, public types implementing <typeparamref name="TInterface"/>
+        /// (for example <see cref="ITask"/> or <see cref="ILogger"/>).
+        /// </summary>
+        /// <remarks>
+        /// Capturing the interface as data (rather than a filter delegate) keeps construction trim-safe: no reflection
+        /// happens here, so callers in field initializers and other contexts that are not [RequiresUnreferencedCode] do
+        /// not produce trim warnings. The interface match runs later, by name, inside the load methods that are already
+        /// annotated [RequiresUnreferencedCode]; name matching is also the only test that works for types inspected
+        /// through a <see cref="MetadataLoadContext"/>.
+        /// </remarks>
+        internal static TypeLoader Create<TInterface>() where TInterface : class => new TypeLoader(typeof(TInterface));
 
         /// <summary>
         /// Delegate used to log warning messages with formatted string support.
@@ -214,6 +227,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="assemblyLoadInfo"></param>
         /// <returns></returns>
+        [RequiresUnreferencedCode("Loads task and factory assemblies discovered at runtime, which is incompatible with trimming.")]
         private static Assembly LoadAssembly(AssemblyLoadInfo assemblyLoadInfo)
         {
             try
@@ -303,6 +317,7 @@ namespace Microsoft.Build.Shared
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
+        [RequiresUnreferencedCode("Loads types by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         internal LoadedType Load(
             string typeName,
             AssemblyLoadInfo assembly,
@@ -319,6 +334,7 @@ namespace Microsoft.Build.Shared
         /// found will be returned.
         /// </summary>
         /// <returns>The loaded type, or null if the type was not found.</returns>
+        [RequiresUnreferencedCode("Loads types by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         internal LoadedType ReflectionOnlyLoad(
             string typeName,
             AssemblyLoadInfo assembly) => GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false, taskHostParamsMatchCurrentProc: true, logWarning: (format, args) => { });
@@ -328,22 +344,23 @@ namespace Microsoft.Build.Shared
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
+        [RequiresUnreferencedCode("Loads types by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         private LoadedType GetLoadedType(
-            ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache,
+            ConcurrentDictionary<Type, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache,
             string typeName,
             AssemblyLoadInfo assembly,
             bool useTaskHost,
             bool taskHostParamsMatchCurrentProc,
             LogWarningDelegate logWarning)
         {
-            // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which
+            // A given interface has been used on a number of assemblies. Based on the interface we will get another dictionary which
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
             ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes> loadInfoToType =
-                cache.GetOrAdd(_isDesiredType, (_) => new ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>());
+                cache.GetOrAdd(_desiredInterface, (_) => new ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>());
 
             // Get an object which is able to take a typename and determine if it is in the assembly pointed to by the AssemblyInfo.
             AssemblyInfoToLoadedTypes typeNameToType =
-                loadInfoToType.GetOrAdd(assembly, (_) => new AssemblyInfoToLoadedTypes(_isDesiredType, _));
+                loadInfoToType.GetOrAdd(assembly, (_) => new AssemblyInfoToLoadedTypes(_desiredInterface, _));
 
             return typeNameToType.GetLoadedTypeByTypeName(typeName, useTaskHost, taskHostParamsMatchCurrentProc, logWarning);
         }
@@ -354,7 +371,7 @@ namespace Microsoft.Build.Shared
         ///
         /// This type represents a combination of a type filter and an assemblyInfo object.
         /// </summary>
-        [DebuggerDisplay("Types in {_assemblyLoadInfo} matching {_isDesiredType}")]
+        [DebuggerDisplay("Types in {_assemblyLoadInfo} matching {_desiredInterface}")]
         private class AssemblyInfoToLoadedTypes
         {
             /// <summary>
@@ -364,9 +381,14 @@ namespace Microsoft.Build.Shared
             private readonly LockType _lockObject = new();
 
             /// <summary>
-            /// Type filter to pick the correct types out of an assembly
+            /// The interface that selected types must implement.
             /// </summary>
-            private Func<Type, object, bool> _isDesiredType;
+            private readonly Type _desiredInterface;
+
+            /// <summary>
+            /// The full name of <see cref="_desiredInterface"/>, cached for the by-name interface lookup.
+            /// </summary>
+            private readonly string _desiredInterfaceName;
 
             /// <summary>
             /// Assembly load information so we can load an assembly
@@ -415,14 +437,15 @@ namespace Microsoft.Build.Shared
             private volatile bool _hasReadRuntimeAndArchitecture;
 
             /// <summary>
-            /// Given a type filter, and an assembly to load the type information from determine if a given type name is in the assembly or not.
+            /// Given a desired interface, and an assembly to load the type information from determine if a given type name is in the assembly or not.
             /// </summary>
-            internal AssemblyInfoToLoadedTypes(Func<Type, object, bool> typeFilter, AssemblyLoadInfo loadInfo)
+            internal AssemblyInfoToLoadedTypes(Type desiredInterface, AssemblyLoadInfo loadInfo)
             {
-                ArgumentNullException.ThrowIfNull(typeFilter, "typefilter");
+                ArgumentNullException.ThrowIfNull(desiredInterface);
                 ArgumentNullException.ThrowIfNull(loadInfo);
 
-                _isDesiredType = typeFilter;
+                _desiredInterface = desiredInterface;
+                _desiredInterfaceName = desiredInterface.FullName;
                 _assemblyLoadInfo = loadInfo;
                 _typeNameToType = new(StringComparer.OrdinalIgnoreCase);
                 _publicTypeNameToType = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
@@ -430,8 +453,23 @@ namespace Microsoft.Build.Shared
             }
 
             /// <summary>
+            /// Determines whether <paramref name="type"/> is a concrete, public class that implements the desired interface.
+            /// </summary>
+            /// <remarks>
+            /// The interface is matched by name rather than with <c>typeof(...).IsAssignableFrom</c> because the candidate
+            /// type may have been inspected through a <see cref="MetadataLoadContext"/>, whose reflection universe is
+            /// separate from the running one (so <c>IsAssignableFrom</c> would always be false). The
+            /// <see cref="Type.GetInterface(string)"/> call is trim-unsafe, but this method is only reachable from the
+            /// [RequiresUnreferencedCode] load paths, which load task and logger assemblies discovered at runtime.
+            /// </remarks>
+            [RequiresUnreferencedCode("Matches a runtime-discovered type against the desired interface by reflecting over its interface list, which is incompatible with trimming.")]
+            private bool IsDesiredType(Type type) =>
+                type.IsClass && !type.IsAbstract && type.GetInterface(_desiredInterfaceName) is not null;
+
+            /// <summary>
             /// Determine if a given type name is in the assembly or not. Return null if the type is not in the assembly.
             /// </summary>
+            [RequiresUnreferencedCode("Loads types by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
             internal LoadedType GetLoadedTypeByTypeName(
                 string typeName,
                 bool useTaskHost,
@@ -470,6 +508,7 @@ namespace Microsoft.Build.Shared
             /// This loads the assembly for actual execution (not metadata-only).
             /// </summary>
             /// <param name="typeName">The type to be loaded.</param>
+            [RequiresUnreferencedCode("Loads types by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
             private LoadedType LoadInProc(string typeName)
             {
                 Type type = _typeNameToType.GetOrAdd(typeName, (key) =>
@@ -482,7 +521,7 @@ namespace Microsoft.Build.Shared
                             Type t2 = Type.GetType(typeName + "," + _assemblyLoadInfo.AssemblyName, false /* don't throw on error */, true /* case-insensitive */);
                             if (t2 != null)
                             {
-                                return !_isDesiredType(t2, null) ? null : t2;
+                                return !IsDesiredType(t2) ? null : t2;
                             }
                         }
                         catch (ArgumentException)
@@ -530,6 +569,7 @@ namespace Microsoft.Build.Shared
             private bool ShouldUseMetadataLoadContext(bool useTaskHost, bool taskHostParamsMatchCurrentProc) =>
                 (useTaskHost || !taskHostParamsMatchCurrentProc) && _assemblyLoadInfo.AssemblyFile is not null;
 
+            [RequiresUnreferencedCode("Loads types by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
             private LoadedType GetTypeForOutOfProcExecution(string typeName) => _publicTypeNameToLoadedType
                 .GetOrAdd(typeName, typeName =>
                 {
@@ -545,7 +585,7 @@ namespace Microsoft.Build.Shared
                     if (!string.IsNullOrEmpty(typeName))
                     {
                         foundType = loadedAssembly.GetType(typeName, throwOnError: false);
-                        if (foundType != null && foundType.IsPublic && _isDesiredType(foundType, null))
+                        if (foundType != null && foundType.IsPublic && IsDesiredType(foundType))
                         {
                             numberOfTypesSearched = 1;
                         }
@@ -559,7 +599,7 @@ namespace Microsoft.Build.Shared
                             numberOfTypesSearched++;
                             try
                             {
-                                if (_isDesiredType(publicType, null) && (typeName.Length == 0 || IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                                if (IsDesiredType(publicType) && (typeName.Length == 0 || IsPartialTypeNameMatch(publicType.FullName, typeName)))
                                 {
                                     foundType = publicType;
                                     break;
@@ -591,6 +631,7 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Gets architecture and runtime from the assembly using MetadataLoadContext.
             /// </summary>
+            [RequiresUnreferencedCode("Reflects over a runtime-loaded assembly to determine its target runtime and architecture, which is incompatible with trimming.")]
             private void SetArchitectureAndRuntime(Assembly assembly)
             {
                 if (_hasReadRuntimeAndArchitecture)
@@ -683,6 +724,7 @@ namespace Microsoft.Build.Shared
             /// Scan the assembly pointed to by the assemblyLoadInfo for public types. We will use these public types to do partial name matching on
             /// to find tasks, loggers, and task factories.
             /// </summary>
+            [RequiresUnreferencedCode("Loads and reflects over a runtime-discovered assembly's public types, which is incompatible with trimming.")]
             private void ScanAssemblyForPublicTypes()
             {
                 // we need to search the assembly for the type...
@@ -692,7 +734,7 @@ namespace Microsoft.Build.Shared
                 Type[] allPublicTypesInAssembly = _loadedAssembly.GetExportedTypes();
                 foreach (Type publicType in allPublicTypesInAssembly)
                 {
-                    if (_isDesiredType(publicType, null))
+                    if (IsDesiredType(publicType))
                     {
                         _publicTypeNameToType.Add(publicType.FullName, publicType);
                     }

@@ -1,0 +1,6 @@
+<Project>
+
+  <!-- Empty on purpose: isolates the AOT validation harness from the repository-root
+       Directory.Build.targets (Arcade test targets, coverage injection, etc.). -->
+
+</Project>

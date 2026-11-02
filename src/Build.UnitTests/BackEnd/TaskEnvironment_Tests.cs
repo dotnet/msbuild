@@ -133,6 +133,41 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// Regression test for the task-host environment-delta self-clear bug. In multithreaded mode
+        /// <see cref="TaskEnvironment.GetEnvironmentVariables"/> returns the driver's backing dictionary by
+        /// reference, so the "environment unchanged" task-host completion path can pass that very dictionary
+        /// back to SetEnvironment. A naive Clear()-then-copy implementation would self-empty the environment
+        /// because the source and destination are the same object; this verifies the environment is preserved.
+        /// </summary>
+        [Fact]
+        public void TaskEnvironment_SetEnvironment_WithAliasedDictionary_PreservesEnvironment()
+        {
+            var taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(GetResolvedTempPath());
+            try
+            {
+                string testVarName = $"MSBUILD_ALIAS_TEST_{Guid.NewGuid():N}";
+                taskEnvironment.SetEnvironmentVariable(testVarName, "alias_value");
+
+                int countBefore = taskEnvironment.GetEnvironmentVariables().Count;
+                countBefore.ShouldBeGreaterThan(1);
+
+                // Pass the driver's own (aliased) dictionary back to SetEnvironment, exactly as the
+                // task-host "environment unchanged" path does for the multithreaded driver.
+                var aliased = (IDictionary<string, string>)taskEnvironment.GetEnvironmentVariables();
+                taskEnvironment.SetEnvironment(aliased);
+
+                var after = taskEnvironment.GetEnvironmentVariables();
+                after.Count.ShouldBe(countBefore);
+                after.TryGetValue(testVarName, out string? value).ShouldBeTrue();
+                value.ShouldBe("alias_value");
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
+            }
+        }
+
         [Theory]
         [MemberData(nameof(EnvironmentTypes))]
         public void TaskEnvironment_SetEnvironment_ShouldReplaceAllVariables(string environmentType)

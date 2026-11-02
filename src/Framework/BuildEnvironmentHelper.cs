@@ -3,9 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
@@ -75,6 +77,7 @@ namespace Microsoft.Build.Shared
             var possibleLocations = new Func<BuildEnvironment>[]
             {
                 TryFromEnvironmentVariable,
+                TryFromSdkRoot,
                 TryFromVisualStudioProcess,
                 TryFromMSBuildProcess,
                 TryFromMSBuildAppHost,
@@ -102,9 +105,24 @@ namespace Microsoft.Build.Shared
             // will be in the output path of the test project, which is what we want.
 
             string msbuildExePath;
+#if NET
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                // Native AOT has no managed assembly file on disk, so typeof(...).Assembly.Location would
+                // be empty. An empty path is meaningless here, so use the running process path instead.
+                msbuildExePath = s_getProcessFromRunningProcess();
+            }
+            else
+#endif
             if (s_runningTests())
             {
                 msbuildExePath = typeof(BuildEnvironmentHelper).Assembly.Location;
+
+                // In a single-file app Assembly.Location is also empty; fall back to the process path there.
+                if (string.IsNullOrEmpty(msbuildExePath))
+                {
+                    msbuildExePath = s_getProcessFromRunningProcess();
+                }
             }
             else
             {
@@ -127,6 +145,25 @@ namespace Microsoft.Build.Shared
             return msBuildExePath == null
                 ? null
                 : TryFromMSBuildExeUnderVisualStudio(msBuildExePath, allowLegacyToolsVersion: true) ?? TryFromStandaloneMSBuildExe(msBuildExePath);
+        }
+
+        private static BuildEnvironment TryFromSdkRoot()
+        {
+            // When the .NET SDK hosts MSBuild in a trimmed or Native AOT process, the process path,
+            // AppContext.BaseDirectory, and Assembly.Location point at the muxer / install root rather
+            // than the versioned SDK directory that actually contains MSBuild. The SDK publishes that
+            // directory through the "Microsoft.DotNet.Sdk.Root" AppContext value (see DotNetSdkPaths);
+            // prefer it when present. A normal JIT MSBuild that discovers itself by path leaves the value
+            // unset, so this simply falls through to the process/assembly-based discovery below.
+            var sdkRoot = s_getSdkRootFromAppContext();
+            if (string.IsNullOrEmpty(sdkRoot))
+            {
+                return null;
+            }
+
+            // Prioritize MSBuild[.exe] over MSBuild.dll, mirroring TryFromAppContextBaseDirectory.
+            return TryFromStandaloneMSBuildExe(Path.Combine(sdkRoot, Constants.MSBuildExecutableName))
+                ?? TryFromStandaloneMSBuildExe(Path.Combine(sdkRoot, Constants.MSBuildAssemblyName));
         }
 
         private static BuildEnvironment TryFromVisualStudioProcess()
@@ -373,37 +410,13 @@ namespace Microsoft.Build.Shared
         }
 
         private static bool? _runningTests;
-        private static readonly LockType _runningTestsLock = new LockType();
 
-        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
-            Justification = "Deliberately reads the internal Microsoft.Build.Framework.TestInfo.s_runningTests field by reflection so this type can be shared across assemblies without a hard reference. The DynamicDependency below keeps the field under trimming.")]
-        [UnconditionalSuppressMessage("Trimming", "IL2075:UnrecognizedReflectionPattern",
-            Justification = "TestInfo.s_runningTests is preserved by the DynamicDependency below, so the GetField lookup remains valid under trimming.")]
-        [DynamicDependency("s_runningTests", "Microsoft.Build.Framework.TestInfo", "Microsoft.Build.Framework")]
         private static bool CheckIfRunningTests()
         {
-            if (_runningTests != null)
-            {
-                return _runningTests.Value;
-            }
-
-            lock (_runningTestsLock)
-            {
-                if (_runningTests != null)
-                {
-                    return _runningTests.Value;
-                }
-
-                // Check if running tests via the TestInfo class in Microsoft.Build.Framework.
-                //  See the comments on the TestInfo class for an explanation of why it works this way.
-                var frameworkAssembly = typeof(Framework.ITask).Assembly;
-                var testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.TestInfo");
-                var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-
-                _runningTests = (bool)runningTestsField.GetValue(null);
-
-                return _runningTests.Value;
-            }
+            // BuildEnvironmentHelper and TestInfo are both compiled into Microsoft.Build.Framework,
+            // so the flag the test host sets (see TestInfo) can be read directly. _runningTests is a
+            // test-only override applied through ResetInstance_ForUnitTestsOnly.
+            return _runningTests ?? Framework.TestInfo.s_runningTests;
         }
 
         /// <summary>
@@ -436,8 +449,17 @@ namespace Microsoft.Build.Shared
                 return processName;
             }
 
-            // EntryAssembly can be null in some hosting scenarios (e.g., when loaded as a library)
-            return System.Reflection.Assembly.GetEntryAssembly()?.Location ?? processName;
+            // Under Native AOT there is no separate managed entry assembly on disk (Assembly.Location is
+            // empty), so the process path is the only meaningful value.
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                return processName;
+            }
+
+            // EntryAssembly can be null in some hosting scenarios (e.g., when loaded as a library), and
+            // Assembly.Location is empty in a single-file app; fall back to the process path in both cases.
+            string entryAssemblyPath = System.Reflection.Assembly.GetEntryAssembly()?.Location;
+            return string.IsNullOrEmpty(entryAssemblyPath) ? processName : entryAssemblyPath;
 #else
 
             return EnvironmentUtilities.ProcessPath;
@@ -454,6 +476,11 @@ namespace Microsoft.Build.Shared
             return AppContext.BaseDirectory;
         }
 
+        private static string GetSdkRootFromAppContext()
+        {
+            return DotNetSdkPaths.SdkRootFromAppContext;
+        }
+
         private static string GetEnvironmentVariable(string variable)
         {
             return Environment.GetEnvironmentVariable(variable);
@@ -466,13 +493,15 @@ namespace Microsoft.Build.Shared
             Func<string> getExecutingAssemblyPath = null, Func<string> getAppContextBaseDirectory = null,
             Func<IEnumerable<VisualStudioInstance>> getVisualStudioInstances = null,
             Func<string, string> getEnvironmentVariable = null,
-            Func<bool> runningTests = null)
+            Func<bool> runningTests = null,
+            Func<string> getSdkRootFromAppContext = null)
         {
             s_getProcessFromRunningProcess = getProcessFromRunningProcess ?? GetProcessFromRunningProcess;
             s_getExecutingAssemblyPath = getExecutingAssemblyPath ?? GetExecutingAssemblyPath;
             s_getAppContextBaseDirectory = getAppContextBaseDirectory ?? GetAppContextBaseDirectory;
             s_getVisualStudioInstances = getVisualStudioInstances ?? VisualStudioLocationHelper.GetInstances;
             s_getEnvironmentVariable = getEnvironmentVariable ?? GetEnvironmentVariable;
+            s_getSdkRootFromAppContext = getSdkRootFromAppContext ?? GetSdkRootFromAppContext;
 
             // Tests which specifically test the BuildEnvironmentHelper need it to be able to act as if it is not running tests
             s_runningTests = runningTests ?? CheckIfRunningTests;
@@ -493,6 +522,7 @@ namespace Microsoft.Build.Shared
         private static Func<string> s_getProcessFromRunningProcess = GetProcessFromRunningProcess;
         private static Func<string> s_getExecutingAssemblyPath = GetExecutingAssemblyPath;
         private static Func<string> s_getAppContextBaseDirectory = GetAppContextBaseDirectory;
+        private static Func<string> s_getSdkRootFromAppContext = GetSdkRootFromAppContext;
         private static Func<IEnumerable<VisualStudioInstance>> s_getVisualStudioInstances = VisualStudioLocationHelper.GetInstances;
         private static Func<string, string> s_getEnvironmentVariable = GetEnvironmentVariable;
         private static Func<bool> s_runningTests = CheckIfRunningTests;

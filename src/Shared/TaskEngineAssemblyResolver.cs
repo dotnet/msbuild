@@ -85,21 +85,27 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
-
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// This is an assembly resolution handler necessary for fixing up types instantiated in different
         /// AppDomains and loaded with a Assembly.LoadFrom equivalent call. See comments in TaskEngine.ExecuteTask
         /// for more details.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
         internal Assembly ResolveAssembly(object sender, ResolveEventArgs args)
 #else
         private Assembly ResolveAssembly(AssemblyLoadContext assemblyLoadContext, AssemblyName assemblyName)
 #endif
         {
+#if NET
+            // When custom plugin/task assembly probing is disabled (for example when trimmed), don't
+            // resolve task assemblies by path; let the default resolution fail rather than reflect. This
+            // guard also lets the trim analyzer treat the reflection-based load below as unreachable.
+            if (!Framework.FeatureSwitches.EnableCustomPluginProbing)
+            {
+                return null;
+            }
+#endif
+
             // Is this our task assembly?
             if (_taskAssemblyFile != null)
             {

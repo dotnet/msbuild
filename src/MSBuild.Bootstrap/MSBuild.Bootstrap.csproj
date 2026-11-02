@@ -23,10 +23,6 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <!-- This file is needed so the dotnet CLI knows how to map preview SDK versions to tfms (because tfms do not have preview information on them) -->
-    <!-- This is because according to semver, 2.1.0-preview is not >= 2.1.0 -->
-    <Content Include="$(DotNetRoot)sdk\$(DotNetCliVersion)\Microsoft.NETCoreSdk.BundledVersions.props" CopyToOutputDirectory="PreserveNewest" />
-
     <!-- Include NuGet build tasks -->
     <PackageReference Include="NuGet.Build.Tasks" />
     <PackageReference Include="NuGet.Build.Tasks.Console" />
@@ -44,7 +40,7 @@
   </ItemGroup>
 
   <!-- Use deps file from this project with additional dependencies listed instead of the one generated in the MSBuild project -->
-  <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build" Condition="($([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) or '$(TargetFramework)' == 'netstandard2.0')">
+  <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).deps.json" DestinationFiles="$(OutputPath)MSBuild.deps.json" SkipUnchangedFiles="true" />
   </Target>
   <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish" Condition="'$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">

@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
@@ -134,6 +135,14 @@ namespace Microsoft.Build.Shared
             // Ensure we are attempting to load a matching version
             // of the Microsoft.Build.* assembly.
             assemblyName.Version = _currentAssemblyVersion;
+
+            // Assembly.Location is empty in a single-file/Native AOT host, where the well-known MSBuild
+            // assembly is already loaded into the image; skip the path-based search there (ILC dead-strips
+            // this read and its IL3000) and let the default resolution find the loaded assembly.
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                return null;
+            }
 
             string[] searchPaths = [Assembly.GetExecutingAssembly().Location];
             return TryResolveAssemblyFromPaths(context, assemblyName, searchPaths);

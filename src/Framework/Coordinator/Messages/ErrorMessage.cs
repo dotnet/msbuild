@@ -10,11 +10,10 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// </summary>
 internal sealed record ErrorMessage : ServerMessage
 {
-    public override ServerMessageType MessageType => ServerMessageType.Error;
-
     public string Message { get; }
 
     public ErrorMessage(string message)
+        : base(ServerMessageType.Error)
     {
         Message = message;
     }
@@ -22,5 +21,12 @@ internal sealed record ErrorMessage : ServerMessage
     protected override void WritePayload(BinaryWriter writer)
     {
         writer.Write(Message);
+    }
+
+    internal static ErrorMessage ReadPayload(BinaryReader reader)
+    {
+        string message = reader.ReadString();
+
+        return new(message);
     }
 }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -19,7 +20,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor
         /// </summary>
-        public IntrinsicTaskFactory(Type intrinsicType)
+        public IntrinsicTaskFactory([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type intrinsicType)
         {
             this.TaskType = intrinsicType;
         }
@@ -35,6 +36,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the task type.
         /// </summary>
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
         public Type TaskType
         {
             get;
@@ -44,6 +46,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize the factory.
         /// </summary>
+        [RequiresUnreferencedCode("Task factories create tasks by reflecting over a task type discovered or generated at runtime, which is incompatible with trimming.")]
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
         {
             Assumed.Equal(taskName, TaskType.Name, StringComparison.OrdinalIgnoreCase, $"Unexpected task name {taskName}.  Expected {TaskType.Name}");
@@ -69,7 +72,16 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Creates an instance of the task.
         /// </summary>
-        public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
+        [RequiresUnreferencedCode("Task factories create tasks by reflecting over a task type discovered or generated at runtime, which is incompatible with trimming.")]
+        public ITask CreateTask(IBuildEngine taskFactoryLoggingHost) => CreateIntrinsicTask();
+
+        /// <summary>
+        /// Creates the intrinsic task instance by direct construction (no reflection), so it is safe under
+        /// trimming/Native AOT. The <see cref="ITaskFactory.CreateTask"/> interface member carries
+        /// <c>[RequiresUnreferencedCode]</c> for general task factories; this engine-internal
+        /// entry point does not, letting the registered/AOT task path construct intrinsic tasks directly.
+        /// </summary>
+        internal ITask CreateIntrinsicTask()
         {
             if (TaskType == typeof(MSBuild))
             {

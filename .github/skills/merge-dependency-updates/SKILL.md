@@ -121,11 +121,9 @@ gh api graphql -f query='
 '
 ```
 
-#### 3b. Bump VersionPrefix (non-main branches only)
+#### 3b. Bump VersionPrefix (vs < 18.10 branches only)
 
-**Skip for `main`** — it uses `Major.Minor.0` with a `preview` label.
-
-For `vs*` branches:
+**Skip for `vs18.10` and newer vs* branches** - they don't need to increment the patch version with every dependency update anymore. Only bump for `vs*` branches that are older than `vs18.10`.
 
 1. Read `<VersionPrefix>X.Y.Z</VersionPrefix>` from the **target branch's** `eng/Versions.props`
 2. Increment patch: `X.Y.Z` → `X.Y.(Z+1)`

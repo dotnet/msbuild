@@ -41,14 +41,14 @@ Apply **all** dimensions on every review, weighted by file location (see [Folder
 
 **Rules:**
 1. Breaking changes are basically forbidden. Customers expect any project that built before to keep building.
-2. In cases where we expect no breaking behavior but there is a slight chance it should be gated behind a ChangeWave. See `../../documentation/wiki/ChangeWaves.md`.
+2. In cases where we expect no breaking behavior but there is a slight chance, gate behind a ChangeWave. This especially applies to changes in risky areas such as IPC or the engine. See `../../documentation/wiki/ChangeWaves.md`.
 3. New warnings are breaking changes because customers set `-WarnAsError` in their builds. Gate them behind a ChangeWave or emit them as `Message`.
 4. Make behavioral changes opt-in by default.
 5. SDK target changes must preserve backward compatibility with existing project files.
 6. Never remove CLI switches or aliases — deprecate with warnings first.
 
 **CHECK — Flag if:**
-- [ ] A change can be percieved by customers as breaking
+- [ ] A change can be perceived by customers as breaking (name the specific scenario)
 - [ ] Risky behavioral change has no ChangeWave gate
 - [ ] New warnings emitted
 - [ ] A property default value has changed
@@ -89,11 +89,12 @@ Hot paths: `Evaluator.cs`, `Expander.cs`, file I/O operations.
 4. Profile before optimizing — claims require evidence.
 
 **CHECK — Flag if:**
-- [ ] LINQ
+- [ ] LINQ on a hot path (cold-path LINQ is idiomatic here — don't flag it)
 - [ ] Strings allocated that could be reused or avoided
 - [ ] A value recomputed on every call when cacheable
 - [ ] `Dictionary` for <10 items, or `List` for frequent lookups of >100 items
 - [ ] Optimization claim without profiling data
+- [ ] `System.Reflection` (constructor discovery, `Activator`, `MethodInfo` lookups) on hot paths — reflection results must be computed once and cached (e.g., via `Lazy<T>` or a static field), never re-invoked per task instantiation or per build request
 
 ---
 
@@ -147,7 +148,7 @@ See `../../documentation/wiki/Binary-Log.md` and `../../documentation/wiki/Loggi
 
 **Rules:**
 1. Changes must be captured in the binary log.
-2. Use appropriate `MessageImportance`: `High` = always shown, `Normal` = default, `Low` = detailed, `Diagnostic` = debug.
+2. Use appropriate `MessageImportance`: `High` = always shown, `Normal` = default, `Low` = detailed.
 3. Add diagnostic logging for complex code paths.
 4. Use structured logging events with sufficient context (project path, target name, item identity).
 5. Binary log format changes must be backward-compatible.
@@ -232,6 +233,8 @@ See `../../documentation/wiki/Microsoft.Build.Framework.md`.
 5. For bug fix PRs, read the original issue and feature PR discussions to understand the design intent. Verify the fix aligns with it.
 6. When code works around an API limitation (try/catch chains, TOCTOU patterns, fallback sequences), check whether a better API exists in already-referenced packages that would eliminate the workaround.
 7. When a pattern is borrowed from another codebase or context, verify its assumptions still hold in the new context.
+8. Respect abstraction layers: a layer should not depend on the internals or concrete types of another, and logic should live in the layer responsible for it. Flag dependency inversions (a lower layer depending on a higher one), leaks (one layer's implementation details exposed across its boundary), and misplaced logic (a decision made outside the layer that owns it), even when functionally correct.
+9. When code is placed in a particular spot because some constraint supposedly requires it, confirm that constraint is real before accepting the placement. A justification that holds for one path may not hold here, and a cleaner location may be available.
 
 **CHECK — Flag if:**
 - [ ] Large feature PR with no linked spec
@@ -241,6 +244,7 @@ See `../../documentation/wiki/Microsoft.Build.Framework.md`.
 - [ ] Fix contradicts design intent established in original feature discussions
 - [ ] Workaround for an API limitation when a better API is available in existing dependencies
 - [ ] Pattern borrowed from a different context without validating its assumptions apply here
+- [ ] Abstraction-layer violation: dependency inversion, a leak across a boundary, or logic placed outside the layer that owns it
 
 ---
 
@@ -312,14 +316,16 @@ See `../../documentation/wiki/Nodes-Orchestration.md`, `../../documentation/spec
 
 **Rules:**
 1. Use clear, descriptive names. Avoid abbreviations unless universally understood (e.g., `PRE` for `ProjectRootElement`).
-2. Be consistent with surrounding code naming.
-3. Test methods: `MethodUnderTest_Scenario_ExpectedResult`.
+2. Names should describe what a member is or does, not why it was introduced. Names should not be misleading.
+3. Be consistent with surrounding code naming.
+4. Test methods: `MethodUnderTest_Scenario_ExpectedResult`.
 
 **CHECK — Flag if:**
 - [ ] Ambiguous names (`data`, `result`, `temp`, `flag`)
 - [ ] Naming inconsistent with adjacent code
 - [ ] Boolean parameter meaning unclear
 - [ ] Test method names don't describe what they test
+- [ ] Misleading names: a name implies semantics different from what the member actually represents or does
 
 ---
 
@@ -407,13 +413,11 @@ See `../../documentation/ProjectReference-Protocol.md`.
 See `../../documentation/wiki/Bootstrap.md`.
 
 **Rules:**
-1. Dependency versions must be pinned via Darc/Maestro. Manual edits to `eng/Versions.props` require justification.
-2. Verify compatibility with all build entry points: Arcade CLI, VS, `dotnet build`, bootstrap.
-3. CI/CD pipeline changes require validation before merge.
-4. Follow VS servicing and branching conventions.
+1. Verify compatibility with all build entry points: Arcade CLI, VS, `dotnet build`, bootstrap.
+2. CI/CD pipeline changes require validation before merge.
+3. Follow VS servicing and branching conventions.
 
 **CHECK — Flag if:**
-- [ ] `eng/Versions.props` manually edited without Darc justification
 - [ ] CI YAML change not validated
 - [ ] Bootstrap build compatibility not verified
 - [ ] Change works in one build entry point but may fail in others
@@ -564,7 +568,7 @@ Use this to prioritize dimensions based on changed files.
 
 1b. **Historical context** (for bug fix and follow-up PRs): Read the linked issue and the original feature PR discussions. Identify design intent, constraints, and reviewer-established principles. Feed this context to every dimension agent so they can evaluate whether the fix aligns with the original design, not just whether the code compiles.
 
-2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-4.6"`). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
+2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-5"`). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
 
    Each sub-agent receives: the PR diff, PR description, the single dimension's rules and checklist, and the folder context.
 
@@ -600,7 +604,7 @@ Use this to prioritize dimensions based on changed files.
 3. For each non-LGTM finding, launch a validation agent that **proves or disproves it** using:
 
    - **Code flow tracing**: Read full source from the PR branch (`github-mcp-server-get_file_contents` with `ref: "refs/pull/{pr}/head"`). Trace callers, callees, locks, thread boundaries.
-   - **Build and test**: Build the PR branch locally. Run existing tests. Check coverage of the claimed scenario.
+   - **Build and test**: if the PR head is checked out, build it and run the tests covering the claimed scenario. Otherwise validate by reading the diff and source via GitHub MCP.
    - **Proof-of-concept test**: Write a minimal test that demonstrates the issue — include in PR feedback as evidence.
    - **Thread timeline**: For concurrency issues, write the interleaving step-by-step:
      ```
@@ -620,13 +624,15 @@ Use this to prioritize dimensions based on changed files.
 
    Confirm only with concrete evidence. Dispute if a lock, blocking call, or control flow prevents the scenario. **Never validate against `main`.**
 
-4. For borderline findings, run the same validation on 3 models (`claude-opus-4.6`, `gpt-5.2-codex`, `gemini-3-pro-preview`). Keep findings confirmed by ≥2/3.
+4. For borderline findings, run the same validation on 3 models (`claude-opus-5`, `gpt-5.6-sol`, `gemini-3.6-flash`). Keep findings confirmed by ≥2/3.
 
 ### Wave 3: Post
 
 > **Tool availability note**: Steps 5–7 reference gh-aw safe-output tools (`create_pull_request_review_comment`, `submit_pull_request_review`, `add_comment`). When running outside an agentic workflow (e.g. locally in VS Code), these tools are unavailable — use the closest GitHub MCP or CLI equivalents instead (e.g. `gh api` to create PR review comments, `gh pr review` to submit a review, `gh pr comment` to post general comments).
 
-5. Post **inline review comments** on the exact diff lines using the `create_pull_request_review_comment` safe-output tool. Each comment must target a specific `path` and `line` in the PR diff. Format:
+5. **Deduplicate first.** Dimensions overlap, so the same defect can be reported by several of them. Group findings by `FILE` + `LINES` and post one comment per root cause, under the highest-severity dimension.
+
+   Post **inline review comments** on the exact diff lines using the `create_pull_request_review_comment` safe-output tool. Each comment must target a specific `path` and `line` in the PR diff. Format:
 
    ```markdown
    **[$SEVERITY] $DimensionName**
@@ -680,3 +686,5 @@ Use this to prioritize dimensions based on changed files.
    **Never use APPROVE** — the agent must not count as a PR approval.
 
    All inline comments from step 5 are automatically bundled into this review submission.
+
+8. **Never resolve or dismiss reviewer threads opened by humans.** Only the maintainer who opened a thread may mark it resolved. If a finding has been addressed in the code, note that in a reply but leave the thread open for the maintainer to close. Threads that were clearly opened by another AI agent or bot (e.g., authored by `[bot]`-suffixed accounts or automated tooling) may be resolved after the finding is addressed.

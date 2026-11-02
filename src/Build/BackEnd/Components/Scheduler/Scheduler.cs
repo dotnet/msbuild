@@ -329,17 +329,17 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Retrieves the request executing on a node.
+        /// Retrieves the request executing on a node, or null if the node is not executing one.
         /// </summary>
+        /// <remarks>
+        /// Unlike the rest of the scheduler, this is reached without holding the BuildManager's lock: file accesses
+        /// for detoured nodes are reported on the thread draining the sandbox's report pipe. The node's executing
+        /// request may therefore be cleared at any point, so look it up once instead of testing and then fetching.
+        /// </remarks>
         public BuildRequest GetExecutingRequestByNode(int nodeId)
         {
-            if (!_schedulingData.IsNodeWorking(nodeId))
-            {
-                return null;
-            }
-
             SchedulableRequest request = _schedulingData.GetExecutingRequestByNode(nodeId);
-            return request.BuildRequest;
+            return request?.BuildRequest;
         }
 
         /// <summary>
@@ -2766,16 +2766,16 @@ namespace Microsoft.Build.BackEnd
 
                         foreach (int nodeId in _availableNodes.Keys)
                         {
+                            SchedulableRequest executingRequest = _schedulingData.GetExecutingRequestByNode(nodeId);
                             file.WriteLine(
                                 "Node {0} {1} ({2} assigned requests, {3} configurations)",
                                 nodeId,
-                                _schedulingData.IsNodeWorking(nodeId)
-                                    ? string.Format(
+                                executingRequest is null
+                                    ? "Idle"
+                                    : string.Format(
                                         CultureInfo.InvariantCulture,
                                         "Active ({0} executing)",
-                                        _schedulingData.GetExecutingRequestByNode(nodeId)
-                                            .BuildRequest.GlobalRequestId)
-                                    : "Idle",
+                                        executingRequest.BuildRequest.GlobalRequestId),
                                 _schedulingData.GetScheduledRequestsCountByNode(nodeId),
                                 _schedulingData.GetConfigurationsCountByNode(nodeId, false, null));
 
@@ -2788,7 +2788,7 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             // If the node is idle, we want to know why.
-                            if (!_schedulingData.IsNodeWorking(nodeId))
+                            if (executingRequest is null)
                             {
                                 file.WriteLine("Top-level requests causing this node to be idle:");
 

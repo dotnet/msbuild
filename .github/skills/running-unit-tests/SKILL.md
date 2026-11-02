@@ -21,7 +21,7 @@ Use a **fast, scoped** `dotnet test` loop while iterating, and the **full `build
 
 These are configured in `Directory.Build.props` (repo root), `src/Directory.Build.targets`, and `src/Shared/UnitTests/xunit.runner.json`. They apply to both `dotnet test` and `build.cmd -test` unless noted otherwise:
 
-- **Multi-targeting**: test projects target `net472` *and* `net10.0` on Windows (`net10.0` only on Linux/macOS). `dotnet test` runs the suite **once per TFM**.
+- **Multi-targeting**: test projects target .NETFramework and .NETCoreApp on Windows (.NETCoreApp only on Linux/macOS). `dotnet test` runs the suite **once per TFM**.
 - **Single-threaded by default**: `xunit.runner.json` sets `maxParallelThreads: 1` and `parallelizeTestCollections: false`. Many tests mutate process-global state (env vars, cwd, SDK resolvers), so this is intentional.
 - **Auto trait filters**: platform/TFM-inappropriate tests are filtered out via `--filter-not-trait Category=...` (e.g., `nonwindowstests`, `failing`, `nonnetcoreapptests`). Don't try to "fix" tests that appear skipped because of these.
 - **Coverage on non-Windows**: `--coverage --coverage-settings Coverage.config` is appended unconditionally to `XunitOptions` in `src/Directory.Build.targets`. There is no MSBuild property switch to disable it from `dotnet test` — to skip coverage, run the test exe directly without `--coverage`.
@@ -61,7 +61,7 @@ Aim for sub-30s iterations.
 
 These trade safety for speed — use during iteration, **revert before final validation**:
 
-- **Single TFM**: pass `-f net10.0`. Halves runtime on Windows by skipping `net472`.
+-- **Single TFM**: pass `-f net10.0`. Halves runtime on Windows by skipping `net472`.
 - **Temporarily relax single-threaded execution**: drop a `xunit.runner.json` next to the test project (or override the existing one) with:
   ```json
   {

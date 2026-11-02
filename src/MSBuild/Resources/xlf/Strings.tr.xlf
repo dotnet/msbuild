@@ -240,7 +240,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
-        <source>  -multithreaded
+        <source>  -multithreaded[:true|false]
                      Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
@@ -253,7 +253,7 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -çok iş parçacıklı
+        <target state="translated">  -multithreaded[:true|false]
                      MSBuild’de DENEYSEL çok iş parçacıklı modu etkinleştirir.
                      Bu, MSBuild’in
                      projeleri işlemek için birden çok iş parçacığı kullanacağı,
@@ -311,6 +311,16 @@
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidMultiThreadedValue">
+        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1072: Çok iş parçacıklı mod değeri geçerli değil. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1072: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -multithreaded parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -393,6 +403,46 @@
         <source>the server process could not be launched</source>
         <target state="translated">sunucu işlemi başlatılamadı</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeReused">
+        <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
+        <target state="translated">Bu derleme için çalışan MSBuild Sunucu düğümü yeniden kullanılıyor (işlem kimliği {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawned">
+        <source>MSBuild Server node started for this build (process ID {0}).</source>
+        <target state="translated">Bu derleme için MSBuild Sunucu düğümü başlatıldı (işlem kimliği {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawnedShortLived">
+        <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
+        <target state="translated">MSBuild Sunucu düğümü yalnızca bu derleme için başlatıldı, ardından kapatılacak (işlem kimliği {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNotUsedForBuild">
+        <source>MSBuild Server was requested but not used for this build: {0}.</source>
+        <target state="translated">MSBuild Sunucusu istendi ancak bu derleme için kullanılmadı: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonBusy">
+        <source>the server was busy with another build</source>
+        <target state="translated">sunucu başka bir derlemeyle meşguldü</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
+        <source>this invocation is not compatible with MSBuild Server</source>
+        <target state="translated">bu çağrı MSBuild Sunucu ile uyumlu değil</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
+        <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
+        <target state="translated">düğüm yeniden kullanımı devre dışı (-nodeReuse:false veya MSBUILDDISABLENODEREUSE=1)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
+        <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
+        <target state="translated">MSBUILDENSURESTDOUTFORTASKPROCESSES kaçış mekanizması etkin</target>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>
@@ -2323,6 +2373,36 @@
         <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
         <target state="translated">MSBUILD : error MSB4192: "{0}" proje dosyası, MSBuild’in doğrudan derleyemeyeceği ".vcproj" veya ".dsp" dosya biçiminde. Lütfen projeyi Visual Studio IDE içinde açarak veya dönüştürme aracını kullanarak dönüştürün ya da “.vcproj” için MSBuild kullanarak projeyi içeren çözüm dosyasını derleyin.</target>
         <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
+        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
+        <target state="translated">MSB5022: MSBuild görev konağı IBuildEngine geri çağırmaları gerçekleştiren görevleri çalıştırmayı desteklemez. Bu işlemleri gerçekleştirmek istiyorsanız lütfen bunun yerine görevinizi çekirdek MSBuild işleminde gerçekleştirin.  UsingTask öğesine bir "Runtime" veya "Architecture" değeri atfedilmişse veya görev çağrısına MSBuild’in geçerli çalışma zamanı ya da mimarisi ile eşleşmeyen bir "MSBuildRuntime" veya "MSBuildArchitecture" değeri atfedilmişse görev konağında bir görev otomatik olarak yürütülür.</target>
+        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="InvalidLogFileFormat">
+        <source>MSB4233: There was an exception while reading the log file: {0}</source>
+        <target state="translated">MSB4233: Günlük dosyası okunurken bir özel durum oluştu: {0}</target>
+        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
+        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
+        <target state="translated">Üst düğümden alınan ortam görev ana bilgisayarına uygulanmadan önce ortamda aşağıdaki değişiklikler yapılıyor:</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
+        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
+        <target state="translated">  '{0}', üst ortamında değeri olan '{2}' yerine '{1}' değerine ayarlanıyor.</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSchemaValidationErrors">
+        <source>Schema validation</source>
+        <target state="translated">Şema doğrulama</target>
+        <note>
+      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
+      "MSBUILD : Schema validation error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.
+    </note>
       </trans-unit>
     </body>
   </file>

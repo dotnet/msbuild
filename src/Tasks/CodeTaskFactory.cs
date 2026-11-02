@@ -170,6 +170,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets the type of the generated task.
         /// </summary>
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
         public Type TaskType { get; private set; }
 
         public string GetAssemblyPath() => _assemblyPath;
@@ -187,6 +188,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Initializes the task factory.
         /// </summary>
+        [RequiresUnreferencedCode("Compiles and loads a task assembly at runtime and reflects over its types, which is incompatible with trimming.")]
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
             _nameOfTask = taskName;
@@ -326,6 +328,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Create a taskfactory instance which contains the data that needs to be refreshed between task invocations.
         /// </summary>
+        [RequiresUnreferencedCode("Instantiates a task type from an assembly compiled at runtime, which is incompatible with trimming.")]
         public ITask CreateTask(IBuildEngine loggingHost)
         {
             // The assembly will have been compiled during class factory initialization, create an instance of it
@@ -1122,6 +1125,8 @@ namespace Microsoft.Build.Tasks
         }
     }
 #else
+    using System.Diagnostics.CodeAnalysis;
+
     /// <summary>
     /// A task factory which can take code dom supported languages and create a task out of it
     /// </summary>
@@ -1132,8 +1137,10 @@ namespace Microsoft.Build.Tasks
     {
         public string FactoryName => "Code Task Factory";
 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
         public Type TaskType { get; } = null;
 
+        [RequiresUnreferencedCode("The CodeTaskFactory is not supported on .NET Core.")]
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
         {
             TaskLoggingHelper log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
@@ -1152,6 +1159,7 @@ namespace Microsoft.Build.Tasks
             throw new NotSupportedException();
         }
 
+        [RequiresUnreferencedCode("The CodeTaskFactory is not supported on .NET Core.")]
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
         {
             throw new NotSupportedException();

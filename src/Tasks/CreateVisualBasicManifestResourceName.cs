@@ -117,8 +117,8 @@ namespace Microsoft.Build.Tasks
             else
             {
                 info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName, treatAsCultureNeutral);
+
                 // If the item has a culture override, respect that.
-                // We need to recheck here due to changewave in condition above - after Wave17_14 removal, this should be unconditional.
                 if (!string.IsNullOrEmpty(culture))
                 {
                     info.culture = culture;
