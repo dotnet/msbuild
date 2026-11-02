@@ -1,6 +1,7 @@
 {
   "sdk": {
     "allowPrerelease": true,
+    "rollForward": "feature",
     "paths": [
       "$host$"
     ],
