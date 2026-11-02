@@ -1,5 +1,7 @@
 # MSBuild trimming & Native AOT — design and strategy
 
+> **.NET 10 servicing boundary:** this document describes the upstream engine-AOT design, not a new guarantee for the servicing engine. The servicing payload preserves existing public API analysis contracts and does not opt Microsoft.Build into the new engine-wide AOT promotion. Pre-existing Framework, Utilities, and Tasks AOT support and additive registration APIs remain; consumers keep their own trim analyzers enabled.
+
 **Status:** Living. This is the **single source of truth** for *how MSBuild
 decides what to do* with a trim/AOT-unfriendly code path. It collapses the design rationale and
 the per-area tactics that were previously scattered across the AOT specs into one decision

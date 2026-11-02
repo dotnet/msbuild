@@ -1,5 +1,7 @@
 # MSBuild object model - Native AOT validation harness
 
+> **.NET 10 servicing boundary:** the new engine-wide AOT promotion is not part of this servicing payload. Existing engine and task-factory APIs retain their baseline analysis contracts so unchanged trim-analyzed consumers continue to compile. Framework, Utilities, and Tasks retain their pre-existing AOT support. This experimental harness remains available for upstream development, but its Native AOT publish is not a servicing support or validation claim.
+
 A standalone **MSTest + Microsoft.Testing.Platform (MTP)** test project that runs **Native
 AOT-published** and validates that the MSBuild object-model scenarios the .NET SDK CLI relies on
 in-process actually work under AOT.
@@ -12,9 +14,8 @@ detection, `reference`/`solution` editing) - and now a **registered-task build**
 task registry (`Microsoft.Build.Utilities.Task.RegisterTask`), a project whose tasks are registered
 **builds** end to end under Native AOT (see [RegisteredTaskAotTests.cs](RegisteredTaskAotTests.cs)). The
 broader **execution engine** (`BuildManager`) remains the AOT-hard path a host falls back to a
-forwarded/JIT MSBuild for - its build entry points stay `[RequiresUnreferencedCode]` for reflective
-logger/plugin loading; an in-process host that passes pre-constructed `ILogger` instances and no
-project-cache plugins (as the harness does) does not hit that path.
+forwarded/JIT MSBuild for. The upstream engine-wide annotations and guarantee described by these
+scenarios are intentionally excluded from the .NET 10 servicing contract.
 
 > This project is **intentionally not part of the repository's Arcade build** (it is not in
 > `MSBuild.slnx`). The local empty `Directory.Build.props` / `Directory.Build.targets` /

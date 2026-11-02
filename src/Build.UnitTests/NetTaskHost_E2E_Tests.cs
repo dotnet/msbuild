@@ -28,6 +28,26 @@ namespace Microsoft.Build.Engine.UnitTests
             _output = output;
         }
 
+        [Fact]
+        public async Task LegacyApisRemainUsableByTrimAnalyzedConsumer()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var outputDirectory = env.CreateFolder();
+            Microsoft.Build.Utilities.CommandLineBuilder command = new();
+            command.AppendFileNameIfNotNull(Path.Combine(TestAssetsRootPath, "LegacyTrimConsumer", "LegacyTrimConsumer.csproj"));
+            command.AppendSwitch("-restore");
+            command.AppendSwitch("-v:q");
+            command.AppendSwitchIfNotNull("-p:BaseIntermediateOutputPath=", FileUtilities.EnsureTrailingSlash(Path.Combine(outputDirectory.Path, "obj")));
+            command.AppendSwitchIfNotNull("-p:OutputPath=", FileUtilities.EnsureTrailingSlash(Path.Combine(outputDirectory.Path, "bin")));
+            command.AppendSwitch("-p:ImportDirectoryBuildProps=false");
+            command.AppendSwitch("-p:ImportDirectoryBuildTargets=false");
+            command.AppendSwitch("-p:ImportDirectoryPackagesProps=false");
+            var (succeeded, output) = await RunnerUtilities.ExecBootstrappedMSBuildAsync(
+                command.ToString(), outputHelper: _output, timeoutMilliseconds: 120_000);
+
+            succeeded.ShouldBeTrue(output);
+        }
+
         [Theory]
         [InlineData("AssemblyTaskFactory", false)]
         [InlineData("TaskHostFactory", false)]

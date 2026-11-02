@@ -709,7 +709,6 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Handles the NodeConfiguration packet.
         /// </summary>
-        [RequiresUnreferencedCode("Initializes node loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         private void HandleNodeConfiguration(NodeConfiguration configuration)
         {
             // Grab the system parameters.

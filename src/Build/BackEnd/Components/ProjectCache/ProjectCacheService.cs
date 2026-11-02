@@ -100,7 +100,6 @@ namespace Microsoft.Build.ProjectCache
         /// <summary>
         /// Optimization which frontloads plugin initialization since we have an entire graph.
         /// </summary>
-        [RequiresUnreferencedCode("Loads project cache plugin assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         public void InitializePluginsForGraph(
             ProjectGraph projectGraph,
             ICollection<string> requestedTargets,
@@ -127,7 +126,6 @@ namespace Microsoft.Build.ProjectCache
                 cancellationToken);
         }
 
-        [RequiresUnreferencedCode("Loads project cache plugin assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         public void InitializePluginsForVsScenario(
             IEnumerable<ProjectCacheDescriptor> projectCacheDescriptors,
             BuildRequestConfiguration buildRequestConfiguration,
@@ -160,7 +158,6 @@ namespace Microsoft.Build.ProjectCache
                 cancellationToken);
         }
 
-        [RequiresUnreferencedCode("Loads a project cache plugin assembly from disk and reflects over its types, which is incompatible with trimming.")]
         private Task<ProjectCachePlugin> GetProjectCachePluginAsync(
             ProjectCacheDescriptor projectCacheDescriptor,
             ProjectGraph? projectGraph,
@@ -196,7 +193,6 @@ namespace Microsoft.Build.ProjectCache
             }
         }
 
-        [RequiresUnreferencedCode("Loads a project cache plugin assembly from disk and reflects over its types, which is incompatible with trimming.")]
         private async Task<ProjectCachePlugin> CreateAndInitializePluginAsync(
             ProjectCacheDescriptor projectCacheDescriptor,
             ProjectGraph? projectGraph,
@@ -429,7 +425,6 @@ namespace Microsoft.Build.ProjectCache
             }
         }
 
-        [RequiresUnreferencedCode("Loads a project cache plugin assembly from disk and reflects over its exported types, which is incompatible with trimming.")]
         [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
         private static Type GetTypeFromAssemblyPath(string pluginAssemblyPath)
         {
@@ -506,7 +501,6 @@ namespace Microsoft.Build.ProjectCache
                 || (buildingProject != null && !ConversionUtilities.ConvertStringToBool(buildingProject, nullOrWhitespaceIsFalse: true));
         }
 
-        [RequiresUnreferencedCode("Loads project cache plugin assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         public void PostCacheRequest(CacheRequest cacheRequest, CancellationToken cancellationToken)
         {
             EnsureNotDisposed();
@@ -581,7 +575,6 @@ namespace Microsoft.Build.ProjectCache
             }
         }
 
-        [RequiresUnreferencedCode("Loads project cache plugin assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         private async ValueTask<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, BuildRequestConfiguration buildRequestConfiguration, BuildEventContext buildEventContext, CancellationToken cancellationToken)
         {
             Assumed.NotNull(buildRequest.ProjectInstance);

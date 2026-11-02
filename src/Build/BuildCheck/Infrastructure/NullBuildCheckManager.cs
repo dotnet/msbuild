@@ -46,7 +46,6 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
-    [RequiresUnreferencedCode("Loads custom build check assemblies from disk and reflects over their types, which is incompatible with trimming.")]
     public void ProcessCheckAcquisition(
         CheckAcquisitionData acquisitionData,
         ICheckContext checkContext)

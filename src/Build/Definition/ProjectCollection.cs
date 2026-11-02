@@ -268,7 +268,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
         /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
-        [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents)
             : this(globalProperties, loggers, null, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly: false)
         {
@@ -288,7 +287,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
         /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
-        [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly)
             : this(globalProperties, loggers, remoteLoggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging: false, reuseProjectRootElementCache: false, enableTargetOutputLogging: false)
         {
@@ -313,7 +311,6 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// This constructor disables target output logging, so TerminalLogger and other loggers may not work well. Prefer <see cref="ProjectCollection(IDictionary{string, string}, IEnumerable{ILogger}, IEnumerable{ForwardingLoggerRecord}, ToolsetDefinitionLocations, int, bool, bool, bool, bool, bool)"/> instead to control this behavior.
         /// </remarks>
-        [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache) :
             this(globalProperties: globalProperties, loggers: loggers, remoteLoggers: remoteLoggers, toolsetDefinitionLocations: toolsetDefinitionLocations, maxNodeCount: maxNodeCount, onlyLogCriticalEvents: onlyLogCriticalEvents, loadProjectsReadOnly: loadProjectsReadOnly, useAsynchronousLogging: useAsynchronousLogging, reuseProjectRootElementCache: reuseProjectRootElementCache, enableTargetOutputLogging: false)
         {
@@ -336,7 +333,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="useAsynchronousLogging">If set to true, asynchronous logging will be used. <see cref="Dispose()"/> has to called to clear resources used by async logging.</param>
         /// <param name="reuseProjectRootElementCache">If set to true, it will try to reuse <see cref="ProjectRootElementCacheBase"/> singleton.</param>
         /// <param name="enableTargetOutputLogging">If set to true, loggers will collect and send Target outputs when targets are finished executing.</param>
-        [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging)
             : this(globalProperties, loggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging, reuseProjectRootElementCache, enableTargetOutputLogging, parseConfigDirectory: null)
         {
@@ -355,7 +351,6 @@ namespace Microsoft.Build.Evaluation
         /// Instantiates a project collection with the specified parameters and a directory to search
         /// for a Directory.Parse.config file (walked upward from the given directory).
         /// </summary>
-        [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging, string parseConfigDirectory)
             : this(globalProperties, loggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging, reuseProjectRootElementCache, enableTargetOutputLogging, parseConfigDirectory)
         {
@@ -1454,7 +1449,6 @@ namespace Microsoft.Build.Evaluation
         /// Adds some remote loggers to the collection of remote loggers used for builds of projects in this collection.
         /// May be null.
         /// </summary>
-        [RequiresUnreferencedCode("Creates forwarding loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         public void RegisterForwardingLoggers(IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
             using (_locker.EnterDisposableWriteLock())

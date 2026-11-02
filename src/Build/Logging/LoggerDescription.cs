@@ -154,7 +154,6 @@ namespace Microsoft.Build.Logging
         /// exceptions if desired.
         /// </summary>
         /// <returns></returns>
-        [RequiresUnreferencedCode("Loads and instantiates a forwarding logger type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         internal IForwardingLogger CreateForwardingLogger()
         {
             IForwardingLogger forwardingLogger = null;
@@ -183,7 +182,6 @@ namespace Microsoft.Build.Logging
         /// exceptions if desired.
         /// </summary>
         /// <returns></returns>
-        [RequiresUnreferencedCode("Loads and instantiates a logger type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         public ILogger CreateLogger()
         {
             return CreateLogger(false);
@@ -193,7 +191,6 @@ namespace Microsoft.Build.Logging
         /// Loads a logger from its assembly, instantiates it, and handles errors.
         /// </summary>
         /// <returns>Instantiated logger.</returns>
-        [RequiresUnreferencedCode("Loads and instantiates a logger type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         private ILogger CreateLogger(bool forwardingLogger)
         {
             ILogger logger = null;

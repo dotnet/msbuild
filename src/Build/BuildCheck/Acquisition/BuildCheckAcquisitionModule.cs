@@ -26,7 +26,6 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
     /// <summary>
     /// Creates a list of factory delegates for building check rules instances from a given assembly path.
     /// </summary>
-    [RequiresUnreferencedCode("Loads custom build check assemblies from disk and reflects over their types, which is incompatible with trimming.")]
     public List<CheckFactory> CreateCheckFactories(
         CheckAcquisitionData checkAcquisitionData,
         ICheckContext checkContext)

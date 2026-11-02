@@ -81,7 +81,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The task type object.
         /// </summary>
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
         public Type TaskType
         {
             get
@@ -99,7 +98,6 @@ namespace Microsoft.Build.Tasks
         /// MSBuild engine will call this to initialize the factory. This should initialize the factory enough so that the factory can be asked
         ///  whether or not task names can be created by the factory.
         /// </summary>
-        [RequiresUnreferencedCode("Generates and loads a task assembly at runtime and reflects over its types, which is incompatible with trimming.")]
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
             ArgumentNullException.ThrowIfNull(taskName);
@@ -220,7 +218,6 @@ namespace Microsoft.Build.Tasks
         /// Create an instance of the task to be used.
         /// </summary>
         /// <param name="taskFactoryLoggingHost">The task factory logging host will log messages in the context of the task.</param>
-        [RequiresUnreferencedCode("Instantiates a task type from an assembly generated at runtime, which is incompatible with trimming.")]
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
         {
             string fullTaskName = $"{TaskNamespace}.{TaskName}";
@@ -271,10 +268,8 @@ namespace Microsoft.Build.Tasks
     {
         public string FactoryName => "XamlTaskFactory";
 
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
         public Type TaskType { get; } = null;
 
-        [RequiresUnreferencedCode("The XamlTaskFactory is not supported on .NET Core.")]
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
         {
             TaskLoggingHelper log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
@@ -293,7 +288,6 @@ namespace Microsoft.Build.Tasks
             throw new NotSupportedException();
         }
 
-        [RequiresUnreferencedCode("The XamlTaskFactory is not supported on .NET Core.")]
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
         {
             throw new NotSupportedException();

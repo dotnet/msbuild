@@ -1149,7 +1149,6 @@ namespace Microsoft.Build.BackEnd
         /// If the set of task identity parameters are defined, only tasks that match that identity are chosen.
         /// </summary>
         /// <returns>The Type of the task, or null if it was not found.</returns>
-        [RequiresUnreferencedCode("Creates and loads a task factory by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         private TaskFactoryWrapper FindTaskInRegistry(in TaskHostParameters taskIdentityParameters)
         {
             if (!_intrinsicTasks.TryGetValue(_taskName, out TaskFactoryWrapper returnClass))
@@ -1212,7 +1211,6 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates the task.
         /// </summary>
-        [RequiresUnreferencedCode("Instantiates a task by reflecting over a task type discovered at runtime, which is incompatible with trimming.")]
         private ITask InstantiateTask(int scheduledNodeId, in TaskHostParameters taskIdentityParameters)
         {
             ITask task = null;
@@ -1482,7 +1480,6 @@ namespace Microsoft.Build.BackEnd
         /// Re-resolves a <c>MetadataLoadContext</c>-loaded parameter type into the live runtime by its
         /// assembly-qualified name.
         /// </summary>
-        [RequiresUnreferencedCode("Resolves the task parameter type from its assembly-qualified name by reflection, which is incompatible with trimming.")]
         private static Type ResolveTaskParameterTypeByName(LoadedType loadedType, TaskPropertyInfo parameter, int indexOfParameter)
         {
             string assemblyQualifiedName =
@@ -2055,7 +2052,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="outOfProcTaskFactory">The out-of-process task factory instance.</param>
         /// <param name="scheduledNodeId">Node for which the task host should be called</param>
         /// <returns>A TaskHostTask that will execute the inner task out of process, or <code>null</code> if task creation fails.</returns>
-        [RequiresUnreferencedCode("Instantiates a task by reflecting over a task type discovered at runtime, which is incompatible with trimming.")]
         private ITask CreateTaskHostTaskForOutOfProcFactory(
             in TaskHostParameters taskIdentityParameters,
             TaskFactoryEngineContext taskFactoryEngineContext,

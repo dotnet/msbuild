@@ -58,7 +58,6 @@ internal interface IBuildCheckManager
 
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
-    [RequiresUnreferencedCode("Loads custom build check assemblies from disk and reflects over their types, which is incompatible with trimming.")]
     void ProcessCheckAcquisition(CheckAcquisitionData acquisitionData, ICheckContext checksContext);
 
     void ProcessProjectImportedEventArgs(ICheckContext checkContext, ProjectImportedEventArgs projectImportedEventArgs);

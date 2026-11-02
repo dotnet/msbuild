@@ -99,7 +99,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             _tracingReporter.AddSetDataSourceStats(stopwatch.Elapsed);
         }
 
-        [RequiresUnreferencedCode("Loads custom build check assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         public void ProcessCheckAcquisition(
             CheckAcquisitionData acquisitionData,
             ICheckContext checkContext)

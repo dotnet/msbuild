@@ -43,7 +43,6 @@ namespace Microsoft.Build.BackEnd
         public string FactoryName => "Registered Task Factory";
 
         /// <inheritdoc />
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
         public Type TaskType => _loadedType.Type;
 
         /// <summary>
@@ -61,11 +60,9 @@ namespace Microsoft.Build.BackEnd
         public TaskPropertyInfo[] GetTaskParameters() => _loadedType.Properties;
 
         /// <inheritdoc />
-        [RequiresUnreferencedCode("Task factories create tasks by reflecting over a task type discovered or generated at runtime, which is incompatible with trimming.")]
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost) => true;
 
         /// <inheritdoc />
-        [RequiresUnreferencedCode("Task factories create tasks by reflecting over a task type discovered or generated at runtime, which is incompatible with trimming.")]
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost) => _registration.CreateInstance(TaskEnvironment.Fallback);
 
         /// <inheritdoc />

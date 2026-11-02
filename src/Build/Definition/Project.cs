@@ -1494,7 +1494,6 @@ namespace Microsoft.Build.Evaluation
         /// Does not modify the Project object.
         /// </summary>
         /// <returns>Returns true on success and false on failure or disabled build.</returns>
-        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build()
         {
             return Build((string[])null);
@@ -1509,7 +1508,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="logger">Logger to use.</param>
         /// <returns>Returns true on success and false on failure or disabled build.</returns>
-        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(ILogger logger)
         {
             var loggers = new List<ILogger>(1) { logger };
@@ -1525,7 +1523,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="loggers">List of loggers.</param>
         /// <returns>Returns true on success and false on failure or disabled build.</returns>
-        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(IEnumerable<ILogger> loggers)
         {
             return Build((string[])null, loggers, null);
@@ -1541,7 +1538,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="loggers">List of loggers.</param>
         /// <param name="remoteLoggers">Remote loggers for multi proc logging.</param>
         /// <returns>Returns true on success and false on failure or disabled build.</returns>
-        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
             return Build((string[])null, loggers, remoteLoggers);
@@ -1556,7 +1552,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="target">Target to build.</param>
         /// <returns>Returns true on success and false on failure or disabled build.</returns>
-        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string target)
         {
             return Build(target, null, null);
@@ -1572,7 +1567,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="target">Target to build.</param>
         /// <param name="loggers">List of loggers.</param>
         /// <returns>Returns true on success and false on failure or disabled build.</returns>
-        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string target, IEnumerable<ILogger> loggers)
         {
             return Build(target, loggers, null);
@@ -1589,7 +1583,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="loggers">List of loggers.</param>
         /// <param name="remoteLoggers">Remote loggers for multi proc logging.</param>
         /// <returns>Returns true on success and false on failure or disabled build.</returns>
-        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string target, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
             // targets may be null, but not an entry within it
@@ -1607,7 +1600,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="targets">Targets to build.</param>
         /// <returns>Returns true on success and false on failure or disabled build.</returns>
-        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string[] targets)
         {
             return Build(targets, null, null);
@@ -1624,7 +1616,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="targets">Targets to build.</param>
         /// <param name="loggers">List of loggers.</param>
         /// <returns>Returns true on success and false on failure or disabled build.</returns>
-        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string[] targets, IEnumerable<ILogger> loggers)
         {
             return Build(targets, loggers, null);
@@ -1642,7 +1633,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="loggers">List of loggers.</param>
         /// <param name="remoteLoggers">Remote loggers for multi proc logging.</param>
         /// <returns>Returns true on success and false on failure or disabled build.</returns>
-        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
             return Build(targets, loggers, remoteLoggers, null);
@@ -1656,7 +1646,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="remoteLoggers">Remote loggers for multi proc logging.</param>
         /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required.</param>
         /// <returns>Returns true on success and false on failure or disabled build.</returns>
-        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, EvaluationContext evaluationContext)
         {
             return implementation.Build(targets, loggers, remoteLoggers, evaluationContext);
@@ -3206,7 +3195,6 @@ namespace Microsoft.Build.Evaluation
             /// <param name="loggers">List of loggers.</param>
             /// <param name="remoteLoggers">Remote loggers for multi proc logging.</param>
             /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required.</param>
-            [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
             public override bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, EvaluationContext evaluationContext)
             {
                 if (!IsBuildEnabled)
