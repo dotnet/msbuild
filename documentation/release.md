@@ -60,7 +60,7 @@ Before a `vs*` branch is created, validate and record the exact compatible `OptP
 
 Pinning a drop name does not extend its expiry, and the existing release pins have not been certified here for their full support and rebuild lifetimes. Missing compatibility or retention evidence requires an explicit release-owner decision as described in the release checklist.
 
-The `.opt-prof.yml` definition on `main` is retained as a manual-only workflow with repository, PR, schedule, and pipeline-resource triggers disabled. Existing release-branch copies and the enabled external pipeline definition require separately authorized cleanup; this `main` change does not retire them retroactively.
+The legacy `.opt-prof.yml` collection workflow is removed from `main`; neither central collection nor frozen-profile consumption needs it. Disable the live MSBuild-OptProf definition 17389 before or with deployment so its triggers cannot attempt to load the missing YAML. That operational change requires separate authorization and is not performed by deleting this file. Existing release-branch copies remain unchanged; disabling the shared definition prevents it from collecting from those copies as well. This removal does not delete profile data or extend its retention.
 
 ## Public API
 
