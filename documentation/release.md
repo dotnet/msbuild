@@ -52,15 +52,7 @@ In [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml), th
 
 ## OptProf inputs
 
-Official `main` builds float to the current supported VS `main` central profiles through the OptProf plugin's branch lookup, using the build job token. The build accepts only finalized, non-deleted, unexpired inputs owned by the VS central profile store. Arcade remains the only optimizer and applies the selected profiles to the four required .NET Framework core assemblies.
-
-Floating lets `main` consume updated profiles without a repository pin refresh, including profiles newer than the MSBuild commit that produced them. An explicit `OptProfDropName` remains the highest-priority override, and disabling OptProf skips both central lookup and profile application.
-
-Before a `vs*` branch is created, validate and record the exact compatible `OptProfBaselineDrop` and retention evidence covering that branch's support lifetime and rebuild needs. The branch inherits that literal pin and keeps it fixed throughout servicing: it is not automatically refreshed and does not fall back to the latest legacy output or the VS `main` central profiles. Later changes on `main` apply only to future branch cuts and never mutate existing servicing pins. This policy requires no central VS release registration, backport, or pointer automation.
-
-Pinning a drop name does not extend its expiry, and the existing release pins have not been certified here for their full support and rebuild lifetimes. Missing compatibility or retention evidence requires an explicit release-owner decision as described in the release checklist.
-
-The legacy `.opt-prof.yml` collection workflow is removed from `main`; neither central collection nor frozen-profile consumption needs it. Disable the live MSBuild-OptProf definition 17389 before or with deployment so its triggers cannot attempt to load the missing YAML. That operational change requires separate authorization and is not performed by deleting this file. Existing release-branch copies remain unchanged; disabling the shared definition prevents it from collecting from those copies as well. This removal does not delete profile data or extend its retention.
+Official `main` builds use centrally collected VS `main` profiles. Before cutting a release branch, select a compatible `OptProfBaselineDrop` and ensure it remains retained for the release's support and rebuild lifetime. Release branches keep that fixed baseline during servicing. `OptProfDropName` can override either default.
 
 ## Public API
 
