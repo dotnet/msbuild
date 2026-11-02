@@ -32,10 +32,11 @@
     <Error Condition="'$(VsTelemetryExperiment)' != 'true' and '$(VsTelemetryExperiment)' != 'false'"
            Text="VsTelemetryExperiment must be true or false. Use false only for an explicitly labeled old-SDK control." />
     <PropertyGroup>
+      <_TelemetryExperimentDirectory>$([MSBuild]::NormalizeDirectory('$(IntermediateOutputPath)', 'telemetry-reunification'))</_TelemetryExperimentDirectory>
       <_DefaultVsSetupSwr Condition="'$(VsTelemetryExperiment)' == 'false'">$([MSBuild]::Escape($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)files.swr'))))</_DefaultVsSetupSwr>
     </PropertyGroup>
     <Message Condition="'$(VsTelemetryExperiment)' == 'true' or '$(_AutomaticTelemetryExperiment)' == 'true'"
-             Importance="high" Text="VS telemetry destination routing: $(VsTelemetryExperiment). Source branch: $(BUILD_SOURCEBRANCH). An active candidate requires the matching VS-owned companion provider at setup." />
+             Importance="high" Text="VS telemetry ordinary SAC experiment: $(VsTelemetryExperiment). Source branch: $(BUILD_SOURCEBRANCH). The destination VS must supply telemetry and its closure in the devenv group." />
     <!-- A single timestamped SWR input prevents reusing the other variant's VSIX when opting in or out. -->
     <MakeDir Directories="$(_TelemetryExperimentDirectory)" />
     <WriteLinesToFile Condition="'$(VsTelemetryExperiment)' == 'false'"

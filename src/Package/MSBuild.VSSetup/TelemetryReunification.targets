@@ -4,18 +4,23 @@
     <_AutomaticTelemetryExperiment Condition="'$(MSBuildRuntimeType)' == 'Full' and '$(IsExperimental)' == 'true' and '$(BUILD_SOURCEBRANCH)' == 'refs/heads/exp/janprovaznik/telemetry-reunification-2'">true</_AutomaticTelemetryExperiment>
     <VsTelemetryExperiment Condition="'$(VsTelemetryExperiment)' == '' and '$(_AutomaticTelemetryExperiment)' == 'true'">true</VsTelemetryExperiment>
     <VsTelemetryExperiment Condition="'$(VsTelemetryExperiment)' == ''">false</VsTelemetryExperiment>
-    <_TelemetryExperimentDirectory>$([MSBuild]::NormalizeDirectory('$(ArtifactsObjDir)', 'MSBuild.VSSetup', '$(Configuration)', '$(FullFrameworkTFM)', 'telemetry-reunification'))</_TelemetryExperimentDirectory>
   </PropertyGroup>
 
   <Target Name="VerifyTelemetryReunificationPackage"
           Condition="'$(VsTelemetryExperiment)' == 'true' and '$(MSBuildRuntimeType)' == 'Full'">
-    <Exec Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Test-TelemetryReunification.ps1&quot; -VsixPath &quot;$(VisualStudioSetupInsertionPath)Microsoft.Build.vsix&quot;" />
+    <ItemGroup>
+      <_TelemetryExperimentPackage Include="$(VisualStudioSetupInsertionPath)$(TargetVsixContainerName)"
+                                  Condition="'$(MSBuildProjectName)' == 'MSBuild.VSSetup' or '$(MSBuildProjectName)' == 'MSBuild.VSSetup.Arm64'" />
+      <_TelemetryExperimentPackage Include="$(VisualStudioSetupInsertionPath)Microsoft.Build.vsix;$(VisualStudioSetupInsertionPath)Microsoft.Build.Arm64.vsix"
+                                  Condition="'$(MSBuildProjectName)' == 'AfterSigning' or '$(MSBuildProjectName)' == 'Publish'" />
+    </ItemGroup>
+    <Exec Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Test-TelemetryReunification.ps1&quot; -VsixPath &quot;%(_TelemetryExperimentPackage.Identity)&quot;" />
   </Target>
 
   <Target Name="_VerifyTelemetryReunificationAfterSwix"
           AfterTargets="SwixBuild"
           DependsOnTargets="VerifyTelemetryReunificationPackage"
-          Condition="'$(MSBuildProjectName)' == 'MSBuild.VSSetup'" />
+          Condition="'$(MSBuildProjectName)' == 'MSBuild.VSSetup' or '$(MSBuildProjectName)' == 'MSBuild.VSSetup.Arm64'" />
 
   <!-- Recheck signed/cached insertion bytes before manifest generation and any artifact publication. -->
   <Target Name="_VerifyTelemetryReunificationBeforePublication"

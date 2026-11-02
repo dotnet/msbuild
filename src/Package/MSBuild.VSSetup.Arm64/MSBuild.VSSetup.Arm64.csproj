@@ -25,12 +25,31 @@
   <Import Project="..\GetBinPaths.Arm64.targets" Condition="'$(ExcludeFromBuild)' != 'true'" />
 
   <Target Name="SetVsixProperties" BeforeTargets="Build" DependsOnTargets="SetBinPathsArm64" Condition="'$(ExcludeFromBuild)' != 'true'">
+    <Error Condition="'$(VsTelemetryExperiment)' != 'true' and '$(VsTelemetryExperiment)' != 'false'"
+           Text="VsTelemetryExperiment must be true or false. Use false only for an explicitly labeled old-SDK control." />
+    <PropertyGroup>
+      <_TelemetryExperimentDirectory>$([MSBuild]::NormalizeDirectory('$(IntermediateOutputPath)', 'telemetry-reunification'))</_TelemetryExperimentDirectory>
+      <_DefaultVsSetupSwr Condition="'$(VsTelemetryExperiment)' == 'false'">$([MSBuild]::Escape($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)files.arm64.swr'))))</_DefaultVsSetupSwr>
+    </PropertyGroup>
+    <MakeDir Directories="$(_TelemetryExperimentDirectory)" />
+    <WriteLinesToFile Condition="'$(VsTelemetryExperiment)' == 'false'"
+                      File="$(_TelemetryExperimentDirectory)files.swr"
+                      Lines="$(_DefaultVsSetupSwr)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+    <Exec Condition="'$(VsTelemetryExperiment)' == 'true'"
+          Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)..\MSBuild.VSSetup\Prepare-TelemetryReunification.ps1&quot; -OutputDirectory &quot;$(_TelemetryExperimentDirectory).&quot; -Arm64Config &quot;$(Arm64BinPath)MSBuild.exe.config&quot; -CoordinatorArm64Config &quot;$(CoordinatorArm64BinPath)MSBuild.Coordinator.exe.config&quot;" />
     <ItemGroup>
+      <SwrFile Remove="files.arm64.swr" />
+      <SwrFile Include="$(_TelemetryExperimentDirectory)files.swr" />
+      <FileWrites Include="$(_TelemetryExperimentDirectory)files.swr" />
       <SwrProperty Include="Version=$(VsixVersion)" />
       <SwrProperty Include="FrameworkBinPath=$(FrameworkBinPath)" />
       <SwrProperty Include="Arm64BinPath=$(Arm64BinPath)" />
       <SwrProperty Include="CoordinatorArm64BinPath=$(CoordinatorArm64BinPath)" />
     </ItemGroup>
   </Target>
+
+  <Import Project="..\MSBuild.VSSetup\TelemetryReunification.targets" />
 
 </Project>
