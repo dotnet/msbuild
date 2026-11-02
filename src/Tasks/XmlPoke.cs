@@ -49,10 +49,10 @@ namespace Microsoft.Build.Tasks
         public string Namespaces { get; set; }
 
         /// <summary>
-        /// Prohibits loading XML with embedded DTD. When true (default), an error is raised if a DTD is present.
-        /// When false, DTDs are ignored.
+        /// Prohibits loading XML with embedded DTD. When true, an error is raised if a DTD is present.
+        /// By default, DTDs are ignored to preserve existing build behavior.
         /// </summary>
-        public bool ProhibitDtd { get; set; } = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11);
+        public bool ProhibitDtd { get; set; }
 
         #endregion
 

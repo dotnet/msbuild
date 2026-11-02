@@ -1109,13 +1109,13 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void TransformDtdShowsTaskSpecificErrorMessageByDefault()
+        public void TransformDtdShowsTaskSpecificErrorMessageWhenProhibited()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             var outputPath = env.GetTempFile(".xml");
             MockEngine engine = new(_output);
 
-            XslTransformation task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            XslTransformation task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest(), ProhibitDtd = true };
             task.BuildEngine = engine;
             task.OutputPaths = [new TaskItem(outputPath.Path)];
             task.XmlContent = _xmlDocumentWithDtd;
@@ -1128,24 +1128,42 @@ namespace Microsoft.Build.UnitTests
             engine.Log.ShouldContain("ProhibitDtd");
         }
 
-        [Fact]
-        public void XslTransformationAllowsDtdByDefaultWhenWave18_11IsDisabled()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("18.11")]
+        [InlineData("999.999")]
+        public void XslTransformationIgnoresDtdByDefaultInServicing(string disabledWave)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
             ChangeWaves.ResetStateForTests();
 
-            new XslTransformation().ProhibitDtd.ShouldBeFalse();
+            var outputPath = env.GetTempFile(".xml");
+            MockEngine engine = new(_output);
+            XslTransformation task = new()
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = engine,
+                OutputPaths = [new TaskItem(outputPath.Path)],
+                XmlContent = _xmlDocumentWithDtd,
+                XslContent = _xslDocumentWithDtd,
+            };
+
+            task.ProhibitDtd.ShouldBeFalse();
+            task.Execute().ShouldBeTrue();
+            XmlDocument result = new();
+            result.Load(outputPath.Path);
+            result.DocumentElement.Name.ShouldBe("root");
         }
 
         [Fact]
-        public void XsltWithDtdShowsTaskSpecificLoadErrorByDefault()
+        public void XsltWithDtdShowsTaskSpecificLoadErrorWhenProhibited()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             var outputPath = env.GetTempFile(".xml");
             MockEngine engine = new(_output);
 
-            XslTransformation task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            XslTransformation task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest(), ProhibitDtd = true };
             task.BuildEngine = engine;
             task.OutputPaths = [new TaskItem(outputPath.Path)];
             task.XmlContent = _xmlDocument;
