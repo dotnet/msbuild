@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="1ec061ee82223a1fff7f84bd78726d18914ebf87" BarId="329383" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="7f9b61be8ca37f9dcdbc7fd03a32f19d5344e0a3" BarId="339485" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="10.0.14">
@@ -103,6 +103,14 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.CSharp" Version="4.12.0-3.24574.8">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha>dfa7fc6bdea31a858a402168384192b633c811fa</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0-3.24574.8">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha>dfa7fc6bdea31a858a402168384192b633c811fa</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
