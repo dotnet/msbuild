@@ -46,6 +46,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             FileLogger8,
             FileLogger9,
             DistributedFileLogger,
+            Precompute,
 #if DEBUG
             WaitForDebugger,
 #endif
@@ -230,6 +231,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             new ParameterlessSwitchInfo(  ["filelogger8", "fl8"],                    ParameterlessSwitch.FileLogger8,           null,       "HelpMessage_20_FileLoggerSwitch"),
             new ParameterlessSwitchInfo(  ["filelogger9", "fl9"],                    ParameterlessSwitch.FileLogger9,           null,       "HelpMessage_20_FileLoggerSwitch"),
             new ParameterlessSwitchInfo(  ["distributedfilelogger", "dfl"],          ParameterlessSwitch.DistributedFileLogger, null,       "HelpMessage_21_DistributedFileLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["precompute"],                            ParameterlessSwitch.Precompute,             null,       "HelpMessage_PrecomputeSwitch"),
 #if DEBUG
             new ParameterlessSwitchInfo(  ["waitfordebugger", "wfd"],                ParameterlessSwitch.WaitForDebugger,       null,       null),
 #endif

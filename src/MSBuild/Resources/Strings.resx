@@ -637,6 +637,12 @@
                      (Short form: -mt)
     </value>
   </data>
+  <data name="HelpMessage_PrecomputeSwitch" xml:space="preserve">
+    <value>  -precompute
+                     Enables EXPERIMENTAL precompute mode.
+                     This option does not currently change build behavior.
+    </value>
+  </data>
   <data name="HelpMessage_24_NodeReuse" xml:space="preserve">
     <value>  -nodeReuse:&lt;parameters&gt;
                      Enables or Disables the reuse of MSBuild nodes.
