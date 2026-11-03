@@ -2,11 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
+using System.Threading;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation.Context;
 
@@ -55,9 +59,101 @@ internal enum NonCacheableReason
 }
 
 /// <summary>
-/// State of a path as evaluation observed it. A cache validates it by comparing against a fresh stat.
+/// State of a path as evaluation observed it. Probes require only the path kind to remain unchanged;
+/// reads additionally require the recorded metadata. Glob traversal timestamps signal when matching results
+/// must be checked again, rather than invalidating on unrelated directory changes.
 /// </summary>
-internal readonly record struct FileDependency(PathKind Kind, DateTime LastWriteTimeUtc, long Length);
+internal readonly record struct FileDependency(
+    PathKind Kind,
+    DateTime LastWriteTimeUtc,
+    long Length,
+    bool RequiresMetadata = true,
+    bool RequiresGlobValidation = false);
+
+/// <summary>
+/// The wildcard expansion evaluation consumed, detached from mutable matcher inputs and returned arrays.
+/// </summary>
+internal sealed class GlobDependency
+{
+    private readonly List<string>? _excludes;
+    private readonly string[] _files;
+    private readonly FileMatcherDriver _driver;
+    private readonly FileMatcherCaseFolding _caseFolding;
+    private readonly bool _usesFileSystemEntryCache;
+    private readonly string _culture;
+
+    internal GlobDependency(FileMatcher.GlobResultObservation observation)
+    {
+        ProjectDirectory = observation.ProjectDirectory;
+        Filespec = observation.Filespec;
+        FromCache = observation.FromCache;
+        _driver = observation.Driver;
+        _caseFolding = observation.CaseFolding;
+        _usesFileSystemEntryCache = observation.UsesFileSystemEntryCache;
+        _culture = CultureInfo.CurrentCulture.Name;
+        _excludes = observation.Excludes is null ? null : [.. observation.Excludes];
+        _files = (string[])observation.Files.Clone();
+        // Match the ordering consumed by EngineFileUtilities.GetFileList, before it escapes the paths.
+        Array.Sort(_files, StringComparer.OrdinalIgnoreCase);
+    }
+
+    internal string ProjectDirectory { get; }
+    internal string Filespec { get; }
+    internal FileMatcherDriver Driver => _driver;
+    internal bool UsesFileSystemEntryCache => _usesFileSystemEntryCache;
+    /// <summary>Whether the cached result may predate this manifest's directory observations.</summary>
+    internal bool FromCache { get; }
+    internal ReadOnlySpan<string> Files => _files;
+
+    internal long RetainedSizeBytes
+    {
+        get
+        {
+            long size = RetainedSizeEstimator.AddString(96, ProjectDirectory);
+            size = RetainedSizeEstimator.AddString(size, Filespec);
+            size = RetainedSizeEstimator.AddString(size, _culture);
+            size = RetainedSizeEstimator.AddStrings(RetainedSizeEstimator.Add(size, 24), _files);
+            return _excludes is null
+                ? size
+                : RetainedSizeEstimator.AddStrings(RetainedSizeEstimator.Add(size, 56), _excludes);
+        }
+    }
+
+    /// <param name="sharedEntryCache">
+    /// An optional directory-listing cache shared by the globs of one entry's validation, so overlapping directory
+    /// trees are listed once. It must not outlive that validation: a file added later has to be visible.
+    /// </param>
+    internal bool IsCurrent(ConcurrentDictionary<string, IReadOnlyList<string>>? sharedEntryCache = null)
+    {
+        if (_caseFolding == FileMatcherCaseFolding.LegacyCurrentCulture
+            && !string.Equals(_culture, CultureInfo.CurrentCulture.Name, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var current = FileMatcher.GetFilesForValidation(
+            ProjectDirectory, Filespec, _excludes, _driver, _caseFolding, _usesFileSystemEntryCache, sharedEntryCache);
+        if (current.GlobFailure is not null
+            || current.Action is FileMatcher.SearchAction.ReturnFileSpec
+                or FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard
+                or FileMatcher.SearchAction.LogDriveEnumeratingWildcard
+            || current.FileList.Length != _files.Length)
+        {
+            return false;
+        }
+
+        Array.Sort(current.FileList, StringComparer.OrdinalIgnoreCase);
+        for (int i = 0; i < _files.Length; i++)
+        {
+            if (!string.Equals(_files[i], current.FileList[i], StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
 
 /// <summary>
 /// An SDK resolution evaluation consumed, including the context required to repeat it.
@@ -413,6 +509,7 @@ internal sealed record EvaluationInputKey(
 /// <param name="RegistryReads">Registry keys, value names, requested views, and returned values, in observation order.</param>
 /// <param name="NonCacheable">Why the result must never be reused, or <see cref="NonCacheableReason.None"/>.</param>
 /// <param name="NonCacheableDetail">The input that made the evaluation non-cacheable, for diagnostics.</param>
+/// <param name="Globs">Wildcard expansions whose results must remain unchanged when traversed directories change.</param>
 internal sealed record EvaluationInputs(
     EvaluationInputKey Key,
     IReadOnlyDictionary<string, FileDependency> Files,
@@ -420,7 +517,47 @@ internal sealed record EvaluationInputs(
     ImmutableArray<SdkDependency> SdkResolutions,
     ImmutableArray<RegistryRead> RegistryReads,
     NonCacheableReason NonCacheable,
-    string? NonCacheableDetail)
+    string? NonCacheableDetail,
+    ImmutableArray<GlobDependency> Globs = default)
 {
+    private ConcurrentDictionary<string, FileDependency>? _validatedGlobDirectories;
+
     internal bool IsCacheable => NonCacheable == NonCacheableReason.None;
+
+    /// <summary>
+    /// The state of a glob-traversed directory at which every glob of this entry was last replayed and matched,
+    /// when that differs from the state evaluation recorded. Only a directory whose timestamp alone signals a replay
+    /// can have one, because a changed timestamp is the only thing that makes the entry replay.
+    /// </summary>
+    internal bool TryGetValidatedGlobDirectory(string path, out FileDependency validated)
+    {
+        ConcurrentDictionary<string, FileDependency>? directories = Volatile.Read(ref _validatedGlobDirectories);
+        if (directories is not null)
+        {
+            return directories.TryGetValue(path, out validated);
+        }
+
+        validated = default;
+        return false;
+    }
+
+    /// <summary>
+    /// Remembers the directory states observed before a replay in which every glob matched, so an unchanged state is not
+    /// replayed again. The manifest itself stays immutable: a later change to a directory produces a state that differs
+    /// from the remembered one, and a replay that does not match remembers nothing.
+    /// </summary>
+    internal void RememberValidatedGlobDirectories(IEnumerable<KeyValuePair<string, FileDependency>> directories)
+    {
+        ConcurrentDictionary<string, FileDependency>? remembered = Volatile.Read(ref _validatedGlobDirectories);
+        if (remembered is null)
+        {
+            Interlocked.CompareExchange(ref _validatedGlobDirectories, new(FileUtilities.PathComparer), null);
+            remembered = _validatedGlobDirectories!;
+        }
+
+        foreach (KeyValuePair<string, FileDependency> directory in directories)
+        {
+            remembered[directory.Key] = directory.Value;
+        }
+    }
 }

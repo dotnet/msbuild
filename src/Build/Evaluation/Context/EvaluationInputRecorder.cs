@@ -10,6 +10,7 @@ using System.Reflection;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.NET.StringTools;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
@@ -29,6 +30,7 @@ internal sealed class EvaluationInputRecorder
     private readonly Dictionary<string, string?> _environmentReads = new(
         NativeMethodsShared.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
     private readonly List<RecordedSdkResolution> _sdkResolutions = [];
+    private List<GlobDependency>? _globs;
     private List<RegistryRead>? _registryReads;
     private NonCacheableReason _nonCacheable;
     private string? _nonCacheableDetail;
@@ -56,7 +58,7 @@ internal sealed class EvaluationInputRecorder
 
         try
         {
-            TryGetOrObserve(Canonicalize(path), out _);
+            TryGetOrObserve(Canonicalize(path), requiresMetadata: true, out _);
         }
         catch (Exception ex) when (IsRecoverable(ex))
         {
@@ -85,7 +87,7 @@ internal sealed class EvaluationInputRecorder
             }
 
             // A probe may have recorded the file moments earlier; its stat serves as well as a new one.
-            if (TryGetOrObserve(path, out FileDependency current)
+            if (TryGetOrObserve(path, requiresMetadata: true, out FileDependency current)
                 && (current.Kind != PathKind.File
                     || current.LastWriteTimeUtc != lastWriteTimeUtcWhenRead
                     || current.Length != lengthWhenRead.Value))
@@ -113,7 +115,8 @@ internal sealed class EvaluationInputRecorder
         try
         {
             string fullPath = Canonicalize(path);
-            if (TryGetOrObserve(fullPath, out FileDependency recorded) && exists != Satisfies(recorded.Kind, kind))
+            if (TryGetOrObserve(fullPath, requiresMetadata: false, out FileDependency recorded)
+                && exists != Satisfies(recorded.Kind, kind))
             {
                 MarkNonCacheable(NonCacheableReason.ConflictingObservation, fullPath);
             }
@@ -122,6 +125,60 @@ internal sealed class EvaluationInputRecorder
         {
             MarkNonCacheable(NonCacheableReason.RecorderFailure, ex.Message);
         }
+    }
+
+    internal void RecordDirectoryProbe(string path, bool exists) =>
+        RecordProbe(path, ProbeKind.Directory, exists);
+
+    internal void RecordGlobDirectory(string path)
+    {
+        if (!IsRecording)
+        {
+            return;
+        }
+
+        try
+        {
+            TryGetOrObserve(Canonicalize(path), requiresMetadata: false, out _, requiresGlobValidation: true);
+        }
+        catch (Exception ex) when (IsRecoverable(ex))
+        {
+            MarkNonCacheable(NonCacheableReason.RecorderFailure, ex.Message);
+        }
+    }
+
+    internal void RecordGlob(FileMatcher.GlobResultObservation observation)
+    {
+        if (!IsRecording)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!observation.Succeeded || !Path.IsPathRooted(observation.ProjectDirectory))
+            {
+                MarkNonCacheable(NonCacheableReason.RecorderFailure, observation.Filespec);
+                return;
+            }
+
+            var dependency = new GlobDependency(observation);
+            lock (_files)
+            {
+                (_globs ??= []).Add(dependency);
+            }
+        }
+        catch (Exception ex) when (IsRecoverable(ex))
+        {
+            MarkNonCacheable(NonCacheableReason.RecorderFailure, ex.Message);
+        }
+    }
+
+    internal void RecordEvaluationScopedGlob(FileMatcher.GlobResultObservation observation)
+    {
+        // These caches started empty under this recorder. Hits retain the first pre-enumeration directory
+        // observations, so changed stamps suffice to trigger replay even when later globs share cached entries.
+        RecordGlob(observation with { FromCache = false });
     }
 
     internal void RecordEnvironmentRead(string name, string? value)
@@ -467,7 +524,8 @@ internal sealed class EvaluationInputRecorder
             [.. sdkResolutions],
             _registryReads is null ? [] : [.. _registryReads],
             _nonCacheable,
-            _nonCacheableDetail);
+            _nonCacheableDetail,
+            _globs is null ? [] : [.. _globs]);
     }
 
     /// <summary>
@@ -504,15 +562,30 @@ internal sealed class EvaluationInputRecorder
     }
 
     /// <summary>
-    /// Returns the recorded state of a path, observing it first when it is new. The stat runs outside the lock so
-    /// parallel glob enumeration does not serialize on it.
+    /// Returns the first recorded state, promoting probes to metadata dependencies when needed.
+    /// The stat runs outside the lock so parallel glob enumeration does not serialize on it.
     /// </summary>
-    private bool TryGetOrObserve(string fullPath, out FileDependency recorded)
+    private bool TryGetOrObserve(
+        string fullPath,
+        bool requiresMetadata,
+        out FileDependency recorded,
+        bool requiresGlobValidation = false)
     {
         lock (_files)
         {
             if (_files.TryGetValue(fullPath, out recorded))
             {
+                if ((requiresMetadata && !recorded.RequiresMetadata)
+                    || (requiresGlobValidation && !recorded.RequiresGlobValidation))
+                {
+                    recorded = recorded with
+                    {
+                        RequiresMetadata = recorded.RequiresMetadata || requiresMetadata,
+                        RequiresGlobValidation = recorded.RequiresGlobValidation || requiresGlobValidation,
+                    };
+                    _files[fullPath] = recorded;
+                }
+
                 return true;
             }
         }
@@ -526,8 +599,22 @@ internal sealed class EvaluationInputRecorder
         {
             if (!_files.TryGetValue(fullPath, out recorded))
             {
-                _files.Add(fullPath, current);
-                recorded = current;
+                recorded = current with
+                {
+                    RequiresMetadata = requiresMetadata,
+                    RequiresGlobValidation = requiresGlobValidation,
+                };
+                _files.Add(fullPath, recorded);
+            }
+            else if ((requiresMetadata && !recorded.RequiresMetadata)
+                || (requiresGlobValidation && !recorded.RequiresGlobValidation))
+            {
+                recorded = recorded with
+                {
+                    RequiresMetadata = recorded.RequiresMetadata || requiresMetadata,
+                    RequiresGlobValidation = recorded.RequiresGlobValidation || requiresGlobValidation,
+                };
+                _files[fullPath] = recorded;
             }
         }
 
@@ -606,7 +693,7 @@ internal sealed class EvaluationInputRecorder
     /// Full path without a trailing separator, so a directory is one entry however it was spelled. The result is
     /// interned so manifests of different projects share one string per SDK file instead of each holding its own.
     /// </summary>
-    private static string Canonicalize(string path)
+    internal static string Canonicalize(string path)
     {
         string fixedPath = FileUtilities.FixFilePath(path);
         string fullPath = FileUtilities.NormalizePath(

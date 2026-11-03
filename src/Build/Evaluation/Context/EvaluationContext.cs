@@ -67,7 +67,10 @@ namespace Microsoft.Build.Evaluation.Context
         private ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
 
         private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem, ISdkResolverService sdkResolverService = null,
-            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null, Action<string> directoryTraversed = null)
+            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null,
+            Action<string> directoryTraversed = null,
+            Action<string, bool> directoryProbed = null,
+            Action<FileMatcher.GlobResultObservation> globResultObserved = null)
         {
             Policy = policy;
 
@@ -77,11 +80,15 @@ namespace Microsoft.Build.Evaluation.Context
             // Only a shared cache outlives the evaluation, so only there is it worth storing the directories an expansion
             // depends on for the recorders of later evaluations.
             FileMatcher = FileMatcher.CreateForEvaluation(
-                FileSystem,
+                globResultObserved is not null && FileSystem is RecordingFileSystem recording
+                    ? recording.Inner
+                    : FileSystem,
                 FileEntryExpansionCache,
                 directoryTraversed: directoryTraversed,
                 cacheTraversedDirectories: policy == SharingPolicy.Shared && Traits.Instance.RecordEvaluationInputs,
-                shouldObserveDirectoryTraversal: () => InputRecorder?.IsRecording == true);
+                shouldObserveDirectoryTraversal: () => InputRecorder?.IsRecording == true,
+                directoryProbed: directoryProbed,
+                globResultObserved: globResultObserved);
         }
 
         /// <summary>
@@ -153,7 +160,8 @@ namespace Microsoft.Build.Evaluation.Context
         /// <param name="fileSystem">The file system to use by the new evaluation context.</param>
         /// <param name="inputRecorder">
         /// Recorder for the evaluation the copy serves, or null. A recording copy shares the glob expansion cache; its
-        /// matcher reports every directory a glob traverses, replaying the cached record when the expansion is reused.
+        /// matcher reports directory traversal and existence probes separately, replaying the cached observations
+        /// when the expansion is reused.
         /// </param>
         /// <param name="recordDirectoryTraversal">
         /// Whether glob cache misses and replays should report traversed directories to the recorder.
@@ -164,12 +172,20 @@ namespace Microsoft.Build.Evaluation.Context
             EvaluationInputRecorder inputRecorder = null,
             bool recordDirectoryTraversal = true)
         {
+            bool evaluationScopedGlobCache = inputRecorder is not null
+                && recordDirectoryTraversal
+                && Policy != SharingPolicy.Shared
+                && FileEntryExpansionCache.IsEmpty;
             return new EvaluationContext(
                 Policy,
                 fileSystem,
                 SdkResolverService,
                 FileEntryExpansionCache,
-                inputRecorder is null || !recordDirectoryTraversal ? null : inputRecorder.RecordPath)
+                inputRecorder is null || !recordDirectoryTraversal ? null : inputRecorder.RecordGlobDirectory,
+                inputRecorder is null || !recordDirectoryTraversal ? null : inputRecorder.RecordDirectoryProbe,
+                inputRecorder is null || !recordDirectoryTraversal
+                    ? null
+                    : evaluationScopedGlobCache ? inputRecorder.RecordEvaluationScopedGlob : inputRecorder.RecordGlob)
             {
                 _used = 1,
                 InputRecorder = inputRecorder,

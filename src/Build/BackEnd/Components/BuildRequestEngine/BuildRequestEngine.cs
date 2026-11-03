@@ -66,6 +66,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private IBuildComponentHost _componentHost;
 
+        private bool _ownsEvaluationCacheDiagnostics;
+
         /// <summary>
         /// The work queue.
         /// </summary>
@@ -223,6 +225,16 @@ namespace Microsoft.Build.BackEnd
 
             _nodeLoggingContext = loggingContext;
 
+            BuildParameters parameters = _componentHost.BuildParameters;
+            _ownsEvaluationCacheDiagnostics = false;
+            if (Traits.Instance.EnableEvaluationCacheDiagnostics && parameters.EvaluationCacheDiagnostics is null)
+            {
+                parameters.EvaluationCacheDiagnostics = new EvaluationCacheDiagnostics();
+                parameters.EvaluationCacheDiagnostics.BeginBuild(string.Empty, parameters.BuildId,
+                    (parameters.EvaluationCacheConfiguration ?? Traits.Instance.EvaluationCache).Mode, []);
+                _ownsEvaluationCacheDiagnostics = true;
+            }
+
             // Create a per-BuildRequestEngine telemetry collector via the provider.
             // Each BuildRequestEngine owns its collector — no cross-engine sharing, no singleton contention.
             var telemetryProvider = (TelemetryCollectorProvider)_componentHost.GetComponent(BuildComponentType.TelemetryCollector);
@@ -324,6 +336,13 @@ namespace Microsoft.Build.BackEnd
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
                     // Flush and send the per-BuildRequestEngine telemetry data if any was collected.
                     _nodeLoggingContext.TelemetryCollector?.FinalizeProcessing(_nodeLoggingContext);
+                    if (_ownsEvaluationCacheDiagnostics)
+                    {
+                        _componentHost.BuildParameters.EvaluationCacheDiagnostics.Flush(
+                            _componentHost.LoggingService, _nodeLoggingContext.BuildEventContext);
+                        _componentHost.BuildParameters.EvaluationCacheDiagnostics = null;
+                        _ownsEvaluationCacheDiagnostics = false;
+                    }
                     // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
                     buildCheckProvider.ShutdownComponent();
                 },

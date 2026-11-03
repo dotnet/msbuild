@@ -56,7 +56,7 @@ internal sealed class EvaluationInputsSnapshotValidationData : IProjectInstanceS
             foreach (KeyValuePair<string, FileDependency> file in Inputs.Files)
             {
                 size = RetainedSizeEstimator.AddString(
-                    RetainedSizeEstimator.Add(size, 80),
+                    RetainedSizeEstimator.Add(size, 88),
                     file.Key);
             }
 
@@ -66,6 +66,15 @@ internal sealed class EvaluationInputsSnapshotValidationData : IProjectInstanceS
                     RetainedSizeEstimator.Add(size, 64),
                     environmentRead.Key);
                 size = RetainedSizeEstimator.AddString(size, environmentRead.Value);
+            }
+
+            if (!Inputs.Globs.IsDefaultOrEmpty)
+            {
+                size = RetainedSizeEstimator.Add(size, 24);
+                foreach (GlobDependency glob in Inputs.Globs)
+                {
+                    size = RetainedSizeEstimator.Add(size, RetainedSizeEstimator.Add(8, glob.RetainedSizeBytes));
+                }
             }
 
             foreach (SdkDependency sdk in Inputs.SdkResolutions)

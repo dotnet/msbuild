@@ -169,6 +169,8 @@
     <Compile Include="BackEnd\Client\MSBuildClient.cs" />
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ProjectInstanceSnapshotCache.cs" />
+    <Compile Include="BackEnd\Components\Caching\EvaluationCacheDiagnostics.cs" />
+    <Compile Include="BackEnd\Components\Caching\TimedBuckets.cs" />
     <Compile Include="BackEnd\Components\Caching\ProjectInstanceSnapshotCacheEntry.cs" />
     <Compile Include="BackEnd\Components\Caching\ProjectInstanceSnapshotCacheKey.cs" />
     <Compile Include="BackEnd\Components\Caching\ProjectInstanceSnapshotValidator.cs" />
@@ -326,6 +328,9 @@
     <Compile Include="Evaluation\Context\EvaluationContext.cs" />
     <Compile Include="Evaluation\Context\EvaluationInputRecorder.cs" />
     <Compile Include="Evaluation\Context\EvaluationInputValidator.cs" />
+    <Compile Include="Evaluation\Context\ImmutableFileStatCache.cs" />
+    <Compile Include="Evaluation\Context\ValidationMeasurements.cs" />
+    <Compile Include="Evaluation\Context\ValidatedDirectoryListings.cs" />
     <Compile Include="Evaluation\Context\EvaluationInputs.cs" />
     <Compile Include="Evaluation\Context\PropertyFunctionEffects.cs" />
     <Compile Include="Evaluation\Context\RecordingFileSystem.cs" />

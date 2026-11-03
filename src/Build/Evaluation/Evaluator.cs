@@ -276,7 +276,11 @@ namespace Microsoft.Build.Evaluation
 
             // A host file system or directory cache may answer from state the recorder cannot see, so such evaluations are not reusable.
             bool hostFileSystem = directoryCache is not null || evaluationContext.FileSystem is not CachingFileSystemWrapper;
-            _inputRecorder = CreateInputRecorder(projectRootElement, evaluationStage, hostFileSystem);
+            _inputRecorder = CreateInputRecorder(
+                projectRootElement,
+                evaluationStage,
+                hostFileSystem,
+                data.GlobalPropertiesDictionary);
             if (_inputRecorder is not null)
             {
                 _evaluationContext = _evaluationContext.ContextWithFileSystem(
@@ -336,8 +340,18 @@ namespace Microsoft.Build.Evaluation
             _streamImports.Add(string.Empty);
         }
 
-        private static EvaluationInputRecorder CreateInputRecorder(ProjectRootElement projectRootElement, ProjectEvaluationStage evaluationStage, bool hostFileSystem)
+        private static EvaluationInputRecorder CreateInputRecorder(
+            ProjectRootElement projectRootElement,
+            ProjectEvaluationStage evaluationStage,
+            bool hostFileSystem,
+            PropertyDictionary<ProjectPropertyInstance> globalProperties)
         {
+            if (Traits.Instance.EvaluationCache.EnableSnapshotCache
+                && globalProperties.Contains(MSBuildConstants.MSBuildRestoreSessionId))
+            {
+                return null;
+            }
+
             EvaluationInputRecorder recorder = EvaluationInputRecorder.CreateIfEnabled();
             if (recorder is null)
             {
@@ -2571,6 +2585,7 @@ namespace Microsoft.Build.Evaluation
                         // clearing the weak cache (and therefore setting explicitload=false) for projects the project system never
                         // was directly interested in (i.e. the ones that were reached for purposes of building a P2P.)
                         bool explicitlyLoaded = importElement.ContainingProject.IsExplicitlyLoaded;
+                        _inputRecorder?.RecordPath(importFileUnescaped);
                         importedProjectElement = ProjectRootElement.OpenProjectOrSolution(
                                     importFileUnescaped,
                                     new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(

@@ -16,6 +16,7 @@ using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -26,8 +27,10 @@ using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.UnitTests.BackEnd;
 
-public sealed class ProjectInstanceSnapshotCache_Tests
+public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
 {
+    private readonly ITestOutputHelper _output = output;
+
     [Fact]
     public void EquivalentEvaluationIdentityProducesEqualKeys()
     {
@@ -346,11 +349,29 @@ public sealed class ProjectInstanceSnapshotCache_Tests
     }
 
     [Fact]
-    public void DefaultMaximumSizeIs256MiB()
+    public void DefaultMaximumSizeIs1GiB()
     {
         var cache = new ProjectInstanceSnapshotCache();
 
-        cache.MaximumSizeBytes.ShouldBe(256L * 1024 * 1024);
+        cache.MaximumSizeBytes.ShouldBe(1024L * 1024 * 1024);
+    }
+
+    [Theory]
+    [InlineData(null, 1024L * 1024 * 1024)]
+    [InlineData("0", 0L)]
+    [InlineData("268435456", 256L * 1024 * 1024)]
+    [InlineData("2147483648", 2L * 1024 * 1024 * 1024)]
+    [InlineData("-1", 1024L * 1024 * 1024)]
+    [InlineData("invalid", 1024L * 1024 * 1024)]
+    public void FactoryHonorsExplicitBudgetAndDefaults(string? configuredBytes, long expectedBytes)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable(ProjectInstanceSnapshotCache.MaximumSizeEnvironmentVariable, configuredBytes);
+
+        var cache = (ProjectInstanceSnapshotCache)ProjectInstanceSnapshotCache.CreateComponent(
+            BuildComponentType.ProjectInstanceSnapshotCache);
+
+        cache.MaximumSizeBytes.ShouldBe(expectedBytes);
     }
 
     [Fact]
@@ -699,6 +720,59 @@ public sealed class ProjectInstanceSnapshotCache_Tests
             firstKey.RetainedSizeBytes
             + thirdKey.RetainedSizeBytes
             + (entry.RetainedSizeBytes * 2L));
+    }
+
+    [Theory]
+    [InlineData(true, 0)]
+    [InlineData(false, 663)]
+    public void HostedSizedWorkingSetAvoidsCyclicEvictionWithDefaultBudget(
+        bool useFormerBudget,
+        int expectedWarmCandidates)
+    {
+        const int ConfigurationCount = 663;
+        // Model payload accounting without allocating hundreds of MiB in the test.
+        ProjectInstanceSnapshotCacheEntry entry = CreateEntry(
+            "working-set", validationDataSizeBytes: 1024 * 1024);
+        ProjectInstanceSnapshotCacheKey[] keys = Enumerable.Range(0, ConfigurationCount)
+            .Select(index => EmptyKey($"Project{index}.csproj"))
+            .ToArray();
+        var cache = useFormerBudget
+            ? new ProjectInstanceSnapshotCache(256L * 1024 * 1024)
+            : new ProjectInstanceSnapshotCache();
+        long workingSetSizeBytes = 0;
+        foreach (ProjectInstanceSnapshotCacheKey key in keys)
+        {
+            workingSetSizeBytes += key.RetainedSizeBytes + entry.RetainedSizeBytes;
+            cache.AddOrReplace(key, entry).ShouldBeTrue();
+        }
+
+        int warmCandidates = 0;
+        foreach (ProjectInstanceSnapshotCacheKey key in keys)
+        {
+            if (cache.TryGet(key, out ProjectInstanceSnapshotCacheEntry? candidate))
+            {
+                candidate.ShouldBeSameAs(entry);
+                warmCandidates++;
+            }
+            else
+            {
+                cache.AddOrReplace(key, entry).ShouldBeTrue();
+            }
+        }
+
+        warmCandidates.ShouldBe(expectedWarmCandidates);
+        cache.CurrentSizeBytes.ShouldBeLessThanOrEqualTo(cache.MaximumSizeBytes);
+        if (useFormerBudget)
+        {
+            workingSetSizeBytes.ShouldBeGreaterThan(cache.MaximumSizeBytes);
+            cache.GetStatistics().EvictedEntries.ShouldBeGreaterThan(ConfigurationCount);
+        }
+        else
+        {
+            cache.Count.ShouldBe(ConfigurationCount);
+            cache.CurrentSizeBytes.ShouldBe(workingSetSizeBytes);
+            cache.GetStatistics().EvictedEntries.ShouldBe(0);
+        }
     }
 
     [Fact]
@@ -1253,8 +1327,235 @@ public sealed class ProjectInstanceSnapshotCache_Tests
         }
     }
 
+    [Theory]
+    [InlineData(nameof(EvaluationCacheMode.SnapshotFileSystem), "MSBuildRestoreSessionId")]
+    [InlineData(nameof(EvaluationCacheMode.SnapshotFileSystem), "msbuildrestoresessionid")]
+    [InlineData(nameof(EvaluationCacheMode.SnapshotUnsafe), "MSBuildRestoreSessionId")]
+    [InlineData(nameof(EvaluationCacheMode.SnapshotUnsafe), "msbuildrestoresessionid")]
+    public void RestoreRequestsDoNotRecordOrDisplaceBuildSnapshots(string modeName, string sessionProperty)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable(EvaluationCacheConfiguration.ModeEnvironmentVariable, modeName);
+        Traits.UpdateFromEnvironment();
+        TransientTestFile project = env.CreateFile(
+            "project.proj",
+            """
+            <Project>
+              <PropertyGroup><Value>unchanged</Value></PropertyGroup>
+            </Project>
+            """);
+        EvaluationCacheConfiguration mode = Traits.Instance.EvaluationCache;
+        var cache = new ProjectInstanceSnapshotCache();
+        cache.ConfigureValidator(mode.ValidationPolicy);
+        var parameters = new BuildParameters
+        {
+            EvaluationCacheConfiguration = mode,
+            ProjectInstanceSnapshotCache = cache,
+        };
+        var host = new MockHost(parameters);
+
+        CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
+            host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+        cache.Count.ShouldBe(1);
+        long retainedSize = cache.CurrentSizeBytes;
+
+        for (int submissionId = 2; submissionId <= 3; submissionId++)
+        {
+            string sessionId = Guid.NewGuid().ToString();
+            BuildRequestConfiguration restore = CreateFileConfiguration(
+                project.Path,
+                parameters,
+                new Dictionary<string, string?> { [sessionProperty] = sessionId });
+            restore.LoadProjectIntoConfiguration(
+                host, BuildRequestDataFlags.None, submissionId, nodeId: 1);
+            restore.Project.GetPropertyValue(sessionProperty).ShouldBe(sessionId);
+            restore.Project.GetPropertyValue("Value").ShouldBe("unchanged");
+            restore.Project.EvaluationInputs.ShouldBeNull();
+            cache.Count.ShouldBe(1);
+            cache.CurrentSizeBytes.ShouldBe(retainedSize);
+        }
+
+        BuildRequestConfiguration nextBuild = CreateFileConfiguration(project.Path, parameters);
+        nextBuild.LoadProjectIntoConfiguration(
+            host, BuildRequestDataFlags.None, submissionId: 4, nodeId: 1);
+
+        nextBuild.Project.GetPropertyValue("Value").ShouldBe("unchanged");
+        nextBuild.Project.EvaluationInputs.ShouldNotBeNull();
+        ProjectInstanceSnapshotCacheStatistics statistics = cache.GetStatistics();
+        statistics.FreshEvaluations.ShouldBe(3);
+        statistics.RecordedEvaluations.ShouldBe(1);
+        statistics.CacheMisses.ShouldBe(1);
+        statistics.CacheHits.ShouldBe(1);
+        statistics.MaterializedEntries.ShouldBe(1);
+        statistics.StoredEntries.ShouldBe(1);
+        statistics.EvictedEntries.ShouldBe(0);
+        statistics.Fallbacks.ShouldBe(0);
+    }
+
     [Fact]
-    public void SnapshotFileSystemRevalidatesSdkAndReusesResultForFreshFallback()
+    public void RecordModeStillRecordsRestoreRequests()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable(
+            EvaluationCacheConfiguration.ModeEnvironmentVariable,
+            nameof(EvaluationCacheMode.Record));
+        Traits.UpdateFromEnvironment();
+        TransientTestFile project = env.CreateFile("project.proj", "<Project />");
+        var cache = new ProjectInstanceSnapshotCache();
+        var parameters = new BuildParameters
+        {
+            EvaluationCacheConfiguration = Traits.Instance.EvaluationCache,
+            ProjectInstanceSnapshotCache = cache,
+        };
+        var host = new MockHost(parameters);
+        BuildRequestConfiguration restore = CreateFileConfiguration(
+            project.Path,
+            parameters,
+            new Dictionary<string, string?> { [MSBuildConstants.MSBuildRestoreSessionId] = "restore-session" });
+
+        restore.LoadProjectIntoConfiguration(
+            host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+
+        restore.Project.EvaluationInputs.ShouldNotBeNull()
+            .Key.GlobalProperties.ShouldContain("MSBUILDRESTORESESSIONID=restore-session\0");
+        ProjectInstanceSnapshotCacheStatistics statistics = cache.GetStatistics();
+        statistics.FreshEvaluations.ShouldBe(1);
+        statistics.RecordedEvaluations.ShouldBe(1);
+        statistics.CacheHits.ShouldBe(0);
+        statistics.CacheMisses.ShouldBe(0);
+        statistics.StoredEntries.ShouldBe(0);
+        statistics.Count.ShouldBe(0);
+    }
+
+    [Fact]
+    public void ExcludedOutputChangesReuseSnapshotsButGeneratedImportsStillInvalidate()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable(
+            EvaluationCacheConfiguration.ModeEnvironmentVariable, nameof(EvaluationCacheMode.SnapshotFileSystem));
+        Traits.UpdateFromEnvironment();
+        TransientTestFolder folder = env.CreateFolder(createFolder: true);
+        string bin = Path.Combine(folder.Path, "bin", "Debug");
+        string obj = Path.Combine(folder.Path, "obj", "Debug");
+        Directory.CreateDirectory(bin);
+        Directory.CreateDirectory(obj);
+        env.CreateFile(folder, "input.txt", "included");
+        TransientTestFile project = env.CreateFile(folder, "project.proj", """
+            <Project>
+              <Import Project="obj/Debug/generated.props" Condition="Exists('obj/Debug/generated.props')" />
+              <ItemGroup>
+                <Asset Include="**/*" Exclude="bin/Debug/**/*;obj/Debug/**/*" />
+              </ItemGroup>
+            </Project>
+            """);
+        var cache = new ProjectInstanceSnapshotCache();
+        cache.ConfigureValidator(EvaluationCacheValidationPolicy.FileSystem);
+        var parameters = new BuildParameters
+        {
+            EvaluationCacheConfiguration = Traits.Instance.EvaluationCache,
+            ProjectInstanceSnapshotCache = cache,
+        };
+        var host = new MockHost(parameters) { LoggingService = new MockLoggingService(_output.WriteLine) };
+        CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
+            host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+        cache.StoredEntries.ShouldBe(1);
+
+        File.WriteAllText(Path.Combine(bin, "output.dll"), "new output");
+        Directory.SetLastWriteTimeUtc(bin, Directory.GetLastWriteTimeUtc(bin).AddSeconds(2));
+        BuildRequestConfiguration unchanged = CreateFileConfiguration(project.Path, parameters);
+        unchanged.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 2, nodeId: 1);
+        unchanged.Project.GetItems("Asset").Select(item => item.EvaluatedInclude)
+            .ShouldBe(["input.txt", "project.proj"], ignoreOrder: true);
+        cache.MaterializedEntries.ShouldBe(1);
+        cache.GetStatistics().FreshEvaluations.ShouldBe(1);
+        cache.ValidationRejections.ShouldBe(0);
+
+        string generatedImport = Path.Combine(obj, "generated.props");
+        File.WriteAllText(generatedImport, "<Project><PropertyGroup><Generated>first</Generated></PropertyGroup></Project>");
+        BuildRequestConfiguration appeared = CreateFileConfiguration(project.Path, parameters);
+        appeared.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 3, nodeId: 1);
+        appeared.Project.GetPropertyValue("Generated").ShouldBe("first");
+        appeared.Project.EvaluationInputs!.Files[generatedImport].RequiresMetadata.ShouldBeTrue();
+        cache.ValidationRejections.ShouldBe(1);
+
+        File.WriteAllText(generatedImport, "<Project><PropertyGroup><Generated>changed-value</Generated></PropertyGroup></Project>");
+        File.SetLastWriteTimeUtc(generatedImport, File.GetLastWriteTimeUtc(generatedImport).AddSeconds(2));
+        BuildRequestConfiguration changed = CreateFileConfiguration(project.Path, parameters);
+        changed.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 4, nodeId: 1);
+        changed.Project.GetPropertyValue("Generated").ShouldBe("changed-value");
+        cache.ValidationRejections.ShouldBe(2);
+        cache.MaterializedEntries.ShouldBe(1);
+        cache.GetStatistics().FreshEvaluations.ShouldBe(3);
+    }
+
+    [Fact]
+    public void UnrelatedOutputCopiesReuseSnapshotsWithRecursiveModuleGlobs()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable(
+            EvaluationCacheConfiguration.ModeEnvironmentVariable, nameof(EvaluationCacheMode.SnapshotFileSystem));
+        Traits.UpdateFromEnvironment();
+        TransientTestFolder folder = env.CreateFolder(createFolder: true);
+        string output = Path.Combine(folder.Path, "bin", "Debug", "net8.0");
+        Directory.CreateDirectory(output);
+        Directory.CreateDirectory(Path.Combine(folder.Path, "obj", "Debug", "net8.0"));
+        TransientTestFile source = env.CreateFile(folder, "input.txt", "unchanged output contents");
+        env.CreateFile(folder, "build.props", "<Project />");
+        string destination = Path.Combine(output, "output.dll");
+        File.Copy(source.Path, destination);
+        TransientTestFile project = env.CreateFile(folder, "project.proj", """
+            <Project>
+              <ItemGroup>
+                <None Include="Assets.*;GulpAssets.*;Assets/**;**/*.props;**/*.targets"
+                      Exclude="obj/**/*.props;obj/**/*.targets" />
+                <Asset Include="**/*" Exclude="bin/**;obj/**;**/*.props;**/*.targets" />
+              </ItemGroup>
+            </Project>
+            """);
+        var cache = new ProjectInstanceSnapshotCache();
+        cache.ConfigureValidator(EvaluationCacheValidationPolicy.FileSystem);
+        var parameters = new BuildParameters
+        {
+            EvaluationCacheConfiguration = Traits.Instance.EvaluationCache,
+            ProjectInstanceSnapshotCache = cache,
+        };
+        var host = new MockHost(parameters) { LoggingService = new MockLoggingService(_output.WriteLine) };
+        BuildRequestConfiguration first = CreateFileConfiguration(project.Path, parameters);
+        first.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+        EvaluationInputs inputs = first.Project.EvaluationInputs.ShouldNotBeNull();
+        inputs.Files[output].RequiresMetadata.ShouldBeFalse();
+        inputs.Files[output].RequiresGlobValidation.ShouldBeTrue();
+        long sizeWithoutGlobs = new EvaluationInputsSnapshotValidationData(inputs with { Globs = [] }).RetainedSizeBytes;
+        new EvaluationInputsSnapshotValidationData(inputs).RetainedSizeBytes
+            .ShouldBeGreaterThan(sizeWithoutGlobs + inputs.Globs.Sum(glob => glob.RetainedSizeBytes));
+
+        for (int i = 0; i < 2; i++)
+        {
+            File.Delete(destination);
+            File.Copy(source.Path, destination);
+            Directory.SetLastWriteTimeUtc(output, Directory.GetLastWriteTimeUtc(output).AddSeconds(2));
+            BuildRequestConfiguration warm = CreateFileConfiguration(project.Path, parameters);
+            warm.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: i + 2, nodeId: 1);
+            warm.Project.GetItems("None").Select(item => item.EvaluatedInclude).ShouldBe(["build.props"]);
+        }
+
+        cache.MaterializedEntries.ShouldBe(2);
+        cache.ValidationRejections.ShouldBe(0);
+        cache.GetStatistics().FreshEvaluations.ShouldBe(1);
+
+        File.WriteAllText(Path.Combine(output, "new.props"), "<Project />");
+        Directory.SetLastWriteTimeUtc(output, Directory.GetLastWriteTimeUtc(output).AddSeconds(2));
+        BuildRequestConfiguration changed = CreateFileConfiguration(project.Path, parameters);
+        changed.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 4, nodeId: 1);
+        changed.Project.GetItems("None").Count.ShouldBe(2);
+        cache.ValidationRejections.ShouldBe(1);
+        cache.GetStatistics().FreshEvaluations.ShouldBe(2);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SnapshotFileSystemRevalidatesSdkAndReusesResultForFreshFallback(bool diagnosticsEnabled)
     {
         const string ModeVariable = EvaluationCacheConfiguration.ModeEnvironmentVariable;
         string? originalMode = Environment.GetEnvironmentVariable(ModeVariable);
@@ -1265,7 +1566,7 @@ public sealed class ProjectInstanceSnapshotCache_Tests
                 nameof(EvaluationCacheMode.SnapshotFileSystem));
             Traits.UpdateFromEnvironment();
 
-            using TestEnvironment env = TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create(_output);
             TransientTestFolder firstSdk = env.CreateFolder();
             TransientTestFolder secondSdk = env.CreateFolder();
             env.CreateFile(firstSdk, "Sdk.props", "<Project><PropertyGroup><SdkValue>first</SdkValue></PropertyGroup></Project>");
@@ -1283,10 +1584,12 @@ public sealed class ProjectInstanceSnapshotCache_Tests
                 EvaluationCacheConfiguration = mode,
                 ProjectInstanceSnapshotCache = cache,
             };
+            cache.ConfigureDiagnostics(diagnosticsEnabled, "manager", 1, mode.Mode, parameters.EnvironmentPropertiesInternal);
             var resolver = new ChangingSdkResolverService(firstSdk.Path);
             var host = new MockHost(parameters)
             {
                 SdkResolverService = resolver,
+                LoggingService = new MockLoggingService(_output.WriteLine),
             };
 
             BuildRequestConfiguration first = CreateFileConfiguration(project.Path, parameters);
@@ -1306,6 +1609,23 @@ public sealed class ProjectInstanceSnapshotCache_Tests
             cache.GetStatistics().ValidationAccepted.ShouldBe(1);
             cache.ValidationRejections.ShouldBe(1);
             cache.MaterializedEntries.ShouldBe(1);
+            if (diagnosticsEnabled)
+            {
+                List<string> messages = [];
+                cache.Diagnostics!.Flush(new MockLoggingService(messages.Add));
+                string log = string.Join(Environment.NewLine, messages);
+                EvaluationCacheDiagnostics_Tests.AssertPhases(log,
+                    ("RequestKey", 3), ("CacheLookup", 3), ("Validation", 2), ("RootElementCheck", 2), ("KeyCheck", 2), ("ManifestValidation", 2),
+                    ("EnvironmentCheck", 2), ("FileStatLoop", 2), ("StatClassification", 2), ("DiagnosticsPublish", 2), ("SdkValidation", 2),
+                    ("Materialization", 1), ("FreshEvaluation", 2), ("SnapshotCreation", 2), ("CacheAdmission", 3),
+                    ("FallbackPreparation", 1));
+                messages.Single(message => message.StartsWith("EvaluationCacheTimingExample|", StringComparison.Ordinal))
+                    .ShouldContain("|Event=Validation|Reason=SdkResultChanged|Detail=TestSdk");
+            }
+            else
+            {
+                cache.Diagnostics.ShouldBeNull();
+            }
         }
         finally
         {
@@ -2062,10 +2382,12 @@ public sealed class ProjectInstanceSnapshotCache_Tests
         }
     }
 
-    [Fact]
-    public void MaterializationFailureDoesNotChangeValidationCounters()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MaterializationFailureDoesNotChangeValidationCounters(bool diagnosticsEnabled)
     {
-        using TestEnvironment env = TestEnvironment.Create();
+        using TestEnvironment env = TestEnvironment.Create(_output);
         TransientTestFile project = env.CreateFile("project.proj", "<Project />");
         var cache = new ProjectInstanceSnapshotCache
         {
@@ -2081,7 +2403,8 @@ public sealed class ProjectInstanceSnapshotCache_Tests
         {
             ProjectInstanceSnapshotCache = cache,
         };
-        var host = new MockHost(parameters);
+        cache.ConfigureDiagnostics(diagnosticsEnabled, "manager", 1, EvaluationCacheMode.SnapshotUnsafe, parameters.EnvironmentPropertiesInternal);
+        var host = new MockHost(parameters) { LoggingService = new MockLoggingService(_output.WriteLine) };
 
         CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
             host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
@@ -2093,6 +2416,21 @@ public sealed class ProjectInstanceSnapshotCache_Tests
         statistics.ValidationErrors.ShouldBe(0);
         statistics.MaterializedEntries.ShouldBe(0);
         statistics.Fallbacks.ShouldBe(1);
+        if (diagnosticsEnabled)
+        {
+            List<string> messages = [];
+            cache.Diagnostics!.Flush(new MockLoggingService(messages.Add));
+            string log = string.Join(Environment.NewLine, messages);
+            EvaluationCacheDiagnostics_Tests.AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1),
+                ("Materialization", 1), ("FreshEvaluation", 1), ("SnapshotCreation", 1), ("CacheAdmission", 2),
+                ("FallbackPreparation", 1));
+            messages.Single(message => message.StartsWith("EvaluationCacheTimingExample|", StringComparison.Ordinal))
+                .ShouldContain("|Event=Fallback|Reason=MaterializationError|");
+        }
+        else
+        {
+            cache.Diagnostics.ShouldBeNull();
+        }
     }
     [Fact]
     public void InvalidModeLogsDiagnosticAndDisablesCache()

@@ -34,6 +34,64 @@ is distinct from leaving the feature unconfigured.
 "Checked mode" means the eventual conforming checked opt-in in this document. It does
 not rename `SnapshotFileSystem` or any public API.
 
+Restore-scoped requests carrying the `MSBuildRestoreSessionId` global property bypass
+recording, snapshot lookup, and admission in snapshot modes. Their per-invocation
+identity prevents cross-restore reuse, so retaining them would evict reusable build
+snapshots. Explicit `Record` mode continues to record these evaluations. Subsequent
+normal builds still validate retained snapshots against current inputs, including
+restore-generated imports; no part of the request key is ignored.
+
+`MSBUILDEVALUATIONCACHEDIAGNOSTICS=1` separately opts into decision and phase timing
+tracing. It MUST NOT activate caching, change candidate identity or validation,
+or emit warnings/errors. It reports bypass/admission/lookup/validation/reuse/lifecycle
+reasons as ordinary versioned messages, preserving binary-log event compatibility.
+Key comparison discloses field and property/environment names, not their values;
+safe validation details disclose paths/names or exception types, not exception text
+or SDK result payloads. Per-tracing-session opaque IDs are not reusable cache keys.
+The original `EvaluationCacheDiagnostic` and `EvaluationCacheDiagnosticSummary`
+Version=1 formats and Low importance remain unchanged. New ordinary High-importance
+`EvaluationCacheTimingSummary|Version=1|` messages expose owner/process/build/trace
+identities, unsampled reason counts, and counts/elapsed totals/maxima/slowest project
+for request-key creation, lookup, validation, materialization, normal fresh evaluation,
+intentional restore evaluation, snapshot freezing/validation-data admission estimates,
+admission/eviction/removal, and fallback preparation. `FallbackPreparation` covers
+post-rejection implicit XML-cache cleanup and SDK resolver preparation, separately
+from candidate removal and the root reopen inside fresh evaluation.
+The existing aggregate experiment status is promoted
+to High importance only while diagnostics are active, retaining its capacity and
+cumulative-counter schema. Worker-local traces remain process-local and MUST NOT
+add diagnostic transport or imply access to the owning cache.
+
+Filesystem/environment manifest validation and SDK validation are separately measured
+inside validation, with explicit parent identification. Top-level scopes do not overlap
+within one request, but they exclude some setup and fallback plumbing. Nested sums
+and sums across parallel requests/nodes MUST NOT be interpreted as additive wall time
+or CPU time. Counts include attempted phases that reject, fall back or throw; timers
+stop on every exit without catching or replacing the underlying exception. Timestamp
+reads, diagnostic formatting/allocations, and additional I/O/resolver invocations MUST
+NOT be introduced on the diagnostics-off path. Even with diagnostics enabled,
+validators and SDK resolution MUST NOT be repeated for instrumentation.
+
+Diagnostic history and detailed-event buffers remain bounded at 2,048 and 10,000,
+with explicit forgotten/dropped counts. Eleven timing accumulators retain only aggregate
+counts/totals/maxima and one slowest-project path each. New High-importance
+`EvaluationCacheTimingExample|Version=1|` messages select at most three examples per
+stable event/reason and 96 per flush for meaningful non-reuse, never one message for
+every decision. Displayed example project/detail and slowest-project fields are bounded
+at 512 UTF-16 code units before escaping, with explicit truncation. A cutoff between
+a high/low surrogate pair backs off by one code unit to preserve valid UTF-16 for
+binary-log serialization. No raw global or
+environment values, SDK payloads, or exception messages are added to console output.
+All logging callbacks occur outside cache and diagnostic locks. Timing, example and
+reason counters reset together on flush; an active timer is counted after completion.
+Reason totals survive example/detail truncation, and `SuppressedExamples` exposes
+example sampling. Candidate comparisons and absent history MUST NOT be presented as proven
+causes for a particular previous configuration. See the benchmark
+[diagnostic instructions](../../../src/MSBuild.Benchmarks/readme.md#diagnosing-cache-decisions)
+for schema, phase boundaries, limits, and collection. Timestamp reads, synchronization,
+hashing and buffered logging add diagnostic overhead; these runs are for attribution,
+not clean performance comparisons.
+
 ## Correctness invariant
 
 A cached evaluation MUST be accepted only when it is semantically equivalent to a fresh, current,
@@ -96,8 +154,49 @@ Before accepting an entry, checked mode MUST establish that all evaluation input
 - restore-generated projects, props, targets, assets, and other generated evaluation inputs.
 
 An SDK result retained for validation MUST be immutable, copied into immutable owned data, or make the
-entry non-reusable. Checked mode validates file and directory kind, last-write timestamp, and file
-length. Its supported operating model assumes relevant edits change timestamp or length and that
+entry non-reusable. Existence-only probes require an unchanged path kind, not unchanged timestamps
+or lengths. File reads, metadata reads, and direct filesystem enumeration additionally require the
+recorded last-write timestamp and length. Glob traversal records directory timestamps as change
+signals and captures the matching paths, include/exclude patterns, and matcher configuration.
+If a traversed directory changes, validation repeats the recorded globs against fresh filesystem
+state and requires the same engine-sorted matching paths. Unrelated file changes therefore do not
+invalidate a glob-only dependency. Results replayed from a cache that can predate this evaluation
+are always checked. An isolated evaluation whose caches started empty under its recorder can retain
+the timestamp fast path: cache hits within that evaluation still have the original pre-enumeration
+directory observations.
+A later stronger observation promotes a dependency without discarding its first observed state;
+neither a probe nor a glob can weaken a direct metadata-read requirement.
+Glob-cache replay MUST preserve this distinction and the original positive/negative probe results.
+This avoids treating excluded-subtree existence checks as reads of their contents without ignoring
+`bin`, `obj`, or any other directory by name. Matching file additions, removals, and renames still
+invalidate glob results. Direct metadata reads and imported generated files remain metadata dependencies.
+
+Validation shares work only where sharing cannot hide a change. Within one build, the metadata of
+each existing file under the toolset, .NET SDK, and NuGet package roots is read once and reused by
+every entry, because those roots are not modified while a build runs. The shared results are
+discarded when the next build starts, so a long-lived host observes edits between builds. Missing
+paths, directories, links, and files elsewhere are always read from the file system, because tasks
+can create or change them between two validations. The globs of one entry share directory listings
+during that entry's validation; a listing never outlives it, so a file added afterwards is always
+visible to glob replay.
+
+When a glob-traversed directory's timestamp differs from the recorded one and every glob of the entry
+matches its recorded result on replay, the entry remembers the timestamp observed before that replay
+and compares against it from then on, so the same unrelated change is not replayed on every later
+hit. The recorded manifest is never rewritten, a replay that does not match remembers nothing, and a
+later change gives the directory a timestamp that differs from the remembered one. Only a timestamp
+more than two seconds older than the check is remembered, so a coarse-resolution file system cannot
+give a later change the same timestamp.
+
+A glob replay reads each directory listing it needs from the file system. A listing read by a replay in
+which every glob matched is kept together with the state its directory had when it was observed, which
+preceded the read. A later replay takes a stored listing only while the directory has exactly that state,
+so only directories that changed are read again; a change gives the directory a new timestamp and the
+stored listing is not used. Listings are shared by every entry and survive a build, because each use
+compares the directory state, and the same two-second timestamp rule applies when a listing is kept.
+Their number is bounded, and they are discarded with the cache's entries.
+
+The supported operating model assumes relevant edits change timestamp or length and that
 inputs are not concurrently written during validation and materialization. Same-size edits that
 preserve timestamps, timestamp aliasing, and concurrent writers are outside this guarantee. Content
 hashing, file-system watchers, detours, and an atomic file-system snapshot are not requirements of
@@ -133,7 +232,8 @@ invalidate all owned entries consistently. Out-of-proc transfer MUST not implici
 ownership.
 
 When the feature is unconfigured or `Disabled`, no recorder or snapshot cache may be created for it.
-The unconfigured path MUST NOT emit cache status. Explicit `Disabled` may emit truthful opt-in status,
+The unconfigured path without diagnostics MUST NOT emit cache status. Explicit `Disabled` or the
+separate diagnostics opt-in may emit truthful status,
 without doing recording or cache work. Shared changes to project provenance, globbing, or evaluation
 seams still require compatibility validation; this contract does not claim literally zero total overhead.
 
@@ -144,9 +244,12 @@ Retention MUST be bounded, with defined, concurrency-safe oversize rejection and
 reduce hit rate but never change build results. Entries MUST NOT keep unbounded shared mutable
 aliases alive.
 
-The prototype's 256 MiB default is an internal configured cache budget, not a promise that process RSS
-is capped at 256 MiB. Conservative estimates cover cache-owned keys, snapshots, and validation
+The prototype's 1 GiB default is an internal configured cache budget, not a promise that process RSS
+is capped at 1 GiB. Conservative estimates cover cache-owned keys, snapshots, and validation
 payloads; allocator, collection-capacity, and general runtime overhead are not an RSS accounting model.
+The bound is measurement headroom for large working sets that thrashed under the former 256 MiB
+default, not an up-front allocation or a production sizing recommendation.
+`MSBUILDPROJECTINSTANCESNAPSHOTCACHEMAXBYTES` continues to override the bound in bytes.
 
 ## Acceptance matrix
 
@@ -180,7 +283,7 @@ This table records present behavior; it does not weaken the requirements above.
 | Activation | [`Traits.cs`](../../../src/Framework/Traits.cs) implements the four modes, explicit precedence, legacy mapping, and fail-closed invalid parsing. [`BuildManager.cs`](../../../src/Build/BackEnd/BuildManager/BuildManager.cs) intentionally reports explicit `Disabled` status; the unconfigured path is quiet. Activation is not evidence of complete enabled-path correctness. |
 | Identity | [`ProjectInstanceSnapshotCacheKey.cs`](../../../src/Build/BackEnd/Components/Caching/ProjectInstanceSnapshotCacheKey.cs) covers many request, toolset, parser, directory, culture, and environment fields. Key equality is intentionally not reuse permission, and complete effect coverage is not established. |
 | Recorded inputs | [`EvaluationInputs.cs`](../../../src/Build/Evaluation/Context/EvaluationInputs.cs) and [`EvaluationInputRecorder.cs`](../../../src/Build/Evaluation/Context/EvaluationInputRecorder.cs) represent paths, environment/registry observations, SDK results, and non-cacheable reasons. Full changed-input coverage has not been demonstrated. |
-| Validation | [`EvaluationInputValidator.cs`](../../../src/Build/Evaluation/Context/EvaluationInputValidator.cs) checks cacheability, direct environment reads using platform environment-name casing, and recorded path kind, timestamp, and length after key agreement. Registry-dependent evaluations are recorded completely but conservatively ineligible. Successful SDK dependencies are re-resolved in their recorded context after cheaper checks and compared before acceptance; failed SDK observations are ineligible because ignored failures emit import diagnostics. |
+| Validation | [`EvaluationInputValidator.cs`](../../../src/Build/Evaluation/Context/EvaluationInputValidator.cs) checks cacheability, direct environment reads using platform environment-name casing, and recorded path kind after key agreement. Timestamp and length are checked for direct reads/enumeration, not existence-only probes. Changed glob-directory stamps trigger fresh matching-result validation; glob results from caches that may predate the evaluation always require it. Captured glob patterns and results are owned by the manifest and included in the retained-size budget. Registry-dependent evaluations are recorded completely but conservatively ineligible. Successful SDK dependencies are re-resolved in their recorded context after cheaper checks and compared before acceptance; failed SDK observations are ineligible because ignored failures emit import diagnostics. |
 | SDK ownership | The recorder copies path, version, additional paths, properties, items and metadata, environment additions, warnings, and errors into immutable owned observations. A rejected SDK validation result is fed to the immediate fresh evaluation so resolver diagnostics are deferred and replayed once rather than emitted during validation or resolved twice. |
 | Diagnostics | Evaluations that emit warnings, errors, or custom SDK logger messages are non-reusable. This avoids silently dropping evaluation diagnostics on a hit without introducing a general diagnostic replay framework. |
 | Integration and provenance | [`BuildRequestConfiguration.cs`](../../../src/Build/BackEnd/Shared/BuildRequestConfiguration.cs) rejects unsaved/unknown-length cached roots for recorded files and rejects any cached root for a recorded-missing path, preserves caller/transferred/in-memory fallback behavior, and propagates cancellation and build aborts. Complete coverage for every host and restore workflow remains an acceptance-matrix gap; the agreed same-metadata and concurrent-writer cases are operating-model exclusions rather than release blockers. |

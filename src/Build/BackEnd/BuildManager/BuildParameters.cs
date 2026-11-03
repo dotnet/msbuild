@@ -315,6 +315,7 @@ namespace Microsoft.Build.Execution
             _shutdownInProcNodeOnBuildFinish = other._shutdownInProcNodeOnBuildFinish;
             ProjectRootElementCache = other.ProjectRootElementCache;
             ProjectInstanceSnapshotCache = other.ProjectInstanceSnapshotCache;
+            EvaluationCacheDiagnostics = other.EvaluationCacheDiagnostics;
             EvaluationCacheConfiguration = other.EvaluationCacheConfiguration;
             ResetCaches = other.ResetCaches;
             LegacyThreadingSemantics = other.LegacyThreadingSemantics;
@@ -825,6 +826,11 @@ namespace Microsoft.Build.Execution
         internal ProjectInstanceSnapshotCache ProjectInstanceSnapshotCache { get; set; }
 
         /// <summary>
+        /// Host-local tracing state. Workers create their own buffer rather than transferring it.
+        /// </summary>
+        internal EvaluationCacheDiagnostics EvaluationCacheDiagnostics { get; set; }
+
+        /// <summary>
         /// Effective evaluation-cache mode for this in-process build.
         /// This is intentionally not transmitted to workers because the cache is owned by the main BuildManager.
         /// </summary>
@@ -1036,6 +1042,7 @@ namespace Microsoft.Build.Execution
 
             // ProjectRootElementCache is not transmitted.
             // ProjectInstanceSnapshotCache is not transmitted.
+            // EvaluationCacheDiagnostics is not transmitted.
             // ResetCaches is not transmitted.
             // LegacyThreadingSemantics is not transmitted.
             // InputResultsCacheFiles and OutputResultsCacheFile are not transmitted, as they are only used by the BuildManager

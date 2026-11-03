@@ -105,26 +105,103 @@ internal sealed class FileSystemProjectInstanceSnapshotValidator : IProjectInsta
         ProjectInstanceSnapshotCacheKey key,
         ProjectInstanceSnapshotCacheEntry entry,
         ProjectInstanceSnapshotValidationContext? validationContext)
+        => ValidateCore(key, entry, validationContext, captureDetails: false, out _, diagnosticRequest: null);
+
+    internal ProjectInstanceSnapshotValidationResult Validate(
+        ProjectInstanceSnapshotCacheKey key,
+        ProjectInstanceSnapshotCacheEntry entry,
+        ProjectInstanceSnapshotValidationContext? validationContext,
+        out EvaluationInputValidationFailure failure)
+        => ValidateCore(key, entry, validationContext, captureDetails: true, out failure, diagnosticRequest: null);
+
+    internal ProjectInstanceSnapshotValidationResult Validate(
+        ProjectInstanceSnapshotCacheKey key,
+        ProjectInstanceSnapshotCacheEntry entry,
+        ProjectInstanceSnapshotValidationContext? validationContext,
+        out EvaluationInputValidationFailure failure,
+        EvaluationCacheDiagnostics.Request diagnosticRequest)
+        => ValidateCore(key, entry, validationContext, captureDetails: true, out failure, diagnosticRequest);
+
+    private static ProjectInstanceSnapshotValidationResult ValidateCore(
+        ProjectInstanceSnapshotCacheKey key,
+        ProjectInstanceSnapshotCacheEntry entry,
+        ProjectInstanceSnapshotValidationContext? validationContext,
+        bool captureDetails,
+        out EvaluationInputValidationFailure failure,
+        EvaluationCacheDiagnostics.Request? diagnosticRequest)
     {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(entry);
-        if (entry.ValidationData is not EvaluationInputsSnapshotValidationData data
-            || !key.Matches(data.Inputs.Key)
-            || !EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _))
+        failure = default;
+        if (entry.ValidationData is not EvaluationInputsSnapshotValidationData data)
         {
-            return ProjectInstanceSnapshotValidationResult.Invalid;
-        }
-
-        if (data.Inputs.SdkResolutions.Length > 0 && validationContext is null)
-        {
-            return ProjectInstanceSnapshotValidationResult.Invalid;
-        }
-
-        foreach (SdkDependency sdk in data.Inputs.SdkResolutions)
-        {
-            if (!validationContext!.Validate(sdk))
+            if (captureDetails)
             {
+                failure = new("MissingValidationManifest", null);
+            }
+
+            return ProjectInstanceSnapshotValidationResult.Invalid;
+        }
+
+        string? mismatchedField;
+        using (diagnosticRequest?.Time(EvaluationCacheDiagnostics.Phase.KeyCheck))
+        {
+            mismatchedField = key.GetMismatch(data.Inputs.Key);
+        }
+
+        if (mismatchedField is string field)
+        {
+            if (captureDetails)
+            {
+                failure = new("RequestKeyMismatch", field);
+            }
+
+            return ProjectInstanceSnapshotValidationResult.Invalid;
+        }
+
+        bool fileSystemCurrent;
+        ValidationMeasurements? measurements = diagnosticRequest is null ? null : new ValidationMeasurements();
+        using (diagnosticRequest?.Time(EvaluationCacheDiagnostics.Phase.ManifestValidation))
+        {
+            fileSystemCurrent = captureDetails
+                ? EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, out failure, validationContext?.FileStatCache, validationContext?.DirectoryListings, measurements)
+                : EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, validationContext?.FileStatCache, validationContext?.DirectoryListings, measurements);
+        }
+
+        if (measurements is not null && diagnosticRequest is not null)
+        {
+            using (diagnosticRequest.Time(EvaluationCacheDiagnostics.Phase.DiagnosticsPublish))
+            {
+                measurements.Publish(diagnosticRequest);
+            }
+        }
+        if (!fileSystemCurrent)
+        {
+            return ProjectInstanceSnapshotValidationResult.Invalid;
+        }
+
+        if (data.Inputs.SdkResolutions.Length > 0)
+        {
+            using var sdkTiming = diagnosticRequest?.Time(EvaluationCacheDiagnostics.Phase.SdkValidation);
+            if (validationContext is null)
+            {
+                if (captureDetails)
+                {
+                    failure = new("MissingSdkContext", data.Inputs.SdkResolutions[0].Reference.Name);
+                }
+
                 return ProjectInstanceSnapshotValidationResult.Invalid;
+            }
+
+            foreach (SdkDependency sdk in data.Inputs.SdkResolutions)
+            {
+                bool sdkCurrent = captureDetails
+                    ? validationContext.Validate(sdk, out failure)
+                    : validationContext.Validate(sdk);
+                if (!sdkCurrent)
+                {
+                    return ProjectInstanceSnapshotValidationResult.Invalid;
+                }
             }
         }
 
@@ -149,7 +226,9 @@ internal sealed class ProjectInstanceSnapshotValidationContext
         ISdkResolverService sdkResolverService,
         ILoggingService loggingService,
         BuildEventContext buildEventContext,
-        int submissionId)
+        int submissionId,
+        ImmutableFileStatCache? fileStatCache = null,
+        ValidatedDirectoryListings? directoryListings = null)
     {
         ArgumentNullException.ThrowIfNull(sdkResolverService);
         ArgumentNullException.ThrowIfNull(loggingService);
@@ -158,11 +237,31 @@ internal sealed class ProjectInstanceSnapshotValidationContext
         _loggingService = loggingService;
         _buildEventContext = buildEventContext;
         _submissionId = submissionId;
+        FileStatCache = fileStatCache;
+        DirectoryListings = directoryListings;
     }
 
-    internal bool Validate(SdkDependency dependency)
+    /// <summary>
+    /// File metadata shared across every entry validated in the current build. Null when the owning cache does
+    /// not provide one (e.g. tests constructing this context directly).
+    /// </summary>
+    internal ImmutableFileStatCache? FileStatCache { get; }
+
+    /// <summary>
+    /// Directory listings kept from earlier glob replays and reused while their directories are unchanged. Null when
+    /// the owning cache does not provide one.
+    /// </summary>
+    internal ValidatedDirectoryListings? DirectoryListings { get; }
+
+    internal bool Validate(SdkDependency dependency) => ValidateCore(dependency, captureDetails: false, out _);
+
+    internal bool Validate(SdkDependency dependency, out EvaluationInputValidationFailure failure)
+        => ValidateCore(dependency, captureDetails: true, out failure);
+
+    private bool ValidateCore(SdkDependency dependency, bool captureDetails, out EvaluationInputValidationFailure failure)
     {
         ArgumentNullException.ThrowIfNull(dependency);
+        failure = default;
         LoggingContext deferredLogging = LoggingContext.CreateDeferred(
             _loggingService,
             _buildEventContext);
@@ -188,11 +287,21 @@ internal sealed class ProjectInstanceSnapshotValidationContext
         }
         catch (Exception)
         {
+            if (captureDetails)
+            {
+                failure = new("SdkResolutionException", dependency.Reference.Name);
+            }
+
             return false;
         }
 
         if (result is null)
         {
+            if (captureDetails)
+            {
+                failure = new("SdkResolutionFailed", dependency.Reference.Name);
+            }
+
             return false;
         }
 
@@ -210,9 +319,23 @@ internal sealed class ProjectInstanceSnapshotValidationContext
             }
         }
 
-        return !hasDeferredDiagnostics
+        if (!hasDeferredDiagnostics
             && !hasResultDiagnostics
-            && dependency.Result.Matches(result);
+            && dependency.Result.Matches(result))
+        {
+            return true;
+        }
+
+        if (captureDetails)
+        {
+            failure = new(
+                !result.Success
+                    ? "SdkResolutionFailed"
+                    : hasDeferredDiagnostics || hasResultDiagnostics ? "SdkDiagnostics" : "SdkResultChanged",
+                dependency.Reference.Name);
+        }
+
+        return false;
     }
 
     internal ISdkResolverService GetResolverForFreshEvaluation()
