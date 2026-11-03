@@ -257,3 +257,5 @@ For most development tasks, following these instructions should be sufficient to
 ## Updating these instructions
 
 When working on a task, if user input is required to complete the task or feedback is provided for guidance around a specific area of the code, evaluate that feedback/guidance and update this document to incorporate that feedback if it's missing.  This document should be a live, evolving set of instructions.
+
+When a skill or agent validator reports a size warning, consolidate existing guidance before appending more; keep task instructions focused and avoid duplicating repo-wide rules.
