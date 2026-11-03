@@ -125,7 +125,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                 // Other temp helpers - depend on environment variables
                 new BannedApi("M:System.IO.Path.GetTempFileName",
-                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; suppress with a justification until a TaskEnvironment alternative is available"),
+                    ApiCategory.TaskEnvironment, "create a unique file under TaskEnvironment.GetTempPath() with Path.GetRandomFileName() and FileMode.CreateNew"),
                 new BannedApi("M:System.IO.Directory.CreateTempSubdirectory(System.String)",
                     ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; suppress with a justification until a TaskEnvironment alternative is available"),
                 new BannedApi("M:System.CodeDom.Compiler.TempFileCollection.#ctor",
