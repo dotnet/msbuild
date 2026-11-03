@@ -164,13 +164,21 @@ namespace Microsoft.Build.UnitTests
         [InlineData("Precompute")]
         public void PrecomputeSwitchIdentificationTests(string switchName)
         {
-            CommandLineSwitches.IsParameterlessSwitch(
+            CommandLineSwitches.IsParameterizedSwitch(
                 switchName,
-                out CommandLineSwitches.ParameterlessSwitch parameterlessSwitch,
-                out string duplicateSwitchErrorMessage).ShouldBeTrue();
+                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
+                out string duplicateSwitchErrorMessage,
+                out bool multipleParametersAllowed,
+                out string missingParametersErrorMessage,
+                out bool unquoteParameters,
+                out bool emptyParametersAllowed).ShouldBeTrue();
 
-            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.Precompute);
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.Precompute);
             duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeTrue();
+            emptyParametersAllowed.ShouldBeFalse();
         }
 
         [Theory]

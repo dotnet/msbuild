@@ -46,7 +46,6 @@ namespace Microsoft.Build.CommandLine.Experimental
             FileLogger8,
             FileLogger9,
             DistributedFileLogger,
-            Precompute,
 #if DEBUG
             WaitForDebugger,
 #endif
@@ -120,6 +119,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             GetResultOutputFile,
             FeatureAvailability,
             MultiThreaded,
+            Precompute,
             ParentPacketVersion,
             NoLogo,
             ServerInstanceId,
@@ -231,7 +231,6 @@ namespace Microsoft.Build.CommandLine.Experimental
             new ParameterlessSwitchInfo(  ["filelogger8", "fl8"],                    ParameterlessSwitch.FileLogger8,           null,       "HelpMessage_20_FileLoggerSwitch"),
             new ParameterlessSwitchInfo(  ["filelogger9", "fl9"],                    ParameterlessSwitch.FileLogger9,           null,       "HelpMessage_20_FileLoggerSwitch"),
             new ParameterlessSwitchInfo(  ["distributedfilelogger", "dfl"],          ParameterlessSwitch.DistributedFileLogger, null,       "HelpMessage_21_DistributedFileLoggerSwitch"),
-            new ParameterlessSwitchInfo(  ["precompute"],                            ParameterlessSwitch.Precompute,             null,       "HelpMessage_PrecomputeSwitch"),
 #if DEBUG
             new ParameterlessSwitchInfo(  ["waitfordebugger", "wfd"],                ParameterlessSwitch.WaitForDebugger,       null,       null),
 #endif
@@ -299,6 +298,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             new ParameterizedSwitchInfo(  ["getResultOutputFile"],              ParameterizedSwitch.GetResultOutputFile,        null,                           true,           "MissingGetResultFileError",           true,   false,   "HelpMessage_51_GetResultOutputFileSwitch"),
             new ParameterizedSwitchInfo(  ["featureAvailability", "fa"],        ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false,   "HelpMessage_46_FeatureAvailabilitySwitch"),
             new ParameterizedSwitchInfo(  ["multithreaded", "mt"],              ParameterizedSwitch.MultiThreaded,              null,                           false,          null,                                  true,   false,   "HelpMessage_49_MultiThreadedSwitch"),
+            new ParameterizedSwitchInfo(  ["precompute"],                       ParameterizedSwitch.Precompute,                  null,                           false,          null,                                  true,   false,   "HelpMessage_PrecomputeSwitch"),
             new ParameterizedSwitchInfo(  ["parentpacketversion"],              ParameterizedSwitch.ParentPacketVersion,        null,                           false,          null,                                  false,  false,   null),
             new ParameterizedSwitchInfo(  ["nologo"],                           ParameterizedSwitch.NoLogo,                     null,                           false,          null,                                  true,   false,   "HelpMessage_5_NoLogoSwitch"),
             new ParameterizedSwitchInfo(  ["serverinstanceid"],                 ParameterizedSwitch.ServerInstanceId,           null,                           false,          null,                                  false,  false,   null)

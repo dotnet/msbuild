@@ -2758,7 +2758,7 @@ namespace Microsoft.Build.CommandLine
                     // figure out if we should use in-proc nodes for parallel build, effectively running the build multi-threaded
                     multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
-                    precompute = commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Precompute];
+                    precompute = IsPrecomputeEnabled(commandLineSwitches);
 
                     // figure out if we should reuse nodes
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
@@ -2894,6 +2894,19 @@ namespace Microsoft.Build.CommandLine
             }
 
             return Traits.Instance.EnableMultiThreaded;
+        }
+
+        internal static bool IsPrecomputeEnabled(CommandLineSwitches commandLineSwitches)
+        {
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Precompute))
+            {
+                return ProcessBooleanSwitch(
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Precompute],
+                    defaultValue: true,
+                    resourceName: "InvalidPrecomputeValue");
+            }
+
+            return false;
         }
 
 #if FEATURE_REPORTFILEACCESSES
