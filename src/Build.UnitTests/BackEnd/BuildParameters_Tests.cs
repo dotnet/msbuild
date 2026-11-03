@@ -6,21 +6,20 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Xunit;
 
-namespace Microsoft.Build.UnitTests.BackEnd
+namespace Microsoft.Build.UnitTests.BackEnd;
+
+public class BuildParameters_Tests
 {
-    public class BuildParameters_Tests
+    [Fact]
+    public void IsPrecomputeIsClonedAndTranslated()
     {
-        [Fact]
-        public void IsPrecomputeIsClonedAndTranslated()
-        {
-            var parameters = new BuildParameters { IsPrecompute = true };
+        var parameters = new BuildParameters { IsPrecompute = true };
 
-            Assert.True(parameters.Clone().IsPrecompute);
+        Assert.True(parameters.Clone().IsPrecompute);
 
-            ((ITranslatable)parameters).Translate(TranslationHelpers.GetWriteTranslator());
-            BuildParameters deserializedParameters = BuildParameters.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+        ((ITranslatable)parameters).Translate(TranslationHelpers.GetWriteTranslator());
+        BuildParameters deserializedParameters = BuildParameters.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.True(deserializedParameters.IsPrecompute);
-        }
+        Assert.True(deserializedParameters.IsPrecompute);
     }
 }
