@@ -639,8 +639,9 @@
   </data>
   <data name="HelpMessage_PrecomputeSwitch" xml:space="preserve">
     <value>  -precompute
-                     Enables EXPERIMENTAL precompute mode.
-                     This option does not currently change build behavior.
+                     Enables EXPERIMENTAL precompute mode, which
+                     separates creation of the build graph from execution
+                     of that graph.
     </value>
   </data>
   <data name="HelpMessage_24_NodeReuse" xml:space="preserve">
