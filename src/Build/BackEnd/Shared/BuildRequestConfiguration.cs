@@ -570,41 +570,29 @@ namespace Microsoft.Build.BackEnd
                     projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
                 }
 
-                bool setEvaluationDirectory = componentHost.BuildParameters.MultiThreaded && componentHost.BuildParameters.SaveOperatingEnvironment;
-                string previousThreadDirectory = setEvaluationDirectory ? FileUtilities.CurrentThreadWorkingDirectory : null;
-                try
-                {
-                    if (setEvaluationDirectory)
-                    {
-                        // Match non-MT evaluation without changing process CWD or the request's execution directory.
-                        FileUtilities.CurrentThreadWorkingDirectory = BuildParameters.StartupDirectory;
-                    }
+                // Match non-MT evaluation without changing process CWD or the request's execution directory.
+                using EvaluationDirectoryScope evaluationDirectory = new(
+                    componentHost.BuildParameters.MultiThreaded && componentHost.BuildParameters.SaveOperatingEnvironment
+                        ? BuildParameters.StartupDirectory
+                        : null);
 
-                    return new ProjectInstance(
-                        ProjectFullPath,
-                        globalProperties,
-                        toolsVersionOverride,
-                        componentHost.BuildParameters,
-                        componentHost.LoggingService,
-                        new BuildEventContext(
-                            submissionId,
-                            nodeId,
-                            BuildEventContext.InvalidEvaluationId,
-                            BuildEventContext.InvalidProjectInstanceId,
-                            BuildEventContext.InvalidProjectContextId,
-                            BuildEventContext.InvalidTargetId,
-                            BuildEventContext.InvalidTaskId),
-                        sdkResolverService,
+                return new ProjectInstance(
+                    ProjectFullPath,
+                    globalProperties,
+                    toolsVersionOverride,
+                    componentHost.BuildParameters,
+                    componentHost.LoggingService,
+                    new BuildEventContext(
                         submissionId,
-                        projectLoadSettings);
-                }
-                finally
-                {
-                    if (setEvaluationDirectory)
-                    {
-                        FileUtilities.CurrentThreadWorkingDirectory = previousThreadDirectory;
-                    }
-                }
+                        nodeId,
+                        BuildEventContext.InvalidEvaluationId,
+                        BuildEventContext.InvalidProjectInstanceId,
+                        BuildEventContext.InvalidProjectContextId,
+                        BuildEventContext.InvalidTargetId,
+                        BuildEventContext.InvalidTaskId),
+                    sdkResolverService,
+                    submissionId,
+                    projectLoadSettings);
             });
         }
 

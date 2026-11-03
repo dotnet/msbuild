@@ -2023,17 +2023,21 @@ namespace Microsoft.Build.Execution
                 buildEventContext = new BuildEventContext(request.SubmissionId, 0, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
             }
 
-            var instances = ProjectInstance.LoadSolutionForBuild(
-                config.ProjectFullPath,
-                config.GlobalProperties,
-                config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null,
-                _buildParameters,
-                ((IBuildComponentHost)this).LoggingService,
-                buildEventContext,
-                false /* loaded by solution parser*/,
-                config.RequestedTargets,
-                SdkResolverService,
-                request.SubmissionId);
+            ProjectInstance[] instances;
+            using (new EvaluationDirectoryScope(_multiThreadedStrictModeScope?.BuildEntryDirectory))
+            {
+                instances = ProjectInstance.LoadSolutionForBuild(
+                    config.ProjectFullPath,
+                    config.GlobalProperties,
+                    config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null,
+                    _buildParameters,
+                    ((IBuildComponentHost)this).LoggingService,
+                    buildEventContext,
+                    false /* loaded by solution parser*/,
+                    config.RequestedTargets,
+                    SdkResolverService,
+                    request.SubmissionId);
+            }
 
             // The first instance is the traversal project, which goes into this configuration
             config.Project = instances[0];
@@ -2449,55 +2453,42 @@ namespace Microsoft.Build.Execution
             var projectGraph = submission.BuildRequestData.ProjectGraph;
             if (projectGraph == null)
             {
-                string? previousThreadDirectory = FileUtilities.CurrentThreadWorkingDirectory;
-                try
-                {
-                    if (_multiThreadedStrictModeScope is not null)
+                // Graph workers inherit the host evaluation directory before request environments exist.
+                using EvaluationDirectoryScope evaluationDirectory = new(_multiThreadedStrictModeScope?.BuildEntryDirectory);
+                projectGraph = new ProjectGraph(
+                    submission.BuildRequestData.ProjectGraphEntryPoints,
+                    ProjectCollection.GlobalProjectCollection,
+                    (path, properties, collection) =>
                     {
-                        // Graph evaluation precedes request environments and historically resolves property-function
-                        // paths against the host directory. Flow it to graph workers without changing process CWD.
-                        FileUtilities.CurrentThreadWorkingDirectory = _multiThreadedStrictModeScope.BuildEntryDirectory;
-                    }
-
-                    projectGraph = new ProjectGraph(
-                        submission.BuildRequestData.ProjectGraphEntryPoints,
-                        ProjectCollection.GlobalProjectCollection,
-                        (path, properties, collection) =>
+                        ProjectLoadSettings projectLoadSettings = _buildParameters!.ProjectLoadSettings;
+                        if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
                         {
-                            ProjectLoadSettings projectLoadSettings = _buildParameters!.ProjectLoadSettings;
-                            if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
-                            {
-                                projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
-                            }
+                            projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
+                        }
 
-                            if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.FailOnUnresolvedSdk))
-                            {
-                                projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
-                            }
+                        if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.FailOnUnresolvedSdk))
+                        {
+                            projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
+                        }
 
-                            return new ProjectInstance(
-                                path,
-                                properties,
-                                null,
-                                _buildParameters,
-                                ((IBuildComponentHost)this).LoggingService,
-                                new BuildEventContext(
-                                    submission.SubmissionId,
-                                    _buildParameters.NodeId,
-                                    BuildEventContext.InvalidEvaluationId,
-                                    BuildEventContext.InvalidProjectInstanceId,
-                                    BuildEventContext.InvalidProjectContextId,
-                                    BuildEventContext.InvalidTargetId,
-                                    BuildEventContext.InvalidTaskId),
-                                SdkResolverService,
+                        return new ProjectInstance(
+                            path,
+                            properties,
+                            null,
+                            _buildParameters,
+                            ((IBuildComponentHost)this).LoggingService,
+                            new BuildEventContext(
                                 submission.SubmissionId,
-                                projectLoadSettings);
-                        });
-                }
-                finally
-                {
-                    FileUtilities.CurrentThreadWorkingDirectory = previousThreadDirectory;
-                }
+                                _buildParameters.NodeId,
+                                BuildEventContext.InvalidEvaluationId,
+                                BuildEventContext.InvalidProjectInstanceId,
+                                BuildEventContext.InvalidProjectContextId,
+                                BuildEventContext.InvalidTargetId,
+                                BuildEventContext.InvalidTaskId),
+                            SdkResolverService,
+                            submission.SubmissionId,
+                            projectLoadSettings);
+                    });
             }
 
             LogMessage(

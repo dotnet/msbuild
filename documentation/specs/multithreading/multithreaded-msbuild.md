@@ -304,12 +304,15 @@ allows cache serialization; a late warning promoted to an error fails `EndBuild`
 The host directory captured before logger initialization is restored when the build ends.
 `BuildManager` resolves relative output-cache paths for CLI and API builds before entering the sentinel;
 the CLI resolves its entry-project path before constructing requests inside that scope.
-Static graph evaluation uses an async-local copy of the captured host directory for relative-path
-property functions, preserving graph-only evaluation semantics while process CWD remains the sentinel.
-Ordinary MT file evaluation likewise uses the startup directory when operating-environment management
-is enabled, matching non-MT evaluation with or without strict mode. The evaluation context is restored
-before target/task execution, which still uses each request's own project directory. Pre-evaluated
-project instances and hosts that disable operating-environment management are not rebased.
+MT must not change which files evaluation reads. Ordinary MT file evaluation uses the non-MT startup
+directory when operating-environment management is enabled, with or without strict mode.
+During strict MT builds, solution-wrapper and static-graph evaluation use an async-local copy of the
+captured host directory while process CWD remains the sentinel. This builder-owned pre-evaluation also
+needs the host directory when `SaveOperatingEnvironment` is false; that flag only opts ordinary project
+loading out of the startup-directory override. Pre-evaluated project instances are not reevaluated.
+Each evaluation scope restores the previous context before target/task execution, which still uses the
+request's own project directory. With wave 18.12 disabled, project loading still uses the virtual
+evaluation directory instead of resetting shared process CWD, removing the old opt-out-path race.
 Loggers must not change the process current directory. Failures to enable strict mode, recover its directory,
 or restore the host directory fail the build; they do not silently disable checks.
 After successful restoration, MSBuild attempts to remove the scope's own temporary directory.

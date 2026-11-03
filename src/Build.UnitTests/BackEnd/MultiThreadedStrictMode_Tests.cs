@@ -136,12 +136,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData(true, true, true)]
-        [InlineData(true, false, true)]
-        [InlineData(true, true, false)]
-        [InlineData(false, true, true)]
-        [InlineData(false, true, false)]
-        public void EvaluationPreservesHostRelativePaths(bool graph, bool build, bool strict)
+        [InlineData(true, true, true, true)]
+        [InlineData(true, false, true, true)]
+        [InlineData(true, true, false, true)]
+        [InlineData(false, true, true, true)]
+        [InlineData(false, true, false, true)]
+        [InlineData(true, true, true, false)]
+        public void EvaluationPreservesHostRelativePaths(bool graph, bool build, bool strict, bool saveEnvironment)
         {
             SetStrictMode(_env, enabled: strict);
             var hostDirectory = _env.CreateFolder();
@@ -190,6 +191,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildParameters parameters = new()
             {
                 MultiThreaded = true,
+                SaveOperatingEnvironment = saveEnvironment,
                 MaxNodeCount = 2,
                 DefaultToolsVersion = MSBuildConstants.CurrentToolsVersion,
                 ShutdownInProcNodeOnBuildFinish = true,
@@ -264,6 +266,80 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalThreadDirectory);
+        }
+
+        [Theory]
+        [InlineData("Directory.Solution.props", true, true)]
+        [InlineData("before.test.sln.targets", true, true)]
+        [InlineData("Directory.Solution.props", false, true)]
+        [InlineData("before.test.sln.targets", false, true)]
+        [InlineData("Directory.Solution.props", true, false)]
+        [InlineData("before.test.sln.targets", true, false)]
+        public void SolutionEvaluationPreservesHostRelativePaths(string importName, bool saveEnvironment, bool strict)
+        {
+            SetStrictMode(_env, enabled: strict);
+            var hostDirectory = _env.CreateFolder();
+            var solutionDirectory = _env.CreateFolder();
+            _env.CreateFile(hostDirectory, "payload.txt", "host payload");
+            _env.CreateFile(solutionDirectory, "payload.txt", "solution payload");
+            _env.SetCurrentDirectory(hostDirectory.Path);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            string? originalThreadDirectory = FileUtilities.CurrentThreadWorkingDirectory;
+            _env.WithTransientTestState(new TransientStartupDirectory(originalDirectory));
+            var solution = _env.CreateFile(solutionDirectory, "test.sln",
+                "Microsoft Visual Studio Solution File, Format Version 12.00");
+            _env.CreateFile(solutionDirectory, importName, """
+                <Project>
+                  <PropertyGroup>
+                    <Payload>$([System.IO.File]::ReadAllText('payload.txt'))</Payload>
+                    <PayloadPath>$([System.IO.Path]::GetFullPath('payload.txt'))</PayloadPath>
+                  </PropertyGroup>
+                  <Target Name="CheckSolution">
+                    <Message Text="SOLUTION_PAYLOAD=$(Payload)" Importance="high" />
+                    <Message Text="SOLUTION_EVALUATION_PATH=$(PayloadPath)" Importance="high" />
+                    <Message Text="SOLUTION_EXECUTION_PATH=$([System.IO.Path]::GetFullPath('payload.txt'))" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+            manager.Build(new BuildParameters
+            {
+                MultiThreaded = true,
+                SaveOperatingEnvironment = saveEnvironment,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            }, new BuildRequestData(solution.Path, new Dictionary<string, string?>(), null, ["CheckSolution"], null))
+                .ShouldHaveSucceeded();
+
+            logger.AssertLogContains("SOLUTION_PAYLOAD=host payload");
+            logger.AssertLogContains($"SOLUTION_EVALUATION_PATH={Path.Combine(originalDirectory, "payload.txt")}");
+            logger.AssertLogContains($"SOLUTION_EXECUTION_PATH={Path.Combine(solutionDirectory.Path, "payload.txt")}");
+            logger.AssertNoErrors();
+            logger.AssertNoWarnings();
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+            FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalThreadDirectory);
+        }
+
+        [Fact]
+        public void EvaluationDirectoryScopeRestoresContextAfterFailure()
+        {
+            string? originalDirectory = FileUtilities.CurrentThreadWorkingDirectory;
+            string processDirectory = Directory.GetCurrentDirectory();
+            string evaluationDirectory = _env.CreateFolder().Path;
+
+            Should.Throw<InvalidOperationException>(() =>
+            {
+                using EvaluationDirectoryScope scope = new(evaluationDirectory);
+                using EvaluationDirectoryScope disabled = new(null);
+                FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(evaluationDirectory);
+                throw new InvalidOperationException("evaluation failed");
+            });
+
+            FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalDirectory);
+            Directory.GetCurrentDirectory().ShouldBe(processDirectory);
         }
 
         [Theory]
