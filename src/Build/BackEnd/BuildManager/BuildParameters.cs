@@ -228,7 +228,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private bool _multiThreaded;
 
-        private bool _isPrecompute;
+        private bool _precompute;
 
         private ProjectIsolationMode _projectIsolationMode;
 
@@ -304,7 +304,7 @@ namespace Microsoft.Build.Execution
             _loggers = other._loggers != null ? new List<ILogger>(other._loggers) : null;
             _maxNodeCount = other._maxNodeCount;
             MultiThreaded = other.MultiThreaded;
-            _isPrecompute = other._isPrecompute;
+            _precompute = other._precompute;
             _memoryUseLimit = other._memoryUseLimit;
             _nodeExeLocation = other._nodeExeLocation;
             NodeId = other.NodeId;
@@ -596,8 +596,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public bool Precompute
         {
-            get => _isPrecompute;
-            set => _isPrecompute = value;
+            get => _precompute;
+            set => _precompute = value;
         }
 
         /// <summary>
@@ -1026,7 +1026,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _question);
             translator.Translate(ref _isBuildCheckEnabled);
             translator.Translate(ref _isTelemetryEnabled);
-            translator.Translate(ref _isPrecompute);
+            translator.Translate(ref _precompute);
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
