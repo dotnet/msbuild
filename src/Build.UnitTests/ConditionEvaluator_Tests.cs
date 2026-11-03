@@ -679,8 +679,8 @@ public class ConditionEvaluator_Tests : IDisposable
         state.Initialize(new NodeStateLayout(1));
         try
         {
-            Should.Throw<InvalidOperationException>(() => state.Initialize(new NodeStateLayout(1))).Message.ShouldBe(
-                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ConditionNodeStateAlreadyInUse"));
+            Should.Throw<InternalErrorException>(() => state.Initialize(new NodeStateLayout(1))).Message.ShouldContain(
+                "Condition node state storage is not initialized.");
             Should.Throw<ArgumentOutOfRangeException>(() => state.GetString(-1));
             Should.Throw<ArgumentOutOfRangeException>(() => state.GetString(1));
             state.GetString(0).ExpandedValue = "first";

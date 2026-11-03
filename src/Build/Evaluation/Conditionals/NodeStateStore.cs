@@ -19,10 +19,7 @@ internal struct NodeStateStore
 
     internal void Initialize(NodeStateLayout layout)
     {
-        if (_initialized)
-        {
-            ErrorUtilities.ThrowInvalidOperation("ConditionNodeStateAlreadyInUse");
-        }
+        Assumed.False(_initialized, "Condition node state storage is not initialized.");
 
         if (layout.StringSlotCount < 0)
         {
