@@ -3,10 +3,10 @@
 # Parallel, non-blocking PR pipeline that exercises Clever Test Selection.
 #
 # Behavior:
-#   1. Download the most recent `cts-baseline-<os>` artifact from the collect
+#   1. Download the most recent `cts-mtp-baseline-<os>` artifact from the collect
 #      pipeline on `main` (latestFromBranch).
-#   2. Build MSBuild.VSTest.slnx and run `cts apply vstest` against the
-#      wrapped projects.
+#   2. Build MSBuild.slnx and run `cts apply testingplatform` against the
+#      native MTP test projects.
 #   3. Emit cts-metrics.json per OS (schema: scripts/cts/METRICS.md).
 #
 # Fallback: if `collectPipelineId` is 0 (pipeline not yet registered) or the
@@ -99,17 +99,17 @@ parameters:
   # passing `--parameters collectSourceBranch=refs/heads/<branch>` to
   # `az pipelines run`.
   default: refs/heads/main
-# Explicit `cts` tool version to install. Empty => latest prerelease. Keep this
+# Explicit `cts` tool version to install. Keep this
 # in lockstep with cts-collect.yml's `ctsToolVersion` so apply and collect run
 # the same tool build (baseline format compatibility).
 - name: ctsToolVersion
   type: string
-  default: ''
+  default: '2.13.0-alpha.26519.2'
 
 variables:
   BuildConfiguration: Debug
   CtsConfigPath: $(Build.SourcesDirectory)/scripts/cts/cts.config.json
-  BaselineDir:   $(Build.SourcesDirectory)/.cts/baseline
+  BaselineDir:   $(Build.SourcesDirectory)/.cts/mtp-baseline
 
 jobs:
 - job: Apply_Windows

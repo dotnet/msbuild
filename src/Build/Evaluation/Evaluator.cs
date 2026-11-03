@@ -741,7 +741,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (_interactive)
                     {
-                        SetBuiltInProperty(ReservedPropertyNames.interactive, "true");
+                        SetBuiltInProperty(ReservedPropertyNames.Interactive, "true");
                     }
                 }
 
@@ -1113,7 +1113,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (expanded.Length > 0)
                 {
-                    SetBuiltInProperty(ReservedPropertyNames.projectDefaultTargets, EscapingUtilities.UnescapeAll(expanded));
+                    SetBuiltInProperty(ReservedPropertyNames.ProjectDefaultTargets, EscapingUtilities.UnescapeAll(expanded));
 
                     List<string> temp = new List<string>(expanded.Split(s_splitter, StringSplitOptions.RemoveEmptyEntries));
 
@@ -1288,38 +1288,38 @@ namespace Microsoft.Build.Evaluation
         {
             string startupDirectory = BuildParameters.StartupDirectory;
 
-            SetBuiltInProperty(ReservedPropertyNames.toolsVersion, _data.Toolset.ToolsVersion);
-            SetBuiltInProperty(ReservedPropertyNames.toolsPath, _data.Toolset.ToolsPath);
-            SetBuiltInProperty(ReservedPropertyNames.binPath, _data.Toolset.ToolsPath);
-            SetBuiltInProperty(ReservedPropertyNames.startupDirectory, startupDirectory);
-            SetBuiltInProperty(ReservedPropertyNames.buildNodeCount, _maxNodeCount.ToString(CultureInfo.CurrentCulture));
-            SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32);
-            SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion);
-            SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
-            SetBuiltInProperty(ReservedPropertyNames.fileVersion, CachedFileVersion);
-            SetBuiltInProperty(ReservedPropertyNames.semanticVersion, ProjectCollection.DisplayVersion);
+            SetBuiltInProperty(ReservedPropertyNames.ToolsVersion, _data.Toolset.ToolsVersion);
+            SetBuiltInProperty(ReservedPropertyNames.ToolsPath, _data.Toolset.ToolsPath);
+            SetBuiltInProperty(ReservedPropertyNames.BinPath, _data.Toolset.ToolsPath);
+            SetBuiltInProperty(ReservedPropertyNames.StartupDirectory, startupDirectory);
+            SetBuiltInProperty(ReservedPropertyNames.BuildNodeCount, _maxNodeCount.ToString(CultureInfo.CurrentCulture));
+            SetBuiltInProperty(ReservedPropertyNames.ProgramFiles32, FrameworkLocationHelper.programFiles32);
+            SetBuiltInProperty(ReservedPropertyNames.AssemblyVersion, Constants.AssemblyVersion);
+            SetBuiltInProperty(ReservedPropertyNames.Version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
+            SetBuiltInProperty(ReservedPropertyNames.FileVersion, CachedFileVersion);
+            SetBuiltInProperty(ReservedPropertyNames.SemanticVersion, ProjectCollection.DisplayVersion);
 
             ValidateChangeWaveState();
 
-            SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.DisabledWave.ToString());
+            SetBuiltInProperty(ReservedPropertyNames.MSBuildDisableFeaturesFromVersion, ChangeWaves.DisabledWave.ToString());
 
             // Fake OS env variables when not on Windows
             if (!NativeMethodsShared.IsWindows)
             {
-                SetBuiltInProperty(ReservedPropertyNames.osName, NativeMethodsShared.OSName);
-                SetBuiltInProperty(ReservedPropertyNames.frameworkToolsRoot, NativeMethodsShared.FrameworkBasePath);
+                SetBuiltInProperty(ReservedPropertyNames.OSName, NativeMethodsShared.OSName);
+                SetBuiltInProperty(ReservedPropertyNames.FrameworkToolsRoot, NativeMethodsShared.FrameworkBasePath);
             }
 
 #if RUNTIME_TYPE_NETCORE
-            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
+            SetBuiltInProperty(ReservedPropertyNames.MSBuildRuntimeType,
                 Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core");
 #else
-            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Full");
+            SetBuiltInProperty(ReservedPropertyNames.MSBuildRuntimeType, "Full");
 #endif
 
             if (string.IsNullOrEmpty(_projectRootElement.FullPath))
             {
-                SetBuiltInProperty(ReservedPropertyNames.projectDirectory, string.IsNullOrEmpty(_projectRootElement.DirectoryPath) ?
+                SetBuiltInProperty(ReservedPropertyNames.ProjectDirectory, string.IsNullOrEmpty(_projectRootElement.DirectoryPath) ?
                     // If this is an un-saved project, this is as far as we can go
                     startupDirectory :
                     // Solution files based on the old OM end up here.  But they do have a location, which is where the solution was loaded from.
@@ -1340,13 +1340,13 @@ namespace Microsoft.Build.Evaluation
                 int rootLength = Path.GetPathRoot(projectDirectory).Length;
                 string projectDirectoryNoRoot = FileUtilities.EnsureNoLeadingOrTrailingSlash(projectDirectory, rootLength);
 
-                // ReservedPropertyNames.projectDefaultTargets is already set
-                SetBuiltInProperty(ReservedPropertyNames.projectFile, projectFile);
-                SetBuiltInProperty(ReservedPropertyNames.projectName, projectFileWithoutExtension);
-                SetBuiltInProperty(ReservedPropertyNames.projectExtension, projectExtension);
-                SetBuiltInProperty(ReservedPropertyNames.projectFullPath, projectFullPath);
-                SetBuiltInProperty(ReservedPropertyNames.projectDirectory, projectDirectory);
-                SetBuiltInProperty(ReservedPropertyNames.projectDirectoryNoRoot, projectDirectoryNoRoot);
+                // ReservedPropertyNames.ProjectDefaultTargets is already set
+                SetBuiltInProperty(ReservedPropertyNames.ProjectFile, projectFile);
+                SetBuiltInProperty(ReservedPropertyNames.ProjectName, projectFileWithoutExtension);
+                SetBuiltInProperty(ReservedPropertyNames.ProjectExtension, projectExtension);
+                SetBuiltInProperty(ReservedPropertyNames.ProjectFullPath, projectFullPath);
+                SetBuiltInProperty(ReservedPropertyNames.ProjectDirectory, projectDirectory);
+                SetBuiltInProperty(ReservedPropertyNames.ProjectDirectoryNoRoot, projectDirectoryNoRoot);
             }
         }
 
@@ -1898,7 +1898,7 @@ namespace Microsoft.Build.Evaluation
                     solutionPath = null;
                 }
 
-                var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
+                var projectPath = _data.GetProperty(ReservedPropertyNames.ProjectFullPath)?.EvaluatedValue;
 
                 static bool HasProperty(string value) =>
                     value != null && ExpressionShredder.ContainsPropertyMarker(value);

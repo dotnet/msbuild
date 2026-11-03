@@ -1,115 +1,124 @@
-# scripts/cts — Local CTS (Clever Test Selection) harness
+# scripts/cts - Local CTS (Clever Test Selection) harness
 
-These scripts run CTS against this repository in **VSTest mode**, which
-avoids the MTP↔CTS JsonRpc hang we hit during the initial adoption attempt.
+These scripts use **native Microsoft.Testing.Platform (MTP)** hosts from the
+normal test projects in `MSBuild.slnx`. No separate solution or VSTest wrapper
+projects are needed.
 
-They drive the **sibling `*.UnitTests.VSTest.csproj`** wrappers next to each
-test project. Each wrapper imports the original `.csproj` so the test
-surface stays in sync; only the runner stack differs.
+MTP is pinned to at least 2.5.1, which includes the UTF-8 JSON-RPC framing fix
+from [testfx#10085](https://github.com/microsoft/testfx/pull/10085). xUnit and
+Arcade's test extensions remain on the existing compatible versions.
 
 ## Layout
 
-| File                       | Role                                                       |
-| -------------------------- | ---------------------------------------------------------- |
-| `projects.json`            | Registry of `*.UnitTests.VSTest` projects + demo files     |
-| `cts.config.json`          | CTS configuration (Modules / SourceCodeFiles / Filter)     |
-| `_Common.ps1`              | Tiny PS helpers (paths, build, registry lookup)            |
-| `Collect-Local.ps1`        | `cts collect vstest --coverage` → baseline in `.cts/`      |
-| `Run-Local.ps1`            | `cts apply vstest --local-development` → impacted-only run |
-| `demos/Demo-NoChange.ps1`    | Apply with no edits (expect 0 impacted)                   |
-| `demos/Demo-NarrowEdit.ps1`  | Touch a narrow source file (expect partial selection)     |
-| `demos/Demo-BroadEdit.ps1`   | Touch a broad source file (expect ~all selected)          |
-| `demos/Demo-UnrelatedEdit.ps1` | Touch a file outside the project (expect 0 impacted)    |
+| File | Role |
+| --- | --- |
+| `projects.json` | Local project keys, build paths and demo files |
+| `cts.config.json` | Coverage/source filters and native Debug/net11 unit-test DLL discovery |
+| `_Common.ps1` | Shared paths, build and registry helpers |
+| `Collect-Local.ps1` | `cts collect testingplatform --coverage` |
+| `Run-Local.ps1` | `cts apply testingplatform --local-development` |
+| `demos/Demo-NoChange.ps1` | Apply with no edits (expect 0 impacted) |
+| `demos/Demo-NarrowEdit.ps1` | Touch a narrow source file (expect partial selection) |
+| `demos/Demo-BroadEdit.ps1` | Touch a broad source file (expect broad selection) |
+| `demos/Demo-UnrelatedEdit.ps1` | Touch a file outside the project (expect 0 impacted) |
 
-Anything you would tweak as configuration belongs in `projects.json` or
-`cts.config.json`, not in the PowerShell.
+Configuration belongs in `projects.json` or `cts.config.json`, not in the
+PowerShell. CI discovers all built modules matching
+`**/artifacts/bin/*/Debug/net11.0/*.UnitTests.dll`, including Coordinator.
+New matching unit-test outputs are automatically included. Add their project
+entries to `projects.json` to make them available through the local scripts too.
+Use a clean build output directory to avoid collecting stale matching modules.
 
 ## Prerequisites
 
+Build the repository once using its normal build instructions to bootstrap the
+repo-local SDK. Ensure the global `cts` host can find the .NET 10 runtime and
+the native test hosts can find a .NET 11 runtime. The CI steps install both;
+the repo-local SDK alone does not install runtimes into the global host.
+CI installs the tool through `eng/common/dotnet.ps1` (Windows) or `dotnet.sh`
+(Linux), which bootstraps the SDK pinned by `global.json` before the solution
+build. Runtime-only agent setup cannot run `dotnet tool update` on its own.
+
+Install the same CTS version used by the collect and apply pipelines:
+
 ```powershell
-dotnet tool install cts --global --prerelease `
+dotnet tool install cts --global --version 2.13.0-alpha.26519.2 `
   --add-source https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json
 ```
 
-The `cts` command must resolve on PATH. A `.cts/` directory at repo root is
-used as the local filesystem cache (gitignored).
+Run tool installation outside the repository if its package source mapping
+rejects `--add-source`. The `cts` command must resolve on PATH.
 
 ## Workflow
 
 ```powershell
-# 1. Collect baseline (clean working tree required)
+# 1. Collect a native baseline (clean working tree required)
 .\scripts\cts\Collect-Local.ps1 -Project StringTools
 
-# 2. Make changes, then run only impacted tests
+# 2. Make changes, rebuild, and run only impacted tests
 .\scripts\cts\Run-Local.ps1 -Project StringTools
 
-# 3. See it in action
-.\scripts\cts\demos\Demo-NoChange.ps1     -Project StringTools
-.\scripts\cts\demos\Demo-NarrowEdit.ps1   -Project StringTools
-.\scripts\cts\demos\Demo-BroadEdit.ps1    -Project StringTools
-.\scripts\cts\demos\Demo-UnrelatedEdit.ps1 -Project StringTools
+# 3. Inspect selection
+.\scripts\cts\demos\Demo-NoChange.ps1       -Project StringTools
+.\scripts\cts\demos\Demo-NarrowEdit.ps1     -Project StringTools
+.\scripts\cts\demos\Demo-BroadEdit.ps1      -Project StringTools
+.\scripts\cts\demos\Demo-UnrelatedEdit.ps1  -Project StringTools
 ```
 
-Omit `-Project` to operate on every project registered in `projects.json`.
+Omit `-Project` to operate on all nine registered projects. `Run-Local.ps1`
+builds by default; use `-SkipBuild` only when the binaries already match the
+source being tested. The demos illustrate file-level selection using a blank
+line edit and existing binaries, not validation of a changed implementation.
+Run demos only with clean source files: they revert their touched file on exit.
+
+Native local baselines live in `.cts/mtp-baseline`, separate from the former
+VSTest cache. **Collect a fresh native baseline after upgrading.** Do not reuse
+VSTest baselines; their test identities are not assumed interchangeable.
+Logs remain in `.cts/logs`. These directories are gitignored.
 
 ## Coverage gap vs the regular PR pipeline
 
-The wrappers are pinned to latest .NETCoreApp. xunit.v3 rejects
-`net472` when `OutputType=Library` (which CTS needs so it can host the
-test DLL), so we cannot run the .NET Framework leg through CTS today.
+CTS targets Debug/net11 unit-test outputs, including Coordinator in addition to
+the original eight projects. This migration does not add net472, macOS or Release.
+Native net472 operation has not been validated.
 
-What this means in practice:
+| Target | Regular PR pipeline | CTS pipeline |
+| --- | --- | --- |
+| Debug/net11 unit-test modules, Windows/Linux | Yes | Yes |
+| .NET Framework, Windows | Yes | Not validated |
+| Remaining regular CI matrix | Yes | No |
 
-| TFM            | Regular PR pipeline | CTS pipeline |
-| -------------- | ------------------- | ------------ |
-| `NETCoreApp`   | ✅                  | ✅           |
-| `.NETFramework` (Win) | ✅           | ❌           |
+The regular PR pipeline remains the merge gate. CTS is a separate,
+**non-blocking shadow experiment**, not a replacement for full tests.
 
-The CTS pipeline is parallel and **non-blocking**; the regular PR
-pipeline continues to provide net472 signal and remains the merge gate.
-CTS adds incrementality for the .NETCoreApp subset only. Closing the gap
-requires either an `OutputType=Exe` net472 wrapper variant (needs
-validation that `cts vstest` works against a .NET Framework Exe host) or
-a legacy-xunit wrapper for .NETFramework.
+CTS starts test hosts directly, so MSBuild's `XunitOptions` trait exclusions
+are not automatically forwarded. This was also true of the old CTS scripts:
+shadow runs can include quarantined/platform-specific cases excluded from
+regular CI. Keep their failures visible when interpreting CTS results.
+The pinned CTS tool's `--test-case-filter` forwards `--filter`, which this
+xUnit runner does not support; it is not a substitute for xUnit's
+`--filter-not-trait` arguments.
 
 ## Local vs CI
 
-These scripts are **local-only** — they use the filesystem cache under
-`<repo>/.cts/` so iterating between collect and apply is instant. They
-target Windows; the CI pipelines invoke `cts` directly and do not source
-`_Common.ps1`, so non-Windows local users should call `cts` themselves.
+Local scripts use the filesystem cache and currently target Windows.
+Non-Windows local users should invoke `cts` directly. CI does not source
+`_Common.ps1`.
 
-CI runs the same `cts` tool but against ADO pipeline artifacts as the
-snapshot store. Two pipelines drive it:
+The existing two pipelines remain separate:
 
-* `azure-pipelines/cts-collect.yml` — scheduled daily at 03:00 UTC against
-  `main`; uses `--storage-type filesystem` locally on the agent and
-  publishes the snapshot directory as `cts-baseline-<os>` (one slot per
-  OS, overwritten daily) plus a sibling `cts-collect-metrics-<os>`
-  artifact containing the SHA the baseline was taken at.
-* `azure-pipelines/cts-apply.yml` — runs in parallel on PRs (non-blocking);
-  downloads the latest `cts-baseline-<os>` from main via
-  `DownloadPipelineArtifact@2`, runs `cts apply vstest` against
-  `MSBuild.VSTest.slnx`. If `collectPipelineId` isn't configured yet (or
-  download fails), the apply step is skipped and only metrics are emitted
-  — we do **not** duplicate the regular PR pipeline's full test run.
+* `azure-pipelines/cts-collect.yml` runs daily at 03:00 UTC against `main`.
+  It builds `MSBuild.slnx`, runs `cts collect testingplatform --coverage`,
+  and publishes `cts-mtp-baseline-<os>` plus `cts-collect-metrics-<os>`.
+* `azure-pipelines/cts-apply.yml` runs alongside regular PR CI, builds the
+  same solution and runs `cts apply testingplatform`. It downloads only
+  native `cts-mtp-baseline-<os>` artifacts. Until the first native collect
+  succeeds, or when the baseline is unavailable, apply skips CTS and emits
+  fallback metrics; the regular pipeline still runs all its tests.
 
-Both pipelines emit `cts-metrics.json` per OS (schema documented in
-[`METRICS.md`](METRICS.md)) so we can later quantify the incrementality
-CTS achieves.
+The new artifact names prevent old VSTest snapshots from being consumed.
+Keep the collect/apply `ctsToolVersion` pins identical when updating them.
+Metrics retain their existing schema; see [METRICS.md](METRICS.md).
 
-`Check-SlnxParity.ps1` verifies that `MSBuild.VSTest.slnx`'s production
-project list matches `MSBuild.slnx`'s so additions to one solution don't
-silently skip the other. It is wired into `azure-pipelines/cts-apply.yml` as
-a **non-blocking** PR-time step, and can also be run locally:
-`pwsh ./scripts/cts/Check-SlnxParity.ps1`.
-
-## Notes
-
-* Baseline + logs live at `<repo>/.cts/` (gitignored).
-* The `.VSTest.csproj` wrappers output to
-  `artifacts/bin/<MSBuildProjectName>/Debug/net11.0/` — distinct from the
-  default MTP variant.
-* Demos hardcode per-project demo files via `projects.json` →
-  `DemoFiles.{Broad,Narrow,Unrelated}`. Projects without `DemoFiles` skip
-  the narrow/broad/unrelated demos.
+Pipeline consolidation, build reuse and replacing full PR tests with CTS
+selection are separate decisions and are not part of this migration.

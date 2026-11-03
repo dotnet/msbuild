@@ -439,10 +439,14 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
-    public async Task FileExists_WithAbsolutePathVariable_NoDiagnostic()
+    [Theory]
+    [InlineData("File.Exists(path);", false)]
+    [InlineData("string file = path; File.Exists(file);", false)]
+    [InlineData("File.Exists(path.Value);", true)]
+    [InlineData("string file = path.Value; File.Exists(file);", true)]
+    public async Task FileExists_WithAbsolutePathConversion(string statement, bool expectDiagnostic)
     {
-        var diags = await GetDiagnosticsAsync("""
+        var diags = await GetDiagnosticsAsync($$"""
             using System.IO;
             using Microsoft.Build.Framework;
             [MSBuildMultiThreadableTask]
@@ -451,14 +455,14 @@ public class MultiThreadableTaskAnalyzerTests
                 public TaskEnvironment TaskEnvironment { get; set; }
                 public override bool Execute()
                 {
-                    AbsolutePath p = TaskEnvironment.GetAbsolutePath("foo.txt");
-                    File.Exists(p);
+                    AbsolutePath path = TaskEnvironment.GetAbsolutePath("foo.txt");
+                    {{statement}}
                     return true;
                 }
             }
             """);
 
-        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+        diags.Count(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldBe(expectDiagnostic ? 1 : 0);
     }
 
     [Fact]
@@ -1609,7 +1613,61 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+        diags.Length.ShouldBe(1);
+        diags[0].Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
+        diags[0].GetMessage().ShouldBe(
+            "'Path.GetTempFileName()' should use TaskEnvironment alternative: create a unique file under TaskEnvironment.GetTempPath() with Path.GetRandomFileName() and FileMode.CreateNew");
+    }
+
+    [Fact]
+    public async Task TaskEnvironmentTempFilePattern_NoDiagnostics()
+    {
+        var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
+            """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+
+                public override bool Execute()
+                {
+                    AbsolutePath filePath = CreateTempFile(TaskEnvironment);
+                    File.Delete(filePath);
+                    return true;
+                }
+
+                private static AbsolutePath CreateTempFile(TaskEnvironment taskEnvironment)
+                {
+                    const int maximumAttempts = 10;
+                    AbsolutePath tempPath = taskEnvironment.GetTempPath();
+
+                    for (int attempt = 1; ; attempt++)
+                    {
+                        AbsolutePath filePath = new(Path.GetRandomFileName(), tempPath);
+
+                        try
+                        {
+                            using FileStream stream = new(
+                                filePath,
+                                FileMode.CreateNew,
+                                FileAccess.Write,
+                                FileShare.None);
+
+                            return filePath;
+                        }
+                        catch (IOException) when (attempt < maximumAttempts && File.Exists(filePath))
+                        {
+                        }
+                    }
+                }
+            }
+            """,
+            new MultiThreadableTaskAnalyzer());
+
+        diagnostics.Where(diagnostic => diagnostic.Id.StartsWith("CS", System.StringComparison.Ordinal)).ShouldBeEmpty();
+        diagnostics.Where(diagnostic => diagnostic.Id.StartsWith("MSBuildTask", System.StringComparison.Ordinal)).ShouldBeEmpty();
     }
 
     [Theory]

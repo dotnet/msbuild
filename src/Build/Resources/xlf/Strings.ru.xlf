@@ -303,12 +303,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0303_MessageFmt">
         <source>The 'WriteLinesToFile' task in project {0} does not specify the 'Overwrite' parameter. Set it explicitly to 'true' to overwrite the file or 'false' to append to it.</source>
-        <target state="new">The 'WriteLinesToFile' task in project {0} does not specify the 'Overwrite' parameter. Set it explicitly to 'true' to overwrite the file or 'false' to append to it.</target>
+        <target state="translated">Задача "WriteLinesToFile" в проекте {0} не указывает параметр "Overwrite". Установите его явно в значение "true", чтобы перезаписать файл, или в "false", чтобы добавить к нему.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0303_Title">
         <source>The 'Overwrite' parameter should be specified when using the 'WriteLinesToFile' task.</source>
-        <target state="new">The 'Overwrite' parameter should be specified when using the 'WriteLinesToFile' task.</target>
+        <target state="translated">Параметр "Overwrite" должен быть указан при использовании задачи "WriteLinesToFile".</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildFinished">

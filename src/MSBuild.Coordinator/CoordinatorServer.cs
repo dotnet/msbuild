@@ -33,8 +33,8 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     private readonly ReaderWriterLockSlim _clientsLock = new();
     private readonly CancellationTokenSource _cts = new();
     private readonly ICoordinatorDebugOutput _output = output ?? DefaultDebugOutput.Instance;
-    private Timer? _heartbeatMonitor;
-    private Timer? _shutdownTimer;
+    private DrainableTimer? _heartbeatMonitor;
+    private DrainableTimer? _shutdownTimer;
     private int _activeConnections;
 
     private bool HasActiveConnections => Volatile.Read(ref _activeConnections) > 0;
@@ -61,7 +61,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         CancellationToken token = linked.Token;
 
         // Start heartbeat monitoring.
-        _heartbeatMonitor = new Timer(
+        _heartbeatMonitor = new DrainableTimer(
             CheckHeartbeats,
             state: null,
             dueTime: _heartbeatIntervalMs,
@@ -103,8 +103,8 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         finally
         {
             _output.WriteLine("CoordinatorServer: Accept loop exiting");
-            _heartbeatMonitor?.Dispose();
-            _shutdownTimer?.Dispose();
+            _heartbeatMonitor?.Stop();
+            _shutdownTimer?.Stop();
 
             // Wait for all remaining client tasks to complete before exiting.
             // This ensures logging (which may reference the test context) completes cleanly.
@@ -549,6 +549,11 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// <param name="state">Timer callback state (unused).</param>
     private void CheckHeartbeats(object? state)
     {
+        if (_cts.IsCancellationRequested)
+        {
+            return;
+        }
+
         DateTime threshold = DateTime.UtcNow - TimeSpan.FromMilliseconds(_settings.HeartbeatTimeoutMs);
 
         List<ConnectedClient> clientsToCheck;
@@ -560,6 +565,11 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
 
         foreach (ConnectedClient client in clientsToCheck)
         {
+            if (_cts.IsCancellationRequested)
+            {
+                return;
+            }
+
             if (client.Grant.LastHeartbeat >= threshold)
             {
                 continue;
@@ -605,10 +615,10 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// </summary>
     private void ResetShutdownTimer()
     {
-        var newTimer = new Timer(
+        var newTimer = new DrainableTimer(
             _ =>
             {
-                if (IsIdle)
+                if (!_cts.IsCancellationRequested && IsIdle)
                 {
                     _output.WriteLine("CoordinatorServer: Auto-shutdown (no active or waiting builds)");
                     _cts.Cancel();

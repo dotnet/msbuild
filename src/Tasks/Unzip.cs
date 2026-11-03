@@ -10,6 +10,7 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Shared.Globbing;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -186,9 +187,11 @@ namespace Microsoft.Build.Tasks
                     continue;
                 }
 
+                // CodeQL [SM02729] False positive: fullDestinationPath is canonicalized via TaskEnvironment.GetAbsolutePath().GetCanonicalForm() and verified with StartsWith(fullDestinationDirectoryPath) on the next line.
                 AbsolutePath fullDestinationPath = TaskEnvironment.GetAbsolutePath(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName)).GetCanonicalForm();
                 ErrorUtilities.VerifyThrowInvalidOperation(fullDestinationPath.Value.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", fullDestinationPath);
 
+                // CodeQL [SM02729] False positive: fullDestinationPath is verified above against ZipSlip path traversal before constructing FileInfo.
                 FileInfo destinationPath = new(fullDestinationPath);
 
                 // Zip archives can have directory entries listed explicitly.
@@ -304,12 +307,12 @@ namespace Microsoft.Build.Tasks
 
             if (_includePatterns.Length > 0)
             {
-                result = _includePatterns.All(pattern => !FileMatcher.IsMatch(FileMatcher.Normalize(zipArchiveEntry.FullName), pattern));
+                result = _includePatterns.All(pattern => !GlobPattern.MatchesName(FileMatcher.Normalize(zipArchiveEntry.FullName).AsSpan(), pattern));
             }
 
             if (_excludePatterns.Length > 0)
             {
-                result |= _excludePatterns.Any(pattern => FileMatcher.IsMatch(FileMatcher.Normalize(zipArchiveEntry.FullName), pattern));
+                result |= _excludePatterns.Any(pattern => GlobPattern.MatchesName(FileMatcher.Normalize(zipArchiveEntry.FullName).AsSpan(), pattern));
             }
 
             return result;

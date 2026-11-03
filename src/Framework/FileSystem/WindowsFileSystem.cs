@@ -74,6 +74,7 @@ namespace Microsoft.Build.Shared.FileSystem
 #if NETFRAMEWORK
             return Microsoft.IO.File.Exists(path);
 #else
+            // CodeQL [SM00414] False positive: MSBuild file system abstraction operates on trusted build/SDK paths.
             return File.Exists(path);
 #endif
         }
