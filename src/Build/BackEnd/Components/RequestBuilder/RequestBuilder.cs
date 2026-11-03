@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -305,7 +306,10 @@ namespace Microsoft.Build.BackEnd
                 if (!taskCleanedUp)
                 {
                     // This can happen when a task has locked us up.
-                    _projectLoggingContext.LogError(new BuildEventFileInfo(String.Empty), "FailedToReceiveTaskThreadStatus", BuildParameters.RequestBuilderShutdownTimeout);
+                    _projectLoggingContext.LogError(
+                        ElementLocation.Empty,
+                        "FailedToReceiveTaskThreadStatus",
+                        BuildParameters.RequestBuilderShutdownTimeout);
                     ErrorUtilities.ThrowInvalidOperation("UnableToCancel");
                 }
             }
@@ -831,7 +835,7 @@ namespace Microsoft.Build.BackEnd
                     string realMessage = TaskLoggingHelper.GetInnerExceptionMessageString(ex);
                     LoggingContext loggingContext = ((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext;
                     loggingContext.LogError(
-                        BuildEventFileInfo.Empty,
+                        ElementLocation.Empty,
                         "FatalErrorWhileLoggingWithInnerException",
                         realMessage);
 
@@ -845,7 +849,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else if (ex is not CriticalTaskException)
                 {
-                    (((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext).LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
+                    (((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext).LogError(ElementLocation.Empty, "UnhandledMSBuildError", ex.ToString());
                 }
 
                 if (ExceptionHandling.IsCriticalException(ex))
@@ -1207,7 +1211,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.Request.BuildEventContext);
             }
 
-
+            string tracedTargets = null;
             try
             {
                 // Determine the set of targets we need to build
@@ -1215,7 +1219,8 @@ namespace Microsoft.Build.BackEnd
                     .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
                 if (MSBuildEventSource.Log.IsEnabled())
                 {
-                    MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
+                    tracedTargets = string.Join(", ", allTargets);
+                    MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath, tracedTargets);
                 }
                 HandleProjectStarted(buildCheckManager);
 
@@ -1256,6 +1261,24 @@ namespace Microsoft.Build.BackEnd
                 BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
                     allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
+                if (!_cancellationTokenSource.IsCancellationRequested
+                    && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope scope
+                    && scope.BuildId == _componentHost.BuildParameters.BuildId)
+                {
+                    ElementLocation location = _requestEntry.RequestConfiguration.Project.ProjectFileLocation;
+                    string entries = scope.VerifyUnresolvedPathWrites(location, out bool recovered);
+                    if (recovered)
+                    {
+                        _projectLoggingContext.LogWarning(DiagnosticSubcategory.None, location,
+                            "MultiThreadedStrictModeSentinelMissing", scope.SentinelDirectory);
+                    }
+                    else if (entries is not null)
+                    {
+                        _projectLoggingContext.LogWarning(DiagnosticSubcategory.None, location,
+                            "MultiThreadedStrictModeUnresolvedPathWrite", entries, scope.SentinelDirectory);
+                    }
+                }
+
                 // Populate the evaluation ID from the configuration for sending to the central node.
                 result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
 
@@ -1265,16 +1288,15 @@ namespace Microsoft.Build.BackEnd
                     ? result
                     : CopyTargetResultsFromProxyTargetsToRealTargets(result);
 
-                if (MSBuildEventSource.Log.IsEnabled())
-                {
-                    MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath,
-                        string.Join(", ", allTargets));
-                }
-
                 return result;
             }
             finally
             {
+                if (tracedTargets is not null)
+                {
+                    MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, tracedTargets);
+                }
+
                 if (buildCheckManager is not null && _projectLoggingContext is not null)
                 {
                     buildCheckManager.EndProjectRequest(
@@ -1356,16 +1378,18 @@ namespace Microsoft.Build.BackEnd
 
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
-                bool wasExecuted =
+                bool hasMatchingResult =
                     unfilteredResult.ResultsByTarget.TryGetValue(projectTargetInstance.Key, out TargetResult targetResult) &&
                     // We need to match on location of target as well - as multiple targets with same name can be defined.
                     // E.g. _SourceLinkHasSingleProvider can be brought explicitly via nuget (Microsoft.SourceLink.GitHub) as well as sdk
                     projectTargetInstance.Value.Location.Equals(targetResult.TargetLocation);
 
-                // Get skip reason from TargetResult - it's set when targets are skipped for various reasons:
-                // - ConditionWasFalse: target's condition evaluated to false
-                // - PreviouslyBuiltSuccessfully/Unsuccessfully: target was already built in this session
+                // Get the local skip reason recorded when the target result was produced.
                 TargetSkipReason skipReason = targetResult?.SkipReason ?? TargetSkipReason.None;
+                bool wasExecuted =
+                    hasMatchingResult &&
+                    skipReason == TargetSkipReason.None &&
+                    targetResult.ResultCode != TargetResultCode.Skipped;
 
                 bool isFromNuget, isMetaprojTarget, isCustom;
 

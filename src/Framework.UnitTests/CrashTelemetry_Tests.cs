@@ -32,7 +32,6 @@ public class CrashTelemetry_Tests
 
         telemetry.ExceptionType.ShouldBe("System.InvalidOperationException");
         telemetry.InnerExceptionType.ShouldBe("System.ArgumentException");
-        telemetry.InnerExceptionMessage.ShouldBe("inner");
         telemetry.HResult.ShouldNotBeNull();
         telemetry.StackHash.ShouldNotBeNull();
         telemetry.StackTop.ShouldNotBeNull();
@@ -55,7 +54,6 @@ public class CrashTelemetry_Tests
         telemetry.ExceptionType.ShouldBe("System.IO.FileNotFoundException");
         telemetry.InnerExceptionType.ShouldBeNull();
         telemetry.InnerExceptionStackTrace.ShouldBeNull();
-        telemetry.InnerExceptionMessage.ShouldBeNull();
         telemetry.LoggerEventType.ShouldBeNull();
     }
 
@@ -145,7 +143,6 @@ public class CrashTelemetry_Tests
         props.ShouldContainKey(nameof(CrashTelemetry.IsUnhandled));
         props.ShouldNotContainKey(nameof(CrashTelemetry.InnerExceptionType));
         props.ShouldNotContainKey(nameof(CrashTelemetry.InnerExceptionStackTrace));
-        props.ShouldNotContainKey(nameof(CrashTelemetry.InnerExceptionMessage));
         props.ShouldNotContainKey(nameof(CrashTelemetry.LoggerEventType));
         props.ShouldNotContainKey(nameof(CrashTelemetry.StackHash));
         props.ShouldNotContainKey(nameof(CrashTelemetry.BuildEngineHost));
@@ -323,7 +320,6 @@ public class CrashTelemetry_Tests
             CrashOriginNamespace = "Microsoft.Build.BackEnd",
             InnermostExceptionType = "System.IO.IOException",
             InnerExceptionStackTrace = "   at SomeLogger.HandleEvent()",
-            InnerExceptionMessage = "Cannot access a disposed object.",
             LoggerEventType = "BuildFinishedEventArgs",
         };
 
@@ -332,7 +328,6 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.CrashOriginNamespace)].ShouldBe("Microsoft.Build.BackEnd");
         props[nameof(CrashTelemetry.InnermostExceptionType)].ShouldBe("System.IO.IOException");
         props[nameof(CrashTelemetry.InnerExceptionStackTrace)].ShouldBe("   at SomeLogger.HandleEvent()");
-        props[nameof(CrashTelemetry.InnerExceptionMessage)].ShouldBe("Cannot access a disposed object.");
         props[nameof(CrashTelemetry.LoggerEventType)].ShouldBe("BuildFinishedEventArgs");
     }
 
@@ -347,7 +342,6 @@ public class CrashTelemetry_Tests
             CrashOriginNamespace = "Microsoft.VisualStudio.RemoteControl",
             InnermostExceptionType = "System.OutOfMemoryException",
             InnerExceptionStackTrace = "   at SomeComponent.DoWork()",
-            InnerExceptionMessage = "Insufficient memory.",
             LoggerEventType = "BuildMessageEventArgs",
         };
 
@@ -356,7 +350,6 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.CrashOriginNamespace)].ShouldBe("Microsoft.VisualStudio.RemoteControl");
         props[nameof(CrashTelemetry.InnermostExceptionType)].ShouldBe("System.OutOfMemoryException");
         props[nameof(CrashTelemetry.InnerExceptionStackTrace)].ShouldBe("   at SomeComponent.DoWork()");
-        props[nameof(CrashTelemetry.InnerExceptionMessage)].ShouldBe("Insufficient memory.");
         props[nameof(CrashTelemetry.LoggerEventType)].ShouldBe("BuildMessageEventArgs");
     }
 
@@ -463,37 +456,19 @@ public class CrashTelemetry_Tests
     }
 
     [Fact]
-    public void PopulateFromException_SetsExceptionMessage()
+    public void ExceptionMessagesAreNotSent()
     {
+        var outer = new InvalidOperationException("outer secret", new ArgumentException("inner secret"));
         CrashTelemetry telemetry = new();
 
-        try
-        {
-            throw new InvalidOperationException("something went wrong");
-        }
-        catch (Exception ex)
-        {
-            telemetry.PopulateFromException(ex);
-        }
+        telemetry.PopulateFromException(outer);
 
-        telemetry.ExceptionMessage.ShouldBe("something went wrong");
-    }
+        telemetry.GetProperties().Values.ShouldAllBe(value => !value.Contains("secret"));
+        telemetry.GetActivityProperties().Values.ShouldAllBe(value => !value.ToString()!.Contains("secret"));
 
-    [Fact]
-    public void PopulateFromException_StripsInternalErrorPrefix()
-    {
-        CrashTelemetry telemetry = new();
-
-        try
-        {
-            throw new Exception("MSB0001: Internal MSBuild Error: All submissions not yet complete.");
-        }
-        catch (Exception ex)
-        {
-            telemetry.PopulateFromException(ex);
-        }
-
-        telemetry.ExceptionMessage.ShouldBe("All submissions not yet complete.");
+        var sanitized = new CrashTelemetryRecorder.SanitizedException(outer);
+        sanitized.Message.ShouldBe(typeof(InvalidOperationException).FullName);
+        sanitized.InnerException!.Message.ShouldBe(typeof(ArgumentException).FullName);
     }
 
     [Fact]
@@ -573,12 +548,10 @@ public class CrashTelemetry_Tests
             IsUnhandled = true,
             StackTop = "at Microsoft.Build.Shared.ErrorUtilities.ThrowInternalError(String message, Object[] args)",
             StackCaller = "at Microsoft.Build.BackEnd.RequestBuilder.BuildProject(String projectFile)",
-            ExceptionMessage = "All submissions not yet complete.",
         };
 
         IDictionary<string, string> props = telemetry.GetProperties();
         props[nameof(CrashTelemetry.StackCaller)].ShouldBe("at Microsoft.Build.BackEnd.RequestBuilder.BuildProject(String projectFile)");
-        props[nameof(CrashTelemetry.ExceptionMessage)].ShouldBe("All submissions not yet complete.");
     }
 
     [Fact]
@@ -690,6 +663,9 @@ public class CrashTelemetry_Tests
     [Fact]
     public void EndBuildHang_GetProperties_IncludesHangDiagnostics()
     {
+        string loggerTypeNames = CrashTelemetry.FormatRegisteredLoggerTypeNames(
+            ["Microsoft.Build.Logging.ConsoleLogger", "Microsoft.Build.Logging.BinaryLogger"]);
+
         CrashTelemetry telemetry = new()
         {
             ExitType = CrashExitType.EndBuildHang,
@@ -705,7 +681,7 @@ public class CrashTelemetry_Tests
             IsCancellationRequested = false,
             WorkQueueDepth = 5,
             SubmissionDetails = "1:True:True:False:False;2:True:False:False:False;3:False:False:False:False",
-            RegisteredLoggerTypeNames = "Microsoft.Build.Logging.ConsoleLogger;Microsoft.Build.Logging.BinaryLogger",
+            RegisteredLoggerTypeNames = loggerTypeNames,
         };
 
         IDictionary<string, string> props = telemetry.GetProperties();
@@ -722,7 +698,7 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.IsCancellationRequested)].ShouldBe("False");
         props[nameof(CrashTelemetry.WorkQueueDepth)].ShouldBe("5");
         props[nameof(CrashTelemetry.SubmissionDetails)].ShouldBe("1:True:True:False:False;2:True:False:False:False;3:False:False:False:False");
-        props[nameof(CrashTelemetry.RegisteredLoggerTypeNames)].ShouldBe("Microsoft.Build.Logging.ConsoleLogger;Microsoft.Build.Logging.BinaryLogger");
+        props[nameof(CrashTelemetry.RegisteredLoggerTypeNames)].ShouldBe(loggerTypeNames);
         props.ShouldNotContainKey(nameof(CrashTelemetry.ActiveNodeIds));
         props.ShouldNotContainKey(nameof(CrashTelemetry.ActiveNodeDetails));
     }
@@ -730,6 +706,15 @@ public class CrashTelemetry_Tests
     [Fact]
     public void EndBuildHang_GetActivityProperties_IncludesHangDiagnostics()
     {
+        string loggerTypeNames = CrashTelemetry.FormatRegisteredLoggerTypeNames(["Microsoft.Build.Logging.ConsoleLogger"]);
+        string activeNodeDetails = string.Join(
+            ";",
+            CrashTelemetry.FormatActiveNodeDetail(2, 10, "MyProject.csproj"),
+            "3:idle",
+            CrashTelemetry.FormatActiveNodeDetail(5, 12, "OtherProject.csproj"),
+            "7:idle",
+            "9:error");
+
         CrashTelemetry telemetry = new()
         {
             ExitType = CrashExitType.EndBuildHang,
@@ -745,10 +730,10 @@ public class CrashTelemetry_Tests
             IsCancellationRequested = false,
             WorkQueueDepth = 0,
             SubmissionDetails = null,
-            RegisteredLoggerTypeNames = "Microsoft.Build.Logging.ConsoleLogger",
+            RegisteredLoggerTypeNames = loggerTypeNames,
             ActiveNodeIds = "2,3,5,7,9",
             EnableNodeReuse = true,
-            ActiveNodeDetails = "2:10:MyProject.csproj;3:idle;5:12:OtherProject.csproj;7:idle;9:error",
+            ActiveNodeDetails = activeNodeDetails,
         };
 
         Dictionary<string, object> props = telemetry.GetActivityProperties();
@@ -764,10 +749,10 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.IsCancellationRequested)].ShouldBe(false);
         props[nameof(CrashTelemetry.WorkQueueDepth)].ShouldBe(0);
         props.ShouldNotContainKey(nameof(CrashTelemetry.SubmissionDetails));
-        props[nameof(CrashTelemetry.RegisteredLoggerTypeNames)].ShouldBe("Microsoft.Build.Logging.ConsoleLogger");
+        props[nameof(CrashTelemetry.RegisteredLoggerTypeNames)].ShouldBe(loggerTypeNames);
         props[nameof(CrashTelemetry.ActiveNodeIds)].ShouldBe("2,3,5,7,9");
         props[nameof(CrashTelemetry.EnableNodeReuse)].ShouldBe(true);
-        props[nameof(CrashTelemetry.ActiveNodeDetails)].ShouldBe("2:10:MyProject.csproj;3:idle;5:12:OtherProject.csproj;7:idle;9:error");
+        props[nameof(CrashTelemetry.ActiveNodeDetails)].ShouldBe(activeNodeDetails);
     }
 
     [Fact]
@@ -807,6 +792,55 @@ public class CrashTelemetry_Tests
         props.ShouldNotContainKey("ShuttingDown");
         props.ShouldNotContainKey("SchedulerHitNoLoggingCompleted");
         props.ShouldNotContainKey("SchedulerNoLoggingDetails");
+    }
+
+    [Fact]
+    public void FormatActiveNodeDetail_ReportsOnlyTheHashOfTheProjectFileName()
+    {
+        string projectFile = Path.Combine(Path.GetTempPath(), "someone", "src", "MyProject.csproj");
+
+        string detail = CrashTelemetry.FormatActiveNodeDetail(2, 10, projectFile);
+
+        detail.ShouldBe($"2:10:{TelemetryDataUtils.GetHashed("MyProject.csproj")}");
+        detail.ShouldNotContain("MyProject");
+        detail.ShouldNotContain("someone");
+    }
+
+    [Fact]
+    public void FormatActiveNodeDetail_HashesTheSameFileNameInDifferentDirectoriesAlike()
+    {
+        string first = CrashTelemetry.FormatActiveNodeDetail(1, 1, Path.Combine(Path.GetTempPath(), "first", "MyProject.csproj"));
+        string second = CrashTelemetry.FormatActiveNodeDetail(1, 1, Path.Combine(Path.GetTempPath(), "second", "MyProject.csproj"));
+
+        first.ShouldBe(second);
+    }
+
+    [Fact]
+    public void FormatActiveNodeDetail_ReportsAQuestionMarkWhenTheProjectFileIsNotKnown()
+    {
+        CrashTelemetry.FormatActiveNodeDetail(3, 7, projectFile: null).ShouldBe("3:7:?");
+    }
+
+    [Fact]
+    public void FormatRegisteredLoggerTypeNames_ReportsTheNamesOfMicrosoftLoggersAsIsAndHashesTheOthers()
+    {
+        string formatted = CrashTelemetry.FormatRegisteredLoggerTypeNames(
+            [
+                "Microsoft.Build.Logging.ConsoleLogger",
+                "Contoso.Billing.CustomerLogger",
+                "Microsoft.Build.BackEnd.Logging.CentralForwardingLogger",
+            ]);
+
+        formatted.ShouldBe(
+            $"Microsoft.Build.Logging.ConsoleLogger;{TelemetryDataUtils.GetHashed("Contoso.Billing.CustomerLogger")};Microsoft.Build.BackEnd.Logging.CentralForwardingLogger");
+        formatted.ShouldNotContain("Contoso");
+        formatted.ShouldNotContain("Billing");
+    }
+
+    [Fact]
+    public void FormatRegisteredLoggerTypeNames_ReportsNothingWhenNoLoggerIsRegistered()
+    {
+        CrashTelemetry.FormatRegisteredLoggerTypeNames([]).ShouldBeEmpty();
     }
 
     /// <summary>
@@ -888,8 +922,6 @@ public class CrashTelemetry_Tests
 
         telemetry.InnerExceptionStackTrace.ShouldNotBeNull();
         telemetry.InnerExceptionStackTrace!.ShouldContain(nameof(PopulateFromException_CapturesInnerExceptionStack).Substring(0, 20));
-        telemetry.InnerExceptionMessage.ShouldNotBeNull();
-        telemetry.InnerExceptionMessage!.ShouldContain("StreamWriter");
     }
 
     [Fact]
@@ -906,20 +938,6 @@ public class CrashTelemetry_Tests
         telemetry.InnerExceptionStackTrace!.ShouldNotContain("useralias");
         telemetry.InnerExceptionStackTrace.ShouldContain("<redacted>");
         telemetry.InnerExceptionStackTrace.ShouldContain("SomeLogger.HandleEvent");
-    }
-
-    [Fact]
-    public void PopulateFromException_InnerExceptionMessage_SanitizesFilePaths()
-    {
-        var inner = new Exception("Cannot access C:\\Users\\useralias\\file.txt");
-        var outer = new InvalidOperationException("wrapper", inner);
-
-        CrashTelemetry telemetry = new();
-        telemetry.PopulateFromException(outer);
-
-        telemetry.InnerExceptionMessage.ShouldNotBeNull();
-        telemetry.InnerExceptionMessage!.ShouldNotContain("useralias");
-        telemetry.InnerExceptionMessage.ShouldContain("<path>");
     }
 
     [Fact]

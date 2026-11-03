@@ -105,6 +105,8 @@ ImmutableDictionary<string, int> lookup = ...;
 
 ## Building
 
+Most development can use `dotnet build`. For the most complete possible build, use `MSBuild.exe` from Visual Studio 2026. See the [Windows build prerequisites](README.md#building-msbuild-with-visual-studio-2026-on-windows).
+
 NEVER pipe MSBuild output to a file. If you want a list of errors, add `-flp:"v=q;LogFile=ErrorsAndWarnings.log"` to the arguments.
 
 When considering a subset of build errors, always look at the BEGINNING of the set, not the end.

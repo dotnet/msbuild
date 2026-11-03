@@ -1,6 +1,6 @@
 ---
 name: optimizing-msbuild-performance
-description: 'Guides performance optimization for MSBuild engine code. Consult when working on hot paths in evaluation or execution, reducing allocations, choosing collection types, handling strings efficiently, modifying Expander.cs or Evaluator.cs, using Span<T>/stackalloc, caching values, or profiling build performance. Also applies when reviewing PRs for performance regression.'
+description: 'Guides performance optimization for MSBuild engine code. Consult when working on hot paths in evaluation or execution, reducing allocations, choosing collection types, handling strings efficiently, modifying Expander.cs or Evaluator.cs, using Span-based APIs and stackalloc, caching values, or profiling build performance. Also applies when reviewing PRs for performance regression.'
 argument-hint: 'Describe the performance-sensitive code area or optimization goal.'
 ---
 

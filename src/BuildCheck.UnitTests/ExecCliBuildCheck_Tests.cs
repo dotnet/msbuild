@@ -121,7 +121,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             return new TaskInvocationCheckData(
                 projectFile,
                 null,
-                Construction.ElementLocation.EmptyLocation,
+                Construction.ElementLocation.Empty,
                 taskName,
                 projectFile,
                 parameters);

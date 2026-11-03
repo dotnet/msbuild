@@ -94,7 +94,7 @@ internal class TargetFrameworkUnexpectedCheck : Check
                 context.ReportResult(BuildCheckResult.Create(
                     SupportedRule,
                     // Populating precise location tracked via https://github.com/dotnet/msbuild/issues/10383
-                    ElementLocation.EmptyLocation,
+                    ElementLocation.Empty,
                     Path.GetFileName(context.Data.ProjectFilePath),
                     _tfm));
 

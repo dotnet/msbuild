@@ -173,6 +173,8 @@ namespace Microsoft.Build.BackEnd
             get { return _status; }
         }
 
+        internal byte NegotiatedPacketVersion => _negotiatedWriteVersion;
+
         #endregion
 
         #region Properties
@@ -656,8 +658,8 @@ namespace Microsoft.Build.BackEnd
         }
 #endif
 
-        private void RunReadLoop(
-            NamedPipeServerStream localPipe,
+        internal void RunReadLoop(
+            Stream localPipe,
             ConcurrentQueue<INodePacket> localPacketQueue,
             AutoResetEvent localPacketAvailable,
             AutoResetEvent localTerminatePacketPump)
@@ -674,10 +676,23 @@ namespace Microsoft.Build.BackEnd
             // Use 64 KB read-ahead under the change wave; retain the legacy 1 KB size otherwise.
             BufferedReadStream localReadPipe = preBufferPacketBody
                 ? new BufferedReadStream(localPipe, 64 * 1024)
-                : new BufferedReadStream(localPipe);
+                : new BufferedReadStream(localPipe, 1024);
 
             byte[] headerByte = new byte[5];
             ITranslator writeTranslator = null;
+            byte[] logPacketBatch = null;
+            int logPacketBatchLength = 0;
+            int logPacketBatchSize = Traits.Instance.LogPacketBatchSize;
+
+            void FlushLogPacketBatch()
+            {
+                if (logPacketBatchLength != 0)
+                {
+                    localPipe.Write(logPacketBatch, 0, logPacketBatchLength);
+                    logPacketBatchLength = 0;
+                }
+            }
+
 #if NET451_OR_GREATER
             Task<int> readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
 #elif NETCOREAPP
@@ -720,10 +735,10 @@ namespace Microsoft.Build.BackEnd
                                 }
                                 catch (Exception e)
                                 {
-                                    // Lost communications.  Abort (but allow node reuse)
+                                    // A failed read terminates the connection, just like unexpected EOF.
                                     CommunicationsUtilities.Trace($"Exception reading from server.  {e}");
                                     DebugUtils.DumpExceptionToFile(e);
-                                    ChangeLinkStatus(LinkStatus.Inactive);
+                                    ChangeLinkStatus(LinkStatus.Failed);
                                     exitLoop = true;
                                     break;
                                 }
@@ -825,6 +840,8 @@ namespace Microsoft.Build.BackEnd
                                     if (hasExtendedHeader)
                                     {
                                         parentVersion = NodePacketTypeExtensions.ReadVersion(deserializationStream);
+                                        // A pooled TaskHost may reconnect to a different parent than its launcher.
+                                        _negotiatedWriteVersion = NodePacketTypeExtensions.GetNegotiatedPacketVersion(parentVersion);
                                     }
 
                                     ITranslator readTranslator = BinaryTranslator.GetReadTranslator(deserializationStream, _sharedReadBuffer);
@@ -876,6 +893,13 @@ namespace Microsoft.Build.BackEnd
                                 INodePacket packet;
                                 while (localPacketQueue.TryDequeue(out packet))
                                 {
+                                    bool isLogPacket = packet.Type == NodePacketType.LogMessage;
+                                    if (!isLogPacket)
+                                    {
+                                        // Deliver preceding logs before serializing or sending control traffic.
+                                        FlushLogPacketBatch();
+                                    }
+
                                     var packetStream = _packetStream;
                                     packetStream.SetLength(0);
 
@@ -891,7 +915,24 @@ namespace Microsoft.Build.BackEnd
                                     _binaryWriter.Write(0);
 
                                     // Reset the position in the write buffer.
-                                    packet.Translate(writeTranslator);
+                                    try
+                                    {
+                                        packet.Translate(writeTranslator);
+                                    }
+                                    catch (Exception serializationException)
+                                    {
+                                        // Earlier packets would already have been sent without batching.
+                                        try
+                                        {
+                                            FlushLogPacketBatch();
+                                        }
+                                        catch (Exception writeException)
+                                        {
+                                            throw new AggregateException(serializationException, writeException);
+                                        }
+
+                                        throw;
+                                    }
 
                                     int packetStreamLength = (int)packetStream.Position;
 
@@ -899,8 +940,32 @@ namespace Microsoft.Build.BackEnd
                                     packetStream.Position = 1;
                                     _binaryWriter.Write(packetStreamLength - 5);
 
-                                    localPipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+                                    if (!isLogPacket || packetStreamLength >= logPacketBatchSize)
+                                    {
+                                        FlushLogPacketBatch();
+                                        localPipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+                                    }
+                                    else
+                                    {
+                                        if (packetStreamLength > logPacketBatchSize - logPacketBatchLength)
+                                        {
+                                            FlushLogPacketBatch();
+                                        }
+
+                                        // Keep serialization at offset zero; translators may depend on packet-relative positions.
+                                        logPacketBatch ??= new byte[logPacketBatchSize];
+                                        Buffer.BlockCopy(packetStream.GetBuffer(), 0, logPacketBatch, logPacketBatchLength, packetStreamLength);
+                                        logPacketBatchLength += packetStreamLength;
+
+                                        if (logPacketBatchLength == logPacketBatchSize)
+                                        {
+                                            FlushLogPacketBatch();
+                                        }
+                                    }
                                 }
+
+                                // Never retain a batch across a wait, including the termination path.
+                                FlushLogPacketBatch();
                             }
                             catch (Exception e)
                             {

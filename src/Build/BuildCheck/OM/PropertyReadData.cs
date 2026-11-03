@@ -25,7 +25,7 @@ internal class PropertyReadData(
         PropertyReadInfo propertyReadInfo)
         : this(projectFilePath,
             projectConfigurationId,
-            propertyReadInfo.PropertyName.Substring(propertyReadInfo.StartIndex, propertyReadInfo.EndIndex - propertyReadInfo.StartIndex + 1),
+            propertyReadInfo.PropertyName.Substring(propertyReadInfo.StartIndex, propertyReadInfo.Length),
             propertyReadInfo.ElementLocation,
             propertyReadInfo.IsUninitialized,
             propertyReadInfo.PropertyReadContext)

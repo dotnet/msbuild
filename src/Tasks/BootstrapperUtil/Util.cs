@@ -116,7 +116,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         // MT-safe overload: falls back to TaskEnvironment.ProjectDirectory instead of the process CWD.
         internal static string GetDefaultPath(string visualStudioVersion, TaskEnvironment taskEnvironment)
         {
-            string projectDirectory = taskEnvironment.ProjectDirectory.Value;
+            string projectDirectory = taskEnvironment.ProjectDirectory;
             string normalized = String.IsNullOrEmpty(visualStudioVersion)
                 ? String.Empty
                 : NormalizeVisualStudioVersion(visualStudioVersion);

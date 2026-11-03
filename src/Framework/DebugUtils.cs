@@ -138,5 +138,10 @@ namespace Microsoft.Build.Framework
         /// based on whether the code is running in the main MSBuild process or a child TaskHost process.
         /// </returns>
         public static bool IsInTaskHostNode() => ProcessNodeMode.Value == NodeMode.OutOfProcTaskHostNode;
+
+        /// <summary>
+        /// Returns the <see cref="NodeMode"/> this process was launched with, or null for the entry process.
+        /// </summary>
+        public static NodeMode? GetProcessNodeMode() => ProcessNodeMode.Value;
     }
 }

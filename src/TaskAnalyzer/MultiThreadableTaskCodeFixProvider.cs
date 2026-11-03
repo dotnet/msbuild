@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Immutable;
-using System.Composition;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -23,8 +22,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// - MSBuildTask0002: Replaces banned APIs with TaskEnvironment equivalents
     /// - MSBuildTask0003: Wraps path arguments with TaskEnvironment.GetAbsolutePath()
     /// </summary>
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MultiThreadableTaskCodeFixProvider))]
-    [Shared]
     public sealed class MultiThreadableTaskCodeFixProvider : CodeFixProvider
     {
         public override ImmutableArray<string> FixableDiagnosticIds =>

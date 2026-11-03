@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
                 // directory rather than the process CWD (which is no longer per-project under MT).
                 string fullRawFileName = rawFileNameCandidate.Length == 0
                     ? rawFileNameCandidate
-                    : taskEnvironment.GetAbsolutePath(rawFileNameCandidate).Value;
+                    : taskEnvironment.GetAbsolutePath(rawFileNameCandidate);
 
                 if (isImmutableFrameworkReference || fileExists(fullRawFileName))
                 {

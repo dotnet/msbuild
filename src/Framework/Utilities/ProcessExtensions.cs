@@ -119,9 +119,15 @@ namespace Microsoft.Build.Shared
                     commandLine = null;
                     return true;
                 }
-                else if (NativeMethods.IsOSX || NativeMethods.IsBSD)
+                else if (OperatingSystem.IsMacOS() || OperatingSystem.IsFreeBSD())
                 {
                     commandLine = BSD.GetCommandLine(process.Id);
+                    return true;
+                }
+                // TODO: Use OperatingSystem.IsOpenBSD() once MSBuild targets net12.0 (https://github.com/dotnet/runtime/pull/133441)
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("OPENBSD")))
+                {
+                    commandLine = BSD.GetCommandLineOpenBSD(process.Id);
                     return true;
                 }
                 else if (NativeMethods.IsLinux)
@@ -131,7 +137,7 @@ namespace Microsoft.Build.Shared
                 }
                 else
                 {
-                    // Unsupported OS - return false to fall back to prior behavior
+                    // Unsupported OS - return a null command line to fall back to prior behavior
                     commandLine = null;
                     return true;
                 }
@@ -501,8 +507,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// macOS/BSD-specific P/Invoke bindings and command line retrieval via sysctl KERN_PROCARGS2.
         /// </summary>
-        [SupportedOSPlatform("macos")]
-        [SupportedOSPlatform("freebsd")]
         private static partial class BSD
         {
             [LibraryImport("libc", SetLastError = true)]
@@ -522,15 +526,23 @@ namespace Microsoft.Build.Shared
 
             private const int CTL_KERN = 1;
             private const int KERN_PROCARGS2 = 49;
+            private const int KERN_PROC_FREEBSD = 14;
+            private const int KERN_PROC_ARGS_FREEBSD = 7;
+            private const int KERN_PROC_ARGS_OPENBSD = 55;
+            private const int KERN_PROC_ARGV_OPENBSD = 1;
 
             /// <summary>
-            /// Uses sysctl with KERN_PROCARGS2 to read the process arguments,
+            /// Uses sysctl with KERN_PROCARGS2 (macOS) or KERN_PROC_ARGS (FreeBSD) to read the process arguments,
             /// then parses the null-separated buffer using span-based slicing with ArrayPool for efficient memory management.
             /// Related: https://github.com/dotnet/runtime/issues/101837
             /// </summary>
+            [SupportedOSPlatform("macos")]
+            [SupportedOSPlatform("freebsd")]
             internal static string? GetCommandLine(int processId)
             {
-                ReadOnlySpan<int> mib = [CTL_KERN, KERN_PROCARGS2, processId];
+                ReadOnlySpan<int> mib = OperatingSystem.IsFreeBSD()
+                    ? [CTL_KERN, KERN_PROC_FREEBSD, KERN_PROC_ARGS_FREEBSD, processId]
+                    : [CTL_KERN, KERN_PROCARGS2, processId];
                 nuint size = 0;
 
                 // Get the required buffer size
@@ -554,6 +566,12 @@ namespace Microsoft.Build.Shared
                 //   argv[0] .. argv[argc-1] (each null-terminated)
                 //   environment variables (not needed)
                 ReadOnlySpan<byte> data = buffer.AsSpan().Slice(0, (int)size);
+
+                // FreeBSD returns just argv[0] .. argv[argc-1]
+                if (OperatingSystem.IsFreeBSD())
+                {
+                    return ParseNullSeparatedArguments(data);
+                }
 
                 if (data.Length < sizeof(int))
                 {
@@ -584,6 +602,39 @@ namespace Microsoft.Build.Shared
                 }
 
                 return ParseNullSeparatedArguments(data, argc);
+            }
+
+            /// <summary>
+            /// Uses sysctl KERN_PROC_ARGS/KERN_PROC_ARGV, which returns a null-terminated argv array
+            /// of absolute pointers into the output buffer, followed by the strings themselves.
+            /// </summary>
+            internal static unsafe string? GetCommandLineOpenBSD(int processId)
+            {
+                ReadOnlySpan<int> mib = [CTL_KERN, KERN_PROC_ARGS_OPENBSD, processId, KERN_PROC_ARGV_OPENBSD];
+                nuint size = 0;
+
+                // Returns ARG_MAX rather than the actual size
+                if (Sysctl(mib, Span<byte>.Empty, ref size) != 0 || size == 0)
+                {
+                    return null;
+                }
+
+                using BufferScope<byte> buffer = new((int)size);
+                Span<byte> span = buffer.AsSpan().Slice(0, (int)size);
+
+                // Must stay pinned until argv[0] is converted to an offset
+                fixed (byte* bufferStart = span)
+                {
+                    if (Sysctl(mib, span, ref size) != 0 || size < (nuint)sizeof(nint))
+                    {
+                        return null;
+                    }
+
+                    nint offset = MemoryMarshal.Read<nint>(span) - (nint)bufferStart;
+                    return offset >= sizeof(nint) && offset < (nint)size
+                        ? ParseNullSeparatedArguments(span.Slice((int)offset, (int)size - (int)offset))
+                        : null;
+                }
             }
         }
 #endif

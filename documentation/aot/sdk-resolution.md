@@ -9,7 +9,7 @@ This document has two parts:
    `<Project Sdk="Microsoft.NET.Sdk">` and a project with no `Sdk` at all).
 2. **A plan** to stop the SDK-resolution path from surfacing `[RequiresUnreferencedCode]`
    all the way up to the `Project` constructors, and instead **fail observably** (via
-   `ProjectFileErrorUtilities.ThrowInvalidProjectFile`) when an SDK actually needs a
+   `ProjectErrorUtilities.ThrowInvalidProject`) when an SDK actually needs a
    dynamically loaded resolver.
 
 See the [folder README](README.md) for the full map; this most directly complements the mechanics
@@ -60,7 +60,7 @@ On first use it builds a manifest registry via `RegisterResolversManifests` ->
     </SdkResolver>
     ```
   * `Foo\Foo.dll` - the resolver assembly directly (no pattern), if there is no manifest.
-  * If **neither** exists -> `ProjectFileErrorUtilities.ThrowInvalidProjectFile("SdkResolverNoDllOrManifest")`.
+  * If **neither** exists -> `ProjectErrorUtilities.ThrowInvalidProject("SdkResolverNoDllOrManifest")`.
 * Manifest parsing (`SdkResolverManifest.Load`) reads the XML and, if present, compiles
   `ResolvableSdkPattern` into a `Regex` (with a 500 ms match timeout). **This step is
   reflection-free** - it only reads files and builds a registry; no resolver assembly is
@@ -193,7 +193,7 @@ resolution running up into the `Project` constructors. Instead:
   under Native AOT.
 * **Dynamically loaded resolvers fail observably.** When an SDK can only be resolved by a
   plugin resolver that must be loaded by reflection (NuGet, workload, custom), the engine
-  raises a clean, reported evaluation error via `ProjectFileErrorUtilities.ThrowInvalidProjectFile`
+  raises a clean, reported evaluation error via `ProjectErrorUtilities.ThrowInvalidProject`
   tied to the `<Project Sdk=...>` location - instead of attempting `Assembly.LoadFrom` (which
   cannot work under AOT) and instead of carrying RUC up to evaluation.
 
@@ -262,8 +262,8 @@ private List<SdkResolver> GetResolvers(IReadOnlyList<SdkResolverManifest> resolv
                 {
                     // Trimmed / Native AOT host: we cannot load a plugin SDK resolver by reflection.
                     // Fail observably so the caller (e.g. the AOT dotnet CLI) can fall back to a JIT MSBuild.
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
-                        new BuildEventFileInfo(sdkReferenceLocation),
+                    ProjectErrorUtilities.ThrowInvalidProject(
+                        sdkReferenceLocation,
                         "SdkResolverDynamicLoadingNotSupported",
                         sdk.Name,
                         resolverManifest.DisplayName);
@@ -287,7 +287,7 @@ Why this placement is correct:
 * If control reaches `GetResolvers`, the default resolver already failed, so the SDK
   genuinely needs a plugin - and every manifest-based resolver requires loading its DLL.
   Throwing is the right, detectable outcome.
-* The throw uses `ProjectFileErrorUtilities.ThrowInvalidProjectFile` with the `<Project Sdk=...>`
+* The throw uses `ProjectErrorUtilities.ThrowInvalidProject` with the `<Project Sdk=...>`
   location, so the developer gets a precise error and an AOT host can detect it.
 
 ### 2.4 Step 3 - remove the now-unnecessary RUC up the chain

@@ -7,6 +7,7 @@ using System.Globalization;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
@@ -262,23 +263,6 @@ internal partial class Expander<P, I>
     }
 
     /// <summary>
-    /// Used only for unit tests. Expands the property expression (including any metadata expressions) and returns
-    /// the result typed (i.e. not converted into a string if the result is a function return).
-    /// </summary>
-    internal object ExpandPropertiesLeaveTypedAndEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
-    {
-        if (expression.Length == 0)
-        {
-            return String.Empty;
-        }
-
-        Assumed.NotNull(elementLocation);
-
-        string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
-        return PropertyExpander.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
-    }
-
-    /// <summary>
     /// Expands embedded item metadata, properties, and embedded item lists (in that order) as specified in the provided options,
     /// then splits on semi-colons into a list of strings.
     /// Use this form when the result is going to be processed further, for example by matching against the file system,
@@ -448,18 +432,36 @@ internal partial class Expander<P, I>
     }
 
     /// <summary>
-    /// Returns true if the supplied string contains a valid property name.
+    ///  Determines whether a string is a valid MSBuild property name.
     /// </summary>
+    /// <param name="propertyName">The property name to validate.</param>
+    /// <returns>
+    ///  <see langword="true"/> if <paramref name="propertyName"/> is valid; otherwise,
+    ///  <see langword="false"/>.
+    /// </returns>
     private static bool IsValidPropertyName(string propertyName)
+        => IsValidPropertyName(propertyName, 0, propertyName.Length);
+
+    /// <summary>
+    ///  Determines whether a segment of a string is a valid MSBuild property name.
+    /// </summary>
+    /// <param name="propertyName">The string containing the property name.</param>
+    /// <param name="startIndex">The zero-based start index of the property name.</param>
+    /// <param name="length">The length of the property name.</param>
+    /// <returns>
+    ///  <see langword="true"/> if the specified segment is valid; otherwise,
+    ///  <see langword="false"/>.
+    /// </returns>
+    private static bool IsValidPropertyName(string propertyName, int startIndex, int length)
     {
-        if (propertyName.Length == 0 || !XmlUtilities.IsValidInitialElementNameCharacter(propertyName[0]))
+        if (length == 0 || !XmlUtilities.IsValidInitialElementNameCharacter(propertyName[startIndex]))
         {
             return false;
         }
 
-        for (int n = 1; n < propertyName.Length; n++)
+        for (int offset = 1; offset < length; offset++)
         {
-            if (!XmlUtilities.IsValidSubsequentElementNameCharacter(propertyName[n]))
+            if (!XmlUtilities.IsValidSubsequentElementNameCharacter(propertyName[startIndex + offset]))
             {
                 return false;
             }
