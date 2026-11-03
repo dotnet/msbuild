@@ -531,9 +531,7 @@ namespace Microsoft.Build.BackEnd
 
             InitializeProject(componentHost.BuildParameters, () =>
             {
-                // Strict mode keeps the sentinel as process CWD throughout project execution.
-                if (componentHost.BuildParameters.SaveOperatingEnvironment
-                    && (!componentHost.BuildParameters.MultiThreaded || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)))
+                if (componentHost.BuildParameters.SaveOperatingEnvironment && !componentHost.BuildParameters.MultiThreaded)
                 {
                     try
                     {
@@ -572,23 +570,41 @@ namespace Microsoft.Build.BackEnd
                     projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
                 }
 
-                return new ProjectInstance(
-                    ProjectFullPath,
-                    globalProperties,
-                    toolsVersionOverride,
-                    componentHost.BuildParameters,
-                    componentHost.LoggingService,
-                    new BuildEventContext(
+                bool setEvaluationDirectory = componentHost.BuildParameters.MultiThreaded && componentHost.BuildParameters.SaveOperatingEnvironment;
+                string previousThreadDirectory = setEvaluationDirectory ? FileUtilities.CurrentThreadWorkingDirectory : null;
+                try
+                {
+                    if (setEvaluationDirectory)
+                    {
+                        // Match non-MT evaluation without changing process CWD or the request's execution directory.
+                        FileUtilities.CurrentThreadWorkingDirectory = BuildParameters.StartupDirectory;
+                    }
+
+                    return new ProjectInstance(
+                        ProjectFullPath,
+                        globalProperties,
+                        toolsVersionOverride,
+                        componentHost.BuildParameters,
+                        componentHost.LoggingService,
+                        new BuildEventContext(
+                            submissionId,
+                            nodeId,
+                            BuildEventContext.InvalidEvaluationId,
+                            BuildEventContext.InvalidProjectInstanceId,
+                            BuildEventContext.InvalidProjectContextId,
+                            BuildEventContext.InvalidTargetId,
+                            BuildEventContext.InvalidTaskId),
+                        sdkResolverService,
                         submissionId,
-                        nodeId,
-                        BuildEventContext.InvalidEvaluationId,
-                        BuildEventContext.InvalidProjectInstanceId,
-                        BuildEventContext.InvalidProjectContextId,
-                        BuildEventContext.InvalidTargetId,
-                        BuildEventContext.InvalidTaskId),
-                    sdkResolverService,
-                    submissionId,
-                    projectLoadSettings);
+                        projectLoadSettings);
+                }
+                finally
+                {
+                    if (setEvaluationDirectory)
+                    {
+                        FileUtilities.CurrentThreadWorkingDirectory = previousThreadDirectory;
+                    }
+                }
             });
         }
 

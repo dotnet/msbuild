@@ -136,10 +136,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData(true, true)]
-        [InlineData(false, true)]
-        [InlineData(true, false)]
-        public void GraphEvaluationPreservesHostRelativePaths(bool build, bool strict)
+        [InlineData(true, true, true)]
+        [InlineData(true, false, true)]
+        [InlineData(true, true, false)]
+        [InlineData(false, true, true)]
+        [InlineData(false, true, false)]
+        public void EvaluationPreservesHostRelativePaths(bool graph, bool build, bool strict)
         {
             SetStrictMode(_env, enabled: strict);
             var hostDirectory = _env.CreateFolder();
@@ -149,6 +151,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _env.CreateFile(hostDirectory, "payload.txt", "host payload");
             _env.SetCurrentDirectory(hostDirectory.Path);
             string originalDirectory = Directory.GetCurrentDirectory();
+            _env.WithTransientTestState(new TransientStartupDirectory(originalDirectory));
             string? originalThreadDirectory = FileUtilities.CurrentThreadWorkingDirectory;
             string expectedPath = Path.Combine(originalDirectory, "payload.txt");
             string projectXml = $"""
@@ -167,6 +170,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   </ItemGroup>
                   <Target Name="Build">
                     <Message Text="EXECUTION_PATH=$(MSBuildProjectName):$([System.IO.Path]::GetFullPath('payload.txt'))" Importance="high" />
+                    <ReadLinesFromFile File="payload.txt">
+                      <Output TaskParameter="Lines" PropertyName="ExecutionPayload" />
+                    </ReadLinesFromFile>
+                    <Message Text="EXECUTION_PAYLOAD=$(MSBuildProjectName):$(ExecutionPayload)" Importance="high" />
+                    <MSBuild Projects="@(ProjectReference)" Targets="Build" BuildInParallel="true" />
                   </Target>
                 </Project>
                 """;
@@ -183,13 +191,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 MultiThreaded = true,
                 MaxNodeCount = 2,
+                DefaultToolsVersion = MSBuildConstants.CurrentToolsVersion,
                 ShutdownInProcNodeOnBuildFinish = true,
                 EnableNodeReuse = false,
                 Loggers = [logger],
             };
-            GraphBuildRequestData request = new(
-                [new ProjectGraphEntryPoint(Path.Combine(projectDirectory.Path, "root.proj"), new Dictionary<string, string>())],
-                ["Build"], null, BuildRequestDataFlags.None, new GraphBuildOptions { Build = build });
+            string projectPath = Path.Combine(projectDirectory.Path, "root.proj");
             using BuildManager manager = new();
             manager.BeginBuild(parameters);
             try
@@ -200,10 +207,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Path.GetFileName(processDirectory).ShouldBe(MultiThreadedStrictModeScope.SentinelDirectoryName);
                 }
 
-                GraphBuildResult result = manager.BuildRequest(request);
-                result.OverallResult.ShouldBe(BuildResultCode.Success);
-                result.Exception.ShouldBeNull();
-                result.ResultsByNode.Count.ShouldBe(build ? 3 : 0);
+                if (graph)
+                {
+                    GraphBuildResult result = manager.BuildRequest(new GraphBuildRequestData(
+                        [new ProjectGraphEntryPoint(projectPath, new Dictionary<string, string>())],
+                        ["Build"], null, BuildRequestDataFlags.None, new GraphBuildOptions { Build = build }));
+                    result.OverallResult.ShouldBe(BuildResultCode.Success);
+                    result.Exception.ShouldBeNull();
+                    result.ResultsByNode.Count.ShouldBe(build ? 3 : 0);
+                }
+                else
+                {
+                    manager.BuildRequest(new BuildRequestData(
+                        projectPath, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
+                }
+
                 if (strict)
                 {
                     Directory.GetCurrentDirectory().ShouldBe(processDirectory);
@@ -234,6 +252,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 foreach (var (directory, name) in projects)
                 {
                     logger.AssertLogContains($"EXECUTION_PATH={name}:{Path.Combine(directory.Path, "payload.txt")}");
+                    logger.AssertLogContains($"EXECUTION_PAYLOAD={name}:project payload");
                 }
             }
 
@@ -245,6 +264,56 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalThreadDirectory);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EvaluationPreservesHostManagedProjectState(bool useProjectInstance)
+        {
+            var hostDirectory = _env.CreateFolder();
+            var projectDirectory = _env.CreateFolder();
+            _env.CreateFile(hostDirectory, "payload.txt", "host payload");
+            _env.CreateFile(projectDirectory, "payload.txt", "project payload");
+            _env.SetCurrentDirectory(hostDirectory.Path);
+            var project = _env.CreateFile(projectDirectory, "build.proj", """
+                <Project>
+                  <PropertyGroup>
+                    <Payload>$([System.IO.File]::ReadAllText('payload.txt'))</Payload>
+                  </PropertyGroup>
+                  <Target Name="Build">
+                    <Message Text="EVALUATED=$(Payload)" Importance="high" />
+                    <Message Text="EXECUTED=$([System.IO.File]::ReadAllText('payload.txt'))" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+            BuildRequestData request;
+            if (useProjectInstance)
+            {
+                ProjectInstance instance = new(project.Path);
+                instance.SetProperty("Payload", "supplied payload");
+                request = new BuildRequestData(instance, ["Build"]);
+            }
+            else
+            {
+                request = new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null);
+            }
+
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+            manager.Build(new BuildParameters
+            {
+                MultiThreaded = true,
+                SaveOperatingEnvironment = useProjectInstance,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            }, request).ShouldHaveSucceeded();
+
+            logger.AssertLogContains(useProjectInstance ? "EVALUATED=supplied payload" : "EVALUATED=project payload");
+            logger.AssertLogContains("EXECUTED=project payload");
+            logger.AssertNoErrors();
+            logger.AssertNoWarnings();
         }
 
         [Fact]
@@ -2149,6 +2218,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION",
                 enabled ? null : ChangeWaves.Wave18_12.ToString());
             ChangeWaves.ResetStateForTests();
+        }
+
+        private sealed class TransientStartupDirectory : TransientTestState
+        {
+            private readonly string _originalDirectory = BuildParameters.StartupDirectory;
+
+            internal TransientStartupDirectory(string directory) => BuildParameters.StartupDirectory = directory;
+
+            public override void Revert() => BuildParameters.StartupDirectory = _originalDirectory;
         }
 
         private static BuildParameters CreateStrictWarningParameters(MockLogger logger, string policy, string code = "MSB4287")

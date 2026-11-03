@@ -306,7 +306,10 @@ The host directory captured before logger initialization is restored when the bu
 the CLI resolves its entry-project path before constructing requests inside that scope.
 Static graph evaluation uses an async-local copy of the captured host directory for relative-path
 property functions, preserving graph-only evaluation semantics while process CWD remains the sentinel.
-Project execution still uses each request's own directory.
+Ordinary MT file evaluation likewise uses the startup directory when operating-environment management
+is enabled, matching non-MT evaluation with or without strict mode. The evaluation context is restored
+before target/task execution, which still uses each request's own project directory. Pre-evaluated
+project instances and hosts that disable operating-environment management are not rebased.
 Loggers must not change the process current directory. Failures to enable strict mode, recover its directory,
 or restore the host directory fail the build; they do not silently disable checks.
 After successful restoration, MSBuild attempts to remove the scope's own temporary directory.
