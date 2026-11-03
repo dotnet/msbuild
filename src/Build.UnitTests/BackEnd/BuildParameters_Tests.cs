@@ -11,15 +11,15 @@ namespace Microsoft.Build.UnitTests.BackEnd;
 public class BuildParameters_Tests
 {
     [Fact]
-    public void IsPrecomputeIsClonedAndTranslated()
+    public void PrecomputeIsClonedAndTranslated()
     {
-        var parameters = new BuildParameters { IsPrecompute = true };
+        var parameters = new BuildParameters { Precompute = true };
 
-        Assert.True(parameters.Clone().IsPrecompute);
+        Assert.True(parameters.Clone().Precompute);
 
         ((ITranslatable)parameters).Translate(TranslationHelpers.GetWriteTranslator());
         BuildParameters deserializedParameters = BuildParameters.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-        Assert.True(deserializedParameters.IsPrecompute);
+        Assert.True(deserializedParameters.Precompute);
     }
 }

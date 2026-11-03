@@ -216,8 +216,6 @@ namespace Microsoft.Build.Execution
 
         private bool _isTelemetryEnabled;
 
-        private bool _isPrecompute;
-
         /// <summary>
         /// The settings used to load the project under build
         /// </summary>
@@ -229,6 +227,8 @@ namespace Microsoft.Build.Execution
         /// When true, enables running build in multiple in-proc nodes.
         /// </summary>
         private bool _multiThreaded;
+
+        private bool _isPrecompute;
 
         private ProjectIsolationMode _projectIsolationMode;
 
@@ -594,7 +594,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets or sets whether precompute mode was requested.
         /// </summary>
-        public bool IsPrecompute
+        public bool Precompute
         {
             get => _isPrecompute;
             set => _isPrecompute = value;
