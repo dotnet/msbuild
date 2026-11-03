@@ -531,18 +531,12 @@ namespace Microsoft.Build.BackEnd
 
             InitializeProject(componentHost.BuildParameters, () =>
             {
-                if (componentHost.BuildParameters.SaveOperatingEnvironment && !componentHost.BuildParameters.MultiThreaded)
+                string evaluationBaseDirectory = componentHost.BuildParameters.SaveOperatingEnvironment
+                    ? GetStartupDirectoryForEvaluation()
+                    : null;
+                if (evaluationBaseDirectory is not null && !componentHost.BuildParameters.MultiThreaded)
                 {
-                    try
-                    {
-                        NativeMethodsShared.SetCurrentDirectory(BuildParameters.StartupDirectory);
-                    }
-                    catch (DirectoryNotFoundException)
-                    {
-                        // Somehow the startup directory vanished. This can happen if build was started from a USB Key and it was removed.
-                        NativeMethodsShared.SetCurrentDirectory(
-                            BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
-                    }
+                    NativeMethodsShared.SetCurrentDirectory(evaluationBaseDirectory);
                 }
 
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
@@ -572,8 +566,8 @@ namespace Microsoft.Build.BackEnd
 
                 // Match non-MT evaluation without changing process CWD or the request's execution directory.
                 using EvaluationDirectoryScope evaluationDirectory = new(
-                    componentHost.BuildParameters.MultiThreaded && componentHost.BuildParameters.SaveOperatingEnvironment
-                        ? BuildParameters.StartupDirectory
+                    componentHost.BuildParameters.MultiThreaded
+                        ? evaluationBaseDirectory
                         : null);
 
                 return new ProjectInstance(
@@ -594,6 +588,41 @@ namespace Microsoft.Build.BackEnd
                     submissionId,
                     projectLoadSettings);
             });
+        }
+
+        private static string GetStartupDirectoryForEvaluation()
+        {
+            string startupDirectory = BuildParameters.StartupDirectory;
+            try
+            {
+                FileAttributes attributes = File.GetAttributes(startupDirectory);
+                if ((attributes & FileAttributes.Directory) != 0)
+                {
+                    if ((attributes & FileAttributes.ReparsePoint) != 0)
+                    {
+#if FEATURE_MSIOREDIST
+                        var target = Microsoft.IO.Directory.ResolveLinkTarget(startupDirectory, returnFinalTarget: true);
+#else
+                        var target = Directory.ResolveLinkTarget(startupDirectory, returnFinalTarget: true);
+#endif
+                        if (target is not null)
+                        {
+                            attributes = File.GetAttributes(target.FullName);
+                        }
+                    }
+
+                    if ((attributes & FileAttributes.Directory) != 0)
+                    {
+                        return startupDirectory;
+                    }
+                }
+            }
+            catch (Exception e) when (e is FileNotFoundException or DirectoryNotFoundException)
+            {
+                // The launch directory can disappear, for example when a removable drive is disconnected.
+            }
+
+            return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
         }
 
         private void InitializeProject(BuildParameters buildParameters, Func<ProjectInstance> loadProjectFromFile)

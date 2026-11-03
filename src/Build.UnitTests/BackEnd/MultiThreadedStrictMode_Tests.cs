@@ -19,6 +19,7 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Logging;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 
@@ -340,6 +341,114 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalDirectory);
             Directory.GetCurrentDirectory().ShouldBe(processDirectory);
+        }
+
+        [Theory]
+        [InlineData(false, false, true)]
+        [InlineData(true, false, true)]
+        [InlineData(true, true, true)]
+        [InlineData(true, true, false)]
+        public void ProjectEvaluationHandlesMissingStartupDirectory(bool multiThreaded, bool strict, bool saveEnvironment)
+            => VerifyStartupDirectoryFallback(multiThreaded, strict, saveEnvironment);
+
+        [Fact]
+        public void ProjectEvaluationHandlesDanglingStartupDirectoryLink()
+            => VerifyStartupDirectoryFallback(true, true, true, useDirectoryLink: true);
+
+        [Fact]
+        public void ProjectEvaluationPreservesExistingStartupDirectoryLink()
+            => VerifyStartupDirectoryFallback(true, true, true, useDirectoryLink: true, deleteStartupDirectory: false);
+
+        private void VerifyStartupDirectoryFallback(
+            bool multiThreaded,
+            bool strict,
+            bool saveEnvironment,
+            bool useDirectoryLink = false,
+            bool deleteStartupDirectory = true)
+        {
+            SetStrictMode(_env, enabled: strict);
+            var startupDirectory = _env.CreateFolder();
+            var hostDirectory = _env.CreateFolder();
+            var projectDirectory = _env.CreateFolder();
+            const string fileName = "Microsoft.Common.CurrentVersion.targets";
+            string toolsDirectory = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
+            File.Exists(Path.Combine(toolsDirectory, fileName)).ShouldBeTrue();
+            _env.CreateFile(hostDirectory, fileName, "host decoy");
+            _env.CreateFile(projectDirectory, fileName, "project decoy");
+            _env.SetCurrentDirectory(hostDirectory.Path);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            string startupPath = startupDirectory.Path;
+            if (useDirectoryLink)
+            {
+                startupPath = Path.Combine(hostDirectory.Path, "startup-link");
+                if (NativeMethodsShared.IsWindows)
+                {
+                    // Junctions exercise directory reparse points without requiring symlink privileges.
+                    string output = RunnerUtilities.RunProcessAndGetOutput(
+                        Path.Combine(Environment.SystemDirectory, "cmd.exe"),
+                        $"/d /c mklink /J \"{startupPath}\" \"{startupDirectory.Path}\"",
+                        out bool success, outputHelper: _output);
+                    success.ShouldBeTrue(output);
+                }
+                else
+                {
+#if FEATURE_MSIOREDIST
+                    Microsoft.IO.Directory.CreateSymbolicLink(startupPath, startupDirectory.Path);
+#else
+                    Directory.CreateSymbolicLink(startupPath, startupDirectory.Path);
+#endif
+                }
+            }
+
+            _env.WithTransientTestState(new TransientStartupDirectory(startupPath));
+            if (deleteStartupDirectory)
+            {
+                Directory.Delete(startupDirectory.Path);
+            }
+            else
+            {
+                _env.CreateFile(startupDirectory, fileName, "startup payload");
+            }
+            var project = _env.CreateFile(projectDirectory, "build.proj", $"""
+                <Project>
+                  <PropertyGroup>
+                    <Probe>$([System.IO.File]::Exists('{fileName}'))</Probe>
+                    <ReadLength>$([System.IO.File]::ReadAllText('{fileName}').Length)</ReadLength>
+                    <EvaluationPath>$([System.IO.Path]::GetFullPath('{fileName}'))</EvaluationPath>
+                  </PropertyGroup>
+                  <Target Name="Build">
+                    <Message Text="PROBE=$(Probe) LENGTH=$(ReadLength)" Importance="high" />
+                    <Message Text="EVALUATED_PATH=$(EvaluationPath)" Importance="high" />
+                    <Message Text="EXECUTED_PATH=$([System.IO.Path]::GetFullPath('{fileName}'))" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+            string expectedDirectory = saveEnvironment
+                ? (deleteStartupDirectory ? toolsDirectory : startupPath)
+                : projectDirectory.Path;
+            string expectedFile = Path.Combine(expectedDirectory, fileName);
+            int expectedLength = File.ReadAllText(expectedFile).Length;
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+            manager.Build(new BuildParameters
+            {
+                MultiThreaded = multiThreaded,
+                SaveOperatingEnvironment = saveEnvironment,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            }, new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
+                .ShouldHaveSucceeded();
+
+            logger.AssertLogContains($"PROBE=True LENGTH={expectedLength}");
+            logger.AssertLogContains($"EVALUATED_PATH={expectedFile}");
+            logger.AssertLogContains($"EXECUTED_PATH={Path.Combine(projectDirectory.Path, fileName)}");
+            logger.AssertNoErrors();
+            logger.AssertNoWarnings();
+            if (multiThreaded)
+            {
+                Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+            }
         }
 
         [Theory]

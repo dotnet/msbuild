@@ -306,6 +306,8 @@ The host directory captured before logger initialization is restored when the bu
 the CLI resolves its entry-project path before constructing requests inside that scope.
 MT must not change which files evaluation reads. Ordinary MT file evaluation uses the non-MT startup
 directory when operating-environment management is enabled, with or without strict mode.
+If that directory no longer exists, both modes explicitly select the current MSBuild tools directory;
+MT applies the fallback virtually without changing process CWD.
 During strict MT builds, solution-wrapper and static-graph evaluation use an async-local copy of the
 captured host directory while process CWD remains the sentinel. This builder-owned pre-evaluation also
 needs the host directory when `SaveOperatingEnvironment` is false; that flag only opts ordinary project
