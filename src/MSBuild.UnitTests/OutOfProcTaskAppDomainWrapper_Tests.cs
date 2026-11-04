@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_APPDOMAIN
                 appDomainSetup: null,
 #endif
-                hostServices: null,
+                hostServicesData: null,
                 taskParams: new Dictionary<string, TaskParameter>());
 
             result.ShouldNotBeNull();
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_APPDOMAIN
                 appDomainSetup: AppDomain.CurrentDomain.SetupInformation,
 #endif
-                hostServices: null,
+                hostServicesData: null,
                 taskParams: new Dictionary<string, TaskParameter>
                 {
                     [nameof(TaskWithoutEnvironmentInitializer.InputPath)] = new TaskParameter("input.txt")
@@ -86,6 +86,30 @@ namespace Microsoft.Build.UnitTests
             {
                 result.FinalParameterValues[nameof(TaskWithEnvironmentConstructor.ConstructorEnvironmentMatchesProperty)].ShouldBe(true);
             }
+        }
+
+        [Fact]
+        public void ExecuteTaskAcceptsEmptyHostServicesData()
+        {
+            Type taskType = typeof(TaskWithoutEnvironmentInitializer);
+            OutOfProcTaskHostTaskResult result = _wrapper.ExecuteTask(
+                oopTaskHostNode: null,
+                taskName: taskType.FullName,
+                taskLocation: taskType.Assembly.Location,
+                taskFile: "test.proj",
+                taskLine: 1,
+                taskColumn: 1,
+                targetName: "TestTarget",
+                projectFile: "test.proj",
+#if FEATURE_APPDOMAIN
+                appDomainSetup: null,
+#endif
+                hostServicesData: new HostServicesData([]),
+                taskParams: new Dictionary<string, TaskParameter>());
+
+            result.TaskException.ShouldBeNull();
+            result.Result.ShouldBe(TaskCompleteType.Success);
+            _wrapper.WrappedTask.HostObject.ShouldBeNull();
         }
 
         public class TaskWithoutEnvironmentInitializer : MarshalByRefObject, IMultiThreadableTask
