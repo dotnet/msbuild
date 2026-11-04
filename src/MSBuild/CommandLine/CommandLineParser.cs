@@ -300,7 +300,8 @@ namespace Microsoft.Build.CommandLine.Experimental
                                 switchParameters = ":no-file";
                             }
                             else if (string.Equals(switchName, "mt", StringComparison.OrdinalIgnoreCase) ||
-                                     string.Equals(switchName, "multithreaded", StringComparison.OrdinalIgnoreCase))
+                                     string.Equals(switchName, "multithreaded", StringComparison.OrdinalIgnoreCase) ||
+                                     string.Equals(switchName, "precompute", StringComparison.OrdinalIgnoreCase))
                             {
                                 switchParameters = ":true";
                             }
