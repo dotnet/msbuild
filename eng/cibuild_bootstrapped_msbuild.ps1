@@ -73,6 +73,7 @@ try {
   KillProcessesFromRepo
 
   $bootstrapRoot = Join-Path $Stage1BinDir "bootstrap"
+  $bootstrapCoreRoot = Join-Path $bootstrapRoot "core"
 
   # we need to do this to guarantee we have/know where dotnet.exe is installed
   $dotnetToolPath = InitializeDotNetCli $true
@@ -86,13 +87,11 @@ try {
   }
   else
   {
-    $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
+    $buildToolPath = Join-Path $bootstrapCoreRoot "dotnet.exe"
     $propsFile = Join-Path $PSScriptRoot "Versions.props"
     $bootstrapSdkVersion = ([xml](Get-Content $propsFile)).SelectSingleNode("//PropertyGroup/BootstrapSdkVersion").InnerText
     $buildToolCommand = "$bootstrapRoot\core\sdk\$bootstrapSdkVersion\MSBuild.dll"
     $buildToolFramework = "net"
-
-    $env:DOTNET_ROOT="$bootstrapRoot\core"
   }
 
   # Use separate artifacts folder for stage 2
@@ -119,13 +118,10 @@ try {
   # Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
   $env:DOTNET_PERFLOG_DIR=$PerfLogDir
 
-  # Mirrors cibuild_bootstrapped_msbuild.sh:96. Required for some test scenarios that spawn
-  # MSBuild grandchildren which need to launch .NET task hosts (notably net472 x86 testhosts
-  # invoking .NET Core MSBuild → /mt → sidecar TaskHost). The SDK CLI `dotnet msbuild` sets
-  # DOTNET_HOST_PATH for the MSBuild process it spawns, but does not propagate it into the
-  # parent script's environment, so we set it here for child processes (tests, their MSBuild
-  # grandchildren) to inherit.
-  $env:DOTNET_HOST_PATH=$dotnetExePath
+  # Task hosts must resolve the runtime from the produced bootstrap, not the initial build SDK.
+  # This is also required when Full MSBuild launches .NET task hosts.
+  $env:DOTNET_ROOT=$bootstrapCoreRoot
+  $env:DOTNET_HOST_PATH=Join-Path $bootstrapCoreRoot "dotnet.exe"
 
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)

@@ -151,6 +151,10 @@ startInfo.Environment.Remove("DOTNET_ROOT_ARM64");
 
 **Note**: Using `ProcessStartInfo.Environment` is thread-safe and scoped to the child process only, avoiding any need for locking or save/restore patterns on the parent process environment.
 
+### Bootstrapped CI
+
+Stage 2 builds must set both `DOTNET_HOST_PATH` and `DOTNET_ROOT` to the produced stage 1 Core bootstrap, including when Full MSBuild launches .NET task hosts. The initial build SDK may not contain the runtime required by that bootstrap. Mixing its muxer path with the bootstrap's runtime root can therefore make task-host app hosts fail even though the stage 2 entry point itself starts successfully.
+
 ### DOTNET_ROOT Propagation to Child Processes
 
 **Concern**: When MSBuild sets `DOTNET_ROOT` to launch a worker node, that environment variable propagates to any tools the worker node executes. This could change tool behavior if the tool relies on `DOTNET_ROOT` to find its runtime.

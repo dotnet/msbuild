@@ -91,9 +91,8 @@ export MSBUILDDONOTLAUNCHDEBUGGER=true
 # Opt into performance logging.
 export DOTNET_PERFLOG_DIR=$PerfLogDir
 
-# Prior to 3.0, the Csc task uses this environment variable to decide whether to run
-# a CLI host or directly execute the compiler.
-export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
+# Task hosts must resolve the runtime from the produced bootstrap, not the initial build SDK.
+export DOTNET_HOST_PATH="$_InitializeBuildTool"
 
 # When using bootstrapped MSBuild:
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
