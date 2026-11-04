@@ -155,6 +155,8 @@ startInfo.Environment.Remove("DOTNET_ROOT_ARM64");
 
 Stage 2 builds must set both `DOTNET_HOST_PATH` and `DOTNET_ROOT` to the produced stage 1 Core bootstrap, including when Full MSBuild launches .NET task hosts. The initial build SDK may not contain the runtime required by that bootstrap. Mixing its muxer path with the bootstrap's runtime root can therefore make task-host app hosts fail even though the stage 2 entry point itself starts successfully.
 
+Bootstrap layout generation also has a build-only dependency on the coordinator project. Its launch payload must be built before the bootstrap copy globs are evaluated; a warmed incremental output directory must not be required for coordinator-enabled builds to work.
+
 ### DOTNET_ROOT Propagation to Child Processes
 
 **Concern**: When MSBuild sets `DOTNET_ROOT` to launch a worker node, that environment variable propagates to any tools the worker node executes. This could change tool behavior if the tool relies on `DOTNET_ROOT` to find its runtime.
