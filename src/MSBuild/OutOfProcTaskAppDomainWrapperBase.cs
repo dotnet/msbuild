@@ -93,23 +93,25 @@ namespace Microsoft.Build.CommandLine
         /// <param name="taskLine">The line in the project file where the task invocation is located.</param>
         /// <param name="taskColumn">The column in the project file where the task invocation is located.</param>
         /// <param name="targetName">The target name that invokes this task.</param>
+        /// <param name="projectFile">The project file associated with the task's host object.</param>
         /// <param name="appDomainSetup">The AppDomainSetup that we want to use to launch our AppDomainIsolated tasks</param>
+        /// <param name="hostServicesData">The remote host object registrations, or <see langword="null"/> if none are supplied.</param>
         /// <param name="taskParams">Parameters that will be passed to the task when created</param>
         /// <returns>Task completion result showing success, failure or if there was a crash</returns>
         internal OutOfProcTaskHostTaskResult ExecuteTask(
-                IBuildEngine oopTaskHostNode,
-                string taskName,
-                string taskLocation,
-                string taskFile,
-                int taskLine,
-                int taskColumn,
-                string targetName,
-                string projectFile,
+            IBuildEngine oopTaskHostNode,
+            string taskName,
+            string taskLocation,
+            string taskFile,
+            int taskLine,
+            int taskColumn,
+            string targetName,
+            string projectFile,
 #if FEATURE_APPDOMAIN
-                AppDomainSetup appDomainSetup,
+            AppDomainSetup appDomainSetup,
 #endif
-                HostServices hostServices,
-                IDictionary<string, TaskParameter> taskParams)
+            HostServicesData hostServicesData,
+            IDictionary<string, TaskParameter> taskParams)
         {
             buildEngine = oopTaskHostNode;
             this.taskName = taskName;
@@ -117,7 +119,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
             _taskAppDomain = null;
 #endif
-            _hostServices = hostServices;
+            _hostServices = hostServicesData?.CreateHostServices<HostServices>();
             wrappedTask = null;
 
             LoadedType taskType = null;
@@ -138,10 +140,10 @@ namespace Microsoft.Build.CommandLine
                 Exception exceptionToReturn = e is TargetInvocationException ? e.InnerException : e;
 
                 return new OutOfProcTaskHostTaskResult(
-                                TaskCompleteType.CrashedDuringInitialization,
-                                exceptionToReturn,
-                                "TaskInstantiationFailureError",
-                                [taskName, taskLocation, String.Empty]);
+                    TaskCompleteType.CrashedDuringInitialization,
+                    exceptionToReturn,
+                    "TaskInstantiationFailureError",
+                    [taskName, taskLocation, string.Empty]);
             }
 
             // TypeLoader.Load returns null (rather than throwing) when the requested type cannot be
@@ -150,10 +152,10 @@ namespace Microsoft.Build.CommandLine
             if (taskType == null)
             {
                 return new OutOfProcTaskHostTaskResult(
-                                TaskCompleteType.CrashedDuringInitialization,
-                                new TypeLoadException(),
-                                "TaskInstantiationFailureError",
-                                [taskName, taskLocation, String.Empty]);
+                    TaskCompleteType.CrashedDuringInitialization,
+                    new TypeLoadException(),
+                    "TaskInstantiationFailureError",
+                    [taskName, taskLocation, string.Empty]);
             }
 
             OutOfProcTaskHostTaskResult taskResult;
@@ -176,10 +178,10 @@ namespace Microsoft.Build.CommandLine
                     taskParams);
 #else
                 return new OutOfProcTaskHostTaskResult(
-                                                    TaskCompleteType.CrashedDuringInitialization,
-                                                    null,
-                                                    "TaskInstantiationFailureNotSupported",
-                                                    [taskName, taskLocation, typeof(RunInSTAAttribute).FullName]);
+                    TaskCompleteType.CrashedDuringInitialization,
+                    null,
+                    "TaskInstantiationFailureNotSupported",
+                    [taskName, taskLocation, typeof(RunInSTAAttribute).FullName]);
 #endif
             }
             else
