@@ -837,7 +837,9 @@ namespace Microsoft.Build.UnitTests
                 itemDefinitions: [definition],
                 projectDirectory: Directory.GetCurrentDirectory(),
                 immutable: false,
-                definingFileEscaped: "test.proj");
+                definingFileEscaped: "test.proj",
+                sourceLineNumber: 12,
+                sourceColumnNumber: 34);
 
             string expected = item.GetMetadata("NameMeta");
 
@@ -948,7 +950,9 @@ namespace Microsoft.Build.UnitTests
                 itemDefinitions: null,
                 projectDirectory: Directory.GetCurrentDirectory(),
                 immutable: false,
-                definingFileEscaped: "test.proj");
+                definingFileEscaped: "import%253B.targets",
+                sourceLineNumber: 12,
+                sourceColumnNumber: 0);
 
             item.GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
             ((ITaskItem2)item).CloneCustomMetadataEscaped().Contains("RecursiveDir").ShouldBeFalse();
@@ -962,6 +966,12 @@ namespace Microsoft.Build.UnitTests
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             (t2.WrappedParameter as ITaskItem).GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
+            ITaskItem roundTripped = (ITaskItem)t2.WrappedParameter;
+            roundTripped.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath));
+            roundTripped.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("12");
+            roundTripped.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("0");
+            roundTripped.CloneCustomMetadata().Contains(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeFalse();
+            new Microsoft.Build.Utilities.TaskItem(roundTripped).GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("12");
         }
 
         /// <summary>

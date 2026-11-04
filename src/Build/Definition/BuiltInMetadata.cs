@@ -80,10 +80,16 @@ namespace Microsoft.Build.Evaluation
             string evaluatedIncludeEscaped,
             string definingProjectEscaped,
             ItemSpecModifierKind modifierKind,
-            ref ItemSpecModifiers.Cache cache)
-            => modifierKind is ItemSpecModifierKind.RecursiveDir
-                ? GetRecursiveDirValue(evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped)
-                : ItemSpecModifiers.GetItemSpecModifier(evaluatedIncludeEscaped, modifierKind, currentDirectory, definingProjectEscaped, ref cache);
+            ref ItemSpecModifiers.Cache cache,
+            int sourceLineNumber = 0,
+            int sourceColumnNumber = 0)
+            => modifierKind switch
+            {
+                ItemSpecModifierKind.RecursiveDir => GetRecursiveDirValue(evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped),
+                ItemSpecModifierKind.DefiningProjectLineNumber or ItemSpecModifierKind.DefiningProjectColumnNumber =>
+                    ItemSpecModifiers.GetSourceLocationModifier(modifierKind, sourceLineNumber, sourceColumnNumber),
+                _ => ItemSpecModifiers.GetItemSpecModifier(evaluatedIncludeEscaped, modifierKind, currentDirectory, definingProjectEscaped, ref cache)
+            };
 
         /// <summary>
         /// Extract the value for "RecursiveDir", if any, from the Include.

@@ -596,6 +596,10 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private string _escapedDefiningProject = null;
 
+            private int _sourceLineNumber;
+
+            private int _sourceColumnNumber;
+
             /// <summary>
             /// The custom metadata
             /// </summary>
@@ -652,6 +656,14 @@ namespace Microsoft.Build.BackEnd
                             _customEscapedMetadata[(string)entry.Key] = EscapingUtilities.Escape((string)entry.Value) ?? string.Empty;
                         }
                     }
+                }
+
+                if (ItemSpecModifiers.IsSourceLocationModifier(ItemSpecModifiers.DefiningProjectLineNumber))
+                {
+                    int.TryParse(copyFrom.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber), NumberStyles.None, CultureInfo.InvariantCulture, out _sourceLineNumber);
+                    int.TryParse(copyFrom.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber), NumberStyles.None, CultureInfo.InvariantCulture, out _sourceColumnNumber);
+                    _customEscapedMetadata.Remove(ItemSpecModifiers.DefiningProjectLineNumber);
+                    _customEscapedMetadata.Remove(ItemSpecModifiers.DefiningProjectColumnNumber);
                 }
 
                 // RecursiveDir cannot be derived from the item spec, only from the wildcard the item was expanded
@@ -788,7 +800,7 @@ namespace Microsoft.Build.BackEnd
 
                 // Non-derivable metadata can only be set at construction time.
                 // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
-                ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName), "CannotChangeItemSpecModifiers", metadataName);
+                ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName) && !ItemSpecModifiers.IsSourceLocationModifier(metadataName), "CannotChangeItemSpecModifiers", metadataName);
 
                 _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
@@ -928,6 +940,12 @@ namespace Microsoft.Build.BackEnd
                     return ItemSpecModifiers.GetItemSpecModifier(_escapedItemSpec, modifierKind, null, _escapedDefiningProject, ref _cachedModifiers);
                 }
 
+                if (ItemSpecModifiers.TryGetModifierKind(metadataName, out modifierKind) &&
+                    modifierKind is ItemSpecModifierKind.DefiningProjectLineNumber or ItemSpecModifierKind.DefiningProjectColumnNumber)
+                {
+                    return ItemSpecModifiers.GetSourceLocationModifier(modifierKind, _sourceLineNumber, _sourceColumnNumber);
+                }
+
                 string metadataValue = null;
                 _customEscapedMetadata?.TryGetValue(metadataName, out metadataValue);
 
@@ -953,7 +971,7 @@ namespace Microsoft.Build.BackEnd
                 // read from the item's own metadata rather than derived.
                 _customEscapedMetadata.TryGetValue(ItemSpecModifiers.RecursiveDir, out string escapedRecursiveDir);
 
-                return BuiltInMetadataExpander.Expand(escapedValue, _escapedItemSpec, _escapedDefiningProject, escapedRecursiveDir, ref _cachedModifiers);
+                return BuiltInMetadataExpander.Expand(escapedValue, _escapedItemSpec, _escapedDefiningProject, escapedRecursiveDir, ref _cachedModifiers, _sourceLineNumber, _sourceColumnNumber);
             }
 
             /// <summary>
@@ -1047,7 +1065,32 @@ namespace Microsoft.Build.BackEnd
             {
                 translator.Translate(ref _escapedItemSpec);
                 translator.Translate(ref _escapedDefiningProject);
-                translator.TranslateDictionary(ref _customEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
+                Dictionary<string, string> metadata = _customEscapedMetadata;
+                bool sourceLocationEnabled = ItemSpecModifiers.IsSourceLocationModifier(ItemSpecModifiers.DefiningProjectLineNumber);
+                if (translator.Mode == TranslationDirection.WriteToStream && sourceLocationEnabled && _sourceLineNumber > 0)
+                {
+                    // Carry coordinates in the existing metadata payload without changing the task-host wire format.
+                    metadata = new Dictionary<string, string>(_customEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default)
+                    {
+                        [ItemSpecModifiers.DefiningProjectLineNumber] = _sourceLineNumber.ToString(CultureInfo.InvariantCulture),
+                        [ItemSpecModifiers.DefiningProjectColumnNumber] = _sourceColumnNumber.ToString(CultureInfo.InvariantCulture),
+                    };
+                }
+
+                translator.TranslateDictionary(ref metadata, MSBuildNameIgnoreCaseComparer.Default);
+                if (translator.Mode == TranslationDirection.ReadFromStream)
+                {
+                    _customEscapedMetadata = metadata;
+                    if (sourceLocationEnabled)
+                    {
+                        metadata.TryGetValue(ItemSpecModifiers.DefiningProjectLineNumber, out string line);
+                        metadata.TryGetValue(ItemSpecModifiers.DefiningProjectColumnNumber, out string column);
+                        int.TryParse(line, NumberStyles.None, CultureInfo.InvariantCulture, out _sourceLineNumber);
+                        int.TryParse(column, NumberStyles.None, CultureInfo.InvariantCulture, out _sourceColumnNumber);
+                        metadata.Remove(ItemSpecModifiers.DefiningProjectLineNumber);
+                        metadata.Remove(ItemSpecModifiers.DefiningProjectColumnNumber);
+                    }
+                }
 
                 Assumed.NotNull(_escapedItemSpec);
                 Assumed.NotNull(_customEscapedMetadata);

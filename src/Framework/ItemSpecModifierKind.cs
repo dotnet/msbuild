@@ -19,5 +19,7 @@ internal enum ItemSpecModifierKind
     DefiningProjectFullPath,
     DefiningProjectDirectory,
     DefiningProjectName,
-    DefiningProjectExtension
+    DefiningProjectExtension,
+    DefiningProjectLineNumber,
+    DefiningProjectColumnNumber
 }

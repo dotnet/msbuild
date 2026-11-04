@@ -9,6 +9,8 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -1236,7 +1238,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.Equal(2, Helpers.MakeList(itemElement.Metadata).Count);
 
-            Assert.Equal(2 + 15 /* built-in metadata */, item.MetadataCount);
+            item.MetadataCount.ShouldBe(2 + ItemSpecModifiers.All.Length);
             Assert.Equal("n1", item.GetMetadataValue("n"));
 
             // Remove one piece of metadata, to hopefully help verify that the DOM is in a good state
