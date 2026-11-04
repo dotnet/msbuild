@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -592,8 +592,9 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets or sets whether precompute mode was requested.
+        /// Gets or sets whether precompute mode was requested. This is highly experimental; expect things to break if you use it.
         /// </summary>
+        [Experimental("MSBUILD_PRECOMPUTE", UrlFormat = "https://aka.ms/msbuild/precompute")]
         public bool Precompute
         {
             get => _precompute;
