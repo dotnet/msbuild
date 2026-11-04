@@ -184,30 +184,6 @@ namespace Microsoft.Build.UnitTests
             t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe("path/filename.");
         }
 
-        [Theory]
-        [InlineData("../outside/file.txt", true)]
-        [InlineData(@"..\outside\file.txt", true)]
-        [InlineData("./sub/file.txt", true)]
-        [InlineData(@"sub\..\other\file.txt", true)]
-        [InlineData("sub/./file.txt", true)]
-        [InlineData(".", true)]
-        [InlineData("..", true)]
-        [InlineData("dir/.", true)]
-        [InlineData("dir/..", true)]
-        [InlineData(@"dir\.", true)]
-        [InlineData(@"dir\..", true)]
-        [InlineData("path/filename.", false)]
-        [InlineData(".gitignore", false)]
-        [InlineData("dir/.hidden/file", false)]
-        [InlineData("sub/file.txt", false)]
-        [InlineData("file.txt", false)]
-        [InlineData("dir.../file", false)]
-        [InlineData("", false)]
-        [InlineData(null, false)]
-        public void HasRelativePathSpecifiers_ReturnsExpected(string path, bool expected)
-        {
-            AssignTargetPath.HasRelativePathSpecifiers(path).ShouldBe(expected);
-        }
 
         [Fact]
         public void ForwardSlashRelativePathRespectsChangeWaveOptOut()

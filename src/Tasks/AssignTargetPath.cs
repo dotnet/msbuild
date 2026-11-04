@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -115,7 +114,7 @@ namespace Microsoft.Build.Tasks
                     if (string.IsNullOrEmpty(targetPath))
                     {
                         bool hasRelativeSpecifiers = isWave18_14Enabled
-                            ? HasRelativePathSpecifiers(Files[i].ItemSpec)
+                            ? !string.IsNullOrEmpty(Files[i].ItemSpec) && FileUtilities.ContainsRelativePathSegments(Files[i].ItemSpec)
                             : Files[i].ItemSpec.Contains("." + Path.DirectorySeparatorChar);
 
                         if (// if the file path is relative
@@ -175,46 +174,6 @@ namespace Microsoft.Build.Tasks
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// Determines whether a path contains any relative directory specifiers ("." or "..").
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool HasRelativePathSpecifiers(string path)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                return false;
-            }
-
-            ReadOnlySpan<char> span = path.AsSpan();
-            if (span.IndexOf('.') < 0)
-            {
-                return false;
-            }
-
-            int start = 0;
-            while (start < span.Length)
-            {
-                int slashIndex = span.Slice(start).IndexOfAny('/', '\\');
-                int segmentLength = slashIndex < 0 ? span.Length - start : slashIndex;
-
-                if ((segmentLength == 1 && span[start] == '.') ||
-                    (segmentLength == 2 && span[start] == '.' && span[start + 1] == '.'))
-                {
-                    return true;
-                }
-
-                if (slashIndex < 0)
-                {
-                    break;
-                }
-
-                start += slashIndex + 1;
-            }
-
-            return false;
         }
     }
 }
