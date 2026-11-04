@@ -17,7 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
     <!-- Bootstrap copies the coordinator payload, so it must exist before the copy globs run. -->
-    <ProjectReference Include="..\MSBuild.Coordinator\MSBuild.Coordinator.csproj" ReferenceOutputAssembly="false" Private="false" PrivateAssets="all" Condition="'$(CreateBootstrap)' != 'false'" />
+    <ProjectReference Include="..\MSBuild.Coordinator\MSBuild.Coordinator.csproj" ReferenceOutputAssembly="false" Private="false" PrivateAssets="all" Condition="'$(CreateBootstrap)' != 'false' and !$(TargetFramework.StartsWith('net4'))" />
 
     <!-- Direct project references needed here to avoid NuGet version conflict errors -->
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
