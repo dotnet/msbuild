@@ -965,6 +965,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                 int cpuCount = 1;
                 bool multiThreaded = false;
+                bool precompute = false;
                 bool enableNodeReuse = true;
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
@@ -1026,6 +1027,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                             ref cpuCount,
                                             ref multiThreaded,
+                                            ref precompute,
                                             ref enableNodeReuse,
                                             ref preprocessWriter,
                                             ref targetsWriter,
@@ -1189,6 +1191,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                     cpuCount,
                                     multiThreaded,
+                                    precompute,
                                     enableNodeReuse,
                                     preprocessWriter,
                                     targetsWriter,
@@ -1661,6 +1664,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             int cpuCount,
             bool multiThreaded,
+            bool precompute,
             bool enableNodeReuse,
             TextWriter preprocessWriter,
             TextWriter targetsWriter,
@@ -1877,6 +1881,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.NodeExeLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
                     parameters.MaxNodeCount = cpuCount;
                     parameters.MultiThreaded = multiThreaded;
+                    parameters.Precompute = precompute;
                     parameters.Loggers = projectCollection.Loggers;
                     parameters.ForwardingLoggers = remoteLoggerRecords;
                     parameters.ToolsetDefinitionLocations = Microsoft.Build.Evaluation.ToolsetDefinitionLocations.ConfigurationFile | Microsoft.Build.Evaluation.ToolsetDefinitionLocations.Registry;
@@ -2509,6 +2514,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             ref int cpuCount,
             ref bool multiThreaded,
+            ref bool precompute,
             ref bool enableNodeReuse,
             ref TextWriter preprocessWriter,
             ref TextWriter targetsWriter,
@@ -2669,6 +2675,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                                            ref cpuCount,
                                                            ref multiThreaded,
+                                                           ref precompute,
                                                            ref enableNodeReuse,
                                                            ref preprocessWriter,
                                                            ref targetsWriter,
@@ -2750,6 +2757,8 @@ namespace Microsoft.Build.CommandLine
 
                     // figure out if we should use in-proc nodes for parallel build, effectively running the build multi-threaded
                     multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
+
+                    precompute = IsPrecomputeEnabled(commandLineSwitches);
 
                     // figure out if we should reuse nodes
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
@@ -2885,6 +2894,19 @@ namespace Microsoft.Build.CommandLine
             }
 
             return Traits.Instance.EnableMultiThreaded;
+        }
+
+        internal static bool IsPrecomputeEnabled(CommandLineSwitches commandLineSwitches)
+        {
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Precompute))
+            {
+                return ProcessBooleanSwitch(
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Precompute],
+                    defaultValue: true,
+                    resourceName: "InvalidPrecomputeValue");
+            }
+
+            return false;
         }
 
 #if FEATURE_REPORTFILEACCESSES
