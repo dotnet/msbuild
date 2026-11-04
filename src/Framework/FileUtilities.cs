@@ -1618,6 +1618,7 @@ namespace Microsoft.Build.Framework
         {
             const int DefaultFileStreamBufferSize = 4096;
             FileMode mode = append ? FileMode.Append : FileMode.Create;
+            // CodeQL [SM00414] False positive: OpenWrite operates on trusted build output paths.
             Stream fileStream = new FileStream(path, mode, FileAccess.Write, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan);
             if (encoding == null)
             {

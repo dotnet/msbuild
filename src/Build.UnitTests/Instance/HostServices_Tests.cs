@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Xml;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -17,599 +16,757 @@ using Xunit;
 
 #nullable disable
 
-namespace Microsoft.Build.UnitTests.OM.Instance
+namespace Microsoft.Build.UnitTests.Instance;
+
+/// <summary>
+/// Tests for the HostServices object.
+/// </summary>
+public class HostServices_Tests
 {
     /// <summary>
-    /// Tests for the HostServices object.
+    /// Setup
     /// </summary>
-    public class HostServices_Tests
+    public HostServices_Tests()
     {
-        /// <summary>
-        /// Setup
-        /// </summary>
-        public HostServices_Tests()
-        {
-            ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
-        }
+        ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
+    }
 
-        /// <summary>
-        /// Test allowed host object registrations
-        /// </summary>
-        [Fact]
-        public void TestValidHostObjectRegistration()
+    /// <summary>
+    /// Test allowed host object registrations
+    /// </summary>
+    [Fact]
+    public void TestValidHostObjectRegistration()
+    {
+        HostServices hostServices = new HostServices();
+        TestHostObject hostObject = new TestHostObject();
+        TestHostObject hostObject2 = new TestHostObject();
+        TestHostObject hostObject3 = new TestHostObject();
+        hostServices.RegisterHostObject("foo.proj", "target", "task", hostObject);
+        hostServices.RegisterHostObject("foo.proj", "target2", "task", hostObject2);
+        hostServices.RegisterHostObject("foo.proj", "target", "task2", hostObject3);
+
+        Assert.Same(hostObject, hostServices.GetHostObject("foo.proj", "target", "task"));
+        Assert.Same(hostObject2, hostServices.GetHostObject("foo.proj", "target2", "task"));
+        Assert.Same(hostObject3, hostServices.GetHostObject("foo.proj", "target", "task2"));
+    }
+
+    /// <summary>
+    /// Test ensuring a null project for host object registration throws.
+    /// </summary>
+    [Fact]
+    public void TestInvalidHostObjectRegistration_NullProject()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
         {
             HostServices hostServices = new HostServices();
             TestHostObject hostObject = new TestHostObject();
-            TestHostObject hostObject2 = new TestHostObject();
-            TestHostObject hostObject3 = new TestHostObject();
-            hostServices.RegisterHostObject("foo.proj", "target", "task", hostObject);
-            hostServices.RegisterHostObject("foo.proj", "target2", "task", hostObject2);
-            hostServices.RegisterHostObject("foo.proj", "target", "task2", hostObject3);
+            hostServices.RegisterHostObject(null, "target", "task", hostObject);
+        });
+    }
+    /// <summary>
+    /// Test ensuring a null target for host object registration throws.
+    /// </summary>
+    [Fact]
+    public void TestInvalidHostObjectRegistration_NullTarget()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+        {
+            HostServices hostServices = new HostServices();
+            TestHostObject hostObject = new TestHostObject();
+            hostServices.RegisterHostObject("project", null, "task", hostObject);
+        });
+    }
+    /// <summary>
+    /// Test ensuring a null task for host object registration throws.
+    /// </summary>
+    [Fact]
+    public void TestInvalidHostObjectRegistration_NullTask()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+        {
+            HostServices hostServices = new HostServices();
+            TestHostObject hostObject = new TestHostObject();
+            hostServices.RegisterHostObject("project", "target", null, hostObject);
+        });
+    }
+    /// <summary>
+    /// Test which verifies host object unregistration.
+    /// </summary>
+    [Fact]
+    public void TestUnregisterHostObject()
+    {
+        HostServices hostServices = new HostServices();
+        TestHostObject hostObject = new TestHostObject();
+        hostServices.RegisterHostObject("project", "target", "task", hostObject);
+        Assert.Same(hostObject, hostServices.GetHostObject("project", "target", "task"));
 
-            Assert.Same(hostObject, hostServices.GetHostObject("foo.proj", "target", "task"));
-            Assert.Same(hostObject2, hostServices.GetHostObject("foo.proj", "target2", "task"));
-            Assert.Same(hostObject3, hostServices.GetHostObject("foo.proj", "target", "task2"));
-        }
+        hostServices.RegisterHostObject("project", "target", "task", hostObject: null);
+        Assert.Null(hostServices.GetHostObject("project", "target", "task"));
+    }
 
-        /// <summary>
-        /// Test ensuring a null project for host object registration throws.
-        /// </summary>
-        [Fact]
-        public void TestInvalidHostObjectRegistration_NullProject()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                HostServices hostServices = new HostServices();
-                TestHostObject hostObject = new TestHostObject();
-                hostServices.RegisterHostObject(null, "target", "task", hostObject);
-            });
-        }
-        /// <summary>
-        /// Test ensuring a null target for host object registration throws.
-        /// </summary>
-        [Fact]
-        public void TestInvalidHostObjectRegistration_NullTarget()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                HostServices hostServices = new HostServices();
-                TestHostObject hostObject = new TestHostObject();
-                hostServices.RegisterHostObject("project", null, "task", hostObject);
-            });
-        }
-        /// <summary>
-        /// Test ensuring a null task for host object registration throws.
-        /// </summary>
-        [Fact]
-        public void TestInvalidHostObjectRegistration_NullTask()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                HostServices hostServices = new HostServices();
-                TestHostObject hostObject = new TestHostObject();
-                hostServices.RegisterHostObject("project", "target", null, hostObject);
-            });
-        }
-        /// <summary>
-        /// Test which verifies host object unregistration.
-        /// </summary>
-        [Fact]
-        public void TestUnregisterHostObject()
+    /// <summary>
+    /// Test which shows that affinity defaults to Any.
+    /// </summary>
+    [Fact]
+    public void TestAffinityDefaultsToAny()
+    {
+        HostServices hostServices = new HostServices();
+        Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
+    }
+
+    /// <summary>
+    /// Test which shows that setting a host object causes the affinity to become InProc.
+    /// </summary>
+    [Fact]
+    public void TestHostObjectCausesInProcAffinity()
+    {
+        HostServices hostServices = new HostServices();
+        TestHostObject hostObject = new TestHostObject();
+        hostServices.RegisterHostObject("project", "target", "task", hostObject);
+        Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
+    }
+
+    /// <summary>
+    /// Test of the ability to set and change specific project affinities.
+    /// </summary>
+    [Fact]
+    public void TestSpecificAffinityRegistration()
+    {
+        HostServices hostServices = new HostServices();
+        hostServices.SetNodeAffinity("project", NodeAffinity.InProc);
+        Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
+        hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
+        Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
+        hostServices.SetNodeAffinity("project", NodeAffinity.Any);
+        Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
+    }
+
+    /// <summary>
+    /// Make sure we get the default affinity when the affinity map exists, but the specific
+    /// project we're requesting is not set.
+    /// </summary>
+    [Fact]
+    public void TestDefaultAffinityWhenProjectNotRegistered()
+    {
+        HostServices hostServices = new HostServices();
+        hostServices.SetNodeAffinity("project1", NodeAffinity.InProc);
+        Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project2"));
+    }
+
+    /// <summary>
+    /// Test of setting the default affinity.
+    /// </summary>
+    [Fact]
+    public void TestGeneralAffinityRegistration()
+    {
+        HostServices hostServices = new HostServices();
+
+        hostServices.SetNodeAffinity(String.Empty, NodeAffinity.InProc);
+        Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
+        Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project2"));
+
+        hostServices.SetNodeAffinity(String.Empty, NodeAffinity.OutOfProc);
+        Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
+        Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project2"));
+
+        hostServices.SetNodeAffinity(String.Empty, NodeAffinity.Any);
+        Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
+        Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project2"));
+    }
+
+    /// <summary>
+    /// Test which ensures specific project affinities override general affinity.
+    /// </summary>
+    [Fact]
+    public void TestOverrideGeneralAffinityRegistration()
+    {
+        HostServices hostServices = new HostServices();
+
+        hostServices.SetNodeAffinity(String.Empty, NodeAffinity.InProc);
+        hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
+        Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
+        Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project2"));
+    }
+
+    [Theory]
+    [InlineData(NodeAffinity.InProc)]
+    [InlineData(NodeAffinity.OutOfProc)]
+    [InlineData(NodeAffinity.Any)]
+    public void TranslationPreservesDefaultNodeAffinity(NodeAffinity affinity)
+    {
+        HostServices hostServices = new();
+        hostServices.SetNodeAffinity(string.Empty, affinity);
+
+        HostServices deserialized = RoundTripBuildRequest(hostServices);
+
+        Assert.Equal(affinity, deserialized.GetNodeAffinity("project.proj"));
+    }
+
+    [Theory]
+    [InlineData(NodeAffinity.InProc)]
+    [InlineData(NodeAffinity.OutOfProc)]
+    [InlineData(NodeAffinity.Any)]
+    public void TranslationPreservesProjectNodeAffinity(NodeAffinity affinity)
+    {
+        HostServices hostServices = new();
+        hostServices.SetNodeAffinity("project.proj", affinity);
+
+        HostServices deserialized = RoundTripBuildRequest(hostServices);
+
+        Assert.Equal(affinity, deserialized.GetNodeAffinity("PROJECT.PROJ"));
+        Assert.Equal(NodeAffinity.Any, deserialized.GetNodeAffinity("other.proj"));
+    }
+
+    [Fact]
+    public void TranslationPreservesNodeAffinityOverrides()
+    {
+        HostServices hostServices = new();
+        hostServices.SetNodeAffinity(string.Empty, NodeAffinity.OutOfProc);
+        hostServices.SetNodeAffinity("project.proj", NodeAffinity.InProc);
+
+        HostServices deserialized = RoundTripBuildRequest(hostServices);
+
+        Assert.Equal(NodeAffinity.InProc, deserialized.GetNodeAffinity("PROJECT.PROJ"));
+        Assert.Equal(NodeAffinity.OutOfProc, deserialized.GetNodeAffinity("other.proj"));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(NodePacketTypeExtensions.PacketVersion - 1)]
+    [InlineData((int)NodePacketTypeExtensions.PacketVersion)]
+    public void TranslationPreservesLegacyPacketFormat(int? packetVersion)
+    {
+        HostServices hostServices = new();
+        hostServices.SetNodeAffinity(string.Empty, NodeAffinity.OutOfProc);
+
+        ITranslator writer = TranslationHelpers.GetWriteTranslator();
+        writer.NegotiatedPacketVersion = packetVersion.HasValue ? (byte)packetVersion.Value : null;
+        ((ITranslatable)hostServices).Translate(writer);
+        string sentinel = "after host services";
+        writer.Translate(ref sentinel);
+
+        ITranslator reader = TranslationHelpers.GetReadTranslator();
+        reader.NegotiatedPacketVersion = writer.NegotiatedPacketVersion;
+        HostServices deserialized = new();
+        ((ITranslatable)deserialized).Translate(reader);
+        string translatedSentinel = null;
+        reader.Translate(ref translatedSentinel);
+        Assert.Equal(sentinel, translatedSentinel);
+        Assert.Equal(NodeAffinity.Any, deserialized.GetNodeAffinity("project.proj"));
+    }
+
+    /// <summary>
+    /// Test of clearing the affinity settings for all projects.
+    /// </summary>
+    [Fact]
+    public void TestClearingAffinities()
+    {
+        HostServices hostServices = new HostServices();
+
+        hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
+        Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
+        hostServices.SetNodeAffinity(null, NodeAffinity.OutOfProc);
+        Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
+
+        hostServices.SetNodeAffinity(String.Empty, NodeAffinity.OutOfProc);
+        Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
+        hostServices.SetNodeAffinity(null, NodeAffinity.OutOfProc);
+        Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
+    }
+
+    /// <summary>
+    /// Test which ensures that setting an OutOfProc affinity for a project with a host object throws.
+    /// </summary>
+    [Fact]
+    public void TestContradictoryAffinityCausesException_OutOfProc()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
         {
             HostServices hostServices = new HostServices();
             TestHostObject hostObject = new TestHostObject();
             hostServices.RegisterHostObject("project", "target", "task", hostObject);
-            Assert.Same(hostObject, hostServices.GetHostObject("project", "target", "task"));
-
-            hostServices.RegisterHostObject("project", "target", "task", hostObject: null);
-            Assert.Null(hostServices.GetHostObject("project", "target", "task"));
-        }
-
-        /// <summary>
-        /// Test which shows that affinity defaults to Any.
-        /// </summary>
-        [Fact]
-        public void TestAffinityDefaultsToAny()
-        {
-            HostServices hostServices = new HostServices();
-            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
-        }
-
-        /// <summary>
-        /// Test which shows that setting a host object causes the affinity to become InProc.
-        /// </summary>
-        [Fact]
-        public void TestHostObjectCausesInProcAffinity()
-        {
-            HostServices hostServices = new HostServices();
-            TestHostObject hostObject = new TestHostObject();
-            hostServices.RegisterHostObject("project", "target", "task", hostObject);
-            Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
-        }
-
-        /// <summary>
-        /// Test of the ability to set and change specific project affinities.
-        /// </summary>
-        [Fact]
-        public void TestSpecificAffinityRegistration()
-        {
-            HostServices hostServices = new HostServices();
-            hostServices.SetNodeAffinity("project", NodeAffinity.InProc);
             Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
             hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
-            Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
-            hostServices.SetNodeAffinity("project", NodeAffinity.Any);
-            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
-        }
-
-        /// <summary>
-        /// Make sure we get the default affinity when the affinity map exists, but the specific
-        /// project we're requesting is not set.
-        /// </summary>
-        [Fact]
-        public void TestDefaultAffinityWhenProjectNotRegistered()
+        });
+    }
+    /// <summary>
+    /// Test which ensures that setting an Any affinity for a project with a host object throws.
+    /// </summary>
+    [Fact]
+    public void TestContradictoryAffinityCausesException_Any()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
         {
             HostServices hostServices = new HostServices();
-            hostServices.SetNodeAffinity("project1", NodeAffinity.InProc);
-            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project2"));
-        }
-
-        /// <summary>
-        /// Test of setting the default affinity.
-        /// </summary>
-        [Fact]
-        public void TestGeneralAffinityRegistration()
-        {
-            HostServices hostServices = new HostServices();
-
-            hostServices.SetNodeAffinity(String.Empty, NodeAffinity.InProc);
+            TestHostObject hostObject = new TestHostObject();
+            hostServices.RegisterHostObject("project", "target", "task", hostObject);
             Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
-            Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project2"));
+            hostServices.SetNodeAffinity("project", NodeAffinity.Any);
+        });
+    }
 
-            hostServices.SetNodeAffinity(String.Empty, NodeAffinity.OutOfProc);
-            Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
-            Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project2"));
+    /// <summary>
+    /// Test which ensures that setting an Any affinity for a project with a remote host object does not throws.
+    /// </summary>
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void TestNoContradictoryRemoteHostObjectAffinity()
+    {
+        HostServices hostServices = new HostServices();
+        hostServices.RegisterHostObject("project", "target", "task", "moniker");
+        hostServices.SetNodeAffinity("project", NodeAffinity.Any);
+    }
 
-            hostServices.SetNodeAffinity(String.Empty, NodeAffinity.Any);
-            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
-            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project2"));
-        }
+    /// <summary>
+    /// Test which ensures that setting the InProc affinity for a project with a host object is allowed.
+    /// </summary>
+    [Fact]
+    public void TestNonContradictoryAffinityAllowed()
+    {
+        HostServices hostServices = new HostServices();
+        TestHostObject hostObject = new TestHostObject();
+        hostServices.RegisterHostObject("project", "target", "task", hostObject);
+        Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
+        hostServices.SetNodeAffinity("project", NodeAffinity.InProc);
+        Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
+    }
 
-        /// <summary>
-        /// Test which ensures specific project affinities override general affinity.
-        /// </summary>
-        [Fact]
-        public void TestOverrideGeneralAffinityRegistration()
+    /// <summary>
+    /// Test which ensures that setting a host object for a project with an out-of-proc affinity throws.
+    /// </summary>
+    [Fact]
+    public void TestContraditcoryHostObjectCausesException_OutOfProc()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
         {
             HostServices hostServices = new HostServices();
-
-            hostServices.SetNodeAffinity(String.Empty, NodeAffinity.InProc);
+            TestHostObject hostObject = new TestHostObject();
             hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
-            Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
-            Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project2"));
-        }
-
-        [Theory]
-        [InlineData(NodeAffinity.InProc)]
-        [InlineData(NodeAffinity.OutOfProc)]
-        [InlineData(NodeAffinity.Any)]
-        public void TranslationPreservesDefaultNodeAffinity(NodeAffinity affinity)
-        {
-            HostServices hostServices = new();
-            hostServices.SetNodeAffinity(string.Empty, affinity);
-
-            HostServices deserialized = RoundTripBuildRequest(hostServices);
-
-            Assert.Equal(affinity, deserialized.GetNodeAffinity("project.proj"));
-        }
-
-        [Theory]
-        [InlineData(NodeAffinity.InProc)]
-        [InlineData(NodeAffinity.OutOfProc)]
-        [InlineData(NodeAffinity.Any)]
-        public void TranslationPreservesProjectNodeAffinity(NodeAffinity affinity)
-        {
-            HostServices hostServices = new();
-            hostServices.SetNodeAffinity("project.proj", affinity);
-
-            HostServices deserialized = RoundTripBuildRequest(hostServices);
-
-            Assert.Equal(affinity, deserialized.GetNodeAffinity("PROJECT.PROJ"));
-            Assert.Equal(NodeAffinity.Any, deserialized.GetNodeAffinity("other.proj"));
-        }
-
-        [Fact]
-        public void TranslationPreservesNodeAffinityOverrides()
-        {
-            HostServices hostServices = new();
-            hostServices.SetNodeAffinity(string.Empty, NodeAffinity.OutOfProc);
-            hostServices.SetNodeAffinity("project.proj", NodeAffinity.InProc);
-
-            HostServices deserialized = RoundTripBuildRequest(hostServices);
-
-            Assert.Equal(NodeAffinity.InProc, deserialized.GetNodeAffinity("PROJECT.PROJ"));
-            Assert.Equal(NodeAffinity.OutOfProc, deserialized.GetNodeAffinity("other.proj"));
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(NodePacketTypeExtensions.PacketVersion - 1)]
-        [InlineData((int)NodePacketTypeExtensions.PacketVersion)]
-        public void TranslationPreservesLegacyPacketFormat(int? packetVersion)
-        {
-            HostServices hostServices = new();
-            hostServices.SetNodeAffinity(string.Empty, NodeAffinity.OutOfProc);
-
-            ITranslator writer = TranslationHelpers.GetWriteTranslator();
-            writer.NegotiatedPacketVersion = packetVersion.HasValue ? (byte)packetVersion.Value : null;
-            ((ITranslatable)hostServices).Translate(writer);
-            string sentinel = "after host services";
-            writer.Translate(ref sentinel);
-
-            ITranslator reader = TranslationHelpers.GetReadTranslator();
-            reader.NegotiatedPacketVersion = writer.NegotiatedPacketVersion;
-            HostServices deserialized = new();
-            ((ITranslatable)deserialized).Translate(reader);
-            string translatedSentinel = null;
-            reader.Translate(ref translatedSentinel);
-            Assert.Equal(sentinel, translatedSentinel);
-            Assert.Equal(NodeAffinity.Any, deserialized.GetNodeAffinity("project.proj"));
-        }
-
-        /// <summary>
-        /// Test of clearing the affinity settings for all projects.
-        /// </summary>
-        [Fact]
-        public void TestClearingAffinities()
-        {
-            HostServices hostServices = new HostServices();
-
-            hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
-            Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
-            hostServices.SetNodeAffinity(null, NodeAffinity.OutOfProc);
-            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
-
-            hostServices.SetNodeAffinity(String.Empty, NodeAffinity.OutOfProc);
-            Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
-            hostServices.SetNodeAffinity(null, NodeAffinity.OutOfProc);
-            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
-        }
-
-        /// <summary>
-        /// Test which ensures that setting an OutOfProc affinity for a project with a host object throws.
-        /// </summary>
-        [Fact]
-        public void TestContradictoryAffinityCausesException_OutOfProc()
-        {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                HostServices hostServices = new HostServices();
-                TestHostObject hostObject = new TestHostObject();
-                hostServices.RegisterHostObject("project", "target", "task", hostObject);
-                Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
-                hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
-            });
-        }
-        /// <summary>
-        /// Test which ensures that setting an Any affinity for a project with a host object throws.
-        /// </summary>
-        [Fact]
-        public void TestContradictoryAffinityCausesException_Any()
-        {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                HostServices hostServices = new HostServices();
-                TestHostObject hostObject = new TestHostObject();
-                hostServices.RegisterHostObject("project", "target", "task", hostObject);
-                Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
-                hostServices.SetNodeAffinity("project", NodeAffinity.Any);
-            });
-        }
-
-        /// <summary>
-        /// Test which ensures that setting an Any affinity for a project with a remote host object does not throws.
-        /// </summary>
-        [WindowsOnlyFact]
-        [SupportedOSPlatform("windows")]
-        public void TestNoContradictoryRemoteHostObjectAffinity()
-        {
-            HostServices hostServices = new HostServices();
-            hostServices.RegisterHostObject("project", "target", "task", "moniker");
-            hostServices.SetNodeAffinity("project", NodeAffinity.Any);
-        }
-
-        /// <summary>
-        /// Test which ensures that setting the InProc affinity for a project with a host object is allowed.
-        /// </summary>
-        [Fact]
-        public void TestNonContradictoryAffinityAllowed()
-        {
-            HostServices hostServices = new HostServices();
-            TestHostObject hostObject = new TestHostObject();
             hostServices.RegisterHostObject("project", "target", "task", hostObject);
-            Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
-            hostServices.SetNodeAffinity("project", NodeAffinity.InProc);
-            Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
-        }
+        });
+    }
+    /// <summary>
+    /// Test which ensures the host object can be set for a project which has the Any affinity specifically set.
+    /// </summary>
+    [Fact]
+    public void TestNonContraditcoryHostObjectAllowed_Any()
+    {
+        HostServices hostServices = new HostServices();
+        TestHostObject hostObject = new TestHostObject();
+        hostServices.SetNodeAffinity("project", NodeAffinity.Any);
+        hostServices.RegisterHostObject("project", "target", "task", hostObject);
+        Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
+    }
 
-        /// <summary>
-        /// Test which ensures that setting a host object for a project with an out-of-proc affinity throws.
-        /// </summary>
-        [Fact]
-        public void TestContraditcoryHostObjectCausesException_OutOfProc()
+    /// <summary>
+    /// Test which ensures the remote host object cannot affect a project which has the Any affinity specifically set.
+    /// </summary>
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void TestRegisterRemoteHostObjectNoAffect_Any2()
+    {
+        HostServices hostServices = new HostServices();
+        hostServices.SetNodeAffinity("project", NodeAffinity.Any);
+        hostServices.RegisterHostObject("project", "target", "task", "moniker");
+        hostServices.GetNodeAffinity("project").ShouldBe(NodeAffinity.Any);
+    }
+
+    /// <summary>
+    /// Test which ensures the host object can be set for a project which has an out-of-proc affinity only because that affinity
+    /// is implied by being set generally for all project, not for that specific project.
+    /// </summary>
+    [Fact]
+    public void TestNonContraditcoryHostObjectAllowed_ImplicitOutOfProc()
+    {
+        HostServices hostServices = new HostServices();
+        TestHostObject hostObject = new TestHostObject();
+        hostServices.SetNodeAffinity(String.Empty, NodeAffinity.InProc);
+        hostServices.RegisterHostObject("project", "target", "task", hostObject);
+    }
+
+    /// <summary>
+    /// Test which ensures the host object can be set for a project which has the InProc affinity specifically set.
+    /// </summary>
+    [Fact]
+    public void TestNonContraditcoryHostObjectAllowed_InProc()
+    {
+        HostServices hostServices = new HostServices();
+        TestHostObject hostObject = new TestHostObject();
+        hostServices.SetNodeAffinity("project", NodeAffinity.InProc);
+        hostServices.RegisterHostObject("project", "target", "task", hostObject);
+    }
+
+    /// <summary>
+    /// Test which ensures the affinity for a project can be changed once the in process host object is registered
+    /// </summary>
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void TestAffinityChangeAfterRegisterInprocessHostObject()
+    {
+        HostServices hostServices = new HostServices();
+        hostServices.RegisterHostObject("project", "target", "task", "moniker");
+        hostServices.GetNodeAffinity("project").ShouldBe(NodeAffinity.Any);
+        TestHostObject hostObject = new TestHostObject();
+        hostServices.RegisterHostObject("project", "target", "task", hostObject);
+        hostServices.GetNodeAffinity("project").ShouldBe(NodeAffinity.InProc);
+    }
+
+    /// <summary>
+    /// Test which ensures the affinity for a project can be changed once the host object is cleared.
+    /// </summary>
+    [Fact]
+    public void TestAffinityChangeAfterClearingHostObject()
+    {
+        HostServices hostServices = new HostServices();
+        TestHostObject hostObject = new TestHostObject();
+        hostServices.RegisterHostObject("project", "target", "task", hostObject);
+        Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
+        hostServices.RegisterHostObject("project", "target", "task", hostObject: null);
+        Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
+        hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
+        Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
+    }
+
+    /// <summary>
+    /// Test which ensures that setting then clearing the host object restores a previously specifically set non-conflicting affinity.
+    /// </summary>
+    [Fact]
+    public void TestUnregisteringNonConflictingHostObjectRestoresOriginalAffinity()
+    {
+        HostServices hostServices = new HostServices();
+        TestHostObject hostObject = new TestHostObject();
+        hostServices.SetNodeAffinity(String.Empty, NodeAffinity.OutOfProc);
+        hostServices.SetNodeAffinity("project", NodeAffinity.Any);
+        Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project2"));
+        Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
+
+        hostServices.RegisterHostObject("project", "target", "task", hostObject);
+        Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
+        hostServices.RegisterHostObject("project", "target", "task", hostObject: null);
+        Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
+        Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project2"));
+    }
+
+    /// <summary>
+    /// Tests that creating a BuildRequestData with a non-conflicting HostServices and ProjectInstance works.
+    /// </summary>
+    [Fact]
+    public void TestProjectInstanceWithNonConflictingHostServices()
+    {
+        HostServices hostServices = new HostServices();
+        ProjectInstance project = CreateDummyProject("foo.proj");
+
+        BuildRequestData data = new BuildRequestData(project, Array.Empty<string>(), hostServices);
+
+        hostServices.SetNodeAffinity(project.FullPath, NodeAffinity.InProc);
+        BuildRequestData data2 = new BuildRequestData(project, Array.Empty<string>(), hostServices);
+    }
+
+    /// <summary>
+    /// Tests that unloading all projects from the project collection
+    /// discards the host services
+    /// </summary>
+    [Fact]
+    public void UnloadedProjectDiscardsHostServicesAllProjects()
+    {
+        HostServices hostServices = new HostServices();
+        TestHostObject th = new TestHostObject();
+        ProjectCollection.GlobalProjectCollection.HostServices = hostServices;
+        Project project = LoadDummyProject("foo.proj");
+
+        hostServices.RegisterHostObject(project.FullPath, "test", "Message", th);
+
+        ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
+
+        Assert.False(hostServices.HasInProcessHostObject(project.FullPath));
+    }
+
+    /// <summary>
+    /// Tests that unloading the last project from the project collection
+    /// discards the host services for that project
+    /// </summary>
+    [Fact]
+    public void UnloadedProjectDiscardsHostServices()
+    {
+        HostServices hostServices = new HostServices();
+        TestHostObject th = new TestHostObject();
+        ProjectCollection.GlobalProjectCollection.HostServices = hostServices;
+        Project project1 = LoadDummyProject("foo.proj");
+        Project project2 = LoadDummyProject("foo.proj");
+
+        hostServices.RegisterHostObject(project1.FullPath, "test", "Message", th);
+
+        ProjectCollection.GlobalProjectCollection.UnloadProject(project1);
+
+        Assert.True(hostServices.HasInProcessHostObject(project2.FullPath));
+
+        ProjectCollection.GlobalProjectCollection.UnloadProject(project2);
+
+        Assert.False(hostServices.HasInProcessHostObject(project2.FullPath));
+    }
+
+    /// <summary>
+    /// Tests that register overrides existing reigsted remote host object.
+    /// </summary>
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void TestRegisterOverrideExistingRegisted()
+    {
+        var hostServices = new HostServices();
+        var rot = new MockRunningObjectTable();
+        hostServices.SetTestRunningObjectTable(rot);
+
+        var moniker = Guid.NewGuid().ToString();
+        var remoteHost = new MockRemoteHostObject(1);
+        rot.Register(moniker, remoteHost).Dispose();
+        var newMoniker = Guid.NewGuid().ToString();
+        var newRemoteHost = new MockRemoteHostObject(2);
+        rot.Register(newMoniker, newRemoteHost).Dispose();
+        hostServices.RegisterHostObject(
+                "WithOutOfProc.targets",
+                "DisplayMessages",
+                "ATask",
+                remoteHost);
+
+        hostServices.RegisterHostObject("project", "test", "Message", moniker);
+        hostServices.RegisterHostObject("project", "test", "Message", newMoniker);
+        var resultObject = (ITestRemoteHostObject)hostServices.GetHostObject("project", "test", "Message");
+
+        resultObject.GetState().ShouldBe(2);
+    }
+
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void HostServicesDataReadsLegacyHostServicesPayload()
+    {
+        HostServices hostServices = CreateHostServicesWithRemoteRegistrations();
+        HostServicesData.Registration[] expectedRegistrations = GetRemoteRegistrations();
+        hostServices.ToHostServicesData().Registrations.ShouldBe(expectedRegistrations);
+
+        ITranslator writer = TranslationHelpers.GetWriteTranslator();
+        writer.Translate(ref hostServices);
+        writer.Writer.Write("after host services");
+
+        ITranslator reader = TranslationHelpers.GetReadTranslator();
+        HostServicesData data = null;
+        reader.Translate(ref data, HostServicesData.FactoryForDeserialization);
+
+        data.ShouldNotBeNull();
+        data.Registrations.ShouldBe(expectedRegistrations);
+        reader.Reader.ReadString().ShouldBe("after host services");
+
+        HostServices reconstructed = data.CreateHostServices<HostServices>();
+        reconstructed.GetHostObject("local.proj", "Build", "LocalTask").ShouldBeNull();
+        reconstructed.GetNodeAffinity("remote.proj").ShouldBe(NodeAffinity.Any);
+    }
+
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void LegacyHostServicesReadsHostServicesDataPayload()
+    {
+        HostServices hostServices = CreateHostServicesWithRemoteRegistrations();
+        HostServicesData data = hostServices.ToHostServicesData();
+
+        ITranslator writer = TranslationHelpers.GetWriteTranslator();
+        writer.Translate(ref data, HostServicesData.FactoryForDeserialization);
+        writer.Writer.Write("after host services");
+
+        ITranslator reader = TranslationHelpers.GetReadTranslator();
+        HostServices deserialized = null;
+        reader.Translate(ref deserialized);
+
+        deserialized.ShouldNotBeNull();
+        deserialized.ToHostServicesData().Registrations.ShouldBe(GetRemoteRegistrations());
+        deserialized.GetHostObject("local.proj", "Build", "LocalTask").ShouldBeNull();
+        deserialized.GetNodeAffinity("remote.proj").ShouldBe(NodeAffinity.Any);
+        reader.Reader.ReadString().ShouldBe("after host services");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HostServicesDataPreservesNullAndEmptyPayloads(bool hasHostServices)
+    {
+        HostServices hostServices = hasHostServices ? new HostServices() : null;
+        ITranslator writer = TranslationHelpers.GetWriteTranslator();
+        writer.Translate(ref hostServices);
+        writer.Writer.Write("after host services");
+
+        ITranslator reader = TranslationHelpers.GetReadTranslator();
+        HostServicesData data = null;
+        reader.Translate(ref data, HostServicesData.FactoryForDeserialization);
+        (data is not null).ShouldBe(hasHostServices);
+        if (hasHostServices)
         {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                HostServices hostServices = new HostServices();
-                TestHostObject hostObject = new TestHostObject();
-                hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
-                hostServices.RegisterHostObject("project", "target", "task", hostObject);
-            });
+            data.Registrations.ShouldBeEmpty();
         }
-        /// <summary>
-        /// Test which ensures the host object can be set for a project which has the Any affinity specifically set.
-        /// </summary>
-        [Fact]
-        public void TestNonContraditcoryHostObjectAllowed_Any()
+        reader.Reader.ReadString().ShouldBe("after host services");
+
+        writer = TranslationHelpers.GetWriteTranslator();
+        writer.Translate(ref data, HostServicesData.FactoryForDeserialization);
+        writer.Writer.Write("after host services");
+
+        reader = TranslationHelpers.GetReadTranslator();
+        HostServices deserialized = null;
+        reader.Translate(ref deserialized);
+        (deserialized is not null).ShouldBe(hasHostServices);
+        if (hasHostServices)
         {
-            HostServices hostServices = new HostServices();
-            TestHostObject hostObject = new TestHostObject();
-            hostServices.SetNodeAffinity("project", NodeAffinity.Any);
-            hostServices.RegisterHostObject("project", "target", "task", hostObject);
-            Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
+            deserialized.ToHostServicesData().Registrations.ShouldBeEmpty();
         }
+        reader.Reader.ReadString().ShouldBe("after host services");
+    }
 
-        /// <summary>
-        /// Test which ensures the remote host object cannot affect a project which has the Any affinity specifically set.
-        /// </summary>
-        [WindowsOnlyFact]
-        [SupportedOSPlatform("windows")]
-        public void TestRegisterRemoteHostObjectNoAffect_Any2()
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void HostServicesDataReconstructionPreservesLegacyLookupBehavior()
+    {
+        HostServicesData data = new(
+        [
+            new("project.proj", "Build", "Task", "first"),
+            new("project.proj", "Build", "Task", "ignored duplicate"),
+            new("PROJECT.PROJ", "Build", "Task", "upper"),
+            new("project.proj", "OtherTarget", "Task", "other"),
+        ]);
+
+        ITranslator writer = TranslationHelpers.GetWriteTranslator();
+        writer.Translate(ref data, HostServicesData.FactoryForDeserialization);
+        ITranslator reader = TranslationHelpers.GetReadTranslator();
+        HostServices legacy = null;
+        reader.Translate(ref legacy);
+
+        HostServices reconstructed = data.CreateHostServices<HostServices>();
+        reconstructed.ToHostServicesData().Registrations.ShouldBe(legacy.ToHostServicesData().Registrations);
+
+        MockRunningObjectTable rot = new();
+        MockRemoteHostObject firstHost = new(1);
+        MockRemoteHostObject upperHost = new(2);
+        MockRemoteHostObject otherHost = new(3);
+        using IDisposable firstRegistration = rot.Register("first", firstHost);
+        using IDisposable upperRegistration = rot.Register("upper", upperHost);
+        using IDisposable otherRegistration = rot.Register("other", otherHost);
+        reconstructed.SetTestRunningObjectTable(rot);
+        legacy.SetTestRunningObjectTable(rot);
+
+        HostServices[] servicesToCheck = [legacy, reconstructed];
+        foreach (HostServices services in servicesToCheck)
         {
-            HostServices hostServices = new HostServices();
-            hostServices.SetNodeAffinity("project", NodeAffinity.Any);
-            hostServices.RegisterHostObject("project", "target", "task", "moniker");
-            hostServices.GetNodeAffinity("project").ShouldBe(NodeAffinity.Any);
+            services.GetHostObject("project.proj", "Build", "Task").ShouldBeSameAs(firstHost);
+            services.GetHostObject("PROJECT.PROJ", "Build", "Task").ShouldBeSameAs(upperHost);
+            services.GetHostObject("Project.proj", "Build", "Task").ShouldBeNull();
+            services.GetHostObject("project.proj", "Build", "Namespace.Task").ShouldBeSameAs(firstHost);
+            services.GetHostObject("project.proj", "OtherTarget", "Task").ShouldBeSameAs(otherHost);
         }
+    }
 
-        /// <summary>
-        /// Test which ensures the host object can be set for a project which has an out-of-proc affinity only because that affinity
-        /// is implied by being set generally for all project, not for that specific project.
-        /// </summary>
-        [Fact]
-        public void TestNonContraditcoryHostObjectAllowed_ImplicitOutOfProc()
+    [Fact]
+    public void HostServicesDataCreatesIndependentReceivers()
+    {
+        HostServicesData data = new([]);
+        HostServices first = data.CreateHostServices<HostServices>();
+        HostServices second = data.CreateHostServices<HostServices>();
+        TestHostObject hostObject = new();
+        first.RegisterHostObject("project.proj", "Build", "Task", hostObject);
+
+        second.ShouldNotBeSameAs(first);
+        first.GetHostObject("project.proj", "Build", "Task").ShouldBeSameAs(hostObject);
+        second.GetHostObject("project.proj", "Build", "Task").ShouldBeNull();
+        second.GetNodeAffinity("project.proj").ShouldBe(NodeAffinity.Any);
+    }
+
+    private static HostServicesData.Registration[] GetRemoteRegistrations() =>
+    [
+        new("remote.proj", "Build", "Task", "first"),
+        new("remote.proj", "OtherTarget", "Task", "second"),
+        new("other.proj", "Build", "OtherTask", "third"),
+    ];
+
+    [SupportedOSPlatform("windows")]
+    private static HostServices CreateHostServicesWithRemoteRegistrations()
+    {
+        HostServices hostServices = new();
+        hostServices.SetNodeAffinity("remote.proj", NodeAffinity.OutOfProc);
+        hostServices.RegisterHostObject("local.proj", "Build", "LocalTask", new TestHostObject());
+        foreach (HostServicesData.Registration registration in GetRemoteRegistrations())
         {
-            HostServices hostServices = new HostServices();
-            TestHostObject hostObject = new TestHostObject();
-            hostServices.SetNodeAffinity(String.Empty, NodeAffinity.InProc);
-            hostServices.RegisterHostObject("project", "target", "task", hostObject);
+            hostServices.RegisterHostObject(registration.ProjectFile, registration.TargetName, registration.TaskName, registration.MonikerName);
         }
+        return hostServices;
+    }
 
-        /// <summary>
-        /// Test which ensures the host object can be set for a project which has the InProc affinity specifically set.
-        /// </summary>
-        [Fact]
-        public void TestNonContraditcoryHostObjectAllowed_InProc()
-        {
-            HostServices hostServices = new HostServices();
-            TestHostObject hostObject = new TestHostObject();
-            hostServices.SetNodeAffinity("project", NodeAffinity.InProc);
-            hostServices.RegisterHostObject("project", "target", "task", hostObject);
-        }
+    private static HostServices RoundTripBuildRequest(HostServices hostServices)
+    {
+        BuildRequest request = new(1, 1, 1, ["Build"], hostServices, BuildEventContext.Invalid, parentRequest: null);
+        ITranslator writer = TranslationHelpers.GetWriteTranslator();
+        request.Translate(writer);
+        string sentinel = "after build request";
+        writer.Translate(ref sentinel);
 
-        /// <summary>
-        /// Test which ensures the affinity for a project can be changed once the in process host object is registered
-        /// </summary>
-        [WindowsOnlyFact]
-        [SupportedOSPlatform("windows")]
-        public void TestAffinityChangeAfterRegisterInprocessHostObject()
-        {
-            HostServices hostServices = new HostServices();
-            hostServices.RegisterHostObject("project", "target", "task", "moniker");
-            hostServices.GetNodeAffinity("project").ShouldBe(NodeAffinity.Any);
-            TestHostObject hostObject = new TestHostObject();
-            hostServices.RegisterHostObject("project", "target", "task", hostObject);
-            hostServices.GetNodeAffinity("project").ShouldBe(NodeAffinity.InProc);
-        }
+        ITranslator reader = TranslationHelpers.GetReadTranslator();
+        BuildRequest deserialized = (BuildRequest)BuildRequest.FactoryForDeserialization(reader);
+        string translatedSentinel = null;
+        reader.Translate(ref translatedSentinel);
+        Assert.Equal(sentinel, translatedSentinel);
+        return deserialized.HostServices;
+    }
 
-        /// <summary>
-        /// Test which ensures the affinity for a project can be changed once the host object is cleared.
-        /// </summary>
-        [Fact]
-        public void TestAffinityChangeAfterClearingHostObject()
-        {
-            HostServices hostServices = new HostServices();
-            TestHostObject hostObject = new TestHostObject();
-            hostServices.RegisterHostObject("project", "target", "task", hostObject);
-            Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
-            hostServices.RegisterHostObject("project", "target", "task", hostObject: null);
-            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
-            hostServices.SetNodeAffinity("project", NodeAffinity.OutOfProc);
-            Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project"));
-        }
-
-        /// <summary>
-        /// Test which ensures that setting then clearing the host object restores a previously specifically set non-conflicting affinity.
-        /// </summary>
-        [Fact]
-        public void TestUnregisteringNonConflictingHostObjectRestoresOriginalAffinity()
-        {
-            HostServices hostServices = new HostServices();
-            TestHostObject hostObject = new TestHostObject();
-            hostServices.SetNodeAffinity(String.Empty, NodeAffinity.OutOfProc);
-            hostServices.SetNodeAffinity("project", NodeAffinity.Any);
-            Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project2"));
-            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
-
-            hostServices.RegisterHostObject("project", "target", "task", hostObject);
-            Assert.Equal(NodeAffinity.InProc, hostServices.GetNodeAffinity("project"));
-            hostServices.RegisterHostObject("project", "target", "task", hostObject: null);
-            Assert.Equal(NodeAffinity.Any, hostServices.GetNodeAffinity("project"));
-            Assert.Equal(NodeAffinity.OutOfProc, hostServices.GetNodeAffinity("project2"));
-        }
-
-        /// <summary>
-        /// Tests that creating a BuildRequestData with a non-conflicting HostServices and ProjectInstance works.
-        /// </summary>
-        [Fact]
-        public void TestProjectInstanceWithNonConflictingHostServices()
-        {
-            HostServices hostServices = new HostServices();
-            ProjectInstance project = CreateDummyProject("foo.proj");
-
-            BuildRequestData data = new BuildRequestData(project, Array.Empty<string>(), hostServices);
-
-            hostServices.SetNodeAffinity(project.FullPath, NodeAffinity.InProc);
-            BuildRequestData data2 = new BuildRequestData(project, Array.Empty<string>(), hostServices);
-        }
-
-        /// <summary>
-        /// Tests that unloading all projects from the project collection
-        /// discards the host services
-        /// </summary>
-        [Fact]
-        public void UnloadedProjectDiscardsHostServicesAllProjects()
-        {
-            HostServices hostServices = new HostServices();
-            TestHostObject th = new TestHostObject();
-            ProjectCollection.GlobalProjectCollection.HostServices = hostServices;
-            Project project = LoadDummyProject("foo.proj");
-
-            hostServices.RegisterHostObject(project.FullPath, "test", "Message", th);
-
-            ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
-
-            Assert.False(hostServices.HasInProcessHostObject(project.FullPath));
-        }
-
-        /// <summary>
-        /// Tests that unloading the last project from the project collection
-        /// discards the host services for that project
-        /// </summary>
-        [Fact]
-        public void UnloadedProjectDiscardsHostServices()
-        {
-            HostServices hostServices = new HostServices();
-            TestHostObject th = new TestHostObject();
-            ProjectCollection.GlobalProjectCollection.HostServices = hostServices;
-            Project project1 = LoadDummyProject("foo.proj");
-            Project project2 = LoadDummyProject("foo.proj");
-
-            hostServices.RegisterHostObject(project1.FullPath, "test", "Message", th);
-
-            ProjectCollection.GlobalProjectCollection.UnloadProject(project1);
-
-            Assert.True(hostServices.HasInProcessHostObject(project2.FullPath));
-
-            ProjectCollection.GlobalProjectCollection.UnloadProject(project2);
-
-            Assert.False(hostServices.HasInProcessHostObject(project2.FullPath));
-        }
-
-        /// <summary>
-        /// Tests that register overrides existing reigsted remote host object.
-        /// </summary>
-        [WindowsOnlyFact]
-        [SupportedOSPlatform("windows")]
-        public void TestRegisterOverrideExistingRegisted()
-        {
-            var hostServices = new HostServices();
-            var rot = new MockRunningObjectTable();
-            hostServices.SetTestRunningObjectTable(rot);
-
-            var moniker = Guid.NewGuid().ToString();
-            var remoteHost = new MockRemoteHostObject(1);
-            rot.Register(moniker, remoteHost).Dispose();
-            var newMoniker = Guid.NewGuid().ToString();
-            var newRemoteHost = new MockRemoteHostObject(2);
-            rot.Register(newMoniker, newRemoteHost).Dispose();
-            hostServices.RegisterHostObject(
-                    "WithOutOfProc.targets",
-                    "DisplayMessages",
-                    "ATask",
-                    remoteHost);
-
-            hostServices.RegisterHostObject("project", "test", "Message", moniker);
-            hostServices.RegisterHostObject("project", "test", "Message", newMoniker);
-            var resultObject = (ITestRemoteHostObject)hostServices.GetHostObject("project", "test", "Message");
-
-            resultObject.GetState().ShouldBe(2);
-        }
-
-        private static HostServices RoundTripBuildRequest(HostServices hostServices)
-        {
-            BuildRequest request = new(1, 1, 1, ["Build"], hostServices, BuildEventContext.Invalid, parentRequest: null);
-            ITranslator writer = TranslationHelpers.GetWriteTranslator();
-            request.Translate(writer);
-            string sentinel = "after build request";
-            writer.Translate(ref sentinel);
-
-            ITranslator reader = TranslationHelpers.GetReadTranslator();
-            BuildRequest deserialized = (BuildRequest)BuildRequest.FactoryForDeserialization(reader);
-            string translatedSentinel = null;
-            reader.Translate(ref translatedSentinel);
-            Assert.Equal(sentinel, translatedSentinel);
-            return deserialized.HostServices;
-        }
-
-        /// <summary>
-        /// Creates a dummy project instance.
-        /// </summary>
-        public ProjectInstance CreateDummyProject(string fileName)
-        {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+    /// <summary>
+    /// Creates a dummy project instance.
+    /// </summary>
+    public ProjectInstance CreateDummyProject(string fileName)
+    {
+        string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
  </Target>
 </Project>
 ");
-            using ProjectFromString projectFromString = new(contents, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion);
-            Project project = projectFromString.Project;
-            project.FullPath = fileName;
-            ProjectInstance instance = project.CreateProjectInstance();
+        using ProjectFromString projectFromString = new(contents, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion);
+        Project project = projectFromString.Project;
+        project.FullPath = fileName;
+        ProjectInstance instance = project.CreateProjectInstance();
 
-            return instance;
-        }
+        return instance;
+    }
 
-        /// <summary>
-        /// Loads a dummy project instance.
-        /// </summary>
-        public Project LoadDummyProject(string fileName)
-        {
-            string contents = ObjectModelHelpers.CleanupFileContents(@"
+    /// <summary>
+    /// Loads a dummy project instance.
+    /// </summary>
+    public Project LoadDummyProject(string fileName)
+    {
+        string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <Message text='hello' />
  </Target>
 </Project>
 ");
-            Dictionary<string, string> globals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            globals["UniqueDummy"] = Guid.NewGuid().ToString();
+        Dictionary<string, string> globals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        globals["UniqueDummy"] = Guid.NewGuid().ToString();
 
-            using var xmlReader = XmlReader.Create(new StringReader(contents));
-            Project project =
-                ProjectCollection.GlobalProjectCollection.LoadProject(
-                    xmlReader,
-                    globals,
-                    ObjectModelHelpers.MSBuildDefaultToolsVersion);
-            project.FullPath = fileName;
+        using var xmlReader = XmlReader.Create(new StringReader(contents));
+        Project project =
+            ProjectCollection.GlobalProjectCollection.LoadProject(
+                xmlReader,
+                globals,
+                ObjectModelHelpers.MSBuildDefaultToolsVersion);
+        project.FullPath = fileName;
 
-            return project;
-        }
+        return project;
+    }
 
+    /// <summary>
+    /// A dummy host object class.
+    /// </summary>
+    private sealed class TestHostObject : ITaskHost
+    {
         /// <summary>
-        /// A dummy host object class.
+        /// Constructor.
         /// </summary>
-        private sealed class TestHostObject : ITaskHost
+        public TestHostObject()
         {
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            public TestHostObject()
-            {
-            }
         }
     }
 }
