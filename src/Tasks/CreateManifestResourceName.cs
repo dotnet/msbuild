@@ -124,6 +124,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>The FileStream</returns>
         private static Stream CreateFileStreamOverNewFileStream(AbsolutePath path, FileMode mode, FileAccess access)
         {
+            // CodeQL [SM00414] False positive: path is a trusted project source/resource file path.
             return new FileStream(path, mode, access);
         }
 

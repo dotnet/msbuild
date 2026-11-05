@@ -7,6 +7,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 internal class EmbeddedResourceCheck : Check

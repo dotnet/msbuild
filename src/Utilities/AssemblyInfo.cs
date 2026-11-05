@@ -26,6 +26,7 @@ using System.Runtime.InteropServices;
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.SDKType))]
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.TargetDotNetFrameworkVersion))]
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.TargetPlatformSDK))]
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.TaskLoggingHelper))]
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.ToolLocationHelper))]
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.VisualStudioVersion))]
 

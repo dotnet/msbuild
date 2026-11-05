@@ -11,9 +11,6 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Console;
 #endif
-#if NETFRAMEWORK
-using Microsoft.Build.Shared;
-#endif
 
 namespace Microsoft.Build.Logging;
 

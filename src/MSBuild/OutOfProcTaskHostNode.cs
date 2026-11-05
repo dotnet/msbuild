@@ -7,21 +7,21 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Eventing;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.Utilities;
-using Microsoft.Build.Experimental.FileAccess;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Messaging;
 #endif
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Components.Caching;
+using Microsoft.Build.Eventing;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.FileAccess;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
