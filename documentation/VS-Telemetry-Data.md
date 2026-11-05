@@ -255,9 +255,10 @@ Other CI systems are detected for upload on exit and set `IsCI`, but they are no
 - `Microsoft.VisualStudio.Telemetry.dll`
 - `Microsoft.VisualStudio.RemoteControl.dll`
 - `Microsoft.VisualStudio.Utilities.Internal.dll`
-- `Newtonsoft.Json.dll`
 
 The 64-bit and ARM64 `MSBuild.exe` find them through `codeBase` entries in their `MSBuild.exe.config`. If the files can't be loaded, telemetry is disabled for that process, and the build is not affected.
+
+The telemetry SDK no longer requires `Newtonsoft.Json.dll`. NuGet's SDK resolver and restore tasks continue to use the copy deployed with NuGet.
 
 ### Diagnostics
 
