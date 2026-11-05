@@ -304,17 +304,6 @@ allows cache serialization; a late warning promoted to an error fails `EndBuild`
 The host directory captured before logger initialization is restored when the build ends.
 `BuildManager` resolves relative output-cache paths for CLI and API builds before entering the sentinel;
 the CLI resolves its entry-project path before constructing requests inside that scope.
-MT must not change which files evaluation reads. Ordinary MT file evaluation uses the non-MT startup
-directory when operating-environment management is enabled, with or without strict mode.
-If that directory no longer exists, both modes explicitly select the current MSBuild tools directory;
-MT applies the fallback virtually without changing process CWD.
-During strict MT builds, solution-wrapper and static-graph evaluation use an async-local copy of the
-captured host directory while process CWD remains the sentinel. This builder-owned pre-evaluation also
-needs the host directory when `SaveOperatingEnvironment` is false; that flag only opts ordinary project
-loading out of the startup-directory override. Pre-evaluated project instances are not reevaluated.
-Each evaluation scope restores the previous context before target/task execution, which still uses the
-request's own project directory. With wave 18.12 disabled, project loading still uses the virtual
-evaluation directory instead of resetting shared process CWD, removing the old opt-out-path race.
 Loggers must not change the process current directory. Failures to enable strict mode, recover its directory,
 or restore the host directory fail the build; they do not silently disable checks.
 After successful restoration, MSBuild attempts to remove the scope's own temporary directory.
@@ -346,6 +335,23 @@ Unannotated tasks retain their TaskHost working directory, but can still receive
 absolute path from project or engine code. When constructing a nested task, pass the parent's
 `TaskEnvironment` to it. Child MSBuild processes also use strict checks when they run
 multi-threaded and change wave 18.12 is enabled. A change-wave setting does not itself enable MT.
+
+## Evaluation working directory
+
+`-mt` must not change which files evaluation reads, so relative paths in property functions resolve
+against the same directory as in a non-MT build. Process CWD is not changed. Each evaluation uses
+an async-local directory and restores the previous one before target and task execution, which
+still use the request's own project directory.
+
+- **Project files:** with change wave 18.14 enabled, evaluation uses the startup directory when
+  `SaveOperatingEnvironment` is true. If that directory no longer exists, it uses the MSBuild tools
+  directory. With `SaveOperatingEnvironment` false or wave 18.14 disabled, evaluation stays
+  project-relative.
+- **Solution wrappers and static graphs:** in strict mode, evaluation uses the captured host
+  directory regardless of `SaveOperatingEnvironment` and wave 18.14, because process CWD is the sentinel.
+- **Project instances supplied by the host:** these are not reevaluated.
+
+Non-MT evaluation is unaffected.
 
 ## Interaction with `DisableInProcNode`
 

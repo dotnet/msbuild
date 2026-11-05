@@ -243,10 +243,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Dictionary<string, string> properties = new(MSBuildNameIgnoreCaseComparer.Default);
                 Internal.Utilities.EnumerateProperties(evaluation.Properties, properties,
                     static (dictionary, property) => dictionary.Add(property.Key, property.Value));
+                // Wave 18.12 also disables wave 18.14, which restores project-relative file evaluation.
+                bool hostRelative = graph || strict;
+                string expectedEvaluationPath = hostRelative
+                    ? expectedPath
+                    : Path.Combine(properties["MSBuildProjectDirectory"], "payload.txt");
                 properties["PayloadExists"].ShouldBe("True");
-                properties["Payload"].ShouldBe("host payload");
-                properties["FullPath"].ShouldBe(expectedPath);
-                properties["NormalizedPath"].ShouldBe(expectedPath);
+                properties["Payload"].ShouldBe(hostRelative ? "host payload" : "project payload");
+                properties["FullPath"].ShouldBe(expectedEvaluationPath);
+                properties["NormalizedPath"].ShouldBe(expectedEvaluationPath);
                 properties["AbsolutePayload"].ShouldBe("project payload");
             }
 
@@ -344,7 +349,63 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData(false, false, true)]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EvaluationWaveOptOutRetainsProjectRelativeFileEvaluation(bool graph)
+        {
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_14.ToString());
+            ChangeWaves.ResetStateForTests();
+            var hostDirectory = _env.CreateFolder();
+            var projectDirectory = _env.CreateFolder();
+            _env.CreateFile(hostDirectory, "payload.txt", "host payload");
+            _env.CreateFile(projectDirectory, "payload.txt", "project payload");
+            _env.SetCurrentDirectory(hostDirectory.Path);
+            _env.WithTransientTestState(new TransientStartupDirectory(Directory.GetCurrentDirectory()));
+            var project = _env.CreateFile(projectDirectory, "build.proj", """
+                <Project>
+                  <PropertyGroup>
+                    <Payload>$([System.IO.File]::ReadAllText('payload.txt'))</Payload>
+                  </PropertyGroup>
+                  <Target Name="Build">
+                    <Message Text="EVALUATED=$(Payload)" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+            manager.BeginBuild(new BuildParameters
+            {
+                MultiThreaded = true,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            });
+            try
+            {
+                if (graph)
+                {
+                    manager.BuildRequest(new GraphBuildRequestData(
+                        [new ProjectGraphEntryPoint(project.Path, new Dictionary<string, string>())],
+                        ["Build"], null, BuildRequestDataFlags.None, new GraphBuildOptions { Build = true })).OverallResult.ShouldBe(BuildResultCode.Success);
+                }
+                else
+                {
+                    manager.BuildRequest(new BuildRequestData(
+                        project.Path, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
+                }
+            }
+            finally
+            {
+                manager.EndBuild();
+            }
+
+            // Graph construction always reads the host directory; the sentinel is never a useful evaluation base.
+            logger.AssertLogContains(graph ? "EVALUATED=host payload" : "EVALUATED=project payload");
+            logger.AssertNoErrors();
+        }
+
+        [Theory]
         [InlineData(true, false, true)]
         [InlineData(true, true, true)]
         [InlineData(true, true, false)]
@@ -423,7 +484,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   </Target>
                 </Project>
                 """);
-            string expectedDirectory = saveEnvironment
+            // Disabling strict mode also disables wave 18.14, so file evaluation stays project-relative.
+            string expectedDirectory = saveEnvironment && strict
                 ? (deleteStartupDirectory ? toolsDirectory : startupPath)
                 : projectDirectory.Path;
             string expectedFile = Path.Combine(expectedDirectory, fileName);

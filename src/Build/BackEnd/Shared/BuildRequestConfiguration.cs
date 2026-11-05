@@ -531,12 +531,20 @@ namespace Microsoft.Build.BackEnd
 
             InitializeProject(componentHost.BuildParameters, () =>
             {
-                string evaluationBaseDirectory = componentHost.BuildParameters.SaveOperatingEnvironment
-                    ? GetStartupDirectoryForEvaluation()
-                    : null;
-                if (evaluationBaseDirectory is not null && !componentHost.BuildParameters.MultiThreaded)
+                // Strict mode keeps the sentinel as process CWD throughout project execution.
+                if (componentHost.BuildParameters.SaveOperatingEnvironment
+                    && (!componentHost.BuildParameters.MultiThreaded || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)))
                 {
-                    NativeMethodsShared.SetCurrentDirectory(evaluationBaseDirectory);
+                    try
+                    {
+                        NativeMethodsShared.SetCurrentDirectory(BuildParameters.StartupDirectory);
+                    }
+                    catch (DirectoryNotFoundException)
+                    {
+                        // Somehow the startup directory vanished. This can happen if build was started from a USB Key and it was removed.
+                        NativeMethodsShared.SetCurrentDirectory(
+                            BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+                    }
                 }
 
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
@@ -567,8 +575,10 @@ namespace Microsoft.Build.BackEnd
                 // Match non-MT evaluation without changing process CWD or the request's execution directory.
                 using EvaluationDirectoryScope evaluationDirectory = new(
                     componentHost.BuildParameters.MultiThreaded
-                        ? evaluationBaseDirectory
-                        : null);
+                        && componentHost.BuildParameters.SaveOperatingEnvironment
+                        && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)
+                            ? GetMultiThreadedEvaluationDirectory()
+                            : null);
 
                 return new ProjectInstance(
                     ProjectFullPath,
@@ -590,7 +600,7 @@ namespace Microsoft.Build.BackEnd
             });
         }
 
-        private static string GetStartupDirectoryForEvaluation()
+        private static string GetMultiThreadedEvaluationDirectory()
         {
             string startupDirectory = BuildParameters.StartupDirectory;
             try
@@ -620,6 +630,11 @@ namespace Microsoft.Build.BackEnd
             catch (Exception e) when (e is FileNotFoundException or DirectoryNotFoundException)
             {
                 // The launch directory can disappear, for example when a removable drive is disconnected.
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // The directory could not be inspected, which does not show that it is gone.
+                return startupDirectory;
             }
 
             return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
