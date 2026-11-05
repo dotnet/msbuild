@@ -3,7 +3,6 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using Microsoft.Build.Shared;
 
 #nullable enable
 
@@ -66,10 +65,7 @@ internal struct NodeStateStore
     [MethodImpl(MethodImplOptions.NoInlining)]
     private readonly void ThrowInvalidSlot(int slot)
     {
-        if (!_initialized)
-        {
-            ErrorUtilities.ThrowInvalidOperation("ConditionNodeStateNotInitialized");
-        }
+        Assumed.True(_initialized, "Condition node state storage is not initialized.");
 
         throw new ArgumentOutOfRangeException(nameof(slot));
     }

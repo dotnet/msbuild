@@ -674,8 +674,8 @@ public class ConditionEvaluator_Tests : IDisposable
     public void NodeStateAccessorValidatesSlotsAndClearsReusedBuffers()
     {
         NodeStateStore state = new();
-        Should.Throw<InvalidOperationException>(() => state.GetString(0)).Message.ShouldBe(
-            ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ConditionNodeStateNotInitialized"));
+        Should.Throw<InternalErrorException>(() => state.GetString(0)).Message.ShouldContain(
+            "Condition node state storage is not initialized.");
         state.Initialize(new NodeStateLayout(1));
         try
         {
@@ -686,7 +686,7 @@ public class ConditionEvaluator_Tests : IDisposable
             state.GetString(0).ExpandedValue = "first";
             state.GetString(0).ExpandedValue.ShouldBe("first");
             state.Release();
-            Should.Throw<InvalidOperationException>(() => state.GetString(0));
+            Should.Throw<InternalErrorException>(() => state.GetString(0));
 
             state.Initialize(new NodeStateLayout(1));
             state.GetString(0).ExpandedValue.ShouldBeNull();
