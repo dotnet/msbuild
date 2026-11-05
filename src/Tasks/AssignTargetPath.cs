@@ -114,7 +114,7 @@ namespace Microsoft.Build.Tasks
                     if (string.IsNullOrEmpty(targetPath))
                     {
                         bool hasRelativeSpecifiers = isWave18_14Enabled
-                            ? !string.IsNullOrEmpty(Files[i].ItemSpec) && FileUtilities.ContainsRelativePathSegments(Files[i].ItemSpec)
+                            ? FileUtilities.ContainsRelativePathSegments(Files[i].ItemSpec)
                             : Files[i].ItemSpec.Contains("." + Path.DirectorySeparatorChar);
 
                         if (// if the file path is relative
