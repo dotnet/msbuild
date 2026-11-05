@@ -341,7 +341,7 @@
       </trans-unit>
       <trans-unit id="InvalidPrecomputeValue">
         <source>MSBUILD : error MSB1074: Precompute mode value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1074: Precompute mode value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1074: Hodnota režimu předběžného výpočtu je neplatná. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1074: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
