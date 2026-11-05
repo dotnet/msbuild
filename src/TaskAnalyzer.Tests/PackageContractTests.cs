@@ -387,24 +387,10 @@ public sealed class PackageContractTests
         int expectedExitCode,
         params string[] arguments)
     {
-        string? candidateHostPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
-        string repoLocalDotnet = Path.Combine(repositoryRoot, ".dotnet", OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet");
-        string? dotnetRootEnv = Environment.GetEnvironmentVariable("DOTNET_ROOT");
-        string? envRootDotnet = dotnetRootEnv is { Length: > 0 }
-            ? Path.Combine(dotnetRootEnv, OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet")
-            : null;
-
-        string dotnetPath = candidateHostPath is { Length: > 0 } && File.Exists(candidateHostPath)
-            ? candidateHostPath
-            : File.Exists(repoLocalDotnet)
-                ? repoLocalDotnet
-                : envRootDotnet is not null && File.Exists(envRootDotnet)
-                    ? envRootDotnet
-                    : Environment.ProcessPath is { Length: > 0 } && File.Exists(Environment.ProcessPath)
-                        ? Environment.ProcessPath
-                        : repoLocalDotnet;
-        string dotnetRoot = Path.GetDirectoryName(dotnetPath)
-            ?? throw new InvalidOperationException($"The dotnet host path '{dotnetPath}' must include its installation directory.");
+        string dotnetRoot = Path.Combine(repositoryRoot, ".dotnet");
+        string dotnetPath = Path.Combine(
+            dotnetRoot,
+            OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet");
         var startInfo = new ProcessStartInfo(dotnetPath)
         {
             WorkingDirectory = workingDirectory,
@@ -413,7 +399,8 @@ public sealed class PackageContractTests
             UseShellExecute = false,
         };
 
-        // Recompute MSBuild paths from the selected host instead of inheriting the parent build's paths.
+        // The two-stage CI build launches tests with paths from the stage 1 bootstrap.
+        // Let this dotnet invocation recompute its MSBuild paths from the repository-local SDK.
         startInfo.Environment.Remove("MSBUILD_EXE_PATH");
         startInfo.Environment.Remove("MSBuildSDKsPath");
         startInfo.Environment.Remove("MSBuildExtensionsPath");
