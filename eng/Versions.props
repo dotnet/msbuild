@@ -57,7 +57,7 @@
     <!-- dotnet/runtime packages -->
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
 
-    <MicrosoftVisualStudioTelemetryVersion>17.14.18</MicrosoftVisualStudioTelemetryVersion>
+    <MicrosoftVisualStudioTelemetryVersion>18.4.50</MicrosoftVisualStudioTelemetryVersion>
     <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
 
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.

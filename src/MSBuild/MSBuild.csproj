@@ -119,6 +119,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
+    <!-- Preserve the VS setup payload after telemetry stopped depending on Newtonsoft.Json. -->
+    <PackageReference Include="Newtonsoft.Json" PrivateAssets="all" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <!-- for consistency with Framework via transitives -->
     <PackageReference Include="System.ValueTuple" ExcludeAssets="Build" />
