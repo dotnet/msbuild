@@ -58,7 +58,9 @@ extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
     pool:
-      name: VSEngSS-MicroBuild2022-1ES
+      name: VSEng-MicroBuildVSLegacy
+      image: server2025-microbuildVS2022-1es
+      os: windows
     stages:
     - stage: VSInsertion
       displayName: VS insertion

@@ -217,8 +217,10 @@ jobs:
       name: NetCore-Public
       demands: ImageOverride -equals windows.vs2022.amd64.open
     ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      name: VSEngSS-MicroBuild2022-1ES
-      demands: agent.os -equals Windows_NT
+      name: VSEng-MicroBuildVSLegacy
+      demands:
+      - agent.os -equals Windows_NT
+      - ImageOverride -equals server2025-microbuildVS2022-1es
   steps:
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2

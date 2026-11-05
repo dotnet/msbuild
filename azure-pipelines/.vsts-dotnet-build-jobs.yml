@@ -16,9 +16,10 @@ parameters:
 jobs:
 - job: Windows_NT
   pool:
-    name: VSEngSS-MicroBuild2022-1ES
+    name: VSEng-MicroBuildVSLegacy
     demands:
     - agent.os -equals Windows_NT
+    - ImageOverride -equals server2025-microbuildVS2022-1es
 
   timeoutInMinutes: 180
 

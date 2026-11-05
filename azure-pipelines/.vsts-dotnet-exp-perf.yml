@@ -64,7 +64,8 @@ extends:
     featureFlags:
       autoBaseline: true
     pool:
-      name: VSEngSS-MicroBuild2022-1ES
+      name: VSEng-MicroBuildVSLegacy
+      image: server2025-microbuildVS2022-1es
       os: windows
     sdl:
       # We generate SBOM ourselves, so don't need steps injected by 1ES.
