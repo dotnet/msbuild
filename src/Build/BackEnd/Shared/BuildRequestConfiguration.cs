@@ -627,7 +627,7 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
-            catch (Exception e) when (e is FileNotFoundException or DirectoryNotFoundException)
+            catch (Exception e) when (e is FileNotFoundException or DirectoryNotFoundException or DriveNotFoundException)
             {
                 // The launch directory can disappear, for example when a removable drive is disconnected.
             }
@@ -637,7 +637,7 @@ namespace Microsoft.Build.BackEnd
                 return startupDirectory;
             }
 
-            return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
+            return null;
         }
 
         private void InitializeProject(BuildParameters buildParameters, Func<ProjectInstance> loadProjectFromFile)
