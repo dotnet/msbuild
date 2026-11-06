@@ -572,6 +572,13 @@ namespace Microsoft.Build.BackEnd
                     projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
                 }
 
+                // Match non-MT evaluation without changing process CWD or the request's execution directory.
+                using EvaluationDirectoryScope evaluationDirectory = new(
+                    componentHost.BuildParameters.MultiThreaded
+                        && componentHost.BuildParameters.SaveOperatingEnvironment
+                            ? GetMultiThreadedEvaluationDirectory()
+                            : null);
+
                 return new ProjectInstance(
                     ProjectFullPath,
                     globalProperties,
@@ -590,6 +597,46 @@ namespace Microsoft.Build.BackEnd
                     submissionId,
                     projectLoadSettings);
             });
+        }
+
+        private static string GetMultiThreadedEvaluationDirectory()
+        {
+            string startupDirectory = BuildParameters.StartupDirectory;
+            try
+            {
+                FileAttributes attributes = File.GetAttributes(startupDirectory);
+                if ((attributes & FileAttributes.Directory) != 0)
+                {
+                    if ((attributes & FileAttributes.ReparsePoint) != 0)
+                    {
+#if FEATURE_MSIOREDIST
+                        var target = Microsoft.IO.Directory.ResolveLinkTarget(startupDirectory, returnFinalTarget: true);
+#else
+                        var target = Directory.ResolveLinkTarget(startupDirectory, returnFinalTarget: true);
+#endif
+                        if (target is not null)
+                        {
+                            attributes = File.GetAttributes(target.FullName);
+                        }
+                    }
+
+                    if ((attributes & FileAttributes.Directory) != 0)
+                    {
+                        return startupDirectory;
+                    }
+                }
+            }
+            catch (Exception e) when (e is FileNotFoundException or DirectoryNotFoundException or DriveNotFoundException)
+            {
+                // The launch directory can disappear, for example when a removable drive is disconnected.
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // The directory could not be inspected, which does not show that it is gone.
+                return startupDirectory;
+            }
+
+            return null;
         }
 
         private void InitializeProject(BuildParameters buildParameters, Func<ProjectInstance> loadProjectFromFile)

@@ -2023,17 +2023,21 @@ namespace Microsoft.Build.Execution
                 buildEventContext = new BuildEventContext(request.SubmissionId, 0, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
             }
 
-            var instances = ProjectInstance.LoadSolutionForBuild(
-                config.ProjectFullPath,
-                config.GlobalProperties,
-                config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null,
-                _buildParameters,
-                ((IBuildComponentHost)this).LoggingService,
-                buildEventContext,
-                false /* loaded by solution parser*/,
-                config.RequestedTargets,
-                SdkResolverService,
-                request.SubmissionId);
+            ProjectInstance[] instances;
+            using (new EvaluationDirectoryScope(_multiThreadedStrictModeScope?.BuildEntryDirectory))
+            {
+                instances = ProjectInstance.LoadSolutionForBuild(
+                    config.ProjectFullPath,
+                    config.GlobalProperties,
+                    config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null,
+                    _buildParameters,
+                    ((IBuildComponentHost)this).LoggingService,
+                    buildEventContext,
+                    false /* loaded by solution parser*/,
+                    config.RequestedTargets,
+                    SdkResolverService,
+                    request.SubmissionId);
+            }
 
             // The first instance is the traversal project, which goes into this configuration
             config.Project = instances[0];
@@ -2449,6 +2453,8 @@ namespace Microsoft.Build.Execution
             var projectGraph = submission.BuildRequestData.ProjectGraph;
             if (projectGraph == null)
             {
+                // Graph workers inherit the host evaluation directory before request environments exist.
+                using EvaluationDirectoryScope evaluationDirectory = new(_multiThreadedStrictModeScope?.BuildEntryDirectory);
                 projectGraph = new ProjectGraph(
                     submission.BuildRequestData.ProjectGraphEntryPoints,
                     ProjectCollection.GlobalProjectCollection,
