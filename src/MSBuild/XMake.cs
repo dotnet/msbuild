@@ -1575,6 +1575,14 @@ namespace Microsoft.Build.CommandLine
                         s_buildComplete.WaitOne();
                     }
 
+                    // Worker nodes never set s_hasBuildStarted, so they must be told to shut down explicitly.
+                    // Both calls are no-ops when the corresponding node type is not running in this process.
+                    if (s_isNodeMode && !s_isServerNode)
+                    {
+                        OutOfProcNode.RequestExternalShutdown();
+                        OutOfProcTaskHostNode.RequestExternalShutdown();
+                    }
+
                     s_cancelComplete.Set(); // This will release our main Execute method so we can finally exit.
                 }
                 finally
