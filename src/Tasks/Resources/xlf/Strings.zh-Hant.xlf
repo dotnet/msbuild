@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.SkippingUnchangedFile">
         <source>Skipping write to file "{0}" because content would not change.</source>
-        <target state="new">Skipping write to file "{0}" because content would not change.</target>
+        <target state="translated">因為內容不會變更，所以正在跳過寫入檔案 "{0}" 的作業。</target>
         <note>{0} is the path to the generated Win32 manifest file.</note>
       </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
