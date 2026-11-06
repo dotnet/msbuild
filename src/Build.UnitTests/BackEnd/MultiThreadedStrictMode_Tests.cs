@@ -245,15 +245,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Dictionary<string, string> properties = new(MSBuildNameIgnoreCaseComparer.Default);
                 Internal.Utilities.EnumerateProperties(evaluation.Properties, properties,
                     static (dictionary, property) => dictionary.Add(property.Key, property.Value));
-                // Wave 18.12 also disables wave 18.14, which restores project-relative file evaluation.
-                bool hostRelative = graph || strict;
-                string expectedEvaluationPath = hostRelative
-                    ? expectedPath
-                    : Path.Combine(properties["MSBuildProjectDirectory"], "payload.txt");
                 properties["PayloadExists"].ShouldBe("True");
-                properties["Payload"].ShouldBe(hostRelative ? "host payload" : "project payload");
-                properties["FullPath"].ShouldBe(expectedEvaluationPath);
-                properties["NormalizedPath"].ShouldBe(expectedEvaluationPath);
+                properties["Payload"].ShouldBe("host payload");
+                properties["FullPath"].ShouldBe(expectedPath);
+                properties["NormalizedPath"].ShouldBe(expectedPath);
                 properties["AbsolutePayload"].ShouldBe("project payload");
             }
 
@@ -351,72 +346,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData(false, false)]
-        [InlineData(false, true)]
-        [InlineData(true, false)]
-        [InlineData(true, true)]
-        public void EvaluationWaveOptOutRetainsProjectRelativeFileEvaluation(bool graph, bool missingStartupDirectory)
-        {
-            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_14.ToString());
-            ChangeWaves.ResetStateForTests();
-            var hostDirectory = _env.CreateFolder();
-            var projectDirectory = _env.CreateFolder();
-            _env.CreateFile(hostDirectory, "payload.txt", "host payload");
-            _env.CreateFile(projectDirectory, "payload.txt", "project payload");
-            _env.SetCurrentDirectory(hostDirectory.Path);
-            string startupDirectory = Directory.GetCurrentDirectory();
-            if (missingStartupDirectory)
-            {
-                startupDirectory = _env.CreateFolder().Path;
-                Directory.Delete(startupDirectory);
-            }
-
-            _env.WithTransientTestState(new TransientStartupDirectory(startupDirectory));
-            var project = _env.CreateFile(projectDirectory, "build.proj", """
-                <Project>
-                  <PropertyGroup>
-                    <Payload>$([System.IO.File]::ReadAllText('payload.txt'))</Payload>
-                  </PropertyGroup>
-                  <Target Name="Build">
-                    <Message Text="EVALUATED=$(Payload)" Importance="high" />
-                  </Target>
-                </Project>
-                """);
-
-            MockLogger logger = new(_output);
-            using BuildManager manager = new();
-            manager.BeginBuild(new BuildParameters
-            {
-                MultiThreaded = true,
-                ShutdownInProcNodeOnBuildFinish = true,
-                EnableNodeReuse = false,
-                Loggers = [logger],
-            });
-            try
-            {
-                if (graph)
-                {
-                    manager.BuildRequest(new GraphBuildRequestData(
-                        [new ProjectGraphEntryPoint(project.Path, new Dictionary<string, string>())],
-                        ["Build"], null, BuildRequestDataFlags.None, new GraphBuildOptions { Build = true })).OverallResult.ShouldBe(BuildResultCode.Success);
-                }
-                else
-                {
-                    manager.BuildRequest(new BuildRequestData(
-                        project.Path, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
-                }
-            }
-            finally
-            {
-                manager.EndBuild();
-            }
-
-            // Graph construction always reads the host directory; the sentinel is never a useful evaluation base.
-            logger.AssertLogContains(graph ? "EVALUATED=host payload" : "EVALUATED=project payload");
-            logger.AssertNoErrors();
-        }
-
-        [Theory]
         [InlineData(false, false, true)]
         [InlineData(false, true, true)]
         [InlineData(true, false, true)]
@@ -453,9 +382,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory]
         [InlineData(true, null, true, true, "project payload")]
         [InlineData(true, null, false, true, "host payload")]
-        [InlineData(true, "18.14", false, true, "project payload")]
-        [InlineData(true, "18.14", true, true, "project payload")]
         [InlineData(true, null, true, false, "project payload")]
+        [InlineData(true, "18.12", false, true, "host payload")]
         [InlineData(true, "18.12", true, true, "host payload")]
         [InlineData(false, null, true, true, "host payload")]
         public void CachedProjectEvaluationPreservesDirectoryContext(
@@ -510,9 +438,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 .ShouldHaveSucceeded();
 
             string evaluationDirectory = expectedPayload is "host payload" ? originalDirectory : projectDirectory.Path;
+            // Non-MT process CWD resolves symlinked temp-directory parents on macOS.
+            string executionDirectory = multiThreaded
+                ? projectDirectory.Path
+                : NativeMethodsShared.RealPath(projectDirectory.Path) ?? projectDirectory.Path;
             logger.AssertLogContains($"EVALUATED={expectedPayload}");
             logger.AssertLogContains($"EVALUATION_PATH={Path.Combine(evaluationDirectory, "payload.txt")}");
-            logger.AssertLogContains($"EXECUTION_PATH={Path.Combine(projectDirectory.Path, "payload.txt")}");
+            logger.AssertLogContains($"EXECUTION_PATH={Path.Combine(executionDirectory, "payload.txt")}");
             cache.Requests.ShouldHaveSingleItem().ProjectInstance!.GetPropertyValue("Payload").ShouldBe(expectedPayload);
             logger.AssertNoErrors();
             logger.AssertNoWarnings();
@@ -588,7 +520,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 expectedDirectory = originalDirectory;
             }
-            else if (saveEnvironment && strict && !deleteStartupDirectory)
+            else if (saveEnvironment && !deleteStartupDirectory)
             {
                 expectedDirectory = startupPath;
             }
@@ -608,7 +540,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             logger.AssertLogContains($"PROBE=True LENGTH={expectedLength}");
             logger.AssertLogContains($"EVALUATED_PATH={expectedFile}");
-            logger.AssertLogContains($"EXECUTED_PATH={Path.Combine(projectDirectory.Path, fileName)}");
+            string executionDirectory = multiThreaded
+                ? projectDirectory.Path
+                : NativeMethodsShared.RealPath(projectDirectory.Path) ?? projectDirectory.Path;
+            logger.AssertLogContains($"EXECUTED_PATH={Path.Combine(executionDirectory, fileName)}");
             logger.AssertNoErrors();
             logger.AssertNoWarnings();
             if (multiThreaded)

@@ -576,7 +576,6 @@ namespace Microsoft.Build.BackEnd
                 using EvaluationDirectoryScope evaluationDirectory = new(
                     componentHost.BuildParameters.MultiThreaded
                         && componentHost.BuildParameters.SaveOperatingEnvironment
-                        && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)
                             ? GetMultiThreadedEvaluationDirectory()
                             : null);
 

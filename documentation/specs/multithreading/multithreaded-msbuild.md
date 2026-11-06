@@ -338,22 +338,13 @@ multi-threaded and change wave 18.12 is enabled. A change-wave setting does not 
 
 ## Evaluation working directory
 
-Evaluation directory overrides are async-local and do not change process CWD. Each scope restores
-the previous directory before target and task execution, which still use the request's own project
-directory.
+`-mt` must not change which files evaluation reads. Relative paths resolve as in a non-MT build:
+against the startup directory for project files, and the host directory for solution wrappers and
+static graphs. MSBuild sets this directory through an async-local value, not process CWD, and
+restores it before targets and tasks run, which still use the project directory.
 
-- **Project files:** with change wave 18.14 enabled and `SaveOperatingEnvironment` true, MT
-  evaluation uses an existing startup directory, matching non-MT evaluation. A missing directory,
-  unavailable drive, or dangling directory link leaves evaluation project-relative; it does not
-  select the MSBuild tools directory. With `SaveOperatingEnvironment` false or wave 18.14 disabled,
-  evaluation also stays project-relative.
-- **Global project caches:** strict-mode pre-evaluation establishes the project directory before
-  applying the project-file rules above.
-- **Solution wrappers and static graphs:** in strict mode, evaluation uses the captured host
-  directory regardless of `SaveOperatingEnvironment` and wave 18.14, because process CWD is the sentinel.
-- **Project instances supplied by the host:** these are not reevaluated.
-
-Non-MT evaluation is unaffected.
+Project-file evaluation stays project-relative when `SaveOperatingEnvironment` is false or the
+startup directory no longer exists. This includes evaluation done by a project cache.
 
 ## Interaction with `DisableInProcNode`
 
