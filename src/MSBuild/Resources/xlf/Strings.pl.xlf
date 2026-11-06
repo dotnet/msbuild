@@ -302,10 +302,10 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      separates creation of the build graph from execution
                      of that graph.
     </source>
-        <target state="new">  -precompute[:true|false]
-                     Enables EXPERIMENTAL precompute mode, which
-                     separates creation of the build graph from execution
-                     of that graph.
+        <target state="translated">  -precompute[:true|false]
+                     Włącza EKSPERYMENTALNY tryb wstępnego obliczania, który
+                     oddziela tworzenie grafu kompilacji od wykonania
+                     tego grafu.
     </target>
         <note />
       </trans-unit>
@@ -341,7 +341,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="InvalidPrecomputeValue">
         <source>MSBUILD : error MSB1074: Precompute mode value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1074: Precompute mode value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1074: wartość trybu wstępnego obliczania jest nieprawidłowa. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1074: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
