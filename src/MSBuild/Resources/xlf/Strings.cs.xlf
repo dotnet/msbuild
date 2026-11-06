@@ -302,10 +302,10 @@
                      separates creation of the build graph from execution
                      of that graph.
     </source>
-        <target state="new">  -precompute[:true|false]
-                     Enables EXPERIMENTAL precompute mode, which
-                     separates creation of the build graph from execution
-                     of that graph.
+        <target state="translated">  -precompute[:true|false]
+                     Přepínač povoluje EXPERIMENTÁLNÍ režim předběžných výpočtů, který
+                     odděluje vytváření grafu sestavení od provádění
+                     tohoto grafu.
     </target>
         <note />
       </trans-unit>
