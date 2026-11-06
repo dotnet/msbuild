@@ -2617,8 +2617,8 @@ namespace Microsoft.Build.Execution
                 ProjectTargetInstance.FactoryForDeserialization,
                 capacity => new RetrievableEntryHashSet<ProjectTargetInstance>(capacity, MSBuildNameIgnoreCaseComparer.Default));
 
-            translator.TranslateDictionary(ref _beforeTargets, TranslatorForTargetSpecificDictionaryKey, TranslatorForTargetSpecificDictionaryValue, count => new Dictionary<string, List<TargetSpecification>>(count, MSBuildNameIgnoreCaseComparer.Default));
-            translator.TranslateDictionary(ref _afterTargets, TranslatorForTargetSpecificDictionaryKey, TranslatorForTargetSpecificDictionaryValue, count => new Dictionary<string, List<TargetSpecification>>(count, MSBuildNameIgnoreCaseComparer.Default));
+            translator.TranslateDictionary(ref _beforeTargets, TranslatorForTargetSpecificDictionaryKey, TranslatorForTargetSpecificDictionaryValue, count => new Dictionary<string, List<TargetSpecification>>(count, StringComparer.OrdinalIgnoreCase));
+            translator.TranslateDictionary(ref _afterTargets, TranslatorForTargetSpecificDictionaryKey, TranslatorForTargetSpecificDictionaryValue, count => new Dictionary<string, List<TargetSpecification>>(count, StringComparer.OrdinalIgnoreCase));
 
             translator.Translate(ref _defaultTargets);
             translator.Translate(ref _initialTargets);
