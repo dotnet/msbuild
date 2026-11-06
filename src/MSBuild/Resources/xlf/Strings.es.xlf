@@ -302,10 +302,10 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                      separates creation of the build graph from execution
                      of that graph.
     </source>
-        <target state="new">  -precompute[:true|false]
-                     Enables EXPERIMENTAL precompute mode, which
-                     separates creation of the build graph from execution
-                     of that graph.
+        <target state="translated">  -precompute[:true|false]
+                     Habilita el modo de preequipo EXPERIMENTAL, que
+                     separa la creación del gráfico de compilación de la ejecución
+                     de ese gráfico.
     </target>
         <note />
       </trans-unit>
