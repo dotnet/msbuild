@@ -48,13 +48,6 @@ namespace Microsoft.Build.Evaluation
         internal abstract bool IsUnexpandedValueEmpty();
 
         /// <summary>
-        /// If any expression nodes cache any state for the duration of evaluation,
-        /// now's the time to clean it up
-        /// </summary>
-        /// <remarks>Used by the Wave 18.14 opt-out path.</remarks>
-        internal abstract void ResetState();
-
-        /// <summary>
         /// The main evaluate entry point for expression trees
         /// </summary>
         /// <param name="state"></param>

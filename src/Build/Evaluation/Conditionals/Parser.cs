@@ -32,16 +32,14 @@ namespace Microsoft.Build.Evaluation
     /// Parses MSBuild condition expressions.
     /// </summary>
     /// <remarks>
-    /// Use <see cref="ParseForEvaluation"/> to obtain a <see cref="ParsedCondition"/> and evaluate it
+    /// Use <see cref="Parse"/> to obtain a <see cref="ParsedCondition"/> and evaluate it
     /// through <see cref="ParsedCondition.Evaluate"/> so private state is initialized and released.
-    /// <see cref="Parse"/> returns a mutable legacy tree that requires exclusive evaluation and reset.
     /// </remarks>
     internal sealed class Parser
     {
         private Scanner _lexer;
         private ParserOptions _options;
         private ElementLocation _elementLocation;
-        private bool _usePrivateState;
         internal int errorPosition = 0; // useful for unit tests
 
         // Slots are local to a parsed condition.
@@ -90,28 +88,10 @@ namespace Microsoft.Build.Evaluation
             // nothing to see here, move along.
         }
 
-        internal ParsedCondition ParseForEvaluation(
+        internal ParsedCondition Parse(
             string expression,
             ParserOptions optionSettings,
             ElementLocation elementLocation)
-        {
-            GenericExpressionNode root = ParseCore(expression, optionSettings, elementLocation, usePrivateState: true);
-            return new ParsedCondition(
-                root,
-                new NodeStateLayout(StringNodeStateCount));
-        }
-
-        /// <summary>
-        /// Parses a mutable legacy tree. Use <see cref="ParseForEvaluation"/> for shared trees.
-        /// </summary>
-        internal GenericExpressionNode Parse(string expression, ParserOptions optionSettings, ElementLocation elementLocation)
-            => ParseCore(expression, optionSettings, elementLocation, usePrivateState: false);
-
-        private GenericExpressionNode ParseCore(
-            string expression,
-            ParserOptions optionSettings,
-            ElementLocation elementLocation,
-            bool usePrivateState)
         {
             // We currently have no support (and no scenarios) for disallowing property references
             // in Conditions.
@@ -119,7 +99,6 @@ namespace Microsoft.Build.Evaluation
 
             _options = optionSettings;
             _elementLocation = elementLocation;
-            _usePrivateState = usePrivateState;
             StringNodeStateCount = 0;
 
             _lexer = new Scanner(expression, _options);
@@ -134,7 +113,7 @@ namespace Microsoft.Build.Evaluation
                 errorPosition = _lexer.GetErrorPosition();
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnexpectedTokenInCondition", expression, _lexer.IsNextString(), errorPosition);
             }
-            return node;
+            return new ParsedCondition(node, new NodeStateLayout(StringNodeStateCount));
         }
 
         //
@@ -402,9 +381,7 @@ namespace Microsoft.Build.Evaluation
 
         // Shared trees assign state slots only to expandable nodes; literals need no state (-1).
         private StringExpressionNode CreateStringNode(string value, bool expandable) =>
-            _usePrivateState
-                ? new StringExpressionNode(value, expandable, expandable ? StringNodeStateCount++ : -1)
-                : new StringExpressionNode(value, expandable);
+            new StringExpressionNode(value, expandable, expandable ? StringNodeStateCount++ : -1);
 
         private bool Same(string expression, Token.TokenType token)
         {

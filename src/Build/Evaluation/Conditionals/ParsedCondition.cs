@@ -26,7 +26,7 @@ internal readonly record struct ParsedCondition(GenericExpressionNode Root, Node
         conditionParser.LogBuildEventContext = loggingContext?.BuildEventContext ?? BuildEventContext.Invalid;
         #endregion
 
-        return conditionParser.ParseForEvaluation(condition, options, elementLocation);
+        return conditionParser.Parse(condition, options, elementLocation);
     }
 
     internal bool Evaluate(ConditionEvaluator.IConditionEvaluationState state)

@@ -14,8 +14,6 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal abstract class MultipleComparisonNode : OperatorExpressionNode
     {
-        private bool _conditionedPropertiesUpdated = false;
-
         /// <summary>
         /// Compare numbers
         /// </summary>
@@ -101,27 +99,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Reset temporary state
-        /// </summary>
-        /// <remarks>Used by the Wave 18.14 opt-out path.</remarks>
-        internal override void ResetState()
-        {
-            base.ResetState();
-            _conditionedPropertiesUpdated = false;
-        }
-
-        /// <summary>
-        /// Updates the conditioned properties table if it hasn't already been done.
+        /// Updates the conditioned properties table.
         /// </summary>
         private void UpdateConditionedProperties(ConditionEvaluator.IConditionEvaluationState state)
         {
             if (state.ConditionedPropertiesInProject == null)
-            {
-                return;
-            }
-
-            bool usePrivateState = state.NodeStates.IsInitialized;
-            if (!usePrivateState && _conditionedPropertiesUpdated)
             {
                 return;
             }
@@ -143,11 +125,6 @@ namespace Microsoft.Build.Evaluation
                     state.ConditionedPropertiesInProject,
                      rightUnexpandedValue,
                      LeftChild.GetExpandedValue(state));
-            }
-
-            if (!usePrivateState)
-            {
-                _conditionedPropertiesUpdated = true;
             }
         }
     }

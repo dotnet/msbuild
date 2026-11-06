@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
             string fileThatMustAlwaysExist = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(fileThatMustAlwaysExist, "foo");
             string command = "Exists('" + fileThatMustAlwaysExist + "')";
-            tree = p.ParseForEvaluation(command, ParserOptions.AllowAll, ElementLocation.Empty);
+            tree = p.Parse(command, ParserOptions.AllowAll, ElementLocation.Empty);
 
             ConditionEvaluator.IConditionEvaluationState state =
                             new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
@@ -435,7 +435,7 @@ namespace Microsoft.Build.UnitTests
                 expander.Metadata = new StringMetadataTable(null);
             }
 
-            ParsedCondition tree = p.ParseForEvaluation(expression, ParserOptions.AllowAll, MockElementLocation.Instance);
+            ParsedCondition tree = p.Parse(expression, ParserOptions.AllowAll, MockElementLocation.Instance);
 
             if (state == null)
             {
@@ -472,7 +472,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 fExceptionCaught = false;
-                ParsedCondition tree = p.ParseForEvaluation(expression, ParserOptions.AllowAll, MockElementLocation.Instance);
+                ParsedCondition tree = p.Parse(expression, ParserOptions.AllowAll, MockElementLocation.Instance);
                 if (state == null)
                 {
                     state =

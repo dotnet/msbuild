@@ -55,18 +55,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// If any expression nodes cache any state for the duration of evaluation,
-        /// now's the time to clean it up
-        /// </summary>
-        /// <remarks>Used by the Wave 18.14 opt-out path.</remarks>
-        internal override void ResetState()
-        {
-            LeftChild?.ResetState();
-            
-            RightChild?.ResetState();
-        }
-
-        /// <summary>
         /// Storage for the left child
         /// </summary>
         internal GenericExpressionNode LeftChild { set; get; }

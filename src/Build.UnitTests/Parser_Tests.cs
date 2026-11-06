@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
         {
             Console.WriteLine("SimpleParseTest()");
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse("$(foo)", ParserOptions.AllowAll, _elementLocation);
+            ParsedCondition tree = p.Parse("$(foo)", ParserOptions.AllowAll, _elementLocation);
 
 
             tree = p.Parse("$(foo)=='hello'", ParserOptions.AllowAll, _elementLocation);
@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests
         {
             Console.WriteLine("ComplexParseTest()");
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse("$(foo)", ParserOptions.AllowAll, _elementLocation);
+            ParsedCondition tree = p.Parse("$(foo)", ParserOptions.AllowAll, _elementLocation);
 
 
             tree = p.Parse("($(foo) or $(bar)) and $(baz)", ParserOptions.AllowAll, _elementLocation);
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests
         {
             Console.WriteLine("NegationParseTest()");
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse("!true", ParserOptions.AllowAll, _elementLocation);
+            ParsedCondition tree = p.Parse("!true", ParserOptions.AllowAll, _elementLocation);
 
             tree = p.Parse("!(true)", ParserOptions.AllowAll, _elementLocation);
 
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests
         {
             Console.WriteLine("FunctionCallParseTest()");
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse("SimpleFunctionCall()", ParserOptions.AllowAll, _elementLocation);
+            ParsedCondition tree = p.Parse("SimpleFunctionCall()", ParserOptions.AllowAll, _elementLocation);
 
             tree = p.Parse("SimpleFunctionCall( 1234 )", ParserOptions.AllowAll, _elementLocation);
             tree = p.Parse("SimpleFunctionCall( true )", ParserOptions.AllowAll, _elementLocation);
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests
         {
             Console.WriteLine("FunctionCallParseTest()");
             Parser p = new Parser();
-            GenericExpressionNode tree;
+            ParsedCondition tree;
             bool fExceptionCaught = false;
             try
             {
@@ -217,18 +217,18 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("ItemFuncParseTest()");
 
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse("@(item->foo('ab'))",
+            ParsedCondition tree = p.Parse("@(item->foo('ab'))",
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
-            Assert.IsType<StringExpressionNode>(tree);
-            Assert.Equal("@(item->foo('ab'))", tree.GetUnexpandedValue(null));
+            Assert.IsType<StringExpressionNode>(tree.Root);
+            Assert.Equal("@(item->foo('ab'))", tree.Root.GetUnexpandedValue(null));
 
             tree = p.Parse("!@(item->foo())",
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
-            Assert.IsType<NotExpressionNode>(tree);
+            Assert.IsType<NotExpressionNode>(tree.Root);
 
             tree = p.Parse("(@(item->foo('ab')) and @(item->foo('bc')))",
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
-            Assert.IsType<AndExpressionNode>(tree);
+            Assert.IsType<AndExpressionNode>(tree.Root);
         }
 
         [Fact]
@@ -236,7 +236,7 @@ namespace Microsoft.Build.UnitTests
         {
             Console.WriteLine("FunctionCallParseTest()");
             Parser p = new Parser();
-            GenericExpressionNode tree;
+            ParsedCondition tree;
             bool fExceptionCaught = false;
             try
             {
@@ -317,7 +317,7 @@ namespace Microsoft.Build.UnitTests
         {
             Console.WriteLine("NegativeTests()");
             Parser p = new Parser();
-            GenericExpressionNode tree;
+            ParsedCondition tree;
             bool fExceptionCaught;
 
             try
@@ -539,34 +539,21 @@ namespace Microsoft.Build.UnitTests
         [InlineData("((true Or false And true))", 1)]
         public void OperatorWarningsRespectParentheses(string expression, int expectedWarningCount)
         {
-            VerifyWarnings(usePrivateState: false);
-            VerifyWarnings(usePrivateState: true);
-
-            void VerifyWarnings(bool usePrivateState)
+            int warningCount = 0;
+            Parser parser = new()
             {
-                int warningCount = 0;
-                Parser parser = new()
+                LoggingServices = new MockLoggingService(message =>
                 {
-                    LoggingServices = new MockLoggingService(message =>
+                    if (message == "ConditionMaybeEvaluatedIncorrectly")
                     {
-                        if (message == "ConditionMaybeEvaluatedIncorrectly")
-                        {
-                            warningCount++;
-                        }
-                    })
-                };
+                        warningCount++;
+                    }
+                })
+            };
 
-                if (usePrivateState)
-                {
-                    parser.ParseForEvaluation(expression, ParserOptions.AllowAll, _elementLocation);
-                }
-                else
-                {
-                    parser.Parse(expression, ParserOptions.AllowAll, _elementLocation);
-                }
+            parser.Parse(expression, ParserOptions.AllowAll, _elementLocation);
 
-                warningCount.ShouldBe(expectedWarningCount);
-            }
+            warningCount.ShouldBe(expectedWarningCount);
         }
 
         // see https://github.com/dotnet/msbuild/issues/5436

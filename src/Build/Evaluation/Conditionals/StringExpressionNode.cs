@@ -24,7 +24,6 @@ namespace Microsoft.Build.Evaluation
         internal int StateSlot { get; }
 
         private readonly string _value;
-        private string _cachedExpandedValue;
 
         /// <summary>
         /// Whether the string potentially has expandable content,
@@ -32,19 +31,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly bool _expandable;
         private readonly bool _isMSBuildToolsVersionExpansion;
-        private readonly bool _usePrivateState;
 
-        internal StringExpressionNode(string value, bool expandable)
+        internal StringExpressionNode(string value, bool expandable, int stateSlot)
         {
             _value = value;
             _expandable = expandable;
-            StateSlot = -1;
-        }
-
-        internal StringExpressionNode(string value, bool expandable, int stateSlot)
-            : this(value, expandable)
-        {
-            _usePrivateState = true;
             _isMSBuildToolsVersionExpansion = expandable &&
                 string.Equals(value, "$(MSBuildToolsVersion)", StringComparison.OrdinalIgnoreCase);
             StateSlot = stateSlot;
@@ -90,52 +81,45 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override bool EvaluatesToEmpty(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (_usePrivateState && !_expandable)
+            if (!_expandable)
             {
                 return _value.Length == 0;
             }
 
             ref string cachedExpandedValue = ref GetCachedExpandedValue(state);
-            if (cachedExpandedValue == null)
+            if (cachedExpandedValue is null)
             {
-                if (_expandable)
+                switch (_value.Length)
                 {
-                    switch (_value.Length)
-                    {
-                        case 0:
-                            cachedExpandedValue = String.Empty;
-                            return true;
-                        // If the length is 1 or 2, it can't possibly be a property, item, or metadata, and it isn't empty.
-                        case 1:
-                        case 2:
-                            cachedExpandedValue = _value;
-                            return false;
-                        default:
-                            if (_value[1] != '(' || (_value[0] != '$' && _value[0] != '%' && _value[0] != '@') || _value[_value.Length - 1] != ')')
-                            {
-                                // This isn't just a property, item, or metadata value, and it isn't empty.
-                                return false;
-                            }
-                            break;
-                    }
-
-                    string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value);
-
-                    if (expandBreakEarly == null)
-                    {
-                        // It broke early: we can't store the value, we just
-                        // know it's non empty
+                    case 0:
+                        cachedExpandedValue = String.Empty;
+                        return true;
+                    // If the length is 1 or 2, it can't possibly be a property, item, or metadata, and it isn't empty.
+                    case 1:
+                    case 2:
+                        cachedExpandedValue = _value;
                         return false;
-                    }
+                    default:
+                        if (_value[1] != '(' || (_value[0] != '$' && _value[0] != '%' && _value[0] != '@') || _value[_value.Length - 1] != ')')
+                        {
+                            // This isn't just a property, item, or metadata value, and it isn't empty.
+                            return false;
+                        }
+                        break;
+                }
 
-                    // It didn't break early, the result is accurate,
-                    // so store it so the work isn't done again.
-                    cachedExpandedValue = expandBreakEarly;
-                }
-                else
+                string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value);
+
+                if (expandBreakEarly is null)
                 {
-                    cachedExpandedValue = _value;
+                    // It broke early: we can't store the value, we just
+                    // know it's non empty
+                    return false;
                 }
+
+                // It didn't break early, the result is accurate,
+                // so store it so the work isn't done again.
+                cachedExpandedValue = expandBreakEarly;
             }
 
             return cachedExpandedValue.Length == 0;
@@ -161,50 +145,23 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (_usePrivateState && !_expandable)
+            if (!_expandable)
             {
                 return _value;
             }
 
             ref string cachedExpandedValue = ref GetCachedExpandedValue(state);
-            if (cachedExpandedValue == null)
+            if (cachedExpandedValue is null)
             {
-                if (_expandable)
-                {
-                    cachedExpandedValue = state.ExpandIntoString(_value);
-                }
-                else
-                {
-                    cachedExpandedValue = _value;
-                }
+                cachedExpandedValue = state.ExpandIntoString(_value);
             }
 
             return cachedExpandedValue;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ref string GetCachedExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            if (_usePrivateState)
-            {
-                return ref state.NodeStates.GetString(StateSlot).ExpandedValue;
-            }
-
-            return ref _cachedExpandedValue;
-        }
-
-        /// <summary>
-        /// If any expression nodes cache any state for the duration of evaluation,
-        /// now's the time to clean it up
-        /// </summary>
-        /// <remarks>Used by the Wave 18.14 opt-out path.</remarks>
-        internal override void ResetState()
-        {
-            _cachedExpandedValue = null;
-            _shouldBeTreatedAsVisualStudioVersion = null;
-        }
-
-        private bool? _shouldBeTreatedAsVisualStudioVersion = null;
+        private ref string GetCachedExpandedValue(ConditionEvaluator.IConditionEvaluationState state) =>
+            ref state.NodeStates.GetString(StateSlot).ExpandedValue;
 
         /// <summary>
         /// Should this node be treated as an expansion of VisualStudioVersion, rather than
@@ -216,33 +173,9 @@ namespace Microsoft.Build.Evaluation
         /// but now cause the project to throw InvalidProjectException when
         /// ToolsVersion is "Current". https://github.com/dotnet/msbuild/issues/4150
         /// </remarks>
-        private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            if (_usePrivateState)
-            {
-                return _isMSBuildToolsVersionExpansion &&
-                    string.Equals(GetExpandedValue(state), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal);
-            }
-
-            if (!_shouldBeTreatedAsVisualStudioVersion.HasValue)
-            {
-                // Treat specially if the node would expand to "Current".
-
-                // Do this check first, because if it's not (common) we can early-out and the next
-                // expansion will be cheap because this will populate the cached expanded value.
-                if (string.Equals(GetExpandedValue(state), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal))
-                {
-                    // and it is just an expansion of MSBuildToolsVersion
-                    _shouldBeTreatedAsVisualStudioVersion = string.Equals(_value, "$(MSBuildToolsVersion)", StringComparison.OrdinalIgnoreCase);
-                }
-                else
-                {
-                    _shouldBeTreatedAsVisualStudioVersion = false;
-                }
-            }
-
-            return _shouldBeTreatedAsVisualStudioVersion.Value;
-        }
+        private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state) =>
+            _isMSBuildToolsVersionExpansion &&
+            string.Equals(GetExpandedValue(state), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal);
 
         internal override string DebuggerDisplay => $"\"{_value}\"";
     }
