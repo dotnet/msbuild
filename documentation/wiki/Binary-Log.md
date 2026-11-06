@@ -123,6 +123,86 @@ The format is backwards compatible, i.e. MSBuild will be able to play back .binl
 
 ## Forward compatibility reading
 
+### Local combined experiment: compiler response strings and item sequences (version 30)
+
+This experimental branch combines candidates 2 and 4 and writes **format 30, minimum
+reader 30**. Use this combined candidate's own reader assemblies, not existing viewers
+or either standalone experiment's reader. Readers implementing only format 28 or earlier
+must reject these files: skipping a string-table entry shifts subsequent implicit IDs,
+and skipping an item dictionary loses data required by known events. The combined reader
+still reads supported legacy formats through 28, but explicitly rejects **format 29**
+in file and direct-reader entry points, including forward-compatible mode. Both standalone
+experiments used 29 with conflicting record IDs and incompatible schemas; neither is
+interpreted as the other or as combined format 30. This is a local performance experiment,
+not an upstream-compatible format rollout or a Structured Log Viewer compatibility claim.
+
+`StringSlice` (record kind **40**) has the same implicit sequential string ID as an ordinary `String`.
+Its payload is a 7-bit-encoded source string ID, UTF-16 start offset and UTF-16 length,
+followed by two ordinary `BinaryWriter.Write(string)` UTF-8 strings (prefix and suffix).
+The reconstructed value is prefix + source slice + suffix. These fragments do not have
+string IDs or independent string-read callbacks. Like an ordinary `String` record, this
+record does not have an enclosing event-length field.
+
+The reference window is part of this experimental format: the last eight **ordinary**
+string records whose original lengths are between 4,096 and 1,048,576 UTF-16 code units,
+inclusive. Shorter/longer strings and reconstructed slices do not enter or evict that
+window. References must name an entry still in the window; forward, expired, reserved,
+or out-of-range references are invalid data. Reader and writer use the same cache rules.
+This bounds additional source retention to 16 MiB of character data.
+
+The writer only attempts sharing for `BuildResponseFile = '<payload>'`, requiring
+an exact ordinal match of the payload to one of those source strings' suffixes.
+ToolTask logs the executable and command-line arguments followed by the response-file
+arguments, so this targets the compiler command/response duplication without changing
+Roslyn, events, or diagnostics. At most eight linear comparisons are made and no extra
+content hash is computed. A mismatch, absent/evicted source, or size-limit miss uses an
+ordinary string record; null/empty references and whole-string deduplication are unchanged.
+The actual hit rate and cold-build/binlog-size benefit must be measured, not assumed.
+
+Both structured and raw readers reconstruct slices. Original source strings are cached
+before `StringReadDone` modifications; the reconstructed target is then passed through
+its own callback exactly once, so source scrubbing cannot change slice offsets or
+bypass target scrubbing. Raw BinaryLogger replay expands slices into ordinary strings
+without deduplication, preserving IDs and the input version header, including for older
+logs. Consequently raw replay is lossless but need not preserve bytes or the size saving.
+Only completed records can be replayed from an interrupted log; an incomplete slice
+throws rather than adding a partial string-table entry.
+
+`ItemSequence` (record kind **41**) has a 7-bit-encoded byte length, followed by the
+existing encoded item count and ordered `(ItemSpec string ID, metadata NameValueList ID)`
+pairs. Its ordinal since the last reset is its zero-based ID. A negative count in an
+event's item list is the bitwise complement of that ID; nonnegative counts retain their
+previous inline meaning, including zero for null/empty lists. The dictionary stores
+encoded bytes, not mutable task items or metadata. Hash matches require complete byte equality.
+
+Only lists with at least two items and 32 to 65,536 encoded bytes are cached. Each dictionary
+epoch is limited to 4,096 entries and 4 MiB of encoded payload on both writer and reader.
+When a new entry would exceed either limit it stays inline and schedules a reset before the
+next event. A zero-length `ItemSequence` record resets only the item dictionary. Resets never
+occur inside an event, where they could invalidate earlier nested lists. Tiny and oversized
+lists stay inline. Item sources are serialized once through the existing paths; deduplication
+uses the event buffer, without extra enumeration or bypassing embedded-file scanning.
+
+Definitions follow all their string/slice and metadata dependencies and precede the event
+that uses them. Structured replay ingests definitions and resets even before an unknown event
+that is skipped. Raw replay copies item definitions/references/resets unchanged, while expanding
+each slice into exactly one ordinary string at the same ID. This preserves the string IDs in
+item definitions even after length-changing source/target scrubbing. Rehydrated items and
+metadata are independent between uses. Item resets neither clear nor reorder the string-source
+window, and string-source eviction does not invalidate already reconstructed item strings.
+
+The historical `ForwardCompatibilityMinimalVersion` remains **18** (when length-prefixed events
+and the minimum-reader header were introduced). A headerless direct reader defaults its minimum
+to 30 for format 30, conservatively to the format version for newer formats, and to the historical
+minimum for formats 18-28. Pre-18 readers use their format version. File readers preserve the
+explicit on-disk minimum rather than substituting that default, and reject a declared minimum
+newer than this reader even when the file-format number is not newer. Combined writers always
+declare minimum 30; editing that field does not make slices or item references readable by older tools.
+
+The two standalone cache sizes and eligibility rules are unchanged for a comparable combined
+experiment. Size reductions are not assumed additive, and no build-time improvement is claimed
+before measuring the combined image against the same baseline.
+
 From version 18, the binlog contains as well the minimum version of reader that can interpret it (stored in bytes 4 to 8). Support for best effort forward compatibility is added by this version. It is “best effort” only because the binlog format is not self-describing, i.e. it doesn't carry its schema around for performance and compactness reasons.
 
 This is not of a high importance for users of the Viewer because Viewer is always up-to-date (there isn't an "old version" of the Viewer unless people go to great lengths to prevent it from auto-updating).
