@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Tracing;
 using Microsoft.Build.Framework;
 
@@ -875,6 +877,63 @@ namespace Microsoft.Build.Eventing
         public void ProjectEvaluationPassCompleted(double durationSeconds, string stage, string pass, string origin, string projectFile, int evaluationId)
         {
             WriteEvent(114, durationSeconds, stage, pass, origin, projectFile, evaluationId);
+        }
+
+        /// <summary>
+        /// Records aggregate time in qualifying uncached glob-resolution calls for one completed project evaluator invocation.
+        /// </summary>
+        /// <param name="durationSeconds">
+        /// Sum of item and import glob-resolution durations in seconds for calls classified as <c>RunSearch</c> or <c>LogDriveEnumeratingWildcard</c>, excluding fully cached results.
+        /// The measured work can short-circuit before directory enumeration, so this is not a pure filesystem-I/O duration.
+        /// Zero means no qualifying calls were measured. NaN means measurement was unavailable or evaluation failed.
+        /// </param>
+        /// <param name="stage">The requested evaluation stage: properties, item_definitions, items, using_tasks, or full.</param>
+        /// <param name="origin">Whether evaluation occurred within a build_submission or outside_build_submission.</param>
+        /// <param name="succeeded">Whether evaluation completed without an error.</param>
+        /// <param name="projectFile">Full path to the evaluated project, or an empty string for an unnamed in-memory project.</param>
+        /// <param name="evaluationId">The evaluation's logging-service ID; see <see cref="ProjectEvaluationCompleted"/> for correlation limits.</param>
+        [Event(117, Level = EventLevel.Informational, Opcode = EventOpcode.Info, Keywords = Keywords.EvaluationMeasurements)]
+        [UnconditionalSuppressMessage(
+            "Trimming",
+            "IL2026:RequiresUnreferencedCode",
+            Justification = "The event payload contains only primitive types and strings whose descriptors are initialized explicitly.")]
+        public unsafe void ProjectEvaluationGlobbingCompleted(double durationSeconds, string stage, string origin, bool succeeded, string projectFile, int evaluationId)
+        {
+            if (!IsEnabled(EventLevel.Informational, Keywords.EvaluationMeasurements))
+            {
+                return;
+            }
+
+            stage ??= string.Empty;
+            origin ??= string.Empty;
+            projectFile ??= string.Empty;
+            int succeededValue = succeeded ? 1 : 0;
+
+            fixed (char* stageBytes = stage, originBytes = origin, projectFileBytes = projectFile)
+            {
+                EventData* data = stackalloc EventData[6];
+
+                data[0] = default;
+                data[0].DataPointer = (IntPtr)(&durationSeconds);
+                data[0].Size = sizeof(double);
+                data[1] = default;
+                data[1].DataPointer = (IntPtr)stageBytes;
+                data[1].Size = (stage.Length + 1) * sizeof(char);
+                data[2] = default;
+                data[2].DataPointer = (IntPtr)originBytes;
+                data[2].Size = (origin.Length + 1) * sizeof(char);
+                data[3] = default;
+                data[3].DataPointer = (IntPtr)(&succeededValue);
+                data[3].Size = sizeof(int);
+                data[4] = default;
+                data[4].DataPointer = (IntPtr)projectFileBytes;
+                data[4].Size = (projectFile.Length + 1) * sizeof(char);
+                data[5] = default;
+                data[5].DataPointer = (IntPtr)(&evaluationId);
+                data[5].Size = sizeof(int);
+
+                WriteEventCore(117, 6, data);
+            }
         }
 
         #endregion
