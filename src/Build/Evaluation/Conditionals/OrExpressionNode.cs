@@ -50,14 +50,5 @@ namespace Microsoft.Build.Evaluation
         }
 
         internal override string DebuggerDisplay => $"(or {LeftChild.DebuggerDisplay} {RightChild.DebuggerDisplay})";
-
-        #region REMOVE_COMPAT_WARNING
-        private bool _possibleOrCollision = true;
-        internal override bool PossibleOrCollision
-        {
-            set { _possibleOrCollision = value; }
-            get { return _possibleOrCollision; }
-        }
-        #endregion
     }
 }
