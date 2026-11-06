@@ -338,13 +338,15 @@ multi-threaded and change wave 18.12 is enabled. A change-wave setting does not 
 
 ## Evaluation working directory
 
-`-mt` must not change which files evaluation reads. Relative paths resolve as in a non-MT build:
-against the startup directory for project files, and the host directory for solution wrappers and
-static graphs. MSBuild sets this directory through an async-local value, not process CWD, and
-restores it before targets and tasks run, which still use the project directory.
+Under `-mt`, relative paths that evaluation resolves against the current directory, for example in
+property functions, resolve as in a non-MT build. For project files they resolve against the startup
+directory. For solution wrappers and static graphs they resolve against the directory the build
+started in. This applies with or without strict mode. MSBuild uses an async-local directory for this,
+not the process CWD, and restores it before targets and tasks run, which still use the project directory.
 
-Project-file evaluation stays project-relative when `SaveOperatingEnvironment` is false or the
-startup directory no longer exists. This includes evaluation done by a project cache.
+Two cases still differ from non-MT, as before this change. When `SaveOperatingEnvironment` is false,
+or the startup directory no longer exists, project-file evaluation under `-mt` stays project-relative,
+while non-MT uses the process current directory. This includes evaluation done by a project cache.
 
 ## Interaction with `DisableInProcNode`
 

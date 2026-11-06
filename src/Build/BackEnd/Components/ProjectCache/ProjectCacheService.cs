@@ -569,7 +569,7 @@ namespace Microsoft.Build.ProjectCache
                     {
                         // Cache-owned evaluation runs before a request installs its project directory.
                         using EvaluationDirectoryScope evaluationDirectory = new(
-                            MultiThreadedStrictModeScope.ActiveScope?.BuildId == _componentHost.BuildParameters.BuildId
+                            _componentHost.BuildParameters.MultiThreaded
                                 ? Path.GetDirectoryName(configuration.ProjectFullPath)
                                 : null);
                         configuration.LoadProjectIntoConfiguration(

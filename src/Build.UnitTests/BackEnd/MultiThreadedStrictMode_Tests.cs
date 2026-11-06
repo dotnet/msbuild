@@ -384,7 +384,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [InlineData(true, null, false, true, "host payload")]
         [InlineData(true, null, true, false, "project payload")]
         [InlineData(true, "18.12", false, true, "host payload")]
-        [InlineData(true, "18.12", true, true, "host payload")]
+        [InlineData(true, "18.12", true, true, "project payload")]
+        [InlineData(true, "18.12", false, false, "project payload")]
         [InlineData(false, null, true, true, "host payload")]
         public void CachedProjectEvaluationPreservesDirectoryContext(
             bool multiThreaded,
