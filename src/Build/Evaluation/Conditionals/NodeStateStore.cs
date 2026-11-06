@@ -63,6 +63,6 @@ internal struct NodeStateStore
     {
         Assumed.True(_initialized, "Condition node state storage is not initialized.");
 
-        throw new ArgumentOutOfRangeException(nameof(slot));
+        Assumed.Unreachable($"Invalid {nameof(slot)} value: {slot}");
     }
 }
