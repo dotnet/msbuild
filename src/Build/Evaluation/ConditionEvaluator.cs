@@ -134,14 +134,14 @@ namespace Microsoft.Build.Evaluation
         {
             // condition string -> a single parsed expression tree and its immutable state layout
             private readonly ConcurrentDictionary<string, CachedCondition> _expressions;
-            private int _mOptimisticSize;
+            private int _optimisticSize;
 
-            public readonly int OptimisticSize => _mOptimisticSize;
+            public readonly int OptimisticSize => _optimisticSize;
 
             public ExpressionTreeForCurrentOptionsWithSize(ConcurrentDictionary<string, CachedCondition> expressions)
             {
                 _expressions = expressions;
-                _mOptimisticSize = expressions.Count;
+                _optimisticSize = expressions.Count;
             }
 
             public ParsedCondition GetOrParse(
@@ -152,7 +152,7 @@ namespace Microsoft.Build.Evaluation
             {
                 if (!_expressions.TryGetValue(condition, out CachedCondition? expression))
                 {
-                    Interlocked.Increment(ref _mOptimisticSize);
+                    Interlocked.Increment(ref _optimisticSize);
                     expression = _expressions.GetOrAdd(condition, static _ => new CachedCondition());
                 }
 
