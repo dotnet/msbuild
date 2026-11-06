@@ -19,7 +19,7 @@ internal struct NodeStateStore
         if (layout.StringSlotCount < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(layout));
-        }
+        Assumed.PositiveOrZero(layout.StringSlotCount);
 
         _layout = layout;
         _initialized = true;
