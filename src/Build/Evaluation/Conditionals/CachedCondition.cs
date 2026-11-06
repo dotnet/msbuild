@@ -5,8 +5,6 @@ using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 
-#nullable enable
-
 namespace Microsoft.Build.Evaluation;
 
 internal sealed class CachedCondition

@@ -4,8 +4,6 @@
 using System;
 using System.Buffers;
 
-#nullable enable
-
 namespace Microsoft.Build.Evaluation;
 
 internal static class ThreadLocalNodeStateBuffer<TState> where TState : struct

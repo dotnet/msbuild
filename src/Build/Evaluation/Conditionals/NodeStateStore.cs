@@ -4,8 +4,6 @@
 using System;
 using System.Runtime.CompilerServices;
 
-#nullable enable
-
 namespace Microsoft.Build.Evaluation;
 
 internal struct NodeStateStore

@@ -5,8 +5,6 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 
-#nullable enable
-
 namespace Microsoft.Build.Evaluation;
 
 internal readonly record struct NodeStateLayout(int StringSlotCount);
