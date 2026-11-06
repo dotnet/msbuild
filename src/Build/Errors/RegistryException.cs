@@ -13,6 +13,7 @@ namespace Microsoft.Build.Exceptions
     /// Generic exception used to wrap exceptions thrown during Registry access.
     /// </summary>
     [Serializable]
+    // CodeQL [SM02227] False positive: static call-graph over-approximation via virtual ToString/Flush in VMR build; deserialization only reads primitive fields.
     internal class RegistryException : BuildExceptionBase
     {
         /// <summary>
