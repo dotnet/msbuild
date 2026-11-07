@@ -48,10 +48,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
             }
 
-            
-            public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator) => null;
+            public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator) =>
+                throw new NotSupportedException("No packets are expected while the endpoint is waiting for a parent.");
 
-public void RoutePacket(int nodeId, INodePacket packet)
+            public void RoutePacket(int nodeId, INodePacket packet)
             {
             }
         }
