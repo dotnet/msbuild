@@ -88,6 +88,12 @@ internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     private Thread _packetPump;
 
     /// <summary>
+    /// Set when the endpoint is being disconnected on purpose (for example on Ctrl+C), so that closing the pipe
+    /// to release a pending connection is not reported as a failure.
+    /// </summary>
+    private volatile bool _disconnectRequested;
+
+    /// <summary>
     /// The factory used to create and route packets.
     /// </summary>
     private INodePacketFactory _packetFactory;
@@ -308,7 +314,18 @@ internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     private void InternalDisconnect()
     {
         Assumed.NotEqual(_packetPump.ManagedThreadId, Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
+        _disconnectRequested = true;
         _terminatePacketPump.Set();
+
+        // While no parent has connected yet, the packet pump is blocked waiting for a connection and never
+        // observes the terminate event, so Join() would wait until the connection timeout. Closing the pipe
+        // aborts that wait. Once connected, the read loop observes terminate itself, and the pipe is left open
+        // so that queued packets (such as NodeShutdown) are still flushed.
+        if (_status == LinkStatus.Inactive)
+        {
+            _pipeServer.Dispose();
+        }
+
         _packetPump.Join();
         _terminatePacketPump.Dispose();
         _pipeServer.Dispose();
@@ -505,7 +522,11 @@ internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
                     localPipeServer.Disconnect();
                 }
 
-                DebugUtils.DumpExceptionToFile(e);
+                if (!_disconnectRequested)
+                {
+                    DebugUtils.DumpExceptionToFile(e);
+                }
+
                 ChangeLinkStatus(LinkStatus.Failed);
                 return;
             }
