@@ -19,7 +19,8 @@
     <DotNetUseShippingVersions Condition="'$(DotNetBuildFromVMR)' != 'true'">true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
-    <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
+    <!-- Tools.csproj consumes this property; SAC group config requires this newer SWIX toolset. -->
+    <MicrosoftVisualStudioEngMicroBuildPluginsSwixBuildVersion>1.1.973</MicrosoftVisualStudioEngMicroBuildPluginsSwixBuildVersion>
   </PropertyGroup>
 
   <!-- Arcade features -->
