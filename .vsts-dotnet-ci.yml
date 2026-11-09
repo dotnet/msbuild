@@ -232,8 +232,6 @@ jobs:
         arguments: $(Build.SourcesDirectory)/NuGet.config $Token
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
-  - bash: sudo apt-get update
-  - bash: sudo apt-get install -y libxml2
   # Intentionally not running tests
   - bash: . 'build.sh' --ci --stage2 --stage2Argument '/p:BuildAnalyzer=true'
     displayName: Build (with stage2)
