@@ -1,6 +1,6 @@
 {
   "sdk": {
-    "version": "12.0.100-alpha.1.26480.102",
+    "version": "11.0.100-rc.3.26522.148",
     "allowPrerelease": true,
     "paths": [
       "$host$"
@@ -11,7 +11,7 @@
     "runner": "Microsoft.Testing.Platform"
   },
   "tools": {
-    "dotnet": "12.0.100-alpha.1.26480.102",
+    "dotnet": "11.0.100-rc.3.26522.148",
     "vs": {
       "version": "18.6"
     }
