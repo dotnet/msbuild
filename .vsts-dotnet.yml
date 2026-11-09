@@ -38,6 +38,12 @@ variables:
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: SourceBranch
       value: main
+  # Use a fixed branch-specific OptProf baseline for vs18.9.
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/vs18.9') }}:
+    - name: OptProfDrop
+      value: OptimizationData/DotNet-msbuild-Trusted/vs18.9/20260907.9/15235178/1
+    - name: SourceBranch
+      value: ''
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop
