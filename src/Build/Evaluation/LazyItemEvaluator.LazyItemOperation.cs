@@ -225,11 +225,8 @@ namespace Microsoft.Build.Evaluation
                     {
                         // Metadata expressions are allowed here.
                         // Temporarily gather and expand these in a table so they can reference other metadata elements above.
-                        EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemType, capacity: metadata.Length);
+                        EvaluatedMetadataTable metadataTable = new(_itemType, metadata.Length);
                         _expander.Metadata = metadataTable;
-
-                        // Also keep a list of everything so we can get the predecessor objects correct.
-                        List<KeyValuePair<ProjectMetadataElement, string>> metadataList = new(metadata.Length);
 
                         foreach (var metadataElement in metadata)
                         {
@@ -249,9 +246,7 @@ namespace Microsoft.Build.Evaluation
 
                             string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
                             evaluatedValue = FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath);
-
                             metadataTable.SetValue(metadataElement, evaluatedValue);
-                            metadataList.Add(new KeyValuePair<ProjectMetadataElement, string>(metadataElement, evaluatedValue));
                         }
 
                         // Apply those metadata to each item
@@ -261,7 +256,7 @@ namespace Microsoft.Build.Evaluation
                         // This is valuable in the case where one item element evaluates to
                         // many items (either by semicolon or wildcards)
                         // and that item also has the same piece/s of metadata for each item.
-                        _itemFactory.SetMetadata(metadataList, itemBatchingContexts.Select(i => i.OperationItem));
+                        _itemFactory.SetMetadata(metadataTable, itemBatchingContexts.Select(i => i.OperationItem));
 
                         // End of legal area for metadata expressions.
                         _expander.Metadata = null;
