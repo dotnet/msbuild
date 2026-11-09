@@ -212,7 +212,7 @@ namespace Microsoft.Build.Execution
 
         private bool _question;
 
-        private bool _cacheConditionFalseTargets;
+        private bool _cacheConditionFalseTargets = Traits.Instance.CacheConditionFalseTargets;
 
         private bool _isBuildCheckEnabled;
 
