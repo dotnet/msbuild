@@ -105,9 +105,14 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 var targetResult = result[target.name];
                 bool isFailure = targetResult.ResultCode == TargetResultCode.Failure;
-                TargetSkipReason skipReason = isFailure
-                    ? TargetSkipReason.PreviouslyBuiltUnsuccessfully
-                    : TargetSkipReason.PreviouslyBuiltSuccessfully;
+                TargetResult concreteResult = targetResult as TargetResult;
+                TargetSkipReason skipReason =
+                    concreteResult?.IsSuccessfulConditionFalse == true ||
+                    concreteResult?.IsPreviouslyConditionFalse == true
+                        ? TargetSkipReason.PreviouslyConditionWasFalse
+                        : isFailure
+                            ? TargetSkipReason.PreviouslyBuiltUnsuccessfully
+                            : TargetSkipReason.PreviouslyBuiltSuccessfully;
 
                 var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
                 {
@@ -116,7 +121,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     BuildReason = target.reason,
                     SkipReason = skipReason,
                     OriginallySucceeded = !isFailure,
-                    OriginalBuildEventContext = (targetResult as TargetResult)?.OriginalBuildEventContext
+                    OriginalBuildEventContext = concreteResult?.OriginalBuildEventContext
                 };
 
                 projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);
