@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using FluentAssertions;
@@ -1035,6 +1036,92 @@ namespace Microsoft.Build.UnitTests
                 logItemMetadata: false,
                 DateTime.MinValue);
         }
+
+        [Fact]
+        public void LargeStringReferenceCachePreservesSerializedBytesForDistinctEqualStrings()
+        {
+            string value = new('x', 84_210);
+            byte[] shared = SerializeLargeStringMessages([value, value, value]);
+            byte[] distinct = SerializeLargeStringMessages(
+                [new string(value.ToCharArray()), new string(value.ToCharArray()), new string(value.ToCharArray())]);
+
+            shared.ShouldBe(distinct);
+        }
+
+        [Fact]
+        public void LargeStringReferenceCacheEvictionPreservesEveryMessage()
+        {
+            string[] values = new string[32];
+            for (int i = 0; i < values.Length; i++)
+            {
+                values[i] = new string((char)('a' + i), 8_192);
+            }
+
+            byte[] bytes = SerializeLargeStringMessages([.. values, .. values]);
+            using var stream = new MemoryStream(bytes);
+            using var binaryReader = new BinaryReader(stream);
+            using var reader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+            for (int pass = 0; pass < 2; pass++)
+            {
+                foreach (string value in values)
+                {
+                    reader.Read().ShouldBeOfType<BuildMessageEventArgs>().Message.ShouldBe(value);
+                }
+            }
+            reader.Read().ShouldBeNull();
+        }
+
+        [Fact]
+        public void LargeStringReferenceCacheHasABoundedRetentionBudget()
+        {
+            using var stream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(stream);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+            string eligible = new('e', 131_072);
+            string oversized = new('o', 131_073);
+            writer.Write(LargeStringMessage(eligible));
+            writer.Write(LargeStringMessage(oversized));
+
+            var cache = (Array)typeof(BuildEventArgsWriter)
+                .GetField("largeStringReferenceCache", BindingFlags.Instance | BindingFlags.NonPublic)
+                .GetValue(writer);
+            cache.Length.ShouldBe(4);
+            bool foundEligible = false;
+            int retainedCharacters = 0;
+            foreach (object entry in cache)
+            {
+                string text = (string)entry.GetType()
+                    .GetField("Text", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetValue(entry);
+                if (text is not null)
+                {
+                    text.Length.ShouldBeLessThanOrEqualTo(131_072);
+                    ReferenceEquals(text, oversized).ShouldBeFalse();
+                    foundEligible |= ReferenceEquals(text, eligible);
+                    retainedCharacters += text.Length;
+                }
+            }
+            foundEligible.ShouldBeTrue();
+            retainedCharacters.ShouldBeLessThanOrEqualTo(4 * 131_072);
+        }
+
+        private static byte[] SerializeLargeStringMessages(string[] values)
+        {
+            using var stream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            {
+                var writer = new BuildEventArgsWriter(binaryWriter);
+                foreach (string value in values)
+                {
+                    writer.Write(LargeStringMessage(value));
+                }
+                binaryWriter.Write((byte)BinaryLogRecordKind.EndOfFile);
+            }
+            return stream.ToArray();
+        }
+
+        private static BuildMessageEventArgs LargeStringMessage(string value)
+            => new(value, null, "cache-test", MessageImportance.Low, DateTime.MinValue);
 
         [Fact]
         public void TaskParameterSerializationReusesSharedBackingMetadata()
