@@ -146,8 +146,8 @@ namespace Microsoft.Build.BackEnd
         /// 1. The passed BuildRequestDataFlags and RequestedProjectStateFilter are compatible with the result data.
         /// 2. All specified targets in the request have successful results in the cache or if the sequence of target results
         ///    includes 0 or more successful targets followed by at least one failed target.
-        /// 3. All initial targets in the configuration for the request have non-skipped results in the cache.
-        /// 4. If there are no specified targets, then all default targets in the request must have non-skipped results
+        /// 3. All initial targets in the configuration for the request have reusable results in the cache.
+        /// 4. If there are no specified targets, then all default targets in the request must have reusable results
         ///    in the cache.
         /// </summary>
         /// <param name="request">The request whose results we should return.</param>
@@ -157,8 +157,10 @@ namespace Microsoft.Build.BackEnd
         /// If true, then as long as there is a result in the cache (regardless of whether it was skipped or not), this method
         /// will return "Satisfied". In most cases this should be false, but it may be set to true in a situation where there is no
         /// chance of re-execution (which is the usual response to missing / skipped targets), and the caller just needs the data.</param>
+        /// <param name="cacheConditionFalseTargets">If true, cached targets skipped because their condition evaluated to false
+        /// satisfy the request without reevaluating the condition.</param>
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
-        public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss)
+        public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss, bool cacheConditionFalseTargets)
         {
             Assumed.True(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
             ResultsCacheResponse response = new(ResultsCacheResponseType.NotSatisfied);
@@ -170,7 +172,7 @@ namespace Microsoft.Build.BackEnd
                     if (AreBuildResultFlagsCompatible(request, allResults))
                     {
                         // Check for targets explicitly specified.
-                        bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, checkTargetsMissingResults: true, skippedResultsDoNotCauseCacheMiss);
+                        bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, checkTargetsMissingResults: true, skippedResultsDoNotCauseCacheMiss, cacheConditionFalseTargets);
 
                         if (explicitTargetsSatisfied)
                         {
@@ -178,7 +180,7 @@ namespace Microsoft.Build.BackEnd
                             response.Type = ResultsCacheResponseType.Satisfied;
 
                             // Check for the initial targets.  If we don't know what the initial targets are, we assume they are not satisfied.
-                            if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss))
+                            if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss, cacheConditionFalseTargets))
                             {
                                 response.Type = ResultsCacheResponseType.NotSatisfied;
                             }
@@ -188,7 +190,7 @@ namespace Microsoft.Build.BackEnd
                             {
                                 // Check for the default target, if necessary.  If we don't know what the default targets are, we
                                 // assume they are not satisfied.
-                                if (configDefaultTargets == null || !CheckResults(allResults, configDefaultTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss))
+                                if (configDefaultTargets == null || !CheckResults(allResults, configDefaultTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss, cacheConditionFalseTargets))
                                 {
                                     response.Type = ResultsCacheResponseType.NotSatisfied;
                                 }
@@ -303,14 +305,18 @@ namespace Microsoft.Build.BackEnd
         /// <param name="checkTargetsMissingResults">If missing targets will be checked for.</param>
         /// <param name="skippedResultsAreOK">If true, a status of "skipped" counts as having valid results
         /// for that target.  Otherwise, a skipped target is treated as equivalent to a missing target.</param>
+        /// <param name="cacheConditionFalseTargets">If true, condition-false skipped targets count as reusable results.</param>
         /// <returns>False if there were missing results, true otherwise.</returns>
-        private static bool CheckResults(BuildResult result, List<string> targets, bool checkTargetsMissingResults, bool skippedResultsAreOK)
+        private static bool CheckResults(BuildResult result, List<string> targets, bool checkTargetsMissingResults, bool skippedResultsAreOK, bool cacheConditionFalseTargets)
         {
             bool returnValue = true;
             bool missingTargetFound = false;
             foreach (string target in targets)
             {
-                if (!result.TryGetResultsForTarget(target, out TargetResult targetResult) || (targetResult.ResultCode == TargetResultCode.Skipped && !skippedResultsAreOK))
+                if (!result.TryGetResultsForTarget(target, out TargetResult targetResult) ||
+                    (targetResult.ResultCode == TargetResultCode.Skipped &&
+                     !skippedResultsAreOK &&
+                     !(cacheConditionFalseTargets && targetResult.WasSkippedDueToFalseCondition)))
                 {
                     if (checkTargetsMissingResults)
                     {

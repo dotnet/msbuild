@@ -1090,6 +1090,11 @@ Błędy: {3}</target>
         <target state="translated">Zestaw SDK „{0}” został pomyślnie rozpoznany przez narzędzie Resolver „{1}” do lokalizacji „{2}” i wersji „{3}”.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TargetPreviouslySkippedDueToFalseCondition">
+        <source>Target "{0}" skipped. Previously skipped because its condition evaluated to false.</source>
+        <target state="new">Target "{0}" skipped. Previously skipped because its condition evaluated to false.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">Zadanie „{0}” żądało {1} rdzeni, uzyskało {2} i teraz jego łączna liczba rdzeni to {3}.</target>

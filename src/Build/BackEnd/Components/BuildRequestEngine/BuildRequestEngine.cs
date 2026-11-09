@@ -603,7 +603,8 @@ namespace Microsoft.Build.BackEnd
                                         request: request,
                                         configInitialTargets: config.ProjectInitialTargets,
                                         configDefaultTargets: config.ProjectDefaultTargets,
-                                        skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+                                        skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(),
+                                        cacheConditionFalseTargets: _componentHost.BuildParameters.CacheConditionFalseTargets);
 
                                     if (cacheResponse.Type == ResultsCacheResponseType.Satisfied)
                                     {
@@ -1270,7 +1271,8 @@ namespace Microsoft.Build.BackEnd
                             request: newRequest,
                             configInitialTargets: matchingConfig.ProjectInitialTargets,
                             configDefaultTargets: matchingConfig.ProjectDefaultTargets,
-                            skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+                            skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(),
+                            cacheConditionFalseTargets: _componentHost.BuildParameters.CacheConditionFalseTargets);
 
                         if (response.Type == ResultsCacheResponseType.Satisfied)
                         {

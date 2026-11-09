@@ -1062,6 +1062,18 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void PreviouslyConditionWasFalseMessage()
+        {
+            var args = new TargetSkippedEventArgs(message: null)
+            {
+                TargetName = "target",
+                SkipReason = TargetSkipReason.PreviouslyConditionWasFalse,
+            };
+
+            Assert.Equal("Target \"target\" skipped. Previously skipped because its condition evaluated to false.", args.Message);
+        }
+
+        [Fact]
         public void RoundTripPropertyReassignmentEventArgs()
         {
             var args = new PropertyReassignmentEventArgs(

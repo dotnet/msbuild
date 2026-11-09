@@ -212,6 +212,8 @@ namespace Microsoft.Build.Execution
 
         private bool _question;
 
+        private bool _cacheConditionFalseTargets;
+
         private bool _isBuildCheckEnabled;
 
         private bool _isTelemetryEnabled;
@@ -326,6 +328,7 @@ namespace Microsoft.Build.Execution
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
             Question = other.Question;
+            CacheConditionFalseTargets = other.CacheConditionFalseTargets;
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
             IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
@@ -849,6 +852,15 @@ namespace Microsoft.Build.Execution
         public ProjectIsolationMode ProjectIsolationMode { get => _projectIsolationMode; set => _projectIsolationMode = value; }
 
         /// <summary>
+        /// Gets or sets whether targets skipped because their condition evaluated to false are reused without reevaluating the condition.
+        /// </summary>
+        public bool CacheConditionFalseTargets
+        {
+            get => _cacheConditionFalseTargets;
+            set => _cacheConditionFalseTargets = value;
+        }
+
+        /// <summary>
         /// Input cache files that MSBuild will use to read build results from.
         /// If the isolation mode is set to <see cref="ProjectIsolationMode.False"/>,
         /// this sets the isolation mode to <see cref="ProjectIsolationMode.True"/>.
@@ -994,6 +1006,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
             translator.Translate(ref _multiThreaded);
+            translator.Translate(ref _cacheConditionFalseTargets);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

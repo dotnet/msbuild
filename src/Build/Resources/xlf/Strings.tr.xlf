@@ -1090,6 +1090,11 @@ Hatalar: {3}</target>
         <target state="translated">"{0}" SDK’sı "{1}" çözümleyicisi tarafından "{2}" konumuna ve "{3}" sürümüne başarıyla çözümlendi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TargetPreviouslySkippedDueToFalseCondition">
+        <source>Target "{0}" skipped. Previously skipped because its condition evaluated to false.</source>
+        <target state="new">Target "{0}" skipped. Previously skipped because its condition evaluated to false.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">"{0}" görevi {1} çekirdek istedi, {2} çekirdek aldı ve şu anda toplam {3} çekirdek tutuyor.</target>

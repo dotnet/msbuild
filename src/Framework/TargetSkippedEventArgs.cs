@@ -37,7 +37,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The condition on the target was evaluated as false.
         /// </summary>
-        ConditionWasFalse
+        ConditionWasFalse,
+
+        /// <summary>
+        /// The target was previously skipped because its condition evaluated to false.
+        /// </summary>
+        PreviouslyConditionWasFalse
     }
 
     /// <summary>
@@ -172,6 +177,11 @@ namespace Microsoft.Build.Framework
                                 TargetName,
                                 Condition,
                                 EvaluatedCondition),
+
+                        TargetSkipReason.PreviouslyConditionWasFalse =>
+                            FormatResourceStringIgnoreCodeAndKeyword(
+                                "TargetPreviouslySkippedDueToFalseCondition",
+                                TargetName),
 
                         TargetSkipReason.OutputsUpToDate =>
                             FormatResourceStringIgnoreCodeAndKeyword(

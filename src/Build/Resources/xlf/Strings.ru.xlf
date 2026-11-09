@@ -1090,6 +1090,11 @@ Errors: {3}</source>
         <target state="translated">SDK "{0}" успешно разрешен преобразователем "{1}" в расположение "{2}" и версию "{3}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="TargetPreviouslySkippedDueToFalseCondition">
+        <source>Target "{0}" skipped. Previously skipped because its condition evaluated to false.</source>
+        <target state="new">Target "{0}" skipped. Previously skipped because its condition evaluated to false.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">Задача "{0}" запросила указанное число ядер ({1}) и получила указанное число ядер ({2}). Теперь общее число ядер, которыми располагает задача, равно {3}.</target>

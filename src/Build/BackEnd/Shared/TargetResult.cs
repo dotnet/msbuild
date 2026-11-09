@@ -202,6 +202,13 @@ namespace Microsoft.Build.Execution
         internal BuildEventContext OriginalBuildEventContext => _originalBuildEventContext;
 
         /// <summary>
+        /// Whether this target was skipped because its condition evaluated to false.
+        /// </summary>
+        internal bool WasSkippedDueToFalseCondition =>
+            ResultCode == TargetResultCode.Skipped &&
+            SkipReason is TargetSkipReason.ConditionWasFalse or TargetSkipReason.PreviouslyConditionWasFalse;
+
+        /// <summary>
         /// Sets or gets a flag indicating whether or not a failure results should cause the build to fail.
         /// </summary>
         internal bool TargetFailureDoesntCauseBuildFailure

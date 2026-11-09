@@ -429,6 +429,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 { new TaskOrTargetTelemetryKey("Build", false, false), TargetExecutionStats.Skipped(TargetSkipReason.OutputsUpToDate) },
                 { new TaskOrTargetTelemetryKey("Compile", false, false), TargetExecutionStats.Skipped(TargetSkipReason.OutputsUpToDate) },
                 { new TaskOrTargetTelemetryKey("Link", false, false), TargetExecutionStats.Skipped(TargetSkipReason.ConditionWasFalse) },
+                { new TaskOrTargetTelemetryKey("Test", false, false), TargetExecutionStats.Skipped(TargetSkipReason.PreviouslyConditionWasFalse) },
                 { new TaskOrTargetTelemetryKey("Pack", false, false), TargetExecutionStats.Executed() }, // Only one executed
             };
             var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>();
@@ -443,13 +444,13 @@ namespace Microsoft.Build.Engine.UnitTests
             var incrementality = properties["Incrementality"] as BuildInsights.BuildIncrementalityInfo;
             incrementality.ShouldNotBeNull();
             incrementality!.Classification.ShouldBe(BuildInsights.BuildType.Incremental);
-            incrementality.TotalTargetsCount.ShouldBe(4);
+            incrementality.TotalTargetsCount.ShouldBe(5);
             incrementality.ExecutedTargetsCount.ShouldBe(1);
-            incrementality.SkippedTargetsCount.ShouldBe(3);
+            incrementality.SkippedTargetsCount.ShouldBe(4);
             incrementality.SkippedDueToUpToDateCount.ShouldBe(2);
-            incrementality.SkippedDueToConditionCount.ShouldBe(1);
+            incrementality.SkippedDueToConditionCount.ShouldBe(2);
             incrementality.SkippedDueToPreviouslyBuiltCount.ShouldBe(0);
-            incrementality.IncrementalityRatio.ShouldBe(0.75);
+            incrementality.IncrementalityRatio.ShouldBe(0.8);
         }
 
         [Fact]

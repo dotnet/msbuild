@@ -351,7 +351,7 @@ namespace Microsoft.Build.Framework.Telemetry
                     _ = kv.Value.SkipReason switch
                     {
                         TargetSkipReason.OutputsUpToDate => skippedDueToUpToDate++,
-                        TargetSkipReason.ConditionWasFalse => skippedDueToCondition++,
+                        TargetSkipReason.ConditionWasFalse or TargetSkipReason.PreviouslyConditionWasFalse => skippedDueToCondition++,
                         TargetSkipReason.PreviouslyBuiltSuccessfully or TargetSkipReason.PreviouslyBuiltUnsuccessfully => skippedDueToPreviouslyBuilt++,
                         _ => 0
                     };
