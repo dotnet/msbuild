@@ -39,6 +39,13 @@ variables:
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: SourceBranch
       value: main
+  # Pin vs17.14 to its last-collected OptProf data.
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/vs17.14') }}:
+    - name: OptProfDrop
+      value: OptimizationData/DotNet-msbuild-Trusted/vs17.14/20250620.1/11799459/1
+    - name: SourceBranch
+      value: ''
+
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop
