@@ -107,6 +107,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             GraphBuild,
             InputResultsCaches,
             OutputResultsCache,
+            CacheConditionFalseTargets,
 #if FEATURE_REPORTFILEACCESSES
             ReportFileAccesses,
 #endif
@@ -284,6 +285,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             new ParameterizedSwitchInfo(  ["graphbuild", "graph"],              ParameterizedSwitch.GraphBuild,                 null,                           true,           null,                                  true,   false,   "HelpMessage_36_GraphBuildSwitch"),
             new ParameterizedSwitchInfo(  ["inputResultsCaches", "irc"],        ParameterizedSwitch.InputResultsCaches,         null,                           true,           null,                                  true,   true,    "HelpMessage_InputCachesFiles"),
             new ParameterizedSwitchInfo(  ["outputResultsCache", "orc"],        ParameterizedSwitch.OutputResultsCache,         "DuplicateOutputResultsCache",  false,          null,                                  true,   true,    "HelpMessage_OutputCacheFile"),
+            new ParameterizedSwitchInfo(  ["cacheConditionFalseTargets"],       ParameterizedSwitch.CacheConditionFalseTargets, null,                           false,          null,                                  true,   false,   "HelpMessage_CacheConditionFalseTargets"),
 #if FEATURE_REPORTFILEACCESSES
             new ParameterizedSwitchInfo(  ["reportfileaccesses"],               ParameterizedSwitch.ReportFileAccesses,         null,                           false,          null,                                  true,   false,   "HelpMessage_42_ReportFileAccessesSwitch"),
 #endif
