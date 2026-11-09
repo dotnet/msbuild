@@ -29,6 +29,8 @@
 # targeting `main` (so a fix PR's effect on the quarantined tests is validated on the PR itself), and
 # manual queue. Consumers that aggregate this data treat rolling and scheduled `main` runs the same
 # (reasons batchedCI/individualCI/schedule), so the mix of triggers is transparent to them.
+# PRs targeting other branches report success without running tests, rather than a neutral skipped
+# check that Maestro treats as an auto-merge failure.
 trigger:
   batch: true
   branches:
@@ -38,7 +40,7 @@ trigger:
 pr:
   branches:
     include:
-    - main
+    - '*'
 
 schedules:
 - cron: "0 8 * * *"
@@ -55,10 +57,23 @@ variables:
   value: true
 - name: Codeql.Enabled
   value: false
+- name: runQuarantineTests
+  value: $[or(ne(variables['Build.Reason'], 'PullRequest'), in(variables['System.PullRequest.TargetBranch'], 'main', 'refs/heads/main'))]
 
 jobs:
+- job: SkipQuarantinedTests
+  displayName: "Quarantined tests not applicable (PR does not target main)"
+  condition: and(succeeded(), ne(variables.runQuarantineTests, true))
+  pool: server
+  steps:
+  - task: Delay@1
+    displayName: "Report success without running quarantined tests"
+    inputs:
+      delayForMinutes: '0'
+
 - job: RunQuarantinedTestsWindows
   displayName: "Run quarantined tests (Windows)"
+  condition: and(succeeded(), eq(variables.runQuarantineTests, true))
   pool:
     name: NetCore-Public
     demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
@@ -114,6 +129,7 @@ jobs:
 
 - job: RunQuarantinedTestsLinux
   displayName: "Run quarantined tests (Linux)"
+  condition: and(succeeded(), eq(variables.runQuarantineTests, true))
   pool:
     name: NetCore-Public
     demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
@@ -160,6 +176,7 @@ jobs:
 
 - job: RunQuarantinedTestsMac
   displayName: "Run quarantined tests (macOS)"
+  condition: and(succeeded(), eq(variables.runQuarantineTests, true))
   pool:
     vmImage: 'macOS-latest'
   timeoutInMinutes: 120
