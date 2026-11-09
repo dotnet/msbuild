@@ -649,13 +649,16 @@ public class ConditionEvaluator_Tests
         NodeStateStore state = new();
         Should.Throw<InternalErrorException>(() => state.GetString(0)).Message.ShouldContain(
             "Condition node state storage is not initialized.");
+        Should.Throw<InternalErrorException>(() => state.Initialize(new NodeStateLayout(-1)));
         state.Initialize(new NodeStateLayout(1));
         try
         {
             Should.Throw<InternalErrorException>(() => state.Initialize(new NodeStateLayout(1))).Message.ShouldContain(
                 "Condition node state storage is not initialized.");
-            Should.Throw<ArgumentOutOfRangeException>(() => state.GetString(-1));
-            Should.Throw<ArgumentOutOfRangeException>(() => state.GetString(1));
+            Should.Throw<InternalErrorException>(() => state.GetString(-1)).Message.ShouldContain(
+                "Invalid slot value: -1");
+            Should.Throw<InternalErrorException>(() => state.GetString(1)).Message.ShouldContain(
+                "Invalid slot value: 1");
             state.GetString(0).ExpandedValue = "first";
             state.GetString(0).ExpandedValue.ShouldBe("first");
             state.Release();

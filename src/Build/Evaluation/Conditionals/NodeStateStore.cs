@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Evaluation;
@@ -16,9 +15,6 @@ internal struct NodeStateStore
     {
         Assumed.False(_initialized, "Condition node state storage is not initialized.");
 
-        if (layout.StringSlotCount < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(layout));
         Assumed.PositiveOrZero(layout.StringSlotCount);
 
         _layout = layout;
