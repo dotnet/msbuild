@@ -503,7 +503,7 @@ namespace Microsoft.Build.Logging
                 throw new LoggerException(message, e, errorCode, helpKeyword);
             }
 
-            stream = new GZipStream(stream, CompressionLevel.Optimal);
+            stream = new GZipStream(stream, CompressionLevel.Fastest);
 
             // wrapping the GZipStream in a buffered stream significantly improves performance
             // and the max throughput is reached with a 32K buffer. See details here:
