@@ -302,10 +302,10 @@
                      separates creation of the build graph from execution
                      of that graph.
     </source>
-        <target state="new">  -precompute[:true|false]
-                     Enables EXPERIMENTAL precompute mode, which
-                     separates creation of the build graph from execution
-                     of that graph.
+        <target state="translated">  -precompute[:true|false]
+                     Habilita o modo de pré-computação EXPERIMENTAL, que
+                     separa a criação do grafo de compilação da execução
+                     desse grafo.
     </target>
         <note />
       </trans-unit>
@@ -341,7 +341,7 @@
       </trans-unit>
       <trans-unit id="InvalidPrecomputeValue">
         <source>MSBUILD : error MSB1074: Precompute mode value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1074: Precompute mode value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1074: o valor do modo de pré-computação não é válido. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1074: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
