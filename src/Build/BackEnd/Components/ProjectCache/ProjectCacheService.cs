@@ -108,20 +108,34 @@ namespace Microsoft.Build.ProjectCache
         {
             EnsureNotDisposed();
 
+            // Register the plugins before returning, so that the graph is what initializes them.
+            // Otherwise the cache query of one of the graph's nodes can register a plugin first. That query has no graph:
+            // the plugin would be initialized with entry points and targets derived from that single build request.
+            HashSet<Lazy<Task<ProjectCachePlugin>>> plugins = [];
+            foreach (ProjectGraphNode node in projectGraph.ProjectNodes)
+            {
+                foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(node.ProjectInstance))
+                {
+                    plugins.Add(GetOrAddProjectCachePlugin(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, requestedTargets, cancellationToken));
+                }
+            }
+
+            if (plugins.Count == 0)
+            {
+                return;
+            }
+
             // Performing this in a Task.Run to break away from the main thread and prevent hangs
             Task.Run(
                 () =>
                 {
                     Parallel.ForEach(
-                        projectGraph.ProjectNodes,
+                        plugins,
                         s_parallelOptions,
-                        node =>
+                        plugin =>
                         {
-                            foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(node.ProjectInstance))
-                            {
-                                // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
-                                _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, requestedTargets, cancellationToken);
-                            }
+                            // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
+                            _ = plugin.Value;
                         });
                 },
                 cancellationToken);
@@ -167,12 +181,23 @@ namespace Microsoft.Build.ProjectCache
             BuildRequestConfiguration? buildRequestConfiguration,
             ICollection<string> requestedTargets,
             CancellationToken cancellationToken)
+            => GetOrAddProjectCachePlugin(projectCacheDescriptor, projectGraph, buildRequestConfiguration, requestedTargets, cancellationToken).Value;
+
+        /// <summary>
+        /// Registers the plugin without initializing it. Whoever registers a plugin first decides what it is initialized with.
+        /// </summary>
+        [RequiresUnreferencedCode("Loads a project cache plugin assembly from disk and reflects over its types, which is incompatible with trimming.")]
+        private Lazy<Task<ProjectCachePlugin>> GetOrAddProjectCachePlugin(
+            ProjectCacheDescriptor projectCacheDescriptor,
+            ProjectGraph? projectGraph,
+            BuildRequestConfiguration? buildRequestConfiguration,
+            ICollection<string> requestedTargets,
+            CancellationToken cancellationToken)
             => _projectCachePlugins.GetOrAdd(
                 projectCacheDescriptor,
                 // The use of Lazy is because ConcurrentDictionary doesn't guarantee the value factory executes only once if there are multiple simultaneous callers,
                 // so this ensures that CreateAndInitializePluginAsync is only called exactly once.
-                descriptor => new Lazy<Task<ProjectCachePlugin>>(() => CreateAndInitializePluginAsync(descriptor, projectGraph, buildRequestConfiguration, requestedTargets, cancellationToken)))
-               .Value;
+                descriptor => new Lazy<Task<ProjectCachePlugin>>(() => CreateAndInitializePluginAsync(descriptor, projectGraph, buildRequestConfiguration, requestedTargets, cancellationToken)));
 
         private IEnumerable<ProjectCacheDescriptor> GetProjectCacheDescriptors(ProjectInstance projectInstance)
         {
