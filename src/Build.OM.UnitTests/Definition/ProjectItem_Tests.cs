@@ -5,10 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -55,11 +57,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ";
 
         protected readonly TestEnvironment _env;
+        protected readonly ITestOutputHelper _output;
         private Lazy<DummyMappedDrive> _mappedDrive = DummyMappedDriveUtils.GetLazyDummyMappedDrive();
 
-        public ProjectItem_Tests()
+        public ProjectItem_Tests(ITestOutputHelper output)
         {
-            _env = TestEnvironment.Create();
+            _output = output;
+            _env = TestEnvironment.Create(output);
         }
 
         public void Dispose()
@@ -804,7 +808,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
         {
             unevaluatedInclude = DummyMappedDriveUtils.UpdatePathToMappedDrive(unevaluatedInclude, _mappedDrive.Value.MappedDriveLetter);
-            ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
+            ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude, _output);
         }
 
         [UnixOnlyTheory]
@@ -814,12 +818,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(@"/*$(empty)*/*.log")]
         public void ProjectGetterResultsInUnixDriveEnumerationWarning(string unevaluatedInclude)
         {
-            ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
+            ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude, _output);
         }
 
-        private static void ProjectGetterResultsInDriveEnumerationWarning(string unevaluatedInclude)
+        private static void ProjectGetterResultsInDriveEnumerationWarning(string unevaluatedInclude, ITestOutputHelper output)
         {
-            using (var env = TestEnvironment.Create())
+            using (var env = TestEnvironment.Create(output))
             {
                 try
                 {
@@ -828,16 +832,23 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                     // Setup
                     using ProjectCollection projectCollection = new ProjectCollection();
-                    MockLogger collectionLogger = new MockLogger();
+                    MockLogger collectionLogger = new MockLogger(output);
                     projectCollection.RegisterLogger(collectionLogger);
-                    Project project = new Project(projectCollection);
+                    var fileSystem = new DriveEnumeratingWildcardFileSystem();
+                    using XmlReader reader = XmlReader.Create(new StringReader("<Project />"));
+                    Project project = Project.FromXmlReader(reader, new ProjectOptions
+                    {
+                        ProjectCollection = projectCollection,
+                        EvaluationContext = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared, fileSystem)
+                    });
 
                     // Add item
-                    _ = project.AddItem("i", unevaluatedInclude);
+                    project.AddItem("i", unevaluatedInclude).ShouldNotBeEmpty();
 
                     // Verify
                     collectionLogger.WarningCount.ShouldBe(1);
                     collectionLogger.AssertLogContains("MSB5029");
+                    fileSystem.AssertRootEnumerationWasBounded(env.Output);
                     projectCollection.UnregisterAllLoggers();
                 }
                 finally
@@ -3761,7 +3772,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
     public class ProjectItemWithOptimizations_Tests : ProjectItem_Tests
     {
-        public ProjectItemWithOptimizations_Tests()
+        public ProjectItemWithOptimizations_Tests(ITestOutputHelper output) : base(output)
         {
             // Make sure we always use the dictionary-based Remove logic.
             _env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
