@@ -405,6 +405,49 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
+  # GHC is unused here; retain hosted-image storage for both bootstrap stages and coverage.
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - bash: |
+        set -eu
+        case "${TF_BUILD:-}" in
+            True|true) ;;
+            *) printf 'This preparation is restricted to the dedicated hosted CI job.\n' >&2; exit 1 ;;
+        esac
+        if [ "$(uname -s)" != Linux ]; then
+            printf 'This preparation is Linux-only.\n' >&2
+            exit 1
+        fi
+
+        minimum_free_mib=15360
+        available_mib=$(df -Pm "$PWD" | awk 'NR == 2 { print $4 }')
+        case "$available_mib" in
+            ''|*[!0-9]*) printf 'Could not read actual workspace free space.\n' >&2; exit 1 ;;
+        esac
+        printf 'Linux CI workspace: %s MiB available; required %s MiB.\n' "$available_mib" "$minimum_free_mib"
+        if [ "$available_mib" -lt "$minimum_free_mib" ]; then
+            compiler_dir=/usr/local/.ghcup/ghc/9.14.1
+            ghcup=/usr/local/.ghcup/bin/ghcup
+            if [ ! -d "$compiler_dir" ] || [ -L "$compiler_dir" ] ||
+               [ "$(readlink -f "$compiler_dir")" != "$compiler_dir" ] ||
+               [ ! -x "$ghcup" ]; then
+                printf 'The verified unused hosted-image GHC 9.14.1 component is unavailable; no alternative cleanup is attempted.\n' >&2
+                exit 1
+            fi
+            printf 'Reclaiming only the preinstalled GHC 9.14.1 component; all .NET SDKs and tested toolchains are retained.\n'
+            sudo env GHCUP_INSTALL_BASE_PREFIX=/usr/local "$ghcup" --offline rm ghc 9.14.1
+        fi
+
+        available_mib=$(df -Pm "$PWD" | awk 'NR == 2 { print $4 }')
+        case "$available_mib" in
+            ''|*[!0-9]*) printf 'Could not read actual post-preparation free space.\n' >&2; exit 1 ;;
+        esac
+        df -Pm "$PWD"
+        if [ "$available_mib" -lt "$minimum_free_mib" ]; then
+            printf 'Insufficient hosted Linux CI storage after the narrowly scoped preparation: %s MiB < %s MiB.\n' "$available_mib" "$minimum_free_mib" >&2
+            exit 1
+        fi
+        printf 'Linux CI headroom accepted: %s MiB; no test, coverage, SDK, feed or audit input changed.\n' "$available_mib"
+      displayName: Ensure private Linux CI storage headroom
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --stage2Properties '/mt'
     displayName: CI Build
     env:
