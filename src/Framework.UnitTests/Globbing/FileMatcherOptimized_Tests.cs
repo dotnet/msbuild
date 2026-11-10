@@ -2273,6 +2273,32 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
     }
 #endif
 
+    [Fact]
+    public void RecordingFileSystemRecordsConcurrentEnumerations()
+    {
+        TransientTestFolder root = _environment.CreateFolder();
+        CreateTree(root.Path);
+        RecordingFileSystem fileSystem = new(FileSystems.Default);
+        const int iterations = 64;
+
+        Parallel.For(0, iterations, iteration =>
+        {
+            string pattern = iteration.ToString(CultureInfo.InvariantCulture);
+            _ = fileSystem.EnumerateFiles(root.Path, pattern).ToArray();
+            _ = fileSystem.EnumerateDirectories(root.Path, pattern).ToArray();
+            _ = fileSystem.EnumerateFileSystemEntries(root.Path, pattern).ToArray();
+        });
+
+        fileSystem.EnumerationCalls.Count.ShouldBe(iterations * 3);
+        for (int iteration = 0; iteration < iterations; iteration++)
+        {
+            string pattern = iteration.ToString(CultureInfo.InvariantCulture);
+            fileSystem.EnumerationCalls.ShouldContain((nameof(IFileSystem.EnumerateFiles), root.Path, pattern));
+            fileSystem.EnumerationCalls.ShouldContain((nameof(IFileSystem.EnumerateDirectories), root.Path, pattern));
+            fileSystem.EnumerationCalls.ShouldContain((nameof(IFileSystem.EnumerateFileSystemEntries), root.Path, pattern));
+        }
+    }
+
     private static void CreateTree(string root)
     {
         string[] files =
@@ -2323,7 +2349,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
             _inner = inner;
         }
 
-        internal List<(string Operation, string Path, string Pattern)> EnumerationCalls { get; } = [];
+        internal ConcurrentQueue<(string Operation, string Path, string Pattern)> EnumerationCalls { get; } = new();
 
         public TextReader ReadFile(string path) => _inner.ReadFile(path);
         public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) =>
@@ -2336,7 +2362,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
             string searchPattern = "*",
             SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
-            EnumerationCalls.Add((nameof(EnumerateFiles), path, searchPattern));
+            EnumerationCalls.Enqueue((nameof(EnumerateFiles), path, searchPattern));
             return _inner.EnumerateFiles(path, searchPattern, searchOption);
         }
 
@@ -2345,7 +2371,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
             string searchPattern = "*",
             SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
-            EnumerationCalls.Add((nameof(EnumerateDirectories), path, searchPattern));
+            EnumerationCalls.Enqueue((nameof(EnumerateDirectories), path, searchPattern));
             return _inner.EnumerateDirectories(path, searchPattern, searchOption);
         }
 
@@ -2354,7 +2380,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
             string searchPattern = "*",
             SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
-            EnumerationCalls.Add((nameof(EnumerateFileSystemEntries), path, searchPattern));
+            EnumerationCalls.Enqueue((nameof(EnumerateFileSystemEntries), path, searchPattern));
             return _inner.EnumerateFileSystemEntries(path, searchPattern, searchOption);
         }
 
