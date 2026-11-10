@@ -2011,12 +2011,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Get any property in the item that has the specified name,
         /// otherwise returns null.
-        /// Name is the segment of the provided string with the provided start and end indexes.
+        /// Name is the segment of the provided string with the provided start index and length.
         /// </summary>
         [DebuggerStepThrough]
-        ProjectPropertyInstance IPropertyProvider<ProjectPropertyInstance>.GetProperty(string name, int startIndex, int endIndex)
+        ProjectPropertyInstance IPropertyProvider<ProjectPropertyInstance>.GetProperty(string name, int startIndex, int length)
         {
-            return _properties.GetProperty(name, startIndex, endIndex);
+            return _properties.GetProperty(name, startIndex, length);
         }
 
         /// <summary>
@@ -2617,8 +2617,8 @@ namespace Microsoft.Build.Execution
                 ProjectTargetInstance.FactoryForDeserialization,
                 capacity => new RetrievableEntryHashSet<ProjectTargetInstance>(capacity, MSBuildNameIgnoreCaseComparer.Default));
 
-            translator.TranslateDictionary(ref _beforeTargets, TranslatorForTargetSpecificDictionaryKey, TranslatorForTargetSpecificDictionaryValue, count => new Dictionary<string, List<TargetSpecification>>(count));
-            translator.TranslateDictionary(ref _afterTargets, TranslatorForTargetSpecificDictionaryKey, TranslatorForTargetSpecificDictionaryValue, count => new Dictionary<string, List<TargetSpecification>>(count));
+            translator.TranslateDictionary(ref _beforeTargets, TranslatorForTargetSpecificDictionaryKey, TranslatorForTargetSpecificDictionaryValue, count => new Dictionary<string, List<TargetSpecification>>(count, StringComparer.OrdinalIgnoreCase));
+            translator.TranslateDictionary(ref _afterTargets, TranslatorForTargetSpecificDictionaryKey, TranslatorForTargetSpecificDictionaryValue, count => new Dictionary<string, List<TargetSpecification>>(count, StringComparer.OrdinalIgnoreCase));
 
             translator.Translate(ref _defaultTargets);
             translator.Translate(ref _initialTargets);

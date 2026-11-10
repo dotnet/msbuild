@@ -17,6 +17,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -446,12 +447,13 @@ namespace Microsoft.Build.BackEnd
                     TaskHostParameters taskIdentityParameters = GatherTaskIdentityParameters(bucket.Expander);
                     (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) = _taskExecutionHost.FindTask(taskIdentityParameters);
                     string taskAssemblyLocation = taskFactoryWrapper?.TaskFactoryLoadedType?.Path;
+                    IntrinsicTaskFactory intrinsicTaskFactory = taskFactoryWrapper?.TaskFactory as IntrinsicTaskFactory;
 
                     if (requirements != null)
                     {
                         TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance, taskAssemblyLocation);
                         MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
-                        if (_componentHost.BuildParameters.IsTelemetryEnabled)
+                        if (_componentHost.BuildParameters.IsTelemetryEnabled && intrinsicTaskFactory is null)
                         {
                             taskFactoryWrapper?.Statistics?.ExecutionStarted();
                         }
@@ -493,14 +495,14 @@ namespace Microsoft.Build.BackEnd
                                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                                 {
                                     _continueOnError = ContinueOnError.ErrorAndStop;
-                                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, "false", true, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
+                                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.LastTaskResult, "false", true, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
                                     taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, e);
                                     throw;
                                 }
 
                                 if (violation)
                                 {
-                                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, "false", true, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
+                                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.LastTaskResult, "false", true, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
                                     taskResult = new WorkUnitResult(
                                         WorkUnitResultCode.Failed,
                                         _continueOnError == ContinueOnError.ErrorAndStop ? WorkUnitActionCode.Stop : WorkUnitActionCode.Continue,
@@ -536,7 +538,23 @@ namespace Microsoft.Build.BackEnd
                             taskLoggingContext.LogTaskBatchFinished(_projectFullPath, taskResult.ResultCode == WorkUnitResultCode.Success || taskResult.ResultCode == WorkUnitResultCode.Skipped);
                             if (_componentHost.BuildParameters.IsTelemetryEnabled)
                             {
-                                taskFactoryWrapper?.Statistics?.ExecutionStopped();
+                                if (intrinsicTaskFactory is null)
+                                {
+                                    taskFactoryWrapper?.Statistics?.ExecutionStopped();
+                                }
+                                else
+                                {
+                                    string taskName = intrinsicTaskFactory.TaskType == typeof(MSBuild)
+                                        ? "Microsoft.Build.Tasks.MSBuild"
+                                        : "Microsoft.Build.Tasks.CallTarget";
+                                    _targetLoggingContext.ProjectLoggingContext?.TelemetryCollector?.AddTask(
+                                        new TaskOrTargetTelemetryKey(taskName, isCustom: false, isFromNugetCache: false, isFromMetaProject: false),
+                                        TimeSpan.Zero,
+                                        executionsCount: 1,
+                                        totalMemoryConsumed: null,
+                                        taskFactoryName: nameof(IntrinsicTaskFactory),
+                                        taskHostRuntime: null);
+                                }
                             }
 
                             if (taskResult.ResultCode == WorkUnitResultCode.Failed && _continueOnError == ContinueOnError.WarnAndContinue)
@@ -899,7 +917,7 @@ namespace Microsoft.Build.BackEnd
                     // The main use of this is if ContinueOnError is true -- so that the next task can consult the result.
                     // So we want it to be "false" even if ContinueOnError is true.
                     // The constants "true" and "false" should NOT be localized. They become property values.
-                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, taskResult ? "true" : "false", true/* may be reserved */, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
+                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.LastTaskResult, taskResult ? "true" : "false", true/* may be reserved */, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
                 }
                 else
                 {

@@ -68,7 +68,7 @@
       </trans-unit>
       <trans-unit id="Binlog_FilteredLog">
         <source>This binary log is filtered. Excluded event kinds: {0}.</source>
-        <target state="new">This binary log is filtered. Excluded event kinds: {0}.</target>
+        <target state="translated">此二进制日志已筛选。排除的事件类型: {0}。</target>
         <note>LOCALIZATION: {0} is a comma-separated list of binary log event kind names. Do not localize the event kind names.</note>
       </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
@@ -300,6 +300,16 @@
         <source>Downloads folder is untrusted for projects building.</source>
         <target state="translated">生成项目不信任下载文件夹。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_MessageFmt">
+        <source>The 'WriteLinesToFile' task in project {0} does not specify the 'Overwrite' parameter. Set it explicitly to 'true' to overwrite the file or 'false' to append to it.</source>
+        <target state="translated">项目 {0} 中的 'WriteLinesToFile' 任务未指定 'Overwrite' 参数。将其显式设置为 'true' 以覆盖文件，或设为 'false' 以追加到该文件。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_Title">
+        <source>The 'Overwrite' parameter should be specified when using the 'WriteLinesToFile' task.</source>
+        <target state="translated">使用 'WriteLinesToFile' 任务时，应指定 'Overwrite' 参数。</target>
+        <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>

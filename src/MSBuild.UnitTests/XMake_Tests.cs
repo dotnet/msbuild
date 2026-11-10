@@ -17,6 +17,7 @@ using Microsoft.Build.CommandLine;
 using Microsoft.Build.CommandLine.Experimental;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
@@ -85,6 +86,29 @@ namespace Microsoft.Build.UnitTests
         private static string TestAssetsRootPath { get; } = Path.Combine(Path.Combine(Path.GetDirectoryName(typeof(XMakeAppTests).Assembly.Location) ?? AppContext.BaseDirectory), "TestAssets");
 
         private const string AutoResponseFileName = "MSBuild.rsp";
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BuildTelemetryTracksResponseFileUsage(bool useResponseFile)
+        {
+            string responseFile = _env.CreateFile("telemetry.rsp", "/help").Path;
+            string[] commandLine = useResponseFile
+                ? [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, "-noAutoResponse", $"@\"{responseFile}\""]
+                : [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, "-noAutoResponse", "/help"];
+
+            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry();
+            try
+            {
+                MSBuildApp.Execute(commandLine).ShouldBe(MSBuildApp.ExitType.Success);
+                KnownTelemetry.PartialBuildTelemetry.ShouldNotBeNull();
+                KnownTelemetry.PartialBuildTelemetry!.ResponseFileUsed.ShouldBe(useResponseFile);
+            }
+            finally
+            {
+                KnownTelemetry.PartialBuildTelemetry = null;
+            }
+        }
 
         [Fact]
         public void GatherCommandLineSwitchesTwoProperties()
@@ -3446,6 +3470,67 @@ EndGlobal
             CommandLineSwitchException exception = Should.Throw<CommandLineSwitchException>(
                 () => MSBuildApp.IsMultiThreadedEnabled(switches));
             exception.Message.ShouldContain("MSB1072");
+        }
+
+        [Fact]
+        public void PrecomputeIsDisabledByDefault()
+        {
+            MSBuildApp.IsPrecomputeEnabled(new CommandLineSwitches()).ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData("/precompute", null, true)]
+        [InlineData("/precompute:true", null, true)]
+        [InlineData("/precompute:false", null, false)]
+        [InlineData("/precompute:false", "/precompute", true)]
+        [InlineData("/precompute", "/precompute:false", false)]
+        [InlineData("/precompute:false", "/precompute:true", true)]
+        [InlineData("/precompute:true", "/precompute:false", false)]
+        public void PrecomputeSwitchUsesLatestValue(string firstArgument, string secondArgument, bool expected)
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(
+                secondArgument is null ? [firstArgument] : [firstArgument, secondArgument],
+                switches);
+
+            switches.HaveErrors().ShouldBeFalse();
+            MSBuildApp.IsPrecomputeEnabled(switches).ShouldBe(expected);
+        }
+
+        [Theory]
+        [InlineData("/precompute", "/precompute:false", false)]
+        [InlineData("/precompute:true", "/precompute:false", false)]
+        [InlineData("/precompute:false", "/precompute", true)]
+        [InlineData("/precompute:false", "/precompute:true", true)]
+        public void PrecomputeSwitchFromCommandLineWinsOverResponseFile(string responseFileArgument, string commandLineArgument, bool expected)
+        {
+            CommandLineParser parser = new CommandLineParser();
+
+            CommandLineSwitches switchesFromAutoResponseFile = new CommandLineSwitches();
+            parser.GatherCommandLineSwitches([responseFileArgument], switchesFromAutoResponseFile);
+
+            CommandLineSwitches switchesNotFromAutoResponseFile = new CommandLineSwitches();
+            parser.GatherCommandLineSwitches([commandLineArgument], switchesNotFromAutoResponseFile);
+
+            CommandLineSwitches combined = MSBuildApp.CombineSwitchesRespectingPriority(
+                switchesFromAutoResponseFile,
+                switchesNotFromAutoResponseFile,
+                string.Empty);
+
+            MSBuildApp.IsPrecomputeEnabled(combined).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void PrecomputeSwitchRejectsInvalidBooleanValue()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(["/precompute:invalid"], switches);
+
+            CommandLineSwitchException exception = Should.Throw<CommandLineSwitchException>(
+                () => MSBuildApp.IsPrecomputeEnabled(switches));
+            exception.Message.ShouldContain("MSB1074");
         }
 
 #if FEATURE_REPORTFILEACCESSES

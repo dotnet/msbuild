@@ -33,6 +33,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// The test class for the TaskExecutionHost
     /// </summary>
+    [Collection("TelemetryManagerTests")]
     public class TaskExecutionHost_Tests : ITestTaskHost, IBuildEngine2, IDisposable
     {
         private readonly ITestOutputHelper _output;
@@ -2051,7 +2052,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Force initing the DebugPath from the env var - as we need it to be unique for those tests.
             // The ProjectCacheTests DataMemberAttribute usages (specifically SuccessfulGraphsWithBuildParameters) lead
             //  to the DebugPath being set before this test runs - and hence the env var is ignored.
-            FrameworkDebugUtils.SetDebugPath();
+            DebugUtils.SetDebugPath();
 
             ObjectModelHelpers.BuildProjectExpectFailure($"""
                      <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -2080,7 +2081,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Reset DebugPath to not affect other tests
             transientEnvVar.Revert();
-            FrameworkDebugUtils.SetDebugPath();
+            DebugUtils.SetDebugPath();
         }
 
         [Fact]

@@ -320,7 +320,7 @@ namespace Microsoft.Build.CommandLine
         /// Only the entry process and the server node report builds, so worker, task host and RAR nodes don't create a session for builds.
         /// </summary>
         /// <remarks>
-        /// The node mode comes from the command line (see <see cref="FrameworkDebugUtils.GetProcessNodeMode"/>),
+        /// The node mode comes from the command line (see <see cref="DebugUtils.GetProcessNodeMode"/>),
         /// so a node mode that is supplied only through a response file is not detected and the process is treated as an entry process.
         /// MSBuild itself always launches nodes with <c>/nodemode:N</c> on the command line.
         /// </remarks>
@@ -337,7 +337,7 @@ namespace Microsoft.Build.CommandLine
         /// </remarks>
         internal static void InitializeTelemetryForInProcessBuild()
         {
-            if (OwnsProcessTelemetrySession(FrameworkDebugUtils.GetProcessNodeMode()))
+            if (OwnsProcessTelemetrySession(DebugUtils.GetProcessNodeMode()))
             {
                 TelemetryManager.Instance.Initialize(isStandalone: true);
             }
@@ -471,6 +471,8 @@ namespace Microsoft.Build.CommandLine
                 {
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 }
+
+                UpdateResponseFileTelemetry();
 
                 // From here the switches are fully gathered (including any project Directory.Build.rsp), so the
                 // in-proc build path can safely reuse them - and the gather's response-file bookkeeping
@@ -841,7 +843,7 @@ namespace Microsoft.Build.CommandLine
                     break;
                 case "3":
                     // Value "3" debugs the main MSBuild process but skips debugging child TaskHost processes
-                    if (!FrameworkDebugUtils.IsInTaskHostNode())
+                    if (!DebugUtils.IsInTaskHostNode())
                     {
                         Debugger.Launch();
                     }
@@ -963,6 +965,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                 int cpuCount = 1;
                 bool multiThreaded = false;
+                bool precompute = false;
                 bool enableNodeReuse = true;
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
@@ -1024,6 +1027,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                             ref cpuCount,
                                             ref multiThreaded,
+                                            ref precompute,
                                             ref enableNodeReuse,
                                             ref preprocessWriter,
                                             ref targetsWriter,
@@ -1056,6 +1060,7 @@ namespace Microsoft.Build.CommandLine
                                             string.Join(" ", commandLine),
                                             switchesAlreadyGathered);
 
+                UpdateResponseFileTelemetry();
                 CommandLineSwitches.SwitchesFromResponseFiles = null;
 
                 if (buildCanBeInvoked)
@@ -1186,6 +1191,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                     cpuCount,
                                     multiThreaded,
+                                    precompute,
                                     enableNodeReuse,
                                     preprocessWriter,
                                     targetsWriter,
@@ -1597,6 +1603,14 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
+        private static void UpdateResponseFileTelemetry()
+        {
+            if (KnownTelemetry.PartialBuildTelemetry is not null)
+            {
+                KnownTelemetry.PartialBuildTelemetry.ResponseFileUsed = commandLineParser.IncludedResponseFiles.Count > 0;
+            }
+        }
+
         /// <summary>
         /// The location of the application executable.
         /// </summary>
@@ -1650,6 +1664,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             int cpuCount,
             bool multiThreaded,
+            bool precompute,
             bool enableNodeReuse,
             TextWriter preprocessWriter,
             TextWriter targetsWriter,
@@ -1866,6 +1881,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.NodeExeLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
                     parameters.MaxNodeCount = cpuCount;
                     parameters.MultiThreaded = multiThreaded;
+                    parameters.Precompute = precompute;
                     parameters.Loggers = projectCollection.Loggers;
                     parameters.ForwardingLoggers = remoteLoggerRecords;
                     parameters.ToolsetDefinitionLocations = Microsoft.Build.Evaluation.ToolsetDefinitionLocations.ConfigurationFile | Microsoft.Build.Evaluation.ToolsetDefinitionLocations.Registry;
@@ -2190,7 +2206,7 @@ namespace Microsoft.Build.CommandLine
                     new BuildManager.DeferredBuildMessage(
                         ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "MSBuildDebugPath",
-                        FrameworkDebugUtils.DebugPath),
+                        DebugUtils.DebugPath),
                         MessageImportance.High));
             }
 
@@ -2498,6 +2514,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             ref int cpuCount,
             ref bool multiThreaded,
+            ref bool precompute,
             ref bool enableNodeReuse,
             ref TextWriter preprocessWriter,
             ref TextWriter targetsWriter,
@@ -2658,6 +2675,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                                            ref cpuCount,
                                                            ref multiThreaded,
+                                                           ref precompute,
                                                            ref enableNodeReuse,
                                                            ref preprocessWriter,
                                                            ref targetsWriter,
@@ -2739,6 +2757,8 @@ namespace Microsoft.Build.CommandLine
 
                     // figure out if we should use in-proc nodes for parallel build, effectively running the build multi-threaded
                     multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
+
+                    precompute = IsPrecomputeEnabled(commandLineSwitches);
 
                     // figure out if we should reuse nodes
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
@@ -2874,6 +2894,19 @@ namespace Microsoft.Build.CommandLine
             }
 
             return Traits.Instance.EnableMultiThreaded;
+        }
+
+        internal static bool IsPrecomputeEnabled(CommandLineSwitches commandLineSwitches)
+        {
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Precompute))
+            {
+                return ProcessBooleanSwitch(
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Precompute],
+                    defaultValue: true,
+                    resourceName: "InvalidPrecomputeValue");
+            }
+
+            return false;
         }
 
 #if FEATURE_REPORTFILEACCESSES

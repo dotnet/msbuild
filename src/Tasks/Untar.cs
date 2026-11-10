@@ -12,6 +12,7 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Shared.Globbing;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -100,27 +101,13 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="Task.Execute"/>
         public override bool Execute()
         {
-            // Bridge from the synchronous ITask.Execute entrypoint to the asynchronous implementation with a
-            // single blocking call. The extraction pipeline is async so it can flow the cancellation token into
-            // the runtime's asynchronous I/O; keeping the only GetAwaiter().GetResult() here (rather than in the
-            // per-entry loop) avoids repeatedly blocking a thread-pool thread inside the loop.
-            return ExecuteAsync()
-                .ConfigureAwait(continueOnCapturedContext: false)
-                .GetAwaiter()
-                .GetResult();
-        }
-
-        /// <summary>
-        /// Asynchronously extracts every source archive to the destination folder.
-        /// </summary>
-        /// <returns>A <see cref="System.Threading.Tasks.Task{Boolean}"/> that resolves to <see langword="true"/> when extraction completed without errors or cancellation.</returns>
-        private async System.Threading.Tasks.Task<bool> ExecuteAsync()
-        {
             if (!TryCreateDestinationDirectory(out DirectoryInfo? destinationDirectory))
             {
                 return false;
             }
 
+            // Yield() and Reacquire() must be called on the same thread, so they bracket the blocking wait here
+            // rather than living inside the async method, whose continuations may resume on a thread-pool thread.
             BuildEngine3.Yield();
 
             try
@@ -129,21 +116,14 @@ namespace Microsoft.Build.Tasks
 
                 if (!Log.HasLoggedErrors)
                 {
-                    foreach (ITaskItem sourceItem in SourceFiles.TakeWhile(i => !_cancellationTokenSource.IsCancellationRequested))
-                    {
-                        FileInfo sourceFile = new FileInfo(TaskEnvironment.GetAbsolutePath(sourceItem.ItemSpec).Value);
-
-                        if (!FileSystems.Default.FileExists(sourceFile.FullName))
-                        {
-                            Log.LogErrorWithCodeFromResources("Untar.ErrorFileDoesNotExist", sourceFile.FullName);
-                            continue;
-                        }
-
-                        if (!await TryExtractTarballAsync(sourceFile, destinationDirectory).ConfigureAwait(continueOnCapturedContext: false))
-                        {
-                            break;
-                        }
-                    }
+                    // Bridge from the synchronous ITask.Execute entrypoint to the asynchronous implementation with a
+                    // single blocking call. The extraction pipeline is async so it can flow the cancellation token into
+                    // the runtime's asynchronous I/O; keeping the only GetAwaiter().GetResult() here (rather than in the
+                    // per-entry loop) avoids repeatedly blocking a thread-pool thread inside the loop.
+                    ExtractAllAsync(destinationDirectory)
+                        .ConfigureAwait(continueOnCapturedContext: false)
+                        .GetAwaiter()
+                        .GetResult();
                 }
             }
             finally
@@ -152,6 +132,30 @@ namespace Microsoft.Build.Tasks
             }
 
             return !_cancellationTokenSource.IsCancellationRequested && !Log.HasLoggedErrors;
+        }
+
+        /// <summary>
+        /// Asynchronously extracts every source archive to the destination folder.
+        /// </summary>
+        /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract entries to.</param>
+        /// <returns>A <see cref="System.Threading.Tasks.Task"/> that completes when all source archives have been processed.</returns>
+        private async System.Threading.Tasks.Task ExtractAllAsync(DirectoryInfo destinationDirectory)
+        {
+            foreach (ITaskItem sourceItem in SourceFiles.TakeWhile(i => !_cancellationTokenSource.IsCancellationRequested))
+            {
+                FileInfo sourceFile = new FileInfo(TaskEnvironment.GetAbsolutePath(sourceItem.ItemSpec));
+
+                if (!FileSystems.Default.FileExists(sourceFile.FullName))
+                {
+                    Log.LogErrorWithCodeFromResources("Untar.ErrorFileDoesNotExist", sourceFile.FullName);
+                    continue;
+                }
+
+                if (!await TryExtractTarballAsync(sourceFile, destinationDirectory).ConfigureAwait(continueOnCapturedContext: false))
+                {
+                    break;
+                }
+            }
         }
 
         /// <summary>
@@ -213,10 +217,11 @@ namespace Microsoft.Build.Tasks
         /// <returns><see langword="true"/> if the destination directory was created; otherwise <see langword="false"/>.</returns>
         private bool TryCreateDestinationDirectory([NotNullWhen(true)] out DirectoryInfo? destinationDirectory)
         {
-            string destinationFolderPath = TaskEnvironment.GetAbsolutePath(DestinationFolder.ItemSpec).Value;
+            string destinationFolderPath = TaskEnvironment.GetAbsolutePath(DestinationFolder.ItemSpec);
 
             try
             {
+                // CodeQL [SM00414] False positive: DestinationFolder is a trusted task input path in the project file.
                 destinationDirectory = Directory.CreateDirectory(destinationFolderPath);
 
                 return true;
@@ -386,12 +391,12 @@ namespace Microsoft.Build.Tasks
 
             if (_includePatterns.Length > 0)
             {
-                result = _includePatterns.All(pattern => !FileMatcher.IsMatch(FileMatcher.Normalize(entryName), pattern));
+                result = _includePatterns.All(pattern => !GlobPattern.MatchesName(FileMatcher.Normalize(entryName).AsSpan(), pattern));
             }
 
             if (_excludePatterns.Length > 0)
             {
-                result |= _excludePatterns.Any(pattern => FileMatcher.IsMatch(FileMatcher.Normalize(entryName), pattern));
+                result |= _excludePatterns.Any(pattern => GlobPattern.MatchesName(FileMatcher.Normalize(entryName).AsSpan(), pattern));
             }
 
             return result;

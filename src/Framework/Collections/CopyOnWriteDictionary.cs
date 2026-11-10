@@ -26,6 +26,7 @@ namespace Microsoft.Build.Collections
     /// be run in a separate appdomain.
     /// </comment>
     [Serializable]
+    // CodeQL [SM02227] False positive: static call-graph over-approximation via virtual ToString/Flush in VMR build; deserialization only reads dictionary entries.
     internal class CopyOnWriteDictionary<V> : IDictionary<string, V>, IDictionary, ISerializable
     {
         /// <summary>

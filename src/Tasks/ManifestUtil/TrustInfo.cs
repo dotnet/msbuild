@@ -432,6 +432,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">The name of the input file.</param>
         public void Read(string path)
         {
+            // CodeQL [SM00414] False positive: path is a trusted application trust XML input file path.
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 Read(s);

@@ -1670,7 +1670,7 @@ namespace Microsoft.Build.UnitTests
             var formatter = new BinaryFormatter();
             formatter.Serialize(stream, exception);
             stream.Position = 0;
-            var roundTripped = (BinaryLogEventFilterException)formatter.Deserialize(stream);
+            var roundTripped = (BinaryLogEventFilterException)formatter.Deserialize(stream); // CodeQL [SM03722, SM04191] False positive: test-only BinaryFormatter round-trip of a trusted in-memory exception.
 
             roundTripped.Message.ShouldBe(exception.Message);
             roundTripped.RecordKind.ShouldBe(exception.RecordKind);

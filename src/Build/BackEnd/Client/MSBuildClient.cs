@@ -653,7 +653,8 @@ namespace Microsoft.Build.Server
                     startedAt: KnownTelemetry.PartialBuildTelemetry.StartAt.GetValueOrDefault(),
                     initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState,
                     serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason,
-                    serverEnableReason: KnownTelemetry.PartialBuildTelemetry.ServerEnableReason);
+                    serverEnableReason: KnownTelemetry.PartialBuildTelemetry.ServerEnableReason,
+                    responseFileUsed: KnownTelemetry.PartialBuildTelemetry.ResponseFileUsed.GetValueOrDefault());
 
             return new ServerNodeBuildCommand(
                         _commandLine,

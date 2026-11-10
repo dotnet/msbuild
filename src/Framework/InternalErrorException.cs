@@ -16,6 +16,7 @@ namespace Microsoft.Build.Framework
     /// did wrong.
     /// </summary>
     [Serializable]
+    // CodeQL [SM02227] False positive: static call-graph over-approximation via virtual ToString/Flush in VMR build; deserialization only reads primitive fields.
     internal sealed class InternalErrorException : BuildExceptionBase
     {
         /// <summary>
