@@ -46,6 +46,7 @@ parameters:
       - main
       - rel/insiders
       - rel/stable
+      - rel/d18.11-ltsc
   - name: DropRetentionDays
     default: 183
     type: number
@@ -61,7 +62,7 @@ variables:
     ${{ if not(eq(parameters.TargetBranch, 'auto')) }}:
       value: ${{ parameters.TargetBranch }}
     ${{ else }}:
-      value: 'rel/stable'
+      value: $[ iif(eq(variables['resources.pipeline.MSBuild.sourceBranch'], 'refs/heads/vs18.11'), 'rel/d18.11-ltsc', 'rel/stable') ]
   - name:  TeamName
     value: msbuild
   - name: TeamEmail
