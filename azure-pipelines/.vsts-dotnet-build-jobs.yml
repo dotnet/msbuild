@@ -12,6 +12,12 @@ parameters:
 - name: enableOptProf
   type: boolean
   default: false
+- name: useCentralOptProf
+  type: boolean
+  default: false
+- name: publishVSSetup
+  type: boolean
+  default: false
 
 jobs:
 - job: Windows_NT
@@ -47,11 +53,12 @@ jobs:
       ArtifactName: logs
       condition: always()
 
-    # Publish test configuration for OptProf data collection
+    # Publish the VSSetup artifact. OptProf data collection consumes its test configuration, and
+    # publishVSSetup lets builds that do not run OptProf (ExpPerf) publish the VSIXes as well.
     - output: buildArtifacts
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\VSSetup\$(BuildConfiguration)'
       ArtifactName: VSSetup
-      condition: and(succeeded(), ${{ parameters.enableOptProf }})
+      condition: and(succeeded(), ${{ or(parameters.enableOptProf, parameters.publishVSSetup) }})
 
     # Archive NuGet packages to DevOps.
     # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the
@@ -59,6 +66,12 @@ jobs:
     - output: buildArtifacts
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\packages\$(BuildConfiguration)'
       ArtifactName: PackageArtifacts
+
+    # Also publish the existing final release packages without changing PackageArtifacts.
+    - ${{ if and(eq(parameters.isExperimental, false), eq(parameters.signTypeParameter, 'real')) }}:
+      - output: pipelineArtifact
+        targetPath: '$(Build.SourcesDirectory)\artifacts\official\packages\$(BuildConfiguration)\Release'
+        artifactName: ReleasePackages
 
     # Publish "IntelliSense" XSD files to their own artifact
     # so it can be consumed by the insertion-to-VS job
@@ -72,7 +85,6 @@ jobs:
       ArtifactName: AssetManifests
 
   variables:
-  - group: Publish-Build-Assets
   - name: TeamName
     value: MSBuild
   - name: VisualStudio.MajorVersion
@@ -112,6 +124,45 @@ jobs:
     displayName: 'Install OptProf Plugin'
     condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
+  - ${{ if parameters.useCentralOptProf }}:
+    - powershell: |
+        $ErrorActionPreference = 'Stop'
+        $pluginRoot = $env:MICROBUILDOVERRIDEPLUGINDIRECTORY
+        if ([string]::IsNullOrWhiteSpace($env:SYSTEM_ACCESSTOKEN)) { throw 'System.AccessToken is required to resolve the central OptProf input for main.' }
+        if ([string]::IsNullOrWhiteSpace($pluginRoot) -or -not (Test-Path -LiteralPath $pluginRoot -PathType Container)) { throw 'The OptProf plugin directory was not provided or does not exist.' }
+
+        $modules = @(Get-ChildItem -Path "$pluginRoot\MicroBuild.Plugins.OptProf.*\tools\Scripts\Optimization.Data.PowerShell.dll" -File -ErrorAction Stop)
+        if ($modules.Count -ne 1) { throw "Expected exactly one Optimization.Data.PowerShell.dll under the OptProf plugin directory; found $($modules.Count)." }
+
+        Import-Module $modules[0].FullName -Force
+        $secureToken = $null
+        $store = $null
+        try {
+          $secureToken = ConvertTo-SecureString $env:SYSTEM_ACCESSTOKEN -AsPlainText -Force
+          $store = Find-OptimizationInputsStoreForBranch -ProjectName DevDiv -RepositoryName VS -BranchName main -PAT $secureToken
+          if ($null -eq $store) { throw 'No central OptProf input was found for the VS main branch.' }
+          if ([string]::IsNullOrWhiteSpace($store.Name) -or -not $store.Name.StartsWith('OptimizationInputs/DevDiv/VS/', [StringComparison]::Ordinal)) {
+            throw "The resolved OptProf input is not owned by OptimizationInputs/DevDiv/VS/."
+          }
+          if (-not $store.Drop.Finalized) { throw "The resolved OptProf input '$($store.Name)' is not finalized." }
+          if ($store.Drop.Deleted) { throw "The resolved OptProf input '$($store.Name)' is deleted." }
+          if (-not $store.Drop.NoExpiration) {
+            if ($null -eq $store.Drop.ExpirationDate) { throw "The resolved OptProf input '$($store.Name)' has no known expiration date." }
+            $expirationDate = ([DateTime]$store.Drop.ExpirationDate).ToUniversalTime()
+            if ($expirationDate -le [DateTime]::UtcNow) { throw "The resolved OptProf input '$($store.Name)' is expired." }
+          }
+
+          Write-Host "##vso[task.setvariable variable=OptProfDrop]$($store.Name)"
+        }
+        finally {
+          if ($null -ne $store) { $store.Dispose() }
+          if ($null -ne $secureToken) { $secureToken.Dispose() }
+        }
+      displayName: 'Resolve central OptProf input'
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+        MICROBUILDOVERRIDEPLUGINDIRECTORY: $(MicroBuildOverridePluginDirectory)
+
   # Required by MicroBuildBuildVSBootstrapper
   - task: MicroBuildSwixPlugin@4
     inputs:
@@ -136,9 +187,6 @@ jobs:
 
     displayName: Build
     condition: succeeded()
-
-  # Required by Microsoft policy
-  - template: /eng/common/templates-official/steps/generate-sbom.yml@self
 
   # Compute the .vsman manifest list (generated by the Build step above) consumed by MicroBuildBuildVSBootstrapper below.
   - pwsh: |
@@ -206,6 +254,10 @@ jobs:
 
       if ("${{ parameters.enableOptProf }}" -eq "true") {
         $paths += "OptProf/$(BuildConfiguration)/Data"
+      }
+
+      # Keep in sync with the condition of the VSSetup output above.
+      if ("${{ or(parameters.enableOptProf, parameters.publishVSSetup) }}" -eq "true") {
         $paths += "VSSetup/$(BuildConfiguration)"
       }
 

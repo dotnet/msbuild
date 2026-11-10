@@ -64,7 +64,7 @@
         <Configuration>
           <WorkingDirectory>C:\OptProf</WorkingDirectory>
           <ProfilesDirectory>C:\Profiles</ProfilesDirectory>
-          <IgnoreProfileNotGeneratedExceptions>true</IgnoreProfileNotGeneratedExceptions>
+          <IgnoreProfileNotGeneratedExceptions>false</IgnoreProfileNotGeneratedExceptions>
           <Deployment PackageName="Microsoft.DevDiv.TestExtensions.OptProfDataCollector" />
         </Configuration>
       </InProcDataCollector>

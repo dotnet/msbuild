@@ -283,7 +283,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         ProjectCollection = projectCollection,
                     });
 
-                project.GetPropertyValue(ReservedPropertyNames.interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
+                project.GetPropertyValue(ReservedPropertyNames.Interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
             }
         }
 
@@ -311,7 +311,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         ProjectCollection = projectCollection,
                     });
 
-                project.GetPropertyValue(ReservedPropertyNames.interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
+                project.GetPropertyValue(ReservedPropertyNames.Interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
             }
         }
 
@@ -341,7 +341,7 @@ namespace Microsoft.Build.UnitTests.Definition
                             ProjectCollection = projectCollection,
                         });
 
-                    project.GetPropertyValue(ReservedPropertyNames.interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
+                    project.GetPropertyValue(ReservedPropertyNames.Interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
                 }
             }
         }

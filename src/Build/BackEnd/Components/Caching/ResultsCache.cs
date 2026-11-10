@@ -1,10 +1,11 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 
 #nullable disable
@@ -159,11 +160,35 @@ namespace Microsoft.Build.BackEnd
         /// chance of re-execution (which is the usual response to missing / skipped targets), and the caller just needs the data.</param>
         /// <param name="cacheConditionFalseTargets">If true, cached targets skipped because their condition evaluated to false
         /// satisfy the request without reevaluating the condition.</param>
+        /// <param name="allowedTopLevelTargets">When non-null, the request is only considered satisfiable if all of its explicitly
+        /// requested targets (or the configuration's default targets when no targets are specified) are contained in this set.
+        /// Used to enforce isolation constraints deterministically for cross-project references in isolated builds.</param>
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
-        public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss, bool cacheConditionFalseTargets)
+        public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss, bool cacheConditionFalseTargets, IReadOnlyCollection<string> allowedTopLevelTargets)
         {
             Assumed.True(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
             ResultsCacheResponse response = new(ResultsCacheResponseType.NotSatisfied);
+
+            // In isolated builds a cross-project reference may only be satisfied from the cache for targets that were
+            // explicitly requested for the referenced configuration (i.e. declared via ProjectReferenceTargets and built
+            // by the static graph). A target that merely has a cached result because it ran as a dependency of another
+            // target must not satisfy the reference, otherwise the build result would depend on node scheduling (whether
+            // the dependency happened to run on the same node). Treat such requests as a cache miss so the isolation
+            // constraint check runs and deterministically reports the incomplete graph.
+            if (allowedTopLevelTargets != null)
+            {
+                List<string> targetsToCheck = request.Targets.Count > 0 ? request.Targets : configDefaultTargets;
+                if (targetsToCheck != null)
+                {
+                    foreach (string target in targetsToCheck)
+                    {
+                        if (!ContainsIgnoreCase(allowedTopLevelTargets, target))
+                        {
+                            return response;
+                        }
+                    }
+                }
+            }
 
             lock (_resultsByConfiguration)
             {
@@ -295,6 +320,22 @@ namespace Microsoft.Build.BackEnd
         {
             Assumed.Equal(componentType, BuildComponentType.ResultsCache, $"Cannot create components of type {componentType}");
             return new ResultsCache();
+        }
+
+        /// <summary>
+        /// Determines whether the given collection contains the specified target name, ignoring case.
+        /// </summary>
+        private static bool ContainsIgnoreCase(IReadOnlyCollection<string> targets, string target)
+        {
+            foreach (string candidate in targets)
+            {
+                if (MSBuildNameIgnoreCaseComparer.Default.Equals(candidate, target))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

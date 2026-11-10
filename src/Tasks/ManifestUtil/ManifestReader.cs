@@ -142,6 +142,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static Manifest ReadManifest(string manifestType, string path, bool preserveStream)
         {
             Manifest m;
+            // CodeQL [SM00414] False positive: path is a trusted ClickOnce manifest input file path.
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 byte[] buffer = new byte[2];

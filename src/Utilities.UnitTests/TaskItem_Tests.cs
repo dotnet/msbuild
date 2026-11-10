@@ -487,6 +487,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void FromITaskItem_InvalidPath_ThrowsArgumentException()
+        {
+            var backingItem = new TaskItem("bad\0path");
+
+            Should.Throw<ArgumentException>(() => new TaskItem<AbsolutePath>(backingItem));
+        }
+
+        [Fact]
         public void FromITaskItem_NonPathType_UsesItemSpec()
         {
             var backingItem = new TaskItem("42");

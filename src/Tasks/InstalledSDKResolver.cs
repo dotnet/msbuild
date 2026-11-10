@@ -53,7 +53,7 @@ namespace Microsoft.Build.Tasks
                 // We have found a resolved SDK item that matches the one on the reference items.
                 if (_resolvedSDKs.TryGetValue(sdkName, out ITaskItem resolvedSDK))
                 {
-                    string sdkDirectory = taskEnvironment.GetAbsolutePath(resolvedSDK.ItemSpec).Value;
+                    string sdkDirectory = taskEnvironment.GetAbsolutePath(resolvedSDK.ItemSpec);
                     string configuration = resolvedSDK.GetMetadata("TargetedSDKConfiguration");
                     string architecture = resolvedSDK.GetMetadata("TargetedSDKArchitecture");
 

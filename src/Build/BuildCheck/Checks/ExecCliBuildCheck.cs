@@ -6,6 +6,7 @@ using System.Collections.Generic;
 #if !FEATURE_MSIOREDIST
 using System.IO;
 #endif
+using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
 #if FEATURE_MSIOREDIST
@@ -61,7 +62,9 @@ internal sealed class ExecCliBuildCheck : Check
 
     private static void TaskInvocationAction(BuildCheckDataContext<TaskInvocationCheckData> context)
     {
-        if (context.Data.TaskName == ExecTaskName
+        // Task names are matched case-insensitively - MSBuild resolves task names without regard to casing,
+        // so the logged name carries whatever casing the project author used.
+        if (MSBuildNameIgnoreCaseComparer.Default.Equals(context.Data.TaskName, ExecTaskName)
             && context.Data.Parameters.TryGetValue(CommandParameterName, out TaskInvocationCheckData.TaskParameter? commandArgument))
         {
             var execCommandValue = commandArgument.Value?.ToString() ?? string.Empty;

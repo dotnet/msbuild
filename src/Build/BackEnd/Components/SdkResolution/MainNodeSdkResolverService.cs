@@ -3,12 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -84,7 +83,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 EvaluationLoggingContext loggingContext = new EvaluationLoggingContext(loggingService, request.BuildEventContext, request.ProjectPath);
 
-                loggingService.LogFatalBuildError(loggingContext.BuildEventContext, e, new BuildEventFileInfo(request.ElementLocation));
+                loggingService.LogFatalBuildError(loggingContext.BuildEventContext, e, request.ElementLocation);
             }
             finally
             {

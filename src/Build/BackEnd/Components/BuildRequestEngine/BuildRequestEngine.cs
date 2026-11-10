@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -148,7 +148,7 @@ namespace Microsoft.Build.BackEnd
         internal BuildRequestEngine()
         {
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpDirectory = FrameworkDebugUtils.DebugPath;
+            _debugDumpDirectory = DebugUtils.DebugPath;
 #if FEATURE_WINDOWSINTEROP
             _debugForceCaching = Environment.GetEnvironmentVariable("MSBUILDDEBUGFORCECACHING") == "1";
 #endif
@@ -382,10 +382,11 @@ namespace Microsoft.Build.BackEnd
                         BuildResult resultToReport = new BuildResult(request, result, null);
                         BuildRequestConfiguration config = ((IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache))[request.ConfigurationId];
 
-                        // Retrieve the config if it has been cached, since this would contain our instance data.  It is safe to do this outside of a lock
-                        // since only one thread can run in the BuildRequestEngine at a time, and it is EvaluateRequestStates which would cause us to
-                        // cache configurations if we are running out of memory.
-                        config.RetrieveFromCache();
+                        // Retrieve the project if it is cached and keep it in memory while preparing the result for
+                        // transfer. Multiple in-proc request engines share the configuration cache, so another engine
+                        // may run a memory-pressure sweep concurrently.
+                        using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                            config.AcquireProjectInstanceUsage();
                         ((IBuildResults)resultToReport).SavedCurrentDirectory = config.SavedCurrentDirectory;
                         ((IBuildResults)resultToReport).SavedEnvironmentVariables = config.SavedEnvironmentVariables;
                         if ((request.BuildRequestDataFlags & BuildRequestDataFlags.IgnoreExistingProjectState) != BuildRequestDataFlags.IgnoreExistingProjectState)
@@ -604,7 +605,12 @@ namespace Microsoft.Build.BackEnd
                                         configInitialTargets: config.ProjectInitialTargets,
                                         configDefaultTargets: config.ProjectDefaultTargets,
                                         skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(),
-                                        cacheConditionFalseTargets: _componentHost.BuildParameters.CacheConditionFalseTargets);
+                                        cacheConditionFalseTargets: _componentHost.BuildParameters.CacheConditionFalseTargets,
+                                        allowedTopLevelTargets: BuildRequestConfiguration.GetIsolationAllowedTopLevelTargets(
+                                            _componentHost.BuildParameters.ProjectIsolationMode,
+                                            currentEntry.RequestConfiguration,
+                                            config,
+                                            request));
 
                                     if (cacheResponse.Type == ResultsCacheResponseType.Satisfied)
                                     {
@@ -959,7 +965,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     _nodeLoggingContext.LogFatalBuildError(
                         e,
-                        new BuildEventFileInfo(Construction.ElementLocation.EmptyLocation));
+                        Construction.ElementLocation.Empty);
                     throw new BuildAbortedException(e.Message, e);
                 }
             }
@@ -1272,7 +1278,8 @@ namespace Microsoft.Build.BackEnd
                             configInitialTargets: matchingConfig.ProjectInitialTargets,
                             configDefaultTargets: matchingConfig.ProjectDefaultTargets,
                             skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(),
-                            cacheConditionFalseTargets: _componentHost.BuildParameters.CacheConditionFalseTargets);
+                            cacheConditionFalseTargets: _componentHost.BuildParameters.CacheConditionFalseTargets,
+                            allowedTopLevelTargets: BuildRequestConfiguration.GetIsolationAllowedTopLevelTargets(_componentHost.BuildParameters.ProjectIsolationMode, issuingEntry.RequestConfiguration, matchingConfig, newRequest));
 
                         if (response.Type == ResultsCacheResponseType.Satisfied)
                         {

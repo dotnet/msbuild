@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -230,6 +230,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private bool _multiThreaded;
 
+        private bool _precompute;
+
         private ProjectIsolationMode _projectIsolationMode;
 
         private string[] _inputResultsCacheFiles;
@@ -237,6 +239,12 @@ namespace Microsoft.Build.Execution
         private string _outputResultsCacheFile;
 
         private bool _reportFileAccesses;
+
+        /// <summary>
+        /// The configuration for allowed unknown attributes/elements during parsing.
+        /// Loaded on the main node and serialized to worker nodes.
+        /// </summary>
+        private ParserIgnoreConfiguration _ParserIgnoreConfiguration = ParserIgnoreConfiguration.Empty;
 
         /// <summary>
         /// Constructor for those who intend to set all properties themselves.
@@ -264,6 +272,7 @@ namespace Microsoft.Build.Execution
 
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(projectCollection.GlobalPropertiesCollection);
             _propertiesFromCommandLine = projectCollection.PropertiesFromCommandLine;
+            _ParserIgnoreConfiguration = projectCollection.ParserIgnoreConfiguration;
         }
 
         /// <summary>
@@ -297,6 +306,7 @@ namespace Microsoft.Build.Execution
             _loggers = other._loggers != null ? new List<ILogger>(other._loggers) : null;
             _maxNodeCount = other._maxNodeCount;
             MultiThreaded = other.MultiThreaded;
+            _precompute = other._precompute;
             _memoryUseLimit = other._memoryUseLimit;
             _nodeExeLocation = other._nodeExeLocation;
             NodeId = other.NodeId;
@@ -333,6 +343,7 @@ namespace Microsoft.Build.Execution
             IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
             _enableTargetOutputLogging = other.EnableTargetOutputLogging;
+            _ParserIgnoreConfiguration = other._ParserIgnoreConfiguration;
         }
 
         /// <summary>
@@ -572,10 +583,25 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Enables running build in multiple in-proc nodes.
         /// </summary>
+        /// <remarks>
+        /// Multi-threaded builds use an empty sentinel current directory and check for process-directory
+        /// changes and unresolved relative-path writes when change wave 18.12 is enabled.
+        /// Cannot be enabled together with <c>ReportFileAccesses</c>.
+        /// </remarks>
         public bool MultiThreaded
         {
             get => _multiThreaded;
             set => _multiThreaded = value;
+        }
+
+        /// <summary>
+        /// Gets or sets whether precompute mode was requested. This is highly experimental; expect things to break if you use it.
+        /// </summary>
+        [Experimental("MSBUILD_PRECOMPUTE", UrlFormat = "https://aka.ms/msbuild/precompute")]
+        public bool Precompute
+        {
+            get => _precompute;
+            set => _precompute = value;
         }
 
         /// <summary>
@@ -826,6 +852,16 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Gets or sets the configuration for allowed unknown attributes/elements during parsing.
+        /// When set, this configuration is used for parsing and evaluation.
+        /// </summary>
+        internal ParserIgnoreConfiguration ParserIgnoreConfiguration
+        {
+            get => _ParserIgnoreConfiguration;
+            set => _ParserIgnoreConfiguration = value;
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating if the build is allowed to interact with the user.
         /// </summary>
         public bool Interactive
@@ -886,6 +922,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets or sets a value indicating whether file accesses should be reported to any configured project cache plugins.
         /// </summary>
+        /// <remarks>Cannot be enabled together with <see cref="MultiThreaded"/>.</remarks>
         public bool ReportFileAccesses
         {
             get => _reportFileAccesses;
@@ -1002,10 +1039,12 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _question);
             translator.Translate(ref _isBuildCheckEnabled);
             translator.Translate(ref _isTelemetryEnabled);
+            translator.Translate(ref _precompute);
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
             translator.Translate(ref _multiThreaded);
+            translator.Translate(ref _ParserIgnoreConfiguration, ParserIgnoreConfiguration.FactoryForDeserialization);
             translator.Translate(ref _cacheConditionFalseTargets);
 
             // ProjectRootElementCache is not transmitted.

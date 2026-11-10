@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.AddResultsForTarget("testTarget2", BuildResultUtilities.GetEmptySucceedingTargetResult());
             cache.AddResult(result);
 
-            ResultsCacheResponse response = cache.SatisfyRequest(request, new List<string>(), new List<string>(new string[] { "testTarget2" }), skippedResultsDoNotCauseCacheMiss: false, cacheConditionFalseTargets: false);
+            ResultsCacheResponse response = cache.SatisfyRequest(request, new List<string>(), new List<string>(new string[] { "testTarget2" }), skippedResultsDoNotCauseCacheMiss: false, cacheConditionFalseTargets: false, allowedTopLevelTargets: null);
 
             Assert.Equal(ResultsCacheResponseType.Satisfied, response.Type);
 
@@ -218,7 +218,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new List<string>(),
                 new List<string>(),
                 skippedResultsDoNotCauseCacheMiss: false,
-                cacheConditionFalseTargets);
+                cacheConditionFalseTargets,
+                allowedTopLevelTargets: null);
 
             Assert.Equal(expectSatisfied ? ResultsCacheResponseType.Satisfied : ResultsCacheResponseType.NotSatisfied, response.Type);
         }
@@ -247,7 +248,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new List<string>(new string[] { initialTarget }),
                 new List<string>(),
                 skippedResultsDoNotCauseCacheMiss: false,
-                cacheConditionFalseTargets);
+                cacheConditionFalseTargets,
+                allowedTopLevelTargets: null);
 
             Assert.Equal(expectSatisfied ? ResultsCacheResponseType.Satisfied : ResultsCacheResponseType.NotSatisfied, response.Type);
         }
@@ -274,7 +276,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new List<string>(),
                 new List<string>(new string[] { defaultTarget }),
                 skippedResultsDoNotCauseCacheMiss: false,
-                cacheConditionFalseTargets);
+                cacheConditionFalseTargets,
+                allowedTopLevelTargets: null);
 
             Assert.Equal(expectSatisfied ? ResultsCacheResponseType.Satisfied : ResultsCacheResponseType.NotSatisfied, response.Type);
         }
@@ -294,7 +297,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new List<string>(),
                 new List<string>(),
                 skippedResultsDoNotCauseCacheMiss: false,
-                cacheConditionFalseTargets: true);
+                cacheConditionFalseTargets: true,
+                allowedTopLevelTargets: null);
 
             Assert.Equal(ResultsCacheResponseType.NotSatisfied, response.Type);
         }
@@ -347,21 +351,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
                new List<string>(),
                new List<string>(new string[] { targetName }),
                skippedResultsDoNotCauseCacheMiss: false,
-               cacheConditionFalseTargets: false);
+               cacheConditionFalseTargets: false,
+               allowedTopLevelTargets: null);
 
             ResultsCacheResponse cachedResponseForProjectState = cache.SatisfyRequest(
                requestWithProjectStateFlag,
                new List<string>(),
                new List<string>(new string[] { targetName }),
                skippedResultsDoNotCauseCacheMiss: false,
-               cacheConditionFalseTargets: false);
+               cacheConditionFalseTargets: false,
+               allowedTopLevelTargets: null);
 
             ResultsCacheResponse cacheResponseForNoBuildDataFlags2 = cache.SatisfyRequest(
                requestWithNoBuildDataFlags2,
                new List<string>(),
                new List<string>(new string[] { targetName }),
                skippedResultsDoNotCauseCacheMiss: false,
-               cacheConditionFalseTargets: false);
+               cacheConditionFalseTargets: false,
+               allowedTopLevelTargets: null);
 
             Assert.Equal(ResultsCacheResponseType.Satisfied, cacheResponseForRequestWithNoBuildDataFlags.Type);
 
@@ -431,14 +438,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new List<string>(),
                 new List<string>(new string[] { targetName }),
                 skippedResultsDoNotCauseCacheMiss: false,
-                cacheConditionFalseTargets: false);
+                cacheConditionFalseTargets: false,
+                allowedTopLevelTargets: null);
 
             ResultsCacheResponse cachedResponseWithSubsetFlag2 = cache.SatisfyRequest(
                 requestWithSubsetFlag2,
                 new List<string>(),
                 new List<string>(new string[] { targetName }),
                 skippedResultsDoNotCauseCacheMiss: false,
-                cacheConditionFalseTargets: false);
+                cacheConditionFalseTargets: false,
+                allowedTopLevelTargets: null);
 
             // We used the same filter that was used for the ProjectInstance in the cache -> cache hit.
             Assert.Equal(ResultsCacheResponseType.Satisfied, cachedResponseWithSubsetFlag1.Type);

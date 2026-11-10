@@ -11,12 +11,12 @@ namespace Microsoft.Build.Framework.Telemetry;
 internal class TaskExecutionStats(
     TimeSpan cumulativeExecutionTime,
     int executionsCount,
-    long totalMemoryConsumption,
+    long? totalMemoryConsumption,
     string? taskFactoryName,
     string? taskHostRuntime)
 {
     private TaskExecutionStats()
-        : this(TimeSpan.Zero, 0, 0, null, null)
+        : this(TimeSpan.Zero, 0, null, null, null)
     { }
 
     /// <summary>
@@ -34,7 +34,7 @@ internal class TaskExecutionStats(
     /// <summary>
     /// Total memory consumption (across all executions) in bytes.
     /// </summary>
-    public long TotalMemoryBytes { get; set; } = totalMemoryConsumption;
+    public long? TotalMemoryBytes { get; set; } = totalMemoryConsumption;
 
     /// <summary>
     /// Total number of executions of the task.
@@ -61,7 +61,11 @@ internal class TaskExecutionStats(
     internal void Accumulate(TaskExecutionStats other)
     {
         CumulativeExecutionTime += other.CumulativeExecutionTime;
-        TotalMemoryBytes += other.TotalMemoryBytes;
+        if (other.TotalMemoryBytes.HasValue)
+        {
+            TotalMemoryBytes = (TotalMemoryBytes ?? 0) + other.TotalMemoryBytes.Value;
+        }
+
         ExecutionsCount += other.ExecutionsCount;
         TaskFactoryName ??= other.TaskFactoryName;
         TaskHostRuntime ??= other.TaskHostRuntime;

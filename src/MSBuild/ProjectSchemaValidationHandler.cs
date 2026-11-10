@@ -7,6 +7,7 @@ using System.IO;
 using System.Xml;
 using System.Xml.Schema;
 
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -229,7 +230,7 @@ namespace Microsoft.Build.CommandLine
 
             return EventArgsFormatting.FormatEventMessage(
                     "error",
-                    AssemblyResources.GetString("SubCategoryForSchemaValidationErrors"),
+                    DiagnosticSubcategory.SchemaValidation.GetDisplayString(),
                     message,
                     errorCode,
                     projectFile,

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -16,7 +16,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.TelemetryInfra;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
@@ -223,7 +225,7 @@ namespace Microsoft.Build.BackEnd
         {
             // Be careful moving these to Traits, changing the timing of reading environment variables has a breaking potential.
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpDirectory = FrameworkDebugUtils.DebugPath;
+            _debugDumpDirectory = DebugUtils.DebugPath;
             _schedulingUnlimitedVariable = Environment.GetEnvironmentVariable("MSBUILDSCHEDULINGUNLIMITED");
             _nodeLimitOffset = 0;
 
@@ -329,17 +331,17 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Retrieves the request executing on a node.
+        /// Retrieves the request executing on a node, or null if the node is not executing one.
         /// </summary>
+        /// <remarks>
+        /// Unlike the rest of the scheduler, this is reached without holding the BuildManager's lock: file accesses
+        /// for detoured nodes are reported on the thread draining the sandbox's report pipe. The node's executing
+        /// request may therefore be cleared at any point, so look it up once instead of testing and then fetching.
+        /// </remarks>
         public BuildRequest GetExecutingRequestByNode(int nodeId)
         {
-            if (!_schedulingData.IsNodeWorking(nodeId))
-            {
-                return null;
-            }
-
             SchedulableRequest request = _schedulingData.GetExecutingRequestByNode(nodeId);
-            return request.BuildRequest;
+            return request?.BuildRequest;
         }
 
         /// <summary>
@@ -1772,7 +1774,7 @@ namespace Microsoft.Build.BackEnd
                 // First, determine if we have already built this request and have results for it.  If we do, we prepare the responses for it
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
                 // comes back up as schedulable, but we prefer to send the results back immediately so this request can (potentially) continue uninterrupted.
-                ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+                ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(), allowedTopLevelTargets: GetIsolationAllowedTopLevelTargets(parentRequest, request));
                 if (response != null)
                 {
                     TraceScheduler($"Request {request.GlobalRequestId} (node request {request.NodeRequestId}) satisfied from the cache.");
@@ -1914,7 +1916,7 @@ namespace Microsoft.Build.BackEnd
             int nodeForResults = (request.Parent != null) ? request.Parent.AssignedNode : InvalidNodeId;
 
             // Do we already have results?  If so, just return them.
-            ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request.BuildRequest, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+            ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request.BuildRequest, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(), allowedTopLevelTargets: GetIsolationAllowedTopLevelTargets(request.Parent, request.BuildRequest));
             if (response != null)
             {
                 if (response.Action == ScheduleActionType.SubmissionComplete)
@@ -2017,10 +2019,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Attempts to get a result from the cache to satisfy the request, and returns the appropriate response if possible.
         /// </summary>
-        private ScheduleResponse TrySatisfyRequestFromCache(int nodeForResults, BuildRequest request, bool skippedResultsDoNotCauseCacheMiss)
+        private ScheduleResponse TrySatisfyRequestFromCache(int nodeForResults, BuildRequest request, bool skippedResultsDoNotCauseCacheMiss, IReadOnlyCollection<string> allowedTopLevelTargets = null)
         {
             BuildRequestConfiguration config = _configCache[request.ConfigurationId];
-            ResultsCacheResponse resultsResponse = _resultsCache.SatisfyRequest(request, config.ProjectInitialTargets, config.ProjectDefaultTargets, skippedResultsDoNotCauseCacheMiss, _componentHost.BuildParameters.CacheConditionFalseTargets);
+            ResultsCacheResponse resultsResponse = _resultsCache.SatisfyRequest(request, config.ProjectInitialTargets, config.ProjectDefaultTargets, skippedResultsDoNotCauseCacheMiss, _componentHost.BuildParameters.CacheConditionFalseTargets, allowedTopLevelTargets);
 
             if (resultsResponse.Type == ResultsCacheResponseType.Satisfied)
             {
@@ -2030,7 +2032,35 @@ namespace Microsoft.Build.BackEnd
             return null;
         }
 
+        /// <summary>
+        /// Computes the set of top-level targets that a cross-project reference is allowed to be satisfied from the cache for
+        /// in a strictly isolated build, or null if no such restriction applies. See
+        /// <see cref="BuildRequestConfiguration.GetIsolationAllowedTopLevelTargets"/> for the rationale.
+        /// </summary>
+        private IReadOnlyCollection<string> GetIsolationAllowedTopLevelTargets(SchedulableRequest parentRequest, BuildRequest request)
+        {
+            if (parentRequest == null)
+            {
+                return null;
+            }
+
+            BuildRequestConfiguration requestConfig = _configCache[request.ConfigurationId];
+            BuildRequestConfiguration parentConfig = _configCache[parentRequest.BuildRequest.ConfigurationId];
+
+            return BuildRequestConfiguration.GetIsolationAllowedTopLevelTargets(
+                _componentHost.BuildParameters.ProjectIsolationMode,
+                parentConfig,
+                requestConfig,
+                request);
+        }
+
         /// <returns>True if caches misses are allowed, false otherwise</returns>
+        /// <remarks>
+        /// INVARIANT: the allow-conditions below are the mirror image of the exemption conditions in
+        /// <see cref="BuildRequestConfiguration.GetIsolationAllowedTopLevelTargets"/>. That gate forces a cache miss for an
+        /// undeclared cross-project reference expecting this method to report MSB4252; if the two drift, a gated miss could be
+        /// silently rebuilt, violating isolation without any diagnostic. Keep both in sync.
+        /// </remarks>
         private bool CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot(int nodeForResults, BuildRequest request, List<ScheduleResponse> responses, bool emitNonErrorLogs)
         {
             ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
@@ -2208,7 +2238,10 @@ namespace Microsoft.Build.BackEnd
             BuildRequestConfiguration configuration = _configCache[request.ConfigurationId];
             int nodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(request.ConfigurationId);
             NodeLoggingContext nodeContext = new NodeLoggingContext(_componentHost.LoggingService, nodeId, true);
+            var telemetryProvider = (TelemetryCollectorProvider)_componentHost.GetComponent(BuildComponentType.TelemetryCollector);
+            nodeContext.TelemetryCollector = telemetryProvider.CreateCollector();
             nodeContext.LogRequestHandledFromCache(request, configuration, result);
+            nodeContext.TelemetryCollector.FinalizeProcessing(nodeContext);
 
             TraceScheduler($"Request {request.GlobalRequestId} (node request {request.NodeRequestId}) with targets ({string.Join(";", request.Targets)}) satisfied from cache");
         }
@@ -2766,16 +2799,16 @@ namespace Microsoft.Build.BackEnd
 
                         foreach (int nodeId in _availableNodes.Keys)
                         {
+                            SchedulableRequest executingRequest = _schedulingData.GetExecutingRequestByNode(nodeId);
                             file.WriteLine(
                                 "Node {0} {1} ({2} assigned requests, {3} configurations)",
                                 nodeId,
-                                _schedulingData.IsNodeWorking(nodeId)
-                                    ? string.Format(
+                                executingRequest is null
+                                    ? "Idle"
+                                    : string.Format(
                                         CultureInfo.InvariantCulture,
                                         "Active ({0} executing)",
-                                        _schedulingData.GetExecutingRequestByNode(nodeId)
-                                            .BuildRequest.GlobalRequestId)
-                                    : "Idle",
+                                        executingRequest.BuildRequest.GlobalRequestId),
                                 _schedulingData.GetScheduledRequestsCountByNode(nodeId),
                                 _schedulingData.GetConfigurationsCountByNode(nodeId, false, null));
 
@@ -2788,7 +2821,7 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             // If the node is idle, we want to know why.
-                            if (!_schedulingData.IsNodeWorking(nodeId))
+                            if (executingRequest is null)
                             {
                                 file.WriteLine("Top-level requests causing this node to be idle:");
 
