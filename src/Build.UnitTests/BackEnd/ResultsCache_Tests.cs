@@ -197,12 +197,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             const string target = "Conditional";
             BuildRequest request = new BuildRequest(1, 0, 1, new string[] { target }, null, BuildEventContext.Invalid, null);
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget(
-                target,
-                new TargetResult(
-                    Array.Empty<ProjectItemInstance.TaskItem>(),
-                    new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null),
-                    skipReason: TargetSkipReason.ConditionWasFalse));
+            result.AddResultsForTarget(target, BuildResultUtilities.GetEmptyConditionFalseSkippedTargetResult());
             ResultsCache cache = new ResultsCache();
             cache.AddResult(result);
 
@@ -233,12 +228,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             const string requestedTarget = "Build";
             BuildRequest request = new BuildRequest(1, 0, 1, new string[] { requestedTarget }, null, BuildEventContext.Invalid, null);
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget(
-                initialTarget,
-                new TargetResult(
-                    Array.Empty<ProjectItemInstance.TaskItem>(),
-                    new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null),
-                    skipReason: TargetSkipReason.ConditionWasFalse));
+            result.AddResultsForTarget(initialTarget, BuildResultUtilities.GetEmptyConditionFalseSkippedTargetResult());
             result.AddResultsForTarget(requestedTarget, BuildResultUtilities.GetEmptySucceedingTargetResult());
             ResultsCache cache = new ResultsCache();
             cache.AddResult(result);
@@ -262,12 +252,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             const string defaultTarget = "Build";
             BuildRequest request = new BuildRequest(1, 0, 1, Array.Empty<string>(), null, BuildEventContext.Invalid, null);
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget(
-                defaultTarget,
-                new TargetResult(
-                    Array.Empty<ProjectItemInstance.TaskItem>(),
-                    new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null),
-                    skipReason: TargetSkipReason.ConditionWasFalse));
+            result.AddResultsForTarget(defaultTarget, BuildResultUtilities.GetEmptyConditionFalseSkippedTargetResult());
             ResultsCache cache = new ResultsCache();
             cache.AddResult(result);
 
