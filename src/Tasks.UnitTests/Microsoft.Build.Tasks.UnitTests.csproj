@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="Microsoft.DotNet.RemoteExecutor" VersionOverride="$(MicrosoftDotNetArcadeSdkPackageVersion)" PrivateAssets="all" />
     <PackageReference Include="Verify.XunitV3" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
@@ -45,6 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\UnitTests\DriveEnumeratingWildcardFileSystem.cs" Link="DriveEnumeratingWildcardFileSystem.cs" />
     <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs">

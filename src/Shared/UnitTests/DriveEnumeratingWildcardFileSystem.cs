@@ -15,7 +15,7 @@ using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
 
-namespace Microsoft.Build.UnitTests.OM;
+namespace Microsoft.Build.UnitTests;
 
 internal sealed class DriveEnumeratingWildcardFileSystem : MSBuildFileSystemBase
 {
@@ -27,7 +27,11 @@ internal sealed class DriveEnumeratingWildcardFileSystem : MSBuildFileSystemBase
     private int _unexpectedEnumerations;
 
     internal static DriveEnumeratingWildcardFileSystem CreateInChild(TestEnvironment environment, string parentProcessId)
-        => environment.WithTransientTestState(new ChildFileSystemOverride(parentProcessId)).FileSystem;
+    {
+        var scope = environment.WithTransientTestState(new ChildFileSystemOverride(parentProcessId));
+        environment.Output.WriteLine($"Hermetic root child runtime: {typeof(object).Assembly.Location}");
+        return scope.FileSystem;
+    }
 
     internal void AssertRootEnumerationWasBounded(ITestOutputHelper output)
     {
@@ -139,10 +143,13 @@ internal sealed class DriveEnumeratingWildcardFileSystem : MSBuildFileSystemBase
     [
         Path.Combine(root, "root.log"),
         Path.Combine(root, "root.cs"),
+        Path.Combine(root, "root.txt"),
         Path.Combine(root, FixtureDirectory, "fixture.log"),
         Path.Combine(root, FixtureDirectory, "fixture.cs"),
+        Path.Combine(root, FixtureDirectory, "fixture.txt"),
         Path.Combine(root, FixtureDirectory, "fixture.targets"),
         Path.Combine(root, FixtureDirectory, "nested", "nested.log"),
+        Path.Combine(root, FixtureDirectory, "nested", "nested.txt"),
         Path.Combine(root, "Certificates", "certificate.pdb")
     ];
 

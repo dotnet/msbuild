@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\UnitTests\DriveEnumeratingWildcardFileSystem.cs" Link="DriveEnumeratingWildcardFileSystem.cs" />
     <Compile Include="..\GlobalUsings.cs">
       <Link>GlobalUsings.cs</Link>
     </Compile>
