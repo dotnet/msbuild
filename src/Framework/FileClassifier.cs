@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
 #if !RUNTIME_TYPE_NETCORE
 using System.Text.RegularExpressions;
@@ -64,11 +63,10 @@ namespace Microsoft.Build.Framework
         ///     StringComparison used for comparing paths on current OS.
         /// </summary>
         /// <remarks>
-        ///     TODO: Replace RuntimeInformation.IsOSPlatform(OSPlatform.Linux) by NativeMethodsShared.OSUsesCaseSensitivePaths once it is moved out from Shared
         ///     FIXME: shared code should be consolidated to Framework https://github.com/dotnet/msbuild/issues/6984 
         ///     this is a subtle bug, MacOS may have both case-insensitive and sensitive file system depending on configuration
         /// </remarks>
-        private static readonly StringComparison PathComparison = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+        private static readonly StringComparison PathComparison = FileUtilities.IsFileSystemCaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
         /// <summary>
         ///     Single, static <see cref="Lazy{T}"/> instance of shared file FileClassifier for <see cref="Shared"/> member.

@@ -148,7 +148,7 @@ namespace Microsoft.Build.BackEnd
         internal BuildRequestEngine()
         {
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpDirectory = FrameworkDebugUtils.DebugPath;
+            _debugDumpDirectory = DebugUtils.DebugPath;
 #if FEATURE_WINDOWSINTEROP
             _debugForceCaching = Environment.GetEnvironmentVariable("MSBUILDDEBUGFORCECACHING") == "1";
 #endif
@@ -964,7 +964,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     _nodeLoggingContext.LogFatalBuildError(
                         e,
-                        new BuildEventFileInfo(Construction.ElementLocation.EmptyLocation));
+                        Construction.ElementLocation.Empty);
                     throw new BuildAbortedException(e.Message, e);
                 }
             }

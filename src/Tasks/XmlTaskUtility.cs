@@ -86,7 +86,8 @@ namespace Microsoft.Build.Tasks
             {
                 // Read only the beginning of the file - DOCTYPE must appear before the root element.
                 // 8KB should be more than enough to find it in any reasonable XML file.
-                using var stream = File.OpenRead(filePath.Value);
+                // CodeQL [SM00414] False positive: filePath is a trusted XML input file path passed to XML tasks.
+                using var stream = File.OpenRead(filePath);
                 using var reader = new StreamReader(stream);
                 var buffer = new char[8192];
                 int charsRead = reader.Read(buffer, 0, buffer.Length);

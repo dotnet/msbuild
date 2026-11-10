@@ -1491,6 +1491,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // check to see if the output resources file (and, if it is a .resx, any linked files)
                     // is up to date compared to the input file
+                    // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                     if (ShouldRebuildResgenOutputFile(Sources[i].ItemSpec, OutputResources[i].ItemSpec))
                     {
                         nothingOutOfDate = false;
@@ -1616,6 +1617,7 @@ namespace Microsoft.Build.Tasks
             ResGenDependencies.ResXFile resxFileInfo;
             try
             {
+                // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                 resxFileInfo = _cache.GetResXFileInfo(sourceFilePath, UsePreserializedResources, Log, WarnOnBinaryFormatterUse);
             }
             catch (Exception e) when (!ExceptionHandling.NotExpectedIoOrXmlException(e) || e is MSBuildResXException)
@@ -2513,6 +2515,7 @@ namespace Microsoft.Build.Tasks
                 for (int i = 0; i < _inFiles.Count; ++i)
                 {
                     string outputSpec = _extractResWFiles ? resWOutputDirectory : _outFiles[i].ItemSpec;
+                    // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                     if (!ProcessFile(_inFiles[i].ItemSpec, outputSpec))
                     {
                         // Since we failed, remove items from OutputResources.  Note when extracting ResW
@@ -2662,6 +2665,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
+                // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                 ReadResources(inFile, _useSourcePath, outFileOrDir);
             }
             catch (InputFormatNotSupportedException)
@@ -2956,6 +2960,7 @@ namespace Microsoft.Build.Tasks
             _logger.LogMessageFromResources("GenerateResource.CorruptOutput", FileUtilities.GetFullPathNoThrow(filename));
             try
             {
+                // CodeQL [SM00414] False positive: filename is a trusted build output resource file path.
                 File.Delete(filename);
             }
             catch (Exception deleteException)
@@ -3068,10 +3073,12 @@ namespace Microsoft.Build.Tasks
                             ResXResourceReader resXReader = null;
                             if (_typeResolver != null)
                             {
+                                // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                                 resXReader = new ResXResourceReader(filename, _typeResolver);
                             }
                             else
                             {
+                                // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                                 resXReader = new ResXResourceReader(filename);
                             }
 
@@ -3102,6 +3109,7 @@ namespace Microsoft.Build.Tasks
 
                     case Format.Binary:
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
+                        // CodeQL [SM02363] False positive: project resource files passed to GenerateResource are trusted developer build inputs.
                         ReadResources(reader, new ResourceReader(filename), filename); // closes reader for us
                         break;
 #else
@@ -3414,12 +3422,14 @@ namespace Microsoft.Build.Tasks
         {
             if (_usePreserializedResources && HaveSystemResourcesExtensionsReference)
             {
+                // CodeQL [SM00414] False positive: filename is a trusted build output resource file path.
                 WriteResources(reader, new PreserializedResourceWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))); // closes writer for us
                 return;
             }
 
             try
             {
+                // CodeQL [SM00414] False positive: filename is a trusted build output resource file path.
                 WriteResources(reader, new ResourceWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))); // closes writer for us
             }
             catch (PreserializedResourceWriterRequiredException)
@@ -3639,6 +3649,7 @@ namespace Microsoft.Build.Tasks
         {
             // Check for byte order marks in the beginning of the input file, but
             // default to UTF-8.
+            // CodeQL [SM00414] False positive: fileName is a trusted project resource input file path.
             using var fs = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
             using (LineNumberStreamReader sr = new LineNumberStreamReader(fs, new UTF8Encoding(true), true))
             {
@@ -4051,6 +4062,7 @@ namespace Microsoft.Build.Tasks
         /// from ReadTextResources
         /// </summary>
         [Serializable]
+        // CodeQL [SM02227] False positive: static call-graph over-approximation via virtual ToString/Flush in VMR build; deserialization only reads primitive fields.
         internal sealed class TextFileException : Exception
         {
             private String fileName;

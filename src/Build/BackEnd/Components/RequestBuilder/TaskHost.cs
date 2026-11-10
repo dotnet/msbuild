@@ -16,6 +16,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -23,7 +24,6 @@ using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 #if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.FileAccesses;
-
 #endif
 
 #nullable disable
@@ -129,6 +129,11 @@ namespace Microsoft.Build.BackEnd
             _disableInprocNode = Traits.Instance.InProcNodeDisabled || host.BuildParameters.DisableInProcNode;
             EngineServices = new EngineServicesImpl(this);
         }
+
+        /// <summary>
+        /// Whether the scheduler has activated this request.
+        /// </summary>
+        internal bool IsRequestActive => _requestEntry.State == BuildRequestEntryState.Active;
 
         /// <summary>
         /// Returns true in the multiproc case
@@ -442,17 +447,7 @@ namespace Microsoft.Build.BackEnd
                     // ContinueOnError is that a project author expects that the task might fail,
                     // but wants to ignore the failures.  This implies that we shouldn't be logging
                     // errors either, because you should never have a successful build with errors.
-                    BuildWarningEventArgs warningEvent = new BuildWarningEventArgs(
-                                e.Subcategory,
-                                e.Code,
-                                e.File,
-                                e.LineNumber,
-                                e.ColumnNumber,
-                                e.EndLineNumber,
-                                e.EndColumnNumber,
-                                e.Message,
-                                e.HelpKeyword,
-                                e.SenderName);
+                    BuildWarningEventArgs warningEvent = CreateWarningFromError(e);
 
                     warningEvent.BuildEventContext = _taskLoggingContext.BuildEventContext;
                     _taskLoggingContext.LoggingService.LogBuildEvent(warningEvent);
@@ -468,6 +463,53 @@ namespace Microsoft.Build.BackEnd
 
                 _taskLoggingContext.HasLoggedErrors = true;
             }
+        }
+
+        /// <summary>
+        /// Builds the <see cref="BuildWarningEventArgs"/> counterpart of an error that <c>ContinueOnError</c>
+        /// is downgrading. Errors carrying extended data become <see cref="ExtendedBuildWarningEventArgs"/> so the
+        /// structured payload survives; <c>ProjectFile</c> is not copied because the logging service assigns it
+        /// from the build event context.
+        /// </summary>
+        private static BuildWarningEventArgs CreateWarningFromError(BuildErrorEventArgs error)
+        {
+            if (error is IExtendedBuildEventArgs extendedError)
+            {
+                return new ExtendedBuildWarningEventArgs(
+                    extendedError.ExtendedType,
+                    error.Subcategory,
+                    error.Code,
+                    error.File,
+                    error.LineNumber,
+                    error.ColumnNumber,
+                    error.EndLineNumber,
+                    error.EndColumnNumber,
+                    error.Message,
+                    error.HelpKeyword,
+                    error.SenderName,
+                    error.HelpLink,
+                    error.RawTimestamp,
+                    messageArgs: null)
+                {
+                    ExtendedMetadata = extendedError.ExtendedMetadata,
+                    ExtendedData = extendedError.ExtendedData,
+                };
+            }
+
+            return new BuildWarningEventArgs(
+                error.Subcategory,
+                error.Code,
+                error.File,
+                error.LineNumber,
+                error.ColumnNumber,
+                error.EndLineNumber,
+                error.EndColumnNumber,
+                error.Message,
+                error.HelpKeyword,
+                error.SenderName,
+                error.HelpLink,
+                error.RawTimestamp,
+                messageArgs: null);
         }
 
         /// <summary>
@@ -1121,7 +1163,7 @@ namespace Microsoft.Build.BackEnd
             if (!e.GetType().IsSerializable && e is not IExtendedBuildEventArgs)
 #pragma warning restore SYSLIB0050
             {
-                _taskLoggingContext.LogWarning(null, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);
+                _taskLoggingContext.LogWarning(DiagnosticSubcategory.None, ElementLocation.Empty, "ExpectedEventToBeSerializable", e.GetType().Name);
                 return false;
             }
 
@@ -1251,10 +1293,10 @@ namespace Microsoft.Build.BackEnd
                         if (!string.IsNullOrEmpty(results[i].SchedulerInducedError))
                         {
                             LoggingContext.LogErrorFromText(
-                                subcategoryResourceName: null,
+                                subcategory: DiagnosticSubcategory.None,
                                 errorCode: null,
                                 helpKeyword: null,
-                                file: new BuildEventFileInfo(ProjectFileOfTaskNode, LineNumberOfTaskNode, ColumnNumberOfTaskNode),
+                                location: ElementLocation.Create(ProjectFileOfTaskNode, LineNumberOfTaskNode, ColumnNumberOfTaskNode),
                                 message: results[i].SchedulerInducedError);
                         }
                     }

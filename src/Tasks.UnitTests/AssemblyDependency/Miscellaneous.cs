@@ -5,10 +5,10 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Resources;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
@@ -29,41 +29,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// </summary>
     public sealed class Miscellaneous : ResolveAssemblyReferenceTestFixture
     {
-        private static List<string> s_assemblyFolderExTestVersions = new List<string>
-        {
-            "v1.0",
-            "v2.0.50727",
-            "v3.0",
-            "v3.5",
-            "v4.0",
-            "v4.0.2116",
-            "v4.1",
-            "v4.0.255",
-            "v4.0.255.87",
-            "v4.0.9999",
-            "v4.0.0000",
-            "v4.0001.0",
-            "v4.0.2116.87",
-            "v3.0SP1",
-            "v3.0 BAZ",
-            "v5.0",
-            "v1",
-            "v5",
-            "v3.5.0.x86chk",
-            "v3.5.1.x86chk",
-            "v3.5.256.x86chk",
-            "v",
-            "1",
-            "1.0",
-            "1.0.0",
-            "V3.5.0.0.0",
-            "V3..",
-            "V-1",
-            "V9999999999999999",
-            "Dan_rocks_bigtime",
-            "v00001.0"
-        };
-
         private string _fullRedistListContents =
             "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
             "<File AssemblyName='System.Xml' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
@@ -1400,7 +1365,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Empty(t.ResolvedFiles);
-            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch", @"C:\Regress714052\X86\A.dll", "X86", "AMD64");
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch", @"C:\Regress714052\X86\A.dll", "X86", "AMD64");
             mockEngine.AssertLogContains(message);
         }
 
@@ -2019,281 +1984,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Single(t.ResolvedFiles);
             Assert.Equal(@"C:\V1Control\MyDeviceControlAssembly.dll", t.ResolvedFiles[0].ItemSpec);
         }
-
-#if FEATURE_WIN32_REGISTRY
-        [Fact]
-        public void GatherVersions10DotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v1.0", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Equal(3, returnedVersions.Count);
-            Assert.Equal("v1.0", (string)returnedVersions[0].RegistryKey);
-            Assert.Equal("v1", (string)returnedVersions[1].RegistryKey);
-            Assert.Equal("v00001.0", (string)returnedVersions[2].RegistryKey);
-        }
-
-        [Fact]
-        public void GatherVersions20DotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v2.0", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Equal(4, returnedVersions.Count);
-            Assert.Equal("v2.0.50727", (string)returnedVersions[0].RegistryKey);
-            Assert.Equal("v1.0", (string)returnedVersions[1].RegistryKey);
-            Assert.Equal("v1", (string)returnedVersions[2].RegistryKey);
-            Assert.Equal("v00001.0", (string)returnedVersions[3].RegistryKey);
-        }
-
-        [Fact]
-        public void GatherVersions30DotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v3.0", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Equal(7, returnedVersions.Count);
-
-            Assert.Equal("v3.0", (string)returnedVersions[0].RegistryKey);
-            Assert.Equal("v2.0.50727", (string)returnedVersions[1].RegistryKey);
-            Assert.Equal("v1.0", (string)returnedVersions[2].RegistryKey);
-            Assert.Equal("v1", (string)returnedVersions[3].RegistryKey);
-            Assert.Equal("v00001.0", (string)returnedVersions[4].RegistryKey);
-            Assert.Equal("v3.0SP1", (string)returnedVersions[5].RegistryKey);
-            Assert.Equal("v3.0 BAZ", (string)returnedVersions[6].RegistryKey);
-        }
-
-        [Fact]
-        public void GatherVersionsVDotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Equal(27, returnedVersions.Count);
-
-            Assert.Equal("v5.0", (string)returnedVersions[0].RegistryKey);
-            Assert.Equal("v5", (string)returnedVersions[1].RegistryKey);
-            Assert.Equal("v4.0001.0", (string)returnedVersions[2].RegistryKey);
-            Assert.Equal("v4.1", (string)returnedVersions[3].RegistryKey);
-            Assert.Equal("v4.0.255.87", (string)returnedVersions[4].RegistryKey);
-            Assert.Equal("v4.0.255", (string)returnedVersions[5].RegistryKey);
-            Assert.Equal("v4.0.0000", (string)returnedVersions[6].RegistryKey);
-            Assert.Equal("v4.0.9999", (string)returnedVersions[7].RegistryKey);
-            Assert.Equal("v4.0.2116.87", (string)returnedVersions[8].RegistryKey);
-            Assert.Equal("v4.0.2116", (string)returnedVersions[9].RegistryKey);
-            Assert.Equal("v4.0", (string)returnedVersions[10].RegistryKey);
-            Assert.Equal("v3.5", (string)returnedVersions[11].RegistryKey);
-            Assert.Equal("v3.0", (string)returnedVersions[12].RegistryKey);
-            Assert.Equal("v2.0.50727", (string)returnedVersions[13].RegistryKey);
-            Assert.Equal("v1.0", (string)returnedVersions[14].RegistryKey);
-            Assert.Equal("v1", (string)returnedVersions[15].RegistryKey);
-            Assert.Equal("v00001.0", (string)returnedVersions[16].RegistryKey);
-            Assert.Equal("v3.0SP1", (string)returnedVersions[17].RegistryKey);
-            Assert.Equal("v3.0 BAZ", (string)returnedVersions[18].RegistryKey);
-            Assert.Equal("v3.5.0.x86chk", (string)returnedVersions[19].RegistryKey);
-            Assert.Equal("v3.5.1.x86chk", (string)returnedVersions[20].RegistryKey);
-            Assert.Equal("v3.5.256.x86chk", (string)returnedVersions[21].RegistryKey);
-            Assert.Equal("v", (string)returnedVersions[22].RegistryKey);
-            Assert.Equal("V3.5.0.0.0", (string)returnedVersions[23].RegistryKey);
-            Assert.Equal("V3..", (string)returnedVersions[24].RegistryKey);
-            Assert.Equal("V-1", (string)returnedVersions[25].RegistryKey);
-            Assert.Equal("v9999999999999999", (string)returnedVersions[26].RegistryKey, true);
-        }
-
-        [Fact]
-        public void GatherVersions35DotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v3.5", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Equal(10, returnedVersions.Count);
-            Assert.Equal("v3.5", (string)returnedVersions[0].RegistryKey);
-            Assert.Equal("v3.0", (string)returnedVersions[1].RegistryKey);
-            Assert.Equal("v2.0.50727", (string)returnedVersions[2].RegistryKey);
-            Assert.Equal("v1.0", (string)returnedVersions[3].RegistryKey);
-            Assert.Equal("v1", (string)returnedVersions[4].RegistryKey);
-            Assert.Equal("v00001.0", (string)returnedVersions[5].RegistryKey);
-            Assert.Equal("v3.5.0.x86chk", (string)returnedVersions[6].RegistryKey);
-            Assert.Equal("v3.5.1.x86chk", (string)returnedVersions[7].RegistryKey);
-            Assert.Equal("v3.5.256.x86chk", (string)returnedVersions[8].RegistryKey);
-            Assert.Equal("V3.5.0.0.0", (string)returnedVersions[9].RegistryKey);
-        }
-
-        [Fact]
-        public void GatherVersions40DotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.0", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Equal(10, returnedVersions.Count);
-            Assert.Equal("v4.0.9999", (string)returnedVersions[0].RegistryKey);
-            Assert.Equal("v4.0.2116.87", (string)returnedVersions[1].RegistryKey);
-            Assert.Equal("v4.0.2116", (string)returnedVersions[2].RegistryKey);
-            Assert.Equal("v4.0", (string)returnedVersions[3].RegistryKey);
-            Assert.Equal("v3.5", (string)returnedVersions[4].RegistryKey);
-            Assert.Equal("v3.0", (string)returnedVersions[5].RegistryKey);
-            Assert.Equal("v2.0.50727", (string)returnedVersions[6].RegistryKey);
-            Assert.Equal("v1.0", (string)returnedVersions[7].RegistryKey);
-            Assert.Equal("v1", (string)returnedVersions[8].RegistryKey);
-            Assert.Equal("v00001.0", (string)returnedVersions[9].RegistryKey);
-        }
-
-        [Fact]
-        public void GatherVersions400DotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.0.0", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Equal(11, returnedVersions.Count);
-            Assert.Equal("v4.0.0000", (string)returnedVersions[0].RegistryKey);
-            Assert.Equal("v4.0.9999", (string)returnedVersions[1].RegistryKey);
-            Assert.Equal("v4.0.2116.87", (string)returnedVersions[2].RegistryKey);
-            Assert.Equal("v4.0.2116", (string)returnedVersions[3].RegistryKey);
-            Assert.Equal("v4.0", (string)returnedVersions[4].RegistryKey);
-            Assert.Equal("v3.5", (string)returnedVersions[5].RegistryKey);
-            Assert.Equal("v3.0", (string)returnedVersions[6].RegistryKey);
-            Assert.Equal("v2.0.50727", (string)returnedVersions[7].RegistryKey);
-            Assert.Equal("v1.0", (string)returnedVersions[8].RegistryKey);
-            Assert.Equal("v1", (string)returnedVersions[9].RegistryKey);
-            Assert.Equal("v00001.0", (string)returnedVersions[10].RegistryKey);
-        }
-
-        [Fact]
-        public void GatherVersions41DotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.1", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Equal(14, returnedVersions.Count);
-
-            Assert.Equal("v4.1", (string)returnedVersions[0].RegistryKey);
-            Assert.Equal("v4.0.255.87", (string)returnedVersions[1].RegistryKey);
-            Assert.Equal("v4.0.255", (string)returnedVersions[2].RegistryKey);
-            Assert.Equal("v4.0.0000", (string)returnedVersions[3].RegistryKey);
-            Assert.Equal("v4.0.9999", (string)returnedVersions[4].RegistryKey);
-            Assert.Equal("v4.0.2116.87", (string)returnedVersions[5].RegistryKey);
-            Assert.Equal("v4.0.2116", (string)returnedVersions[6].RegistryKey);
-            Assert.Equal("v4.0", (string)returnedVersions[7].RegistryKey);
-            Assert.Equal("v3.5", (string)returnedVersions[8].RegistryKey);
-            Assert.Equal("v3.0", (string)returnedVersions[9].RegistryKey);
-            Assert.Equal("v2.0.50727", (string)returnedVersions[10].RegistryKey);
-            Assert.Equal("v1.0", (string)returnedVersions[11].RegistryKey);
-            Assert.Equal("v1", (string)returnedVersions[12].RegistryKey);
-            Assert.Equal("v00001.0", (string)returnedVersions[13].RegistryKey);
-        }
-
-        [Fact]
-        public void GatherVersions410DotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.1.0", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Equal(15, returnedVersions.Count);
-
-            Assert.Equal("v4.0001.0", (string)returnedVersions[0].RegistryKey);
-            Assert.Equal("v4.1", (string)returnedVersions[1].RegistryKey);
-            Assert.Equal("v4.0.255.87", (string)returnedVersions[2].RegistryKey);
-            Assert.Equal("v4.0.255", (string)returnedVersions[3].RegistryKey);
-            Assert.Equal("v4.0.0000", (string)returnedVersions[4].RegistryKey);
-            Assert.Equal("v4.0.9999", (string)returnedVersions[5].RegistryKey);
-            Assert.Equal("v4.0.2116.87", (string)returnedVersions[6].RegistryKey);
-            Assert.Equal("v4.0.2116", (string)returnedVersions[7].RegistryKey);
-            Assert.Equal("v4.0", (string)returnedVersions[8].RegistryKey);
-            Assert.Equal("v3.5", (string)returnedVersions[9].RegistryKey);
-            Assert.Equal("v3.0", (string)returnedVersions[10].RegistryKey);
-            Assert.Equal("v2.0.50727", (string)returnedVersions[11].RegistryKey);
-            Assert.Equal("v1.0", (string)returnedVersions[12].RegistryKey);
-            Assert.Equal("v1", (string)returnedVersions[13].RegistryKey);
-            Assert.Equal("v00001.0", (string)returnedVersions[14].RegistryKey);
-        }
-
-        [Fact]
-        public void GatherVersions40255DotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v4.0.255", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Equal(13, returnedVersions.Count);
-            Assert.Equal("v4.0.255.87", (string)returnedVersions[0].RegistryKey);
-            Assert.Equal("v4.0.255", (string)returnedVersions[1].RegistryKey);
-            Assert.Equal("v4.0.0000", (string)returnedVersions[2].RegistryKey);
-            Assert.Equal("v4.0.9999", (string)returnedVersions[3].RegistryKey);
-            Assert.Equal("v4.0.2116.87", (string)returnedVersions[4].RegistryKey);
-            Assert.Equal("v4.0.2116", (string)returnedVersions[5].RegistryKey);
-            Assert.Equal("v4.0", (string)returnedVersions[6].RegistryKey);
-            Assert.Equal("v3.5", (string)returnedVersions[7].RegistryKey);
-            Assert.Equal("v3.0", (string)returnedVersions[8].RegistryKey);
-            Assert.Equal("v2.0.50727", (string)returnedVersions[9].RegistryKey);
-            Assert.Equal("v1.0", (string)returnedVersions[10].RegistryKey);
-            Assert.Equal("v1", (string)returnedVersions[11].RegistryKey);
-            Assert.Equal("v00001.0", (string)returnedVersions[12].RegistryKey);
-        }
-
-        [Fact]
-        public void GatherVersions5DotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v5.0", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Equal(17, returnedVersions.Count);
-
-            Assert.Equal("v5.0", (string)returnedVersions[0].RegistryKey);
-            Assert.Equal("v5", (string)returnedVersions[1].RegistryKey);
-            Assert.Equal("v4.0001.0", (string)returnedVersions[2].RegistryKey);
-            Assert.Equal("v4.1", (string)returnedVersions[3].RegistryKey);
-            Assert.Equal("v4.0.255.87", (string)returnedVersions[4].RegistryKey);
-            Assert.Equal("v4.0.255", (string)returnedVersions[5].RegistryKey);
-            Assert.Equal("v4.0.0000", (string)returnedVersions[6].RegistryKey);
-            Assert.Equal("v4.0.9999", (string)returnedVersions[7].RegistryKey);
-            Assert.Equal("v4.0.2116.87", (string)returnedVersions[8].RegistryKey);
-            Assert.Equal("v4.0.2116", (string)returnedVersions[9].RegistryKey);
-            Assert.Equal("v4.0", (string)returnedVersions[10].RegistryKey);
-            Assert.Equal("v3.5", (string)returnedVersions[11].RegistryKey);
-            Assert.Equal("v3.0", (string)returnedVersions[12].RegistryKey);
-            Assert.Equal("v2.0.50727", (string)returnedVersions[13].RegistryKey);
-            Assert.Equal("v1.0", (string)returnedVersions[14].RegistryKey);
-            Assert.Equal("v1", (string)returnedVersions[15].RegistryKey);
-            Assert.Equal("v00001.0", (string)returnedVersions[16].RegistryKey);
-        }
-
-        [Fact]
-        public void GatherVersionsv5DotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v5", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Equal(17, returnedVersions.Count);
-
-            Assert.Equal("v5.0", (string)returnedVersions[0].RegistryKey);
-            Assert.Equal("v5", (string)returnedVersions[1].RegistryKey);
-            Assert.Equal("v4.0001.0", (string)returnedVersions[2].RegistryKey);
-            Assert.Equal("v4.1", (string)returnedVersions[3].RegistryKey);
-            Assert.Equal("v4.0.255.87", (string)returnedVersions[4].RegistryKey);
-            Assert.Equal("v4.0.255", (string)returnedVersions[5].RegistryKey);
-            Assert.Equal("v4.0.0000", (string)returnedVersions[6].RegistryKey);
-            Assert.Equal("v4.0.9999", (string)returnedVersions[7].RegistryKey);
-            Assert.Equal("v4.0.2116.87", (string)returnedVersions[8].RegistryKey);
-            Assert.Equal("v4.0.2116", (string)returnedVersions[9].RegistryKey);
-            Assert.Equal("v4.0", (string)returnedVersions[10].RegistryKey);
-            Assert.Equal("v3.5", (string)returnedVersions[11].RegistryKey);
-            Assert.Equal("v3.0", (string)returnedVersions[12].RegistryKey);
-            Assert.Equal("v2.0.50727", (string)returnedVersions[13].RegistryKey);
-            Assert.Equal("v1.0", (string)returnedVersions[14].RegistryKey);
-            Assert.Equal("v1", (string)returnedVersions[15].RegistryKey);
-            Assert.Equal("v00001.0", (string)returnedVersions[16].RegistryKey);
-        }
-
-        [Fact]
-        public void GatherVersions35x86chkDotNet()
-        {
-            List<ExtensionFoldersRegistryKey> returnedVersions = AssemblyFoldersEx.GatherVersionStrings("v3.5.0.x86chk", s_assemblyFolderExTestVersions);
-
-            Assert.NotNull(returnedVersions);
-            Assert.Single(returnedVersions);
-
-            Assert.Equal("v3.5.0.x86chk", (string)returnedVersions[0].RegistryKey);
-        }
-#endif
 
         /// <summary>
         /// Conditions (OSVersion/Platform) can be passed in SearchPaths to filter the result.
@@ -3556,14 +3246,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
 
             bool result = Execute(t);
-            ResourceManager resources = new ResourceManager("Microsoft.Build.Tasks.Strings", Assembly.GetExecutingAssembly());
-
             // Unresolved primary reference with itemspec "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null".
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnifiedReferenceDependsOn", "A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_ADllPath);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_CDllPath);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_BDllPath);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_V2_ADllPath);
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_UnifiedReferenceDependsOn", "A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_ADllPath));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_PrimarySourceItemsForReference", s_regress444809_CDllPath));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_PrimarySourceItemsForReference", s_regress444809_BDllPath));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_PrimarySourceItemsForReference", s_regress444809_V2_ADllPath));
         }
 
         /// <summary>
@@ -3604,11 +3292,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             bool result = Execute(t);
 
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null", String.Empty);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnifiedReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnResolvedPrimaryItemSpec", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null");
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_DDllPath);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_BDllPath);
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_ReferenceDependsOn", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null", String.Empty));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_UnifiedReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_UnResolvedPrimaryItemSpec", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null"));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_PrimarySourceItemsForReference", s_regress444809_DDllPath));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_PrimarySourceItemsForReference", s_regress444809_BDllPath));
         }
 
         /// <summary>
@@ -3650,9 +3338,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // Check that we have a message identifying conflicts with "D"
             string warningMessage = e.WarningEvents[0].Message;
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.FoundConflicts", "D", string.Empty));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
+            warningMessage.ShouldContain(FormatInvariantResourceStripCode("AssemblyConflict_FoundConflicts", "D", string.Empty));
+            warningMessage.ShouldContain(FormatInvariantResource("AssemblyConflict_ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
+            warningMessage.ShouldContain(FormatInvariantResource("ResolveAssemblyReference.FourSpaceIndent", FormatInvariantResource("AssemblyConflict_ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
         }
 
         [Fact]
@@ -3726,14 +3414,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // Check that we have both the expected messages
             string warningMessage = e.WarningEvents[0].Message;
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.FoundConflicts", "D", string.Empty));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
+            warningMessage.ShouldContain(FormatInvariantResourceStripCode("AssemblyConflict_FoundConflicts", "D", string.Empty));
+            warningMessage.ShouldContain(FormatInvariantResource("AssemblyConflict_ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
+            warningMessage.ShouldContain(FormatInvariantResource("ResolveAssemblyReference.FourSpaceIndent", FormatInvariantResource("AssemblyConflict_ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
 
             warningMessage = e.WarningEvents[1].Message;
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.FoundConflicts", "G", string.Empty));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", "G, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "G, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "G, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "G.dll"))));
+            warningMessage.ShouldContain(FormatInvariantResourceStripCode("AssemblyConflict_FoundConflicts", "G", string.Empty));
+            warningMessage.ShouldContain(FormatInvariantResource("AssemblyConflict_ConflictFound", "G, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "G, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
+            warningMessage.ShouldContain(FormatInvariantResource("ResolveAssemblyReference.FourSpaceIndent", FormatInvariantResource("AssemblyConflict_ReferenceDependsOn", "G, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "G.dll"))));
         }
 
         /// <summary>
@@ -7741,7 +7429,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             e.AssertLogContains(
-                String.Format(AssemblyResources.GetString("ResolveAssemblyReference.ConflictUnsolvable"), @"MyAssembly, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", "MyAssembly, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null"));
+                String.Format(AssemblyResources.GetString("AssemblyConflict_ConflictUnsolvable"), @"MyAssembly, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", "MyAssembly, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null"));
+            e.WarningEvents.Single(warning => warning.Code == "MSB3243").HelpKeyword
+                .ShouldBe("MSBuild.ResolveAssemblyReference.ConflictUnsolvable");
+        }
+
+        private static string FormatInvariantResource(string resourceName, params object[] args)
+            => string.Format(CultureInfo.InvariantCulture, AssemblyResources.GetString(resourceName, CultureInfo.InvariantCulture), args);
+
+        private static string FormatInvariantResourceStripCode(string resourceName, params object[] args)
+        {
+            const string codePrefix = "MSB3277: ";
+            string message = FormatInvariantResource(resourceName, args);
+            return message.StartsWith(codePrefix, StringComparison.Ordinal)
+                ? message.Substring(codePrefix.Length)
+                : message;
         }
 
         /// <summary>
@@ -8557,7 +8259,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(rar).ShouldBeTrue();
 
-            mockEngine.AssertLogContains(rar.Log.FormatResourceString("ResolveAssemblyReference.SearchPathAddedByParentAssembly",
+            mockEngine.AssertLogContains(rar.Log.FormatResourceString("AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly",
                 @"C:\DirectoryTest",
                 @"C:\DirectoryTest\A.dll"));
         }

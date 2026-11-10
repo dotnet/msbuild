@@ -1,0 +1,15 @@
+# This file configures CodeQL runs and TSA bug autofiling. For more information, see:
+# https://eng.ms/docs/coreai/devdiv/one-engineering-system-1es/1es-docs/codeql/troubleshooting/bugs/generated-library-code
+# (Access restricted to Microsoft employees only.)
+
+queries:
+  - exclude:
+      queryid:
+        # [Serializable] on MSBuild exception/event types only preserves legacy .NET Framework
+        # serialization compatibility (and is [Obsolete(SYSLIB0051)] on modern .NET).
+        # In the unified VMR build, cs/dangerous-deserialization-routine traces a false-positive
+        # static call graph from SerializationInfo.GetString/GetValue through virtual
+        # IFormatterConverter.ToString/TextWriter.Flush dispatches into unrelated build tools.
+        # Actual deserialization call sites remain covered by cs/dangerous-binary-deserialization,
+        # cs/binary-formatter-without-binder, and cs/unsafe-deserialization-untrusted-input.
+        - "cs/dangerous-deserialization-routine"

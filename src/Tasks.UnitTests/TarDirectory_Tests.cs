@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
+using System.Threading;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -60,6 +61,62 @@ namespace Microsoft.Build.Tasks.UnitTests
                         ],
                         ignoreOrder: true);
             }
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/15331: Yield() and Reacquire() must be called on
+        /// the same thread even when the asynchronous write resumes on a thread-pool thread.
+        /// </summary>
+        [Fact]
+        public void YieldAndReacquireOnSameThread()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+
+            TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+            File.WriteAllBytes(Path.Combine(sourceFolder.Path, "large.bin"), new byte[1024 * 1024]);
+
+            string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+            TarDirectory tarDirectory = new TarDirectory
+            {
+                BuildEngine = _mockEngine,
+                DestinationFile = new TaskItem(tarFilePath),
+                SourceDirectory = new TaskItem(sourceFolder.Path),
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+            };
+
+            ExecuteOnDedicatedThread(tarDirectory).ShouldBeTrue(_mockEngine.Log);
+
+            GetTarEntryNames(tarFilePath, TarDirectory.TarCompression.None).ShouldBe(["large.bin"]);
+        }
+
+        /// <summary>
+        /// Runs <paramref name="task"/> on a dedicated (non-thread-pool) thread so that any asynchronous continuation is
+        /// guaranteed to resume on a different thread than the one that started executing the task.
+        /// </summary>
+        internal static bool ExecuteOnDedicatedThread(Microsoft.Build.Framework.ITask task)
+        {
+            bool result = false;
+            Exception? exception = null;
+
+            Thread thread = new Thread(() =>
+            {
+                try
+                {
+                    result = task.Execute();
+                }
+                catch (Exception e)
+                {
+                    exception = e;
+                }
+            });
+
+            thread.Start();
+            thread.Join();
+
+            exception.ShouldBeNull();
+
+            return result;
         }
 
         [Fact]

@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.NET.StringTools;
 
@@ -215,7 +216,7 @@ internal partial class Expander<P, I>
                     {
                         _loggingContext.LogComment(
                             MessageImportance.Low,
-                            new BuildEventFileInfo(_elementLocation),
+                            _elementLocation,
                             "ItemReferencingSelfInTarget",
                             itemMetadata.ItemType,
                             metadataName);

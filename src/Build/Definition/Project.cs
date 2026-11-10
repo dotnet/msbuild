@@ -20,6 +20,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
+using Microsoft.Build.Internal;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Constants = Microsoft.Build.Framework.Constants;
@@ -3211,7 +3212,10 @@ namespace Microsoft.Build.Evaluation
             {
                 if (!IsBuildEnabled)
                 {
-                    LoggingService.LogError(s_buildEventContext, new BuildEventFileInfo(FullPath), "SecurityProjectBuildDisabled");
+                    LoggingService.LogError(
+                        s_buildEventContext,
+                        ElementLocation.Create(FullPath),
+                        "SecurityProjectBuildDisabled");
                     if (LoggingService is LoggingService defaultLoggingService)
                     {
                         defaultLoggingService.WaitForLoggingToProcessEvents();
@@ -4472,12 +4476,12 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Returns the property with the specified name or null if it was not present.
+            /// Returns the property whose name is the specified segment of a string, or null if it was not present.
             /// </summary>
             /// <returns>The property.</returns>
-            public ProjectProperty GetProperty(string name, int startIndex, int endIndex)
+            public ProjectProperty GetProperty(string name, int startIndex, int length)
             {
-                return Properties.GetProperty(name, startIndex, endIndex);
+                return Properties.GetProperty(name, startIndex, length);
             }
 
             #endregion

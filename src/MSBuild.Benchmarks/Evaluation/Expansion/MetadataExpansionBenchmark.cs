@@ -56,11 +56,11 @@ public class MetadataExpansionBenchmark
         => _fixture.Expander.ExpandIntoStringAndUnescape(
             MultipleMetadata,
             ExpanderOptions.ExpandMetadata,
-            ElementLocation.EmptyLocation);
+            ElementLocation.Empty);
 
     private string Expand(string expression)
         => _fixture.Expander.ExpandIntoStringLeaveEscaped(
             expression,
             ExpanderOptions.ExpandMetadata,
-            ElementLocation.EmptyLocation);
+            ElementLocation.Empty);
 }
