@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO.Pipes;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
@@ -331,6 +333,91 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task WaitingClientDisconnectsAfterGrantLookup_DoesNotAffectOtherWaiters(bool supportsNestedGrants)
+    {
+        using ManualResetEventSlim notificationReached = new();
+        using ManualResetEventSlim resumeNotification = new();
+        DeferredGrantDebugOutput output = new(_output, notificationReached, resumeNotification);
+        using CoordinatorServer server = new(DefaultSettings with { TotalNodeBudget = 4 }, output);
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        using NamedPipeClientStream client1 = await ConnectClientPipeAsync();
+        BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
+        BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
+        using NamedPipeClientStream client2 = await ConnectClientPipeAsync();
+        BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
+        BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
+        using NamedPipeClientStream client3 = await ConnectClientPipeAsync();
+        BinaryWriter writer3 = new(client3, Encoding.UTF8, leaveOpen: true);
+        BinaryReader reader3 = new(client3, Encoding.UTF8, leaveOpen: true);
+        bool waiterClosed = false;
+        Task<ServerMessage>? remainingGrant = null;
+
+        try
+        {
+            SendHandshake(writer1, reader1, processId: 10001, supportsNestedGrants);
+            writer1.Write(new RequestNodesMessage(requestedNodes: 4));
+            reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>().GrantedNodes.ShouldBe(4);
+            SendHandshake(writer2, reader2, processId: 10002, supportsNestedGrants);
+            writer2.Write(new RequestNodesMessage(requestedNodes: 4));
+            reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+            SendHandshake(writer3, reader3, processId: 10003, supportsNestedGrants);
+            writer3.Write(new RequestNodesMessage(requestedNodes: 4));
+            reader3.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+
+            writer1.Write(ReleaseNodesMessage.Instance);
+            notificationReached.Wait(TimeSpan.FromSeconds(5)).ShouldBeTrue();
+            writer2.Dispose();
+            reader2.Dispose();
+            client2.Dispose();
+            waiterClosed = true;
+
+            // Observe real handler cleanup without adding a production scheduling hook.
+            FieldInfo activeConnections = typeof(CoordinatorServer).GetField("_activeConnections", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?? throw new InvalidOperationException("CoordinatorServer must track active connection handlers.");
+            SpinWait.SpinUntil(() => activeConnections.GetValue(server) is 2, TimeSpan.FromSeconds(5)).ShouldBeTrue();
+
+            remainingGrant = Task.Run(reader3.ReadServerMessage);
+            resumeNotification.Set();
+            Task completed = await Task.WhenAny(remainingGrant, Task.Delay(TimeSpan.FromSeconds(5)));
+            completed.ShouldBeSameAs(remainingGrant, "A disconnected waiter's disposed pipe must not stop other grant notifications.");
+            (await remainingGrant).ShouldBeOfType<NodeGrantMessage>().GrantedNodes.ShouldBeGreaterThan(0);
+            writer3.Write(ReleaseNodesMessage.Instance);
+        }
+        finally
+        {
+            resumeNotification.Set();
+            _cts.Cancel();
+            writer1.Dispose();
+            reader1.Dispose();
+            client1.Dispose();
+            if (!waiterClosed)
+            {
+                writer2.Dispose();
+                reader2.Dispose();
+                client2.Dispose();
+            }
+            writer3.Dispose();
+            reader3.Dispose();
+            client3.Dispose();
+            if (remainingGrant is not null)
+            {
+                try
+                {
+                    await remainingGrant;
+                }
+                catch (Exception ex) when (ex is IOException or ObjectDisposedException)
+                {
+                    _output.WriteLine($"Pending test reader ended after pipe cleanup: {ex.GetType().Name}");
+                }
+            }
+            await serverTask;
+        }
+    }
+
     [ActiveIssue("https://github.com/dotnet/msbuild/issues/14193", TestPlatforms.Windows)]
     [Fact]
     public async Task ConcurrentClients_AllReceiveGrants()
@@ -616,4 +703,26 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
 
     private CoordinatorServer CreateServer(CoordinatorSettings settings)
         => new(settings, _output);
+
+    private sealed class DeferredGrantDebugOutput(
+        ICoordinatorDebugOutput output,
+        ManualResetEventSlim notificationReached,
+        ManualResetEventSlim resumeNotification) : ICoordinatorDebugOutput
+    {
+        public bool IsEnabled => true;
+
+        public void WriteLine(string message)
+        {
+            output.WriteLine(message);
+            if (message.StartsWith("CoordinatorServer: Granting ", StringComparison.Ordinal) &&
+                message.EndsWith("PID 10002", StringComparison.Ordinal))
+            {
+                notificationReached.Set();
+                resumeNotification.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            }
+        }
+
+        public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorDebugOutput.WriteLineInterpolatedStringHandler handler)
+            => WriteLine(handler.GetFormattedText());
+    }
 }
