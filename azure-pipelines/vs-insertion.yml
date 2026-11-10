@@ -62,7 +62,7 @@ variables:
     ${{ if not(eq(parameters.TargetBranch, 'auto')) }}:
       value: ${{ parameters.TargetBranch }}
     ${{ else }}:
-      value: 'rel/insiders'
+      value: 'rel/d18.11-ltsc'
   - name:  TeamName
     value: msbuild
   - name: TeamEmail
