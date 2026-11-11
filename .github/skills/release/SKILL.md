@@ -111,6 +111,14 @@ Read-only commands (`get-default-channels`, `get-subscriptions`, `get-channel`) 
 
 **Phase 2 — VMR backflow rotation.** Backflow (`dotnet/dotnet → msbuild`, source-enabled) keeps each MSBuild branch's dependencies aligned with its SDK band. When the new `vs{{THIS_RELEASE_VERSION}}` is paired with an SDK band, repoint the `→ main` backflow to the **next** SDK band channel and add backflow from the **outgoing** band channel into the release branch. Skip this for a VS-only release. See checklist steps 2.2b / 2.3f / 2.3g.
 
+### Arcade publishing readiness
+
+In checklist step **1.2e**, check the destination channel ID (`darc get-channels`) and its configuration in [Arcade's `PublishingConstants.ChannelInfos`](https://github.com/dotnet/arcade/blob/main/src/Microsoft.DotNet.Build.Tasks.Feed/src/model/PublishingConstants.cs). Then verify SDK publication **and Arcade's self-bootstrap**: a published SDK containing the entry must be consumed by a merged self-dependency/pin update in `msbuild-sdks.Microsoft.DotNet.Arcade.Sdk` in [Arcade main's `global.json`](https://github.com/dotnet/arcade/blob/main/global.json). If that pin already contains the change, verify the existing version rather than creating a redundant update.
+
+Confirm an actual promotion run restores that pinned SDK and successfully publishes to the destination channel; record the SDK version/build, self-bootstrap update PR or pin commit, and promotion run in the release issue. [The `ValidateSdk` promotion test](https://github.com/dotnet/arcade/blob/main/eng/validation/validate-promotion.ps1) runs with the newly built SDK, while final promotion uses the bootstrap pin, so its success alone is not proof that the final publisher has been updated.
+
+Report missing support and record the **maintainer's decision**, rather than automatically blocking Phase 2. The maintainer may rotate to the intended channel while publishing support is pending, accepting publishing failures to preserve correct codeflow; keeping main on the release branch's channel risks consumers picking up the wrong bits. Coordinate missing support with First Responders and prefer preparing future channels ahead of time with the .NET tooling maintainers.
+
 ## Branch retirement (Phase 1.3)
 
 Audit every release branch to keep required SDK/VS servicing flows active and remove unused dependency automation.
