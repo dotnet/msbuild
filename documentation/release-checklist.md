@@ -100,7 +100,7 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
     - **SDK lifecycle.** The band ↔ VS version ↔ EOL mapping is the [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions). It states which VS version each SDK band pairs with and when that band's support ends. \
     Use the published lifecycle for support decisions and Maestro channels for dependency routing.
     - **VS lifecycle — a separate source; the SDK table does not answer it.** Use [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs). \
-    **VS 2026 and later: one month of support after Stable release.** Non-LTSC releases are serviced through Insiders and Stable; promoting a new release to Stable ends VS support for the previous release. LTSC baselines are supported for one year after release; identify them from the published LTSC table.
+    **VS 2026 and later: one month of support after Stable release.** Non-LTSC releases are serviced through Insiders and Stable; promoting a new release to Stable ends VS support for the previous release. LTSC baselines are supported for two years from their LTSC release; identify them from the published LTSC table.
 
     **At branch snap, before Stable promotion:** the current release plus two preceding releases is a useful audit window, so `vs{{THIS_RELEASE_VERSION}} - 3` is worth checking. Use actual Stable promotions and SDK/VS deadlines for retirement decisions.
 
