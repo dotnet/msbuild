@@ -29,8 +29,7 @@
 # targeting `main` (so a fix PR's effect on the quarantined tests is validated on the PR itself), and
 # manual queue. Consumers that aggregate this data treat rolling and scheduled `main` runs the same
 # (reasons batchedCI/individualCI/schedule), so the mix of triggers is transparent to them.
-# PRs targeting other branches report success without running tests, rather than a neutral skipped
-# check that Maestro treats as an auto-merge failure.
+# PRs targeting other branches report success without running tests.
 trigger:
   batch: true
   branches:
