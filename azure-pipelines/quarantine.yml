@@ -58,19 +58,9 @@ variables:
 - name: Codeql.Enabled
   value: false
 - name: runQuarantineTests
-  value: $[or(ne(variables['Build.Reason'], 'PullRequest'), in(variables['System.PullRequest.TargetBranch'], 'main', 'refs/heads/main'))]
+  value: $[or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['System.PullRequest.TargetBranch'], 'main'))]
 
 jobs:
-- job: SkipQuarantinedTests
-  displayName: "Quarantined tests not applicable (PR does not target main)"
-  condition: and(succeeded(), ne(variables.runQuarantineTests, true))
-  pool: server
-  steps:
-  - task: Delay@1
-    displayName: "Report success without running quarantined tests"
-    inputs:
-      delayForMinutes: '0'
-
 - job: RunQuarantinedTestsWindows
   displayName: "Run quarantined tests (Windows)"
   condition: and(succeeded(), eq(variables.runQuarantineTests, true))
