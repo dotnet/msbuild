@@ -31,13 +31,17 @@ internal static class BuiltInMetadataExpander
     ///  The item's RecursiveDir, which comes from the wildcard the item was expanded from rather than the item spec.
     /// </param>
     /// <param name="cache">Cache of already derived modifier values for this item.</param>
+    /// <param name="sourceLineNumber">The source element's line, or zero when unavailable.</param>
+    /// <param name="sourceColumnNumber">The source element's column, or zero when unavailable.</param>
     /// <returns>The value with built-in metadata references expanded.</returns>
     internal static string? Expand(
         string? escapedValue,
         string escapedItemSpec,
         string? escapedDefiningProject,
         string? escapedRecursiveDir,
-        ref ItemSpecModifiers.Cache cache)
+        ref ItemSpecModifiers.Cache cache,
+        int sourceLineNumber = 0,
+        int sourceColumnNumber = 0)
     {
         int index = escapedValue is null ? -1 : IndexOfMetadataMarker(escapedValue, 0);
 
@@ -65,9 +69,13 @@ internal static class BuiltInMetadataExpander
                 {
                     builder ??= Strings.GetSpanBasedStringBuilder();
                     builder.Append(escapedValue, copiedUpTo, index - copiedUpTo);
-                    builder.Append(kind is ItemSpecModifierKind.RecursiveDir
-                        ? escapedRecursiveDir ?? string.Empty
-                        : ItemSpecModifiers.GetItemSpecModifier(escapedItemSpec, kind, currentDirectory: null, escapedDefiningProject, ref cache));
+                    builder.Append(kind switch
+                    {
+                        ItemSpecModifierKind.RecursiveDir => escapedRecursiveDir ?? string.Empty,
+                        ItemSpecModifierKind.DefiningProjectLineNumber or ItemSpecModifierKind.DefiningProjectColumnNumber =>
+                            ItemSpecModifiers.GetSourceLocationModifier(kind, sourceLineNumber, sourceColumnNumber),
+                        _ => ItemSpecModifiers.GetItemSpecModifier(escapedItemSpec, kind, currentDirectory: null, escapedDefiningProject, ref cache)
+                    });
                     copiedUpTo = closingParenthesis + 1;
 
                     index = IndexOfMetadataMarker(escapedValue, copiedUpTo);

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Shared;
@@ -31,9 +32,11 @@ internal static class ItemSpecModifiers
     public const string DefiningProjectDirectory = "DefiningProjectDirectory";
     public const string DefiningProjectName = "DefiningProjectName";
     public const string DefiningProjectExtension = "DefiningProjectExtension";
+    public const string DefiningProjectLineNumber = "DefiningProjectLineNumber";
+    public const string DefiningProjectColumnNumber = "DefiningProjectColumnNumber";
 
     // These are all the well-known attributes.
-    public static readonly ImmutableArray<string> All =
+    private static readonly ImmutableArray<string> s_legacyModifiers =
     [
         FullPath,
         RootDir,
@@ -51,6 +54,13 @@ internal static class ItemSpecModifiers
         DefiningProjectName,
         DefiningProjectExtension
     ];
+
+    private static readonly ImmutableArray<string> s_modifiersWithSourceLocation =
+        [.. s_legacyModifiers, DefiningProjectLineNumber, DefiningProjectColumnNumber];
+
+    public static ImmutableArray<string> All => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)
+        ? s_modifiersWithSourceLocation
+        : s_legacyModifiers;
 
     /// <summary>
     ///  Per-item cache for the FullPath modifier. Other derivable modifiers (RootDir,
@@ -293,6 +303,26 @@ internal static class ItemSpecModifiers
                 }
 
                 break;
+
+            case 25:
+                if (string.Equals(name, DefiningProjectLineNumber, StringComparison.OrdinalIgnoreCase) &&
+                    ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14))
+                {
+                    kind = ItemSpecModifierKind.DefiningProjectLineNumber;
+                    return true;
+                }
+
+                break;
+
+            case 27:
+                if (string.Equals(name, DefiningProjectColumnNumber, StringComparison.OrdinalIgnoreCase) &&
+                    ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14))
+                {
+                    kind = ItemSpecModifierKind.DefiningProjectColumnNumber;
+                    return true;
+                }
+
+                break;
         }
 
         kind = default;
@@ -303,7 +333,7 @@ internal static class ItemSpecModifiers
     public static bool TryGetDerivableModifierKind(string name, out ItemSpecModifierKind result)
     {
         if (TryGetModifierKind(name, out ItemSpecModifierKind kind) &&
-            kind is not ItemSpecModifierKind.RecursiveDir)
+            kind is not (ItemSpecModifierKind.RecursiveDir or ItemSpecModifierKind.DefiningProjectLineNumber or ItemSpecModifierKind.DefiningProjectColumnNumber))
         {
             result = kind;
             return true;
@@ -329,6 +359,15 @@ internal static class ItemSpecModifiers
     public static bool IsDerivableItemSpecModifier([NotNullWhen(true)] string? name)
         => name is not null
         && TryGetDerivableModifierKind(name, out _);
+
+    internal static bool IsSourceLocationModifier(string name)
+        => TryGetModifierKind(name, out ItemSpecModifierKind kind) &&
+           kind is ItemSpecModifierKind.DefiningProjectLineNumber or ItemSpecModifierKind.DefiningProjectColumnNumber;
+
+    internal static string GetSourceLocationModifier(ItemSpecModifierKind kind, int line, int column)
+        => line > 0
+            ? (kind == ItemSpecModifierKind.DefiningProjectLineNumber ? line : column).ToString(CultureInfo.InvariantCulture)
+            : string.Empty;
 
     /// <summary>
     ///  Performs path manipulations on the given item-spec as directed.
@@ -434,6 +473,8 @@ internal static class ItemSpecModifiers
                     return ComputeDirectory(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
 
                 case ItemSpecModifierKind.RecursiveDir:
+                case ItemSpecModifierKind.DefiningProjectLineNumber:
+                case ItemSpecModifierKind.DefiningProjectColumnNumber:
                     return string.Empty;
 
                 case ItemSpecModifierKind.Identity:
