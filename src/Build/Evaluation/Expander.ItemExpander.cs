@@ -117,7 +117,7 @@ internal partial class Expander<P, I>
         {
             // Each transform runs on the full set of transformed items from the previous result.
             // We can reuse our buffers by just swapping the references after each transform.
-            List<TransformEntry> input = CreateEntries(itemsOfType);
+            List<TransformEntry> input = CreateEntries(expander, itemsOfType);
             List<TransformEntry> output = new(itemsOfType.Count);
 
             // Create a TransformFunction for each transform in the chain by extracting the relevant information
@@ -251,7 +251,7 @@ internal partial class Expander<P, I>
         /// <summary>
         ///  Creates transform entries from the given items, pairing each with its evaluated include.
         /// </summary>
-        private static List<TransformEntry> CreateEntries(ICollection<I> items)
+        private static List<TransformEntry> CreateEntries(Expander<P, I> expander, ICollection<I> items)
         {
             List<TransformEntry> entries = new(items.Count);
 
@@ -263,7 +263,8 @@ internal partial class Expander<P, I>
                         EngineFileUtilities.GetFileListEscaped(
                             item.ProjectDirectory,
                             item.EvaluatedIncludeEscaped,
-                            forceEvaluate: true))
+                            forceEvaluate: true,
+                            globbingMeasurement: expander.GlobbingMeasurement))
                     {
                         entries.Add(new TransformEntry(resultantItem, item));
                     }
