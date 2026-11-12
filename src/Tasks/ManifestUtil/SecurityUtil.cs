@@ -565,8 +565,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                     string targetFrameworkIdentifier,
                                     bool disallowMansignTimestampFallback)
         {
-            SignFile(certThumbprint, timestampUrl, TaskEnvironment.Fallback.GetAbsolutePathOrEmpty(path),
-                targetFrameworkVersion, targetFrameworkIdentifier, disallowMansignTimestampFallback, TaskEnvironment.Fallback);
+            System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
+            X509Certificate2 cert = GetSigningCertificate(certThumbprint, resources);
+            bool supportsSha256 = TargetFrameworkSupportsSha256(targetFrameworkVersion, targetFrameworkIdentifier);
+            SignFileInternal(cert, timestampUrl, path, supportsSha256, resources,
+                !String.IsNullOrEmpty(targetFrameworkVersion) && disallowMansignTimestampFallback);
         }
 
         [SupportedOSPlatform("windows")]
@@ -581,45 +584,49 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                      TaskEnvironment taskEnvironment)
         {
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
+            X509Certificate2 cert = GetSigningCertificate(certThumbprint, resources);
+            bool supportsSha256 = TargetFrameworkSupportsSha256(targetFrameworkVersion, targetFrameworkIdentifier);
+            SignFileInternal(cert, timestampUrl, path, supportsSha256, resources, taskEnvironment,
+                !String.IsNullOrEmpty(targetFrameworkVersion) && disallowMansignTimestampFallback);
+        }
 
+        private static X509Certificate2 GetSigningCertificate(string certThumbprint, System.Resources.ResourceManager resources)
+        {
             if (String.IsNullOrEmpty(certThumbprint))
             {
                 throw new ArgumentNullException(nameof(certThumbprint));
             }
 
             X509Certificate2 cert = GetCert(certThumbprint);
-            if (cert == null)
+            if (cert is null)
             {
                 throw new ArgumentException(resources.GetString("CertNotInStore"), nameof(certThumbprint));
             }
 
-            if (!String.IsNullOrEmpty(targetFrameworkVersion))
-            {
-                Version targetVersion = Util.GetTargetFrameworkVersion(targetFrameworkVersion);
+            return cert;
+        }
 
-                if (targetVersion == null)
-                {
-                    throw new ArgumentException("TargetFrameworkVersion");
-                }
-
-                bool isTargetFrameworkSha256Supported = false;
-                if (String.IsNullOrEmpty(targetFrameworkIdentifier) ||
-                    targetFrameworkIdentifier.Equals(Constants.DotNetFrameworkIdentifier, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    // SHA-256 digest can be parsed only with .NET 4.5 or higher.
-                    isTargetFrameworkSha256Supported = targetVersion.CompareTo(s_dotNet45Version) >= 0;
-                }
-                else if (targetFrameworkIdentifier.Equals(Constants.DotNetCoreAppIdentifier, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    // Use SHA-256 digest for .NET Core apps
-                    isTargetFrameworkSha256Supported = true;
-                }
-                SignFileInternal(cert, timestampUrl, path, isTargetFrameworkSha256Supported, resources, taskEnvironment, disallowMansignTimestampFallback);
-            }
-            else
+        private static bool TargetFrameworkSupportsSha256(string targetFrameworkVersion, string targetFrameworkIdentifier)
+        {
+            if (String.IsNullOrEmpty(targetFrameworkVersion))
             {
-                SignFileInternal(cert, timestampUrl, path, targetFrameworkSupportsSha256: true, resources, taskEnvironment);
+                return true;
             }
+
+            Version targetVersion = Util.GetTargetFrameworkVersion(targetFrameworkVersion);
+            if (targetVersion is null)
+            {
+                throw new ArgumentException("TargetFrameworkVersion");
+            }
+
+            if (String.IsNullOrEmpty(targetFrameworkIdentifier) ||
+                targetFrameworkIdentifier.Equals(Constants.DotNetFrameworkIdentifier, StringComparison.InvariantCultureIgnoreCase))
+            {
+                // SHA-256 digest can be parsed only with .NET 4.5 or higher.
+                return targetVersion.CompareTo(s_dotNet45Version) >= 0;
+            }
+
+            return targetFrameworkIdentifier.Equals(Constants.DotNetCoreAppIdentifier, StringComparison.InvariantCultureIgnoreCase);
         }
 
         // We need to refactor these functions to handle real sign tool
@@ -665,8 +672,29 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             // setup resources
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
-            SignFileInternal(cert, timestampUrl, TaskEnvironment.Fallback.GetAbsolutePathOrEmpty(path),
-                targetFrameworkSupportsSha256: true, resources, TaskEnvironment.Fallback);
+            SignFileInternal(cert, timestampUrl, path, targetFrameworkSupportsSha256: true, resources);
+        }
+
+        [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
+        private static void SignFileInternal(X509Certificate2 cert,
+                                            Uri timestampUrl,
+                                            string path,
+                                            bool targetFrameworkSupportsSha256,
+                                            System.Resources.ResourceManager resources,
+                                            bool disallowMansignTimestampFallback = false)
+        {
+            ValidateSigningArguments(cert, path);
+            if (!FileSystems.Default.FileExists(path))
+            {
+                throw new FileNotFoundException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SignTargetNotFound"), path), path);
+            }
+
+            // Public helpers retain native Windows drive-relative resolution, unlike project-scoped task paths.
+            AbsolutePath absolutePath = new(Path.GetFullPath(path), path, ignoreRootedCheck: true);
+            SignFileContents(cert, timestampUrl, absolutePath, targetFrameworkSupportsSha256, resources,
+                TaskEnvironment.Fallback, disallowMansignTimestampFallback);
         }
 
         [SupportedOSPlatform("windows")]
@@ -680,7 +708,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                             TaskEnvironment taskEnvironment,
                                             bool disallowMansignTimestampFallback = false)
         {
-            if (cert == null)
+            ValidateSigningArguments(cert, path);
+            if (!FileSystems.Default.FileExists(path))
+            {
+                throw new FileNotFoundException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SignTargetNotFound"), path.OriginalValue), path.OriginalValue);
+            }
+
+            SignFileContents(cert, timestampUrl, path, targetFrameworkSupportsSha256, resources, taskEnvironment, disallowMansignTimestampFallback);
+        }
+
+        private static void ValidateSigningArguments(X509Certificate2 cert, string path)
+        {
+            if (cert is null)
             {
                 throw new ArgumentNullException(nameof(cert));
             }
@@ -689,12 +728,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 throw new ArgumentNullException(nameof(path));
             }
+        }
 
-            if (!FileSystems.Default.FileExists(path))
-            {
-                throw new FileNotFoundException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SignTargetNotFound"), path.OriginalValue), path.OriginalValue);
-            }
-
+        [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
+        private static void SignFileContents(X509Certificate2 cert,
+                                             Uri timestampUrl,
+                                             AbsolutePath path,
+                                             bool targetFrameworkSupportsSha256,
+                                             System.Resources.ResourceManager resources,
+                                             TaskEnvironment taskEnvironment,
+                                             bool disallowMansignTimestampFallback)
+        {
             bool useSha256 = UseSha256Algorithm(cert) && targetFrameworkSupportsSha256;
 
             if (PathUtil.IsPEFile(path))
@@ -825,13 +871,25 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             ProcessStartInfo startInfo = taskEnvironment.GetProcessStartInfo();
             startInfo.FileName = GetPathToTool(resources, taskEnvironment);
-            startInfo.Arguments = GetCommandLineParameters(cert.Thumbprint, timestampUrl, path.OriginalValue, useSha256, useRFC3161Timestamp);
+            string target = path.OriginalValue;
+            bool driveRelativeTarget = target.Length >= 2 && target[1] == ':' &&
+                (target.Length == 2 || target[2] is not ('\\' or '/'));
+            if (driveRelativeTarget)
+            {
+                target = path.GetCanonicalForm();
+            }
+            startInfo.Arguments = GetCommandLineParameters(cert.Thumbprint, timestampUrl, target, useSha256, useRFC3161Timestamp);
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardError = true;
             startInfo.RedirectStandardOutput = true;
 
             Process signTool = null;
+            string GetToolError()
+            {
+                string message = signTool.StandardError.ReadToEnd();
+                return driveRelativeTarget ? message.Replace(target, path.OriginalValue) : message;
+            }
 
             try
             {
@@ -850,13 +908,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         break;
                     case 1:
                         // error, report it
-                        throw new ApplicationException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolFail"), path.OriginalValue, signTool.StandardError.ReadToEnd()));
+                        throw new ApplicationException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolFail"), path.OriginalValue, GetToolError()));
                     case 2:
                         // warning, report it
-                        throw new WarningException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolWarning"), path.OriginalValue, signTool.StandardError.ReadToEnd()));
+                        throw new WarningException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolWarning"), path.OriginalValue, GetToolError()));
                     default:
                         // treat as error
-                        throw new ApplicationException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolFail"), path.OriginalValue, signTool.StandardError.ReadToEnd()));
+                        throw new ApplicationException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolFail"), path.OriginalValue, GetToolError()));
                 }
             }
             finally

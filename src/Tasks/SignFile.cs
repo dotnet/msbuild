@@ -58,7 +58,6 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
             AbsolutePath signingTargetPath = TaskEnvironment.GetAbsolutePathOrEmpty(SigningTarget.ItemSpec);
-            string SanitizeMessage(string msg) => msg?.Replace((string)signingTargetPath, signingTargetPath.OriginalValue) ?? msg;
             try
             {
                 SecurityUtilities.SignFile(
@@ -83,22 +82,22 @@ namespace Microsoft.Build.Tasks
             }
             catch (ApplicationException ex)
             {
-                Log.LogErrorWithCodeFromResources("SignFile.SignToolError", SanitizeMessage(ex.Message).Trim());
+                Log.LogErrorWithCodeFromResources("SignFile.SignToolError", ex.Message.Trim());
                 return false;
             }
             catch (WarningException ex)
             {
-                Log.LogWarningWithCodeFromResources("SignFile.SignToolWarning", SanitizeMessage(ex.Message).Trim());
+                Log.LogWarningWithCodeFromResources("SignFile.SignToolWarning", ex.Message.Trim());
                 return true;
             }
             catch (CryptographicException ex)
             {
-                Log.LogErrorWithCodeFromResources("SignFile.SignToolError", SanitizeMessage(ex.Message).Trim());
+                Log.LogErrorWithCodeFromResources("SignFile.SignToolError", ex.Message.Trim());
                 return false;
             }
             catch (Win32Exception ex)
             {
-                Log.LogErrorWithCodeFromResources("SignFile.SignToolError", SanitizeMessage(ex.Message).Trim());
+                Log.LogErrorWithCodeFromResources("SignFile.SignToolError", ex.Message.Trim());
                 return false;
             }
             catch (UriFormatException ex)

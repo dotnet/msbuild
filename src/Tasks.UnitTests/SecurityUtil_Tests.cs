@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.Versioning;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.UnitTests;
@@ -107,14 +108,17 @@ namespace Microsoft.Build.Tasks.UnitTests
 #endif
 
         [WindowsOnlyTheory]
-        [InlineData(0, true, 0, 0, false)]
-        [InlineData(1, false, 1, 0, false)]
-        [InlineData(2, true, 0, 1, false)]
-        [InlineData(7, false, 1, 0, false)]
-        [InlineData(0, true, 0, 0, true)]
+        [InlineData(0, true, 0, 0, false, false)]
+        [InlineData(1, false, 1, 0, false, false)]
+        [InlineData(2, true, 0, 1, false, false)]
+        [InlineData(7, false, 1, 0, false, false)]
+        [InlineData(0, true, 0, 0, true, false)]
+        [InlineData(0, true, 0, 0, false, true)]
+        [InlineData(1, false, 1, 0, false, true)]
+        [InlineData(2, true, 0, 1, false, true)]
         [SupportedOSPlatform("windows")]
         public void SignFile_PEToolUsesTaskEnvironment(
-            int exitCode, bool expectedSuccess, int expectedErrors, int expectedWarnings, bool retryTimestamp)
+            int exitCode, bool expectedSuccess, int expectedErrors, int expectedWarnings, bool retryTimestamp, bool driveRelativeTarget)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             TransientTestFolder project = env.CreateFolder();
@@ -122,14 +126,19 @@ namespace Microsoft.Build.Tasks.UnitTests
             string toolPath = CreateSignTool(env, project);
             env.CreateFile(project, "application.exe", "MZtest");
             env.SetCurrentDirectory(decoy.Path);
+            env.SetEnvironmentVariable("SIGNFILE_TEST_REMOVED", "host-only");
             env.WithTransientTestState(new SignToolFileSystemScope(toolPath));
             StoredTestCertificate certificate = env.WithTransientTestState(new StoredTestCertificate());
-            SignFile task = CreateTask(certificate.Certificate, project.Path, "application.exe");
+            string target = driveRelativeTarget
+                ? $"{(char.ToUpperInvariant(project.Path[0]) == 'C' ? 'D' : 'C')}:application.exe"
+                : "application.exe";
+            SignFile task = CreateTask(certificate.Certificate, project.Path, target);
             string observationsPath = Path.Combine(project.Path, "tool-observations.txt");
             task.TaskEnvironment.SetEnvironmentVariable("SIGNFILE_TEST_OUTPUT", observationsPath);
             task.TaskEnvironment.SetEnvironmentVariable("SIGNFILE_TEST_VALUE", "project-specific");
             task.TaskEnvironment.SetEnvironmentVariable("SIGNFILE_TEST_EXIT_CODE", exitCode.ToString(System.Globalization.CultureInfo.InvariantCulture));
             task.TaskEnvironment.SetEnvironmentVariable("SIGNFILE_TEST_RETRY", retryTimestamp ? "1" : "0");
+            task.TaskEnvironment.SetEnvironmentVariable("SIGNFILE_TEST_REMOVED", null);
             task.TimestampUrl = retryTimestamp ? "https://timestamp.invalid" : null;
 
             task.Execute().ShouldBe(expectedSuccess);
@@ -139,20 +148,97 @@ namespace Microsoft.Build.Tasks.UnitTests
             engine.Warnings.ShouldBe(expectedWarnings);
             engine.Log.ShouldNotContain(Path.Combine(project.Path, "application.exe"));
             string[] observations = File.ReadAllLines(observationsPath);
-            observations.Length.ShouldBe(retryTimestamp ? 8 : 4);
-            for (int i = 0; i < observations.Length; i += 4)
+            observations.Length.ShouldBe(retryTimestamp ? 12 : 6);
+            for (int i = 0; i < observations.Length; i += 6)
             {
                 observations[i].ShouldBe(project.Path);
                 observations[i + 1].ShouldBe("project-specific");
-                observations[i + 2].ShouldBe("application.exe");
+                observations[i + 2].ShouldBe(driveRelativeTarget ? Path.Combine(project.Path, "application.exe") : "application.exe");
+                observations[i + 4].ShouldBe("MZtest");
+                observations[i + 5].ShouldBe("<unset>");
             }
 
             if (retryTimestamp)
             {
                 observations[3].ShouldContain("/tr https://timestamp.invalid/");
-                observations[7].ShouldContain("/t https://timestamp.invalid/");
+                observations[9].ShouldContain("/t https://timestamp.invalid/");
             }
         }
+
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [SupportedOSPlatform("windows")]
+        public void SignFile_PublicHelpersPreserveDriveRelativeTargets(bool useThumbprint)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFolder project = env.CreateFolder();
+            env.SetCurrentDirectory(project.Path);
+            StoredTestCertificate certificate = env.WithTransientTestState(new StoredTestCertificate());
+            string fileName = $"{Guid.NewGuid():N}.manifest";
+            string originalContents = File.ReadAllText(Path.Combine(TestAssembliesPaths, "ClickOnceProfile.pubxml"));
+            TransientTestFile decoy = env.CreateFile(project, fileName, originalContents);
+            string target = $"{(char.ToUpperInvariant(project.Path[0]) == 'C' ? 'D' : 'C')}:{fileName}";
+            File.Exists(target).ShouldBeFalse();
+
+            FileNotFoundException exception = Should.Throw<FileNotFoundException>(() =>
+            {
+                if (useThumbprint)
+                {
+                    SecurityUtilities.SignFile(certificate.Certificate.Thumbprint, null, target, "v4.5", Constants.DotNetFrameworkIdentifier, false);
+                }
+                else
+                {
+                    SecurityUtilities.SignFile(certificate.Certificate, null, target);
+                }
+            });
+
+            exception.FileName.ShouldBe(target);
+            File.ReadAllText(decoy.Path).ShouldBe(originalContents);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("\0")]
+        [SupportedOSPlatform("windows")]
+        public void SignFile_PublicHelpersValidateCertificateBeforeTarget(string? target)
+        {
+            X509Certificate2? certificate = null;
+            Should.Throw<ArgumentNullException>(() =>
+                SecurityUtilities.SignFile(certificate, null, target)).ParamName.ShouldBe("cert");
+            Should.Throw<ArgumentNullException>(() =>
+                SecurityUtilities.SignFile(string.Empty, null, target, "invalid-version", Constants.DotNetFrameworkIdentifier, false))
+                .ParamName.ShouldBe("certThumbprint");
+        }
+
+#if FEATURE_WINDOWSINTEROP
+        [WindowsOnlyTheory]
+        [InlineData("application.manifest")]
+        [InlineData(@".\application.manifest")]
+        [SupportedOSPlatform("windows")]
+        public void SignFile_LockedManifestPreservesExistingDiagnostic(string target)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFolder project = env.CreateFolder();
+            TransientTestFolder decoy = env.CreateFolder();
+            env.SetCurrentDirectory(project.Path);
+            StoredTestCertificate certificate = env.WithTransientTestState(new StoredTestCertificate());
+            TransientTestFile manifest = env.CreateFile(project, "application.manifest",
+                File.ReadAllText(Path.Combine(TestAssembliesPaths, "ClickOnceProfile.pubxml")));
+            using FileStream readLock = File.Open(manifest.Path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            ApplicationException existingError = Should.Throw<ApplicationException>(() =>
+                SecurityUtilities.SignFile(certificate.Certificate, null, target));
+            env.SetCurrentDirectory(decoy.Path);
+            SignFile task = CreateTask(certificate.Certificate, project.Path, target);
+
+            task.Execute().ShouldBeFalse();
+
+            BuildErrorEventArgs error = ((MockEngine)task.BuildEngine).ErrorEvents.ShouldHaveSingleItem();
+            error.Code.ShouldBe("MSB3482");
+            error.Message.ShouldBe(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SignFile.SignToolError", existingError.Message.Trim()));
+        }
+#endif
 
         [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
@@ -211,7 +297,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                             Directory.GetCurrentDirectory(),
                             Environment.GetEnvironmentVariable("SIGNFILE_TEST_VALUE"),
                             args[args.Length - 1],
-                            string.Join(" ", args)
+                            string.Join(" ", args),
+                            File.ReadAllText(args[args.Length - 1]),
+                            Environment.GetEnvironmentVariable("SIGNFILE_TEST_REMOVED") ?? "<unset>"
                         });
                         Console.Error.WriteLine("signtool diagnostic: " + args[args.Length - 1]);
                         if (Environment.GetEnvironmentVariable("SIGNFILE_TEST_RETRY") == "1"
