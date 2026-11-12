@@ -1062,6 +1062,9 @@
   <data name="TargetSkippedFalseCondition" xml:space="preserve">
     <value>Target "{0}" skipped, due to false condition; ({1}) was evaluated as ({2}).</value>
   </data>
+  <data name="TargetPreviouslySkippedDueToFalseCondition" xml:space="preserve">
+    <value>Target "{0}" skipped. Previously skipped because its condition evaluated to false.</value>
+  </data>
   <data name="TargetSkippedWhenSkipNonexistentTargets" xml:space="preserve">
     <value>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</value>
     <comment>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</comment>

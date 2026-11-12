@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -594,14 +594,19 @@ namespace Microsoft.Build.BackEnd
             {
                 Assumed.NotNull(targetResult);
 
-                if (targetResult.ResultCode != TargetResultCode.Skipped)
+                if (CanReuseTargetResult(targetResult))
                 {
-                    // If we've already dealt with this target and it didn't skip, let's log appropriately
+                    // If we've already dealt with this target and its result is reusable, log appropriately.
                     // Otherwise we don't want anything more to do with it.
-                    bool success = targetResult.ResultCode == TargetResultCode.Success;
-                    TargetSkipReason skipReason = success
-                        ? TargetSkipReason.PreviouslyBuiltSuccessfully
-                        : TargetSkipReason.PreviouslyBuiltUnsuccessfully;
+                    bool success = targetResult.ResultCode != TargetResultCode.Failure;
+                    TargetSkipReason skipReason = targetResult.WasSkippedDueToFalseCondition ?
+                        TargetSkipReason.PreviouslyConditionWasFalse :
+                        success ?
+                            TargetSkipReason.PreviouslyBuiltSuccessfully :
+                            TargetSkipReason.PreviouslyBuiltUnsuccessfully;
+
+                    // Update the skip reason on the existing result for telemetry purposes and subsequent reuse.
+                    targetResult.SkipReason = skipReason;
 
                     var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
                     {
@@ -623,7 +628,7 @@ namespace Microsoft.Build.BackEnd
                         stopProcessingStack = true;
                     }
 
-                    if (targetResult.ResultCode == TargetResultCode.Success)
+                    if (success)
                     {
                         _targetsToBuild.Peek().LeaveLegacyCallTargetScopes();
                         _targetsToBuild.Pop();
@@ -646,6 +651,10 @@ namespace Microsoft.Build.BackEnd
 
             return false;
         }
+
+        private bool CanReuseTargetResult(TargetResult targetResult) =>
+            targetResult.ResultCode != TargetResultCode.Skipped ||
+            (_componentHost.BuildParameters.CacheConditionFalseTargets && targetResult.WasSkippedDueToFalseCondition);
 
         /// <summary>
         /// When a target build fails, we don't just stop building that target; we also pop all of the other dependency targets of its
@@ -713,7 +722,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Don't build any Before or After targets for which we already have results.  Unlike other targets,
                     // we don't explicitly log a skipped-with-results message because it is not interesting.
-                    if (_buildResult.TryGetResultsForTarget(targetSpecification.TargetName, out TargetResult targetResult) && targetResult.ResultCode != TargetResultCode.Skipped)
+                    if (_buildResult.TryGetResultsForTarget(targetSpecification.TargetName, out TargetResult targetResult) && CanReuseTargetResult(targetResult))
                     {
                         continue;
                     }

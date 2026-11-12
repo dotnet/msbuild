@@ -545,6 +545,16 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
+  <data name="HelpMessage_CacheConditionFalseTargets" xml:space="preserve">
+    <value>  -cacheConditionFalseTargets[:True|False]
+                     Reuses targets skipped because their condition evaluated
+                     to false without evaluating the condition again.
+   </value>
+    <comment>
+      LOCALIZATION: "cacheConditionFalseTargets", "True" and "False" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
   <data name="HelpMessage_20_FileLoggerSwitch" xml:space="preserve">
     <value>  -fileLogger[n]     Logs the build output to a file. By default
                      the file is in the current directory and named
@@ -1544,6 +1554,13 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="ReportFileAccessesIncompatibleWithMultiThreaded" xml:space="preserve">
+    <value>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1073: "}
+      LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
+    </comment>
+  </data>
   <data name="InvalidPrecomputeValue" xml:space="preserve">
     <value>MSBUILD : error MSB1074: Precompute mode value is not valid. {0}</value>
     <comment>
@@ -1553,11 +1570,13 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
-  <data name="ReportFileAccessesIncompatibleWithMultiThreaded" xml:space="preserve">
-    <value>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</value>
+  <data name="InvalidCacheConditionFalseTargetsValue" xml:space="preserve">
+    <value>MSBUILD : error MSB1086: Cache condition-false targets value is not valid. {0}</value>
     <comment>
-      {StrBegin="MSBUILD : error MSB1073: "}
-      LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
+      {StrBegin="MSBUILD : error MSB1086: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for cacheConditionFalseTargets that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" and "cacheConditionFalseTargets" should not be localized.
     </comment>
   </data>
   <data name="InvalidIsolateProjectsValue" xml:space="preserve">
@@ -1880,7 +1899,7 @@
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1086.
+        Next error code should be MSB1087.
 
         Don't forget to update this comment after using the new code.
   -->

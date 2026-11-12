@@ -816,8 +816,8 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // Add new data after reset - collector should still work.
             var key2 = new TaskOrTargetTelemetryKey("TestTarget2", isCustom: false, isFromNugetCache: false, isFromMetaProject: false);
-            collector.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
-            collector.AddTargetResult(wasExecuted: false, TargetSkipReason.ConditionWasFalse);
+            collector.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.PreviouslyConditionWasFalse);
+            collector.AddTargetResult(wasExecuted: false, TargetSkipReason.PreviouslyConditionWasFalse);
 
             // Third FinalizeProcessing should emit only the new data.
             collector.FinalizeProcessing(loggingContext);

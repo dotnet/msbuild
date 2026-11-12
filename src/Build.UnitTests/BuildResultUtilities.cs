@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
@@ -20,6 +21,14 @@ namespace Microsoft.Build.Unittest
         public static TargetResult GetEmptySucceedingTargetResult()
         {
             return new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetSuccessResult());
+        }
+
+        public static TargetResult GetEmptyConditionFalseSkippedTargetResult()
+        {
+            return new TargetResult(
+                Array.Empty<TaskItem>(),
+                BuildResultUtilities.GetSkippedResult(),
+                skipReason: TargetSkipReason.ConditionWasFalse);
         }
 
         public static TargetResult GetNonEmptySucceedingTargetResult()

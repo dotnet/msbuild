@@ -981,6 +981,7 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
                 bool question = false;
+                bool? cacheConditionFalseTargets = null;
                 bool isTaskInputLoggingRequired = false;
                 bool isBuildCheckEnabled = false;
                 string[] getProperty = [];
@@ -1049,6 +1050,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                             ref lowPriority,
                                             ref question,
+                                            ref cacheConditionFalseTargets,
                                             ref isTaskInputLoggingRequired,
                                             ref isBuildCheckEnabled,
                                             ref getProperty,
@@ -1207,6 +1209,7 @@ namespace Microsoft.Build.CommandLine
                                     graphBuildOptions,
                                     lowPriority,
                                     question,
+                                    cacheConditionFalseTargets,
                                     isTaskInputLoggingRequired,
                                     isBuildCheckEnabled,
                                     inputResultsCaches,
@@ -1680,6 +1683,7 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             bool question,
+            bool? cacheConditionFalseTargets,
             bool isTaskAndTargetItemLoggingRequired,
             bool isBuildCheckEnabled,
             string[] inputResultsCaches,
@@ -1895,6 +1899,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
                     parameters.Question = question;
+                    parameters.CacheConditionFalseTargets = cacheConditionFalseTargets ?? parameters.CacheConditionFalseTargets;
                     parameters.IsBuildCheckEnabled = isBuildCheckEnabled;
 #if FEATURE_REPORTFILEACCESSES
                     parameters.ReportFileAccesses = reportFileAccesses;
@@ -2536,6 +2541,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             ref bool lowPriority,
             ref bool question,
+            ref bool? cacheConditionFalseTargets,
             ref bool isTaskInputLoggingRequired,
             ref bool isBuildCheckEnabled,
             ref string[] getProperty,
@@ -2697,6 +2703,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                                            ref lowPriority,
                                                            ref question,
+                                                           ref cacheConditionFalseTargets,
                                                            ref isTaskInputLoggingRequired,
                                                            ref isBuildCheckEnabled,
                                                            ref getProperty,
@@ -2808,6 +2815,11 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.CacheConditionFalseTargets))
+                    {
+                        cacheConditionFalseTargets = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.CacheConditionFalseTargets], defaultValue: true, resourceName: "InvalidCacheConditionFalseTargetsValue");
+                    }
 
                     isBuildCheckEnabled = IsBuildCheckEnabled(commandLineSwitches);
 

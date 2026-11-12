@@ -131,6 +131,7 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
                 SkippedDueToUpToDateCount++;
                 break;
             case TargetSkipReason.ConditionWasFalse:
+            case TargetSkipReason.PreviouslyConditionWasFalse:
                 SkippedDueToConditionCount++;
                 break;
             case TargetSkipReason.PreviouslyBuiltSuccessfully:
