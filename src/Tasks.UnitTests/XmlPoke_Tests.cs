@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void PokeDtdShowsTaskSpecificErrorMessageByDefault()
+        public void PokeDtdShowsTaskSpecificErrorMessageWhenProhibited()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             var xmlInput = env.CreateFile("doc.xml", _xmlFileNoNsWithDtd);
@@ -214,6 +214,7 @@ namespace Microsoft.Build.UnitTests
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = engine,
+                ProhibitDtd = true,
                 XmlInputPath = new TaskItem(xmlInput.Path),
                 Query = "//variable/@Name",
                 Value = new TaskItem("Mert"),
@@ -226,14 +227,30 @@ namespace Microsoft.Build.UnitTests
             engine.Log.ShouldContain("ProhibitDtd");
         }
 
-        [Fact]
-        public void PokeAllowsDtdByDefaultWhenWave18_11IsDisabled()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("18.11")]
+        [InlineData("999.999")]
+        public void PokeIgnoresDtdByDefaultInServicing(string disabledWave)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
             ChangeWaves.ResetStateForTests();
 
-            new XmlPoke().ProhibitDtd.ShouldBeFalse();
+            var xmlInput = env.CreateFile("doc.xml", _xmlFileNoNsWithDtd);
+            MockEngine engine = new(_output);
+            XmlPoke task = new()
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = engine,
+                XmlInputPath = new TaskItem(xmlInput.Path),
+                Query = "//variable/@Name",
+                Value = new TaskItem("updated"),
+            };
+
+            task.ProhibitDtd.ShouldBeFalse();
+            task.Execute().ShouldBeTrue();
+            File.ReadAllText(xmlInput.Path).ShouldContain("Name=\"updated\"");
         }
 
         [Fact]
@@ -271,6 +288,7 @@ namespace Microsoft.Build.UnitTests
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = engine,
+                ProhibitDtd = true,
                 XmlInputPath = new TaskItem(xmlInput.Path),
                 Query = "//variable/@Name",
                 Value = new TaskItem("x"),

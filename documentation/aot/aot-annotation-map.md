@@ -1,6 +1,7 @@
 # Trim / AOT annotation map and improvement strategies
 
-**Status:** Living (annotation inventory).
+**Status:** Upstream 18.11 annotation inventory. This historical inventory does not describe the
+[.NET 10 servicing annotation contract](README.md#net-10-servicing-boundary).
 
 A map of **where** the MSBuild engine carries trim/AOT annotations - `[RequiresUnreferencedCode]` (RUC),
 `[RequiresDynamicCode]` (RDC), `[DynamicallyAccessedMembers]` (DAM), and

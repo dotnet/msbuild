@@ -12,10 +12,6 @@
 
     <EnableDefaultItems>false</EnableDefaultItems>
 
-    <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
-         older TFMs (net472) from emitting NETSDK1210. -->
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
-
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <!-- Do not create Tlbs when building in .NET product mode. The packages are not shipped to VS,
          only their contents redisted within the SDK. -->

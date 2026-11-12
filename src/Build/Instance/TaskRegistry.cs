@@ -446,7 +446,6 @@ namespace Microsoft.Build.Execution
         /// Given a task name, this method retrieves the task class. If the task has been requested before, it will be found in
         /// the class cache; otherwise, &lt;UsingTask&gt; declarations will be used to search the appropriate assemblies.
         /// </summary>
-        [RequiresUnreferencedCode("Creates and loads a task factory by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         internal TaskFactoryWrapper GetRegisteredTask(
             string taskName,
             string taskProjectFile,
@@ -505,7 +504,6 @@ namespace Microsoft.Build.Execution
         /// <param name="retrievedFromCache">True if the record was retrieved from the cache.</param>
         /// <param name="isMultiThreadedBuild">Whether the build is running in multi-threaded mode.</param>
         /// <returns>The task registration record, or null if none was found.</returns>
-        [RequiresUnreferencedCode("Creates and loads a task factory by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         internal RegisteredTaskRecord GetTaskRegistrationRecord(
             string taskName,
             string taskProjectFile,
@@ -746,7 +744,6 @@ namespace Microsoft.Build.Execution
         /// Given a task name and a list of records which may contain the task, this helper method will ask the records to see if the task name
         /// can be created by the factories which are wrapped by the records. (this is done by instantiating the task factory and asking it).
         /// </summary>
-        [RequiresUnreferencedCode("Creates and loads a task factory by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         private RegisteredTaskRecord GetMatchingRegistration(
             string taskName,
             IEnumerable<RegisteredTaskRecord> taskRecords,
@@ -1270,7 +1267,6 @@ namespace Microsoft.Build.Execution
             /// loads an external file and uses that to generate the tasks.
             /// </summary>
             /// <returns>true if the task can be created by the factory, false if it cannot be created</returns>
-            [RequiresUnreferencedCode("Creates and loads a task factory by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
             internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, TaskHostParameters taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild)
             {
                 // First check (fast path - no locking)
@@ -1379,7 +1375,6 @@ namespace Microsoft.Build.Execution
             /// Given a Registered task record and a task name. Check create an instance of the task factory using the record.
             /// If the factory is a assembly task factory see if the assemblyFile has the correct task inside of it.
             /// </summary>
-            [RequiresUnreferencedCode("Creates and loads a task factory by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
             internal TaskFactoryWrapper GetTaskFactoryFromRegistrationRecord(string taskName, string taskProjectFile, in TaskHostParameters taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild)
             {
                 if (CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, isMultiThreadedBuild))
@@ -1394,7 +1389,6 @@ namespace Microsoft.Build.Execution
             /// Create an instance of the task factory and load it from the assembly.
             /// </summary>
             /// <exception cref="InvalidProjectFileException">If the task factory could not be properly created an InvalidProjectFileException will be thrown</exception>
-            [RequiresUnreferencedCode("Creates and loads a task factory by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
             private bool GetTaskFactory(TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, string taskProjectFile, bool isMultiThreadedBuild)
             {
                 // see if we have already created the factory before, only create it once
@@ -1739,7 +1733,6 @@ namespace Microsoft.Build.Execution
                 /// <see cref="FeatureSwitches.EnableReflectiveTaskParameterTypes"/> switch is enabled, so a
                 /// trimmer that substitutes that switch to false removes this path from the image entirely.
                 /// </summary>
-                [RequiresUnreferencedCode("Resolves a task parameter type by name with Type.GetType; the type cannot be determined statically, so this path is unsupported under trimming.")]
                 private static Type ResolveParameterTypeByName(string expandedType)
                 {
                     if (expandedType.StartsWith("Microsoft.Build.Framework.", StringComparison.OrdinalIgnoreCase) && !expandedType.Contains(","))

@@ -717,11 +717,13 @@ namespace Microsoft.Build.CommandLine.Experimental
 
         /// <summary>
         /// Checks if the provided multiple valued parametrized switch needs to be unquoted.
-        /// The method will return 'true' in case the parametrized switch is 'Target'.
+        /// The method will return 'true' in case:
+        ///     The changewave 17.10 is not set and
+        ///     The parametrized switch is 'Target'
         /// </summary>
         private bool IsMultipleAllowedSwitchParameterDueToUnquote(bool unquoteParameter, ParameterizedSwitch parameterizedSwitch)
         {
-            if (!unquoteParameter)
+            if (!unquoteParameter || !Traits.Instance.EscapeHatches.UnquoteTargetSwitchParameters)
             {
                 return false;
             }

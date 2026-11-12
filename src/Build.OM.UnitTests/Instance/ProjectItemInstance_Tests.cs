@@ -3,12 +3,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests.Shared;
+using Microsoft.DotNet.RemoteExecutor;
+using Shouldly;
 using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
@@ -25,8 +31,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// The number of built-in metadata for items.
         /// </summary>
         public const int BuiltInMetadataCount = 15;
+        private readonly ITestOutputHelper _output;
         private Lazy<DummyMappedDrive> _mappedDrive = DummyMappedDriveUtils.GetLazyDummyMappedDrive();
 
+        public ProjectItemInstance_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         public void Dispose()
         {
@@ -1059,11 +1070,29 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     string.Format(content, include, exclude) :
                     string.Format(content, property, propertyValue, include);
 
-            Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
-                    content,
+            BuildTargetWithDriveEnumerationWarning(content);
+        }
+
+        private void BuildTargetWithDriveEnumerationWarning(string content)
+        {
+            FileMatcher originalMatcher = FileMatcher.Default;
+            IFileSystem originalFileSystem = FileSystems.Default;
+            using Process parent = Process.GetCurrentProcess();
+            RemoteExecutor.Invoke(static (projectContents, parentProcessId) =>
+            {
+                using TestEnvironment env = TestEnvironment.Create();
+                var fileSystem = DriveEnumeratingWildcardFileSystem.CreateInChild(env, parentProcessId);
+                Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
+                    projectContents,
                     "0",
                     "TestTarget",
-                    Helpers.ExpectedBuildResult.SucceedWithWarning);
+                    Helpers.ExpectedBuildResult.SucceedWithWarning,
+                    env.Output);
+                fileSystem.AssertRootEnumerationWasBounded(env.Output);
+            }, content, parent.Id.ToString(CultureInfo.InvariantCulture)).Dispose();
+            FileMatcher.Default.ShouldBeSameAs(originalMatcher);
+            FileSystems.Default.ShouldBeSameAs(originalFileSystem);
+            _output.WriteLine("Hermetic root-warning build completed in RemoteExecutor; parent filesystem and matcher unchanged.");
         }
 
         /// <summary>

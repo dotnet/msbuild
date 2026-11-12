@@ -1,4 +1,17 @@
 <Project>
+  <!-- Run SDK acquisition outside the desktop host's assembly binding context. -->
+  <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Full'">
+    <DOTNET_HOST_PATH>$(DotNetTool)</DOTNET_HOST_PATH>
+    <RuntimeIdentifierGraphPath>$(DotNetRoot)sdk\$(DotNetCliVersion)\RuntimeIdentifierGraph.json</RuntimeIdentifierGraphPath>
+  </PropertyGroup>
+
+  <UsingTask TaskName="Microsoft.DotNet.Arcade.Sdk.InstallDotNetCore"
+             AssemblyFile="$(ArcadeSdkBuildTasksAssembly.Replace('\netframework\', '\net\'))"
+             TaskFactory="TaskHostFactory"
+             Runtime="NET"
+             Override="true"
+             Condition="'$(MSBuildRuntimeType)' == 'Full'" />
+
   <PropertyGroup>
     <OptProfMetadataJson>$(BUILD_STAGINGDIRECTORY)\InsertionOutputs\Metadata.json</OptProfMetadataJson>
     <OptProfMetadataOutputDir>$(ArtifactsDir)\VSSetup\$(Configuration)</OptProfMetadataOutputDir>

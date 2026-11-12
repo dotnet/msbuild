@@ -228,7 +228,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                if (string.IsNullOrEmpty(value))
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14) && string.IsNullOrEmpty(value))
                 {
                     throw new ArgumentNullException(nameof(FullPath));
                 }

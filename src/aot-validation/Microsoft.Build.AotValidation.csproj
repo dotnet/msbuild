@@ -14,7 +14,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net11.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
@@ -115,8 +115,8 @@
     NuGet.Frameworks at runtime. Microsoft.Build references it with PrivateAssets="all" (in a real SDK it
     loads the NuGet.Frameworks.dll that ships next to MSBuild.dll), so it does not flow transitively to this
     harness. A real AOT host bundles NuGet.Frameworks into its native image; mirror that here so the assembly
-    is copied for the JIT pass and linked into the AOT image. Version tracks NuGetBuildTasksPackageVersion in
-    eng/Version.Details.props (the same version Microsoft.Build compiles against and the bootstrap SDK ships).
+    is copied for the JIT pass and linked into the AOT image. The isolated harness pins the same version
+    Microsoft.Build compiles against; the real host SDK supplies its own aligned NuGet toolset.
   -->
   <ItemGroup>
     <PackageReference Include="NuGet.Frameworks" Version="7.9.0-rc.37" />

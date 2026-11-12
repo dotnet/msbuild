@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.Shared
 #if NET
             => NativeMethodsShared.IsWindows
                 ? $"\"{BootstrapMSBuildExecutablePath}\""
-                : $"\"{s_dotnetExePath}\" \"{Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildAssemblyName)}\"";
+                : $"\"{s_bootstrapDotnetHostPath}\" \"{Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildAssemblyName)}\"";
 #else
             => $"\"{BootstrapMSBuildExecutablePath}\"";
 #endif

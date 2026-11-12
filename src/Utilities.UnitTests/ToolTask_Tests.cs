@@ -75,6 +75,8 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             internal bool ExecuteCalled { get; private set; }
 
+            internal bool SkipProcessExecution { get; set; }
+
             internal Action<ProcessStartInfo> DoProcessStartInfoMutation { get; set; }
 
             protected override string ToolName => Path.GetFileName(_fullToolName);
@@ -111,6 +113,11 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("executetool");
                 _pathToToolUsed = pathToTool;
                 ExecuteCalled = true;
+                if (SkipProcessExecution)
+                {
+                    return 0;
+                }
+
                 if (!NativeMethodsShared.IsWindows && string.IsNullOrEmpty(responseFileCommands) && string.IsNullOrEmpty(commandLineCommands))
                 {
                     // Unix makes sh interactive and it won't exit if there is nothing on the command line
@@ -1636,8 +1643,8 @@ namespace Microsoft.Build.UnitTests
             using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
             var taskEnv = new TaskEnvironment(driver);
 
-            // Use MyTool pointing to the actual tool location.
-            using var tool = new MyTool();
+            // Probe path resolution without launching the dummy file as a native executable.
+            using var tool = new MyTool { SkipProcessExecution = true };
             tool.FullToolName = toolFullPath;
             tool.TaskEnvironment = taskEnv;
             tool.BuildEngine = new MockEngine(_output);
@@ -1646,7 +1653,9 @@ namespace Microsoft.Build.UnitTests
             // for file existence checks. The tool exists at an absolute path, so this should succeed.
             bool result = tool.Execute();
 
-            // Assert: the tool should have been found and executed.
+            // Assert: the resolved tool path reached ExecuteTool.
+            result.ShouldBeTrue();
+            tool.PathToToolUsed.ShouldBe(toolFullPath);
             tool.ExecuteCalled.ShouldBeTrue(
                 "ComputePathToTool should find the tool using TaskEnvironment-absolutized path for existence check");
         }

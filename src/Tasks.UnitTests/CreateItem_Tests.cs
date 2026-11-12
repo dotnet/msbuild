@@ -3,12 +3,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
+using Microsoft.DotNet.RemoteExecutor;
 using Shouldly;
 using Xunit;
 
@@ -335,7 +340,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@"\**\*.log")]
         public void LogUnixWarningUponCreateItemExecution(string itemSpec)
         {
-            VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(itemSpec);
+            VerifyUnixDriveEnumerationWarningInChild(itemSpec, buildProject: false);
         }
 
         private static void VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(string itemSpec)
@@ -436,12 +441,37 @@ namespace Microsoft.Build.UnitTests
         public void LogUnixWarningUponItemCreationWithDriveEnumeration(string content, string include)
         {
             content = string.Format(content, include);
-            Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
-                    content,
-                    "0",
-                    "TestTarget",
-                    Helpers.ExpectedBuildResult.SucceedWithWarning,
-                    _testOutput);
+            VerifyUnixDriveEnumerationWarningInChild(content, buildProject: true);
+        }
+
+        private void VerifyUnixDriveEnumerationWarningInChild(string input, bool buildProject)
+        {
+            FileMatcher originalMatcher = FileMatcher.Default;
+            IFileSystem originalFileSystem = FileSystems.Default;
+            using Process parent = Process.GetCurrentProcess();
+            RemoteExecutor.Invoke(static (value, build, parentProcessId) =>
+            {
+                using TestEnvironment env = TestEnvironment.Create();
+                var fileSystem = DriveEnumeratingWildcardFileSystem.CreateInChild(env, parentProcessId);
+                if (bool.Parse(build))
+                {
+                    Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
+                        value,
+                        "0",
+                        "TestTarget",
+                        Helpers.ExpectedBuildResult.SucceedWithWarning,
+                        env.Output);
+                }
+                else
+                {
+                    VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(value);
+                }
+
+                fileSystem.AssertRootEnumerationWasBounded(env.Output);
+            }, input, buildProject.ToString(), parent.Id.ToString(CultureInfo.InvariantCulture)).Dispose();
+            FileMatcher.Default.ShouldBeSameAs(originalMatcher);
+            FileSystems.Default.ShouldBeSameAs(originalFileSystem);
+            _testOutput.WriteLine("Hermetic CreateItem root-warning assertions completed in RemoteExecutor; parent filesystem and matcher unchanged.");
         }
     }
 }

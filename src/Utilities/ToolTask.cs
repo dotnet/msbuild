@@ -246,12 +246,14 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                if (_encoding != null)
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
                 {
-                    // Keep the encoding of standard output & error consistent with the console code page.
-                    return _encoding;
+                    if (_encoding != null)
+                    {
+                        // Keep the encoding of standard output & error consistent with the console code page.
+                        return _encoding;
+                    }
                 }
-
                 return EncodingUtilities.CurrentSystemOemEncoding;
             }
         }
@@ -268,12 +270,14 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                if (_encoding != null)
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
                 {
-                    // Keep the encoding of standard output & error consistent with the console code page.
-                    return _encoding;
+                    if (_encoding != null)
+                    {
+                        // Keep the encoding of standard output & error consistent with the console code page.
+                        return _encoding;
+                    }
                 }
-
                 return EncodingUtilities.CurrentSystemOemEncoding;
             }
         }
@@ -1554,7 +1558,10 @@ namespace Microsoft.Build.Utilities
                         }
 
                         File.AppendAllText(_temporaryBatchFile, commandLineCommands, encoding);
-                        _encoding = encoding;
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                        {
+                            _encoding = encoding;
+                        }
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 

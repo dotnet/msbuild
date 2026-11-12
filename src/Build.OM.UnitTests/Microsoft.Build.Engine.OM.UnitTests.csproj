@@ -19,6 +19,7 @@
     <Reference Include="System.Net.Http" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
 
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="Microsoft.DotNet.RemoteExecutor" VersionOverride="$(MicrosoftDotNetArcadeSdkPackageVersion)" PrivateAssets="all" />
 
     <PackageDownload Include="NuGet.CommandLine" Version="[$(NuGetCommandLinePackageVersion)]" />
   </ItemGroup>
@@ -29,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\UnitTests\DriveEnumeratingWildcardFileSystem.cs" Link="DriveEnumeratingWildcardFileSystem.cs" />
     <Compile Include="..\GlobalUsings.cs">
       <Link>GlobalUsings.cs</Link>
     </Compile>

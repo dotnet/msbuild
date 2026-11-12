@@ -8,7 +8,7 @@ using System.IO;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
-using Microsoft.Build.Server;
+using Microsoft.Build.Experimental;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -25,6 +25,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public MSBuildClient_Tests(ITestOutputHelper output)
         {
             _output = output;
+        }
+
+        [Fact]
+        public void ServerNodeRetainsSingleParameterConstructor()
+        {
+            typeof(OutOfProcServerNode).GetConstructor([typeof(OutOfProcServerNode.BuildCallback)]).ShouldNotBeNull();
         }
 
         /// <summary>

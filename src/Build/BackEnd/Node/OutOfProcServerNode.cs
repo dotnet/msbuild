@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -16,23 +15,16 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Server
+namespace Microsoft.Build.Experimental
 {
     /// <summary>
     /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server
     /// </summary>
-    /// <remarks>
-    /// This type is public only so that the MSBuild command-line application can host the MSBuild server;
-    /// third-party use is not expected or supported. It exists to wrap the MSBuild CLI and offers nothing
-    /// beyond it, so invoke the CLI instead.
-    /// </remarks>
-    [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
         /// <summary>
         /// A callback used to execute command line build.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
         public delegate (int exitCode, string exitType) BuildCallback(string[] commandLine);
 
         private readonly BuildCallback _buildFunction;
@@ -99,7 +91,21 @@ namespace Microsoft.Build.Server
         /// </summary>
         private readonly string? _instanceId;
 
-        public OutOfProcServerNode(BuildCallback buildFunction, string? instanceId = null)
+        /// <summary>
+        /// Creates a resident MSBuild server node.
+        /// </summary>
+        /// <param name="buildFunction">The callback used to execute a build.</param>
+        public OutOfProcServerNode(BuildCallback buildFunction)
+            : this(buildFunction, instanceId: null)
+        {
+        }
+
+        /// <summary>
+        /// Creates an MSBuild server node with the specified transient identity.
+        /// </summary>
+        /// <param name="buildFunction">The callback used to execute a build.</param>
+        /// <param name="instanceId">The transient server identity, or null for a resident server.</param>
+        public OutOfProcServerNode(BuildCallback buildFunction, string? instanceId)
         {
             _buildFunction = buildFunction;
             _instanceId = instanceId;

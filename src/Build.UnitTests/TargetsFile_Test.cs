@@ -4,7 +4,10 @@
 using System;
 using System.IO;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -16,6 +19,57 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     public sealed class TargetsFile_Test
     {
+        private readonly ITestOutputHelper _output;
+
+        public TargetsFile_Test(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
+        [Theory]
+        [InlineData("11.0.0", true, true)]
+        [InlineData("11.0.100", true, true)]
+        [InlineData("11.0.100-preview.1", true, true)]
+        [InlineData("12.0.100", true, true)]
+        [InlineData("10.0.400", true, false)]
+        [InlineData("", true, false)]
+        [InlineData("11.0.100", false, false)]
+        public void CommonTargetsRegisterTarTasksFromSdk(string sdkVersion, bool hasSdkRoot, bool registerOnFullFramework)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string sdkRoot = env.CreateFolder().Path + Path.DirectorySeparatorChar;
+            using ProjectCollection collection = new();
+            using ProjectFromString project = new(
+                $"""
+                <Project>
+                  <PropertyGroup>
+                    <NetCoreSdkRoot>{(hasSdkRoot ? sdkRoot : "")}</NetCoreSdkRoot>
+                    <NETCoreSdkVersion>{sdkVersion}</NETCoreSdkVersion>
+                  </PropertyGroup>
+                  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.CurrentVersion.targets" />
+                </Project>
+                """,
+                null, null, collection);
+
+            ProjectInstance instance = project.Project.CreateProjectInstance();
+            bool shouldRegister = registerOnFullFramework && instance.GetPropertyValue("MSBuildRuntimeType") == "Full";
+
+            string[] taskNames = ["Microsoft.Build.Tasks.TarDirectory", "Microsoft.Build.Tasks.Untar"];
+            foreach (string taskName in taskNames)
+            {
+                TaskRegistry.RegisteredTaskIdentity identity = new(taskName, new TaskHostParameters("NET", XMakeAttributes.MSBuildArchitectureValues.any));
+                bool registered = instance.TaskRegistry.TaskRegistrations.TryGetValue(identity, out var records);
+                registered.ShouldBe(shouldRegister);
+
+                if (shouldRegister)
+                {
+                    records.ShouldHaveSingleItem();
+                    records[0].TaskFactoryAssemblyLoadInfo.AssemblyFile.ShouldBe(Path.Combine(sdkRoot, "Microsoft.Build.Tasks.Core.dll"));
+                    records[0].TaskFactoryAssemblyLoadInfo.AssemblyName.ShouldBeNull();
+                }
+            }
+        }
+
 #if FEATURE_COMPILE_IN_TESTS
         /// <summary>
         /// Check that the ARM flag is passed to the compiler when targeting ARM.

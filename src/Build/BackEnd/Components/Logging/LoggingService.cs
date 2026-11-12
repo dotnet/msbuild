@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -612,13 +611,23 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>().ToList();
 
-                // If any logger requested the data - we need to emit them
-                IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
-                    sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
-                // If any logger didn't request the data - hence it's likely legacy logger
-                //  - we need to populate the data in legacy way
-                IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
-                    sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                {
+                    // If any logger requested the data - we need to emit them
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
+                        sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
+                    // If any logger didn't request the data - hence it's likely legacy logger
+                    //  - we need to populate the data in legacy way
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
+                        sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
+                }
+                else
+                {
+                    bool allSinksIncludeEvalData = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = allSinksIncludeEvalData;
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !allSinksIncludeEvalData;
+                }
             }
         }
 
@@ -1108,7 +1117,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">If forwardingLogger is null</exception>
         /// <exception cref="LoggerException">If a logger exception is thrown while creating or initializing the distributed or central logger</exception>
         /// <exception cref="InternalLoggerException">If any exception (other than a loggerException)is thrown while creating or initializing the distributed or central logger, we will wrap these exceptions in an InternalLoggerException</exception>
-        [RequiresUnreferencedCode("Creates forwarding loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool RegisterDistributedLogger(ILogger centralLogger, LoggerDescription forwardingLogger)
         {
             lock (_lockObject)
@@ -1223,7 +1231,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="nodeId">The id of the node the logging services is on</param>
         /// <exception cref="InternalErrorException">When forwardingLoggerSink is null</exception>
         /// <exception cref="InternalErrorException">When loggerDescriptions is null</exception>
-        [RequiresUnreferencedCode("Creates forwarding loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         public void InitializeNodeLoggers(ICollection<LoggerDescription> descriptions, IBuildEventSink forwardingLoggerSink, int nodeId)
         {
             lock (_lockObject)

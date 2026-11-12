@@ -25,6 +25,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
@@ -32,7 +33,6 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
-using Microsoft.Build.Server;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
@@ -4708,7 +4708,15 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ShowVersion()
         {
-            Console.WriteLine(ProjectCollection.Version.ToString());
+            // Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            {
+                Console.WriteLine(ProjectCollection.Version.ToString());
+            }
+            else
+            {
+                Console.Write(ProjectCollection.Version.ToString());
+            }
         }
 
         private static void ShowFeatureAvailability(string[] features)
