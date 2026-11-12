@@ -157,6 +157,10 @@ public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 
 `AbsolutePath` converts implicitly to string for seamless integration with existing File/Directory APIs.
 
+`TaskEnvironment.Fallback` preserves process-based resolution, including Windows per-drive
+current directories for drive-relative paths such as `D:manifest.xml`. Isolated task
+environments resolve paths against their project directory instead.
+
 ### API Usage Example
 
 ```csharp

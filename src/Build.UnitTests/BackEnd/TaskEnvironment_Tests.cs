@@ -276,6 +276,29 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [WindowsOnlyTheory]
+        [InlineData("")]
+        [InlineData("app.trustinfo")]
+        public void FallbackResolvesOtherDriveRelativePathsUsingProcessState(string relativePath)
+        {
+            char currentDrive = char.ToUpperInvariant(Path.GetPathRoot(Directory.GetCurrentDirectory())![0]);
+            string path = (currentDrive == 'C' ? "D:" : "C:") + relativePath;
+
+            AbsolutePath absolutePath = TaskEnvironment.Fallback.GetAbsolutePath(path);
+
+            absolutePath.Value.ShouldBe(Path.GetFullPath(path));
+            absolutePath.OriginalValue.ShouldBe(path);
+        }
+
+        [WindowsOnlyFact]
+        public void FallbackDriveRelativePathsDeferInvalidCharacterValidation()
+        {
+            AbsolutePath absolutePath = TaskEnvironment.Fallback.GetAbsolutePath("C:invalid|file.txt");
+
+            File.Exists(absolutePath).ShouldBeFalse();
+            absolutePath.OriginalValue.ShouldBe("C:invalid|file.txt");
+        }
+
         [Theory]
         [MemberData(nameof(EnvironmentTypes))]
         public void TaskEnvironment_GetAbsolutePath_WithAlreadyAbsolutePath_ShouldReturnUnchanged(string environmentType)

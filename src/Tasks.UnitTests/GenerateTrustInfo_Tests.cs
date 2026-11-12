@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if NETFRAMEWORK
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -64,7 +65,7 @@ public sealed class GenerateTrustInfo_Tests
             return new GenerateTrustInfo
             {
                 BuildEngine = new MockEngine(_output),
-                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(directory),
+                TaskEnvironment = CreateTaskEnvironment(env, directory),
                 BaseManifest = new TaskItem(useAbsolutePaths ? manifestPath : "app.manifest"),
                 TrustInfoFile = new TaskItem(useAbsolutePaths ? Path.Combine(directory, "trust", "app.trustinfo") : Path.Combine("trust", "app.trustinfo")),
                 TargetZone = "Custom",
@@ -104,7 +105,7 @@ public sealed class GenerateTrustInfo_Tests
         var task = new GenerateTrustInfo
         {
             BuildEngine = engine,
-            TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory),
+            TaskEnvironment = CreateTaskEnvironment(env, projectDirectory),
             BaseManifest = baseManifest is null ? null : new TaskItem(baseManifest),
             TrustInfoFile = new TaskItem(outputPath),
             TargetZone = "Custom",
@@ -126,7 +127,7 @@ public sealed class GenerateTrustInfo_Tests
         var task = new GenerateTrustInfo
         {
             BuildEngine = engine,
-            TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory),
+            TaskEnvironment = CreateTaskEnvironment(env, projectDirectory),
             BaseManifest = new TaskItem("app.manifest"),
             TrustInfoFile = new TaskItem("app.trustinfo"),
             TargetZone = "Custom",
@@ -140,6 +141,48 @@ public sealed class GenerateTrustInfo_Tests
         message.ShouldContain("app.manifest");
         message.ShouldNotContain(projectDirectory);
         File.Exists(Path.Combine(projectDirectory, "app.trustinfo")).ShouldBeFalse();
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("\t")]
+    public void InvalidOutputPathPreservesArgumentException(string outputPath)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string projectDirectory = env.CreateFolder().Path;
+        var task = new GenerateTrustInfo
+        {
+            BuildEngine = new MockEngine(_output),
+            TaskEnvironment = CreateTaskEnvironment(env, projectDirectory),
+            TrustInfoFile = new TaskItem(outputPath),
+            TargetZone = "Custom",
+        };
+
+        Should.Throw<ArgumentException>(() => task.Execute());
+
+        Directory.GetFileSystemEntries(projectDirectory).ShouldBeEmpty();
+    }
+
+    private static TaskEnvironment CreateTaskEnvironment(TestEnvironment env, string projectDirectory)
+        => env.WithTransientTestState(new IsolatedTaskEnvironment(projectDirectory)).Value;
+
+    private sealed class IsolatedTaskEnvironment : TransientTestState
+    {
+        private readonly string? _originalThreadDirectory = FileUtilities.CurrentThreadWorkingDirectory;
+
+        public IsolatedTaskEnvironment(string projectDirectory)
+        {
+            Value = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory);
+        }
+
+        public TaskEnvironment Value { get; }
+
+        public override void Revert()
+        {
+            Value.Dispose();
+            FileUtilities.CurrentThreadWorkingDirectory = _originalThreadDirectory;
+        }
     }
 #else
     [Fact]
