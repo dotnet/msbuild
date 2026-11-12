@@ -968,11 +968,26 @@ namespace Microsoft.Build.Framework
         /// Useful to get a better path for an error message, without the risk of throwing
         /// if the error message was itself caused by the path being invalid!
         /// </summary>
-        internal static string GetFullPathNoThrow(string path)
+        internal static string GetFullPathNoThrow(string path) => GetFullPathNoThrow(path, null);
+
+        internal static string GetFullPathNoThrow(string path, AbsolutePath? baseDirectory)
         {
             try
             {
-                path = NormalizePath(path);
+                if (baseDirectory is { } directory && !string.IsNullOrEmpty(path))
+                {
+                    // The base-directory overload accepts blank Windows paths, unlike the original overload.
+                    if (NativeMethods.IsWindows && string.IsNullOrWhiteSpace(path))
+                    {
+                        return path;
+                    }
+
+                    path = FixFilePath(NewPath.GetFullPath(path, directory));
+                }
+                else
+                {
+                    path = NormalizePath(path);
+                }
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {

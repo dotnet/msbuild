@@ -134,6 +134,14 @@ The following tables list specific .NET APIs and their threading safety classifi
 
 These APIs are not inherently unsafe. They require review because sharing changes in multithreaded mode. Tasks in different processes do not share the cache.
 
+### Assembly Identity (System.Reflection.AssemblyName class)
+
+`AssemblyName.GetAssemblyName` reads a file without loading it for execution. Resolve its path relative to `TaskEnvironment.ProjectDirectory` (for example, with `TaskEnvironment.GetAbsolutePath()`) while preserving the original path in task outputs and log messages. The file-system analyzer's monitored types do not include `AssemblyName`, so a clean analyzer run does not verify this call.
+
+| API | Level | Short Reason | Recommendation |
+|-----|-------|--------------|-------|
+| `AssemblyName.GetAssemblyName(string assemblyFile)` | ERROR | Resolves relative paths against the process working directory | Use absolute paths |
+
 ### Assembly Loading (System.Reflection.Assembly class, System.Activator class)
 Tasks that load assemblies dynamically in the task host may cause version conflicts. Version conflicts in task assemblies will cause build failures (previously these might have been sporadic). Both dynamically loaded dependencies and static dependencies can cause issues.
 
