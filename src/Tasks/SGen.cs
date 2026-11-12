@@ -162,7 +162,7 @@ namespace Microsoft.Build.Tasks
                 string thisPath;
                 try
                 {
-                    thisPath = TaskEnvironment.GetAbsolutePath(_buildAssemblyPath).GetCanonicalForm().Value;
+                    thisPath = TaskEnvironment.GetAbsolutePath(_buildAssemblyPath).GetCanonicalForm();
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
@@ -358,7 +358,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Add the assembly switch
-                commandLineBuilder.AppendSwitchIfNotNull("/assembly:", AssemblyFullPath.Value);
+                commandLineBuilder.AppendSwitchIfNotNull("/assembly:", AssemblyFullPath);
 
                 commandLineBuilder.AppendWhenTrue("/proxytypes", Bag, "UseProxyTypes");
 

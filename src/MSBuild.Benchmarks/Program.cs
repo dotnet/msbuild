@@ -13,13 +13,18 @@ var argList = new List<string>(args);
 ParseAndRemoveBooleanParameter(argList, "--collect-etw", out bool collectEtw);
 ParseAndRemoveBooleanParameter(argList, "--disable-ngen", out bool disableNGen);
 ParseAndRemoveBooleanParameter(argList, "--disable-inlining", out bool disableJitInlining);
+ParseAndRemoveBooleanParameter(argList, "--enforce-power-plan", out bool enforcePowerPlan);
 
 return BenchmarkSwitcher
     .FromAssembly(typeof(Program).Assembly)
-    .Run([.. argList], GetConfig(collectEtw, disableNGen, disableJitInlining))
+    .Run([.. argList], GetConfig(collectEtw, disableNGen, disableJitInlining, enforcePowerPlan))
     .ToExitCode();
 
-static IConfig GetConfig(bool collectEtw, bool disableNGen, bool disableJitInlining)
+static IConfig GetConfig(
+    bool collectEtw,
+    bool disableNGen,
+    bool disableJitInlining,
+    bool enforcePowerPlan)
 {
     if (Debugger.IsAttached)
     {
@@ -35,8 +40,14 @@ static IConfig GetConfig(bool collectEtw, bool disableNGen, bool disableJitInlin
 
     // Use a mutator for settings that should apply to all jobs
     // (default or CLI-specified like --job short).
-    Job overrides = new Job()
-        .DontEnforcePowerPlan();
+    Job overrides = new();
+
+    // Dedicated benchmark machines should use a stable power plan. Leave the host unchanged by
+    // default, but allow BenchmarkDotNet to temporarily select High Performance when requested.
+    if (!enforcePowerPlan)
+    {
+        overrides = overrides.DontEnforcePowerPlan();
+    }
 
     if (disableNGen)
     {
@@ -52,6 +63,11 @@ static IConfig GetConfig(bool collectEtw, bool disableNGen, bool disableJitInlin
             .WithEnvironmentVariable("COMPlus_JitNoInline", "1")
             .WithEnvironmentVariable("DOTNET_JitNoInline", "1");
     }
+
+    // DllGatherer redirects every project reference to one output directory. The Tasks project also builds
+    // netstandard2.0 reference-only Framework and Utilities assemblies for RoslynCodeTaskFactory, which can
+    // overwrite the current-TFM implementations and cause the generated benchmark executable to fail loading them.
+    overrides = overrides.WithMsBuildArguments("/p:SkipNetstandardRefAssembliesForBenchmarks=true");
 
     config = config.AddJob(overrides.AsMutator());
 

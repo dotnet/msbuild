@@ -7,13 +7,13 @@ using System.Buffers;
 #endif
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Utilities;
+using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
-
-#pragma warning disable SA1519 // Braces should not be omitted from multi-line child statement
 
 namespace Microsoft.Build.Shared;
 
@@ -47,6 +47,12 @@ internal static class EscapingUtilities
         }
     }
 
+    // All escapable characters lie within the ASCII range ['$' (0x24) .. '@' (0x40)].
+    // Encoding each as bit (c - '$') in a uint gives a 29-bit bitmask that replaces the
+    // per-character O(k) scan with a single range check and bit test.
+    //   Bit:  0='$'  1='%'  3='\''  4='('  5=')'  6='*'  23=';'  27='?'  28='@'
+    private const uint EscapeCharBitmask = 0x1880_007Bu;
+
 #if NET
     private static readonly SearchValues<char> s_searchValues = SearchValues.Create(['%', '*', '?', '@', '$', '(', ')', ';', '\'']);
 
@@ -56,18 +62,11 @@ internal static class EscapingUtilities
         return i < 0 ? i : i + startIndex;
     }
 #else
-    // All chars in s_charsToEscape lie within the ASCII range ['$' (0x24) .. '@' (0x40)].
-    // Encoding each as bit (c - '$') in a uint gives a 29-bit bitmask that replaces the
-    // per-char O(k) array scan inside IndexOfAny with a single range check + bit test.
-    //   Bit:  0='$'  1='%'  3='\''  4='('  5=')'  6='*'  23=';'  27='?'  28='@'
-    private const uint EscapeCharBitmask = 0x1880_007Bu;
-
     private static int IndexOfAnyEscapeChar(string value, int startIndex = 0)
     {
         for (int i = startIndex; i < value.Length; i++)
         {
-            int offset = value[i] - '$';
-            if ((uint)offset <= 28u && ((EscapeCharBitmask >> offset) & 1u) != 0)
+            if (NeedsEscaping(value[i]))
             {
                 return i;
             }
@@ -76,6 +75,14 @@ internal static class EscapingUtilities
         return -1;
     }
 #endif
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool NeedsEscaping(char value)
+    {
+        int offset = value - '$';
+        return (uint)offset <= 28u &&
+            ((EscapeCharBitmask >> offset) & 1u) != 0;
+    }
 
     private static bool TryDecodeHexDigit(char c, out int digit)
     {
@@ -109,52 +116,85 @@ internal static class EscapingUtilities
         }
 
         int startIndex = 0;
-        int endIndex = value.Length;
+        int length = value.Length;
 
         if (trim)
         {
-            while (startIndex < endIndex && char.IsWhiteSpace(value[startIndex]))
-            {
-                startIndex++;
-            }
-
-            if (startIndex == endIndex)
-            {
-                return string.Empty;
-            }
-
-            while (char.IsWhiteSpace(value[endIndex - 1]))
-            {
-                endIndex--;
-            }
+            value.GetTrimBounds(out startIndex, out length);
         }
 
-        // Search only within the active [startIndex, endIndex) window.
-        int percentIndex = value.IndexOf('%', startIndex, endIndex - startIndex);
+        return UnescapeAllCore(value, startIndex, length);
+    }
+
+    /// <summary>
+    ///  Replaces every valid <c>%XX</c> escape sequence in the specified range with the character represented by
+    ///  the hexadecimal value <c>XX</c>.
+    /// </summary>
+    /// <param name="value">The string containing the range to unescape, or <see langword="null"/>.</param>
+    /// <param name="startIndex">The zero-based index at which the range begins.</param>
+    /// <param name="length">The number of characters in the range.</param>
+    /// <returns>
+    ///  The unescaped range, or <see langword="null"/> when <paramref name="value"/> is <see langword="null"/>.
+    /// </returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    ///  <paramref name="startIndex"/> or <paramref name="length"/> does not identify a valid range within
+    ///  <paramref name="value"/>.
+    /// </exception>
+    [return: NotNullIfNotNull(nameof(value))]
+    public static string? UnescapeAll(string? value, int startIndex, int length)
+    {
+        if (value is null)
+        {
+            return null;
+        }
+
+        if ((uint)startIndex > (uint)value.Length ||
+            (uint)length > (uint)(value.Length - startIndex))
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(startIndex);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(startIndex, value.Length);
+            ArgumentOutOfRangeException.ThrowIfNegative(length);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(length, value.Length - startIndex);
+        }
+
+        return length > 0
+            ? UnescapeAllCore(value, startIndex, length)
+            : value.Length == 0 ? value : string.Empty;
+    }
+
+    private static string UnescapeAllCore(string value, int startIndex, int length)
+    {
+        // Search only within the active [startIndex, startIndex + length) window.
+        int percentIndex = value.IndexOf('%', startIndex, length);
         if (percentIndex == -1)
         {
             // value contains no escape sequences.
-            return GetDefaultResult(value, startIndex, endIndex);
+            return GetDefaultResult(value, startIndex, length);
         }
 
         StringBuilder? sb = null;
 
         do
         {
+            int index = percentIndex - startIndex;
+
             // There must be two hex characters following the percent sign.
-            if (percentIndex <= endIndex - 3 &&
+            if (index <= length - 3 &&
                 TryDecodeHexDigit(value[percentIndex + 1], out int hi) &&
                 TryDecodeHexDigit(value[percentIndex + 2], out int lo))
             {
-                sb ??= StringBuilderCache.Acquire(value.Length);
+                sb ??= StringBuilderCache.Acquire(length);
 
-                sb.Append(value, startIndex, percentIndex - startIndex);
+                sb.Append(value, startIndex, index);
                 sb.Append((char)((hi << 4) + lo));
-                startIndex = percentIndex + 3;
+
+                int consumed = index + 3;
+                startIndex += consumed;
+                length -= consumed;
             }
 
-            int nextIndex = percentIndex + 1;
-            percentIndex = value.IndexOf('%', nextIndex, endIndex - nextIndex);
+            int nextIndex = Math.Max(percentIndex + 1, startIndex);
+            percentIndex = value.IndexOf('%', nextIndex, length - (nextIndex - startIndex));
         }
         while (percentIndex >= 0);
 
@@ -162,17 +202,17 @@ internal static class EscapingUtilities
         {
             // No escape sequences were decoded; return the original string, or the trimmed
             // slice if trim was requested.
-            return GetDefaultResult(value, startIndex, endIndex);
+            return GetDefaultResult(value, startIndex, length);
         }
 
-        sb.Append(value, startIndex, endIndex - startIndex);
+        sb.Append(value, startIndex, length);
 
         return StringBuilderCache.GetStringAndRelease(sb);
 
-        static string GetDefaultResult(string value, int startIndex, int endIndex)
-            => startIndex == 0 && endIndex == value.Length
+        static string GetDefaultResult(string value, int startIndex, int length)
+            => startIndex == 0 && length == value.Length
                 ? value
-                : value.Substring(startIndex, endIndex - startIndex);
+                : value.Substring(startIndex, length);
     }
 
     /// <summary>
@@ -268,8 +308,7 @@ internal static class EscapingUtilities
 
             unsafe
             {
-                fixed (char* src = value)
-                fixed (char* dst = result)
+                fixed (char* src = value, dst = result)
                 {
                     int srcIndex = 0;
                     int dstIndex = 0;
@@ -353,5 +392,87 @@ internal static class EscapingUtilities
         }
 
         return false;
+    }
+
+    /// <summary>
+    ///  Appends a string after applying MSBuild escaping the specified number of times.
+    /// </summary>
+    /// <param name="builder">The builder to which the escaped value is appended.</param>
+    /// <param name="value">The string to append, or <see langword="null"/>.</param>
+    /// <param name="escapeCount">
+    ///  The number of times to apply escaping. Specify <c>0</c> to append <paramref name="value"/> unchanged.
+    /// </param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="escapeCount"/> is negative.</exception>
+    /// <remarks>
+    ///  This is equivalent to repeatedly calling <see cref="Escape"/> and appending the final result, but does not
+    ///  allocate the intermediate strings.
+    /// </remarks>
+    public static void AppendEscaped(this ref ValueStringBuilder builder, string? value, int escapeCount = 1)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(escapeCount);
+
+        if (value.IsNullOrEmpty())
+        {
+            return;
+        }
+
+        if (escapeCount == 0)
+        {
+            builder.Append(value);
+            return;
+        }
+
+        int sourceIndex = 0;
+        int specialCharIndex = IndexOfAnyEscapeChar(value);
+
+        while (specialCharIndex >= 0)
+        {
+            builder.Append(value.AsSpan(sourceIndex, specialCharIndex - sourceIndex));
+            builder.AppendEscapedCharacter(value[specialCharIndex], escapeCount);
+
+            sourceIndex = specialCharIndex + 1;
+            specialCharIndex = IndexOfAnyEscapeChar(value, sourceIndex);
+        }
+
+        builder.Append(value.AsSpan(sourceIndex));
+    }
+
+    /// <summary>
+    ///  Appends a character after applying MSBuild escaping the specified number of times.
+    /// </summary>
+    /// <param name="builder">The builder to which the escaped value is appended.</param>
+    /// <param name="value">The character to append.</param>
+    /// <param name="escapeCount">
+    ///  The number of times to apply escaping. Specify <c>0</c> to append <paramref name="value"/> unchanged.
+    /// </param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="escapeCount"/> is negative.</exception>
+    /// <remarks>
+    ///  Characters that do not require MSBuild escaping are appended unchanged regardless of
+    ///  <paramref name="escapeCount"/>.
+    /// </remarks>
+    public static void AppendEscaped(this ref ValueStringBuilder builder, char value, int escapeCount = 1)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(escapeCount);
+
+        if (escapeCount == 0 || !NeedsEscaping(value))
+        {
+            builder.Append(value);
+            return;
+        }
+
+        builder.AppendEscapedCharacter(value, escapeCount);
+    }
+
+    private static void AppendEscapedCharacter(this ref ValueStringBuilder builder, char value, int escapeCount)
+    {
+        builder.Append('%');
+
+        for (int i = 1; i < escapeCount; i++)
+        {
+            builder.Append("25");
+        }
+
+        builder.Append(HexDigitChar(value >> 4));
+        builder.Append(HexDigitChar(value & 0x0F));
     }
 }

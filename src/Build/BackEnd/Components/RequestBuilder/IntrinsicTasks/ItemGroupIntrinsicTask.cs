@@ -11,6 +11,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
@@ -188,7 +189,7 @@ namespace Microsoft.Build.BackEnd
                     if (// If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
                         bucket.BucketSequenceNumber == 0 &&
                         // Referring to unqualified metadata of other item (transform) is fine.
-                        !child.Include.Contains("@("))
+                        !ExpressionShredder.ContainsItemVectorMarker(child.Include))
                     {
                         expanderOptions |= ExpanderOptions.LogOnItemMetadataSelfReference;
                     }
@@ -659,9 +660,9 @@ namespace Microsoft.Build.BackEnd
             MatchOnMetadataOptions matchingOptions)
         {
             ItemSpec<ProjectPropertyInstance, ProjectItemInstance> itemSpec = new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, expander, child.RemoveLocation, Project.Directory, true);
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 itemSpec.Fragments.All(f => f is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment),
-                BuildEventFileInfo.Empty,
+                ElementLocation.Empty,
                 "OM_MatchOnMetadataIsRestrictedToReferencedItems",
                 child.RemoveLocation,
                 child.Remove);

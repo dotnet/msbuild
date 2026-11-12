@@ -39,7 +39,7 @@ The server node uses same IPC approach as current worker nodes - named pipes. Th
 2. Initiate handshake
 2. Issue build command with `ServerNodeBuildCommand` packet
 3. Read packets from pipe
-   - Write content to the appropriate output stream (respecting coloring) with the `ServerNodeConsoleWrite` packet
+   - Write content to the appropriate output stream (respecting coloring) with the `ConsoleWritePacket` packet
    - After the build completes, the `ServerNodeBuildResult` packet indicates the exit code
 
 ### Pipe name convention & handshake
@@ -63,12 +63,14 @@ Server requires to introduce new packet types for IPC.
 | UICulture                | CultureInfo                  | The UI culture value for current build |
 | ConsoleConfiguration     | TargetConsoleConfiguration   | Console configuration of target Console at which the output will be rendered |
 
-`ServerNodeConsoleWrite` contains information for console output.
+`ConsoleWritePacket` contains information for console output. It is shared with `-mt` task hosts, which use it to forward console output to their connected node.
 
 | Property name            | Type          | Description |
 |---|---|---|
 | Text                     | String        | The text that is written to the output stream. It includes ANSI escape codes for formatting. |
 | OutputType               | Byte          | Identification of the output stream (1 = standard output, 2 = error output) |
+
+Task-host console forwarding requires protocol v7. Owned sidecars can retain their connection across builds using the lifetime protocol introduced in v6, but console writers are disposed during per-build cleanup and forwarding is enabled again for the next build. Writers cached by a previous build remain inert. Legacy pooling is best-effort: a later build may receive a new task-host process instead.
 
 `ServerNodeBuildResult` indicates how the build finished.
 

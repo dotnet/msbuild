@@ -52,12 +52,18 @@ namespace Microsoft.Build.UnitTests
         {
             TaskEnvironment env = CreateTaskEnvironment();
 
-            env.GetAbsolutePathOrEmpty(null!).ShouldBeNull();
-            env.GetAbsolutePathOrEmpty(string.Empty).ShouldBe(string.Empty);
+            string nullPath = env.GetAbsolutePathOrEmpty(null!);
+            string emptyPath = env.GetAbsolutePathOrEmpty(string.Empty);
 
-            string absolutized = env.GetAbsolutePathOrEmpty("foo.txt");
+            nullPath.ShouldBeNull();
+            emptyPath.ShouldBe(string.Empty);
+
+            AbsolutePath absolutized = env.GetAbsolutePathOrEmpty("foo.txt");
+            string absolutizedString = absolutized;
+
             Path.IsPathRooted(absolutized).ShouldBeTrue();
-            absolutized.ShouldEndWith("foo.txt");
+            absolutizedString.ShouldEndWith("foo.txt");
+            absolutized.OriginalValue.ShouldBe("foo.txt");
         }
     }
 }

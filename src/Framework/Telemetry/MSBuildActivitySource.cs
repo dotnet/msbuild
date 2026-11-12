@@ -17,11 +17,17 @@ namespace Microsoft.Build.Framework.Telemetry
     {
 #if NETFRAMEWORK
         private readonly TelemetrySession? _telemetrySession;
+        private volatile bool _hasStartedActivities;
 
         public MSBuildActivitySource(TelemetrySession? telemetrySession)
         {
             _telemetrySession = telemetrySession;
         }
+
+        /// <summary>
+        /// Whether this source started an event, which means the session may have events to save or upload when it shuts down.
+        /// </summary>
+        public bool HasStartedActivities => _hasStartedActivities;
 #else
         private readonly ActivitySource _source;
 
@@ -42,7 +48,13 @@ namespace Microsoft.Build.Framework.Telemetry
 
 #if NETFRAMEWORK
             TelemetryScope<OperationEvent>? operation = _telemetrySession?.StartOperation(eventName);
-            return operation != null ? new VsTelemetryActivity(operation) : null;
+            if (operation is null)
+            {
+                return null;
+            }
+
+            _hasStartedActivities = true;
+            return new VsTelemetryActivity(operation);
 #else
             Activity? activity = Activity.Current?.HasRemoteParent == true
                 ? _source.StartActivity(eventName, ActivityKind.Internal, parentId: Activity.Current.ParentId)

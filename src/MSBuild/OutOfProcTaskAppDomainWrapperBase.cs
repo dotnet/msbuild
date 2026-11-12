@@ -93,23 +93,25 @@ namespace Microsoft.Build.CommandLine
         /// <param name="taskLine">The line in the project file where the task invocation is located.</param>
         /// <param name="taskColumn">The column in the project file where the task invocation is located.</param>
         /// <param name="targetName">The target name that invokes this task.</param>
+        /// <param name="projectFile">The project file associated with the task's host object.</param>
         /// <param name="appDomainSetup">The AppDomainSetup that we want to use to launch our AppDomainIsolated tasks</param>
+        /// <param name="hostServicesData">The remote host object registrations, or <see langword="null"/> if none are supplied.</param>
         /// <param name="taskParams">Parameters that will be passed to the task when created</param>
         /// <returns>Task completion result showing success, failure or if there was a crash</returns>
         internal OutOfProcTaskHostTaskResult ExecuteTask(
-                IBuildEngine oopTaskHostNode,
-                string taskName,
-                string taskLocation,
-                string taskFile,
-                int taskLine,
-                int taskColumn,
-                string targetName,
-                string projectFile,
+            IBuildEngine oopTaskHostNode,
+            string taskName,
+            string taskLocation,
+            string taskFile,
+            int taskLine,
+            int taskColumn,
+            string targetName,
+            string projectFile,
 #if FEATURE_APPDOMAIN
-                AppDomainSetup appDomainSetup,
+            AppDomainSetup appDomainSetup,
 #endif
-                HostServices hostServices,
-                IDictionary<string, TaskParameter> taskParams)
+            HostServicesData hostServicesData,
+            IDictionary<string, TaskParameter> taskParams)
         {
             buildEngine = oopTaskHostNode;
             this.taskName = taskName;
@@ -117,7 +119,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
             _taskAppDomain = null;
 #endif
-            _hostServices = hostServices;
+            _hostServices = hostServicesData?.CreateHostServices<HostServices>();
             wrappedTask = null;
 
             LoadedType taskType = null;
@@ -138,10 +140,10 @@ namespace Microsoft.Build.CommandLine
                 Exception exceptionToReturn = e is TargetInvocationException ? e.InnerException : e;
 
                 return new OutOfProcTaskHostTaskResult(
-                                TaskCompleteType.CrashedDuringInitialization,
-                                exceptionToReturn,
-                                "TaskInstantiationFailureError",
-                                [taskName, taskLocation, String.Empty]);
+                    TaskCompleteType.CrashedDuringInitialization,
+                    exceptionToReturn,
+                    "TaskInstantiationFailureError",
+                    [taskName, taskLocation, string.Empty]);
             }
 
             // TypeLoader.Load returns null (rather than throwing) when the requested type cannot be
@@ -150,10 +152,10 @@ namespace Microsoft.Build.CommandLine
             if (taskType == null)
             {
                 return new OutOfProcTaskHostTaskResult(
-                                TaskCompleteType.CrashedDuringInitialization,
-                                new TypeLoadException(),
-                                "TaskInstantiationFailureError",
-                                [taskName, taskLocation, String.Empty]);
+                    TaskCompleteType.CrashedDuringInitialization,
+                    new TypeLoadException(),
+                    "TaskInstantiationFailureError",
+                    [taskName, taskLocation, string.Empty]);
             }
 
             OutOfProcTaskHostTaskResult taskResult;
@@ -176,10 +178,10 @@ namespace Microsoft.Build.CommandLine
                     taskParams);
 #else
                 return new OutOfProcTaskHostTaskResult(
-                                                    TaskCompleteType.CrashedDuringInitialization,
-                                                    null,
-                                                    "TaskInstantiationFailureNotSupported",
-                                                    [taskName, taskLocation, typeof(RunInSTAAttribute).FullName]);
+                    TaskCompleteType.CrashedDuringInitialization,
+                    null,
+                    "TaskInstantiationFailureNotSupported",
+                    [taskName, taskLocation, typeof(RunInSTAAttribute).FullName]);
 #endif
             }
             else
@@ -360,6 +362,21 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 wrappedTask.BuildEngine = oopTaskHostNode;
+
+                if (wrappedTask is IMultiThreadableTask multiThreadableTask)
+                {
+#if FEATURE_APPDOMAIN
+                    if (_taskAppDomain is not null)
+                    {
+                        // TaskEnvironment is not serializable; assign the fallback inside the task's AppDomain.
+                        _taskAppDomain.DoCallBack(new TaskEnvironmentInitializer(multiThreadableTask).Initialize);
+                    }
+                    else
+#endif
+                    {
+                        multiThreadableTask.TaskEnvironment = TaskEnvironment.Fallback;
+                    }
+                }
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -381,11 +398,26 @@ namespace Microsoft.Build.CommandLine
 
             foreach (KeyValuePair<string, TaskParameter> param in taskParams)
             {
+                PropertyInfo paramInfo = null;
                 try
                 {
-                    PropertyInfo paramInfo = wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
-                    paramInfo.SetValue(wrappedTask, param.Value?.WrappedParameter, null);
+                    paramInfo = wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
+                    object parameterValue = param.Value?.WrappedParameter;
+#if NET
+                    parameterValue = ConvertTaskParameterValue(parameterValue, paramInfo.PropertyType);
+#endif
+                    paramInfo.SetValue(wrappedTask, parameterValue, null);
                 }
+#if NET
+                catch (TaskParameterConversionException e)
+                {
+                    return new OutOfProcTaskHostTaskResult(
+                        TaskCompleteType.CrashedDuringInitialization,
+                        e.InnerException,
+                        "InvalidTaskParameterValueError",
+                        [e.Value, param.Key, paramInfo.PropertyType.FullName, taskName]);
+                }
+#endif
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
                     return new OutOfProcTaskHostTaskResult(
@@ -437,7 +469,13 @@ namespace Microsoft.Build.CommandLine
                             outputValue = FilterNullsFromStringArray(stringArray, value.Name);
                         }
 
+#if NET
+                        finalParameterValues[value.Name] = outputValue is null
+                            ? TaskParameter.CreateForTaskOutput(outputValue, value.PropertyType)
+                            : outputValue;
+#else
                         finalParameterValues[value.Name] = outputValue;
+#endif
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
@@ -451,6 +489,70 @@ namespace Microsoft.Build.CommandLine
 
             return new OutOfProcTaskHostTaskResult(success ? TaskCompleteType.Success : TaskCompleteType.Failure, finalParameterValues);
         }
+
+#if FEATURE_APPDOMAIN
+        [Serializable]
+        private sealed class TaskEnvironmentInitializer(IMultiThreadableTask task)
+        {
+            public void Initialize() => task.TaskEnvironment = TaskEnvironment.Fallback;
+        }
+#endif
+
+#if NET
+        internal static object ConvertTaskParameterValue(object value, Type targetType)
+        {
+            if (value is null || targetType.IsInstanceOfType(value))
+            {
+                return value;
+            }
+
+            if (targetType.IsArray && value is Array sourceArray)
+            {
+                Type elementType = targetType.GetElementType();
+                Array convertedArray = Array.CreateInstance(elementType, sourceArray.Length);
+                for (int i = 0; i < sourceArray.Length; i++)
+                {
+                    convertedArray.SetValue(ConvertTaskParameterValue(sourceArray.GetValue(i), elementType), i);
+                }
+
+                return convertedArray;
+            }
+
+            if (TaskItemTypeDetector.TryGetTaskItemValueType(targetType, out Type taskItemValueType)
+                && value is ITaskItem taskItem)
+            {
+                Type taskItemType = typeof(TaskItem<>).MakeGenericType(taskItemValueType);
+                try
+                {
+                    return Activator.CreateInstance(taskItemType, taskItem);
+                }
+                catch (TargetInvocationException e) when (e.InnerException is ArgumentException)
+                {
+                    throw new TaskParameterConversionException(taskItem.ItemSpec, e.InnerException);
+                }
+            }
+
+            if (value is not string stringValue)
+            {
+                return value;
+            }
+
+            try
+            {
+                return ValueTypeParser.Parse(stringValue, targetType);
+            }
+            catch (ArgumentException e)
+            {
+                throw new TaskParameterConversionException(stringValue, e);
+            }
+        }
+
+        private sealed class TaskParameterConversionException(string value, Exception innerException)
+            : Exception(null, innerException)
+        {
+            internal string Value { get; } = value;
+        }
+#endif
 
         /// <summary>
         /// Logs errors from TaskLoader

@@ -75,9 +75,11 @@ namespace Microsoft.Build.Tasks
             try
             {
                 inputPath = TaskEnvironment.GetAbsolutePath(XmlInputPath.ItemSpec);
+                // CodeQL [SM00414] False positive: XmlInputPath is a trusted task input path in the project file.
                 using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     var xrs = new XmlReaderSettings { DtdProcessing = ProhibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore };
+                    // CodeQL [SM00404] False positive: XmlPoke edits arbitrary user XML files that do not have a fixed XSD schema; DTD processing is controlled above.
                     using (XmlReader sr = XmlReader.Create(fs, xrs))
                     {
                         xmlDoc.Load(sr);
@@ -159,11 +161,13 @@ namespace Microsoft.Build.Tasks
             if (count > 0)
             {
 #if RUNTIME_TYPE_NETCORE
+                // CodeQL [SM00414] False positive: XmlInputPath is a trusted task input path in the project file.
                 using (Stream stream = File.Create(inputPath))
                 {
                     xmlDoc.Save(stream);
                 }
 #else
+                // CodeQL [SM00414] False positive: XmlInputPath is a trusted task input path in the project file.
                 xmlDoc.Save(inputPath);
 #endif
             }

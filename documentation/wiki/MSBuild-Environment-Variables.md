@@ -25,6 +25,8 @@ Some of the env variables listed here are unsupported, meaning there is no guara
 - `MSBUILDDEBUGONSTART=1`
   - Launches debugger on build start. Works on Windows operating systems only.
   - Setting the value of 2 allows for manually attaching a debugger to a process ID. This works on Windows and non-Windows operating systems.
+  - `4` launches a debugger only in MSBuild Server; `5` waits for manual attachment there. Both stop after the client connects and before evaluation, so attaching does not consume the connection timeout. They work with new or reused servers and leave the forwarding client, workers, and TaskHosts alone.
+  - For `5`, attach to the server PID printed in the client terminal; no Enter key is needed. These settings do not enable Server. Existing cancellation and fallback behavior are unchanged; resume or stop the server manually to abandon an attachment wait.
 - `MSBUILDDEBUGSCHEDULER=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
   - Dumps scheduler state at specified directory.
 - `MsBuildSkipEagerWildCardEvaluationRegexes`
@@ -35,6 +37,16 @@ Some of the env variables listed here are unsupported, meaning there is no guara
 - `MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC`
   - Set this to force all inline tasks to run out of process. It is not compatible with custom TaskFactories.
 - `MSBUILDFORCEMULTITHREADED=1`
-  - Set this to force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build), equivalent to passing `-multiThreaded` / `-mt` on the command line. Useful for opting in without modifying command lines.
+  - Force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build). This overrides and ignores any `-multiThreaded` / `-mt` command-line switch.
+- `MSBUILDENABLEMULTITHREADED=1`
+  - Enable multi-threaded mode by default while allowing an explicit `-multiThreaded:false` / `-mt:false` command-line switch to disable it.
 - `MSBUILD_CONSOLE_USE_DEFAULT_ENCODING`
   - It opts out automatic console encoding UTF-8. Make Console use default encoding in the system.
+- `MSBUILD_TELEMETRY_OPTOUT=1`
+  - Turns off telemetry for MSBuild on .NET Framework, both in `MSBuild.exe` and inside Visual Studio. `DOTNET_CLI_TELEMETRY_OPTOUT` also turns it off there, and is the only one of the two that applies to MSBuild running on .NET. See [Consent](../VS-Telemetry-Data.md#consent).
+- `MSBUILD_HOST_NAME`
+  - Overrides the host name reported in build telemetry, for example `Azure DevOps` or `GitHub Action`, which are otherwise detected from `TF_BUILD` and `GITHUB_ACTIONS`.
+- `MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS`
+  - Total time in milliseconds that `MSBuild.exe` on .NET Framework waits on exit to save or upload telemetry. The default is `10000`, and `0` means don't wait. In CI the upload gets up to 80% of it, and the rest is kept for saving the events locally if the upload doesn't complete. See [Delivery](../VS-Telemetry-Data.md#delivery).
+- `MSBUILD_TELEMETRY_DIAGNOSTICS=1`
+  - Writes telemetry status messages, without event data, to standard error.

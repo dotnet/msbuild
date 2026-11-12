@@ -3,109 +3,20 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
+#if !NET
 using Microsoft.Build.Shared;
+#endif
 
 #nullable disable
 
 namespace Microsoft.Build.Internal
 {
-    /// <summary>
-    /// Contains a list of the special (reserved) properties that are settable by MSBuild code only.
-    /// </summary>
-    internal static class ReservedPropertyNames
-    {
-        // NOTE: if you add to this list, update the ReservedProperties hashtable below
-        internal const string projectDirectory = "MSBuildProjectDirectory";
-        internal const string projectDirectoryNoRoot = "MSBuildProjectDirectoryNoRoot";
-        internal const string projectFile = "MSBuildProjectFile";
-        internal const string projectExtension = "MSBuildProjectExtension";
-        internal const string projectFullPath = "MSBuildProjectFullPath";
-        internal const string projectName = "MSBuildProjectName";
-        internal const string thisFileDirectory = "MSBuildThisFileDirectory";
-        internal const string thisFileDirectoryNoRoot = "MSBuildThisFileDirectoryNoRoot";
-        internal const string thisFile = "MSBuildThisFile"; // "MSBuildThisFileFile" sounds silly!
-        internal const string thisFileExtension = "MSBuildThisFileExtension";
-        internal const string thisFileFullPath = "MSBuildThisFileFullPath";
-        internal const string thisFileName = "MSBuildThisFileName";
-        internal const string binPath = "MSBuildBinPath";
-        internal const string projectDefaultTargets = "MSBuildProjectDefaultTargets";
-        internal const string extensionsPath = "MSBuildExtensionsPath";
-        internal const string extensionsPath32 = "MSBuildExtensionsPath32";
-        internal const string extensionsPath64 = "MSBuildExtensionsPath64";
-        internal const string userExtensionsPath = "MSBuildUserExtensionsPath";
-        internal const string toolsPath = MSBuildConstants.ToolsPath;
-        internal const string toolsVersion = "MSBuildToolsVersion";
-        internal const string msbuildRuntimeType = "MSBuildRuntimeType";
-        internal const string overrideTasksPath = "MSBuildOverrideTasksPath";
-        internal const string defaultOverrideToolsVersion = "DefaultOverrideToolsVersion";
-        internal const string startupDirectory = "MSBuildStartupDirectory";
-        internal const string buildNodeCount = "MSBuildNodeCount";
-        internal const string lastTaskResult = "MSBuildLastTaskResult";
-        internal const string extensionsPathSuffix = "MSBuild";
-        internal const string userExtensionsPathSuffix = "Microsoft\\MSBuild";
-        internal const string programFiles32 = "MSBuildProgramFiles32";
-        internal const string localAppData = "LocalAppData";
-        internal const string assemblyVersion = "MSBuildAssemblyVersion";
-        internal const string fileVersion = "MSBuildFileVersion";
-        internal const string semanticVersion = "MSBuildSemanticVersion";
-        internal const string version = "MSBuildVersion";
-        internal const string osName = "OS";
-        internal const string frameworkToolsRoot = "MSBuildFrameworkToolsRoot";
-        internal const string interactive = "MSBuildInteractive";
-        internal const string msbuilddisablefeaturesfromversion = "MSBuildDisableFeaturesFromVersion";
-
-        /// <summary>
-        /// Lookup for reserved property names. Intentionally do not include MSBuildExtensionsPath* or MSBuildUserExtensionsPath in this list.  We need tasks to be able to override those.
-        /// </summary>
-        private static readonly HashSet<string> ReservedProperties = new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default)
-        {
-            projectDirectory,
-            projectDirectoryNoRoot,
-            projectFile,
-            projectExtension,
-            projectFullPath,
-            projectName,
-
-            thisFileDirectory,
-            thisFileDirectoryNoRoot,
-            thisFile,
-            thisFileExtension,
-            thisFileFullPath,
-            thisFileName,
-
-            binPath,
-            projectDefaultTargets,
-            toolsPath,
-            toolsVersion,
-            msbuildRuntimeType,
-            startupDirectory,
-            buildNodeCount,
-            lastTaskResult,
-            programFiles32,
-            assemblyVersion,
-            version,
-            interactive,
-            msbuilddisablefeaturesfromversion,
-        };
-
-        /// <summary>
-        /// Indicates if the given property is a reserved property.
-        /// </summary>
-        /// <returns>true, if specified property is reserved</returns>
-        internal static bool IsReservedProperty(string property)
-        {
-            return ReservedProperties.Contains(property);
-        }
-    }
-
     /// <summary>
     /// The set of available static methods.
     /// NOTE: Do not allow methods here that could do "bad" things under any circumstances.
@@ -277,13 +188,8 @@ namespace Microsoft.Build.Internal
         [DynamicDependency(PropertyFunctionMembers, typeof(Uri))]
         [DynamicDependency(PropertyFunctionMembers, typeof(UriBuilder))]
         [DynamicDependency(PropertyFunctionMembers, typeof(Version))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Microsoft.Build.Utilities.ToolLocationHelper))]
 #if NET
-        // ToolLocationHelper lives in Microsoft.Build.Utilities.Core in the SDK, which Microsoft.Build does not
-        // directly reference, so it cannot be named with typeof here like the entries above. Root it with the
-        // (memberTypes, typeName, assemblyName) string overload instead - it is otherwise an ordinary allowlist
-        // entry (see the TryAdd for it below). That overload (and trimming itself) exists only on .NET, so this
-        // entry is guarded for the .NET build; the allowlist still includes the type at run time on .NET Framework.
-        [DynamicDependency(PropertyFunctionMembers, "Microsoft.Build.Utilities.ToolLocationHelper", "Microsoft.Build.Utilities.Core")]
         [DynamicDependency(PropertyFunctionMembers, typeof(OperatingSystem))]
 #endif
         // The DynamicDependency allowlist above preserves each property-function receiver type's public
@@ -393,7 +299,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Uri", new Tuple<string, Type>(null, typeof(Uri)));
                         availableStaticMethods.TryAdd("System.UriBuilder", new Tuple<string, Type>(null, typeof(UriBuilder)));
                         availableStaticMethods.TryAdd("System.Version", new Tuple<string, Type>(null, typeof(Version)));
-                        availableStaticMethods.TryAdd("Microsoft.Build.Utilities.ToolLocationHelper", new Tuple<string, Type>("Microsoft.Build.Utilities.ToolLocationHelper, Microsoft.Build.Utilities.Core, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null));
+                        availableStaticMethods.TryAdd("Microsoft.Build.Utilities.ToolLocationHelper", new Tuple<string, Type>(null, typeof(Microsoft.Build.Utilities.ToolLocationHelper)));
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.RuntimeInformation", runtimeInformationType);
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.OSPlatform", osPlatformType);
 #if NET

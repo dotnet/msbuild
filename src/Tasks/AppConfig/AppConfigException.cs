@@ -11,6 +11,7 @@ namespace Microsoft.Build.Tasks
     /// An exception thrown while parsing through an app.config.
     /// </summary>
     [Serializable]
+    // CodeQL [SM02227] False positive: static call-graph over-approximation via virtual ToString/Flush in VMR build; deserialization only reads primitive fields.
     internal class AppConfigException :
         System.ApplicationException
     {

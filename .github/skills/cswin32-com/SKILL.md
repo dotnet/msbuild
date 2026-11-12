@@ -1,6 +1,6 @@
 ---
 name: cswin32-com
-description: 'Guides struct-based COM interop in MSBuild using CsWin32 patterns. Consult when working with ComScope<T>, ComClassFactory, IComIID, IID.Get<T>(), delegate* unmanaged vtables, CoCreateInstance, or manually defining COM interfaces not in Win32 metadata (e.g. WMI IWbemLocator, IWbemServices).'
+description: 'Guides struct-based COM interop in MSBuild using CsWin32 patterns. Consult when working with the generic ComScope type, ComClassFactory, IComIID, the IID.Get generic method, delegate* unmanaged vtables, CoCreateInstance, or manually defining COM interfaces not in Win32 metadata (e.g. WMI IWbemLocator, IWbemServices).'
 argument-hint: 'Describe the COM interface or activation pattern you are working with.'
 ---
 

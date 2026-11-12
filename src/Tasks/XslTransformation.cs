@@ -548,6 +548,7 @@ namespace Microsoft.Build.Tasks
                         {
                             using var sr = new StringReader(_data);
                             var settings = new XmlReaderSettings { DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore };
+                            // CodeQL [SM00404] False positive: XslTransformation loads user-specified XSLT stylesheets without a fixed schema; DTD processing is configured above.
                             using var xmlReader = XmlReader.Create(sr, settings);
                             xslct.Load(xmlReader, XsltSettings.Default, new XmlUrlResolver());
                             break;

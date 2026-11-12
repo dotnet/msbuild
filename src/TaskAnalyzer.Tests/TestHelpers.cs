@@ -45,12 +45,14 @@ internal static class TestHelpers
                 public void SetEnvironmentVariable(string name, string? value) { }
                 public System.Collections.Generic.IReadOnlyDictionary<string, string> GetEnvironmentVariables() => new System.Collections.Generic.Dictionary<string, string>();
                 public AbsolutePath GetAbsolutePath(string path) => default;
+                public AbsolutePath GetTempPath() => default;
                 public System.Diagnostics.ProcessStartInfo GetProcessStartInfo() => new();
             }
 
             public struct AbsolutePath : System.IEquatable<AbsolutePath>
             {
                 public AbsolutePath(string path) { Value = path; OriginalValue = path; }
+                public AbsolutePath(string path, AbsolutePath basePath) { Value = System.String.Concat(basePath.Value, path); OriginalValue = path; }
                 public string Value { get; }
                 public string OriginalValue { get; }
                 public static implicit operator string(AbsolutePath p) => p.Value;
@@ -137,35 +139,46 @@ internal static class TestHelpers
     /// </summary>
     public static MetadataReference[] GetCoreReferences() => s_coreReferences;
 
-    /// <summary>
-    /// Runs the MultiThreadableTaskAnalyzer on the given source code and returns analyzer diagnostics.
-    /// Source is combined with framework stubs automatically.
-    /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(string source)
+    public static MetadataReference CreateAliasedAttributeReference(string alias, string attributeName)
     {
-        var compilation = CreateCompilation(source);
-        var analyzer = new MultiThreadableTaskAnalyzer();
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
+        var compilation = CSharpCompilation.Create(
+            "AliasedAttributes",
+            [
+                CSharpSyntaxTree.ParseText($$"""
+                    namespace Microsoft.Build.Framework
+                    {
+                        [System.AttributeUsage(System.AttributeTargets.Class, Inherited = false)]
+                        public sealed class {{attributeName}} : System.Attribute
+                        {
+                        }
+                    }
+                    """),
+            ],
+            s_coreReferences,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-        var allDiags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
-        return allDiags;
+        using var image = new System.IO.MemoryStream();
+        if (!compilation.Emit(image).Success)
+        {
+            throw new System.InvalidOperationException("Failed to compile the aliased attribute reference.");
+        }
+
+        return MetadataReference.CreateFromImage(
+            image.ToArray(),
+            MetadataReferenceProperties.Assembly.WithAliases([alias]));
     }
 
     /// <summary>
-    /// Runs BOTH the direct and transitive analyzers on the given source code.
+    /// Runs the MultiThreadableTaskAnalyzer with the shipping default behavior.
     /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsAsync(string source)
-    {
-        var compilation = CreateCompilation(source);
-        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(
-            new MultiThreadableTaskAnalyzer(),
-            new TransitiveCallChainAnalyzer());
-        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
+    public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(string source) =>
+        GetDiagnosticsWithDefaultConfigurationAsync(source);
 
-        var allDiags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
-        return allDiags;
-    }
+    /// <summary>
+    /// Runs both the direct and transitive analyzers with the shipping default behavior.
+    /// </summary>
+    public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsAsync(string source) =>
+        GetAllDiagnosticsWithDefaultConfigurationAsync(source);
 
     /// <summary>
     /// Runs compiler diagnostics together with analyzers and suppressors and returns
@@ -241,23 +254,73 @@ internal static class TestHelpers
     }
 
     /// <summary>
-    /// Runs the MultiThreadableTaskAnalyzer with a specific scope option and returns analyzer diagnostics.
+    /// Runs the MultiThreadableTaskAnalyzer with the all-task migration option and returns analyzer diagnostics.
     /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithScopeAsync(string source, string scope)
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithAllTasksOptionAsync(string source, bool enabled)
     {
         var compilation = CreateCompilation(source);
         var analyzer = new MultiThreadableTaskAnalyzer();
+        var compilationWithAnalyzers = compilation.WithAnalyzers(
+            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), CreateAnalyzerOptions(enabled));
+        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+    }
 
+    /// <summary>
+    /// Runs the MultiThreadableTaskAnalyzer without the all-task migration option.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithDefaultConfigurationAsync(string source)
+    {
+        var compilation = CreateCompilation(source);
+        var analyzer = new MultiThreadableTaskAnalyzer();
+        var compilationWithAnalyzers = compilation.WithAnalyzers(
+            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), CreateAnalyzerOptions());
+        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+    }
+
+    /// <summary>
+    /// Runs both the direct and transitive analyzers with the all-task migration option.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsWithAllTasksOptionAsync(string source, bool enabled)
+    {
+        var compilation = CreateCompilation(source);
+        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(
+            new MultiThreadableTaskAnalyzer(),
+            new TransitiveCallChainAnalyzer());
+
+        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers, CreateAnalyzerOptions(enabled));
+        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+    }
+
+    /// <summary>
+    /// Runs both the direct and transitive analyzers without the all-task migration option.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsWithDefaultConfigurationAsync(string source)
+    {
+        var compilation = CreateCompilation(source);
+        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(
+            new MultiThreadableTaskAnalyzer(),
+            new TransitiveCallChainAnalyzer());
+        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers, CreateAnalyzerOptions());
+        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+    }
+
+    private static AnalyzerOptions CreateAnalyzerOptions(bool? analyzeAllTasks = null)
+    {
         var globalOptions = new Dictionary<string, string>
         {
-            { $"build_property.{SharedAnalyzerHelpers.ScopeOptionKey}", scope }
+            { "unrelated_analyzer_option", "true" },
         };
-        var optionsProvider = new TestAnalyzerConfigOptionsProvider(globalOptions);
-        var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
 
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), options);
-        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        if (analyzeAllTasks is not null)
+        {
+            globalOptions.Add(
+                SharedAnalyzerHelpers.AnalyzeAllTasksOptionKey,
+                analyzeAllTasks.Value.ToString());
+        }
+
+        return new AnalyzerOptions(
+            ImmutableArray<AdditionalText>.Empty,
+            new TestAnalyzerConfigOptionsProvider(globalOptions));
     }
 
     private static MetadataReference[] CreateCoreReferences()
@@ -285,6 +348,7 @@ internal static class TestHelpers
             typeof(System.Xml.XmlReader).Assembly,            // System.Xml.ReaderWriter
             typeof(System.IO.Compression.ZipFile).Assembly,   // System.IO.Compression.ZipFile
             typeof(System.IO.Compression.ZipArchive).Assembly, // System.IO.Compression
+            typeof(System.CodeDom.Compiler.TempFileCollection).Assembly, // System.CodeDom
         };
 
         var locations = assemblies
@@ -311,7 +375,7 @@ internal static class TestHelpers
 
 /// <summary>
 /// A test implementation of <see cref="AnalyzerConfigOptionsProvider"/> that returns
-/// configurable global options for testing scope and other analyzer settings.
+/// configurable global options for testing analyzer settings.
 /// </summary>
 internal sealed class TestAnalyzerConfigOptionsProvider : AnalyzerConfigOptionsProvider
 {
@@ -324,7 +388,7 @@ internal sealed class TestAnalyzerConfigOptionsProvider : AnalyzerConfigOptionsP
 
     public override AnalyzerConfigOptions GlobalOptions => _globalOptions;
 
-    public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => TestAnalyzerConfigOptions.Empty;
+    public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => _globalOptions;
 
     public override AnalyzerConfigOptions GetOptions(AdditionalText textFile) => TestAnalyzerConfigOptions.Empty;
 

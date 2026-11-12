@@ -139,10 +139,10 @@ namespace Microsoft.Build.Execution
             new CopyOnWriteDictionary<(string, ElementLocation)>(StringComparer.OrdinalIgnoreCase),
             new List<ProjectTaskInstanceChild>(),
             location,
-            condition == string.Empty ? null : ElementLocation.EmptyLocation,
-            continueOnError == string.Empty ? null : ElementLocation.EmptyLocation,
-            msbuildRuntime == string.Empty ? null : ElementLocation.EmptyLocation,
-            msbuildArchitecture == string.Empty ? null : ElementLocation.EmptyLocation)
+            condition == string.Empty ? null : ElementLocation.Empty,
+            continueOnError == string.Empty ? null : ElementLocation.Empty,
+            msbuildRuntime == string.Empty ? null : ElementLocation.Empty,
+            msbuildArchitecture == string.Empty ? null : ElementLocation.Empty)
         {
         }
 
@@ -325,7 +325,7 @@ namespace Microsoft.Build.Execution
         /// <param name="unevaluatedValue">The unevaluated value for the parameter.</param>
         internal void SetParameter(string parameterName, string unevaluatedValue)
         {
-            _parameters[parameterName] = (unevaluatedValue, ElementLocation.EmptyLocation);
+            _parameters[parameterName] = (unevaluatedValue, ElementLocation.Empty);
         }
 
         /// <summary>
@@ -338,7 +338,7 @@ namespace Microsoft.Build.Execution
         {
             ArgumentException.ThrowIfNullOrEmpty(taskOutputParameterName);
             ArgumentException.ThrowIfNullOrEmpty(itemName);
-            _outputs.Add(new ProjectTaskOutputItemInstance(itemName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, condition == null ? null : ElementLocation.EmptyLocation));
+            _outputs.Add(new ProjectTaskOutputItemInstance(itemName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.Empty, ElementLocation.Empty, ElementLocation.Empty, condition == null ? null : ElementLocation.Empty));
         }
 
         /// <summary>
@@ -351,7 +351,7 @@ namespace Microsoft.Build.Execution
         {
             ArgumentException.ThrowIfNullOrEmpty(taskOutputParameterName);
             ArgumentException.ThrowIfNullOrEmpty(propertyName);
-            _outputs.Add(new ProjectTaskOutputPropertyInstance(propertyName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, condition == null ? null : ElementLocation.EmptyLocation));
+            _outputs.Add(new ProjectTaskOutputPropertyInstance(propertyName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.Empty, ElementLocation.Empty, ElementLocation.Empty, condition == null ? null : ElementLocation.Empty));
         }
 
         void ITranslatable.Translate(ITranslator translator)
