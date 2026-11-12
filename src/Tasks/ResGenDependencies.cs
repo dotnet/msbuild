@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+#if FEATURE_APPDOMAIN
+using System.Runtime.Serialization;
+#endif
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using System.Collections;
 using System.Resources;
@@ -42,6 +45,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [NonSerialized]
         private bool _isDirty;
+
+        private TaskEnvironment _taskEnvironment = TaskEnvironment.Fallback;
 
         /// <summary>
         ///  This is the directory that will be used for resolution of files linked within a .resx.
@@ -87,7 +92,7 @@ namespace Microsoft.Build.Tasks
                 // contains the .resx file as the path from which it should resolve
                 // relative paths. So we should base our timestamp/existence checking
                 // on the same switch & resolve in the same manner as ResGen.
-                BaseLinkedFileDirectory = value ? null : Directory.GetCurrentDirectory();
+                BaseLinkedFileDirectory = value ? null : _taskEnvironment.ProjectDirectory;
             }
         }
 
@@ -121,7 +126,7 @@ namespace Microsoft.Build.Tasks
             translator.Translate(ref baseLinkedFileDirectory);
         }
 
-        internal ResXFile GetResXFileInfo(string resxFile, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
+        internal ResXFile GetResXFileInfo(AbsolutePath resxFile, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
         {
             // First, try to retrieve the resx information from our hashtable.
             if (!resXFiles.TryGetValue(resxFile, out ResXFile retVal))
@@ -146,19 +151,19 @@ namespace Microsoft.Build.Tasks
             return retVal;
         }
 
-        private ResXFile AddResxFile(string file, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
+        private ResXFile AddResxFile(AbsolutePath file, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
         {
             // This method adds a .resx file "file" to our .resx cache.  The method causes the file
             // to be cracked for contained files.
 
             // CodeQL [SM02363] False positive: project resource files tracked by ResGenDependencies are trusted developer build inputs.
-            var resxFile = new ResXFile(file, BaseLinkedFileDirectory, useMSBuildResXReader, log, logWarningForBinaryFormatter);
+            var resxFile = new ResXFile(file, BaseLinkedFileDirectory, useMSBuildResXReader, log, logWarningForBinaryFormatter, _taskEnvironment);
             resXFiles.Add(file, resxFile);
             _isDirty = true;
             return resxFile;
         }
 
-        internal PortableLibraryFile TryGetPortableLibraryInfo(string libraryPath)
+        internal PortableLibraryFile TryGetPortableLibraryInfo(AbsolutePath libraryPath)
         {
             // First, try to retrieve the portable library information from our hashtable.
             portableLibraries.TryGetValue(libraryPath, out PortableLibraryFile retVal);
@@ -188,7 +193,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Writes the contents of this object out to the specified file.
         /// </summary>
-        internal override void SerializeCache(string stateFile, TaskLoggingHelper log, bool serializeEmptyState = false)
+        internal override void SerializeCache(AbsolutePath stateFile, TaskLoggingHelper log, bool serializeEmptyState = false)
         {
             base.SerializeCache(stateFile, log, serializeEmptyState);
             _isDirty = false;
@@ -197,9 +202,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the .cache file from disk into a ResGenDependencies object.
         /// </summary>
-        internal static ResGenDependencies DeserializeCache(string stateFile, bool useSourcePath, TaskLoggingHelper log)
+        internal static ResGenDependencies DeserializeCache(AbsolutePath stateFile, bool useSourcePath, TaskLoggingHelper log, TaskEnvironment taskEnvironment)
         {
             var retVal = DeserializeCache<ResGenDependencies>(stateFile, log) ?? new ResGenDependencies();
+            retVal._taskEnvironment = taskEnvironment;
 
             // Ensure that the cache is properly initialized with respect to how resgen will
             // resolve linked files within .resx files.  ResGen has two different
@@ -225,7 +231,7 @@ namespace Microsoft.Build.Tasks
 
             internal string[] LinkedFiles => linkedFiles;
 
-            internal ResXFile(string filename, string baseLinkedFileDirectory, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter) : base(filename)
+            internal ResXFile(AbsolutePath filename, string baseLinkedFileDirectory, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter, TaskEnvironment taskEnvironment) : base(filename)
             {
                 // Creates a new ResXFile object and populates the class member variables
                 // by computing a list of linked files within the .resx that was passed in.
@@ -235,7 +241,7 @@ namespace Microsoft.Build.Tasks
                 if (FileSystems.Default.FileExists(FileName))
                 {
                     // CodeQL [SM02363] False positive: project resource files tracked by ResGenDependencies are trusted developer build inputs.
-                    linkedFiles = GetLinkedFiles(filename, baseLinkedFileDirectory, useMSBuildResXReader, log, logWarningForBinaryFormatter);
+                    linkedFiles = GetLinkedFiles(filename, baseLinkedFileDirectory, useMSBuildResXReader, log, logWarningForBinaryFormatter, taskEnvironment);
                 }
             }
 
@@ -246,7 +252,7 @@ namespace Microsoft.Build.Tasks
             public void Translate(ITranslator translator)
             {
                 translator.Translate(ref linkedFiles);
-                translator.Translate(ref filename);
+                TranslateFileName(translator);
                 translator.Translate(ref lastModified);
                 translator.Translate(ref exists);
             }
@@ -256,7 +262,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             /// <exception cref="ArgumentException">May be thrown if Resx is invalid. May contain XmlException.</exception>
             /// <exception cref="XmlException">May be thrown if Resx is invalid</exception>
-            private static string[] GetLinkedFiles(string filename, string baseLinkedFileDirectory, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
+            private static string[] GetLinkedFiles(AbsolutePath filename, string baseLinkedFileDirectory, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter, TaskEnvironment taskEnvironment)
             {
                 // This method finds all linked .resx files for the .resx file that is passed in.
                 // filename is the filename of the .resx file that is to be examined.
@@ -266,7 +272,7 @@ namespace Microsoft.Build.Tasks
 
                 if (useMSBuildResXReader)
                 {
-                    foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, pathsRelativeToBasePath: baseLinkedFileDirectory == null, log, logWarningForBinaryFormatter))
+                    foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, pathsRelativeToBasePath: baseLinkedFileDirectory == null, log, logWarningForBinaryFormatter, taskEnvironment.ProjectDirectory))
                     {
                         if (resource is ILinkedFileResource linked)
                         {
@@ -328,6 +334,9 @@ namespace Microsoft.Build.Tasks
         [Serializable]
 #endif
         internal sealed class PortableLibraryFile : DependencyFile, ITranslatable
+#if FEATURE_APPDOMAIN
+            , ISerializable
+#endif
         {
             internal string[] outputFiles;
             internal string neutralResourceLanguage;
@@ -337,17 +346,39 @@ namespace Microsoft.Build.Tasks
             {
             }
 
+#if FEATURE_APPDOMAIN
+            private PortableLibraryFile(SerializationInfo info, StreamingContext context)
+            {
+                filename = new AbsolutePath(info.GetString(nameof(filename)));
+                lastModified = info.GetDateTime(nameof(lastModified));
+                exists = info.GetBoolean(nameof(exists));
+                outputFiles = (string[])info.GetValue(nameof(outputFiles), typeof(string[]));
+                neutralResourceLanguage = info.GetString(nameof(neutralResourceLanguage));
+                assemblySimpleName = info.GetString(nameof(assemblySimpleName));
+            }
+
+            void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                info.AddValue(nameof(filename), filename.Value);
+                info.AddValue(nameof(lastModified), lastModified);
+                info.AddValue(nameof(exists), exists);
+                info.AddValue(nameof(outputFiles), outputFiles);
+                info.AddValue(nameof(neutralResourceLanguage), neutralResourceLanguage);
+                info.AddValue(nameof(assemblySimpleName), assemblySimpleName);
+            }
+#endif
+
             public void Translate(ITranslator translator)
             {
                 translator.Translate(ref assemblySimpleName);
                 translator.Translate(ref outputFiles);
                 translator.Translate(ref neutralResourceLanguage);
-                translator.Translate(ref filename);
+                TranslateFileName(translator);
                 translator.Translate(ref lastModified);
                 translator.Translate(ref exists);
             }
 
-            internal PortableLibraryFile(string filename)
+            internal PortableLibraryFile(AbsolutePath filename)
                 : base(filename)
             {
             }
@@ -370,12 +401,12 @@ namespace Microsoft.Build.Tasks
                 set => assemblySimpleName = value;
             }
 
-            internal bool AllOutputFilesAreUpToDate()
+            internal bool AllOutputFilesAreUpToDate(TaskEnvironment taskEnvironment)
             {
                 Debug.Assert(outputFiles != null, "OutputFiles hasn't been set");
                 foreach (string outputFileName in outputFiles)
                 {
-                    var outputFile = new FileInfo(FileUtilities.FixFilePath(outputFileName));
+                    var outputFile = new FileInfo(taskEnvironment.GetAbsolutePathOrEmpty(FileUtilities.FixFilePath(outputFileName)));
                     if (!outputFile.Exists || outputFile.LastWriteTime < LastModified)
                     {
                         return false;

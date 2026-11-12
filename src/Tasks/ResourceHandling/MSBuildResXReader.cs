@@ -19,7 +19,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 {
     internal class MSBuildResXReader
     {
-        public static IReadOnlyList<IResource> ReadResources(Stream s, string filename, bool pathsRelativeToBasePath, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
+        private static IReadOnlyList<IResource> ReadResources(Stream s, AbsolutePath filename, bool pathsRelativeToBasePath, TaskLoggingHelper log, bool logWarningForBinaryFormatter, AbsolutePath linkedFileBaseDirectory)
         {
             var resources = new List<IResource>();
             var aliases = new Dictionary<string, string>();
@@ -41,7 +41,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                             case "resheader":
                                 break;
                             case "data":
-                                ParseData(filename, pathsRelativeToBasePath, resources, aliases, elem, log, logWarningForBinaryFormatter);
+                                ParseData(filename, pathsRelativeToBasePath, resources, aliases, elem, log, logWarningForBinaryFormatter, linkedFileBaseDirectory);
                                 break;
                         }
                     }
@@ -109,13 +109,14 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         }
 
         private static void ParseData(
-            string resxFilename,
+            AbsolutePath resxFilename,
             bool pathsRelativeToBasePath,
             List<IResource> resources,
             Dictionary<string, string> aliases,
             XElement elem,
             TaskLoggingHelper log,
-            bool logWarningForBinaryFormatter)
+            bool logWarningForBinaryFormatter,
+            AbsolutePath linkedFileBaseDirectory)
         {
             string name = elem.Attribute("name").Value;
             string value;
@@ -151,7 +152,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 {
                     // If nothing is specified, or String is explicitly specified
                     // with no mimetype: read the string from the resx and return it.
-                    resources.Add(new StringResource(name, value, resxFilename));
+                    resources.Add(new StringResource(name, value, resxFilename.OriginalValue));
                     return;
                 }
 
@@ -161,7 +162,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             if (typename.StartsWith("System.Resources.ResXFileRef", StringComparison.Ordinal)) // TODO: is this too general? Should it be OrdinalIgnoreCase?
             {
-                AddLinkedResource(resxFilename, pathsRelativeToBasePath, resources, name, value);
+                AddLinkedResource(resxFilename, pathsRelativeToBasePath, resources, name, value, linkedFileBaseDirectory);
                 return;
             }
 
@@ -184,7 +185,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     return;
                 }
 
-                resources.Add(new TypeConverterStringResource(name, typename, value, resxFilename));
+                resources.Add(new TypeConverterStringResource(name, typename, value, resxFilename.OriginalValue));
                 return;
             }
             else
@@ -195,7 +196,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                         // TypeConverter from byte array
                         byte[] typeConverterBytes = Convert.FromBase64String(value);
 
-                        resources.Add(new TypeConverterByteArrayResource(name, typename, typeConverterBytes, resxFilename));
+                        resources.Add(new TypeConverterByteArrayResource(name, typename, typeConverterBytes, resxFilename.OriginalValue));
                         return;
                     case BinSerializedObjectMimeType:
                     case Beta2CompatSerializedObjectMimeType:
@@ -203,29 +204,29 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                         // Warn of BinaryFormatter exposure (SDK should turn this on by default in .NET 8+)
                         if (logWarningForBinaryFormatter)
                         {
-                            log?.LogWarningWithCodeFromResources(null, resxFilename, ((IXmlLineInfo)elem).LineNumber, ((IXmlLineInfo)elem).LinePosition, 0, 0, "GenerateResource.BinaryFormatterUse", name);
+                            log?.LogWarningWithCodeFromResources(null, resxFilename.OriginalValue, ((IXmlLineInfo)elem).LineNumber, ((IXmlLineInfo)elem).LinePosition, 0, 0, "GenerateResource.BinaryFormatterUse", name);
                         }
 
                         // BinaryFormatter from byte array
                         byte[] binaryFormatterBytes = Convert.FromBase64String(value);
 
-                        resources.Add(new BinaryFormatterByteArrayResource(name, binaryFormatterBytes, resxFilename));
+                        resources.Add(new BinaryFormatterByteArrayResource(name, binaryFormatterBytes, resxFilename.OriginalValue));
                         return;
                     default:
                         if (log is null)
                         {
-                            throw new NotSupportedException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("GenerateResource.MimeTypeNotSupportedOnCore", name, resxFilename, mimetype));
+                            throw new NotSupportedException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("GenerateResource.MimeTypeNotSupportedOnCore", name, resxFilename.OriginalValue, mimetype));
                         }
                         else
                         {
-                            log.LogErrorFromResources("GenerateResource.MimeTypeNotSupportedOnCore", name, resxFilename, mimetype);
+                            log.LogErrorFromResources("GenerateResource.MimeTypeNotSupportedOnCore", name, resxFilename.OriginalValue, mimetype);
                             return;
                         }
                 }
             }
         }
 
-        private static void AddLinkedResource(string resxFilename, bool pathsRelativeToBasePath, List<IResource> resources, string name, string value)
+        private static void AddLinkedResource(AbsolutePath resxFilename, bool pathsRelativeToBasePath, List<IResource> resources, string name, string value, AbsolutePath linkedFileBaseDirectory)
         {
             string[] fileRefInfo = ParseResxFileRefString(value);
 
@@ -234,11 +235,16 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             if (pathsRelativeToBasePath)
             {
+                ArgumentException.ThrowIfNullOrEmpty(resxFilename.Value);
                 fileName = Path.Combine(
                     FileUtilities.GetDirectory(
                         FileUtilities.NormalizePath(resxFilename)),
                     fileName);
             }
+
+            AbsolutePath linkedFile = string.IsNullOrEmpty(fileName)
+                ? new AbsolutePath(fileName, ignoreRootedCheck: true)
+                : new AbsolutePath(fileName, linkedFileBaseDirectory);
 
             if (IsString(fileRefType))
             {
@@ -258,16 +264,16 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 Encoding textFileEncoding = fileRefEncoding != null
                     ? Encoding.GetEncoding(fileRefEncoding)
                     : Encoding.Default;
-                using (StreamReader sr = new StreamReader(fileName, textFileEncoding))
+                using (StreamReader sr = new StreamReader(linkedFile, textFileEncoding))
                 {
-                    resources.Add(new LinkedStringResource(name, sr.ReadToEnd(), resxFilename, fileName));
+                    resources.Add(new LinkedStringResource(name, sr.ReadToEnd(), resxFilename.OriginalValue, fileName));
 
                     return;
                 }
             }
             else if (IsByteArray(fileRefType))
             {
-                byte[] byteArray = FileSystems.Default.ReadFileAllBytes(fileName);
+                byte[] byteArray = FileSystems.Default.ReadFileAllBytes(linkedFile);
 
                 resources.Add(new LinkedLiveObjectResource(name, byteArray, fileName));
                 return;
@@ -276,13 +282,13 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             {
                 // See special-case handling in ResXFileRef
                 // https://github.com/dotnet/winforms/blob/689cd9c69e632997bc85bf421af221d79b12ddd4/src/System.Windows.Forms/src/System/Resources/ResXFileRef.cs#L293-L297
-                byte[] byteArray = FileSystems.Default.ReadFileAllBytes(fileName);
+                byte[] byteArray = FileSystems.Default.ReadFileAllBytes(linkedFile);
 
                 resources.Add(new LinkedLiveObjectResource(name, new MemoryStream(byteArray), fileName));
                 return;
             }
 
-            resources.Add(new FileStreamResource(name, fileRefType, fileName, resxFilename));
+            resources.Add(new FileStreamResource(name, fileRefType, linkedFile, resxFilename.OriginalValue));
         }
 
         /// <summary>
@@ -312,20 +318,20 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         /// <summary>
         /// Extract <see cref="IResource"/>s from a given file on disk.
         /// </summary>
-        public static IReadOnlyList<IResource> GetResourcesFromFile(string filename, bool pathsRelativeToBasePath, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
+        public static IReadOnlyList<IResource> GetResourcesFromFile(AbsolutePath filename, bool pathsRelativeToBasePath, TaskLoggingHelper log, bool logWarningForBinaryFormatter, AbsolutePath basePath)
         {
             // CodeQL [SM00414] False positive: filename is a trusted project .resx resource file path.
             using (var x = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return ReadResources(x, filename, pathsRelativeToBasePath, log, logWarningForBinaryFormatter);
+                return ReadResources(x, filename, pathsRelativeToBasePath, log, logWarningForBinaryFormatter, basePath);
             }
         }
 
-        public static IReadOnlyList<IResource> GetResourcesFromString(string resxContent, TaskLoggingHelper log, bool logWarningForBinaryFormatter, string basePath = null, bool? useRelativePath = null)
+        public static IReadOnlyList<IResource> GetResourcesFromString(string resxContent, TaskLoggingHelper log, bool logWarningForBinaryFormatter, AbsolutePath basePath, AbsolutePath filename = default, bool? useRelativePath = null)
         {
             using (var x = new MemoryStream(Encoding.UTF8.GetBytes(resxContent)))
             {
-                return ReadResources(x, basePath, useRelativePath.GetValueOrDefault(basePath != null), log, logWarningForBinaryFormatter);
+                return ReadResources(x, filename, useRelativePath.GetValueOrDefault(filename.OriginalValue != null), log, logWarningForBinaryFormatter, basePath);
             }
         }
 

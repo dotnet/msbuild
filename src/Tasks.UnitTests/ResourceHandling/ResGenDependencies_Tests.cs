@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
@@ -39,15 +40,15 @@ namespace Microsoft.Build.UnitTests
         public void DirtyCleanScenario(bool useMSBuildResXReader)
         {
             ResGenDependencies cache = new();
-            string resx = CreateSampleResx();
-            string stateFile = FileUtilities.GetTemporaryFile();
+            AbsolutePath resx = TaskEnvironment.Fallback.GetAbsolutePath(CreateSampleResx());
+            AbsolutePath stateFile = TaskEnvironment.Fallback.GetAbsolutePath(FileUtilities.GetTemporaryFile());
 
             try
             {
                 // A newly created cache is not dirty.
                 cache.IsDirty.ShouldBeFalse();
 
-                ResGenDependencies.PortableLibraryFile libFile = new("otherFileName");
+                ResGenDependencies.PortableLibraryFile libFile = new(TaskEnvironment.Fallback.GetAbsolutePath("otherFileName"));
                 libFile.outputFiles = new string[] { "first", "second" };
                 libFile.assemblySimpleName = "simpleName";
                 libFile.lastModified = DateTime.Now.Subtract(TimeSpan.FromSeconds(10));
@@ -70,7 +71,7 @@ namespace Microsoft.Build.UnitTests
                 cache.IsDirty.ShouldBeFalse();
 
                 // Deserialize from disk. Result should not be dirty.
-                ResGenDependencies cache2 = ResGenDependencies.DeserializeCache(stateFile, true, /* Log */ null);
+                ResGenDependencies cache2 = ResGenDependencies.DeserializeCache(stateFile, true, /* Log */ null, TaskEnvironment.Fallback);
                 cache2.IsDirty.ShouldBeFalse();
 
                 // Validate that serialization worked
@@ -148,7 +149,7 @@ namespace Microsoft.Build.UnitTests
         "));
 
             var cache = new ResGenDependencies();
-            ResGenDependencies.ResXFile resxFile = cache.GetResXFileInfo(resxPath, useMSBuildResXReader: true, log: null, logWarningForBinaryFormatter: false);
+            ResGenDependencies.ResXFile resxFile = cache.GetResXFileInfo(TaskEnvironment.Fallback.GetAbsolutePath(resxPath), useMSBuildResXReader: true, log: null, logWarningForBinaryFormatter: false);
 
             resxFile.LinkedFiles.ShouldNotBeNull();
             resxFile.LinkedFiles.Length.ShouldBe(4);
@@ -156,6 +157,33 @@ namespace Microsoft.Build.UnitTests
             resxFile.LinkedFiles.ShouldContain(byteFile.Path);
             resxFile.LinkedFiles.ShouldContain(memStreamFile.Path);
             resxFile.LinkedFiles.ShouldContain(bitmapPath);
+        }
+
+        [Fact]
+        public void PortableLibraryAppDomainSerializationPreservesAbsolutePath()
+        {
+            var project = _env.CreateFolder();
+            var input = project.CreateFile("input.dll");
+            ResGenDependencies.PortableLibraryFile library = new(new AbsolutePath(input.Path))
+            {
+                OutputFiles = ["first.resw", "second.resw"],
+                NeutralResourceLanguage = "en-US",
+                AssemblySimpleName = "Example"
+            };
+            using MemoryStream stream = new();
+            BinaryFormatter formatter = new();
+
+            formatter.Serialize(stream, library);
+            stream.Position = 0;
+            ResGenDependencies.PortableLibraryFile restored = formatter.Deserialize(stream).ShouldBeOfType<ResGenDependencies.PortableLibraryFile>();
+
+            restored.FileName.Value.ShouldBe(input.Path);
+            restored.LastModified.ShouldBe(library.LastModified);
+            restored.Exists.ShouldBeTrue();
+            restored.OutputFiles.ShouldBe(["first.resw", "second.resw"]);
+            restored.NeutralResourceLanguage.ShouldBe("en-US");
+            restored.AssemblySimpleName.ShouldBe("Example");
+            restored.HasFileChanged().ShouldBeFalse();
         }
 
         /// <summary>

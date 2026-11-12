@@ -1,9 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Resources.Extensions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Tasks.UnitTests.ResourceHandling;
 using Microsoft.Build.UnitTests;
@@ -17,10 +20,149 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
     public class MSBuildResXReader_Tests
     {
         private readonly ITestOutputHelper _output;
+        private readonly AbsolutePath _basePath = new(AppContext.BaseDirectory);
 
         public MSBuildResXReader_Tests(ITestOutputHelper output)
         {
             _output = output;
+        }
+
+        [Theory]
+        [InlineData("System.String")]
+        [InlineData("System.Byte[]")]
+        [InlineData("System.IO.MemoryStream")]
+        [InlineData("Example.Type")]
+        public void LinkedResourcesUseExplicitProjectDirectory(string typeName)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var project = env.CreateFolder();
+            project.CreateFile("linked.dat", "linked data");
+            project.CreateFile("input.resx", $$"""
+                <root>
+                  <data name="Resource" type="System.Resources.ResXFileRef, System.Windows.Forms">
+                    <value>linked.dat;{{typeName}}, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+                  </data>
+                </root>
+                """);
+            AbsolutePath basePath = new(project.Path);
+
+            IResource resource = MSBuildResXReader.GetResourcesFromFile(
+                new AbsolutePath("input.resx", basePath), false, null, false, basePath).ShouldHaveSingleItem();
+            resource.ShouldBeAssignableTo<ILinkedFileResource>().LinkedFilePath.ShouldBe("linked.dat");
+            switch (typeName)
+            {
+                case "System.String":
+                    resource.ShouldBeOfType<LinkedStringResource>().Value.ShouldBe("linked data");
+                    break;
+                case "System.Byte[]":
+                    resource.ShouldBeOfType<LinkedLiveObjectResource>().Value.ShouldBeOfType<byte[]>().ShouldBe(Encoding.UTF8.GetBytes("linked data"));
+                    break;
+                case "System.IO.MemoryStream":
+                    using (MemoryStream value = resource.ShouldBeOfType<LinkedLiveObjectResource>().Value.ShouldBeOfType<MemoryStream>())
+                    {
+                        value.ToArray().ShouldBe(Encoding.UTF8.GetBytes("linked data"));
+                    }
+                    break;
+                default:
+                    resource.ShouldBeOfType<FileStreamResource>().OriginatingFile.ShouldBe("input.resx");
+                    using (MemoryStream serialized = new())
+                    {
+                        using (PreserializedResourceWriter writer = new(serialized))
+                        {
+                            resource.AddTo(writer);
+                        }
+                        Encoding.UTF8.GetString(serialized.ToArray()).ShouldContain("linked data");
+                    }
+                    break;
+            }
+        }
+
+        [Theory]
+        [InlineData(false, "project")]
+        [InlineData(true, "source")]
+        public void LinkedResourcesChooseSourceOrProjectDirectory(bool useSourcePath, string expectedValue)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var project = env.CreateFolder();
+            var source = project.CreateDirectory("resources");
+            project.CreateFile("linked.txt", "project");
+            var sourceLinkedFile = source.CreateFile("linked.txt", "source");
+            var resx = source.CreateFile("input.resx", """
+                <root>
+                  <data name="Greeting" type="System.Resources.ResXFileRef, System.Windows.Forms">
+                    <value>linked.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+                  </data>
+                </root>
+                """);
+            AbsolutePath basePath = new(project.Path);
+
+            LinkedStringResource resource = MSBuildResXReader.GetResourcesFromFile(
+                new AbsolutePath(resx.Path), useSourcePath, null, false, basePath).ShouldHaveSingleItem().ShouldBeOfType<LinkedStringResource>();
+
+            resource.Value.ShouldBe(expectedValue);
+            resource.OriginatingFile.ShouldBe(resx.Path);
+            resource.LinkedFilePath.ShouldBe(useSourcePath ? sourceLinkedFile.Path : "linked.txt");
+
+            LinkedStringResource stringResource = MSBuildResXReader.GetResourcesFromString(
+                File.ReadAllText(resx.Path), null, false, basePath, new AbsolutePath(resx.Path), useRelativePath: useSourcePath)
+                .ShouldHaveSingleItem().ShouldBeOfType<LinkedStringResource>();
+
+            stringResource.Value.ShouldBe(expectedValue);
+            stringResource.OriginatingFile.ShouldBe(resx.Path);
+            stringResource.LinkedFilePath.ShouldBe(useSourcePath ? sourceLinkedFile.Path : "linked.txt");
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("relative.resx")]
+        public void StringResourcesPreserveOriginalFilename(string filename)
+        {
+            AbsolutePath sourceFile = string.IsNullOrEmpty(filename)
+                ? new AbsolutePath(filename, ignoreRootedCheck: true)
+                : new AbsolutePath(filename, _basePath);
+            StringResource resource = MSBuildResXReader.GetResourcesFromString(
+                """<root><data name="Greeting"><value>Hello</value></data></root>""",
+                null, false, _basePath, sourceFile, useRelativePath: true).ShouldHaveSingleItem().ShouldBeOfType<StringResource>();
+
+            resource.Value.ShouldBe("Hello");
+            resource.OriginatingFile.ShouldBe(filename);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void SourceRelativeLinksRequireFilename(string filename)
+        {
+            Should.Throw<MSBuildResXException>(() => MSBuildResXReader.GetResourcesFromString(
+                """
+                <root>
+                  <data name="Resource" type="System.Resources.ResXFileRef, System.Windows.Forms">
+                    <value>linked.dat;Example.Type, Example.Assembly</value>
+                  </data>
+                </root>
+                """,
+                null, false, _basePath, new AbsolutePath(filename, ignoreRootedCheck: true), useRelativePath: true))
+                .InnerException.ShouldBeAssignableTo<ArgumentException>();
+        }
+
+        [Fact]
+        public void EmptyDeferredLinkedPathRemainsDeferred()
+        {
+            IResource resource = MSBuildResXReader.GetResourcesFromString(
+                """
+                <root>
+                  <data name="Resource" type="System.Resources.ResXFileRef, System.Windows.Forms">
+                    <value>;Example.Type, Example.Assembly</value>
+                  </data>
+                </root>
+                """,
+                null, false, _basePath).ShouldHaveSingleItem();
+
+            resource.ShouldBeOfType<FileStreamResource>().LinkedFilePath.ShouldBeEmpty();
+            using MemoryStream serialized = new();
+            using PreserializedResourceWriter writer = new(serialized);
+            Should.Throw<ArgumentException>(() => resource.AddTo(writer));
         }
 
         [Fact]
@@ -31,7 +173,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
                     @"<data name=""StringResource"" xml:space=""preserve"">
     <value>StringValue</value>
     <comment>Comment</comment>
-  </data>"), null, false);
+  </data>"), null, false, _basePath);
 
             AssertSingleStringResource(resxWithSingleString, "StringResource", "StringValue");
         }
@@ -44,7 +186,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
                     @"<data name=""StringResource"">
     <value> StringValue </value>
     <comment>Comment</comment>
-  </data>"), null, false);
+  </data>"), null, false, _basePath);
 
             AssertSingleStringResource(resxWithSingleString, "StringResource", " StringValue ");
         }
@@ -57,7 +199,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
                     @"<data name=""StringResource"" xml:space=""preserve"">
     <value> </value>
     <comment>Comment</comment>
-  </data>"), null, false);
+  </data>"), null, false, _basePath);
 
             AssertSingleStringResource(resxWithSingleString, "StringResource", " ");
         }
@@ -70,7 +212,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
                     @"<data name=""StringResource"">
     <value> </value>
     <comment>Comment</comment>
-  </data>"), null, false);
+  </data>"), null, false, _basePath);
 
             AssertSingleStringResource(resxWithSingleString, "StringResource", "");
         }
@@ -82,7 +224,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
                 ResXHelper.SurroundWithBoilerplate(
                     @"<data name=""StringResource"" type=""System.String"">
     <value>StringValue</value>
-  </data>"), null, false);
+  </data>"), null, false, _basePath);
 
             AssertSingleStringResource(resxWithSingleString, "StringResource", "StringValue");
         }
@@ -99,7 +241,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
   </data>
   <data name=""2StringResource2"" xml:space=""preserve"">
     <value>2StringValue2</value>
-  </data>"), null, false);
+  </data>"), null, false, _basePath);
 
             resxWithTwoStrings.Count.ShouldBe(2);
 
@@ -120,7 +262,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
 @"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
   <data name=""$this.AccessibleDescription"" type=""System.Resources.ResXNullRef, System.Windows.Forms, Version=1.0.5000.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"">
     <value />
-  </data>"), null, false);
+  </data>"), null, false, _basePath);
 
             resxWithNullRef.ShouldHaveSingleItem();
 
@@ -135,14 +277,14 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
         [InlineData("System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
         public void LoadsStringFromFileRefAsString(string stringType)
         {
-            File.Exists(Path.Combine("ResourceHandling", "TextFile1.txt")).ShouldBeTrue("Test deployment is missing None files");
+            File.Exists(Path.Combine(_basePath.Value, "ResourceHandling", "TextFile1.txt")).ShouldBeTrue("Test deployment is missing None files");
 
             var resxWithLinkedString = MSBuildResXReader.GetResourcesFromString(
                 ResXHelper.SurroundWithBoilerplate(
 $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
   <data name=""TextFile1"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
     <value>ResourceHandling\TextFile1.txt;{stringType};utf-8</value>
-  </data>"), null, false);
+  </data>"), null, false, _basePath);
 
             AssertSingleStringResourceFromFile(resxWithLinkedString, "TextFile1", "Contents of TextFile1");
         }
@@ -175,7 +317,8 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
   </data>"),
                     null,
                     false,
-                    Path.Combine(baseDir.Path, nameof(LoadsStringFromFileRefAsStringWithShiftJISEncoding) + ".resx"),
+                    new AbsolutePath(baseDir.Path),
+                    new AbsolutePath(Path.Combine(baseDir.Path, nameof(LoadsStringFromFileRefAsStringWithShiftJISEncoding) + ".resx")),
                     useRelativePath: true);
 
                 AssertSingleStringResourceFromFile(resxWithLinkedString, "TextFile1", JapaneseString);
@@ -221,7 +364,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
         b7eblRw4yy8Ta2GCpaZp1sIzz2LfCMS+EYh9401iw/gG1gYfvzjQIXcAAAAASUVORK5CYII=
 </value>
   </data>
-"), null, false);
+"), null, false, _basePath);
             resxWithEmbeddedBitmap.ShouldHaveSingleItem();
             resxWithEmbeddedBitmap[0].ShouldBeOfType(typeof(TypeConverterByteArrayResource));
 
@@ -239,7 +382,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
     <data name=""color"" type=""System.Drawing.Color, System.Drawing"">
       <value>Blue</value>
     </data>
-"), null, false);
+"), null, false, _basePath);
             resxWithEmbeddedBitmap.ShouldHaveSingleItem();
             resxWithEmbeddedBitmap[0].ShouldBeOfType(typeof(TypeConverterStringResource));
 
@@ -263,7 +406,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
                 ResXHelper.SurroundWithBoilerplate(
 @"  <assembly alias=""System.Drawing"" name=""System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
     <data name=""Color1"" type=""System.Drawing.Color, System.Drawing"">Blue</data>
-"), null, false);
+"), null, false, _basePath);
             resxWithEmbeddedBitmap.ShouldHaveSingleItem();
             resxWithEmbeddedBitmap[0].ShouldBeOfType(typeof(TypeConverterStringResource));
 
@@ -283,7 +426,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
 $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Forms'>
     <value>{bitmapPath};System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-"), null, false);
+"), null, false, _basePath);
             resxWithLinkedBitmap.ShouldHaveSingleItem();
             resxWithLinkedBitmap[0].ShouldBeOfType(typeof(FileStreamResource));
 
@@ -312,7 +455,7 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
 $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Forms'>
     <value>{linkedTextFile.Path};{typeNameInResx}</value>
   </data>
-"), null, false);
+"), null, false, new AbsolutePath(baseDir.Path));
 
             var resource = resources.ShouldHaveSingleItem()
                 .ShouldBeOfType<LinkedLiveObjectResource>();
@@ -332,7 +475,7 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
                 ResXHelper.SurroundWithBoilerplate(
 @"  <assembly name=""System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
     <data name=""Color1"" type=""System.Drawing.Color, System.Drawing""><value>Blue</value></data>
-"), null, false);
+"), null, false, _basePath);
             resxWithEmbeddedBitmap.ShouldHaveSingleItem();
             resxWithEmbeddedBitmap[0].ShouldBeOfType(typeof(TypeConverterStringResource));
 
@@ -349,7 +492,7 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
                 ResXHelper.SurroundWithBoilerplate(
                     @"<data name=""StringResource"" xml:space=""preserve"">
     <value>StringValue</value>
-  </data>"), null, false);
+  </data>"), null, false, _basePath);
 
             resources.ShouldHaveSingleItem();
             resources[0].ShouldBeOfType<StringResource>();
@@ -358,14 +501,14 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
         [Fact]
         public void FileRefStringIsLinkedFileResource()
         {
-            File.Exists(Path.Combine("ResourceHandling", "TextFile1.txt")).ShouldBeTrue("Test deployment is missing None files");
+            File.Exists(Path.Combine(_basePath.Value, "ResourceHandling", "TextFile1.txt")).ShouldBeTrue("Test deployment is missing None files");
 
             var resources = MSBuildResXReader.GetResourcesFromString(
                 ResXHelper.SurroundWithBoilerplate(
 $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
   <data name=""TextFile1"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
     <value>ResourceHandling\TextFile1.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>"), null, false);
+  </data>"), null, false, _basePath);
 
             resources.ShouldHaveSingleItem();
             resources[0].ShouldBeOfType<LinkedStringResource>();
