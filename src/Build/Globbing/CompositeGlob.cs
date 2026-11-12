@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Microsoft.Build.Globbing
 {
@@ -12,7 +11,7 @@ namespace Microsoft.Build.Globbing
     ///     A composite glob that returns a match for an input if any of its
     ///     inner globs match the input (disjunction).
     /// </summary>
-    public class CompositeGlob : IMSBuildGlob
+    public class CompositeGlob : IMSBuildGlob, IContextAwareGlob
     {
         private readonly ImmutableArray<IMSBuildGlob> _globs;
 
@@ -58,10 +57,25 @@ namespace Microsoft.Build.Globbing
         /// <inheritdoc />
         public bool IsMatch(string stringToMatch)
         {
-            // Threadpools are a scarce resource in Visual Studio, do not use them.
-            // return Globs.AsParallel().Any(g => g.IsMatch(stringToMatch));
+            var context = new GlobMatchContext(stringToMatch);
+            return IsMatch(ref context);
+        }
 
-            return _globs.Any(static (glob, str) => glob.IsMatch(str), stringToMatch);
+        bool IContextAwareGlob.IsMatch(ref GlobMatchContext context) => IsMatch(ref context);
+
+        private bool IsMatch(ref GlobMatchContext context)
+        {
+            // Do not be tempted to turn this into a LINQ query or to parallelize it. This is a very hot allocation path,
+            // and thread pool threads are a scarce resource in Visual Studio.
+            foreach (IMSBuildGlob glob in _globs)
+            {
+                if (context.IsMatch(glob))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
