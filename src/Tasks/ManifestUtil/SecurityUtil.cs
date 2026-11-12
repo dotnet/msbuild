@@ -4,8 +4,8 @@
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using System;
-#if !RUNTIME_TYPE_NETCORE
 using Microsoft.Build.Framework;
+#if !RUNTIME_TYPE_NETCORE
 using System.Collections.Generic;
 #endif
 using System.ComponentModel;
@@ -565,6 +565,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                     string targetFrameworkIdentifier,
                                     bool disallowMansignTimestampFallback)
         {
+            SignFile(certThumbprint, timestampUrl, TaskEnvironment.Fallback.GetAbsolutePathOrEmpty(path),
+                targetFrameworkVersion, targetFrameworkIdentifier, disallowMansignTimestampFallback, TaskEnvironment.Fallback);
+        }
+
+        [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
+        internal static void SignFile(string certThumbprint,
+                                     Uri timestampUrl,
+                                     AbsolutePath path,
+                                     string targetFrameworkVersion,
+                                     string targetFrameworkIdentifier,
+                                     bool disallowMansignTimestampFallback,
+                                     TaskEnvironment taskEnvironment)
+        {
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
 
             if (String.IsNullOrEmpty(certThumbprint))
@@ -599,11 +614,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     // Use SHA-256 digest for .NET Core apps
                     isTargetFrameworkSha256Supported = true;
                 }
-                SignFileInternal(cert, timestampUrl, path, isTargetFrameworkSha256Supported, resources, disallowMansignTimestampFallback);
+                SignFileInternal(cert, timestampUrl, path, isTargetFrameworkSha256Supported, resources, taskEnvironment, disallowMansignTimestampFallback);
             }
             else
             {
-                SignFile(cert, timestampUrl, path);
+                SignFileInternal(cert, timestampUrl, path, targetFrameworkSupportsSha256: true, resources, taskEnvironment);
             }
         }
 
@@ -650,7 +665,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             // setup resources
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
-            SignFileInternal(cert, timestampUrl, path, targetFrameworkSupportsSha256: true, resources);
+            SignFileInternal(cert, timestampUrl, TaskEnvironment.Fallback.GetAbsolutePathOrEmpty(path),
+                targetFrameworkSupportsSha256: true, resources, TaskEnvironment.Fallback);
         }
 
         [SupportedOSPlatform("windows")]
@@ -658,9 +674,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         private static void SignFileInternal(X509Certificate2 cert,
                                             Uri timestampUrl,
-                                            string path,
+                                            AbsolutePath path,
                                             bool targetFrameworkSupportsSha256,
                                             System.Resources.ResourceManager resources,
+                                            TaskEnvironment taskEnvironment,
                                             bool disallowMansignTimestampFallback = false)
         {
             if (cert == null)
@@ -675,7 +692,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (!FileSystems.Default.FileExists(path))
             {
-                throw new FileNotFoundException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SignTargetNotFound"), path), path);
+                throw new FileNotFoundException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SignTargetNotFound"), path.OriginalValue), path.OriginalValue);
             }
 
             bool useSha256 = UseSha256Algorithm(cert) && targetFrameworkSupportsSha256;
@@ -684,7 +701,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 if (IsCertInStore(cert))
                 {
-                    SignPEFile(cert, timestampUrl, path, resources, useSha256);
+                    SignPEFile(cert, timestampUrl, path, resources, useSha256, taskEnvironment);
                 }
                 else
                 {
@@ -738,14 +755,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         if (NativeMethodsShared.IsWindows)
                         {
                             string clrDllDir = Path.Combine(
-                                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                                    Path.GetDirectoryName(Environment.SystemDirectory),
                                     "Microsoft.NET",
                                     Environment.Is64BitProcess ? "Framework64" : "Framework",
                                     "v4.0.30319");
 
-                            PInvoke.SetDllDirectory(clrDllDir);
-                            hModule = PInvoke.LoadLibraryEx(Path.Combine(clrDllDir, "clr.dll"), LOAD_LIBRARY_FLAGS.LOAD_LIBRARY_AS_DATAFILE);
-                            // No need to check hModule - Sign() method will quickly fail if we did not load clr.dll
+                            // Load executable exports and their dependencies without changing the host's DLL search path.
+                            hModule = PInvoke.LoadLibraryEx(Path.Combine(clrDllDir, "clr.dll"),
+                                LOAD_LIBRARY_FLAGS.LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_FLAGS.LOAD_LIBRARY_SEARCH_SYSTEM32);
+                            if (hModule.IsNull)
+                            {
+                                throw new Win32Exception();
+                            }
                         }
 #endif
                         if (timestampUrl == null)
@@ -777,8 +798,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                             {
                                 PInvoke.FreeLibrary(hModule);
                             }
-
-                            PInvoke.SetDllDirectory((string)null);
                         }
                     }
 #endif
@@ -786,39 +805,38 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-        private static void SignPEFile(X509Certificate2 cert, Uri timestampUrl, string path, System.Resources.ResourceManager resources, bool useSha256)
+        private static void SignPEFile(X509Certificate2 cert, Uri timestampUrl, AbsolutePath path, System.Resources.ResourceManager resources, bool useSha256, TaskEnvironment taskEnvironment)
         {
             try
             {
-                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, true);
+                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, true, taskEnvironment);
             }
             catch (ApplicationException) when (timestampUrl != null)
             {
                 // error, retry with signtool /t if timestamp url was given
-                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, false);
+                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, false, taskEnvironment);
                 return;
             }
         }
 
         private static void SignPEFileInternal(X509Certificate2 cert, Uri timestampUrl,
-                                               string path, System.Resources.ResourceManager resources,
-                                               bool useSha256, bool useRFC3161Timestamp)
+                                               AbsolutePath path, System.Resources.ResourceManager resources,
+                                               bool useSha256, bool useRFC3161Timestamp, TaskEnvironment taskEnvironment)
         {
-            var startInfo = new ProcessStartInfo(
-                GetPathToTool(resources),
-                GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256, useRFC3161Timestamp))
-            {
-                CreateNoWindow = true,
-                UseShellExecute = false,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true
-            };
+            ProcessStartInfo startInfo = taskEnvironment.GetProcessStartInfo();
+            startInfo.FileName = GetPathToTool(resources, taskEnvironment);
+            startInfo.Arguments = GetCommandLineParameters(cert.Thumbprint, timestampUrl, path.OriginalValue, useSha256, useRFC3161Timestamp);
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardError = true;
+            startInfo.RedirectStandardOutput = true;
 
             Process signTool = null;
 
             try
             {
-                signTool = Process.Start(startInfo);
+                signTool = new Process { StartInfo = startInfo };
+                signTool.Start();
                 signTool.WaitForExit();
 
                 while (!signTool.HasExited)
@@ -832,13 +850,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         break;
                     case 1:
                         // error, report it
-                        throw new ApplicationException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolFail"), path, signTool.StandardError.ReadToEnd()));
+                        throw new ApplicationException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolFail"), path.OriginalValue, signTool.StandardError.ReadToEnd()));
                     case 2:
                         // warning, report it
-                        throw new WarningException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolWarning"), path, signTool.StandardError.ReadToEnd()));
+                        throw new WarningException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolWarning"), path.OriginalValue, signTool.StandardError.ReadToEnd()));
                     default:
                         // treat as error
-                        throw new ApplicationException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolFail"), path, signTool.StandardError.ReadToEnd()));
+                        throw new ApplicationException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolFail"), path.OriginalValue, signTool.StandardError.ReadToEnd()));
                 }
             }
             finally
@@ -872,15 +890,20 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         internal static string GetPathToTool(System.Resources.ResourceManager resources)
+            => GetPathToTool(resources, TaskEnvironment.Fallback);
+
+        internal static AbsolutePath GetPathToTool(System.Resources.ResourceManager resources, TaskEnvironment taskEnvironment)
         {
+            bool ToolExists(string candidate) => !string.IsNullOrEmpty(candidate) && FileSystems.Default.FileExists(taskEnvironment.GetAbsolutePath(candidate));
+
 #pragma warning disable 618 // Disabling warning on using internal ToolLocationHelper API. At some point we should migrate this.
             string toolPath = ToolLocationHelper.GetPathToWindowsSdkFile(ToolName, TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest);
-            if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
+            if (!ToolExists(toolPath))
             {
                 toolPath = ToolLocationHelper.GetPathToWindowsSdkFile(ToolName, TargetDotNetFrameworkVersion.Version45,
                     VisualStudioVersion.Version110);
             }
-            if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
+            if (!ToolExists(toolPath))
             {
                 var pathToDotNetFrameworkSdk = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version40, VisualStudioVersion.Version100);
                 if (pathToDotNetFrameworkSdk != null)
@@ -888,21 +911,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     toolPath = Path.Combine(pathToDotNetFrameworkSdk, "bin", ToolName);
                 }
             }
-            if (NativeMethodsShared.IsWindows && (toolPath == null || !FileSystems.Default.FileExists(toolPath)))
+            if (NativeMethodsShared.IsWindows && !ToolExists(toolPath))
             {
                 toolPath = GetVersionIndependentToolPath(ToolName);
             }
-            if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
+            if (!ToolExists(toolPath))
             {
-                toolPath = Path.Combine(Directory.GetCurrentDirectory(), ToolName);
+                toolPath = taskEnvironment.GetAbsolutePath(ToolName);
             }
-            if (!FileSystems.Default.FileExists(toolPath))
+            if (!ToolExists(toolPath))
             {
                 throw new ApplicationException(String.Format(CultureInfo.CurrentCulture,
                     resources.GetString("SecurityUtil.SigntoolNotFound"), toolPath));
             }
 
-            return toolPath;
+            return taskEnvironment.GetAbsolutePath(toolPath);
 #pragma warning restore 618
         }
 

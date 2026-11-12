@@ -164,12 +164,24 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static bool IsPEFile(string path)
         {
-            byte[] buffer = new byte[2];
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                s.ReadExactly(buffer, 0, 2);
+                return IsPEFile(s);
             }
+        }
 
+        internal static bool IsPEFile(AbsolutePath path)
+        {
+            using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return IsPEFile(s);
+            }
+        }
+
+        private static bool IsPEFile(Stream stream)
+        {
+            byte[] buffer = new byte[2];
+            stream.ReadExactly(buffer, 0, 2);
             // if first two bytes are "MZ" then we're looking at an .exe or a .dll not a .manifest
             return (buffer[0] == 0x4D) && (buffer[1] == 0x5A);
         }

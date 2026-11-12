@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(SignFile));
                 return false;
             }
-            AbsolutePath signingTargetPath = TaskEnvironment.GetAbsolutePath(SigningTarget.ItemSpec);
+            AbsolutePath signingTargetPath = TaskEnvironment.GetAbsolutePathOrEmpty(SigningTarget.ItemSpec);
             string SanitizeMessage(string msg) => msg?.Replace((string)signingTargetPath, signingTargetPath.OriginalValue) ?? msg;
             try
             {
@@ -67,7 +67,8 @@ namespace Microsoft.Build.Tasks
                     signingTargetPath,
                     TargetFrameworkVersion,
                     TargetFrameworkIdentifier,
-                    DisallowMansignTimestampFallback);
+                    DisallowMansignTimestampFallback,
+                    TaskEnvironment);
                 return true;
             }
             catch (ArgumentException ex) when (ex.ParamName.Equals("certThumbprint"))

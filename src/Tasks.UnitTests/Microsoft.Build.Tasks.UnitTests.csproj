@@ -38,6 +38,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="PresentationFramework" Condition="$([MSBuild]::IsOSPlatform('windows'))" />
