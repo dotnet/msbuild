@@ -807,7 +807,6 @@ public sealed class TaskWithoutOutputFiles : Microsoft.Build.Utilities.Task
         File.WriteAllText(OutputFile, "executed");
         return true;
     }
-
 }
 
 [MSBuildDeclaredIOTask]
