@@ -153,10 +153,10 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         TransientTestFile project = helper.CreateFile(
             projectFolder,
             "StaticGraphRestoreRepro.csproj",
-            """
+            $"""
             <Project Sdk="Microsoft.NET.Sdk">
               <PropertyGroup>
-                <TargetFramework>net10.0</TargetFramework>
+                <TargetFramework>{RunnerUtilities.LatestDotNetCoreForMSBuild}</TargetFramework>
               </PropertyGroup>
             </Project>
             """);
