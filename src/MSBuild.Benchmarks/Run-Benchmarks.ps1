@@ -94,7 +94,8 @@ param(
         'ExpressionShredderThroughput',
         'ExpressionShredderAllocations',
         'Items',
-        'ItemEvaluation')]
+        'ItemEvaluation',
+        'InvariantMetadata')]
     [string[]]$Set,
 
     [Parameter(Mandatory, ParameterSetName = 'All')]
