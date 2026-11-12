@@ -32,6 +32,7 @@ namespace Microsoft.Build.Logging
     internal class BuildEventArgsWriter
     {
         private const int StringReferenceCacheSize = 256; // Must remain a power of two.
+        private const int SingleMetadataCacheSize = 512; // Must remain a power of two.
         private const int MaxCachedStringLength = 4096;
 
         private readonly Stream originalStream;
@@ -91,6 +92,8 @@ namespace Microsoft.Build.Logging
         /// Avoid repeatedly hashing shared string instances without retaining the full string population.
         /// </summary>
         private readonly StringReferenceCacheEntry[] stringReferenceCache = new StringReferenceCacheEntry[StringReferenceCacheSize];
+        // Independently evaluated items can have the same metadata without sharing a dictionary.
+        private readonly SingleMetadataCacheEntry[] singleMetadataCache = new SingleMetadataCacheEntry[SingleMetadataCacheSize];
 
         /// <summary>
         /// Hashtable used for deduplicating name-value lists. Same as strings.
@@ -105,6 +108,8 @@ namespace Microsoft.Build.Logging
 
 #if DEBUG
         internal int MetadataReferenceCacheHits { get; private set; }
+        internal int MetadataReferenceCacheEntriesCreated { get; private set; }
+        internal int SingleMetadataCacheHits { get; private set; }
 #endif
 
         /// <summary>
@@ -1342,6 +1347,7 @@ namespace Microsoft.Build.Logging
             }
 
             ImmutableDictionary<string, string> backingMetadata = null;
+            bool cacheMetadataByReference = false;
             IMetadataContainer metadataContainer = item as IMetadataContainer;
             if (metadataContainer != null
 #if FEATURE_APPDOMAIN
@@ -1359,7 +1365,15 @@ namespace Microsoft.Build.Logging
                         return;
                     }
 
-                    if (metadataRecordIds.TryGetValue(backingMetadata, out StrongBox<int> cachedRecord))
+                    if (backingMetadata.Count == 1)
+                    {
+                        WriteSingleEntryMetadata(backingMetadata);
+                        return;
+                    }
+
+                    // Single-entry metadata uses content deduplication without reference-cache bookkeeping.
+                    cacheMetadataByReference = backingMetadata.Count > 1;
+                    if (cacheMetadataByReference && metadataRecordIds.TryGetValue(backingMetadata, out StrongBox<int> cachedRecord))
                     {
 #if DEBUG
                         MetadataReferenceCacheHits++;
@@ -1398,10 +1412,57 @@ namespace Microsoft.Build.Logging
             int metadataRecordId = WriteNameValueList();
             nameValueListBuffer.Clear();
 
-            if (backingMetadata != null)
+            if (cacheMetadataByReference)
             {
                 metadataRecordIds.Add(backingMetadata, new StrongBox<int>(metadataRecordId));
+#if DEBUG
+                MetadataReferenceCacheEntriesCreated++;
+#endif
             }
+        }
+
+        private void WriteSingleEntryMetadata(ImmutableDictionary<string, string> metadata)
+        {
+            using var enumerator = metadata.GetEnumerator();
+            enumerator.MoveNext();
+            KeyValuePair<string, string> pair = enumerator.Current;
+            int cacheIndex = -1;
+            if (pair.Value != null
+                && pair.Key.Length <= MaxCachedStringLength
+                && pair.Value.Length <= MaxCachedStringLength - pair.Key.Length)
+            {
+                cacheIndex = unchecked((pair.Key.GetHashCode() * 397) ^ pair.Value.GetHashCode()) & (SingleMetadataCacheSize - 1);
+                ref SingleMetadataCacheEntry cached = ref singleMetadataCache[cacheIndex];
+                if (StringComparer.Ordinal.Equals(cached.Name, pair.Key)
+                    && StringComparer.Ordinal.Equals(cached.EscapedValue, pair.Value))
+                {
+#if DEBUG
+                    SingleMetadataCacheHits++;
+#endif
+                    Write(cached.RecordId);
+                    return;
+                }
+            }
+
+            nameValueListBuffer.Add(new KeyValuePair<string, string>(pair.Key, EscapingUtilities.UnescapeAll(pair.Value)));
+            int recordId = WriteNameValueList();
+            nameValueListBuffer.Clear();
+            if (cacheIndex >= 0)
+            {
+                singleMetadataCache[cacheIndex] = new SingleMetadataCacheEntry
+                {
+                    Name = pair.Key,
+                    EscapedValue = pair.Value,
+                    RecordId = recordId
+                };
+            }
+        }
+
+        private struct SingleMetadataCacheEntry
+        {
+            internal string Name;
+            internal string EscapedValue;
+            internal int RecordId;
         }
 
         private void WriteProperties(IEnumerable properties)
