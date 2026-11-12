@@ -157,6 +157,13 @@ public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 
 `AbsolutePath` converts implicitly to string for seamless integration with existing File/Directory APIs.
 
+For wildcard expansion, keep the project directory separate from the glob expression.
+Pass it to every `FileMatcher` operation that can resolve short names, including
+validation and matching used to compute `RecursiveDir`. Prefixing the directory to
+the raw glob can reinterpret valid directory names as glob syntax or an invalid
+file specification. Root the filesystem lookups while preserving the original
+relative or rooted form of task outputs.
+
 ### API Usage Example
 
 ```csharp

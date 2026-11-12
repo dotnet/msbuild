@@ -51,7 +51,7 @@ namespace Microsoft.Build.Shared
         // until Cloudbuild switches to EvaluationContext, we need to keep their dependence on global glob caching via an environment variable
         private static readonly Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>> s_cachedGlobExpansions = new Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>>(() => new ConcurrentDictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase));
         private static readonly Lazy<ConcurrentDictionary<string, object>> s_cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
-        private static readonly Lazy<ConcurrentDictionary<string, (Regex regex, bool needsRecursion, bool isLegalFileSpec)>> s_regexCache = new(() => new(StringComparer.Ordinal));
+        private static readonly Lazy<ConcurrentDictionary<(string projectDirectory, string fileSpec), (Regex regex, bool needsRecursion, bool isLegalFileSpec)>> s_regexCache = new(() => new());
 
         private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _cachedGlobExpansions;
         private readonly Lazy<ConcurrentDictionary<string, object>> _cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
@@ -433,11 +433,13 @@ namespace Microsoft.Build.Shared
         /// Given a path name, get its long version.
         /// </summary>
         /// <param name="path">The short path.</param>
+        /// <param name="projectDirectory">The base directory for relative filesystem lookups.</param>
         /// <returns>The long path.</returns>
         internal string GetLongPathName(
-            string path)
+            string path,
+            string projectDirectory = null)
         {
-            return GetLongPathName(path, _getFileSystemEntries);
+            return GetLongPathName(path, _getFileSystemEntries, projectDirectory);
         }
 
         /// <summary>
@@ -445,10 +447,12 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="path">The short path.</param>
         /// <param name="getFileSystemEntries">Delegate.</param>
+        /// <param name="projectDirectory">The base directory for relative filesystem lookups.</param>
         /// <returns>The long path.</returns>
         internal static string GetLongPathName(
             string path,
-            GetFileSystemEntries getFileSystemEntries)
+            GetFileSystemEntries getFileSystemEntries,
+            string projectDirectory = null)
         {
             if (!path.Contains('~'))
             {
@@ -491,6 +495,13 @@ namespace Microsoft.Build.Shared
             string[] longParts = new string[parts.Length - startingElement];
 
             string longPath = pathRoot;
+            if (projectDirectory is not null)
+            {
+                string lookupRoot = pathRoot.Length == 0 ? Path.GetPathRoot(path) : pathRoot;
+                longPath = string.IsNullOrEmpty(lookupRoot)
+                    ? projectDirectory
+                    : new AbsolutePath(lookupRoot, new AbsolutePath(projectDirectory, ignoreRootedCheck: true)).Value;
+            }
             for (int i = startingElement; i < parts.Length; ++i)
             {
                 // If there is a zero-length part, then that means there was an extra slash.
@@ -548,11 +559,13 @@ namespace Microsoft.Build.Shared
         /// <param name="fixedDirectoryPart">Receives the fixed directory part.</param>
         /// <param name="wildcardDirectoryPart">The wildcard directory part.</param>
         /// <param name="filenamePart">The filename part.</param>
+        /// <param name="projectDirectory">The base directory for short-name resolution.</param>
         internal void SplitFileSpec(
             string filespec,
             out string fixedDirectoryPart,
             out string wildcardDirectoryPart,
-            out string filenamePart)
+            out string filenamePart,
+            string projectDirectory = null)
         {
             PreprocessFileSpecForSplitting(
                 filespec,
@@ -574,7 +587,7 @@ namespace Microsoft.Build.Shared
                 filenamePart = "*.*";
             }
 
-            fixedDirectoryPart = FileMatcher.GetLongPathName(fixedDirectoryPart, _getFileSystemEntries);
+            fixedDirectoryPart = FileMatcher.GetLongPathName(fixedDirectoryPart, _getFileSystemEntries, projectDirectory);
         }
 
         /// <summary>
@@ -1497,15 +1510,17 @@ namespace Microsoft.Build.Shared
         /// <param name="regexFileMatch">Receives the regular expression.</param>
         /// <param name="needsRecursion">Receives the flag that is true if recursion is required.</param>
         /// <param name="isLegalFileSpec">Receives the flag that is true if the filespec is legal.</param>
+        /// <param name="projectDirectory">The base directory for short-name resolution.</param>
         internal void GetFileSpecInfoWithRegexObjectCore(
             string filespec,
             out Regex regexFileMatch,
             out bool needsRecursion,
-            out bool isLegalFileSpec)
+            out bool isLegalFileSpec,
+            string projectDirectory = null)
         {
             GetFileSpecInfo(filespec,
                 out string fixedDirectoryPart, out string wildcardDirectoryPart, out string filenamePart,
-                out needsRecursion, out isLegalFileSpec);
+                out needsRecursion, out isLegalFileSpec, projectDirectory: projectDirectory);
 
             if (isLegalFileSpec)
             {
@@ -1523,11 +1538,14 @@ namespace Microsoft.Build.Shared
            string filespec,
            out Regex regexFileMatch,
            out bool needsRecursion,
-           out bool isLegalFileSpec)
+           out bool isLegalFileSpec,
+           string projectDirectory = null)
         {
-            var result = s_regexCache.Value.GetOrAdd(filespec, spec =>
+            // Only short-name expansion depends on the project directory.
+            string cacheProjectDirectory = filespec.Contains('~') ? projectDirectory : null;
+            var result = s_regexCache.Value.GetOrAdd((cacheProjectDirectory, filespec), key =>
             {
-                GetFileSpecInfoWithRegexObjectCore(spec, out var regex, out var needsRec, out var isLegal);
+                GetFileSpecInfoWithRegexObjectCore(key.fileSpec, out var regex, out var needsRec, out var isLegal, key.projectDirectory);
                 return (regex, needsRec, isLegal);
             });
             regexFileMatch = result.regex;
@@ -1550,6 +1568,7 @@ namespace Microsoft.Build.Shared
         /// <param name="needsRecursion">Receives the flag that is true if recursion is required.</param>
         /// <param name="isLegalFileSpec">Receives the flag that is true if the filespec is legal.</param>
         /// <param name="fixupParts">hook method to further change the parts</param>
+        /// <param name="projectDirectory">The base directory for short-name resolution.</param>
         internal void GetFileSpecInfo(
             string filespec,
             out string fixedDirectoryPart,
@@ -1557,7 +1576,8 @@ namespace Microsoft.Build.Shared
             out string filenamePart,
             out bool needsRecursion,
             out bool isLegalFileSpec,
-            FixupParts fixupParts = null)
+            FixupParts fixupParts = null,
+            string projectDirectory = null)
         {
             needsRecursion = false;
             fixedDirectoryPart = string.Empty;
@@ -1573,7 +1593,7 @@ namespace Microsoft.Build.Shared
             /*
              * Now break up the filespec into constituent parts--fixed, wildcard and filename.
              */
-            SplitFileSpec(filespec, out fixedDirectoryPart, out wildcardDirectoryPart, out filenamePart);
+            SplitFileSpec(filespec, out fixedDirectoryPart, out wildcardDirectoryPart, out filenamePart, projectDirectory);
 
             if (fixupParts != null)
             {
@@ -1840,21 +1860,24 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="filespec">The filespec.</param>
         /// <param name="fileToMatch">The candidate to match against.</param>
+        /// <param name="projectDirectory">The base directory for short-name resolution.</param>
         /// <returns>The result class.</returns>
         internal Result FileMatch(
             string filespec,
-            string fileToMatch)
+            string fileToMatch,
+            string projectDirectory = null)
         {
             Result matchResult = new Result();
 
-            fileToMatch = GetLongPathName(fileToMatch, _getFileSystemEntries);
+            fileToMatch = GetLongPathName(fileToMatch, _getFileSystemEntries, projectDirectory);
 
             Regex regexFileMatch;
             GetFileSpecInfoWithRegexObject(
                 filespec,
                 out regexFileMatch,
                 out matchResult.isFileSpecRecursive,
-                out matchResult.isLegalFileSpec);
+                out matchResult.isLegalFileSpec,
+                projectDirectory);
 
             if (matchResult.isLegalFileSpec)
             {
@@ -2076,7 +2099,8 @@ namespace Microsoft.Build.Shared
                 out string wildcardDirectoryPart,
                 out string filenamePart,
                 out bool needsRecursion,
-                out bool isLegalFileSpec);
+                out bool isLegalFileSpec,
+                projectDirectory: projectDirectoryUnescaped);
 
             /*
              * If the filespec is invalid, then just return now.
@@ -2086,8 +2110,7 @@ namespace Microsoft.Build.Shared
                 return SearchAction.ReturnFileSpec;
             }
 
-            // The projectDirectory is not null only if we are running the evaluation from
-            // inside the engine (i.e. not from a task)
+            // Keep the project directory separate from the glob syntax.
             string oldFixedDirectoryPart = fixedDirectoryPart;
             if (projectDirectoryUnescaped != null)
             {
@@ -2095,14 +2118,17 @@ namespace Microsoft.Build.Shared
                 {
                     try
                     {
-                        fixedDirectoryPart = Path.Combine(projectDirectoryUnescaped, fixedDirectoryPart);
+                        fixedDirectoryPart = fixedDirectoryPart.Length == 0
+                            ? projectDirectoryUnescaped
+                            : new AbsolutePath(fixedDirectoryPart, new AbsolutePath(projectDirectoryUnescaped, ignoreRootedCheck: true)).Value;
                     }
                     catch (ArgumentException)
                     {
                         return SearchAction.ReturnEmptyList;
                     }
 
-                    stripProjectDirectory = !string.Equals(fixedDirectoryPart, oldFixedDirectoryPart, StringComparison.OrdinalIgnoreCase);
+                    stripProjectDirectory = !Path.IsPathRooted(oldFixedDirectoryPart)
+                        && !string.Equals(fixedDirectoryPart, oldFixedDirectoryPart, StringComparison.OrdinalIgnoreCase);
                 }
                 else
                 {
@@ -2171,7 +2197,7 @@ namespace Microsoft.Build.Shared
                 matchWithRegex ? null : filenamePart,
                 directoryPattern,
                 // if using the file pattern, ignore the regular expression
-                matchWithRegex ? new Regex(RegularExpressionFromFileSpec(oldFixedDirectoryPart, wildcardDirectoryPart, filenamePart), RegexOptions.IgnoreCase) : null,
+                matchWithRegex ? new Regex(RegularExpressionFromFileSpec(stripProjectDirectory ? oldFixedDirectoryPart : fixedDirectoryPart, wildcardDirectoryPart, filenamePart), RegexOptions.IgnoreCase) : null,
                 needsRecursion);
 
             result.SearchData = searchData;

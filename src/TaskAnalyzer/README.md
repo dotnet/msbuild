@@ -377,10 +377,11 @@ When packaged as a NuGet analyzer, add it as a package reference:
 
 ### MSBuild Tasks Build
 
-To enable the analyzer in the MSBuild Tasks project build, pass `/p:BuildAnalyzer=true`:
+The MSBuild Tasks project enables the source-built analyzer by default. To disable it
+explicitly for a local build, pass `/p:BuildAnalyzer=false`:
 
 ```
-dotnet build src/Tasks/Microsoft.Build.Tasks.csproj /p:BuildAnalyzer=true
+dotnet build src/Tasks/Microsoft.Build.Tasks.csproj /p:BuildAnalyzer=false
 ```
 
 ## Example

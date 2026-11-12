@@ -3,6 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+#if !NETFRAMEWORK
+using System.IO;
+#else
+using Microsoft.IO;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -146,9 +151,9 @@ namespace Microsoft.Build.Tasks
         {
             // Used to detect and log drive enumerating wildcard patterns.
             string[] files;
-            string itemSpec = string.Empty;
+            AbsolutePath projectDirectory = default;
 
-            if (expand == null)
+            if (expand is null)
             {
                 return (null, true);
             }
@@ -159,7 +164,12 @@ namespace Microsoft.Build.Tasks
                 {
                     if (FileMatcher.HasWildcards(i.ItemSpec))
                     {
-                        FileMatcher.Default.GetFileSpecInfo(i.ItemSpec, out string directoryPart, out string wildcardPart, out string filenamePart, out bool needsRecursion, out bool isLegalFileSpec);
+                        if (projectDirectory.Value is null)
+                        {
+                            projectDirectory = TaskEnvironment.ProjectDirectory;
+                        }
+
+                        FileMatcher.Default.GetFileSpecInfo(i.ItemSpec, out string directoryPart, out string wildcardPart, out _, out _, out bool isLegalFileSpec, projectDirectory: projectDirectory);
                         bool logDriveEnumeratingWildcard = FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart);
                         if (logDriveEnumeratingWildcard)
                         {
@@ -182,21 +192,34 @@ namespace Microsoft.Build.Tasks
                         }
                         else if (isLegalFileSpec)
                         {
-                            // Resolve wildcards against the task's project directory (rather than the process
-                            // current directory) while keeping the relative ItemSpec so the resulting items'
-                            // ItemSpec values remain project-relative, preserving the original [Output] contract.
-                            (files, _, _, string? globFailure) = FileMatcher.Default.GetFiles(TaskEnvironment.ProjectDirectory, i.ItemSpec);
-                            if (globFailure != null)
+                            (files, _, _, string? globFailure) = FileMatcher.Default.GetFiles(projectDirectory, i.ItemSpec);
+                            if (globFailure is not null)
                             {
                                 Log.LogMessage(MessageImportance.Low, globFailure);
                             }
 
-                            foreach (string file in files)
+                            IEnumerable<string> outputFiles = files;
+                            string outputRoot = string.Empty;
+                            if (globFailure is null && Path.IsPathRooted(i.ItemSpec))
                             {
-                                TaskItem newItem = new TaskItem(i) { ItemSpec = file };
+                                // FileMatcher roots the search; preserve partially rooted output spellings.
+                                AbsolutePath absoluteItemSpec = new(i.ItemSpec, projectDirectory);
+                                if (!string.Equals(absoluteItemSpec.Value, i.ItemSpec, StringComparison.Ordinal))
+                                {
+                                    outputRoot = Path.GetPathRoot(i.ItemSpec)!;
+                                    string outputBase = outputRoot.EndsWith(":", StringComparison.Ordinal)
+                                        ? projectDirectory.Value
+                                        : FileMatcher.Normalize(Path.GetPathRoot(absoluteItemSpec.Value)!);
+                                    outputFiles = FileMatcher.RemoveProjectDirectory(files, outputBase);
+                                }
+                            }
+
+                            foreach (string file in outputFiles)
+                            {
+                                TaskItem newItem = new TaskItem(i) { ItemSpec = outputRoot + file };
 
                                 // Compute the RecursiveDir portion.
-                                FileMatcher.Result match = FileMatcher.Default.FileMatch(i.ItemSpec, file);
+                                FileMatcher.Result match = FileMatcher.Default.FileMatch(i.ItemSpec, newItem.ItemSpec, projectDirectory);
                                 if (match.isLegalFileSpec && match.isMatch)
                                 {
                                     if (!string.IsNullOrEmpty(match.wildcardDirectoryPart))
