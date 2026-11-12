@@ -15,7 +15,7 @@ description: "Automatically runs the expert-reviewer agent when a non-draft PR i
 on:
   pull_request_target:
     types: [opened, ready_for_review]
-    forks: ["*"]
+    acknowledge-risk: true
   roles: [admin, maintainer, write]
 
 # Skip draft PRs — only run for PRs opened as ready or converted from draft
