@@ -11,7 +11,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -52,7 +51,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [InlineData("AssemblyTaskFactory", false)]
         [InlineData("TaskHostFactory", false)]
         [InlineData("AssemblyTaskFactory", true)]
-        public async Task TypedTaskInputsPreservePathsAndMetadata(string taskFactory, bool multiThreaded)
+        public void TypedTaskInputsPreservePathsAndMetadata(string taskFactory, bool multiThreaded)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             var taskOutput = env.CreateFolder();
@@ -62,34 +61,24 @@ namespace Microsoft.Build.Engine.UnitTests
 #else
             string taskFramework = "net472";
 #endif
-            Microsoft.Build.Utilities.CommandLineBuilder buildCommand = new();
-            buildCommand.AppendFileNameIfNotNull(Path.Combine(assetPath, "TypedTaskInputs.csproj"));
-            buildCommand.AppendSwitch("-restore");
-            buildCommand.AppendSwitch("-v:q");
-            buildCommand.AppendSwitchIfNotNull("-p:TaskTargetFramework=", taskFramework);
-            buildCommand.AppendSwitchIfNotNull("-p:BaseIntermediateOutputPath=", FileUtilities.EnsureTrailingSlash(Path.Combine(taskOutput.Path, "obj")));
-            buildCommand.AppendSwitchIfNotNull("-p:OutputPath=", FileUtilities.EnsureTrailingSlash(Path.Combine(taskOutput.Path, "bin")));
-            buildCommand.AppendSwitch("-p:AppendTargetFrameworkToOutputPath=false");
-            buildCommand.AppendSwitch("-p:ImportDirectoryBuildProps=false");
-            buildCommand.AppendSwitch("-p:ImportDirectoryBuildTargets=false");
-            buildCommand.AppendSwitch("-p:ImportDirectoryPackagesProps=false");
-            var (buildSucceeded, buildOutput) = await RunnerUtilities.ExecBootstrappedMSBuildAsync(
-                buildCommand.ToString(), outputHelper: _output, timeoutMilliseconds: 120_000);
+            string buildOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{Path.Combine(assetPath, "TypedTaskInputs.csproj")}\" -restore -v:q"
+                + $" -p:TaskTargetFramework={taskFramework}"
+                + $" -p:BaseIntermediateOutputPath=\"{Path.Combine(taskOutput.Path, "obj")}\""
+                + $" -p:OutputPath=\"{Path.Combine(taskOutput.Path, "bin")}\""
+                + " -p:AppendTargetFrameworkToOutputPath=false"
+                + " -p:ImportDirectoryBuildProps=false -p:ImportDirectoryBuildTargets=false -p:ImportDirectoryPackagesProps=false",
+                out bool buildSucceeded,
+                outputHelper: _output);
             buildSucceeded.ShouldBeTrue(buildOutput);
 
             string taskAssembly = Path.Combine(taskOutput.Path, "bin", "TypedTaskInputs.dll");
-            Microsoft.Build.Utilities.CommandLineBuilder runCommand = new();
-            runCommand.AppendFileNameIfNotNull(Path.Combine(assetPath, "TypedTaskInputs.proj"));
-            runCommand.AppendSwitch("-v:n");
-            runCommand.AppendSwitchIfNotNull("-p:TaskAssembly=", taskAssembly);
-            runCommand.AppendSwitchIfNotNull("-p:TaskFactoryToUse=", taskFactory);
-            if (multiThreaded)
-            {
-                runCommand.AppendSwitch("-mt");
-            }
-
-            var (succeeded, output) = await RunnerUtilities.ExecBootstrappedMSBuildAsync(
-                runCommand.ToString(), outputHelper: _output, timeoutMilliseconds: 120_000);
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{Path.Combine(assetPath, "TypedTaskInputs.proj")}\" -v:n"
+                + $" -p:TaskAssembly=\"{taskAssembly}\" -p:TaskFactoryToUse={taskFactory}"
+                + (multiThreaded ? " -mt" : ""),
+                out bool succeeded,
+                outputHelper: _output);
 
             succeeded.ShouldBeTrue(output);
             output.ShouldContain("TypedInputContractVerified=True");
