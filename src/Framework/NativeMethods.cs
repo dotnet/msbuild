@@ -444,18 +444,10 @@ internal static class NativeMethods
     }
 
     /// <summary>
-    /// Cached value for IsUnixLike (this method is called frequently during evaluation).
-    /// </summary>
-    private static readonly bool s_isUnixLike = IsLinux || IsOSX || IsBSD || IsHaiku || IsOpenHarmony;
-
-    /// <summary>
     /// Gets a flag indicating if we are running under a Unix-like system (Mac, Linux, etc.)
     /// </summary>
     [UnsupportedOSPlatformGuard("windows")]
-    internal static bool IsUnixLike
-    {
-        get { return s_isUnixLike; }
-    }
+    internal static bool IsUnixLike => !IsWindows;
 
     /// <summary>
     /// Gets a flag indicating if we are running under Linux
@@ -464,40 +456,6 @@ internal static class NativeMethods
     internal static bool IsLinux
     {
         get { return RuntimeInformation.IsOSPlatform(OSPlatform.Linux); }
-    }
-
-    /// <summary>
-    /// Gets a flag indicating if we are running under OpenHarmony
-    /// </summary>
-    internal static bool IsOpenHarmony
-    {
-        get { return RuntimeInformation.IsOSPlatform(OSPlatform.Create("OPENHARMONY")); }
-    }
-
-    /// <summary>
-    /// Gets a flag indicating if we are running under flavor of BSD (NetBSD, OpenBSD, FreeBSD)
-    /// </summary>
-    [SupportedOSPlatformGuard("freebsd")]
-    internal static bool IsBSD
-    {
-        get
-        {
-            return RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")) ||
-                   RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD")) ||
-                   RuntimeInformation.IsOSPlatform(OSPlatform.Create("OPENBSD"));
-        }
-    }
-
-    /// <summary>
-    /// Gets a flag indicating if we are running under Haiku
-    /// </summary>
-    [SupportedOSPlatformGuard("haiku")]
-    internal static bool IsHaiku
-    {
-        get
-        {
-            return RuntimeInformation.IsOSPlatform(OSPlatform.Create("HAIKU"));
-        }
     }
 
     private static bool? _isWindows;
@@ -563,34 +521,6 @@ internal static class NativeMethods
     {
         return IsOSX ? "osx" : IsUnixLike ? "unix" : "windows";
     }
-
-    internal static bool OSUsesCaseSensitivePaths
-    {
-        get { return IsLinux; }
-    }
-
-    /// <summary>
-    /// Determines whether the file system is case sensitive by creating a test file.
-    /// Copied from FileUtilities.GetIsFileSystemCaseSensitive() in Shared.
-    /// FIXME: shared code should be consolidated to Framework https://github.com/dotnet/msbuild/issues/6984
-    /// </summary>
-    private static readonly Lazy<bool> s_isFileSystemCaseSensitive = new(() =>
-    {
-        try
-        {
-            string pathWithUpperCase = Path.Combine(Path.GetTempPath(), $"INTCASESENSITIVETEST{Guid.NewGuid():N}");
-            using (new FileStream(pathWithUpperCase, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
-            {
-                return !File.Exists(pathWithUpperCase.ToLowerInvariant());
-            }
-        }
-        catch
-        {
-            return OSUsesCaseSensitivePaths;
-        }
-    });
-
-    internal static bool IsFileSystemCaseSensitive => s_isFileSystemCaseSensitive.Value;
 
     /// <summary>
     /// The base directory for all framework paths in Mono

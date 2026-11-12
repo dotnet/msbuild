@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -44,7 +45,7 @@ namespace Microsoft.Build.Execution
     /// mediates access from the build to the host.
     /// </summary>
     [DebuggerDisplay("#Entries={_hostObjectMap.Count}")]
-    public class HostServices : ITranslatable
+    public class HostServices : ITranslatable, IRemoteHostServicesInitializer
     {
         /// <summary>
         /// Collection storing host objects for particular project/task/target combinations.
@@ -301,6 +302,63 @@ namespace Microsoft.Build.Execution
             }
 
             return hostObjects;
+        }
+
+        /// <summary>
+        ///  Exports the remote host object registrations for a task-host configuration.
+        /// </summary>
+        /// <returns>
+        ///  A snapshot of the remote registrations, excluding in-process host objects and node affinities.
+        /// </returns>
+        internal HostServicesData ToHostServicesData()
+        {
+            if (_hostObjectMap is not { } hostObjectMap)
+            {
+                return HostServicesData.Empty;
+            }
+
+            using RefArrayBuilder<HostServicesData.Registration> registrations = default;
+
+            foreach (var (key, value) in hostObjectMap)
+            {
+                foreach (var (taskKey, monikerNameOrTaskHost) in value._hostObjects)
+                {
+                    if (monikerNameOrTaskHost.IsMoniker)
+                    {
+                        registrations.Add(new(
+                            key,
+                            taskKey._targetName,
+                            taskKey._taskName,
+                            monikerNameOrTaskHost.MonikerName));
+                    }
+                }
+            }
+
+            return new HostServicesData(registrations.ToImmutable());
+        }
+
+        void IRemoteHostServicesInitializer.Initialize(HostServicesData data)
+        {
+            Assumed.NotNull(data);
+
+            // Match the legacy deserializer's case-sensitive project map, not the public registration API's comparer.
+            var hostObjectMap = new Dictionary<string, HostObjects>();
+            foreach (HostServicesData.Registration registration in data.Registrations)
+            {
+                var targetTaskKey = new HostObjects.TargetTaskKey(registration.TargetName, registration.TaskName);
+                if (!hostObjectMap.TryGetValue(registration.ProjectFile, out HostObjects hostObject))
+                {
+                    hostObject = new HostObjects();
+                    hostObjectMap[registration.ProjectFile] = hostObject;
+                }
+
+                if (!hostObject._hostObjects.ContainsKey(targetTaskKey))
+                {
+                    hostObject._hostObjects.Add(targetTaskKey, new MonikerNameOrITaskHost(registration.MonikerName));
+                }
+            }
+
+            _hostObjectMap = hostObjectMap;
         }
 
         void ITranslatable.Translate(ITranslator translator)

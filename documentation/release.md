@@ -15,7 +15,7 @@ Update this list when cutting or retiring a branch.
 | `vs17.14` | [Visual Studio 2022](https://learn.microsoft.com/visualstudio/releases/2022/servicing-vs2022) | January 2032 |
 | `vs18.0` | [SDK 10.0.1xx](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) | [November 14, 2028](https://dotnet.microsoft.com/platform/support/policy/dotnet-core) |
 | `vs18.9` | [SDK 10.0.4xx](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) | [November 14, 2028](https://dotnet.microsoft.com/platform/support/policy/dotnet-core) |
-| `vs18.11` | [VS Stable](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs#stable-channel-support) | Next Stable promotion, unless selected as an LTSC baseline |
+| `vs18.11` | [LTSC 18.11](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs#long-term-servicing-channel-ltsc-support) | November 2028 |
 | `vs18.12` | [SDK 11.0.1xx](https://github.com/dotnet/dotnet/blob/release/11.0.1xx/src/msbuild/eng/Versions.props) | [November 9, 2028 (planned GA lifecycle)](https://github.com/dotnet/core/blob/main/release-notes/11.0/README.md) |
 | `vs18.13` | [Visual Studio 18.13](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs#stable-channel-support) | Next Stable promotion after 18.13, unless selected as an LTSC baseline |
 | `main` | [Development](../eng/Versions.props) | No fixed end date |
@@ -33,7 +33,7 @@ MSBuild is a **component** inserted into Visual Studio. VS ships monthly; MSBuil
 * Insertion → VS main
   - vs* builds auto-insert into VS main
 * Before INSIDERS_SNAP_DATE — Phase 4
-  - OptProf bootstrap
+  - Verify the frozen OptProf pin and retention
   - Release branch bits land in VS main
 * VS snaps
   - VS snaps main → rel/insiders
@@ -49,6 +49,10 @@ The [VS insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?defini
 VS handles the progression from `main` → `rel/insiders` → `rel/stable` on its own schedule. MSBuild's responsibility is to have final-branded bits in VS `main` before `INSIDERS_SNAP_DATE`.
 
 In [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml), the `TargetBranch` parameter sets `InsertTargetBranch`. The default `auto` currently resolves to VS `main`; verify the branch-local pipeline when servicing an older release. For a one-off servicing insertion, select `rel/insiders` or `rel/stable` explicitly and select the intended official MSBuild resource build. Changes to automatic routing or OptProf routing require a separate reviewed pipeline change.
+
+## OptProf inputs
+
+Official `main` builds use centrally collected VS `main` profiles. Before cutting a release branch, select a compatible `OptProfBaselineDrop` and ensure it remains retained for the release's support and rebuild lifetime. Release branches keep that fixed baseline during servicing. `OptProfDropName` can override either default.
 
 ## Public API
 

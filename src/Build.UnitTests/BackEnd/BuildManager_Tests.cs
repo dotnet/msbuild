@@ -21,6 +21,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -4166,6 +4167,40 @@ namespace Microsoft.Build.UnitTests.BackEnd
             projectInstance.GetPropertyValue("MyProp").ShouldBe("FromB");
         }
 
+        [Theory]
+        [InlineData("build", true)]
+        [InlineData("BUILD", true)]
+        [InlineData("Build", true)]
+        [InlineData("build", false)]
+        public void EntireProjectInstancePreservesCaseInsensitiveTargetHooks(string requestedTarget, bool outOfProc)
+        {
+            string contents = """
+                <Project>
+                  <Target Name="BeforeBuildHook" BeforeTargets="Build">
+                    <Message Text="[before-build-hook]" Importance="High" />
+                  </Target>
+                  <Target Name="Build">
+                    <Message Text="[build-body]" Importance="High" />
+                  </Target>
+                  <Target Name="AfterBuildHook" AfterTargets="Build">
+                    <Message Text="[after-build-hook]" Importance="High" />
+                  </Target>
+                </Project>
+                """.Cleanup();
+            BuildRequestData request = GetBuildRequestData(contents, [requestedTarget]);
+            request.ProjectInstance.TranslateEntireState = true;
+            _parameters.DisableInProcNode = outOfProc;
+
+            BuildResult result = _buildManager.Build(_parameters, request);
+
+            result.ShouldHaveSucceeded();
+            _logger.AssertLogContains("[build-body]");
+            _logger.AssertLogContains("[before-build-hook]");
+            _logger.AssertLogContains("[after-build-hook]");
+            _logger.TargetStartedEvents.Count(e => e.TargetName == "BeforeBuildHook").ShouldBe(1);
+            _logger.TargetStartedEvents.Count(e => e.TargetName == "AfterBuildHook").ShouldBe(1);
+        }
+
         /// <summary>
         /// When a <see cref="ProjectInstance"/> based <see cref="BuildRequestData"/> is built out of proc, the node should
         /// not reload it from disk but instead fully utilize the entire translate project instance state
@@ -5103,7 +5138,7 @@ $@"<Project InitialTargets=`Sleep`>
                 string debugPath = _env.CreateFolder().Path;
                 _env.SetEnvironmentVariable("MSBUILDDEBUGSCHEDULER", "1");
                 _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath);
-                FrameworkDebugUtils.SetDebugPath();
+                DebugUtils.SetDebugPath();
 
                 // Create a root project that builds several independent child projects in parallel.
                 // This forces multiple in-proc nodes to run concurrently, which triggers
