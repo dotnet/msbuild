@@ -192,6 +192,11 @@ public class TaskEnvironment
 
 The `TaskEnvironment` class that MSBuild provides is not thread-safe. Task authors who spawn multiple threads within their task implementation must provide their own synchronization when accessing the task environment from multiple threads. However, each task receives its own isolated environment object, so synchronization with other concurrent tasks is not required.
 
+In multithreaded mode, `GetProcessStartInfo()` uses the task's complete environment
+snapshot, not an overlay on the current host environment. Variables removed with
+`SetEnvironmentVariable(name, null)`, or added only to the host after the snapshot,
+must not be inherited by the child process.
+
 ### Path Handling
 
 To prevent common thread-safety issues related to path handling, we introduce path type that is implicitly convertible to string:
@@ -215,6 +220,13 @@ public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 
 `AbsolutePath` converts implicitly to string for seamless integration with existing File/Directory APIs.
 `GetCanonicalForm()` applies `Path.GetFullPath()` canonicalization to an already fully qualified path, resolving `.` and `..` segments and normalizing directory separators. Use it when migrating code that previously relied on `Path.GetFullPath()`; `TaskEnvironment.GetAbsolutePath()` produces fully qualified paths but intentionally does not canonicalize them.
+
+Keep relative tool arguments only when the child resolves them to the same files
+as the task. Windows drive-relative arguments such as `C:input.dll` can resolve
+differently from project-scoped paths; pass the resolved absolute path in that
+case and preserve `OriginalValue` in task-generated diagnostics. Do not blanket
+rewrite exception text: BCL exceptions may already have contained absolute paths
+before the migration.
 
 ### API Usage Example
 
