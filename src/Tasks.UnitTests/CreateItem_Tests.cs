@@ -2,15 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Task = System.Threading.Tasks.Task;
 
 #nullable disable
 
@@ -442,6 +446,340 @@ namespace Microsoft.Build.UnitTests
                     "TestTarget",
                     Helpers.ExpectedBuildResult.SucceedWithWarning,
                     _testOutput);
+        }
+
+        /// <summary>
+        /// Relative wildcard Include resolves against TaskEnvironment.ProjectDirectory, not cwd.
+        /// </summary>
+        [Fact]
+        public void WildcardInclude_ResolvesAgainstProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            TransientTestFolder projectDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(projectDir, "alpha.txt", "alpha");
+
+            TransientTestFolder otherDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(otherDir, "beta.txt", "beta");
+
+            env.SetCurrentDirectory(otherDir.Path);
+
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = [new TaskItem("*.txt")],
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1);
+            t.Include[0].ItemSpec.ShouldBe("alpha.txt");
+        }
+
+        /// <summary>
+        /// Relative wildcard Exclude resolves against TaskEnvironment.ProjectDirectory, not cwd.
+        /// The *.log exclude should match SampleFile.log in the project directory and filter it out.
+        /// </summary>
+        [Fact]
+        public void WildcardExclude_ResolvesAgainstProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            TransientTestFolder projectDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(projectDir, "SampleFile.log", "SampleFile");
+
+            TransientTestFolder otherDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(otherDir, "decoy.log", "decoy");
+            env.SetCurrentDirectory(otherDir.Path);
+
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = [new TaskItem("SampleFile.log")],
+                Exclude = [new TaskItem("*.log")],
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.ShouldBeEmpty();
+        }
+
+        /// <summary>
+        /// RecursiveDir metadata is correctly set when wildcard expansion uses a custom ProjectDirectory.
+        /// </summary>
+        [Fact]
+        public void RecursiveDir_WithCustomProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            TransientTestFolder projectDir = env.CreateFolder(createFolder: true);
+            string sampleSubdirectory = Path.Combine(projectDir.Path, "SampleSubdirectory");
+            Directory.CreateDirectory(sampleSubdirectory);
+            File.WriteAllText(Path.Combine(sampleSubdirectory, "SampleFile.txt"), "content");
+
+            TransientTestFolder otherDir = env.CreateFolder(createFolder: true);
+            env.SetCurrentDirectory(otherDir.Path);
+
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = [new TaskItem($"**{Path.DirectorySeparatorChar}*.txt")],
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1);
+            t.Include[0].ItemSpec.ShouldBe(Path.Combine("SampleSubdirectory", "SampleFile.txt"));
+
+            string recursiveDir = t.Include[0].GetMetadata("RecursiveDir");
+            recursiveDir.ShouldBe("SampleSubdirectory" + Path.DirectorySeparatorChar);
+        }
+
+        /// <summary>
+        /// Absolute wildcard patterns are unaffected by ProjectDirectory — the same files are returned
+        /// regardless of what ProjectDirectory is set to.
+        /// </summary>
+        [Fact]
+        public void AbsoluteWildcard_IgnoresProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            TransientTestFolder targetDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(targetDir, "SampleFile.txt", "content");
+
+            TransientTestFolder unrelatedDir = env.CreateFolder(createFolder: true);
+
+            string absolutePattern = Path.Combine(targetDir.Path, "*.txt");
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = [new TaskItem(absolutePattern)],
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(unrelatedDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1);
+            t.Include[0].ItemSpec.ShouldBe(Path.Combine(targetDir.Path, "SampleFile.txt"));
+        }
+
+        [Fact]
+        public async Task ConcurrentProjectDirectories_ReturnDisjointFileSets()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFolder firstDirectory = env.CreateFolder(createFolder: true);
+            TransientTestFolder secondDirectory = env.CreateFolder(createFolder: true);
+            TransientTestFolder decoyDirectory = env.CreateFolder(createFolder: true);
+            env.CreateFile(firstDirectory, "first.txt", "first");
+            env.CreateFile(secondDirectory, "second.txt", "second");
+            env.CreateFile(decoyDirectory, "decoy.txt", "decoy");
+            env.SetCurrentDirectory(decoyDirectory.Path);
+
+            CreateItem first = new()
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(firstDirectory.Path),
+                Include = [new TaskItem("*.txt")],
+            };
+            CreateItem second = new()
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(secondDirectory.Path),
+                Include = [new TaskItem("*.txt")],
+            };
+
+            bool[] results = await Task.WhenAll(
+                Task.Run(first.Execute),
+                Task.Run(second.Execute));
+
+            results.ShouldBe([true, true]);
+            first.Include.ShouldHaveSingleItem().ItemSpec.ShouldBe("first.txt");
+            second.Include.ShouldHaveSingleItem().ItemSpec.ShouldBe("second.txt");
+        }
+
+        [Theory]
+        [InlineData("*.txt", "root.txt", "")]
+        [InlineData("./*.txt", "./root.txt", "")]
+        [InlineData("sub/../*.txt", "sub/../root.txt", "")]
+        [InlineData("sub/**/*.txt", "sub/nested/child.txt", "nested/")]
+        [InlineData("missing/*.txt", null, null)]
+        [InlineData("invalid.../*.txt", null, null)]
+        public void FallbackTaskEnvironment_WildcardParityWithLegacy(string pattern, string expectedItem, string expectedRecursiveDir)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFolder directory = env.CreateFolder(createFolder: true);
+            env.CreateFile(directory, "root.txt", "root");
+            string nestedDirectory = Path.Combine(directory.Path, "sub", "nested");
+            Directory.CreateDirectory(nestedDirectory);
+            File.WriteAllText(Path.Combine(nestedDirectory, "child.txt"), "child");
+            env.SetCurrentDirectory(directory.Path);
+
+            CreateItem task = new()
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = [new TaskItem(pattern)],
+            };
+
+            task.Execute().ShouldBeTrue();
+
+            if (expectedItem is null)
+            {
+                task.Include.ShouldBeEmpty();
+            }
+            else
+            {
+                ITaskItem item = task.Include.ShouldHaveSingleItem();
+                item.ItemSpec.ShouldBe(expectedItem.Replace('/', Path.DirectorySeparatorChar));
+                item.GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir.Replace('/', Path.DirectorySeparatorChar));
+            }
+        }
+
+        [Fact]
+        public void WildcardWithTildes_UsesAbsolutePathsForAllFileAccess()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFolder projectDirectory = env.CreateFolder(createFolder: true);
+            TransientTestFolder decoyDirectory = env.CreateFolder(createFolder: true);
+            string nestedDirectory = Path.Combine(projectDirectory.Path, "sub~dir", "nested~dir");
+            Directory.CreateDirectory(nestedDirectory);
+            File.WriteAllText(Path.Combine(nestedDirectory, "file~name.txt"), "project");
+            env.SetCurrentDirectory(decoyDirectory.Path);
+
+            RecordingFileSystem fileSystem = new();
+            env.WithTransientTestState(new FileMatcherTestState(new FileMatcher(fileSystem)));
+            CreateItem task = new()
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory.Path),
+                Include = [new TaskItem(Path.Combine("sub~dir", "**", "*.txt"))],
+            };
+
+            task.Execute().ShouldBeTrue();
+
+            ITaskItem item = task.Include.ShouldHaveSingleItem();
+            item.ItemSpec.ShouldBe(Path.Combine("sub~dir", "nested~dir", "file~name.txt"));
+            item.GetMetadata("RecursiveDir").ShouldBe("nested~dir" + Path.DirectorySeparatorChar);
+            fileSystem.Paths.ShouldNotBeEmpty();
+            fileSystem.Paths.ShouldAllBe(path => Path.IsPathRooted(path));
+        }
+
+        [Theory]
+        [InlineData("project...dir")]
+        [InlineData("project~dir")]
+        public void Wildcard_ProjectDirectoryIsNotPartOfPattern(string directoryName)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFolder root = env.CreateFolder(createFolder: true);
+            TransientTestFolder projectDirectory = env.CreateFolder(Path.Combine(root.Path, directoryName));
+            TransientTestFolder decoyDirectory = env.CreateFolder(createFolder: true);
+            string nestedDirectory = Path.Combine(projectDirectory.Path, "sub", "nested");
+            Directory.CreateDirectory(nestedDirectory);
+            File.WriteAllText(Path.Combine(nestedDirectory, "child.txt"), "project");
+            env.SetCurrentDirectory(decoyDirectory.Path);
+
+            CreateItem task = new()
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory.Path),
+                Include = [new TaskItem(Path.Combine("sub", "**", "*.txt"))],
+            };
+
+            task.Execute().ShouldBeTrue();
+            ITaskItem item = task.Include.ShouldHaveSingleItem();
+            item.ItemSpec.ShouldBe(Path.Combine("sub", "nested", "child.txt"));
+            item.GetMetadata("RecursiveDir").ShouldBe("nested" + Path.DirectorySeparatorChar);
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void PartiallyRootedWildcard_PreservesOutputRoot(bool driveRelative)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFolder projectDirectory = env.CreateFolder(createFolder: true);
+            TransientTestFolder decoyDirectory = env.CreateFolder(createFolder: true);
+            string subdirectory = Path.Combine(projectDirectory.Path, "sub");
+            Directory.CreateDirectory(subdirectory);
+            File.WriteAllText(Path.Combine(subdirectory, "root.txt"), "project");
+            env.SetCurrentDirectory(decoyDirectory.Path);
+
+            string pattern = driveRelative
+                ? projectDirectory.Path.Substring(0, 2) + @"sub\*.txt"
+                : Path.Combine(projectDirectory.Path.Substring(2), "sub", "*.txt");
+            string expectedItem = driveRelative
+                ? projectDirectory.Path.Substring(0, 2) + @"sub\root.txt"
+                : Path.Combine(projectDirectory.Path.Substring(2), "sub", "root.txt");
+            CreateItem task = new()
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory.Path),
+                Include = [new TaskItem(pattern)],
+            };
+
+            task.Execute().ShouldBeTrue();
+            task.Include.ShouldHaveSingleItem().ItemSpec.ShouldBe(expectedItem);
+        }
+
+        [Fact]
+        public void LiteralItems_UnaffectedByProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFolder directory = env.CreateFolder(createFolder: true);
+
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(directory.Path),
+                Include = [new TaskItem("A.txt"), new TaskItem("B.txt")],
+                Exclude = [new TaskItem("B.txt")],
+                AdditionalMetadata = ["Tag=Value"],
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1);
+            t.Include[0].ItemSpec.ShouldBe("A.txt");
+            t.Include[0].GetMetadata("Tag").ShouldBe("Value");
+        }
+
+        private sealed class FileMatcherTestState : TransientTestState
+        {
+            private readonly FileMatcher _original;
+
+            public FileMatcherTestState(FileMatcher matcher)
+            {
+                _original = FileMatcher.Default;
+                FileMatcher.Default = matcher;
+            }
+
+            public override void Revert() => FileMatcher.Default = _original;
+        }
+
+        private sealed class RecordingFileSystem : ManagedFileSystem
+        {
+            public ConcurrentBag<string> Paths { get; } = [];
+
+            public override bool DirectoryExists(string path)
+            {
+                Paths.Add(path);
+                return base.DirectoryExists(path);
+            }
+
+            public override IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
+            {
+                Paths.Add(path);
+                return base.EnumerateFiles(path, searchPattern, searchOption);
+            }
+
+            public override IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
+            {
+                Paths.Add(path);
+                return base.EnumerateDirectories(path, searchPattern, searchOption);
+            }
+
+            public override IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
+            {
+                Paths.Add(path);
+                return base.EnumerateFileSystemEntries(path, searchPattern, searchOption);
+            }
         }
     }
 }

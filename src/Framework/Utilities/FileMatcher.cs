@@ -146,7 +146,7 @@ namespace Microsoft.Build.Shared
         private static readonly Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>> s_cachedGlobExpansions = new(() => new ConcurrentDictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal));
         private static readonly Lazy<ConcurrentDictionary<string, object>> s_cachedGlobExpansionsLock = new(() => new ConcurrentDictionary<string, object>(StringComparer.Ordinal));
         private static readonly Lazy<ConcurrentDictionary<
-            (string FileSpec, FileMatcherCaseFolding CaseFolding, string CultureName),
+            (string FileSpec, FileMatcherCaseFolding CaseFolding, string CultureName, string ProjectDirectory),
             (GlobPattern matcher, bool needsRecursion, bool isLegalFileSpec)>> s_globCache = new();
 
         private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _cachedGlobExpansions;
@@ -520,11 +520,13 @@ namespace Microsoft.Build.Shared
         /// Given a path name, get its long version.
         /// </summary>
         /// <param name="path">The short path.</param>
+        /// <param name="projectDirectory">The base directory for relative filesystem lookups.</param>
         /// <returns>The long path.</returns>
         internal string GetLongPathName(
-            string path)
+            string path,
+            string projectDirectory = null)
         {
-            return GetLongPathName(path, _getFileSystemEntries);
+            return GetLongPathName(path, _getFileSystemEntries, projectDirectory);
         }
 
         /// <summary>
@@ -532,10 +534,12 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="path">The short path.</param>
         /// <param name="getFileSystemEntries">Delegate.</param>
+        /// <param name="projectDirectory">The base directory for relative filesystem lookups.</param>
         /// <returns>The long path.</returns>
         internal static string GetLongPathName(
             string path,
-            GetFileSystemEntries getFileSystemEntries)
+            GetFileSystemEntries getFileSystemEntries,
+            string projectDirectory = null)
         {
             if (!path.Contains('~'))
             {
@@ -578,6 +582,13 @@ namespace Microsoft.Build.Shared
             string[] longParts = new string[parts.Length - startingElement];
 
             string longPath = pathRoot;
+            if (projectDirectory is not null)
+            {
+                string lookupRoot = pathRoot.Length == 0 ? Path.GetPathRoot(path) : pathRoot;
+                longPath = string.IsNullOrEmpty(lookupRoot)
+                    ? projectDirectory
+                    : new AbsolutePath(lookupRoot, new AbsolutePath(projectDirectory, ignoreRootedCheck: true)).Value;
+            }
             for (int i = startingElement; i < parts.Length; ++i)
             {
                 // If there is a zero-length part, then that means there was an extra slash.
@@ -635,11 +646,13 @@ namespace Microsoft.Build.Shared
         /// <param name="fixedDirectoryPart">Receives the fixed directory part.</param>
         /// <param name="wildcardDirectoryPart">The wildcard directory part.</param>
         /// <param name="filenamePart">The filename part.</param>
+        /// <param name="projectDirectory">The base directory for short-name resolution.</param>
         internal void SplitFileSpec(
             string filespec,
             out string fixedDirectoryPart,
             out string wildcardDirectoryPart,
-            out string filenamePart)
+            out string filenamePart,
+            string projectDirectory = null)
         {
             PreprocessFileSpecForSplitting(
                 filespec,
@@ -661,7 +674,7 @@ namespace Microsoft.Build.Shared
                 filenamePart = "*.*";
             }
 
-            fixedDirectoryPart = FileMatcher.GetLongPathName(fixedDirectoryPart, _getFileSystemEntries);
+            fixedDirectoryPart = FileMatcher.GetLongPathName(fixedDirectoryPart, _getFileSystemEntries, projectDirectory);
         }
 
         /// <summary>
@@ -1404,15 +1417,17 @@ namespace Microsoft.Build.Shared
         /// <param name="globFileMatch">Receives the glob matcher.</param>
         /// <param name="needsRecursion">Receives the flag that is true if recursion is required.</param>
         /// <param name="isLegalFileSpec">Receives the flag that is true if the filespec is legal.</param>
+        /// <param name="projectDirectory">The base directory for short-name resolution.</param>
         private void GetFileSpecInfoWithGlobCore(
             string filespec,
             out GlobPattern globFileMatch,
             out bool needsRecursion,
-            out bool isLegalFileSpec)
+            out bool isLegalFileSpec,
+            string projectDirectory = null)
         {
             GetFileSpecInfo(filespec,
                 out string fixedDirectoryPart, out string wildcardDirectoryPart, out string filenamePart,
-                out needsRecursion, out isLegalFileSpec);
+                out needsRecursion, out isLegalFileSpec, projectDirectory: projectDirectory);
 
             if (isLegalFileSpec)
             {
@@ -1431,15 +1446,18 @@ namespace Microsoft.Build.Shared
            string filespec,
            out GlobPattern globFileMatch,
            out bool needsRecursion,
-           out bool isLegalFileSpec)
+           out bool isLegalFileSpec,
+           string projectDirectory = null)
         {
             FileMatcherCaseFolding caseFolding = ResolvedCaseFolding;
             string cultureName = caseFolding == FileMatcherCaseFolding.LegacyCurrentCulture
                 ? CultureInfo.CurrentCulture.Name
                 : string.Empty;
-            var result = s_globCache.Value.GetOrAdd((filespec, caseFolding, cultureName), key =>
+            // Only short-name expansion depends on the project directory.
+            string cacheProjectDirectory = filespec.Contains('~') ? projectDirectory : null;
+            var result = s_globCache.Value.GetOrAdd((filespec, caseFolding, cultureName, cacheProjectDirectory), key =>
             {
-                GetFileSpecInfoWithGlobCore(key.FileSpec, out var matcher, out var needsRec, out var isLegal);
+                GetFileSpecInfoWithGlobCore(key.FileSpec, out var matcher, out var needsRec, out var isLegal, key.ProjectDirectory);
                 return (matcher, needsRec, isLegal);
             });
             globFileMatch = result.matcher;
@@ -1462,6 +1480,7 @@ namespace Microsoft.Build.Shared
         /// <param name="needsRecursion">Receives the flag that is true if recursion is required.</param>
         /// <param name="isLegalFileSpec">Receives the flag that is true if the filespec is legal.</param>
         /// <param name="fixupParts">hook method to further change the parts</param>
+        /// <param name="projectDirectory">The base directory for short-name resolution.</param>
         internal void GetFileSpecInfo(
             string filespec,
             out string fixedDirectoryPart,
@@ -1469,7 +1488,8 @@ namespace Microsoft.Build.Shared
             out string filenamePart,
             out bool needsRecursion,
             out bool isLegalFileSpec,
-            FixupParts fixupParts = null)
+            FixupParts fixupParts = null,
+            string projectDirectory = null)
         {
             needsRecursion = false;
             fixedDirectoryPart = string.Empty;
@@ -1485,7 +1505,7 @@ namespace Microsoft.Build.Shared
             /*
              * Now break up the filespec into constituent parts--fixed, wildcard and filename.
              */
-            SplitFileSpec(filespec, out fixedDirectoryPart, out wildcardDirectoryPart, out filenamePart);
+            SplitFileSpec(filespec, out fixedDirectoryPart, out wildcardDirectoryPart, out filenamePart, projectDirectory);
 
             if (fixupParts != null)
             {
@@ -1608,21 +1628,24 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="filespec">The filespec.</param>
         /// <param name="fileToMatch">The candidate to match against.</param>
+        /// <param name="projectDirectory">The base directory for short-name resolution.</param>
         /// <returns>The result class.</returns>
         internal Result FileMatch(
             string filespec,
-            string fileToMatch)
+            string fileToMatch,
+            string projectDirectory = null)
         {
             Result matchResult = new Result();
 
-            fileToMatch = GetLongPathName(fileToMatch, _getFileSystemEntries);
+            fileToMatch = GetLongPathName(fileToMatch, _getFileSystemEntries, projectDirectory);
 
             GlobPattern globFileMatch;
             GetFileSpecInfoWithGlob(
                 filespec,
                 out globFileMatch,
                 out matchResult.isFileSpecRecursive,
-                out matchResult.isLegalFileSpec);
+                out matchResult.isLegalFileSpec,
+                projectDirectory);
 
             if (matchResult.isLegalFileSpec)
             {
@@ -1675,7 +1698,7 @@ namespace Microsoft.Build.Shared
             // For performance. Short-circuit iff there is no wildcard.
             if (!HasWildcards(filespecUnescaped))
             {
-                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), SearchAction.None, string.Empty, null);
+                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped, projectDirectoryUnescaped), SearchAction.None, string.Empty, null);
             }
 
             DriverSelection selection = SelectDriver(
@@ -1828,7 +1851,8 @@ namespace Microsoft.Build.Shared
                 out string wildcardDirectoryPart,
                 out string filenamePart,
                 out bool needsRecursion,
-                out bool isLegalFileSpec);
+                out bool isLegalFileSpec,
+                projectDirectory: projectDirectoryUnescaped);
 
             /*
              * If the filespec is invalid, then just return now.
@@ -1838,8 +1862,7 @@ namespace Microsoft.Build.Shared
                 return SearchAction.ReturnFileSpec;
             }
 
-            // The projectDirectory is not null only if we are running the evaluation from
-            // inside the engine (i.e. not from a task)
+            // Keep the project directory separate from the glob syntax.
             string oldFixedDirectoryPart = fixedDirectoryPart;
             if (projectDirectoryUnescaped != null)
             {
@@ -1847,14 +1870,17 @@ namespace Microsoft.Build.Shared
                 {
                     try
                     {
-                        fixedDirectoryPart = Path.Combine(projectDirectoryUnescaped, fixedDirectoryPart);
+                        fixedDirectoryPart = fixedDirectoryPart.Length == 0
+                            ? projectDirectoryUnescaped
+                            : new AbsolutePath(fixedDirectoryPart, new AbsolutePath(projectDirectoryUnescaped, ignoreRootedCheck: true)).Value;
                     }
                     catch (ArgumentException)
                     {
                         return SearchAction.ReturnEmptyList;
                     }
 
-                    stripProjectDirectory = !string.Equals(fixedDirectoryPart, oldFixedDirectoryPart, StringComparison.OrdinalIgnoreCase);
+                    stripProjectDirectory = !Path.IsPathRooted(oldFixedDirectoryPart)
+                        && !string.Equals(fixedDirectoryPart, oldFixedDirectoryPart, StringComparison.OrdinalIgnoreCase);
                 }
                 else
                 {
@@ -1919,7 +1945,7 @@ namespace Microsoft.Build.Shared
                 directoryPattern,
                 matchWithGlob && createGlobFileMatch
                     ? new GlobPattern(
-                        oldFixedDirectoryPart, wildcardDirectoryPart, filenamePart,
+                        stripProjectDirectory ? oldFixedDirectoryPart : fixedDirectoryPart, wildcardDirectoryPart, filenamePart,
                         ResolvedCaseFolding == FileMatcherCaseFolding.InvariantCulture)
                     : null,
                 matchWithGlob,
@@ -2098,7 +2124,7 @@ namespace Microsoft.Build.Shared
             return index;
         }
 
-        private string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, List<string> excludeSpecsUnescaped)
+        private string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, List<string> excludeSpecsUnescaped, string projectDirectory)
         {
             if (excludeSpecsUnescaped != null)
             {
@@ -2112,7 +2138,7 @@ namespace Microsoft.Build.Shared
                         return [];
                     }
 
-                    var match = FileMatch(excludeSpec, filespecUnescaped);
+                    var match = FileMatch(excludeSpec, filespecUnescaped, projectDirectory);
 
                     if (match.isLegalFileSpec && match.isMatch)
                     {
@@ -2209,7 +2235,8 @@ namespace Microsoft.Build.Shared
                     out string wildcardDirectoryPart,
                     out _,
                     out _,
-                    out bool isLegalFileSpec);
+                    out bool isLegalFileSpec,
+                    projectDirectory: projectRoot);
 
                 if (isLegalFileSpec && projectRoot is not null && !Path.IsPathRooted(fixedDirectoryPart))
                 {
@@ -2351,7 +2378,8 @@ namespace Microsoft.Build.Shared
                     out _,
                     out _,
                     out _,
-                    out isLegal);
+                    out isLegal,
+                    projectDirectory: projectDirectory);
             }
 
             bool HasInvalidWildcardExclude(List<string>? excludes)
@@ -2398,14 +2426,16 @@ namespace Microsoft.Build.Shared
                     out _,
                     out _,
                     out _,
-                    out bool includeIsLegal);
+                    out bool includeIsLegal,
+                    projectDirectory: projectDirectory);
                 GetFileSpecInfo(
                     excludeSpec,
                     out string excludeBaseDirectory,
                     out string excludeWildcardDirectory,
                     out _,
                     out _,
-                    out bool excludeIsLegal);
+                    out bool excludeIsLegal,
+                    projectDirectory: projectDirectory);
 
                 if (!includeIsLegal
                     || !excludeIsLegal
@@ -2617,7 +2647,7 @@ namespace Microsoft.Build.Shared
 
             if (action == SearchAction.ReturnFileSpec)
             {
-                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), action, string.Empty, null);
+                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped, projectDirectoryUnescaped), action, string.Empty, null);
             }
 
             if (action == SearchAction.FailOnDriveEnumeratingWildcard)
@@ -2652,7 +2682,8 @@ namespace Microsoft.Build.Shared
                 out _,
                 out string filenamePart,
                 out _,
-                out _);
+                out _,
+                projectDirectory: projectDirectoryUnescaped);
 
             SearchAction trackedAction = action;
             string trackedExcludeFileSpec = string.Empty;
@@ -2738,7 +2769,7 @@ namespace Microsoft.Build.Shared
             catch (Exception ex) when (IsIoRelatedExceptionOrAggregate(ex))
             {
                 return (
-                    CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped),
+                    CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped, projectDirectoryUnescaped),
                     trackedAction,
                     trackedExcludeFileSpec,
                     SR.FormatGlobExpansionFailed(filespecUnescaped, ex.ToString()));
@@ -2919,7 +2950,8 @@ namespace Microsoft.Build.Shared
                     out _,
                     out string excludeFilenamePart,
                     out _,
-                    out _);
+                    out _,
+                    projectDirectory: projectDirectoryUnescaped);
 
                 (excludesToMatch ??= []).Add(new OptimizedFileSearch(
                     excludeState.BaseDirectory,
@@ -3400,7 +3432,7 @@ namespace Microsoft.Build.Shared
             }
             else if (action == SearchAction.ReturnFileSpec)
             {
-                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), action, string.Empty, null);
+                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped, projectDirectoryUnescaped), action, string.Empty, null);
             }
             else if (action == SearchAction.FailOnDriveEnumeratingWildcard)
             {
@@ -3610,7 +3642,7 @@ namespace Microsoft.Build.Shared
             {
                 // Assume it's not meant to be a path, but pass the information about the failure to expand
                 return (
-                    CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped),
+                    CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped, projectDirectoryUnescaped),
                     trackSearchAction,
                     trackExcludeFileSpec,
                     SR.FormatGlobExpansionFailed(filespecUnescaped, ex.ToString()));
