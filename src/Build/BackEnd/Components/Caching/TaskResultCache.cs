@@ -75,27 +75,29 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private const string ManifestFileName = "manifest.bin";
         private const string ManifestMagic = "MSBuild Task Result Cache";
         private const int MaximumEventCount = 1_000_000;
+        private const int MaximumOutputCount = 1_000_000;
+        private const int Sha256HashLength = 32;
         private const string TrimLockFileName = ".trim.lock";
         private static readonly TimeSpan s_trimInterval = TimeSpan.FromHours(1);
 
         private readonly string _cacheDirectory;
         private readonly string _entryDirectory;
+        private readonly TaskResultCacheFileDigestCache _fileDigestCache;
         private readonly string _key;
         private readonly long _maximumCacheSizeBytes;
-        private readonly IReadOnlyList<string> _outputPaths;
 
         private TaskResultCacheSession(
             string cacheDirectory,
             string entryDirectory,
             string key,
             long maximumCacheSizeBytes,
-            IReadOnlyList<string> outputPaths)
+            TaskResultCacheFileDigestCache fileDigestCache)
         {
             _cacheDirectory = cacheDirectory;
             _entryDirectory = entryDirectory;
+            _fileDigestCache = fileDigestCache;
             _key = key;
             _maximumCacheSizeBytes = maximumCacheSizeBytes;
-            _outputPaths = outputPaths;
         }
 
         internal string Key => _key;
@@ -189,7 +191,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 entryDirectory,
                 key,
                 maximumCacheSizeBytes,
-                keyResponse.OutputPaths!);
+                fileDigestCache);
 
             if (!Directory.Exists(entryDirectory))
             {
@@ -219,6 +221,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         }
 
         internal async ValueTask<TaskResultCacheStoreResponse> TryStoreAsync(
+            IReadOnlyList<string> outputPaths,
             IReadOnlyList<TaskResultCacheEvent> events,
             CancellationToken cancellationToken)
         {
@@ -227,10 +230,10 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             try
             {
                 Directory.CreateDirectory(temporaryDirectory);
-                var outputs = new List<CachedOutput>(_outputPaths.Count);
-                for (int i = 0; i < _outputPaths.Count; i++)
+                var outputs = new List<CachedOutput>(outputPaths.Count);
+                for (int i = 0; i < outputPaths.Count; i++)
                 {
-                    string outputPath = _outputPaths[i];
+                    string outputPath = outputPaths[i];
                     if (Directory.Exists(outputPath))
                     {
                         return new TaskResultCacheStoreResponse(
@@ -244,6 +247,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                             outputPath,
                             Present: false,
                             Length: 0,
+                            Hash: [],
                             Attributes: 0,
                             UnixFileMode: 0));
                         continue;
@@ -264,12 +268,15 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 #else
                     const int unixFileMode = 0;
 #endif
+                    TaskResultCacheFileDigest digest =
+                        await _fileDigestCache.GetDigestAsync(outputPath, cancellationToken);
                     string payloadPath = GetPayloadPath(temporaryDirectory, i);
                     File.Copy(outputPath, payloadPath);
                     outputs.Add(new CachedOutput(
                         outputPath,
                         Present: true,
-                        Length: new FileInfo(payloadPath).Length,
+                        digest.Length,
+                        digest.Hash,
                         Attributes: attributes,
                         UnixFileMode: unixFileMode));
                 }
@@ -339,19 +346,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     Path.Combine(_entryDirectory, ManifestFileName),
                     cancellationToken);
                 IReadOnlyList<CachedOutput> outputs = manifest.Outputs;
-                if (outputs.Count != _outputPaths.Count)
-                {
-                    throw new InvalidDataException("The cached output count does not match the invocation.");
-                }
-
-                for (int i = 0; i < outputs.Count; i++)
-                {
-                    CachedOutput output = outputs[i];
-                    if (!String.Equals(output.Path, _outputPaths[i], StringComparison.Ordinal))
-                    {
-                        throw new InvalidDataException("The cached output paths do not match the invocation.");
-                    }
-                }
 
                 var temporaryFiles = new string?[outputs.Count];
                 var backupFiles = new string?[outputs.Count];
@@ -377,7 +371,10 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                             output.Path + "." + Guid.NewGuid().ToString("N") + ".msbuild-cache";
                         temporaryFiles[i] = temporaryFile;
                         File.Copy(GetPayloadPath(_entryDirectory, i), temporaryFile);
-                        if (new FileInfo(temporaryFile).Length != output.Length)
+                        TaskResultCacheFileDigest digest =
+                            await _fileDigestCache.GetDigestAsync(temporaryFile, cancellationToken);
+                        if (digest.Length != output.Length ||
+                            !digest.Hash.AsSpan().SequenceEqual(output.Hash))
                         {
                             throw new InvalidDataException("A cached output payload is missing or corrupt.");
                         }
@@ -415,6 +412,17 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                         }
 #endif
                         File.SetAttributes(output.Path, output.Attributes);
+                    }
+
+                    for (int i = 0; i < outputs.Count; i++)
+                    {
+                        CachedOutput output = outputs[i];
+                        if (output.Present)
+                        {
+                            _fileDigestCache.Seed(
+                                output.Path,
+                                new TaskResultCacheFileDigest(output.Length, output.Hash));
+                        }
                     }
 
                     restoreSucceeded = true;
@@ -537,20 +545,12 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                         Reason: "The task assembly does not have a readable file location.");
                 }
 
-                if (!TryGetDeclaredPaths(
-                        taskType,
+                if (!TryGetFilePaths(
                         task,
-                        "DeclaredInputs",
+                        "InputFiles",
                         projectDirectory,
                         out IReadOnlyList<string>? inputPaths,
-                        out string? reason) ||
-                    !TryGetDeclaredPaths(
-                        taskType,
-                        task,
-                        "DeclaredOutputs",
-                        projectDirectory,
-                        out IReadOnlyList<string>? outputPaths,
-                        out reason))
+                        out string? reason))
                 {
                     return new TaskResultCacheKeyResponse(
                         Success: false,
@@ -587,12 +587,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     return new TaskResultCacheKeyResponse(Success: false, Reason: reason);
                 }
 
-                writer.Write(outputPaths.Count);
-                for (int i = 0; i < outputPaths.Count; i++)
-                {
-                    writer.Write(outputPaths[i]);
-                }
-
                 writer.Write(inputPaths.Count);
                 for (int i = 0; i < inputPaths.Count; i++)
                 {
@@ -623,8 +617,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 hashStream.FlushFinalBlock();
                 return new TaskResultCacheKeyResponse(
                     Success: true,
-                    ToHex(hash.Hash!),
-                    outputPaths);
+                    ToHex(hash.Hash!));
             }
             catch (Exception e) when (IsExpectedCacheException(e) || e is TargetInvocationException)
             {
@@ -761,44 +754,56 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
         [UnconditionalSuppressMessage(
             "Trimming",
-            "IL2070",
+            "IL2075",
             Justification = "Declared-IO cache binding reflects only over task types, which are already rooted by task loading.")]
-        private static bool TryGetDeclaredPaths(
-            Type taskType,
+        internal static bool TryGetFilePaths(
             ITask task,
             string propertyName,
             string projectDirectory,
             [NotNullWhen(true)] out IReadOnlyList<string>? paths,
             out string? reason)
         {
-            paths = null;
-            reason = null;
-            PropertyInfo? property = taskType.GetProperty(
-                propertyName,
-                BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
-            if (property?.GetMethod is null || property.GetValue(task) is not ITaskItem[] items)
+            try
             {
-                reason = $"Task property \"{propertyName}\" is not a readable ITaskItem array.";
+                paths = null;
+                reason = null;
+                PropertyInfo? property = task.GetType().GetProperty(
+                    propertyName,
+                    BindingFlags.Instance | BindingFlags.Public);
+                if (property?.GetMethod is null ||
+                    property.GetSetMethod(nonPublic: true) is not null ||
+                    !typeof(IEnumerable<string>).IsAssignableFrom(property.PropertyType) ||
+                    property.GetValue(task) is not IEnumerable<string> values)
+                {
+                    reason =
+                        $"Task property \"{propertyName}\" must be a public get-only IEnumerable<string>.";
+                    return false;
+                }
+
+                StringComparer pathComparer = NativeMethodsShared.IsWindows
+                    ? StringComparer.OrdinalIgnoreCase
+                    : StringComparer.Ordinal;
+                var seen = new HashSet<string>(pathComparer);
+                var result = new List<string>();
+                foreach (string value in values)
+                {
+                    string path = FileUtilities.NormalizePath(projectDirectory, value);
+                    if (seen.Add(path))
+                    {
+                        result.Add(path);
+                    }
+                }
+
+                result.Sort(pathComparer);
+                paths = result;
+                return true;
+            }
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            {
+                paths = null;
+                reason = e.InnerException?.Message ?? e.Message;
                 return false;
             }
-
-            StringComparer pathComparer = NativeMethodsShared.IsWindows
-                ? StringComparer.OrdinalIgnoreCase
-                : StringComparer.Ordinal;
-            var seen = new HashSet<string>(pathComparer);
-            var result = new List<string>(items.Length);
-            for (int i = 0; i < items.Length; i++)
-            {
-                string path = FileUtilities.NormalizePath(projectDirectory, items[i].ItemSpec);
-                if (seen.Add(path))
-                {
-                    result.Add(path);
-                }
-            }
-
-            result.Sort(pathComparer);
-            paths = result;
-            return true;
         }
 
         private async ValueTask WriteManifestAsync(
@@ -820,6 +825,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 if (output.Present)
                 {
                     writer.Write(output.Length);
+                    writer.Write(output.Hash);
                     writer.Write((int)output.Attributes);
                     writer.Write(output.UnixFileMode);
                 }
@@ -861,7 +867,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             }
 
             int outputCount = reader.ReadInt32();
-            if (outputCount < 0 || outputCount > _outputPaths.Count)
+            if (outputCount < 0 || outputCount > MaximumOutputCount)
             {
                 throw new InvalidDataException("The cache manifest output count is invalid.");
             }
@@ -871,19 +877,33 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             {
                 string path = reader.ReadString();
                 bool present = reader.ReadBoolean();
-                outputs[i] = present
-                    ? new CachedOutput(
+                if (present)
+                {
+                    long length = reader.ReadInt64();
+                    byte[] hash = reader.ReadBytes(Sha256HashLength);
+                    if (hash.Length != Sha256HashLength)
+                    {
+                        throw new InvalidDataException("The cache manifest output digest is invalid.");
+                    }
+
+                    outputs[i] = new CachedOutput(
                         path,
                         present,
-                        reader.ReadInt64(),
+                        length,
+                        hash,
                         (FileAttributes)reader.ReadInt32(),
-                        reader.ReadInt32())
-                    : new CachedOutput(
+                        reader.ReadInt32());
+                }
+                else
+                {
+                    outputs[i] = new CachedOutput(
                         path,
                         present,
                         Length: 0,
+                        Hash: [],
                         Attributes: 0,
                         UnixFileMode: 0);
+                }
             }
 
             int eventCount = reader.ReadInt32();
@@ -1144,7 +1164,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private readonly record struct TaskResultCacheKeyResponse(
             bool Success,
             string? Key = null,
-            IReadOnlyList<string>? OutputPaths = null,
             string? Reason = null
         );
 
@@ -1163,6 +1182,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             string Path,
             bool Present,
             long Length,
+            byte[] Hash,
             FileAttributes Attributes,
             int UnixFileMode
         );

@@ -6,7 +6,7 @@ MSBuild can reuse successful task results from a content-addressed disk cache wh
 
 `MSBuildContentCacheSizeMB` controls the maximum size of live cache entries, where one MB is 1,048,576 bytes. The default is 10,000 MB. A value of zero disables eviction. MSBuild updates an entry's recency after a successful hit and periodically removes least-recently-used entries when the cache exceeds the configured size.
 
-A cacheable task type must have `Microsoft.Build.Framework.MSBuildDeclaredIOTaskAttribute`. Each cacheable invocation must explicitly supply both `DeclaredInputs` and `DeclaredOutputs`, even when either list is empty, and must not contain MSBuild `<Output>` elements. A task can apply `MSBuildDeclaredIORequiresUnsetAttribute` to parameters whose behavior cannot satisfy its declared-I/O contract; invocations that bind those parameters execute normally without caching.
+A cacheable task type must have the experimental `Microsoft.Build.Framework.MSBuildDeclaredIOTaskAttribute` and public get-only `IEnumerable<string>` properties named `InputFiles` and `OutputFiles`. These properties are task-computed conventions rather than bindable MSBuild parameters: the engine reads `InputFiles` after parameter binding and `OutputFiles` after successful execution. `OutputFiles` must include every path whose final presence or absence is part of the task result. Cacheable invocations must not contain MSBuild `<Output>` elements. Every ordinary bound task parameter is part of the key; a task can additionally apply `MSBuildDeclaredIORequiresUnsetAttribute` to parameters whose behavior depends on undeclared files or ambient state. Invocations that bind those parameters execute normally without caching.
 
 The cache key includes:
 
@@ -14,12 +14,11 @@ The cache key includes:
 - The MSBuild engine module, runtime, operating-system, architecture, and culture identity.
 - The project path and execution directory.
 - Every explicitly bound task parameter, including ordered task items and metadata.
-- Declared output paths.
 - The existence, type, and contents of each declared input.
 
-Cache entries contain the declared output files and supported task messages and warnings. A hit restores outputs and replays diagnostics while retaining normal task start and finish events. Failed tasks, out-of-process tasks, directory outputs, unsupported task events, corrupt entries, and cache I/O failures fall back to ordinary execution.
+Cache entries contain the task-reported output paths and files plus supported task messages and warnings. A hit restores outputs and replays diagnostics while retaining normal task start and finish events. Failed tasks, out-of-process tasks, directory outputs, unsupported task events, corrupt entries, and cache I/O failures fall back to ordinary execution.
 
-Cache key hashing and manifest I/O use cancellation-aware asynchronous I/O. Payloads are copied once and validated by length before staged files replace declared outputs. Existing outputs are preserved until the staged set is ready, and a failed replacement restores the prior output state before normal task execution. During a build, each node retains input-file digests and performs a fast length and last-write-time check on every cache request. Previously seen files with unchanged metadata reuse their digest; the first request for a new or changed file computes its digest while concurrent requests wait for that same operation. The digest table is discarded at build completion. Filesystem operations without asynchronous platform APIs remain synchronous.
+Cache key hashing and manifest I/O use cancellation-aware asynchronous I/O. Payloads are copied once and validated by length and SHA-256 digest before staged files replace declared outputs. Existing outputs are preserved until the staged set is ready, and a failed replacement restores the prior output state before normal task execution. During a build, each node retains file digests and performs a fast length and last-write-time check on every cache request. Previously seen files with unchanged metadata reuse their digest; stored outputs populate this table, and restored outputs seed it for downstream consumers. The first request for a new or changed file computes its digest while concurrent requests wait for that same operation. The digest table is discarded at build completion. Filesystem operations without asynchronous platform APIs remain synchronous.
 
 Content-cache hits, misses, and failures are logged at low importance and captured in binary logs.
 

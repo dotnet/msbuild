@@ -50,6 +50,14 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             return await entry.GetDigestAsync(cancellationToken);
         }
 
+        internal void Seed(string path, TaskResultCacheFileDigest digest)
+        {
+            string normalizedPath = FileUtilities.NormalizePath(path);
+            _digests.GetOrAdd(
+                normalizedPath,
+                static path => new DigestEntry(path)).Seed(digest);
+        }
+
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
             Assumed.Equal(
@@ -93,6 +101,13 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 {
                     _gate.Release();
                 }
+            }
+
+            internal void Seed(TaskResultCacheFileDigest digest)
+            {
+                Volatile.Write(
+                    ref _state,
+                    new DigestState(GetFingerprint(path), digest));
             }
 
             private static FileFingerprint GetFingerprint(string path)

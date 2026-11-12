@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Security;
@@ -17,6 +18,7 @@ using Xunit;
 using Xunit.NetCore.Extensions;
 
 #nullable enable
+#pragma warning disable MSBEXP0001
 
 namespace Microsoft.Build.UnitTests.BackEnd;
 
@@ -50,9 +52,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
                 <TaskResultCacheTestTask
                     Input="@(CacheInput)"
                     OutputFile="@(CacheOutput)"
-                    Marker="!"
-                    DeclaredInputs="@(CacheInput)"
-                    DeclaredOutputs="@(CacheOutput)" />
+                    Marker="!" />
               </Target>
             </Project>
             """);
@@ -164,9 +164,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
               <Target Name="Build">
                 <TaskResultCacheTestTask
                     Input="@(CacheInput)"
-                    OutputFile="@(CacheOutput)"
-                    DeclaredInputs="@(CacheInput)"
-                    DeclaredOutputs="@(CacheOutput)" />
+                    OutputFile="@(CacheOutput)" />
               </Target>
             </Project>
             """);
@@ -230,9 +228,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
                 <TaskResultCacheTestTask
                     Input="@(CacheInput)"
                     OutputFile="@(CacheOutput)"
-                    WriteOutput="false"
-                    DeclaredInputs="@(CacheInput)"
-                    DeclaredOutputs="@(CacheOutput)" />
+                    WriteOutput="false" />
               </Target>
             </Project>
             """);
@@ -295,9 +291,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
                     <TaskResultCacheTestTask
                         Input="@(CacheInput)"
                         OutputFile="@(CacheOutput)"
-                        SynchronizationDirectory="{SecurityElement.Escape(synchronizationDirectory)}"
-                        DeclaredInputs="@(CacheInput)"
-                        DeclaredOutputs="@(CacheOutput)" />
+                        SynchronizationDirectory="{SecurityElement.Escape(synchronizationDirectory)}" />
                   </Target>
                 </Project>
                 """);
@@ -358,6 +352,11 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
             await fileDigestCache.GetDigestAsync(input.Path, CancellationToken.None);
         nextBuild.Hash.ShouldBe(second.Hash);
         nextBuild.Hash.ShouldNotBeSameAs(second.Hash);
+
+        fileDigestCache.Seed(input.Path, second);
+        TaskResultCacheFileDigest seeded =
+            await fileDigestCache.GetDigestAsync(input.Path, CancellationToken.None);
+        seeded.Hash.ShouldBeSameAs(second.Hash);
     }
 
     [Fact]
@@ -383,9 +382,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
                 <TaskResultCacheTestTask
                     Input="input.txt"
                     OutputFile="output.txt"
-                    UncacheableMode="true"
-                    DeclaredInputs="input.txt"
-                    DeclaredOutputs="output.txt" />
+                    UncacheableMode="true" />
               </Target>
             </Project>
             """);
@@ -407,7 +404,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
     }
 
     [Fact]
-    public void DeclaredPathGetterFailureRunsTask()
+    public void InputFilesGetterFailureRunsTask()
     {
         using TestEnvironment env = TestEnvironment.Create(testOutput);
         TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
@@ -429,9 +426,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
                 <TaskResultCacheTestTask
                     Input="input.txt"
                     OutputFile="output.txt"
-                    ThrowOnDeclaredInputsRead="true"
-                    DeclaredInputs="input.txt"
-                    DeclaredOutputs="output.txt" />
+                    ThrowOnInputFilesRead="true" />
               </Target>
             </Project>
             """);
@@ -439,7 +434,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         MockLogger logger = BuildCacheProject(projectPath);
 
         logger.AssertNoErrors();
-        logger.FullLog.ShouldContain("declared-input-getter-failure");
+        logger.FullLog.ShouldContain("input-files-getter-failure");
         logger.FullLog.ShouldNotContain("Content cache miss");
         File.ReadAllText(outputPath).ShouldBe("input");
     }
@@ -495,7 +490,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
 #endif
 
     [Fact]
-    public void PayloadLengthMismatchRunsTaskAndRepublishes()
+    public void PayloadDigestMismatchRunsTaskAndRepublishes()
     {
         using TestEnvironment env = TestEnvironment.Create(testOutput);
         CacheProject project = CreateCacheProject(env);
@@ -506,7 +501,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
             project.CachePath,
             "0.bin",
             SearchOption.AllDirectories).ShouldHaveSingleItem();
-        File.AppendAllText(payloadPath, "corrupt");
+        File.WriteAllText(payloadPath, "wrong");
 
         File.Delete(project.OutputPath);
         BuildCacheProject(project.ProjectPath)
@@ -541,16 +536,13 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
                   AssemblyFile="{SecurityElement.Escape(typeof(TaskResultCacheTestTask).Assembly.Location)}" />
               <ItemGroup>
                 <CacheInput Include="input.txt" />
-                <CacheOutput Include="first.txt;second.txt" />
               </ItemGroup>
               <Target Name="Build">
                 <TaskResultCacheTestTask
                     Input="@(CacheInput)"
                     OutputFile="first.txt"
                     AdditionalOutputFile="second.txt"
-                    LogDeclaredOutputState="true"
-                    DeclaredInputs="@(CacheInput)"
-                    DeclaredOutputs="@(CacheOutput)" />
+                    LogDeclaredOutputState="true" />
               </Target>
             </Project>
             """);
@@ -599,9 +591,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
               <Target Name="Build">
                 <TaskResultCacheTestTask
                     Input="@(CacheInput)"
-                    OutputFile="@(CacheOutput)"
-                    DeclaredInputs="@(CacheInput)"
-                    DeclaredOutputs="@(CacheOutput)" />
+                    OutputFile="@(CacheOutput)" />
               </Target>
             </Project>
             """);
@@ -642,7 +632,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
 [MSBuildDeclaredIORequiresUnset(nameof(UncacheableMode))]
 public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
 {
-    private ITaskItem[] _declaredInputs = [];
+    private readonly List<string> _outputFiles = [];
 
     public ITaskItem Input { get; set; } = null!;
 
@@ -658,28 +648,37 @@ public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
 
     public bool UncacheableMode { get; set; }
 
-    public bool ThrowOnDeclaredInputsRead { get; set; }
+    public bool ThrowOnInputFilesRead { get; set; }
 
     public bool LogDeclaredOutputState { get; set; }
 
-    public ITaskItem[] DeclaredInputs
+    public IEnumerable<string> InputFiles
     {
-        get => ThrowOnDeclaredInputsRead
-            ? throw new InvalidOperationException("declared-input-getter-failure")
-            : _declaredInputs;
-        set => _declaredInputs = value;
+        get
+        {
+            if (ThrowOnInputFilesRead)
+            {
+                throw new InvalidOperationException("input-files-getter-failure");
+            }
+
+            yield return Input.ItemSpec;
+        }
     }
 
-    public ITaskItem[] DeclaredOutputs { get; set; } = [];
+    public IEnumerable<string> OutputFiles => _outputFiles;
 
     public override bool Execute()
     {
+        _outputFiles.Clear();
         if (LogDeclaredOutputState)
         {
-            var states = new string[DeclaredOutputs.Length];
-            for (int i = 0; i < DeclaredOutputs.Length; i++)
+            int outputCount = AdditionalOutputFile is null ? 1 : 2;
+            var states = new string[outputCount];
+            for (int i = 0; i < outputCount; i++)
             {
-                string path = DeclaredOutputs[i].ItemSpec;
+                string path = i == 0
+                    ? OutputFile.ItemSpec
+                    : AdditionalOutputFile!.ItemSpec;
                 states[i] = Directory.Exists(path)
                     ? "directory"
                     : File.Exists(path)
@@ -752,6 +751,12 @@ public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
         else
         {
             File.Delete(OutputFile.ItemSpec);
+        }
+
+        _outputFiles.Add(OutputFile.ItemSpec);
+        if (AdditionalOutputFile is not null)
+        {
+            _outputFiles.Add(AdditionalOutputFile.ItemSpec);
         }
 
         if (synchronizationMarker is not null)

@@ -8,8 +8,8 @@ using System;
 namespace Microsoft.Build.Framework;
 
 /// <summary>
-/// Requires a task parameter to be unset for an <see cref="MSBuildDeclaredIOTaskAttribute"/>
-/// contract to apply.
+/// Requires a task parameter whose behavior is not represented by the declared file properties
+/// to be unset for an <see cref="MSBuildDeclaredIOTaskAttribute"/> contract to apply.
 /// </summary>
 /// <remarks>
 /// MSBuild detects this attribute by its namespace and name only, ignoring the defining assembly.

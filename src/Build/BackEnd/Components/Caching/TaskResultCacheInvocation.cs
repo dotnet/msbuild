@@ -20,7 +20,9 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private readonly IReadOnlyList<TaskResultCacheEvent>? _cachedEvents;
         private readonly TaskResultCacheEventCollector? _eventCollector;
         private readonly TaskLoggingContext _loggingContext;
+        private readonly string? _projectDirectory;
         private readonly TaskResultCacheSession? _session;
+        private readonly ITask? _task;
         private readonly string _taskName;
 
         private TaskResultCacheInvocation(
@@ -36,11 +38,15 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private TaskResultCacheInvocation(
             TaskLoggingContext loggingContext,
             string taskName,
-            TaskResultCacheSession session)
+            TaskResultCacheSession session,
+            ITask task,
+            string projectDirectory)
         {
             _loggingContext = loggingContext;
+            _projectDirectory = projectDirectory;
             _taskName = taskName;
             _session = session;
+            _task = task;
             _eventCollector = new TaskResultCacheEventCollector();
         }
 
@@ -113,7 +119,9 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     return new TaskResultCacheInvocation(
                         loggingContext,
                         taskNode.Name,
-                        response.Session);
+                        response.Session,
+                        task,
+                        buildRequestEntry.ProjectRootDirectory);
 
                 default:
                     LogFailure(loggingContext, taskNode.Name, response.Reason);
@@ -168,8 +176,23 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 return;
             }
 
+            if (!TaskResultCacheSession.TryGetFilePaths(
+                    invocation._task!,
+                    "OutputFiles",
+                    invocation._projectDirectory!,
+                    out IReadOnlyList<string>? outputPaths,
+                    out string? reason))
+            {
+                LogFailure(
+                    invocation._loggingContext,
+                    invocation._taskName,
+                    reason);
+                return;
+            }
+
             TaskResultCacheStoreResponse response =
                 await invocation._session.TryStoreAsync(
+                    outputPaths,
                     invocation._eventCollector.Events,
                     cancellationToken);
             if (!response.Success)
@@ -189,13 +212,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             if (!taskType.HasValidMSBuildDeclaredIOAttributes)
             {
                 reason = "the task has an invalid declared-I/O annotation";
-                return false;
-            }
-
-            if (!ContainsParameter(parameterNames, "DeclaredInputs") ||
-                !ContainsParameter(parameterNames, "DeclaredOutputs"))
-            {
-                reason = "the task invocation must explicitly supply DeclaredInputs and DeclaredOutputs";
                 return false;
             }
 
