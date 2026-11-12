@@ -17,6 +17,16 @@ Review the existing documentation on [Task Writing](https://learn.microsoft.com/
 
 Tasks are generally simple and should not require much effort to develop.  If you find a task becoming very complicated, consider breaking it up into smaller tasks which can be run together in a target.
 
+### Multithreaded task analysis
+
+The Tasks project enables the in-repository `Microsoft.Build.TaskAuthoring.Analyzer` by default.
+Review its diagnostics when migrating tasks, including warnings about transitive helper calls.
+The analyzer cannot prove that every helper is safe: audit shared state and path consumers against
+the [thread-safe task guidance](../specs/multithreading/thread-safe-tasks.md) and
+[API analysis reference](../specs/multithreading/thread-safe-tasks-api-analysis.md).
+Add task-specific tests with a project directory different from the process working directory,
+and verify generated files and output parameters rather than only the task's return value.
+
 ## Developing unit tests
 Contributed tasks must have unit tests in place to prove they work and to prevent regressions caused by other code changes.  There are a lot of examples in the [Microsoft.Build.Tasks.UnitTests](https://github.com/dotnet/msbuild/tree/main/src/Tasks.UnitTests) project.  Please provide a reasonable amount of test coverage so ensure the quality of the product.
 
