@@ -3,22 +3,21 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.11.2</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind><!-- Keep next to VersionPrefix to create a conflict in forward-flow -->
-    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
+    <VersionPrefix>18.11.2</VersionPrefix>
+    <PreReleaseVersionLabel>1</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">$(PreReleaseVersionLabel)-test</PreReleaseVersionLabel>
+    <!-- The .NET 10 SDK builds MSBuild from the VMR, which does not override this repo's version kind; ship stable versions there. -->
+    <DotNetFinalVersionKind Condition="'$(DotNetBuildFromVMR)' == 'true'">release</DotNetFinalVersionKind>
+    <!-- Baseline must have the net10.0 runtime TFM; 18.10+ packages target net11.0. -->
     <PackageValidationBaselineVersion>18.8.0-preview-26276-02</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
-    <!-- differentiate experimental insertions to avoid package id conflicts, 
-     it has to be alphabetically after "preview" to avoid downgrade errors in VS -->
-    <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">test</PreReleaseVersionLabel>
     <!--
       Don't use shipping versions when building in the VMR unless the VMR directs the build to use shipping versions.
       This can cause issues when building downstream repos in the orchestrated build if the time MSBuild
       is built crosses a UTC date boundary.
     -->
     <DotNetUseShippingVersions Condition="'$(DotNetBuildFromVMR)' != 'true'">true</DotNetUseShippingVersions>
-    <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
-    <SemanticVersioningV1>true</SemanticVersioningV1>
     <!-- Tools.csproj consumes this property; SAC group config requires this newer SWIX toolset. -->
     <MicrosoftVisualStudioEngMicroBuildPluginsSwixBuildVersion>1.1.973</MicrosoftVisualStudioEngMicroBuildPluginsSwixBuildVersion>
   </PropertyGroup>
@@ -29,6 +28,7 @@
     <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
+    <UsingToolNuGetRepack>true</UsingToolNuGetRepack>
   </PropertyGroup>
 
   <!-- Production Dependencies -->

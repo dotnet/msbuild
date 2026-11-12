@@ -62,7 +62,7 @@ variables:
     ${{ if not(eq(parameters.TargetBranch, 'auto')) }}:
       value: ${{ parameters.TargetBranch }}
     ${{ else }}:
-      value: $[ iif(eq(variables['resources.pipeline.MSBuild.sourceBranch'], 'refs/heads/vs18.11'), 'rel/d18.11-ltsc', 'rel/stable') ]
+      value: 'rel/d18.11-ltsc'
   - name:  TeamName
     value: msbuild
   - name: TeamEmail
