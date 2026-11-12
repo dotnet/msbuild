@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -11,6 +11,7 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
+using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -46,6 +47,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             succeeded.ShouldBeTrue(output);
         }
+
         [WindowsFullFrameworkOnlyFact]
         public void NetTaskHostTest_AppHostFromResolvedSdk()
         {
