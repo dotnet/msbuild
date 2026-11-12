@@ -19,6 +19,7 @@
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">full</ApplyNgenOptimization>
     <EnablePackageValidation>true</EnablePackageValidation>
+    <BuildAnalyzer Condition="'$(BuildAnalyzer)' == ''">true</BuildAnalyzer>
   </PropertyGroup>
 
   <ItemGroup>

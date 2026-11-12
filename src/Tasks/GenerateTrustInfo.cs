@@ -3,6 +3,7 @@
 
 #if NETFRAMEWORK
 using System;
+using System.IO;
 
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
@@ -21,8 +22,11 @@ namespace Microsoft.Build.Tasks
     /// This task generates the application trust from the base manifest
     /// and the TargetZone and ExcludedPermissions properties.
     /// </summary>
-    public sealed class GenerateTrustInfo : TaskExtension, IGenerateTrustInfoTaskContract
+    [MSBuildMultiThreadableTask]
+    public sealed class GenerateTrustInfo : TaskExtension, IGenerateTrustInfoTaskContract, IMultiThreadableTask
     {
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
         private const string Custom = "Custom";
 
         public ITaskItem BaseManifest { get; set; }
@@ -50,16 +54,20 @@ namespace Microsoft.Build.Tasks
             }
 
             // Read trust-info from app.manifest
-            if (BaseManifest != null && FileSystems.Default.FileExists(BaseManifest.ItemSpec))
+            if (BaseManifest != null && !string.IsNullOrEmpty(BaseManifest.ItemSpec))
             {
-                try
+                AbsolutePath baseManifestPath = TaskEnvironment.GetAbsolutePath(BaseManifest.ItemSpec);
+                if (FileSystems.Default.FileExists(baseManifestPath))
                 {
-                    trustInfo.ReadManifest(BaseManifest.ItemSpec);
-                }
-                catch (Exception ex)
-                {
-                    Log.LogErrorWithCodeFromResources("GenerateManifest.ReadInputManifestFailed", BaseManifest.ItemSpec, ex.Message);
-                    return false;
+                    try
+                    {
+                        trustInfo.ReadManifest(baseManifestPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.LogErrorWithCodeFromResources("GenerateManifest.ReadInputManifestFailed", BaseManifest.ItemSpec, ex.Message);
+                        return false;
+                    }
                 }
             }
 
@@ -99,7 +107,16 @@ namespace Microsoft.Build.Tasks
             }
 
             // Write trust-info back to a stand-alone trust file
-            trustInfo.Write(TrustInfoFile.ItemSpec);
+            if (string.IsNullOrWhiteSpace(TrustInfoFile.ItemSpec))
+            {
+                // Preserve File.Open's rejection of whitespace-only paths before rooting the path.
+#pragma warning disable MSBuildTask0002 // Invalid paths throw without resolving against process state.
+                Path.GetFullPath(TrustInfoFile.ItemSpec);
+#pragma warning restore MSBuildTask0002
+            }
+
+            AbsolutePath trustInfoFilePath = TaskEnvironment.GetAbsolutePath(TrustInfoFile.ItemSpec);
+            trustInfo.Write(trustInfoFilePath);
 
             return true;
         }
@@ -107,6 +124,7 @@ namespace Microsoft.Build.Tasks
 
 #else
 
+    [MSBuildMultiThreadableTask]
     public sealed class GenerateTrustInfo : TaskRequiresFramework, IGenerateTrustInfoTaskContract
     {
         public GenerateTrustInfo()

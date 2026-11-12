@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -40,6 +41,16 @@ namespace Microsoft.Build.Framework
         /// <inheritdoc/>
         public AbsolutePath GetAbsolutePath(string path)
         {
+            ArgumentException.ThrowIfNullOrEmpty(path);
+
+            if (NativeMethods.IsWindows && FileUtilitiesRegex.StartsWithDrivePattern(path) &&
+                (path.Length == 2 || path[2] is not ('\\' or '/')))
+            {
+                // Preserve the per-drive current directory used by file APIs in multi-process mode.
+                AbsolutePath driveDirectory = new(Path.GetFullPath(path.Substring(0, 2)));
+                return new AbsolutePath(path, driveDirectory);
+            }
+
             return new AbsolutePath(path, ProjectDirectory);
         }
 
