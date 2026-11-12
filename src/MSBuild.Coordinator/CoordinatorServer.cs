@@ -472,11 +472,11 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
                     TrackRootGrant(grant);
                     WriteGrantMessage(waitingClient, grant);
                 }
-                catch (Exception ex) when (ex is IOException or ObjectDisposedException)
+                catch (IOException)
                 {
                     _output.WriteLine($"CoordinatorServer: PID {grant.ProcessId} disconnected while waiting");
 
-                    // The client loop may have disposed the pipe after the lookup. Release its grant, then append
+                    // Client disconnected while waiting. Release their grant too, then append
                     // any newly available grants after the current notification batch.
                     ImmutableArray<BuildGrant> appendedGrants = ReleaseClientAndGrant(waitingClient);
                     EnqueueNewlyGrantedNotifications(pendingNotifications, appendedGrants);
