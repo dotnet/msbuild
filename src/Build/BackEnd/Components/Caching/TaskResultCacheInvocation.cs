@@ -78,10 +78,14 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             }
 
             ICollection<string> parameterNames = taskNode.ParametersForBuild.Keys;
-            if (!IsEligible(taskType, parameterNames, out string? reason))
+            foreach (string parameterName in parameterNames)
             {
-                LogFailure(loggingContext, taskNode.Name, reason);
-                return null;
+                if (MSBuildNameIgnoreCaseComparer.Default.Equals(parameterName, "InputFiles") ||
+                    MSBuildNameIgnoreCaseComparer.Default.Equals(parameterName, "OutputFiles"))
+                {
+                    LogFailure(loggingContext, taskNode.Name, "file-list properties must not be supplied as task parameters");
+                    return null;
+                }
             }
 
             var fileDigestCache = (TaskResultCacheFileDigestCache)componentHost.GetComponent(
@@ -202,47 +206,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     invocation._taskName,
                     response.Reason);
             }
-        }
-
-        private static bool IsEligible(
-            LoadedType taskType,
-            ICollection<string> parameterNames,
-            out string? reason)
-        {
-            if (!taskType.HasValidMSBuildDeclaredIOAttributes)
-            {
-                reason = "the task has an invalid declared-I/O annotation";
-                return false;
-            }
-
-            foreach (string requiredUnsetParameter in taskType.DeclaredIORequiredUnsetParameters)
-            {
-                if (ContainsParameter(parameterNames, requiredUnsetParameter))
-                {
-                    reason = $"the task parameter \"{requiredUnsetParameter}\" must be unset";
-                    return false;
-                }
-            }
-
-            reason = null;
-            return true;
-        }
-
-        private static bool ContainsParameter(
-            ICollection<string> parameterNames,
-            string expectedName)
-        {
-            foreach (string parameterName in parameterNames)
-            {
-                if (MSBuildNameIgnoreCaseComparer.Default.Equals(
-                        parameterName,
-                        expectedName))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private static void LogFailure(

@@ -15,7 +15,7 @@ namespace Microsoft.Build.UnitTests;
 public sealed class DeclaredIOAttribute_Tests
 {
     [Fact]
-    public void AttributesExposeDeclaredConfiguration()
+    public void OptInAttributeIsExperimental()
     {
         MSBuildDeclaredIOTaskAttribute? taskAttribute =
             typeof(DeclaredIOTask)
@@ -23,18 +23,11 @@ public sealed class DeclaredIOAttribute_Tests
         ExperimentalAttribute? experimentalAttribute =
             typeof(MSBuildDeclaredIOTaskAttribute)
                 .GetCustomAttribute<ExperimentalAttribute>();
-        MSBuildDeclaredIORequiresUnsetAttribute? requiresUnsetAttribute =
-            typeof(DeclaredIOTask)
-                .GetCustomAttribute<MSBuildDeclaredIORequiresUnsetAttribute>();
-
         taskAttribute.ShouldNotBeNull();
         experimentalAttribute.ShouldNotBeNull();
         experimentalAttribute.DiagnosticId.ShouldBe("MSBEXP0001");
-        requiresUnsetAttribute.ShouldNotBeNull();
-        requiresUnsetAttribute.ParameterName.ShouldBe("UncacheableMode");
     }
 
     [MSBuildDeclaredIOTask]
-    [MSBuildDeclaredIORequiresUnset("UncacheableMode")]
     private sealed class DeclaredIOTask;
 }

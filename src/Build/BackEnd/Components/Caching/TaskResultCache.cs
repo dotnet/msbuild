@@ -370,9 +370,11 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                         string temporaryFile =
                             output.Path + "." + Guid.NewGuid().ToString("N") + ".msbuild-cache";
                         temporaryFiles[i] = temporaryFile;
-                        File.Copy(GetPayloadPath(_entryDirectory, i), temporaryFile);
                         TaskResultCacheFileDigest digest =
-                            await _fileDigestCache.GetDigestAsync(temporaryFile, cancellationToken);
+                            await CopyPayloadAsync(
+                                GetPayloadPath(_entryDirectory, i),
+                                temporaryFile,
+                                cancellationToken);
                         if (digest.Length != output.Length ||
                             !digest.Hash.AsSpan().SequenceEqual(output.Hash))
                         {
@@ -526,6 +528,20 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             }
         }
 
+        private static async ValueTask<TaskResultCacheFileDigest> CopyPayloadAsync(
+            string sourcePath,
+            string destinationPath,
+            CancellationToken cancellationToken)
+        {
+            using var source = CreateAsyncFileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var destination = CreateAsyncFileStream(destinationPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+            using SHA256 hash = SHA256.Create();
+            using var hashStream = new CryptoStream(destination, hash, CryptoStreamMode.Write, leaveOpen: true);
+            await source.CopyToAsync(hashStream, 81920, cancellationToken);
+            hashStream.FlushFinalBlock();
+            return new TaskResultCacheFileDigest(destination.Position, hash.Hash!);
+        }
+
         private static async ValueTask<TaskResultCacheKeyResponse> TryCreateKeyAsync(
             ITask task,
             ICollection<string> parameterNames,
@@ -545,12 +561,13 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                         Reason: "The task assembly does not have a readable file location.");
                 }
 
-                if (!TryGetFilePaths(
+                if (!TryGetFileProperty(task, "OutputFiles", out _, out string? reason) ||
+                    !TryGetFilePaths(
                         task,
                         "InputFiles",
                         projectDirectory,
                         out IReadOnlyList<string>? inputPaths,
-                        out string? reason))
+                        out reason))
                 {
                     return new TaskResultCacheKeyResponse(
                         Success: false,
@@ -752,10 +769,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             }
         }
 
-        [UnconditionalSuppressMessage(
-            "Trimming",
-            "IL2075",
-            Justification = "Declared-IO cache binding reflects only over task types, which are already rooted by task loading.")]
         internal static bool TryGetFilePaths(
             ITask task,
             string propertyName,
@@ -767,16 +780,15 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             {
                 paths = null;
                 reason = null;
-                PropertyInfo? property = task.GetType().GetProperty(
-                    propertyName,
-                    BindingFlags.Instance | BindingFlags.Public);
-                if (property?.GetMethod is null ||
-                    property.GetSetMethod(nonPublic: true) is not null ||
-                    !typeof(IEnumerable<string>).IsAssignableFrom(property.PropertyType) ||
-                    property.GetValue(task) is not IEnumerable<string> values)
+                if (!TryGetFileProperty(task, propertyName, out PropertyInfo? property, out reason))
+                {
+                    return false;
+                }
+
+                if (property.GetValue(task) is not IEnumerable<string> values)
                 {
                     reason =
-                        $"Task property \"{propertyName}\" must be a public get-only IEnumerable<string>.";
+                        $"Task property \"{propertyName}\" must return a non-null IEnumerable<string>.";
                     return false;
                 }
 
@@ -801,6 +813,40 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
                 paths = null;
+                reason = e.InnerException?.Message ?? e.Message;
+                return false;
+            }
+        }
+
+        [UnconditionalSuppressMessage(
+            "Trimming",
+            "IL2075",
+            Justification = "Declared-IO cache binding reflects only over task types, which are already rooted by task loading.")]
+        private static bool TryGetFileProperty(
+            ITask task,
+            string propertyName,
+            [NotNullWhen(true)] out PropertyInfo? property,
+            out string? reason)
+        {
+            try
+            {
+                property = task.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
+                if (property?.GetGetMethod() is not null &&
+                    property.GetSetMethod() is null &&
+                    property.GetIndexParameters().Length == 0 &&
+                    typeof(IEnumerable<string>).IsAssignableFrom(property.PropertyType))
+                {
+                    reason = null;
+                    return true;
+                }
+
+                property = null;
+                reason = $"Task property \"{propertyName}\" must be a publicly readable IEnumerable<string> without a public setter.";
+                return false;
+            }
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            {
+                property = null;
                 reason = e.InnerException?.Message ?? e.Message;
                 return false;
             }

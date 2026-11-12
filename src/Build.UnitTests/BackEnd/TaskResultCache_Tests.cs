@@ -360,50 +360,6 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
     }
 
     [Fact]
-    public void HonorsRequiresUnset()
-    {
-        using TestEnvironment env = TestEnvironment.Create(testOutput);
-        TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
-        string inputPath = Path.Combine(projectFolder.Path, "input.txt");
-        string outputPath = Path.Combine(projectFolder.Path, "output.txt");
-        string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
-        File.WriteAllText(inputPath, "input");
-        File.WriteAllText(
-            projectPath,
-            $"""
-            <Project>
-              <PropertyGroup>
-                <MSBuildContentCacheDirectory>cache</MSBuildContentCacheDirectory>
-              </PropertyGroup>
-              <UsingTask
-                  TaskName="{typeof(TaskResultCacheTestTask).FullName}"
-                  AssemblyFile="{SecurityElement.Escape(typeof(TaskResultCacheTestTask).Assembly.Location)}" />
-              <Target Name="Build">
-                <TaskResultCacheTestTask
-                    Input="input.txt"
-                    OutputFile="output.txt"
-                    UncacheableMode="true" />
-              </Target>
-            </Project>
-            """);
-
-        MockLogger firstLogger = BuildCacheProject(projectPath);
-        firstLogger.AssertNoErrors();
-        firstLogger.FullLog.ShouldContain(
-            "the task parameter \"UncacheableMode\" must be unset");
-        firstLogger.FullLog.ShouldNotContain("Content cache miss");
-
-        File.Delete(outputPath);
-
-        MockLogger secondLogger = BuildCacheProject(projectPath);
-        secondLogger.AssertNoErrors();
-        secondLogger.FullLog.ShouldContain(
-            "the task parameter \"UncacheableMode\" must be unset");
-        secondLogger.FullLog.ShouldNotContain("Content cache hit");
-        File.ReadAllText(outputPath).ShouldBe("input");
-    }
-
-    [Fact]
     public void InputFilesGetterFailureRunsTask()
     {
         using TestEnvironment env = TestEnvironment.Create(testOutput);
@@ -437,6 +393,68 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         logger.FullLog.ShouldContain("input-files-getter-failure");
         logger.FullLog.ShouldNotContain("Content cache miss");
         File.ReadAllText(outputPath).ShouldBe("input");
+    }
+
+    [Fact]
+    public void MissingOutputFilesRunsTaskWithoutReadingInputs()
+    {
+        using TestEnvironment env = TestEnvironment.Create(testOutput);
+        TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+        string outputPath = Path.Combine(projectFolder.Path, "output.txt");
+        string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
+        File.WriteAllText(
+            projectPath,
+            $"""
+            <Project>
+              <PropertyGroup>
+                <MSBuildContentCacheDirectory>cache</MSBuildContentCacheDirectory>
+              </PropertyGroup>
+              <UsingTask
+                  TaskName="{typeof(TaskWithoutOutputFiles).FullName}"
+                  AssemblyFile="{SecurityElement.Escape(typeof(TaskWithoutOutputFiles).Assembly.Location)}" />
+              <Target Name="Build">
+                <TaskWithoutOutputFiles OutputFile="output.txt" />
+              </Target>
+            </Project>
+            """);
+
+        MockLogger logger = BuildCacheProject(projectPath);
+
+        logger.AssertNoErrors();
+        logger.FullLog.ShouldContain("Task property \"OutputFiles\"");
+        logger.FullLog.ShouldNotContain("input-files-getter-failure");
+        logger.FullLog.ShouldNotContain("Content cache miss");
+        File.ReadAllText(outputPath).ShouldBe("executed");
+    }
+
+    [Fact]
+    public void BoundFileListRunsWithoutCaching()
+    {
+        using TestEnvironment env = TestEnvironment.Create(testOutput);
+        TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+        string outputPath = Path.Combine(projectFolder.Path, "output.txt");
+        string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
+        File.WriteAllText(
+            projectPath,
+            $"""
+            <Project>
+              <PropertyGroup>
+                <MSBuildContentCacheDirectory>cache</MSBuildContentCacheDirectory>
+              </PropertyGroup>
+              <UsingTask
+                  TaskName="{typeof(TaskWithBindableFileList).FullName}"
+                  AssemblyFile="{SecurityElement.Escape(typeof(TaskWithBindableFileList).Assembly.Location)}" />
+              <Target Name="Build">
+                <TaskWithBindableFileList InputFiles="input.txt" OutputFile="output.txt" />
+              </Target>
+            </Project>
+            """);
+
+        MockLogger logger = BuildCacheProject(projectPath);
+
+        logger.AssertNoErrors();
+        logger.FullLog.ShouldNotContain("Content cache miss");
+        File.ReadAllText(outputPath).ShouldBe("input.txt");
     }
 
 #if NET
@@ -629,7 +647,6 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
 }
 
 [MSBuildDeclaredIOTask]
-[MSBuildDeclaredIORequiresUnset(nameof(UncacheableMode))]
 public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
 {
     private readonly List<string> _outputFiles = [];
@@ -645,8 +662,6 @@ public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
     public bool WriteOutput { get; set; } = true;
 
     public string SynchronizationDirectory { get; set; } = String.Empty;
-
-    public bool UncacheableMode { get; set; }
 
     public bool ThrowOnInputFilesRead { get; set; }
 
@@ -665,11 +680,12 @@ public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
         }
     }
 
-    public IEnumerable<string> OutputFiles => _outputFiles;
+    public IEnumerable<string> OutputFiles { get; private set; } = [];
 
     public override bool Execute()
     {
         _outputFiles.Clear();
+        OutputFiles = _outputFiles;
         if (LogDeclaredOutputState)
         {
             int outputCount = AdditionalOutputFile is null ? 1 : 2;
@@ -774,6 +790,38 @@ public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
             }
         }
 
+        return true;
+    }
+}
+
+[MSBuildDeclaredIOTask]
+public sealed class TaskWithoutOutputFiles : Microsoft.Build.Utilities.Task
+{
+    public string OutputFile { get; set; } = String.Empty;
+
+    public IEnumerable<string> InputFiles =>
+        throw new InvalidOperationException("input-files-getter-failure");
+
+    public override bool Execute()
+    {
+        File.WriteAllText(OutputFile, "executed");
+        return true;
+    }
+
+}
+
+[MSBuildDeclaredIOTask]
+public sealed class TaskWithBindableFileList : Microsoft.Build.Utilities.Task
+{
+    public string OutputFile { get; set; } = String.Empty;
+
+    public string[] InputFiles { get; private set; } = [];
+
+    public string[] OutputFiles => [OutputFile];
+
+    public override bool Execute()
+    {
+        File.WriteAllText(OutputFile, String.Join(";", InputFiles));
         return true;
     }
 }

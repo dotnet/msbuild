@@ -115,7 +115,7 @@ namespace Microsoft.Build.Shared
             Assembly = assemblyLoadInfo;
 
             HasSTAThreadAttribute = CheckForHardcodedSTARequirement();
-            _declaredIOMetadata = ReadMSBuildDeclaredIOAttributes();
+            HasMSBuildDeclaredIOTaskAttribute = ReadMSBuildDeclaredIOTaskAttribute();
             LoadedAssemblyName = loadedAssembly.GetName();
             LoadedViaMetadataLoadContext = loadedViaMetadataLoadContext;
             Architecture = architecture;

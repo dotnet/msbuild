@@ -10,13 +10,14 @@ namespace Microsoft.Build.Framework;
 
 /// <summary>
 /// Marks a task class whose externally observable filesystem inputs and outputs are completely described
-/// by public get-only <c>IEnumerable&lt;string&gt;</c> properties named <c>InputFiles</c> and
-/// <c>OutputFiles</c>.
+/// by publicly readable <c>IEnumerable&lt;string&gt;</c> properties named <c>InputFiles</c> and
+/// <c>OutputFiles</c> without public setters.
 /// </summary>
 /// <remarks>
 /// MSBuild reads <c>InputFiles</c> after binding task parameters and <c>OutputFiles</c> after successful execution.
 /// <c>OutputFiles</c> should include every path whose final presence or absence is part of the task result.
-/// Invocation constraints are described with <see cref="MSBuildDeclaredIORequiresUnsetAttribute"/>.
+/// Every supported invocation must satisfy this contract: its results must depend only on the task's
+/// parameters, declared inputs, and other values included in the cache key.
 /// This API is experimental and may change or be removed without preserving compatibility.
 /// Temporary files whose useful lifetime is contained within one invocation and which do not remain after
 /// successful execution are implementation details rather than declared outputs.
