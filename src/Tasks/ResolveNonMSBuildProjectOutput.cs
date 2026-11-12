@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks
     /// which would not be possible with a mixed list of MSBuild and non-MSBuild references.
     /// </remarks>
     [MSBuildMultiThreadableTask]
-    public class ResolveNonMSBuildProjectOutput : ResolveProjectBase
+    public class ResolveNonMSBuildProjectOutput : ResolveProjectBase, IMultiThreadableTask
     {
         #region Constructors
 
@@ -38,6 +38,9 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region Properties
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// A special XML string containing resolved project outputs - we need to simply match the projects and
@@ -94,7 +97,9 @@ namespace Microsoft.Build.Tasks
                 var resolvedPaths = new List<ITaskItem>(ProjectReferences.GetLength(0));
                 var unresolvedReferences = new List<ITaskItem>(ProjectReferences.GetLength(0));
 
-                CacheProjectElementsFromXml(PreresolvedProjectOutputs);
+                // Preserve legacy per-drive current-directory resolution outside multithreaded mode.
+                AbsolutePath? projectDirectory = TaskEnvironment.IsMultiThreaded ? TaskEnvironment.ProjectDirectory : null;
+                CacheProjectElementsFromXml(PreresolvedProjectOutputs, projectDirectory);
 
                 foreach (ITaskItem projectRef in ProjectReferences)
                 {
@@ -113,7 +118,7 @@ namespace Microsoft.Build.Tasks
                             // assembly check.
                             try
                             {
-                                GetAssemblyName(resolvedPath.ItemSpec);
+                                GetAssemblyName(FileUtilities.GetFullPathNoThrow(resolvedPath.ItemSpec, projectDirectory));
                                 resolvedPath.SetMetadata("ManagedAssembly", "true");
                             }
                             catch (BadImageFormatException)

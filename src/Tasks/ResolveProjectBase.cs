@@ -105,7 +105,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Pre-cache individual project elements from the XML string in a hashtable for quicker access.
         /// </summary>
-        internal void CacheProjectElementsFromXml(string xmlString) => _solutionConfiguration = new SolutionConfiguration(xmlString);
+        internal void CacheProjectElementsFromXml(string xmlString, AbsolutePath? projectDirectory = null) =>
+            _solutionConfiguration = new SolutionConfiguration(xmlString, projectDirectory);
 
         /// <summary>
         /// Helper method for retrieving whatever was stored in the XML string for the given project
