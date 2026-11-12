@@ -78,6 +78,14 @@
     <RuntimeOutputPlatformTarget>AnyCPU</RuntimeOutputPlatformTarget>
   </PropertyGroup>
 
+  <!-- Many BCL APIs aren't nullable-annotated on .NET Framework, forcing null-forgiving ('!') suppressions
+       that are unneeded (and flagged by IDE0370) on the other TFMs of multi-targeted projects.
+       Disable nullable analysis for the net4x leg of such projects so those suppressions become unnecessary
+       everywhere. https://github.com/dotnet/msbuild/issues/12726 -->
+  <PropertyGroup Condition="'$(TargetFramework)' != '' and $(TargetFramework.StartsWith('net4')) and $(TargetFrameworks.Contains(';'))">
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
   <PropertyGroup>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificContentInPackage);ShipRefAssembliesToNuGetPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
