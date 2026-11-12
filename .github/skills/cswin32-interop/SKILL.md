@@ -1,6 +1,6 @@
 ---
 name: cswin32-interop
-description: 'Guides CsWin32 P/Invoke interop in MSBuild. Consult when working with the PInvoke class, Windows.Win32 namespaces, FEATURE_WINDOWSINTEROP, HANDLE/HMODULE/HRESULT types, BufferScope<T>, replacing [DllImport] with CsWin32, or conditioning Windows-only code for source builds.'
+description: 'Guides CsWin32 P/Invoke interop in MSBuild. Consult when working with the PInvoke class, Windows.Win32 namespaces, FEATURE_WINDOWSINTEROP, HANDLE/HMODULE/HRESULT types, the generic BufferScope type, replacing [DllImport] with CsWin32, or conditioning Windows-only code for source builds.'
 argument-hint: 'Describe the Windows API or interop code you are migrating or adding.'
 ---
 

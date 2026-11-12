@@ -71,9 +71,12 @@ internal sealed class InternalTelemetryConsumingLogger : ILogger
 
         Console.WriteLine("==========================================");
         Console.WriteLine("Tasks by memory consumption:");
-        foreach (var task in _workerNodeTelemetryData.TasksExecutionData.OrderByDescending(t => t.Value.TotalMemoryBytes))
+        foreach (var task in _workerNodeTelemetryData.TasksExecutionData.OrderByDescending(t => t.Value.TotalMemoryBytes ?? -1))
         {
-            Console.WriteLine($"{task.Key} - {task.Value.TotalMemoryBytes / 1024.0:0.00}kB");
+            string memory = task.Value.TotalMemoryBytes is long totalMemoryBytes
+                ? $"{totalMemoryBytes / 1024.0:0.00}kB"
+                : "n/a";
+            Console.WriteLine($"{task.Key} - {memory}");
         }
 
         Console.WriteLine("==========================================");

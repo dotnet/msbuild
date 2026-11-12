@@ -49,7 +49,7 @@ internal sealed class UntrustedLocationCheck : Check
         {
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,
-                ElementLocation.EmptyLocation,
+                ElementLocation.Empty,
                 context.Data.ProjectFileDirectory,
                 context.Data.ProjectFilePath.Substring(context.Data.ProjectFileDirectory.Length + 1)));
         }

@@ -261,7 +261,12 @@ internal enum NodePacketType : byte
     /// </summary>
     TaskHostIsRunningMultipleNodesResponse = 0x25,
 
-    // 0x26-0x27 reserved for future TaskHost callback packet types
+    /// <summary>
+    /// Enables console output forwarding in the TaskHost process.
+    /// </summary>
+    TaskHostConsoleConfiguration = 0x26,
+
+    // 0x27 reserved for future TaskHost callback packet types
 
     #endregion
 
@@ -279,9 +284,9 @@ internal enum NodePacketType : byte
     ServerNodeBuildResult = 0x3D,
 
     /// <summary>
-    /// Info about server console activity.
+    /// Console output from a server or task-host node.
     /// </summary>
-    ServerNodeConsoleWrite = 0x3E,
+    ConsoleWrite = 0x3E,
 
     /// <summary>
     /// Command to cancel ongoing build.

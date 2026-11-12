@@ -25,20 +25,24 @@ namespace Microsoft.Build.Shared
         internal static AssemblyLoadInfo Create(string assemblyName, string assemblyFile)
         {
             Assumed.True(
-                (!string.IsNullOrEmpty(assemblyName)) || (!string.IsNullOrEmpty(assemblyFile)),
-                "We must have either the assembly name or the assembly file/path.");
-            Assumed.True(
-                (assemblyName == null) || (assemblyFile == null),
-                "We must not have both the assembly name and the assembly file/path.");
+                (assemblyName is null) != (assemblyFile is null),
+                "Exactly one of the assembly name and assembly file/path must be provided.");
 
-            if (assemblyName != null)
-            {
-                return new AssemblyLoadInfoWithName(assemblyName);
-            }
-            else
-            {
-                return new AssemblyLoadInfoWithFile(assemblyFile);
-            }
+            return assemblyName != null
+                ? FromName(assemblyName)
+                : FromFile(assemblyFile);
+        }
+
+        internal static AssemblyLoadInfo FromFile(string assemblyFile)
+        {
+            Assumed.NotNullOrEmpty(assemblyFile);
+            return new AssemblyLoadInfoWithFile(assemblyFile);
+        }
+
+        internal static AssemblyLoadInfo FromName(string assemblyName)
+        {
+            Assumed.NotNullOrEmpty(assemblyName);
+            return new AssemblyLoadInfoWithName(assemblyName);
         }
 
         /// <summary>

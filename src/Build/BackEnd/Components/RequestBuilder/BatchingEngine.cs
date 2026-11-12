@@ -8,10 +8,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-#if !NET
 using Microsoft.Build.Internal;
-#endif
-using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 #nullable disable

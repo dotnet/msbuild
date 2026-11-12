@@ -59,10 +59,8 @@ namespace Microsoft.Build.Framework.BuildException
                 exceptionFactories[key] = exceptionFactory;
             }
 
-            if (Interlocked.Exchange(ref s_exceptionFactories, exceptionFactories) != null)
-            {
-                InternalError.Throw("Serialization contract was already initialized.");
-            }
+            // Concurrent BuildManager construction can race here. The first writer wins; later callers built an equivalent map.
+            Interlocked.CompareExchange(ref s_exceptionFactories, exceptionFactories, null);
         }
 
         internal static string GetExceptionSerializationKey(Type exceptionType)

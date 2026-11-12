@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.TelemetryInfra;
 using static Microsoft.Build.Execution.ProjectPropertyInstance;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -28,6 +29,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Telemetry data for a project
         /// </summary>
         private readonly ProjectTelemetry _projectTelemetry = new ProjectTelemetry();
+
+        /// <summary>
+        /// Gets the telemetry collector associated with this project request.
+        /// </summary>
+        internal ITelemetryCollector TelemetryCollector { get; }
 
         /// <summary>
         /// Constructs a project logging context.
@@ -103,6 +109,7 @@ namespace Microsoft.Build.BackEnd.Logging
         : base(nodeLoggingContext, projectStarted.BuildEventContext)
         {
             _projectFullPath = projectStarted.ProjectFile;
+            TelemetryCollector = nodeLoggingContext.TelemetryCollector;
 
             // No need to log a redundant message in the common case
             if (projectStarted.ToolsVersion != "Current")
@@ -142,6 +149,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     projectContextId))
         {
             _projectFullPath = projectFullPath;
+            TelemetryCollector = nodeLoggingContext.TelemetryCollector;
 
             // No need to log a redundant message in the common case
             if (toolsVersion != "Current")

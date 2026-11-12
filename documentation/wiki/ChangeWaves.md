@@ -10,6 +10,12 @@ The opt-out comes in the form of setting the environment variable `MSBUILDDISABL
 
 The opt-out should be just a *temporary* workaround for a problem - as the feature will anyways become permanent eventually. For this reason - **please make sure to create or upvote a bug describing the issue making you opt-out**.
 
+### Change waves and reused processes
+
+`MSBUILDDISABLEFEATURESFROMVERSION` is read once per process, so a process that outlives a single build - a reused worker node or an MSBuild Server node - keeps the change wave it started with. To make sure every process taking part in a build agrees on the change wave, the resolved change wave is part of the node handshake: a node that resolved a different change wave refuses the connection and MSBuild starts a fresh one instead. Changing `MSBUILDDISABLEFEATURESFROMVERSION` between builds therefore starts new nodes rather than reusing the existing ones. Values that resolve to the same change wave (for example an unset variable and a value in an invalid format) still allow node reuse.
+
+Task hosts are deliberately left out of this. A task host connection can span two different MSBuild versions - most notably the .NET task host, where a .NET Framework parent such as Visual Studio talks to a child taken from the installed .NET SDK - and the resolved change wave is version-relative, because the environment variable is clamped and rounded into the wave list of whichever binary reads it. Two versions can therefore resolve the same variable to different waves. Unlike a worker node, a task host that fails the handshake cannot be replaced by a compatible one, since the parent can only relaunch the very same executable, so the build would fail with MSB4216. A task host consequently keeps the change wave it started with even across builds.
+
 ## When do they become permanent?
 
 A wave of features is eligible to "rotate out" (i.e. become standard functionality) six months after its release. For example, wave 16.8 stayed opt-out through wave 16.10, becoming standard functionality when wave 17.0 is introduced.
@@ -29,8 +35,33 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
+### 18.14
+- [AssignTargetPath recognizes forward slashes in relative path specifiers and correctly handles relative paths outside the root folder cone on Windows.](https://github.com/dotnet/msbuild/pull/15267)
+- [AddToWin32Manifest preserves the generated manifest's timestamp when its contents are unchanged, allowing CoreCompile to skip unchanged builds with PreferNativeArm64 enabled.](https://github.com/dotnet/msbuild/issues/15417) Set `MSBUILDDISABLEFEATURESFROMVERSION=18.14` to retain unconditional manifest writes.
+
+### 18.13
+- [Task hosts preserve ordinary task-environment variables while retaining Windows bitness adjustments.](https://github.com/dotnet/msbuild/pull/15032)
+- [ResolveAssemblyReference discovers redist and subset lists relative to the project directory when `TargetFrameworkDirectories` contains relative paths.](https://github.com/dotnet/msbuild/pull/15089)
+- [ClickOnce application manifest generation resolves relative sentinel assembly dependencies against the task project directory before reading their identities, preventing duplicate .NET Framework 3.0/3.5 prerequisite entries.](https://github.com/dotnet/msbuild/pull/15222)
+- [The logging event queue grows from its default 200,000 events instead of blocking the threads that log, as long as the memory that the GC reports as still available could hold the added capacity. This prevents stalls such as the one of ResolveAssemblyReference in multithreaded builds, and applies to .NET only.](https://github.com/dotnet/msbuild/pull/15281) Setting `MSBUILDLOGGINGQUEUECAPACITY` keeps the queue at a fixed capacity.
+
+### 18.12
+- [Multi-threaded builds use an empty sentinel current directory, check CWD after tasks, and detect unresolved relative-path writes at project/build completion.](https://github.com/dotnet/msbuild/pull/14917)
+- [TaskHosts used to run a task out of process under `-mt` stay connected to the process that launched them and exit with it, instead of remaining available for any other process to reuse. TaskHosts of a different runtime or architecture are unaffected.](https://github.com/dotnet/msbuild/pull/14584)
+- [Events that a task logs from a TaskHost - extended errors, warnings and messages, critical messages, telemetry, and any other event kind the router did not enumerate - reach the parent process instead of being dropped.](https://github.com/dotnet/msbuild/pull/14876)
+- [RAR writes one structured search event for each reference instead of one message for each rejected assembly candidate.](https://github.com/dotnet/msbuild/pull/14599) This change reduces binary-log size. The event's default message uses the invariant culture, while the console and terminal loggers render it using the current UI culture. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.12` to retain individual candidate messages.
+- RAR now logs structured events for version-conflict dependency details. These events replace large text messages for MSB3277 warnings and low-importance diagnostics.
+  - The events contain victor and victim identities, dependency chains, and source items.
+  - Events render invariant English messages from their structured data without transmitting localized format strings. Built-in user-facing loggers re-render them in the active UI culture; other consumers can use the structured fields to do the same.
+  - Strict readers older than binary-log format 28 reject the newer format. Forward-compatible readers skip the structured conflict records.
+  - Set `MSBUILDDISABLEFEATURESFROMVERSION=18.12` to restore the legacy localized plain-text events.
+
 ### 18.11
 - [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)
+- [Out-of-proc communication uses larger read-ahead buffers and pre-buffers TaskHost packet bodies to reduce pipe reads.](https://github.com/dotnet/msbuild/pull/14505)
+- [Restore no longer discards a ProjectRootElementCache that reloads changed files from disk, so the build that follows an implicit restore does not re-parse the import closure.](https://github.com/dotnet/msbuild/pull/14558)
+- [Use optimized MSBuild file specification matching and enumeration](https://github.com/dotnet/msbuild/pull/14663). Regex-backed file globs use culture-invariant case folding; set `MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS=1` to preserve legacy current-culture folding without disabling other Wave 18.11 features.
+- [Isolated (`-graph -isolate`) builds fail deterministically with MSB4252 on a cross-project reference to a target that is not declared via `ProjectReferenceTargets`, instead of passing if the referenced project happened to build on that node previously.](https://github.com/dotnet/msbuild/pull/14280)
 
 ### 18.10
 - [Resolve relative project paths against the Unix logical current directory from `PWD`, so builds under symlinked directories produce stable project full paths and related output paths.](https://github.com/dotnet/msbuild/pull/13752)

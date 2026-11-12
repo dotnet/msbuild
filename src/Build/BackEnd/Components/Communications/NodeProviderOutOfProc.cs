@@ -29,7 +29,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor.
         /// </summary>
-        private NodeProviderOutOfProc()
+        protected NodeProviderOutOfProc()
         {
         }
 

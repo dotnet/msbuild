@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Tasks;
+using Shouldly;
 using Xunit;
 using Windows.Win32.System.Com;
 using Windows.Win32.System.Ole;
@@ -18,6 +19,13 @@ namespace Microsoft.Build.UnitTests
 {
     public class ComReferenceWalker_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public ComReferenceWalker_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         // Obtains a COM-callable-wrapper pointer for the managed mock type library (which implements the
         // built-in System.Runtime.InteropServices.ComTypes.ITypeLib) and hands it to the struct-based walker.
         private static unsafe void AnalyzeTypeLibrary(ComDependencyWalker walker, MockTypeLib typeLib)
@@ -35,10 +43,10 @@ namespace Microsoft.Build.UnitTests
 
         private void AssertDependenciesContainTypeLib(TLIBATTR[] dependencies, MockTypeLib typeLib, bool contains)
         {
-            AssertDependenciesContainTypeLib("", dependencies, typeLib, contains);
+            AssertDependenciesContainTypeLib("type library", dependencies, typeLib, contains);
         }
 
-        private void AssertDependenciesContainTypeLib(string message, TLIBATTR[] dependencies, MockTypeLib typeLib, bool contains)
+        private void AssertDependenciesContainTypeLib(string description, TLIBATTR[] dependencies, MockTypeLib typeLib, bool contains)
         {
             bool dependencyExists = false;
 
@@ -51,7 +59,26 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            Assert.Equal(contains, dependencyExists);
+            dependencyExists.ShouldBe(
+                contains,
+                $"Expected {description} {typeLib.Attributes.guid} to {(contains ? "appear" : "not appear")} in the dependency list. " +
+                $"Actual dependencies: {FormatDependencies(dependencies)}.");
+        }
+
+        private static string FormatDependencies(TLIBATTR[] dependencies)
+        {
+            if (dependencies.Length == 0)
+            {
+                return "<none>";
+            }
+
+            string[] dependencyIds = new string[dependencies.Length];
+            for (int i = 0; i < dependencies.Length; i++)
+            {
+                dependencyIds[i] = dependencies[i].guid.ToString();
+            }
+
+            return string.Join(", ", dependencyIds);
         }
 
         [Fact]
@@ -80,12 +107,23 @@ namespace Microsoft.Build.UnitTests
             ComDependencyWalker walker = new ComDependencyWalker();
             AnalyzeTypeLibrary(walker, mainTypeLib);
 
+            if (walker.EncounteredProblems.Count > 0)
+            {
+                _output.WriteLine($"ComDependencyWalker encountered {walker.EncounteredProblems.Count} problem(s):");
+                foreach (Exception problem in walker.EncounteredProblems)
+                {
+                    _output.WriteLine(problem.ToString());
+                }
+            }
+
+            walker.EncounteredProblems.ShouldBeEmpty("ComDependencyWalker should complete without COM errors.");
+
             TLIBATTR[] dependencies = walker.GetDependencies();
 
             // types from the main type library should be in the dependency list
-            AssertDependenciesContainTypeLib(dependencies, mainTypeLib, true);
+            AssertDependenciesContainTypeLib(nameof(mainTypeLib), dependencies, mainTypeLib, true);
 
-            AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib, dependencyShouldBePresent);
+            AssertDependenciesContainTypeLib(nameof(dependencyTypeLib), dependencies, dependencyTypeLib, dependencyShouldBePresent);
 
             mainTypeLib.AssertAllHandlesReleased();
             dependencyTypeLib.AssertAllHandlesReleased();
@@ -173,13 +211,13 @@ namespace Microsoft.Build.UnitTests
             CreateTwoTypeLibs(out dependencyTypeLib2, out dependencyTypeLib3);
 
             mainTypeLib.ContainedTypeInfos[0].DefinesFunction(
-                new MockTypeInfo[] { dependencyTypeLib1.ContainedTypeInfos[0], dependencyTypeLib2.ContainedTypeInfos[0] },
+                [dependencyTypeLib1.ContainedTypeInfos[0], dependencyTypeLib2.ContainedTypeInfos[0]],
                 dependencyTypeLib3.ContainedTypeInfos[0]);
 
             TLIBATTR[] dependencies = RunDependencyWalker(mainTypeLib, dependencyTypeLib1, true);
 
-            AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib2, true);
-            AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib3, true);
+            AssertDependenciesContainTypeLib(nameof(dependencyTypeLib2), dependencies, dependencyTypeLib2, true);
+            AssertDependenciesContainTypeLib(nameof(dependencyTypeLib3), dependencies, dependencyTypeLib3, true);
 
             dependencyTypeLib2.AssertAllHandlesReleased();
             dependencyTypeLib3.AssertAllHandlesReleased();

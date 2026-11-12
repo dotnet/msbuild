@@ -41,7 +41,6 @@ variables:
   - name: Codeql.Enabled
     value: false
   - group: DotNet-MSBuild-SDLValidation-Params
-  - group: AzureDevOps-Artifact-Feeds-Pats
   - name: cfsNugetWarnLevel
     value: warn
   - name: nugetMultiFeedWarnLevel
@@ -88,6 +87,7 @@ extends:
           enableComponentGovernance: false
           signTypeParameter: ${{ parameters.signTypeParameter }}
           enableOptProf: ${{ parameters.enableOptProf }}
+          publishVSSetup: true
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
