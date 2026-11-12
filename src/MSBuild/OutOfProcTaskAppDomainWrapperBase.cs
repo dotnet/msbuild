@@ -384,8 +384,7 @@ namespace Microsoft.Build.CommandLine
                 try
                 {
                     PropertyInfo paramInfo = wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
-                    object parameterValue = TaskParameterValueConverter.ConvertToParameterType(param.Value?.WrappedParameter, paramInfo.PropertyType);
-                    paramInfo.SetValue(wrappedTask, parameterValue, null);
+                    paramInfo.SetValue(wrappedTask, param.Value?.WrappedParameter, null);
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
