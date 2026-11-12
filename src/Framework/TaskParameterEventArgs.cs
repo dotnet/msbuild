@@ -220,6 +220,11 @@ namespace Microsoft.Build.Framework
                     writer.Write7BitEncodedInt(0);
                 }
             }
+            else if (item is AbsolutePath absolutePath)
+            {
+                writer.Write(absolutePath.OriginalValue ?? string.Empty);
+                writer.Write7BitEncodedInt(0);
+            }
             else // string or ValueType
             {
                 writer.Write(item?.ToString() ?? "");

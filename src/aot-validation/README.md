@@ -143,7 +143,7 @@ static-reachability false positive and no special-casing is warranted.
 [DotnetTemplateAotTests.cs](DotnetTemplateAotTests.cs) goes past synthetic projects: it shells out to the
 bootstrap `dotnet new` to create the stock `console` and `classlib` templates, then opens each real
 `Microsoft.NET.Sdk` project with `new Project(...)`. Getting a full SDK project to evaluate under Native
-AOT surfaced three host responsibilities a real AOT MSBuild host must take on - each mirrored in the `.csproj`:
+AOT surfaced two host responsibilities a real AOT MSBuild host must take on - each mirrored in the `.csproj`:
 
 - **Disable workload resolution.** `Microsoft.NET.Sdk` unconditionally imports the workload-locator SDKs
   (`Microsoft.NET.SDK.WorkloadAutoImportPropsLocator` / `...WorkloadManifestTargetsLocator`), resolved by the
@@ -155,11 +155,6 @@ AOT surfaced three host responsibilities a real AOT MSBuild host must take on - 
   (`[MSBuild]::GetTargetFrameworkIdentifier` and friends). `Microsoft.Build` references `NuGet.Frameworks`
   with `PrivateAssets="all"` (in a real SDK it loads the copy next to `MSBuild.dll`), so it does not flow to
   the harness transitively; the harness adds its own reference to put it in the output and the AOT image.
-- **Root `Microsoft.Build.Utilities.Core`.** The SDK invokes
-  `[Microsoft.Build.Utilities.ToolLocationHelper]::...` property functions, and the allowlist resolves such
-  cross-assembly receivers by assembly-qualified name via `Type.GetType` - which under AOT only succeeds if
-  the type's metadata is preserved. The harness references the (`IsAotCompatible`) assembly and roots it with
-  `TrimmerRootAssembly`.
 
 With those in place both templates evaluate end to end under Native AOT, and the tests read back the derived
 properties a host cares about: `OutputType`, the `bin`/`obj` output directories, `TargetFramework`, and

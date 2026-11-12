@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
@@ -92,9 +91,17 @@ namespace Microsoft.Build.Server
         private bool _cancelRequested = false;
         private string _serverBusyMutexName = default!;
 
-        public OutOfProcServerNode(BuildCallback buildFunction)
+        /// <summary>
+        /// Identifies this transient server, or <see langword="null"/> when this is the resident
+        /// server. Supplied by the client that launched this process, which derives the same pipe and
+        /// mutex names from it.
+        /// </summary>
+        private readonly string? _instanceId;
+
+        public OutOfProcServerNode(BuildCallback buildFunction, string? instanceId = null)
         {
             _buildFunction = buildFunction;
+            _instanceId = instanceId;
 
             _receivedPackets = new ConcurrentQueue<INodePacket>();
             _packetReceivedEvent = new AutoResetEvent(false);
@@ -116,7 +123,8 @@ namespace Microsoft.Build.Server
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {
             ServerNodeHandshake handshake = new(
-                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
+                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()),
+                _instanceId);
 
             _serverBusyMutexName = GetBusyServerMutexName(handshake);
 
@@ -184,6 +192,13 @@ namespace Microsoft.Build.Server
         }
 
         #endregion
+
+        /// <summary>
+        /// The command line switch a client uses to tell the transient server it launches which
+        /// instance it is. Both sides fold the value into <see cref="ServerNodeHandshake.ComputeHash"/>,
+        /// so a transient server is addressable only by that client.
+        /// </summary>
+        internal const string ServerInstanceIdCommandLineSwitch = "/serverinstanceid:";
 
         internal static string GetPipeName(ServerNodeHandshake handshake)
             => NamedPipeUtil.GetPlatformSpecificPipeName($"MSBuildServer-{handshake.ComputeHash()}");
@@ -341,7 +356,8 @@ namespace Microsoft.Build.Server
         /// <param name="buildComplete"></param>
         private void HandleServerShutdownCommand(NodeBuildComplete buildComplete)
         {
-            bool shouldReuse = buildComplete.PrepareForReuse;
+            // A transient server is private to one build and must never enter the resident reuse loop.
+            bool shouldReuse = buildComplete.PrepareForReuse && _instanceId is null;
 
             if (shouldReuse)
             {
@@ -439,6 +455,7 @@ namespace Microsoft.Build.Server
                     buildTelemetry.InitialMSBuildServerState = command.PartialBuildTelemetry.InitialServerState;
                     buildTelemetry.ServerFallbackReason = command.PartialBuildTelemetry.ServerFallbackReason;
                     buildTelemetry.ServerEnableReason = command.PartialBuildTelemetry.ServerEnableReason;
+                    buildTelemetry.ResponseFileUsed = command.PartialBuildTelemetry.ResponseFileUsed;
                 }
 
                 // Also try our best to increase chance custom Loggers which use Console static members will work as expected.
@@ -460,8 +477,8 @@ namespace Microsoft.Build.Server
                 }
 
                 // Dispose must be called before the server sends ServerNodeBuildResult packet
-                using (RedirectConsoleWriter outWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
-                using (RedirectConsoleWriter errWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
+                using (RedirectConsoleWriter outWriter = new(text => SendPacket(new ConsoleWritePacket(text, ConsoleOutput.Standard))))
+                using (RedirectConsoleWriter errWriter = new(text => SendPacket(new ConsoleWritePacket(text, ConsoleOutput.Error))))
                 {
                     Console.SetOut(outWriter);
                     Console.SetError(errWriter);
@@ -492,336 +509,6 @@ namespace Microsoft.Build.Server
             // Shutdown server after this build if a cancel was requested, or if the client asked for no reuse. This is consistent with nodes behavior.
             _shutdownReason = (_cancelRequested || command.ShutdownAfterBuild) ? NodeEngineShutdownReason.BuildComplete : NodeEngineShutdownReason.BuildCompleteReuse;
             _shutdownEvent.Set();
-        }
-
-        internal sealed class RedirectConsoleWriter : TextWriter
-        {
-            private readonly Action<string> _writeCallback;
-            private readonly Timer _timer;
-            private readonly LockType _lock = new LockType();
-            private readonly StringWriter _internalWriter;
-
-            public RedirectConsoleWriter(Action<string> writeCallback)
-            {
-                _writeCallback = writeCallback;
-                _internalWriter = new StringWriter();
-                _timer = new Timer(TimerCallback, null, 0, 40);
-            }
-
-            public override Encoding Encoding => _internalWriter.Encoding;
-
-            public override void Flush()
-            {
-                lock (_lock)
-                {
-                    var sb = _internalWriter.GetStringBuilder();
-                    string captured = sb.ToString();
-                    sb.Clear();
-
-                    _writeCallback(captured);
-                    _internalWriter.Flush();
-                }
-            }
-
-            public override void Write(char value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(value);
-                }
-            }
-
-            public override void Write(char[]? buffer)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(buffer);
-                }
-            }
-
-            public override void Write(char[] buffer, int index, int count)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(buffer, index, count);
-                }
-            }
-
-            public override void Write(bool value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(value);
-                }
-            }
-
-            public override void Write(int value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(value);
-                }
-            }
-
-            public override void Write(uint value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(value);
-                }
-            }
-
-            public override void Write(long value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(value);
-                }
-            }
-
-            public override void Write(ulong value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(value);
-                }
-            }
-
-            public override void Write(float value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(value);
-                }
-            }
-
-            public override void Write(double value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(value);
-                }
-            }
-
-            public override void Write(decimal value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(value);
-                }
-            }
-
-            public override void Write(string? value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(value);
-                }
-            }
-
-            public override void Write(object? value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(value);
-                }
-            }
-
-            public override void Write(string format, object? arg0)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(format, arg0);
-                }
-            }
-
-            public override void Write(string format, object? arg0, object? arg1)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(format, arg0, arg1);
-                }
-            }
-
-            public override void Write(string format, object? arg0, object? arg1, object? arg2)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.Write(format, arg0, arg1, arg2);
-                }
-            }
-
-            public override void Write(string format, params object?[] arg)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(format, arg);
-                }
-            }
-
-            public override void WriteLine()
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine();
-                }
-            }
-
-            public override void WriteLine(char value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(value);
-                }
-            }
-
-            public override void WriteLine(decimal value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(value);
-                }
-            }
-
-            public override void WriteLine(char[]? buffer)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(buffer);
-                }
-            }
-
-            public override void WriteLine(char[] buffer, int index, int count)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(buffer, index, count);
-                }
-            }
-
-            public override void WriteLine(bool value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(value);
-                }
-            }
-
-            public override void WriteLine(int value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(value);
-                }
-            }
-
-            public override void WriteLine(uint value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(value);
-                }
-            }
-
-            public override void WriteLine(long value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(value);
-                }
-            }
-
-            public override void WriteLine(ulong value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(value);
-                }
-            }
-
-            public override void WriteLine(float value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(value);
-                }
-            }
-
-            public override void WriteLine(double value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(value);
-                }
-            }
-
-            public override void WriteLine(string? value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(value);
-                }
-            }
-
-            public override void WriteLine(object? value)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(value);
-                }
-            }
-
-            public override void WriteLine(string format, object? arg0)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(format, arg0);
-                }
-            }
-
-            public override void WriteLine(string format, object? arg0, object? arg1)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(format, arg0, arg1);
-                }
-            }
-
-            public override void WriteLine(string format, object? arg0, object? arg1, object? arg2)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(format, arg0, arg1, arg2);
-                }
-            }
-
-            public override void WriteLine(string format, params object?[] arg)
-            {
-                lock (_lock)
-                {
-                    _internalWriter.WriteLine(format, arg);
-                }
-            }
-
-            private void TimerCallback(object? state)
-            {
-                if (_internalWriter.GetStringBuilder().Length > 0)
-                {
-                    Flush();
-                }
-            }
-
-            protected override void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    _timer.Dispose();
-                    Flush();
-                    _internalWriter?.Dispose();
-                }
-
-                base.Dispose(disposing);
-            }
         }
     }
 }

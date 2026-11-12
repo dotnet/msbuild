@@ -4,9 +4,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Globbing;
 
 #nullable disable
 
@@ -17,9 +17,9 @@ namespace Microsoft.Build.Internal
         private readonly string _currentDirectory;
         private readonly string _unescapedFileSpec;
         private readonly string _filenamePattern;
-        private readonly Regex _regex;
+        private readonly GlobPattern _matcher;
 
-        private FileSpecMatcherTester(string currentDirectory, string unescapedFileSpec, string filenamePattern, Regex regex)
+        private FileSpecMatcherTester(string currentDirectory, string unescapedFileSpec, string filenamePattern, GlobPattern matcher)
         {
             Debug.Assert(!string.IsNullOrEmpty(unescapedFileSpec));
             Debug.Assert(currentDirectory != null);
@@ -27,9 +27,9 @@ namespace Microsoft.Build.Internal
             _currentDirectory = currentDirectory;
             _unescapedFileSpec = unescapedFileSpec;
             _filenamePattern = filenamePattern;
-            _regex = regex;
+            _matcher = matcher;
 
-            if (_regex == null && _filenamePattern == null)
+            if (_matcher is null && _filenamePattern is null)
             {
                 // We'll be testing files by comparing their normalized paths. Normalize our file spec right away
                 // to avoid doing this work on each IsMatch call.
@@ -41,14 +41,14 @@ namespace Microsoft.Build.Internal
         {
             string unescapedFileSpec = EscapingUtilities.UnescapeAll(fileSpec);
             string filenamePattern = null;
-            Regex regex = null;
+            GlobPattern matcher = null;
 
             if (EngineFileUtilities.FilespecHasWildcards(fileSpec))
             {
-                CreateRegexOrFilenamePattern(unescapedFileSpec, currentDirectory, out filenamePattern, out regex);
+                CreateGlobOrFilenamePattern(unescapedFileSpec, currentDirectory, out filenamePattern, out matcher);
             }
 
-            return new FileSpecMatcherTester(currentDirectory, unescapedFileSpec, filenamePattern, regex);
+            return new FileSpecMatcherTester(currentDirectory, unescapedFileSpec, filenamePattern, matcher);
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Microsoft.Build.Internal
 
             // Historically we've used slightly different normalization logic depending on the type of matching
             // performed in IsMatchNormalized. We have to keep doing it for compat.
-            if (_regex == null && _filenamePattern == null)
+            if (_matcher is null && _filenamePattern is null)
             {
                 fileToMatch = FileUtilities.NormalizePathForComparisonNoThrow(fileToMatch, _currentDirectory);
             }
@@ -78,17 +78,17 @@ namespace Microsoft.Build.Internal
         {
             Debug.Assert(!string.IsNullOrEmpty(normalizedFileToMatch));
 
-            // We do the matching using one of three code paths, depending on the value of _filenamePattern and _regex.
-            if (_regex != null)
+            // Select full-path globbing, filename matching, or literal path comparison.
+            if (_matcher is not null)
             {
-                return _regex.IsMatch(normalizedFileToMatch);
+                return _matcher.IsMatch(normalizedFileToMatch);
             }
 
             if (_filenamePattern != null)
             {
                 // Check file name first as it's more likely to not match.
                 string filename = Path.GetFileName(normalizedFileToMatch);
-                if (!FileMatcher.IsMatch(filename, _filenamePattern))
+                if (!GlobPattern.MatchesName(filename.AsSpan(), _filenamePattern))
                 {
                     return false;
                 }
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Internal
         // without this normalization step, strings pointing outside the globbing cone would still match when they shouldn't
         // for example, we dont want "**/*.cs" to match "../Shared/Foo.cs"
         // todo: glob rooting knowledge partially duplicated with MSBuildGlob.Parse and FileMatcher.ComputeFileEnumerationCacheKey
-        private static void CreateRegexOrFilenamePattern(string unescapedFileSpec, string currentDirectory, out string filenamePattern, out Regex regex)
+        private static void CreateGlobOrFilenamePattern(string unescapedFileSpec, string currentDirectory, out string filenamePattern, out GlobPattern matcher)
         {
             FileMatcher.Default.SplitFileSpec(
                 unescapedFileSpec,
@@ -114,7 +114,7 @@ namespace Microsoft.Build.Internal
             if (FileUtilities.PathIsInvalid(fixedDirPart))
             {
                 filenamePattern = null;
-                regex = null;
+                matcher = null;
                 return;
             }
 
@@ -122,7 +122,7 @@ namespace Microsoft.Build.Internal
             if (string.IsNullOrEmpty(fixedDirPart) && FileMatcher.IsRecursiveDirectoryMatch(wildcardDirectoryPart))
             {
                 filenamePattern = filenamePart;
-                regex = null;
+                matcher = null;
                 return;
             }
 
@@ -136,14 +136,14 @@ namespace Microsoft.Build.Internal
 
             var recombinedFileSpec = string.Concat(normalizedFixedDirPart, wildcardDirectoryPart, filenamePart);
 
-            FileMatcher.Default.GetFileSpecInfoWithRegexObject(
+            FileMatcher.Default.GetFileSpecInfoWithGlob(
                 recombinedFileSpec,
-                out Regex regexObject,
+                out GlobPattern glob,
                 out bool _,
                 out bool isLegal);
 
             filenamePattern = null;
-            regex = isLegal ? regexObject : null;
+            matcher = isLegal ? glob : null;
         }
     }
 }

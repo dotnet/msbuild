@@ -91,16 +91,6 @@ public class EscapingUtilitiesBenchmark
     public string Escape_ManySpecialChars()
         => EscapingUtilities.Escape(ManySpecialChars);
 
-    // --- EscapeWithCaching ---
-
-    [Benchmark]
-    public string EscapeWithCaching_FewSpecialChars()
-        => EscapingUtilities.Escape(FewSpecialChars, cache: true);
-
-    [Benchmark]
-    public string EscapeWithCaching_ManySpecialChars()
-        => EscapingUtilities.Escape(ManySpecialChars, cache: true);
-
     // --- ContainsEscapedWildcards ---
 
     [Benchmark]

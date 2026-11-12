@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using BenchmarkDotNet.Attributes;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -9,7 +10,15 @@ using Microsoft.Build.Utilities;
 
 namespace MSBuild.Benchmarks;
 
+/// <summary>
+///  Measures cold and repeated access to derivable item-spec modifiers.
+/// </summary>
+/// <remarks>
+///  Iteration setup creates fresh items, and each benchmark batches enough items for a single
+///  measured invocation before results are normalized per item.
+/// </remarks>
 [MemoryDiagnoser]
+[RunOncePerIteration]
 public class ItemSpecModifiersCachingBenchmark
 {
     /// <summary>
@@ -23,88 +32,105 @@ public class ItemSpecModifiersCachingBenchmark
     /// </summary>
     private const int RepeatedReads = 10;
 
-    private string _tempDir = null!;
+    private TemporaryDirectory _tempDir = null!;
+    private string[] _filePaths = null!;
+    private ProjectCollection _projectCollection = null!;
+    private ProjectRootElement _projectRoot = null!;
     private TaskItem[] _taskItems = null!;
-    private ProjectInstance _projectInstance = null!;
+    private ProjectItemInstance[] _projectItems = null!;
 
     [GlobalSetup]
     public void GlobalSetup()
     {
-        _tempDir = Path.Combine(Path.GetTempPath(), "MSBuildBenchmarks", Guid.NewGuid().ToString("N"));
-        string srcDir = Path.Combine(_tempDir, "src", "Framework");
-        Directory.CreateDirectory(srcDir);
+        _tempDir = new TemporaryDirectory(nameof(ItemSpecModifiersCachingBenchmark));
+        string srcDir = _tempDir.CreateDirectory(Path.Combine("src", "Framework"));
 
-        // Create TaskItem instances with realistic file paths.
-        _taskItems = new TaskItem[ItemCount];
+        _filePaths = new string[ItemCount];
         for (int i = 0; i < ItemCount; i++)
         {
             string filePath = Path.Combine(srcDir, $"File{i}.cs");
             File.WriteAllText(filePath, string.Empty);
-            _taskItems[i] = new TaskItem(filePath);
+            _filePaths[i] = filePath;
         }
 
-        // Create a ProjectInstance with the same items for the ProjectItemInstance benchmarks.
-        using var projectCollection = new ProjectCollection();
-        var root = Microsoft.Build.Construction.ProjectRootElement.Create(projectCollection);
-        root.FullPath = Path.Combine(_tempDir, "Test.csproj");
+        _projectCollection = new ProjectCollection();
+        _projectRoot = ProjectRootElement.Create(_projectCollection);
+        _projectRoot.FullPath = _tempDir.GetPath("Test.csproj");
 
-        var itemGroup = root.AddItemGroup();
+        ProjectItemGroupElement itemGroup = _projectRoot.AddItemGroup();
         for (int i = 0; i < ItemCount; i++)
         {
-            itemGroup.AddItem("Compile", Path.Combine(srcDir, $"File{i}.cs"));
+            itemGroup.AddItem("Compile", _filePaths[i]);
+        }
+    }
+
+    [IterationSetup]
+    public void IterationSetup()
+    {
+        _taskItems = new TaskItem[ItemCount];
+        for (int i = 0; i < ItemCount; i++)
+        {
+            _taskItems[i] = new TaskItem(_filePaths[i]);
         }
 
-        var project = new Project(root, null, null, projectCollection);
-        _projectInstance = project.CreateProjectInstance();
+        ProjectInstance projectInstance = new(
+            _projectRoot,
+            globalProperties: null,
+            toolsVersion: null,
+            _projectCollection);
+
+        _projectItems = [.. projectInstance.GetItems("Compile")];
     }
 
     [GlobalCleanup]
     public void GlobalCleanup()
     {
-        if (Directory.Exists(_tempDir))
-        {
-            Directory.Delete(_tempDir, recursive: true);
-        }
+        _projectCollection.Dispose();
+        _tempDir.Dispose();
     }
 
     // -----------------------------------------------------------------------
-    // TaskItem: Read all derivable modifiers on one item once.
-    // This is the cold-cache baseline — every modifier must be computed.
+    // TaskItem: Read all derivable modifiers once on each fresh item.
+    // Every modifier is computed from a cold per-item cache.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemCount)]
     public string TaskItem_AllDerivableModifiers_Once()
     {
-        TaskItem item = _taskItems[0];
         string last = null!;
 
-        last = item.GetMetadata(ItemSpecModifiers.FullPath);
-        last = item.GetMetadata(ItemSpecModifiers.RootDir);
-        last = item.GetMetadata(ItemSpecModifiers.Filename);
-        last = item.GetMetadata(ItemSpecModifiers.Extension);
-        last = item.GetMetadata(ItemSpecModifiers.RelativeDir);
-        last = item.GetMetadata(ItemSpecModifiers.Directory);
-        last = item.GetMetadata(ItemSpecModifiers.Identity);
+        foreach (TaskItem item in _taskItems)
+        {
+            last = item.GetMetadata(ItemSpecModifiers.FullPath);
+            last = item.GetMetadata(ItemSpecModifiers.RootDir);
+            last = item.GetMetadata(ItemSpecModifiers.Filename);
+            last = item.GetMetadata(ItemSpecModifiers.Extension);
+            last = item.GetMetadata(ItemSpecModifiers.RelativeDir);
+            last = item.GetMetadata(ItemSpecModifiers.Directory);
+            last = item.GetMetadata(ItemSpecModifiers.Identity);
+        }
 
         return last;
     }
 
     // -----------------------------------------------------------------------
-    // TaskItem: Read Filename + Extension repeatedly on one item.
+    // TaskItem: Read Filename + Extension repeatedly on each item.
     // This is the hot-path pattern — tasks reading the same metadata many
     // times on the same item. The cache should make reads 2..N near-free.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemCount)]
     public string TaskItem_FilenameAndExtension_Repeated()
     {
-        TaskItem item = _taskItems[0];
         string last = null!;
 
-        for (int i = 0; i < RepeatedReads; i++)
+        foreach (TaskItem item in _taskItems)
         {
-            last = item.GetMetadata(ItemSpecModifiers.Filename);
-            last = item.GetMetadata(ItemSpecModifiers.Extension);
+            for (int i = 0; i < RepeatedReads; i++)
+            {
+                last = item.GetMetadata(ItemSpecModifiers.Filename);
+                last = item.GetMetadata(ItemSpecModifiers.Extension);
+            }
         }
 
         return last;
@@ -117,7 +143,7 @@ public class ItemSpecModifiersCachingBenchmark
     // cost including the initial computation.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemCount)]
     public string TaskItem_Filename_ManyItems()
     {
         string last = null!;
@@ -131,46 +157,50 @@ public class ItemSpecModifiersCachingBenchmark
     }
 
     // -----------------------------------------------------------------------
-    // TaskItem: Read FullPath + Directory + RootDir repeatedly on one item.
+    // TaskItem: Read FullPath + Directory + RootDir repeatedly on each item.
     // Directory and RootDir both depend on FullPath internally, so the cache
     // should eliminate redundant Path.GetFullPath calls after the first read.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemCount)]
     public string TaskItem_FullPathDerivedModifiers_Repeated()
     {
-        TaskItem item = _taskItems[0];
         string last = null!;
 
-        for (int i = 0; i < RepeatedReads; i++)
+        foreach (TaskItem item in _taskItems)
         {
-            last = item.GetMetadata(ItemSpecModifiers.FullPath);
-            last = item.GetMetadata(ItemSpecModifiers.RootDir);
-            last = item.GetMetadata(ItemSpecModifiers.Directory);
+            for (int i = 0; i < RepeatedReads; i++)
+            {
+                last = item.GetMetadata(ItemSpecModifiers.FullPath);
+                last = item.GetMetadata(ItemSpecModifiers.RootDir);
+                last = item.GetMetadata(ItemSpecModifiers.Directory);
+            }
         }
 
         return last;
     }
 
     // -----------------------------------------------------------------------
-    // ProjectItemInstance: Read all derivable modifiers once.
+    // ProjectItemInstance: Read all derivable modifiers once on each fresh item.
     // Exercises the ProjectItemInstance.TaskItem → BuiltInMetadata →
     // ItemSpecModifiers.GetItemSpecModifier(ref CachedItemSpecModifiers) path.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemCount)]
     public string ProjectItemInstance_AllDerivableModifiers_Once()
     {
-        ProjectItemInstance item = _projectInstance.GetItems("Compile").First();
         string last = null!;
 
-        last = item.GetMetadataValue(ItemSpecModifiers.FullPath);
-        last = item.GetMetadataValue(ItemSpecModifiers.RootDir);
-        last = item.GetMetadataValue(ItemSpecModifiers.Filename);
-        last = item.GetMetadataValue(ItemSpecModifiers.Extension);
-        last = item.GetMetadataValue(ItemSpecModifiers.RelativeDir);
-        last = item.GetMetadataValue(ItemSpecModifiers.Directory);
-        last = item.GetMetadataValue(ItemSpecModifiers.Identity);
+        foreach (ProjectItemInstance item in _projectItems)
+        {
+            last = item.GetMetadataValue(ItemSpecModifiers.FullPath);
+            last = item.GetMetadataValue(ItemSpecModifiers.RootDir);
+            last = item.GetMetadataValue(ItemSpecModifiers.Filename);
+            last = item.GetMetadataValue(ItemSpecModifiers.Extension);
+            last = item.GetMetadataValue(ItemSpecModifiers.RelativeDir);
+            last = item.GetMetadataValue(ItemSpecModifiers.Directory);
+            last = item.GetMetadataValue(ItemSpecModifiers.Identity);
+        }
 
         return last;
     }
@@ -181,12 +211,12 @@ public class ItemSpecModifiersCachingBenchmark
     // reading %(Filename)%(Extension) for output path computation.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemCount)]
     public string ProjectItemInstance_FilenameExtension_AllItems()
     {
         string last = null!;
 
-        foreach (ProjectItemInstance item in _projectInstance.GetItems("Compile"))
+        foreach (ProjectItemInstance item in _projectItems)
         {
             last = item.GetMetadataValue(ItemSpecModifiers.Filename);
             last = item.GetMetadataValue(ItemSpecModifiers.Extension);
@@ -201,14 +231,14 @@ public class ItemSpecModifiersCachingBenchmark
     // the same evaluated items during a single build.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemCount)]
     public string ProjectItemInstance_FilenameExtension_AllItems_Repeated()
     {
         string last = null!;
 
         for (int pass = 0; pass < RepeatedReads; pass++)
         {
-            foreach (ProjectItemInstance item in _projectInstance.GetItems("Compile"))
+            foreach (ProjectItemInstance item in _projectItems)
             {
                 last = item.GetMetadataValue(ItemSpecModifiers.Filename);
                 last = item.GetMetadataValue(ItemSpecModifiers.Extension);

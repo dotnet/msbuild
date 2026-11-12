@@ -7,6 +7,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 internal class TargetFrameworkUnexpectedCheck : Check
@@ -94,7 +95,7 @@ internal class TargetFrameworkUnexpectedCheck : Check
                 context.ReportResult(BuildCheckResult.Create(
                     SupportedRule,
                     // Populating precise location tracked via https://github.com/dotnet/msbuild/issues/10383
-                    ElementLocation.EmptyLocation,
+                    ElementLocation.Empty,
                     Path.GetFileName(context.Data.ProjectFilePath),
                     _tfm));
 

@@ -22,6 +22,7 @@ namespace Microsoft.Build.Framework
     // without following certain special FX guidelines, can break both
     // forward and backward compatibility
     [Serializable]
+    // CodeQL [SM02227] False positive: static call-graph over-approximation via virtual ToString/Flush in VMR build; deserialization only reads event fields.
     public class ProjectStartedEventArgs : BuildStatusEventArgs
     {
         #region Constants

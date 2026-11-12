@@ -14,7 +14,7 @@ namespace Microsoft.Build.Shared.FileSystem
     /// <summary>
     /// Implementation of file system operations directly over the dot net managed layer
     /// </summary>
-    internal class ManagedFileSystem : IFileSystem
+    internal class ManagedFileSystem : IFileSystem, IDirectFileSystemEnumeration
     {
         private static readonly ManagedFileSystem Instance = new ManagedFileSystem();
 
@@ -32,6 +32,8 @@ namespace Microsoft.Build.Shared.FileSystem
 
         protected ManagedFileSystem() { }
 
+        public virtual bool SupportsDirectEnumeration => true;
+
         public TextReader ReadFile(string path)
         {
             return new StreamReader(path);
@@ -44,6 +46,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public string ReadFileAllText(string path)
         {
+            // CodeQL [SM00414] False positive: MSBuild file system abstraction operates on trusted build/SDK paths.
             return File.ReadAllText(path);
         }
 
@@ -134,11 +137,13 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public virtual bool DirectoryExists(string path)
         {
+            // CodeQL [SM00414] False positive: MSBuild file system abstraction operates on trusted build/SDK paths.
             return Directory.Exists(path);
         }
 
         public virtual bool FileExists(string path)
         {
+            // CodeQL [SM00414] False positive: MSBuild file system abstraction operates on trusted build/SDK paths.
             return File.Exists(path);
         }
 

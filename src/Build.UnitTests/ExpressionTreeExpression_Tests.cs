@@ -432,7 +432,7 @@ namespace Microsoft.Build.UnitTests
         public void EvaluateAVarietyOfTrueExpressions(string expression)
         {
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+            GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.Empty);
             ConditionEvaluator.IConditionEvaluationState state =
                 new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                     expression,
@@ -440,7 +440,7 @@ namespace Microsoft.Build.UnitTests
                     ExpanderOptions.ExpandAll,
                     null,
                     Directory.GetCurrentDirectory(),
-                    ElementLocation.EmptyLocation,
+                    ElementLocation.Empty,
                     FileSystems.Default);
 
             Assert.True(tree.Evaluate(state), "expected true from '" + expression + "'");
@@ -456,7 +456,7 @@ namespace Microsoft.Build.UnitTests
         public void EvaluateAVarietyOfFalseExpressions(string expression)
         {
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+            GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.Empty);
             ConditionEvaluator.IConditionEvaluationState state =
                 new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                     expression,
@@ -464,7 +464,7 @@ namespace Microsoft.Build.UnitTests
                     ExpanderOptions.ExpandAll,
                     null,
                     Directory.GetCurrentDirectory(),
-                    ElementLocation.EmptyLocation,
+                    ElementLocation.Empty,
                     FileSystems.Default);
 
             Assert.False(tree.Evaluate(state), "expected false from '" + expression + "' and got true");
@@ -487,7 +487,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Parser p = new Parser();
-                var tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+                var tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.Empty);
 
                 ConditionEvaluator.IConditionEvaluationState state =
                     new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
@@ -496,7 +496,7 @@ namespace Microsoft.Build.UnitTests
                         ExpanderOptions.ExpandAll,
                         null,
                         Directory.GetCurrentDirectory(),
-                        ElementLocation.EmptyLocation,
+                        ElementLocation.Empty,
                         FileSystems.Default);
 
                 tree.Evaluate(state);

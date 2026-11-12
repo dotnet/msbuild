@@ -14,7 +14,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -596,8 +595,8 @@ namespace Microsoft.Build.Evaluation
                 if (defaultTasksFiles.Length == 0)
                 {
                     loggingContext.LogWarning(
-                        null,
-                        new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
+                        DiagnosticSubcategory.None,
+                        ElementLocation.Empty,
                         taskFileWarning,
                         taskPattern,
                         searchPath,
@@ -607,8 +606,8 @@ namespace Microsoft.Build.Evaluation
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 loggingContext.LogWarning(
-                    null,
-                    new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
+                    DiagnosticSubcategory.None,
+                    ElementLocation.Empty,
                     taskFileWarning,
                     taskPattern,
                     searchPath,
@@ -799,14 +798,14 @@ namespace Microsoft.Build.Evaluation
 
                 List<ProjectPropertyInstance> reservedProperties = new List<ProjectPropertyInstance>();
 
-                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.binPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
-                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.toolsVersion, ToolsVersion, mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.BinPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.ToolsVersion, ToolsVersion, mayBeReserved: true));
 
-                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.toolsPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
-                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion, mayBeReserved: true));
-                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild, mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.ToolsPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.AssemblyVersion, Constants.AssemblyVersion, mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.Version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild, mayBeReserved: true));
 
-                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.msbuildRuntimeType,
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.MSBuildRuntimeType,
 #if RUNTIME_TYPE_NETCORE
                     Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core",
 #else
@@ -863,7 +862,11 @@ namespace Microsoft.Build.Evaluation
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                loggingContext.LogError(new BuildEventFileInfo(/* this warning truly does not involve any file it is just gathering properties */String.Empty), "TasksPropertyBagError", e.Message);
+                // This warning truly does not involve any file; it is just gathering properties.
+                loggingContext.LogError(
+                    ElementLocation.Empty,
+                    "TasksPropertyBagError",
+                    e.Message);
             }
         }
 
@@ -904,14 +907,14 @@ namespace Microsoft.Build.Evaluation
                                     if (!overrideDirectoryExists)
                                     {
                                         string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", _overrideTasksPath);
-                                        loggingContext.LogWarning(null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
+                                        loggingContext.LogWarning(DiagnosticSubcategory.None, ElementLocation.Empty, "OverrideTasksFileFailure", rootedPathMessage);
                                     }
                                 }
                             }
                             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                             {
                                 string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskProblemWithPath", _overrideTasksPath, e.Message);
-                                loggingContext.LogWarning(null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
+                                loggingContext.LogWarning(DiagnosticSubcategory.None, ElementLocation.Empty, "OverrideTasksFileFailure", rootedPathMessage);
                             }
 
                             if (overrideDirectoryExists)
@@ -951,12 +954,12 @@ namespace Microsoft.Build.Evaluation
             catch (XmlException e)
             {
                 // handle XML errors in the default tasks file
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(currentTasksFile, e),
+                ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.CreateFrom(currentTasksFile, e),
                     taskFileError, e.Message);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                loggingContext.LogError(new BuildEventFileInfo(currentTasksFile),
+                loggingContext.LogError(ElementLocation.Create(currentTasksFile),
                     taskFileError, e.Message);
             }
 

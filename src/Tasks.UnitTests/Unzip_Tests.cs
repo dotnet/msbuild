@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
@@ -468,6 +469,40 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 _mockEngine.Log.ShouldContain("MSB3938", customMessage: _mockEngine.Log);
             }
+        }
+
+        [Fact]
+        public void DoesNotExtractFilesOutsideDestination()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            TransientTestFolder root = testEnvironment.CreateFolder(createFolder: true);
+            string destinationPath = Path.Combine(root.Path, "destination");
+            Directory.CreateDirectory(destinationPath);
+
+            string outsideFilePath = Path.Combine(root.Path, "escaped.txt");
+            string zipPath = Path.Combine(root.Path, "zipslip.zip");
+
+            using (FileStream zipStream = new FileStream(zipPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+            using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
+            {
+                ZipArchiveEntry entry = archive.CreateEntry("../escaped.txt");
+                using Stream entryStream = entry.Open();
+                using StreamWriter writer = new StreamWriter(entryStream);
+                writer.Write("malicious content");
+            }
+
+            Unzip unzip = new Unzip
+            {
+                BuildEngine = _mockEngine,
+                DestinationFolder = new TaskItem(destinationPath),
+                OverwriteReadOnlyFiles = true,
+                SkipUnchangedFiles = false,
+                SourceFiles = [new TaskItem(zipPath)],
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
+            };
+
+            unzip.Execute().ShouldBeFalse(_mockEngine.Log);
+            File.Exists(outsideFilePath).ShouldBeFalse();
         }
 
         [UnixOnlyFact]

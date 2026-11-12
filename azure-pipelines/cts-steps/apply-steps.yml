@@ -41,31 +41,23 @@ parameters:
   # collect and a PR apply can change the baseline serialization format and
   # make `cts apply` silently fall back. Bump the pin intentionally.
   type: string
-  default: ''
+  default: '2.13.0-alpha.26519.2'
 
 steps:
 - checkout: self
   fetchDepth: 0   # Need history for baselineAgeCommits.
   clean: true
 
-# Drift guard: MSBuild.VSTest.slnx must mirror MSBuild.slnx's production graph
-# (see scripts/cts/Check-SlnxParity.ps1). Non-blocking so it never gates a PR —
-# a failure surfaces as succeededWithIssues and the "Present/Missing" project
-# lists are printed to the step log for triage.
-- pwsh: ./scripts/cts/Check-SlnxParity.ps1
-  displayName: Check MSBuild.VSTest.slnx parity (non-blocking)
-  continueOnError: true
-
 - task: UseDotNet@2
-  # cts itself is built against net8.0; see collect-steps.yml.
-  displayName: Install .NET 8 runtime (cts apphost)
+  # The pinned cts tool targets net10.0; see collect-steps.yml.
+  displayName: Install .NET 10 runtime (cts apphost)
   inputs:
     packageType: runtime
-    version: 8.0.x
+    version: 10.0.x
 
 - task: UseDotNet@2
-  # For vstest's testhost.exe; see collect-steps.yml.
-  displayName: Install .NET runtime (testhost)
+  # For the native MTP test DLLs; see collect-steps.yml.
+  displayName: Install .NET runtime (native MTP test host)
   inputs:
     packageType: runtime
     version: 11.0.x
@@ -95,10 +87,20 @@ steps:
       '</configuration>'
     )
     Set-Content -Path $cfgPath -Value $lines -Encoding utf8
-    $installArgs = @('tool', 'update', 'cts', '--global', '--prerelease', '--configfile', "$cfgPath")
+    $installArgs = @('tool', 'update', 'cts', '--global', '--configfile', "$cfgPath")
     $toolVersion = '${{ parameters.ctsToolVersion }}'
-    if ($toolVersion) { $installArgs += @('--version', $toolVersion) }
-    dotnet @installArgs
+    if ($toolVersion) {
+      $installArgs += @('--version', $toolVersion)
+    } else {
+      $installArgs += '--prerelease'
+    }
+    # Runtime installation above does not provide the SDK required by global.json.
+    # Bootstrap in a child process so the CTS apphost keeps its runtime environment.
+    if ($IsWindows) {
+      pwsh -NoProfile -File "$(Build.SourcesDirectory)/eng/common/dotnet.ps1" @installArgs
+    } else {
+      bash "$(Build.SourcesDirectory)/eng/common/dotnet.sh" @installArgs
+    }
     if ($LASTEXITCODE -ne 0) { throw "cts install/update failed" }
     $toolsDir = if ($IsWindows) { Join-Path $env:USERPROFILE '.dotnet\tools' } else { Join-Path $env:HOME '.dotnet/tools' }
     Write-Host "##vso[task.prependpath]$toolsDir"
@@ -112,7 +114,7 @@ steps:
 
 - ${{ if ne(parameters.collectPipelineId, 0) }}:
   - task: DownloadPipelineArtifact@2
-    displayName: Download latest cts-baseline-${{ parameters.osTag }}
+    displayName: Download latest cts-mtp-baseline-${{ parameters.osTag }}
     continueOnError: true
     inputs:
       buildType: specific
@@ -120,7 +122,7 @@ steps:
       definition: ${{ parameters.collectPipelineId }}
       buildVersionToDownload: latestFromBranch
       branchName: ${{ parameters.collectSourceBranch }}
-      artifactName: cts-baseline-${{ parameters.osTag }}
+      artifactName: cts-mtp-baseline-${{ parameters.osTag }}
       targetPath: $(BaselineDir)
       # Required: the collect pipeline frequently ends with overall result
       # = "failed" or "partiallySucceeded" because one OS leg may fail while
@@ -189,19 +191,19 @@ steps:
       & "$(Build.SourcesDirectory)/build.cmd" `
         -ci `
         -configuration $(BuildConfiguration) `
-        -projects "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" `
+        -projects "$(Build.SourcesDirectory)/MSBuild.slnx" `
         -verbosity minimal `
         /p:UsingToolVisualStudioIbcTraining=false
     } else {
       bash "$(Build.SourcesDirectory)/build.sh" `
         --ci `
         --configuration $(BuildConfiguration) `
-        --projects "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" `
+        --projects "$(Build.SourcesDirectory)/MSBuild.slnx" `
         --verbosity minimal `
         /p:UsingToolVisualStudioIbcTraining=false
     }
-    if ($LASTEXITCODE -ne 0) { throw "Build MSBuild.VSTest.slnx failed" }
-  displayName: Build MSBuild.VSTest.slnx
+    if ($LASTEXITCODE -ne 0) { throw "Build MSBuild.slnx failed" }
+  displayName: Build MSBuild.slnx
 
 - pwsh: |
     $sw = [Diagnostics.Stopwatch]::StartNew()
@@ -215,7 +217,7 @@ steps:
     } else {
       # Stream cts output to both the console (so you can watch it live in the
       # ADO log) and a file (so the next step can parse the summary block).
-      cts apply vstest `
+      cts apply testingplatform `
         --rootPath                    "$(Build.SourcesDirectory)" `
         --config                      "$(CtsConfigPath)" `
         --storage-type                filesystem `
@@ -240,7 +242,7 @@ steps:
     Write-Host "##vso[task.setvariable variable=CtsApplyWallTimeMs]$([int]$sw.ElapsedMilliseconds)"
     Write-Host "##vso[task.setvariable variable=CtsApplyExit]$exit"
     Write-Host "##vso[task.setvariable variable=CtsApplyLog]$applyLog"
-  displayName: cts apply vstest
+  displayName: cts apply testingplatform
   continueOnError: true
 
 - pwsh: |
