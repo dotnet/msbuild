@@ -3,7 +3,7 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.11.2</VersionPrefix>
+    <VersionPrefix>18.11.3</VersionPrefix>
     <PreReleaseVersionLabel>1</PreReleaseVersionLabel>
     <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">$(PreReleaseVersionLabel)-test</PreReleaseVersionLabel>
     <!-- The .NET 10 SDK builds MSBuild from the VMR, which does not override this repo's version kind; ship stable versions there. -->
