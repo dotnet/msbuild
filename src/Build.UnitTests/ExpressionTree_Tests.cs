@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests
                                     ElementLocation.Empty,
                                     FileSystems.Default);
 
-            value = tree.Evaluate(state);
+            value = ConditionEvaluator.EvaluateParsedCondition(tree, state);
             Assert.True(value);
 
             if (File.Exists(fileThatMustAlwaysExist))
@@ -450,7 +450,7 @@ namespace Microsoft.Build.UnitTests
                         FileSystems.Default);
             }
 
-            bool result = tree.Evaluate(state);
+            bool result = ConditionEvaluator.EvaluateParsedCondition(tree, state);
             Assert.Equal(expected, result);
         }
 
@@ -485,7 +485,7 @@ namespace Microsoft.Build.UnitTests
                             ElementLocation.Empty,
                             FileSystems.Default);
                 }
-                tree.Evaluate(state);
+                ConditionEvaluator.EvaluateParsedCondition(tree, state);
             }
             catch (InvalidProjectFileException e)
             {

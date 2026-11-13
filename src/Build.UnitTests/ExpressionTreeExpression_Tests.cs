@@ -11,6 +11,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared.FileSystem;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -443,7 +444,7 @@ namespace Microsoft.Build.UnitTests
                     ElementLocation.Empty,
                     FileSystems.Default);
 
-            Assert.True(tree.Evaluate(state), "expected true from '" + expression + "'");
+            ConditionEvaluator.EvaluateParsedCondition(tree, state).ShouldBeTrue("expected true from '" + expression + "'");
         }
 
         /// <summary>
@@ -467,7 +468,7 @@ namespace Microsoft.Build.UnitTests
                     ElementLocation.Empty,
                     FileSystems.Default);
 
-            Assert.False(tree.Evaluate(state), "expected false from '" + expression + "' and got true");
+            ConditionEvaluator.EvaluateParsedCondition(tree, state).ShouldBeFalse("expected false from '" + expression + "' and got true");
         }
 
         /// <summary>
@@ -499,7 +500,7 @@ namespace Microsoft.Build.UnitTests
                         ElementLocation.Empty,
                         FileSystems.Default);
 
-                tree.Evaluate(state);
+                ConditionEvaluator.EvaluateParsedCondition(tree, state);
             }
             catch (InvalidProjectFileException ex)
             {

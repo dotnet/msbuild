@@ -259,11 +259,27 @@ namespace Microsoft.Build.Evaluation
             expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
             try
             {
-                return parsedExpression.Evaluate(state);
+                return EvaluateParsedCondition(parsedExpression, state);
             }
             finally
             {
                 expander.PropertiesUseTracker.ResetPropertyReadContext();
+            }
+        }
+
+        /// <summary>
+        /// Evaluates a parsed condition with private node state.
+        /// </summary>
+        internal static bool EvaluateParsedCondition(ParsedCondition parsedCondition, IConditionEvaluationState state)
+        {
+            state.NodeStates.Initialize(parsedCondition.StateLayout);
+            try
+            {
+                return parsedCondition.Root.Evaluate(state);
+            }
+            finally
+            {
+                state.NodeStates.Release();
             }
         }
 
@@ -307,7 +323,7 @@ namespace Microsoft.Build.Evaluation
             /// Gets the mutable node state owned by one active condition evaluation.
             /// </summary>
             /// <remarks>
-            /// <see cref="ParsedCondition.Evaluate"/> initializes this store for its parsed layout and releases it in a finally block.
+            /// <see cref="EvaluateParsedCondition"/> initializes this store for its parsed layout and releases it in a finally block.
             /// </remarks>
             ref NodeStateStore NodeStates { get; }
 

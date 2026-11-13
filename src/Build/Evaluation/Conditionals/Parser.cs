@@ -32,7 +32,7 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     /// <remarks>
     /// Use <see cref="Parse"/> to obtain a <see cref="ParsedCondition"/> and evaluate it
-    /// through <see cref="ParsedCondition.Evaluate"/> so private state is initialized and released.
+    /// through <see cref="ConditionEvaluator.EvaluateParsedCondition"/> so private state is initialized and released.
     /// Report warnings from successful parsing separately with <see cref="LogWarnings"/>.
     /// </remarks>
     internal sealed class Parser
