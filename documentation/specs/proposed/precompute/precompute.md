@@ -6,7 +6,8 @@ Precompute mode separates the creation of a build graph, called the precompute p
 
 This is a fundamentally different approach to graph construction than [static graph](../../static-graph.md) (i.e. `/graph`).
 
-This document is meant to be an introduction to precompute mode, not a full specification or detailed design.
+This document is meant to be both an introduction and a vision document for precompute mode.
+It is not a full specification or detailed design.
 
 Precompute mode mainly affects SDK authors (i.e. Targets authors).
 Many users just consume an SDK and provide items / properties to them and so they will likely not need to change or understand precompute mode in detail.
@@ -91,7 +92,7 @@ For simplicity, this example doesn't use any SDKs but hopefully it still illustr
     <!-- The targets would typically be in SDKs somewhere else -->
 
     <!-- The first set of targets are from one SDK generating some code that is consumed by a different SDK -->
-    <UsingTask TaskName="GenerateTask" AssemblyFile="path\to\GeneratorAssembly.dll" PrecomputeMode="Graph" />
+    <UsingTask TaskName="GenerateTask" AssemblyFile="path\to\GeneratorAssembly.dll" DefaultPhase="Compute" />
 
     <Target Name="GeneratePrepTarget" Condition="@(Generate->Count()) > 0">
         <PropertyGroup Condition="'$(SomePrepareSetting)' == 'True'">
@@ -125,7 +126,7 @@ For simplicity, this example doesn't use any SDKs but hopefully it still illustr
     </PropertyGroup>
 
     <!-- This is a second SDK -->
-    <UsingTask TaskName="CompileTask" AssemblyFile="path\to\CompilerAssembly.dll" PrecomputeMode="Graph" />
+    <UsingTask TaskName="CompileTask" AssemblyFile="path\to\CompilerAssembly.dll" DefaultPhase="Compute" />
 
     <Target Name="CompileTarget" DependsOnTargets="$(CompileDependsOn)" Inputs="@(Compile)" Outputs="$(OutputDirectory)\$(CompileOutputName).dll">
         <CompileTask 
@@ -151,7 +152,7 @@ Notably this sets `GeneratorFlags` to include `/someflag` because `SomePrepareSe
 This is all done during precompute and nothing is deferred to the execution phase.
 
 Next `GenerateTarget` executes and it processes its first `PropertyGroup`, setting the `GeneratorFlags` property.
-When execution gets to the `GenerateTask`, the task's annotation `PrecomputeMode="Graph"` means it will not be invoked during precompute and will instead be stored into the graph as a step in a node.
+When execution gets to the `GenerateTask`, `DefaultPhase="Compute"` means it will not be invoked during precompute and will instead be stored into the graph as a step in a node.
 The node also notes that the `GeneratorMetadata` output parameter of the `GenerateTask` will be added to `@(CompilerMetadata)`.
 The engine notes that the `CompilerMetadata` item is now only known during the compute phase and cannot be expanded during the precompute phase.
 It adds a special output to the `GenerateTarget` node that represents these resulting items.
@@ -182,7 +183,7 @@ This results in something akin to the following being stored into the graph as a
 ```
 
 Next the `CompileTarget` executes.
-Its only task is also `PrecomputeMode="Graph"` so it follows a similar pattern.
+Its only task is also `DefaultPhase="Compute"` so it follows a similar pattern.
 The one notable difference is that the `CompilerMetadata` value is produced by a prior target that is in the graph.
 This means it cannot be expanded now and instead the build graph will capture/consume the value during the compute phase.
 This results in an input being added that contains the values of the items or properties coming from the prior target and instructions on the appropriate steps to expand that data.
