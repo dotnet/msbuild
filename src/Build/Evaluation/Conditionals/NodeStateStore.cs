@@ -27,7 +27,6 @@ internal struct NodeStateStore
         _initialized = true;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ref StringExpressionNode.EvaluationState GetString(int slot)
     {
         if (!_initialized || (uint)slot >= (uint)_layout.StringSlotCount)
@@ -51,11 +50,9 @@ internal struct NodeStateStore
         }
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     private StringExpressionNode.EvaluationState[] AcquireStringStates() =>
         _stringStates = ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(_layout.StringSlotCount);
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     private readonly void ThrowInvalidSlot(int slot)
     {
         Assumed.True(_initialized, "Condition node state storage is not initialized.");
