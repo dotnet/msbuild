@@ -3,13 +3,12 @@
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Evaluation;
 
 internal readonly record struct NodeStateLayout(int StringSlotCount);
 
-internal readonly record struct ParsedCondition(GenericExpressionNode Root, NodeStateLayout StateLayout)
+internal sealed record ParsedCondition(GenericExpressionNode Root, NodeStateLayout StateLayout)
 {
     internal static ParsedCondition Parse(
         string condition,
@@ -18,13 +17,9 @@ internal readonly record struct ParsedCondition(GenericExpressionNode Root, Node
         LoggingContext? loggingContext)
     {
         Parser conditionParser = new();
-
-        #region REMOVE_COMPAT_WARNING
-        conditionParser.LoggingServices = loggingContext?.LoggingService;
-        conditionParser.LogBuildEventContext = loggingContext?.BuildEventContext ?? BuildEventContext.Invalid;
-        #endregion
-
-        return conditionParser.Parse(condition, options, elementLocation);
+        ParsedCondition parsed = conditionParser.Parse(condition, options, elementLocation, loggingContext);
+        conditionParser.LogWarnings(condition, loggingContext);
+        return parsed;
     }
 
     internal bool Evaluate(ConditionEvaluator.IConditionEvaluationState state)

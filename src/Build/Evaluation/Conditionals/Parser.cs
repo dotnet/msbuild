@@ -3,7 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Framework;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
@@ -11,8 +12,6 @@ using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 namespace Microsoft.Build.Evaluation
 {
-    using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-
     [Flags]
     internal enum ParserOptions
     {
@@ -34,64 +33,36 @@ namespace Microsoft.Build.Evaluation
     /// <remarks>
     /// Use <see cref="Parse"/> to obtain a <see cref="ParsedCondition"/> and evaluate it
     /// through <see cref="ParsedCondition.Evaluate"/> so private state is initialized and released.
+    /// Report warnings from successful parsing separately with <see cref="LogWarnings"/>.
     /// </remarks>
     internal sealed class Parser
     {
         private Scanner _lexer;
         private ParserOptions _options;
         private ElementLocation _elementLocation;
+        private bool _hasMixedAndOr;
         internal int errorPosition = 0; // useful for unit tests
 
         // Slots are local to a parsed condition.
         internal int StringNodeStateCount { get; private set; }
-
-        #region REMOVE_COMPAT_WARNING
-
-        private bool _warnedForExpression = false;
-
-        private BuildEventContext _logBuildEventContext;
-        /// <summary>
-        ///  Location contextual information which are attached to logging events to
-        ///  say where they are in relation to the process, engine, project, target,task which is executing
-        /// </summary>
-        internal BuildEventContext LogBuildEventContext
-        {
-            get
-            {
-                return _logBuildEventContext;
-            }
-            set
-            {
-                _logBuildEventContext = value;
-            }
-        }
-        private ILoggingService _loggingServices;
-        /// <summary>
-        /// Engine Logging Service reference where events will be logged to
-        /// </summary>
-        internal ILoggingService LoggingServices
-        {
-            set
-            {
-                _loggingServices = value;
-            }
-
-            get
-            {
-                return _loggingServices;
-            }
-        }
-        #endregion
 
         internal Parser()
         {
             // nothing to see here, move along.
         }
 
+        /// <summary>
+        /// Parses a condition and records compatibility warnings.
+        /// </summary>
+        /// <remarks>
+        /// The <paramref name="loggingContext"/> is used only to report warnings before a parse failure.
+        /// After successful parsing, call <see cref="LogWarnings"/> to report them.
+        /// </remarks>
         internal ParsedCondition Parse(
             string expression,
             ParserOptions optionSettings,
-            ElementLocation elementLocation)
+            ElementLocation elementLocation,
+            LoggingContext loggingContext = null)
         {
             // We currently have no support (and no scenarios) for disallowing property references
             // in Conditions.
@@ -100,20 +71,43 @@ namespace Microsoft.Build.Evaluation
             _options = optionSettings;
             _elementLocation = elementLocation;
             StringNodeStateCount = 0;
+            _hasMixedAndOr = false;
 
-            _lexer = new Scanner(expression, _options);
-            if (!_lexer.Advance())
+            try
             {
-                errorPosition = _lexer.GetErrorPosition();
-                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, _lexer.GetErrorResource(), expression, errorPosition, _lexer.UnexpectedlyFound);
+                _lexer = new Scanner(expression, _options);
+                if (!_lexer.Advance())
+                {
+                    errorPosition = _lexer.GetErrorPosition();
+                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, _lexer.GetErrorResource(), expression, errorPosition, _lexer.UnexpectedlyFound);
+                }
+                GenericExpressionNode node = Expr(expression);
+                if (!_lexer.IsNext(Token.TokenType.EndOfInput))
+                {
+                    errorPosition = _lexer.GetErrorPosition();
+                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnexpectedTokenInCondition", expression, _lexer.IsNextString(), errorPosition);
+                }
+                return new ParsedCondition(node, new NodeStateLayout(StringNodeStateCount));
             }
-            GenericExpressionNode node = Expr(expression);
-            if (!_lexer.IsNext(Token.TokenType.EndOfInput))
+            catch (InvalidProjectFileException)
             {
-                errorPosition = _lexer.GetErrorPosition();
-                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnexpectedTokenInCondition", expression, _lexer.IsNextString(), errorPosition);
+                // Failed parses cannot be published, so their diagnostics belong to this caller.
+                LogWarnings(expression, loggingContext);
+                throw;
             }
-            return new ParsedCondition(node, new NodeStateLayout(StringNodeStateCount));
+        }
+
+        /// <summary>
+        /// Reports compatibility warnings recorded by the most recent parse.
+        /// </summary>
+        internal void LogWarnings(string expression, LoggingContext loggingContext)
+        {
+            if (_hasMixedAndOr && loggingContext is not null)
+            {
+                loggingContext.LoggingService.LogWarning(
+                    loggingContext.BuildEventContext, DiagnosticSubcategory.None, _elementLocation,
+                    "ConditionMaybeEvaluatedIncorrectly", expression);
+            }
         }
 
         //
@@ -131,19 +125,7 @@ namespace Microsoft.Build.Evaluation
                 node = ExprPrime(expression, node, ref hasAnd, ref hasOr);
             }
 
-            #region REMOVE_COMPAT_WARNING
-            // Check for potential change in behavior
-            if (LoggingServices != null && !_warnedForExpression &&
-                hasAnd && hasOr)
-            {
-                // We only want to warn once even if there multiple () sub expressions
-                _warnedForExpression = true;
-
-                // Log a warning regarding the fact the expression may have been evaluated
-                // incorrectly in earlier version of MSBuild
-                LoggingServices.LogWarning(_logBuildEventContext, DiagnosticSubcategory.None, _elementLocation, "ConditionMaybeEvaluatedIncorrectly", expression);
-            }
-            #endregion
+            _hasMixedAndOr |= hasAnd && hasOr;
 
             return node;
         }

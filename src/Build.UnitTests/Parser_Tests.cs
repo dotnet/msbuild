@@ -3,8 +3,10 @@
 
 using System;
 using System.Linq;
+using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
@@ -540,19 +542,24 @@ namespace Microsoft.Build.UnitTests
         public void OperatorWarningsRespectParentheses(string expression, int expectedWarningCount)
         {
             int warningCount = 0;
-            Parser parser = new()
+            MockLoggingService loggingService = new(message =>
             {
-                LoggingServices = new MockLoggingService(message =>
+                if (message == "ConditionMaybeEvaluatedIncorrectly")
                 {
-                    if (message == "ConditionMaybeEvaluatedIncorrectly")
-                    {
-                        warningCount++;
-                    }
-                })
-            };
+                    warningCount++;
+                }
+            });
+            EvaluationLoggingContext loggingContext = new(
+                loggingService, BuildEventContext.Invalid, _elementLocation.File);
+            Parser parser = new();
 
-            parser.Parse(expression, ParserOptions.AllowAll, _elementLocation);
+            parser.Parse(expression, ParserOptions.AllowAll, _elementLocation, loggingContext);
 
+            warningCount.ShouldBe(0);
+            parser.LogWarnings(expression, loggingContext);
+            warningCount.ShouldBe(expectedWarningCount);
+            parser.Parse("true", ParserOptions.AllowAll, _elementLocation, loggingContext);
+            parser.LogWarnings("true", loggingContext);
             warningCount.ShouldBe(expectedWarningCount);
         }
 

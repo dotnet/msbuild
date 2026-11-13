@@ -9,9 +9,7 @@ namespace Microsoft.Build.Evaluation;
 
 internal sealed class CachedCondition
 {
-    private ParsedCondition _condition;
-    private bool _initialized;
-    private object? _initializationLock;
+    private ParsedCondition? _condition;
 
     internal ParsedCondition GetOrParse(
         string condition,
@@ -19,23 +17,25 @@ internal sealed class CachedCondition
         ElementLocation elementLocation,
         LoggingContext? loggingContext)
     {
-        if (Volatile.Read(ref _initialized))
-        {
-            return _condition;
-        }
-
-        return Initialize(condition, options, elementLocation, loggingContext);
+        ParsedCondition? parsed = Volatile.Read(ref _condition);
+        return parsed ?? Initialize(condition, options, elementLocation, loggingContext);
     }
 
     private ParsedCondition Initialize(
         string condition,
         ParserOptions options,
         ElementLocation elementLocation,
-        LoggingContext? loggingContext) =>
-        // Unlike Lazy<T>, failed initialization is retried with the current caller's location.
-        LazyInitializer.EnsureInitialized(
-            ref _condition,
-            ref _initialized,
-            ref _initializationLock,
-            () => ParsedCondition.Parse(condition, options, elementLocation, loggingContext));
+        LoggingContext? loggingContext)
+    {
+        Parser conditionParser = new();
+        ParsedCondition parsed = conditionParser.Parse(condition, options, elementLocation, loggingContext);
+        ParsedCondition? existing = Interlocked.CompareExchange(ref _condition, parsed, null);
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        conditionParser.LogWarnings(condition, loggingContext);
+        return parsed;
+    }
 }
