@@ -89,7 +89,11 @@ It computes `git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}`, find
 | **2: DARC Subscription Updates** | Phase 1 branch exists (`vs*` created) | Retarget `main`-targeting subs + VMR backflow to next channel, retired-branch cleanup (batched PR), Arcade verify |
 | **3: Bump Main** | Phase 2 ingested and verified | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, verify future-cut OptProf baseline) |
 | **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Telemetry, API compatibility, frozen OptProf coverage, VS insertion before Insiders snap |
-| **5: Post-GA** | VS shipped (`VS_SHIP_DATE`) | Resolve the exact shipped version (SDK-coupled? SDK wins over VS `rel/stable`), nuget.org publish, docs, GitHub release, Change Waves Learn sync, retro |
+| **5: Post-GA** | VS shipped (`VS_SHIP_DATE`) | Resolve the exact shipped version (SDK-coupled? SDK wins over VS `rel/stable`), nuget.org publish via `msbuild-nuget-release`, docs, GitHub release, Change Waves Learn sync, retro |
+
+## nuget.org Publishing (Phase 5.1)
+
+Publish with the [`msbuild-nuget-release`](https://dev.azure.com/dnceng/internal/_build?definitionId=1700) pipeline in dnceng/internal; it replaces emailing the .NET Release Team. Pass `msbuildBuildId` (a pipeline 9434 build id) and run `validateOnly: true` first. The source build must publish a `ReleasePackages` artifact ([#15407](https://github.com/dotnet/msbuild/pull/15407), backported per branch). If the SDK/VS-shipped commit predates that, publish a later same-`VersionPrefix` build whose diff is infra-only, and tag that build's commit.
 
 ## DARC Batching
 
@@ -124,7 +128,7 @@ Check both lifecycles because either the SDK or Visual Studio can require a bran
 | **SDK band** | [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) — maps each feature band to its VS version and support end date |
 | **Visual Studio** | [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) — annual releases and the LTSC table |
 
-**VS 2026 and later:** non-LTSC releases are serviced through Insiders and for one month after Stable release. A new Stable promotion ends VS support for the previous release. LTSC baselines receive one year of servicing after release; use the published LTSC table to identify them.
+**VS 2026 and later:** non-LTSC releases are serviced through Insiders and for one month after Stable release. A new Stable promotion ends VS support for the previous release. LTSC baselines receive two years of security servicing from their LTSC release; use the published LTSC table to identify them (LTSC 18.11: November 2026 to November 2028).
 
 Use published SDK and VS deadlines for lifecycle decisions, and DARC channels and subscriptions for dependency routing.
 
