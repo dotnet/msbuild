@@ -24,7 +24,11 @@ internal struct NodeStateStore
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ref StringExpressionNode.EvaluationState GetString(int slot)
     {
-        VerifySlot(slot, _layout.StringSlotCount);
+        if (!_initialized || (uint)slot >= (uint)_layout.StringSlotCount)
+        {
+            ThrowInvalidSlot(slot);
+        }
+
         StringExpressionNode.EvaluationState[] states = _stringStates ?? AcquireStringStates();
         return ref states[slot];
     }
@@ -44,15 +48,6 @@ internal struct NodeStateStore
     [MethodImpl(MethodImplOptions.NoInlining)]
     private StringExpressionNode.EvaluationState[] AcquireStringStates() =>
         _stringStates = ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(_layout.StringSlotCount);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private readonly void VerifySlot(int slot, int count)
-    {
-        if (!_initialized || (uint)slot >= (uint)count)
-        {
-            ThrowInvalidSlot(slot);
-        }
-    }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private readonly void ThrowInvalidSlot(int slot)
