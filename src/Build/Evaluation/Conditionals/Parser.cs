@@ -119,8 +119,8 @@ namespace Microsoft.Build.Evaluation
         //
         private GenericExpressionNode Expr(string expression)
         {
-            // Track mixed And/Or at this level: older MSBuild versions could evaluate them incorrectly.
-            // Parentheses make the intended evaluation order explicit.
+            // Track mixes like "A Or B And C" so we can warn users
+            // to make the grouping explicit with parentheses.
             bool hasAnd = false;
             bool hasOr = false;
             GenericExpressionNode node = BooleanTerm(expression, ref hasAnd);
