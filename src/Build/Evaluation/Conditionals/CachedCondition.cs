@@ -7,10 +7,20 @@ using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Evaluation;
 
+/// <summary>
+/// Publishes and reuses a parsed condition for one condition text and parser-options pair.
+/// </summary>
 internal sealed class CachedCondition
 {
     private ParsedCondition? _condition;
 
+    /// <summary>
+    /// Gets the published condition or parses and attempts to publish it.
+    /// </summary>
+    /// <remarks>
+    /// Concurrent cache misses may parse independently; only the caller that wins publication reports successful-parse warnings.
+    /// Parse failures are not cached.
+    /// </remarks>
     internal ParsedCondition GetOrParse(
         string condition,
         ParserOptions options,

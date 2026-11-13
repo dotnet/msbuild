@@ -5,6 +5,12 @@ using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Evaluation;
 
+/// <summary>
+/// Owns mutable node state for one active condition evaluation.
+/// </summary>
+/// <remarks>
+/// Initialize from the parsed layout and release afterward.
+/// </remarks>
 internal struct NodeStateStore
 {
     private NodeStateLayout _layout;

@@ -6,6 +6,9 @@ using System.Buffers;
 
 namespace Microsoft.Build.Evaluation;
 
+/// <summary>
+/// Supplies exclusively borrowed node-state buffers, with thread-local reuse and shared pooling.
+/// </summary>
 internal static class ThreadLocalNodeStateBuffer<TState> where TState : struct
 {
     // Do not retain exceptionally large condition buffers on every evaluator thread.

@@ -43,7 +43,9 @@ namespace Microsoft.Build.Evaluation
         private bool _hasMixedAndOr;
         internal int errorPosition = 0; // useful for unit tests
 
-        // Slots are local to a parsed condition.
+        /// <summary>
+        /// Number of evaluation-state slots assigned to expandable string nodes in this condition.
+        /// </summary>
         internal int StringNodeStateCount { get; private set; }
 
         internal Parser()
@@ -117,6 +119,8 @@ namespace Microsoft.Build.Evaluation
         //
         private GenericExpressionNode Expr(string expression)
         {
+            // Track mixed And/Or at this level: older MSBuild versions could evaluate them incorrectly.
+            // Parentheses make the intended evaluation order explicit.
             bool hasAnd = false;
             bool hasOr = false;
             GenericExpressionNode node = BooleanTerm(expression, ref hasAnd);

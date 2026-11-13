@@ -303,6 +303,12 @@ namespace Microsoft.Build.Evaluation
 
         internal interface IConditionEvaluationState
         {
+            /// <summary>
+            /// Gets the mutable node state owned by one active condition evaluation.
+            /// </summary>
+            /// <remarks>
+            /// <see cref="ParsedCondition.Evaluate"/> initializes this store for its parsed layout and releases it in a finally block.
+            /// </remarks>
             ref NodeStateStore NodeStates { get; }
 
             string Condition { get; }
