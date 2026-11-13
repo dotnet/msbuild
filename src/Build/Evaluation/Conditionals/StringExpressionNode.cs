@@ -16,11 +16,6 @@ namespace Microsoft.Build.Evaluation
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal sealed class StringExpressionNode : OperandExpressionNode
     {
-        internal struct EvaluationState
-        {
-            public string ExpandedValue;
-        }
-
         internal int StateSlot { get; }
 
         private readonly string _value;

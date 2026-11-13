@@ -402,7 +402,7 @@ public class ConditionEvaluator_Tests
         A.CallTo(() => fileSystem.FileOrDirectoryExists(innerPath)).Returns(true);
         A.CallTo(() => fileSystem.FileOrDirectoryExists(outerPath)).ReturnsLazily(() =>
         {
-            ref StringExpressionNode.EvaluationState outer = ref outerState.NodeStates.GetString(0);
+            ref NodeStateStore.StringNodeState outer = ref outerState.NodeStates.GetString(0);
             outer.ExpandedValue.ShouldBe("outer");
             parsed.Evaluate(innerState).ShouldBeTrue();
             outer.ExpandedValue.ShouldBe("outer");
@@ -563,16 +563,16 @@ public class ConditionEvaluator_Tests
     {
         await Task.Factory.StartNew(() =>
         {
-            StringExpressionNode.EvaluationState[] small =
-                ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(64);
-            ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(small, 64);
+            NodeStateStore.StringNodeState[] small =
+                ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Acquire(64);
+            ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Release(small, 64);
 
-            StringExpressionNode.EvaluationState[] large =
-                ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(128);
-            StringExpressionNode.EvaluationState[]? nested = null;
+            NodeStateStore.StringNodeState[] large =
+                ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Acquire(128);
+            NodeStateStore.StringNodeState[]? nested = null;
             try
             {
-                nested = ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(64);
+                nested = ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Acquire(64);
                 nested.ShouldBeSameAs(small);
                 nested.ShouldNotBeSameAs(large);
             }
@@ -580,21 +580,21 @@ public class ConditionEvaluator_Tests
             {
                 if (nested is not null)
                 {
-                    ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(nested, 64);
+                    ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Release(nested, 64);
                 }
 
-                ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(large, 128);
+                ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Release(large, 128);
             }
 
-            StringExpressionNode.EvaluationState[] reused =
-                ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(128);
+            NodeStateStore.StringNodeState[] reused =
+                ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Acquire(128);
             try
             {
                 reused.ShouldBeSameAs(large);
             }
             finally
             {
-                ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(reused, 128);
+                ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Release(reused, 128);
             }
         }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
     }
@@ -604,15 +604,15 @@ public class ConditionEvaluator_Tests
     [InlineData(258)]
     public void ConditionStateBuffersAreReusedAndIsolated(int slots)
     {
-        StringExpressionNode.EvaluationState[] first =
-            ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(slots);
+        NodeStateStore.StringNodeState[] first =
+            ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Acquire(slots);
         first[0].ExpandedValue = "first";
         first[slots - 1].ExpandedValue = "last";
-        ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(first, slots);
+        ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Release(first, slots);
 
-        StringExpressionNode.EvaluationState[] reused =
-            ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(slots);
-        StringExpressionNode.EvaluationState[]? nested = null;
+        NodeStateStore.StringNodeState[] reused =
+            ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Acquire(slots);
+        NodeStateStore.StringNodeState[]? nested = null;
         try
         {
             reused.ShouldBeSameAs(first);
@@ -621,12 +621,12 @@ public class ConditionEvaluator_Tests
             reused[0].ExpandedValue = "outer";
             reused[slots - 1].ExpandedValue = "outer-last";
 
-            nested = ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(slots);
+            nested = ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Acquire(slots);
             nested.ShouldNotBeSameAs(reused);
             nested[0].ExpandedValue.ShouldBeNull();
             nested[slots - 1].ExpandedValue.ShouldBeNull();
             nested[0].ExpandedValue = "inner";
-            ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(nested, slots);
+            ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Release(nested, slots);
             nested = null;
 
             reused[0].ExpandedValue.ShouldBe("outer");
@@ -636,10 +636,10 @@ public class ConditionEvaluator_Tests
         {
             if (nested is not null)
             {
-                ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(nested, slots);
+                ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Release(nested, slots);
             }
 
-            ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(reused, slots);
+            ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Release(reused, slots);
         }
     }
 
