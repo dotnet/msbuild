@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests
         public void FunctionTests()
         {
             Parser p = new Parser();
-            GenericExpressionNode tree;
+            ParsedCondition tree;
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), new ItemDictionary<ProjectItemInstance>(), FileSystems.Default, null);
             expander.Metadata = new StringMetadataTable(null);
             bool value;
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests
                                     ElementLocation.Empty,
                                     FileSystems.Default);
 
-            value = tree.Evaluate(state);
+            value = ConditionEvaluator.EvaluateParsedCondition(tree, state);
             Assert.True(value);
 
             if (File.Exists(fileThatMustAlwaysExist))
@@ -435,7 +435,7 @@ namespace Microsoft.Build.UnitTests
                 expander.Metadata = new StringMetadataTable(null);
             }
 
-            GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, MockElementLocation.Instance);
+            ParsedCondition tree = p.Parse(expression, ParserOptions.AllowAll, MockElementLocation.Instance);
 
             if (state == null)
             {
@@ -450,7 +450,7 @@ namespace Microsoft.Build.UnitTests
                         FileSystems.Default);
             }
 
-            bool result = tree.Evaluate(state);
+            bool result = ConditionEvaluator.EvaluateParsedCondition(tree, state);
             Assert.Equal(expected, result);
         }
 
@@ -472,7 +472,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 fExceptionCaught = false;
-                GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, MockElementLocation.Instance);
+                ParsedCondition tree = p.Parse(expression, ParserOptions.AllowAll, MockElementLocation.Instance);
                 if (state == null)
                 {
                     state =
@@ -485,7 +485,7 @@ namespace Microsoft.Build.UnitTests
                             ElementLocation.Empty,
                             FileSystems.Default);
                 }
-                tree.Evaluate(state);
+                ConditionEvaluator.EvaluateParsedCondition(tree, state);
             }
             catch (InvalidProjectFileException e)
             {

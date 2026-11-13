@@ -3,7 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Framework;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
@@ -11,8 +12,6 @@ using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 namespace Microsoft.Build.Evaluation
 {
-    using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-
     [Flags]
     internal enum ParserOptions
     {
@@ -29,73 +28,43 @@ namespace Microsoft.Build.Evaluation
     };
 
     /// <summary>
-    /// This class implements the grammar for complex conditionals.
-    ///
-    /// The usage is:
-    ///    Parser p = new Parser(CultureInfo);
-    ///    ExpressionTree t = p.Parse(expression, XmlNode);
-    ///
-    /// The expression tree can then be evaluated and re-evaluated as needed.
+    /// Parses MSBuild condition expressions.
     /// </summary>
     /// <remarks>
-    /// UNDONE: When we copied over the conditionals code, we didn't copy over the unit tests for scanner, parser, and expression tree.
+    /// Use <see cref="Parse"/> to obtain a <see cref="ParsedCondition"/> and evaluate it
+    /// through <see cref="ConditionEvaluator.EvaluateParsedCondition"/> so private state is initialized and released.
+    /// Report warnings from successful parsing separately with <see cref="LogWarnings"/>.
     /// </remarks>
     internal sealed class Parser
     {
         private Scanner _lexer;
         private ParserOptions _options;
         private ElementLocation _elementLocation;
+        private bool _hasMixedAndOr;
         internal int errorPosition = 0; // useful for unit tests
 
-        #region REMOVE_COMPAT_WARNING
-
-        private bool _warnedForExpression = false;
-
-        private BuildEventContext _logBuildEventContext;
         /// <summary>
-        ///  Location contextual information which are attached to logging events to
-        ///  say where they are in relation to the process, engine, project, target,task which is executing
+        /// Number of evaluation-state slots assigned to expandable string nodes in this condition.
         /// </summary>
-        internal BuildEventContext LogBuildEventContext
-        {
-            get
-            {
-                return _logBuildEventContext;
-            }
-            set
-            {
-                _logBuildEventContext = value;
-            }
-        }
-        private ILoggingService _loggingServices;
-        /// <summary>
-        /// Engine Logging Service reference where events will be logged to
-        /// </summary>
-        internal ILoggingService LoggingServices
-        {
-            set
-            {
-                _loggingServices = value;
-            }
-
-            get
-            {
-                return _loggingServices;
-            }
-        }
-        #endregion
+        internal int StringNodeStateCount { get; private set; }
 
         internal Parser()
         {
             // nothing to see here, move along.
         }
 
-        //
-        // Main entry point for parser.
-        // You pass in the expression you want to parse, and you get an
-        // ExpressionTree out the back end.
-        //
-        internal GenericExpressionNode Parse(string expression, ParserOptions optionSettings, ElementLocation elementLocation)
+        /// <summary>
+        /// Parses a condition and records compatibility warnings.
+        /// </summary>
+        /// <remarks>
+        /// The <paramref name="loggingContext"/> is used only to report warnings before a parse failure.
+        /// After successful parsing, call <see cref="LogWarnings"/> to report them.
+        /// </remarks>
+        internal ParsedCondition Parse(
+            string expression,
+            ParserOptions optionSettings,
+            ElementLocation elementLocation,
+            LoggingContext loggingContext = null)
         {
             // We currently have no support (and no scenarios) for disallowing property references
             // in Conditions.
@@ -103,20 +72,44 @@ namespace Microsoft.Build.Evaluation
 
             _options = optionSettings;
             _elementLocation = elementLocation;
+            StringNodeStateCount = 0;
+            _hasMixedAndOr = false;
 
-            _lexer = new Scanner(expression, _options);
-            if (!_lexer.Advance())
+            try
             {
-                errorPosition = _lexer.GetErrorPosition();
-                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, _lexer.GetErrorResource(), expression, errorPosition, _lexer.UnexpectedlyFound);
+                _lexer = new Scanner(expression, _options);
+                if (!_lexer.Advance())
+                {
+                    errorPosition = _lexer.GetErrorPosition();
+                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, _lexer.GetErrorResource(), expression, errorPosition, _lexer.UnexpectedlyFound);
+                }
+                GenericExpressionNode node = Expr(expression);
+                if (!_lexer.IsNext(Token.TokenType.EndOfInput))
+                {
+                    errorPosition = _lexer.GetErrorPosition();
+                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnexpectedTokenInCondition", expression, _lexer.IsNextString(), errorPosition);
+                }
+                return new ParsedCondition(node, new NodeStateLayout(StringNodeStateCount));
             }
-            GenericExpressionNode node = Expr(expression);
-            if (!_lexer.IsNext(Token.TokenType.EndOfInput))
+            catch (InvalidProjectFileException)
             {
-                errorPosition = _lexer.GetErrorPosition();
-                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnexpectedTokenInCondition", expression, _lexer.IsNextString(), errorPosition);
+                // Failed parses cannot be published, so their diagnostics belong to this caller.
+                LogWarnings(expression, loggingContext);
+                throw;
             }
-            return node;
+        }
+
+        /// <summary>
+        /// Reports compatibility warnings recorded by the most recent parse.
+        /// </summary>
+        internal void LogWarnings(string expression, LoggingContext loggingContext)
+        {
+            if (_hasMixedAndOr && loggingContext is not null)
+            {
+                loggingContext.LoggingService.LogWarning(
+                    loggingContext.BuildEventContext, DiagnosticSubcategory.None, _elementLocation,
+                    "ConditionMaybeEvaluatedIncorrectly", expression);
+            }
         }
 
         //
@@ -126,30 +119,22 @@ namespace Microsoft.Build.Evaluation
         //
         private GenericExpressionNode Expr(string expression)
         {
-            GenericExpressionNode node = BooleanTerm(expression);
+            // Track mixes like "A Or B And C" so we can warn users
+            // to make the grouping explicit with parentheses.
+            bool hasAnd = false;
+            bool hasOr = false;
+            GenericExpressionNode node = BooleanTerm(expression, ref hasAnd);
             if (!_lexer.IsNext(Token.TokenType.EndOfInput))
             {
-                node = ExprPrime(expression, node);
+                node = ExprPrime(expression, node, ref hasAnd, ref hasOr);
             }
 
-            #region REMOVE_COMPAT_WARNING
-            // Check for potential change in behavior
-            if (LoggingServices != null && !_warnedForExpression &&
-                node.PotentialAndOrConflict())
-            {
-                // We only want to warn once even if there multiple () sub expressions
-                _warnedForExpression = true;
-
-                // Log a warning regarding the fact the expression may have been evaluated
-                // incorrectly in earlier version of MSBuild
-                LoggingServices.LogWarning(_logBuildEventContext, DiagnosticSubcategory.None, _elementLocation, "ConditionMaybeEvaluatedIncorrectly", expression);
-            }
-            #endregion
+            _hasMixedAndOr |= hasAnd && hasOr;
 
             return node;
         }
 
-        private GenericExpressionNode ExprPrime(string expression, GenericExpressionNode lhs)
+        private GenericExpressionNode ExprPrime(string expression, GenericExpressionNode lhs, ref bool hasAnd, ref bool hasOr)
         {
             if (Same(expression, Token.TokenType.EndOfInput))
             {
@@ -157,11 +142,12 @@ namespace Microsoft.Build.Evaluation
             }
             else if (Same(expression, Token.TokenType.Or))
             {
+                hasOr = true;
                 OperatorExpressionNode orNode = new OrExpressionNode();
-                GenericExpressionNode rhs = BooleanTerm(expression);
+                GenericExpressionNode rhs = BooleanTerm(expression, ref hasAnd);
                 orNode.LeftChild = lhs;
                 orNode.RightChild = rhs;
-                return ExprPrime(expression, orNode);
+                return ExprPrime(expression, orNode, ref hasAnd, ref hasOr);
             }
             else
             {
@@ -172,7 +158,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private GenericExpressionNode BooleanTerm(string expression)
+        private GenericExpressionNode BooleanTerm(string expression, ref bool hasAnd)
         {
             GenericExpressionNode node = RelationalExpr(expression);
             if (node == null)
@@ -183,12 +169,12 @@ namespace Microsoft.Build.Evaluation
 
             if (!_lexer.IsNext(Token.TokenType.EndOfInput))
             {
-                node = BooleanTermPrime(expression, node);
+                node = BooleanTermPrime(expression, node, ref hasAnd);
             }
             return node;
         }
 
-        private GenericExpressionNode BooleanTermPrime(string expression, GenericExpressionNode lhs)
+        private GenericExpressionNode BooleanTermPrime(string expression, GenericExpressionNode lhs, ref bool hasAnd)
         {
             if (_lexer.IsNext(Token.TokenType.EndOfInput))
             {
@@ -196,6 +182,7 @@ namespace Microsoft.Build.Evaluation
             }
             else if (Same(expression, Token.TokenType.And))
             {
+                hasAnd = true;
                 GenericExpressionNode rhs = RelationalExpr(expression);
                 if (rhs == null)
                 {
@@ -206,7 +193,7 @@ namespace Microsoft.Build.Evaluation
                 OperatorExpressionNode andNode = new AndExpressionNode();
                 andNode.LeftChild = lhs;
                 andNode.RightChild = rhs;
-                return BooleanTermPrime(expression, andNode);
+                return BooleanTermPrime(expression, andNode, ref hasAnd);
             }
             else
             {
@@ -354,7 +341,7 @@ namespace Microsoft.Build.Evaluation
             Token current = _lexer.CurrentToken;
             if (Same(expression, Token.TokenType.String))
             {
-                return new StringExpressionNode(current.String, current.Expandable);
+                return CreateStringNode(current.String, current.Expandable);
             }
             else if (Same(expression, Token.TokenType.Numeric))
             {
@@ -362,21 +349,25 @@ namespace Microsoft.Build.Evaluation
             }
             else if (Same(expression, Token.TokenType.Property))
             {
-                return new StringExpressionNode(current.String, true /* requires expansion */);
+                return CreateStringNode(current.String, expandable: true);
             }
             else if (Same(expression, Token.TokenType.ItemMetadata))
             {
-                return new StringExpressionNode(current.String, true /* requires expansion */);
+                return CreateStringNode(current.String, expandable: true);
             }
             else if (Same(expression, Token.TokenType.ItemList))
             {
-                return new StringExpressionNode(current.String, true /* requires expansion */);
+                return CreateStringNode(current.String, expandable: true);
             }
             else
             {
                 return null;
             }
         }
+
+        // Shared trees assign state slots only to expandable nodes; literals need no state (-1).
+        private StringExpressionNode CreateStringNode(string value, bool expandable) =>
+            new StringExpressionNode(value, expandable, expandable ? StringNodeStateCount++ : -1);
 
         private bool Same(string expression, Token.TokenType token)
         {

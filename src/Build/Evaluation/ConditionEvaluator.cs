@@ -8,7 +8,6 @@ using System.Threading;
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared.FileSystem;
-using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -131,35 +130,33 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        // Implements a pool of expression trees for each condition.
-        // This is because an expression tree is a mutually exclusive resource (has non thread safe state while it evaluates).
-        // During high demand when all expression trees are busy evaluating, a new expression tree is created and added to the pool.
-        // The pool is represented by the ConcurrentStack.
         private struct ExpressionTreeForCurrentOptionsWithSize
         {
-            // condition string -> pool of expression trees
-            private readonly ConcurrentDictionary<string, Stack<GenericExpressionNode>> _conditionPools;
-            private int _mOptimisticSize;
+            // condition string -> a single parsed expression tree and its immutable state layout
+            private readonly ConcurrentDictionary<string, CachedCondition> _expressions;
+            private int _optimisticSize;
 
-            public readonly int OptimisticSize => _mOptimisticSize;
+            public readonly int OptimisticSize => _optimisticSize;
 
-            public ExpressionTreeForCurrentOptionsWithSize(ConcurrentDictionary<string, Stack<GenericExpressionNode>> conditionPools)
+            public ExpressionTreeForCurrentOptionsWithSize(ConcurrentDictionary<string, CachedCondition> expressions)
             {
-                _conditionPools = conditionPools;
-                _mOptimisticSize = conditionPools.Count;
+                _expressions = expressions;
+                _optimisticSize = expressions.Count;
             }
 
-            public Stack<GenericExpressionNode> GetOrAdd(string condition, Func<string, Stack<GenericExpressionNode>> addFunc)
+            public ParsedCondition GetOrParse(
+                string condition,
+                ParserOptions options,
+                ElementLocation elementLocation,
+                LoggingContext? loggingContext)
             {
-                if (!_conditionPools.TryGetValue(condition, out Stack<GenericExpressionNode>? stack))
+                if (!_expressions.TryGetValue(condition, out CachedCondition? expression))
                 {
-                    // Count how many conditions there are in the cache.
-                    // The condition evaluator will flush the cache when some threshold is exceeded.
-                    Interlocked.Increment(ref _mOptimisticSize);
-                    stack = _conditionPools.GetOrAdd(condition, addFunc);
+                    Interlocked.Increment(ref _optimisticSize);
+                    expression = _expressions.GetOrAdd(condition, static _ => new CachedCondition());
                 }
 
-                return stack;
+                return expression.GetOrParse(condition, options, elementLocation, loggingContext);
             }
         }
 
@@ -240,68 +237,49 @@ namespace Microsoft.Build.Evaluation
             // Get the expression tree cache for the current parsing options.
             var cachedExpressionTreesForCurrentOptions = s_cachedExpressionTrees.GetOrAdd(
                 (int)options,
-                _ => new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal)));
+                static _ => new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, CachedCondition>(StringComparer.Ordinal)));
 
-            cachedExpressionTreesForCurrentOptions = FlushCacheIfLargerThanThreshold(options, cachedExpressionTreesForCurrentOptions);
+            cachedExpressionTreesForCurrentOptions = FlushCacheIfLargerThanThreshold(
+                options, cachedExpressionTreesForCurrentOptions);
 
-            // Get the pool of expressions for this condition.
-            Stack<GenericExpressionNode> expressionPool = cachedExpressionTreesForCurrentOptions.GetOrAdd(condition, _ => new Stack<GenericExpressionNode>());
+            ParsedCondition parsedExpression = s_disableExpressionCaching
+                ? ParsedCondition.Parse(condition, options, elementLocation, loggingContext)
+                : cachedExpressionTreesForCurrentOptions.GetOrParse(condition, options, elementLocation, loggingContext);
 
-            lock (expressionPool)
+            var state = new ConditionEvaluationState<P, I>(
+                condition,
+                expander,
+                expanderOptions,
+                conditionedPropertiesTable,
+                evaluationDirectory,
+                elementLocation,
+                fileSystem,
+                projectRootElementCache);
+
+            expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
+            try
             {
-                // Try and see if there's an available expression tree in the pool.
-                // If not, parse a new expression tree and add it back to the pool.
-                GenericExpressionNode parsedExpression;
-                if (expressionPool.Count == 0)
-                {
-                    var conditionParser = new Parser();
+                return EvaluateParsedCondition(parsedExpression, state);
+            }
+            finally
+            {
+                expander.PropertiesUseTracker.ResetPropertyReadContext();
+            }
+        }
 
-                    #region REMOVE_COMPAT_WARNING
-                    conditionParser.LoggingServices = loggingContext?.LoggingService;
-                    conditionParser.LogBuildEventContext = loggingContext?.BuildEventContext ?? BuildEventContext.Invalid;
-                    #endregion
-
-                    parsedExpression = conditionParser.Parse(condition, options, elementLocation);
-                }
-                else
-                {
-                    parsedExpression = expressionPool.Pop();
-                }
-
-                bool result;
-
-                var state = new ConditionEvaluationState<P, I>(
-                    condition,
-                    expander,
-                    expanderOptions,
-                    conditionedPropertiesTable,
-                    evaluationDirectory,
-                    elementLocation,
-                    fileSystem,
-                    projectRootElementCache);
-
-                expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
-                // We are evaluating this expression now and it can cache some state for the duration,
-                // so we don't want multiple threads working on the same expression
-                lock (parsedExpression)
-                {
-                    try
-                    {
-                        result = parsedExpression.Evaluate(state);
-                    }
-                    finally
-                    {
-                        parsedExpression.ResetState();
-                        if (!s_disableExpressionCaching)
-                        {
-                            // Finished using the expression tree. Add it back to the pool so other threads can use it.
-                            expressionPool.Push(parsedExpression);
-                        }
-                        expander.PropertiesUseTracker.ResetPropertyReadContext();
-                    }
-                }
-
-                return result;
+        /// <summary>
+        /// Evaluates a parsed condition with private node state.
+        /// </summary>
+        internal static bool EvaluateParsedCondition(ParsedCondition parsedCondition, IConditionEvaluationState state)
+        {
+            state.NodeStates.Initialize(parsedCondition.StateLayout);
+            try
+            {
+                return parsedCondition.Root.Evaluate(state);
+            }
+            finally
+            {
+                state.NodeStates.Release();
             }
         }
 
@@ -322,16 +300,12 @@ namespace Microsoft.Build.Evaluation
                 // entries and one with about 650 entries. So 3000 seems large enough.
                 cachedExpressionTreesForCurrentOptions = s_cachedExpressionTrees.AddOrUpdate(
                     (int)options,
-                    _ =>
-                        new ExpressionTreeForCurrentOptionsWithSize(
-                            new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal)),
-                    (key, existing) =>
+                    static _ => new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, CachedCondition>(StringComparer.Ordinal)),
+                    static (_, existing) =>
                     {
                         if (existing.OptimisticSize > 3000)
                         {
-                            return
-                                new ExpressionTreeForCurrentOptionsWithSize(
-                                    new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal));
+                            return new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, CachedCondition>(StringComparer.Ordinal));
                         }
                         else
                         {
@@ -345,6 +319,14 @@ namespace Microsoft.Build.Evaluation
 
         internal interface IConditionEvaluationState
         {
+            /// <summary>
+            /// Gets the mutable node state owned by one active condition evaluation.
+            /// </summary>
+            /// <remarks>
+            /// <see cref="EvaluateParsedCondition"/> initializes this store for its parsed layout and releases it in a finally block.
+            /// </remarks>
+            ref NodeStateStore NodeStates { get; }
+
             string Condition { get; }
 
             string EvaluationDirectory { get; }
@@ -395,6 +377,9 @@ namespace Microsoft.Build.Evaluation
         {
             private readonly Expander<P, I> _expander;
             private readonly ExpanderOptions _expanderOptions;
+            private NodeStateStore _nodeStates;
+
+            public ref NodeStateStore NodeStates => ref _nodeStates;
 
             /// <summary>
             /// Condition that was parsed. This does not belong here,

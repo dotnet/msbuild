@@ -11,6 +11,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared.FileSystem;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -432,7 +433,7 @@ namespace Microsoft.Build.UnitTests
         public void EvaluateAVarietyOfTrueExpressions(string expression)
         {
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.Empty);
+            ParsedCondition tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.Empty);
             ConditionEvaluator.IConditionEvaluationState state =
                 new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                     expression,
@@ -443,7 +444,7 @@ namespace Microsoft.Build.UnitTests
                     ElementLocation.Empty,
                     FileSystems.Default);
 
-            Assert.True(tree.Evaluate(state), "expected true from '" + expression + "'");
+            ConditionEvaluator.EvaluateParsedCondition(tree, state).ShouldBeTrue("expected true from '" + expression + "'");
         }
 
         /// <summary>
@@ -456,7 +457,7 @@ namespace Microsoft.Build.UnitTests
         public void EvaluateAVarietyOfFalseExpressions(string expression)
         {
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.Empty);
+            ParsedCondition tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.Empty);
             ConditionEvaluator.IConditionEvaluationState state =
                 new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                     expression,
@@ -467,7 +468,7 @@ namespace Microsoft.Build.UnitTests
                     ElementLocation.Empty,
                     FileSystems.Default);
 
-            Assert.False(tree.Evaluate(state), "expected false from '" + expression + "' and got true");
+            ConditionEvaluator.EvaluateParsedCondition(tree, state).ShouldBeFalse("expected false from '" + expression + "' and got true");
         }
 
         /// <summary>
@@ -487,7 +488,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Parser p = new Parser();
-                var tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.Empty);
+                ParsedCondition tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.Empty);
 
                 ConditionEvaluator.IConditionEvaluationState state =
                     new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
@@ -499,7 +500,7 @@ namespace Microsoft.Build.UnitTests
                         ElementLocation.Empty,
                         FileSystems.Default);
 
-                tree.Evaluate(state);
+                ConditionEvaluator.EvaluateParsedCondition(tree, state);
             }
             catch (InvalidProjectFileException ex)
             {
