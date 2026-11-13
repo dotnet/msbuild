@@ -4519,6 +4519,125 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Verify that concurrent evaluations of the same condition (same text and parser options) don't block each other,
+        /// and that each gets its own expression tree, so the state a tree caches while evaluating (e.g. expanded values) isn't shared.
+        /// The first evaluation is blocked in its Exists() file system call, and the second must reach its own Exists() call meanwhile.
+        /// </summary>
+        [Fact]
+        public void ConditionEvaluatorEvaluatesSameConditionConcurrently()
+        {
+            TimeSpan timeout = TimeSpan.FromSeconds(30);
+
+            // A property name unique to this test, so the condition's expression tree pool starts empty
+            string propertyName = $"PathToCheck_{Guid.NewGuid():N}";
+            string condition = $" Exists('$({propertyName})') ";
+            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            string firstPath = Path.Combine(directory, "first");
+            string secondPath = Path.Combine(directory, "second");
+
+            using ManualResetEventSlim firstEntered = new ManualResetEventSlim();
+            using ManualResetEventSlim releaseFirst = new ManualResetEventSlim();
+            using ManualResetEventSlim secondEntered = new ManualResetEventSlim();
+            bool firstReleased = false;
+
+            // "Exists" for the first path (once released), not for the second - so the results differ, as well as the expanded values
+            BlockingFileSystem fileSystem = new BlockingFileSystem(path =>
+            {
+                if (string.Equals(path, firstPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    firstEntered.Set();
+                    firstReleased = releaseFirst.Wait(timeout);
+                    return true;
+                }
+
+                if (string.Equals(path, secondPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    secondEntered.Set();
+                    return false;
+                }
+
+                return false;
+            });
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> firstExpander = CreateExpander(firstPath);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> secondExpander = CreateExpander(secondPath);
+
+            Task<bool> firstEvaluation = null;
+            Task<bool> secondEvaluation = null;
+            bool firstReachedFileSystem = false;
+            bool secondReachedFileSystem = false;
+            try
+            {
+                firstEvaluation = Task.Run(() => Evaluate(firstExpander));
+                firstReachedFileSystem = firstEntered.Wait(timeout);
+
+                if (firstReachedFileSystem)
+                {
+                    // The first evaluation is now blocked mid-evaluation - the second must not wait for it
+                    secondEvaluation = Task.Run(() => Evaluate(secondExpander));
+                    secondReachedFileSystem = secondEntered.Wait(timeout);
+                }
+            }
+            finally
+            {
+                releaseFirst.Set();
+            }
+
+            firstReachedFileSystem.ShouldBeTrue("The first evaluation should have called Exists()");
+            secondReachedFileSystem.ShouldBeTrue("The second evaluation of the same condition should have run while the first was still evaluating");
+
+            firstEvaluation.Wait(timeout).ShouldBeTrue();
+            secondEvaluation.Wait(timeout).ShouldBeTrue();
+            firstReleased.ShouldBeTrue();
+
+            // Each evaluation used its own expanded value
+            firstEvaluation.Result.ShouldBeTrue();
+            secondEvaluation.Result.ShouldBeFalse();
+            fileSystem.ExistenceChecks.ShouldBe(new[] { firstPath, secondPath }, ignoreOrder: true);
+
+            // The trees returned to the pool are reusable, without state left over from the concurrent evaluations
+            Evaluate(secondExpander).ShouldBeFalse();
+            Evaluate(firstExpander).ShouldBeTrue();
+            Evaluate(secondExpander).ShouldBeFalse();
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> CreateExpander(string path)
+            {
+                PropertyDictionary<ProjectPropertyInstance> propertyBag = new PropertyDictionary<ProjectPropertyInstance>();
+                propertyBag.Set(ProjectPropertyInstance.Create(propertyName, path));
+                return new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, FileSystems.Default);
+            }
+
+            bool Evaluate(Expander<ProjectPropertyInstance, ProjectItemInstance> expander) => ConditionEvaluator.EvaluateCondition(
+                condition,
+                ParserOptions.AllowAll,
+                expander,
+                ExpanderOptions.ExpandProperties,
+                Directory.GetCurrentDirectory(),
+                MockElementLocation.Instance,
+                fileSystem,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+        }
+
+        /// <summary>
+        /// A file system whose existence checks are answered by a callback, recording the paths it is asked about
+        /// </summary>
+        private sealed class BlockingFileSystem : Microsoft.Build.FileSystem.MSBuildFileSystemBase
+        {
+            private readonly Func<string, bool> _fileOrDirectoryExists;
+            private readonly System.Collections.Concurrent.ConcurrentQueue<string> _existenceChecks = new System.Collections.Concurrent.ConcurrentQueue<string>();
+
+            public BlockingFileSystem(Func<string, bool> fileOrDirectoryExists) => _fileOrDirectoryExists = fileOrDirectoryExists;
+
+            public IReadOnlyCollection<string> ExistenceChecks => _existenceChecks.ToArray();
+
+            public override bool FileOrDirectoryExists(string path)
+            {
+                _existenceChecks.Enqueue(path);
+                return _fileOrDirectoryExists(path);
+            }
+        }
+
+        /// <summary>
         /// Test regression reported at https://github.com/dotnet/msbuild/issues/2228
         /// </summary>
         [Fact]
