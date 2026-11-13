@@ -26,14 +26,9 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests;
 
-public class ConditionEvaluator_Tests
+public class ConditionEvaluator_Tests(ITestOutputHelper output)
 {
-    private readonly ITestOutputHelper _output;
-
-    public ConditionEvaluator_Tests(ITestOutputHelper output)
-    {
-        _output = output;
-    }
+    private readonly ITestOutputHelper _output = output;
 
     [Fact]
     public void CachedConditionReusesSharedTreeWithoutEvaluationLocks()
