@@ -237,7 +237,7 @@ namespace Microsoft.Build.Evaluation
             // Get the expression tree cache for the current parsing options.
             var cachedExpressionTreesForCurrentOptions = s_cachedExpressionTrees.GetOrAdd(
                 (int)options,
-                _ => new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, CachedCondition>(StringComparer.Ordinal)));
+                static _ => new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, CachedCondition>(StringComparer.Ordinal)));
 
             cachedExpressionTreesForCurrentOptions = FlushCacheIfLargerThanThreshold(
                 options, cachedExpressionTreesForCurrentOptions);
