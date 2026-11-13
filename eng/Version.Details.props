@@ -31,7 +31,7 @@ This file should be imported by eng/Versions.props
     <SystemThreadingChannelsPackageVersion>10.0.15</SystemThreadingChannelsPackageVersion>
     <SystemThreadingTasksDataflowPackageVersion>10.0.15</SystemThreadingTasksDataflowPackageVersion>
     <!-- nuget-nuget.client dependencies -->
-    <NuGetBuildTasksPackageVersion>8.0.0-rc.126</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>8.2.0-rc.6</NuGetBuildTasksPackageVersion>
   </PropertyGroup>
   <!--Property group for alternate package version names-->
   <PropertyGroup>
