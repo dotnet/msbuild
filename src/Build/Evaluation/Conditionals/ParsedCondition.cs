@@ -16,7 +16,7 @@ namespace Microsoft.Build.Evaluation;
 internal readonly record struct NodeStateLayout(int StringSlotCount);
 
 /// <summary>
-/// A reusable parsed condition with a shared expression tree and a private node-state strorage.
+/// A reusable parsed condition with a shared expression tree and private node-state storage.
 /// </summary>
 /// <param name="Root">Root of the shared expression tree.</param>
 /// <param name="StateLayout">Layout for each evaluation's private node-state storage.</param>
