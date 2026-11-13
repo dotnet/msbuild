@@ -531,7 +531,7 @@
     <Compile Include="Evaluation\Conditionals\Parser.cs" />
     <Compile Include="Evaluation\Conditionals\Scanner.cs" />
     <Compile Include="Evaluation\Conditionals\StringExpressionNode.cs" />
-    <Compile Include="Evaluation\Conditionals\ThreadLocalNodeStateBuffer.cs" />
+    <Compile Include="Evaluation\Conditionals\ThreadLocalStringNodeStateBuffer.cs" />
     <Compile Include="Evaluation\Conditionals\Token.cs" />
     <Compile Include="Evaluation\EvaluatorMetadataTable.cs" />
     <Compile Include="Evaluation\IEvaluatorData.cs" />

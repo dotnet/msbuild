@@ -3,26 +3,27 @@
 
 using System;
 using System.Buffers;
+using StringNodeState = Microsoft.Build.Evaluation.NodeStateStore.StringNodeState;
 
 namespace Microsoft.Build.Evaluation;
 
 /// <summary>
-/// Supplies exclusively borrowed node-state buffers, with thread-local reuse and shared pooling.
+/// Supplies exclusively borrowed string-node state buffers, with thread-local reuse and shared pooling.
 /// </summary>
-internal static class ThreadLocalNodeStateBuffer<TState> where TState : struct
+internal static class ThreadLocalStringNodeStateBuffer
 {
     // Do not retain exceptionally large condition buffers on every evaluator thread.
     private const int MaxCachedBufferLength = 256;
     private const int MaxPooledBufferLength = 4096;
 
     [ThreadStatic]
-    private static TState[]? t_cachedBuffer;
+    private static StringNodeState[]? t_cachedBuffer;
 
-    internal static TState[] Acquire(int minimumLength)
+    internal static StringNodeState[] Acquire(int minimumLength)
     {
         if (minimumLength <= MaxCachedBufferLength)
         {
-            TState[]? buffer = t_cachedBuffer;
+            StringNodeState[]? buffer = t_cachedBuffer;
             if (buffer is not null && buffer.Length >= minimumLength)
             {
                 t_cachedBuffer = null;
@@ -31,19 +32,19 @@ internal static class ThreadLocalNodeStateBuffer<TState> where TState : struct
         }
         else if (minimumLength <= MaxPooledBufferLength)
         {
-            return ArrayPool<TState>.Shared.Rent(minimumLength);
+            return ArrayPool<StringNodeState>.Shared.Rent(minimumLength);
         }
 
-        return new TState[minimumLength];
+        return new StringNodeState[minimumLength];
     }
 
-    internal static void Release(TState[] buffer, int usedLength)
+    internal static void Release(StringNodeState[] buffer, int usedLength)
     {
         if (buffer.Length > MaxCachedBufferLength)
         {
             if (buffer.Length <= MaxPooledBufferLength)
             {
-                ArrayPool<TState>.Shared.Return(buffer, clearArray: true);
+                ArrayPool<StringNodeState>.Shared.Return(buffer, clearArray: true);
             }
 
             return;

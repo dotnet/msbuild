@@ -20,9 +20,9 @@ public class ConditionStateBufferBenchmark
     public void RentAndReturn()
     {
         NodeStateStore.StringNodeState[] buffer =
-            ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Acquire(Slots);
+            ThreadLocalStringNodeStateBuffer.Acquire(Slots);
         buffer[0].ExpandedValue = "first";
         buffer[Slots - 1].ExpandedValue = "last";
-        ThreadLocalNodeStateBuffer<NodeStateStore.StringNodeState>.Release(buffer, Slots);
+        ThreadLocalStringNodeStateBuffer.Release(buffer, Slots);
     }
 }

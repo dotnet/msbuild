@@ -40,7 +40,7 @@ internal struct NodeStateStore
             ThrowInvalidSlot(slot);
         }
 
-        StringNodeState[] states = _stringStates ?? AcquireStringStates();
+        StringNodeState[] states = _stringStates ??= ThreadLocalStringNodeStateBuffer.Acquire(_layout.StringSlotCount);
         return ref states[slot];
     }
 
@@ -52,12 +52,9 @@ internal struct NodeStateStore
 
         if (stringStates is not null)
         {
-            ThreadLocalNodeStateBuffer<StringNodeState>.Release(stringStates, layout.StringSlotCount);
+            ThreadLocalStringNodeStateBuffer.Release(stringStates, layout.StringSlotCount);
         }
     }
-
-    private StringNodeState[] AcquireStringStates() =>
-        _stringStates = ThreadLocalNodeStateBuffer<StringNodeState>.Acquire(_layout.StringSlotCount);
 
     private readonly void ThrowInvalidSlot(int slot)
     {
