@@ -247,62 +247,69 @@ namespace Microsoft.Build.Evaluation
             // Get the pool of expressions for this condition.
             Stack<GenericExpressionNode> expressionPool = cachedExpressionTreesForCurrentOptions.GetOrAdd(condition, _ => new Stack<GenericExpressionNode>());
 
+            // Try and see if there's an available expression tree in the pool.
+            // The pool is only locked while taking a tree from it (and returning it, below) - parsing and evaluating
+            // happen outside the lock, so evaluations of the same condition (e.g. one in a common SDK target,
+            // evaluated by every project) on different threads run concurrently, each with its own tree.
+            GenericExpressionNode? parsedExpression = null;
             lock (expressionPool)
             {
-                // Try and see if there's an available expression tree in the pool.
-                // If not, parse a new expression tree and add it back to the pool.
-                GenericExpressionNode parsedExpression;
-                if (expressionPool.Count == 0)
-                {
-                    var conditionParser = new Parser();
-
-                    #region REMOVE_COMPAT_WARNING
-                    conditionParser.LoggingServices = loggingContext?.LoggingService;
-                    conditionParser.LogBuildEventContext = loggingContext?.BuildEventContext ?? BuildEventContext.Invalid;
-                    #endregion
-
-                    parsedExpression = conditionParser.Parse(condition, options, elementLocation);
-                }
-                else
+                if (expressionPool.Count > 0)
                 {
                     parsedExpression = expressionPool.Pop();
                 }
+            }
 
-                bool result;
+            // If not, parse a new expression tree and add it to the pool after evaluating it.
+            if (parsedExpression is null)
+            {
+                var conditionParser = new Parser();
 
-                var state = new ConditionEvaluationState<P, I>(
-                    condition,
-                    expander,
-                    expanderOptions,
-                    conditionedPropertiesTable,
-                    evaluationDirectory,
-                    elementLocation,
-                    fileSystem,
-                    projectRootElementCache);
+                #region REMOVE_COMPAT_WARNING
+                conditionParser.LoggingServices = loggingContext?.LoggingService;
+                conditionParser.LogBuildEventContext = loggingContext?.BuildEventContext ?? BuildEventContext.Invalid;
+                #endregion
 
-                expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
-                // We are evaluating this expression now and it can cache some state for the duration,
-                // so we don't want multiple threads working on the same expression
-                lock (parsedExpression)
+                parsedExpression = conditionParser.Parse(condition, options, elementLocation);
+            }
+
+            bool result;
+
+            var state = new ConditionEvaluationState<P, I>(
+                condition,
+                expander,
+                expanderOptions,
+                conditionedPropertiesTable,
+                evaluationDirectory,
+                elementLocation,
+                fileSystem,
+                projectRootElementCache);
+
+            expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
+            // We are evaluating this expression now and it can cache some state for the duration,
+            // so we don't want multiple threads working on the same expression
+            lock (parsedExpression)
+            {
+                try
                 {
-                    try
+                    result = parsedExpression.Evaluate(state);
+                }
+                finally
+                {
+                    parsedExpression.ResetState();
+                    if (!s_disableExpressionCaching)
                     {
-                        result = parsedExpression.Evaluate(state);
-                    }
-                    finally
-                    {
-                        parsedExpression.ResetState();
-                        if (!s_disableExpressionCaching)
+                        // Finished using the expression tree. Add it back to the pool so other threads can use it.
+                        lock (expressionPool)
                         {
-                            // Finished using the expression tree. Add it back to the pool so other threads can use it.
                             expressionPool.Push(parsedExpression);
                         }
-                        expander.PropertiesUseTracker.ResetPropertyReadContext();
                     }
+                    expander.PropertiesUseTracker.ResetPropertyReadContext();
                 }
-
-                return result;
             }
+
+            return result;
         }
 
         private static ExpressionTreeForCurrentOptionsWithSize FlushCacheIfLargerThanThreshold(
