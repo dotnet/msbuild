@@ -105,7 +105,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             ICheckContext checkContext)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            if (IsInProcNode)
+            // The central logger and replay can acquire checks before build execution starts.
+            if (_enabledDataSources[(int)BuildCheckDataSource.EventArgs])
             {
                 var checksFactories = _acquisitionModule.CreateCheckFactories(acquisitionData, checkContext);
                 if (checksFactories.Count != 0)
