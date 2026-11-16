@@ -53,5 +53,6 @@ When a `BuildResult` is stored in the cache, the `BuildRequestDataFlags` active 
 ### How It Works with Other Parts
 
 *   **`Scheduler`**: This is the part of MSBuild that decides what to build and when. It communicates frequently with `ResultsCache` – asking if work can be satisfied from the cache and informing the cache about new outcomes.
+*   **`BuildRequestEngine`**: Each node's engine checks the cache for the requests that a project makes, for example through the MSBuild task, before sending them to the `Scheduler`. When the cache satisfies all of the requests of an MSBuild task call, the task continues without waiting for the engine (change wave 18.14).
 *   **`BuildResult`**: This is the `BuildResult` object that `ResultsCache` stores. `ResultsCache` uses features of `BuildResult` to combine outcomes and check if they are still valid.
 *   **`BuildRequest`**: When MSBuild needs to build something, it creates a `BuildRequest`. This request tells `ResultsCache` what to look for (which project setup, which targets, and what kind of outcome, including flags, is needed).

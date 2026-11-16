@@ -909,13 +909,28 @@ namespace Microsoft.Build.BackEnd
                 Assumed.True(CollectionHelpers.SetEquivalent(request.Targets, request.ProxyTargets.ProxyTargetToRealTargetMap.Keys), "Targets must be same as proxy targets");
             }
 
+            return GetTargetsUsedToBuildRequest(request, _projectInitialTargets, _projectDefaultTargets);
+        }
+
+        /// <summary>
+        /// Gets the list of targets which are used to build the specified request, including all initial and applicable default targets
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="projectInitialTargets">The initial targets of the request's configuration.</param>
+        /// <param name="projectDefaultTargets">The default targets of the request's configuration.</param>
+        /// <returns>The targets with the reason they are built.</returns>
+        internal static List<(string name, TargetBuiltReason reason)> GetTargetsUsedToBuildRequest(
+            BuildRequest request,
+            List<string> projectInitialTargets,
+            List<string> projectDefaultTargets)
+        {
             bool hasInitialTargets = request.Targets.Count == 0 ? false : true;
 
             List<(string name, TargetBuiltReason reason)> allTargets = new(
-                _projectInitialTargets.Count +
-                (hasInitialTargets ? _projectDefaultTargets.Count : request.Targets.Count));
+                projectInitialTargets.Count +
+                (hasInitialTargets ? projectDefaultTargets.Count : request.Targets.Count));
 
-            foreach (var target in _projectInitialTargets)
+            foreach (var target in projectInitialTargets)
             {
                 allTargets.Add((target, TargetBuiltReason.InitialTargets));
             }
@@ -929,7 +944,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                foreach (var target in _projectDefaultTargets)
+                foreach (var target in projectDefaultTargets)
                 {
                     allTargets.Add((target, TargetBuiltReason.DefaultTargets));
                 }

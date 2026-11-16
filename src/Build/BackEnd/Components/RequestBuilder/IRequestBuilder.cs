@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Threading;
 using Microsoft.Build.Execution;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
@@ -31,10 +32,25 @@ namespace Microsoft.Build.BackEnd
     internal delegate void BuildRequestBlockedDelegate(BuildRequestEntry issuingEntry, int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult);
 
     /// <summary>
+    /// Delegate for the callback which tries to satisfy all of a set of new build requests from the results cache.
+    /// </summary>
+    /// <param name="issuingEntry">The entry issuing the requests.</param>
+    /// <param name="requests">The requests to satisfy.</param>
+    /// <param name="cancellationToken">The cancellation token of the issuing request.</param>
+    /// <returns>The results in request order if every request was satisfied from the cache; otherwise, null.</returns>
+    internal delegate BuildResult[] TrySatisfyBuildRequestsFromCacheDelegate(BuildRequestEntry issuingEntry, FullyQualifiedBuildRequest[] requests, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Represents a class which is capable of building BuildRequestEntries.
     /// </summary>
     internal interface IRequestBuilder
     {
+        /// <summary>
+        /// Gets or sets the callback used to satisfy the requests of an MSBuild task from the results cache, without
+        /// blocking the request, when the cache has the results for all of them.
+        /// </summary>
+        TrySatisfyBuildRequestsFromCacheDelegate TrySatisfyBuildRequestsFromCache { get; set; }
+
         /// <summary>
         /// Raised when a new build request is to be issued.
         /// </summary>

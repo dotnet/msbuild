@@ -1646,6 +1646,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #pragma warning restore
 
             /// <summary>
+            /// Not Implemented
+            /// </summary>
+            public TrySatisfyBuildRequestsFromCacheDelegate TrySatisfyBuildRequestsFromCache { get; set; }
+
+            /// <summary>
             /// BuildResults to return from the BuildProjects method.
             /// </summary>
             public BuildResult[] BuildResultsToReturn

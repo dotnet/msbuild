@@ -143,6 +143,11 @@ namespace Microsoft.Build.BackEnd
 #endif
 
         /// <summary>
+        /// The callback given to each request builder to satisfy MSBuild task requests from the results cache.
+        /// </summary>
+        private readonly TrySatisfyBuildRequestsFromCacheDelegate _trySatisfyBuildRequestsFromCache;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         internal BuildRequestEngine()
@@ -166,6 +171,7 @@ namespace Microsoft.Build.BackEnd
             _requests = new List<BuildRequestEntry>();
             _unsubmittedRequests = new Queue<PendingUnsubmittedBuildRequests>();
             _requestsByGlobalRequestId = new Dictionary<int, BuildRequestEntry>();
+            _trySatisfyBuildRequestsFromCache = TrySatisfyBuildRequestsFromCache;
         }
 
         #region IBuildRequestEngine Members
@@ -867,6 +873,7 @@ namespace Microsoft.Build.BackEnd
                 completedEntry.Builder.OnNewBuildRequests -= Builder_OnNewBuildRequests;
                 completedEntry.Builder.OnBuildRequestBlocked -= Builder_OnBlockedRequest;
                 completedEntry.Builder.OnResourceRequest -= Builder_OnResourceRequest;
+                completedEntry.Builder.TrySatisfyBuildRequestsFromCache = null;
                 ((IBuildComponent)completedEntry.Builder).ShutdownComponent();
 
                 BuildRequestConfiguration configuration = _configCache[completedEntry.Request.ConfigurationId];
@@ -1013,6 +1020,7 @@ namespace Microsoft.Build.BackEnd
             builder.OnNewBuildRequests += Builder_OnNewBuildRequests;
             builder.OnBuildRequestBlocked += Builder_OnBlockedRequest;
             builder.OnResourceRequest += Builder_OnResourceRequest;
+            builder.TrySatisfyBuildRequestsFromCache = _trySatisfyBuildRequestsFromCache;
 
             return builder;
         }
@@ -1084,6 +1092,92 @@ namespace Microsoft.Build.BackEnd
         private void Builder_OnResourceRequest(ResourceRequest request)
         {
             OnResourceRequest?.Invoke(request);
+        }
+
+        /// <summary>
+        /// Satisfies all of the new requests of an MSBuild task from the results cache, if possible, so that the issuing
+        /// request continues without blocking.
+        /// </summary>
+        /// <param name="issuingEntry">The active entry issuing the requests.</param>
+        /// <param name="newRequests">The requests to satisfy.</param>
+        /// <param name="cancellationToken">The cancellation token of the issuing request.</param>
+        /// <returns>
+        /// The results in request order if every request was satisfied from the cache. Otherwise, null; nothing has been
+        /// logged then, and the requests are issued through <see cref="Builder_OnNewBuildRequests"/>.
+        /// </returns>
+        /// <remarks>
+        /// Called by the issuing request's builder rather than on the engine thread. It therefore only reads the thread-safe
+        /// configuration and results caches and logs through the thread-safe logging service. It doesn't change the
+        /// engine's bookkeeping or the issuing entry, which stays active, and satisfies requests like
+        /// <see cref="IssueBuildRequests"/> does.
+        /// </remarks>
+        private BuildResult[] TrySatisfyBuildRequestsFromCache(BuildRequestEntry issuingEntry, FullyQualifiedBuildRequest[] newRequests, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var requests = new BuildRequest[newRequests.Length];
+                var configurations = new BuildRequestConfiguration[newRequests.Length];
+                var targetsUsedToBuildRequests = new List<(string name, TargetBuiltReason reason)>[newRequests.Length];
+                var results = new BuildResult[newRequests.Length];
+
+                for (int i = 0; i < newRequests.Length; i++)
+                {
+                    BuildRequestConfiguration configuration = _configCache.GetMatchingConfiguration(newRequests[i].Config);
+
+                    // Replacing the project instance of a configuration resets its targets, so use one snapshot of them to
+                    // both look up and log the results.
+                    List<string> initialTargets = configuration?.ProjectInitialTargets;
+                    List<string> defaultTargets = configuration?.ProjectDefaultTargets;
+
+                    if (initialTargets is null || defaultTargets is null)
+                    {
+                        return null;
+                    }
+
+                    BuildRequest request = CreateChildBuildRequest(issuingEntry, newRequests[i], configuration.ConfigurationId);
+                    ResultsCacheResponse response = SatisfyRequestFromResultsCache(issuingEntry, request, configuration, initialTargets, defaultTargets);
+
+                    if (response.Type != ResultsCacheResponseType.Satisfied)
+                    {
+                        return null;
+                    }
+
+                    requests[i] = request;
+                    configurations[i] = configuration;
+                    targetsUsedToBuildRequests[i] = BuildRequestConfiguration.GetTargetsUsedToBuildRequest(request, initialTargets, defaultTargets);
+                    results[i] = response.Results;
+                }
+
+                // A request canceled from here on behaves as if it was canceled right after receiving its results.
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return null;
+                }
+
+                for (int i = 0; i < requests.Length; i++)
+                {
+                    _nodeLoggingContext.LogRequestHandledFromCache(requests[i], configurations[i], results[i], targetsUsedToBuildRequests[i]);
+
+                    TraceEngine($"Request {requests[i].GlobalRequestId} (node request {requests[i].NodeRequestId}) with targets ({string.Join(",", newRequests[i].Targets)}) satisfied from cache without blocking request {issuingEntry.Request.GlobalRequestId}");
+                }
+
+                return results;
+            }
+            catch (Exception e)
+            {
+                // Fail like the engine thread does instead of failing the MSBuild task, which could continue on error.
+                TraceEngine($"TSBRFC: EXCEPTION caught in engine: {e.GetType()} - {e.Message}");
+                DebugUtils.DumpExceptionToFile(e);
+                RaiseEngineException(e);
+
+                // Let the critical ones melt down the system.
+                if (ExceptionHandling.IsCriticalException(e))
+                {
+                    InternalError.Throw(e.Message, e);
+                }
+
+                throw new BuildAbortedException(e.Message, e);
+            }
         }
 
         #endregion
@@ -1202,14 +1296,6 @@ namespace Microsoft.Build.BackEnd
                     BuildRequestConfiguration matchingConfig = globalConfigCache.GetMatchingConfiguration(request.Config);
                     BuildRequest newRequest;
 
-                    BuildRequestDataFlags buildRequestDataFlags = request.BuildRequestDataFlags;
-
-                    if (issuingEntry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
-                    {
-                        // If the issuing build requested to ignore missing, empty, and invalid imports, this entry should also
-                        buildRequestDataFlags |= BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports;
-                    }
-
                     if (matchingConfig == null)
                     {
                         // No configuration locally, are we already waiting for it?
@@ -1234,17 +1320,7 @@ namespace Microsoft.Build.BackEnd
                         // waiting for results.  It is important that we tell the issuing request to wait for a result
                         // prior to issuing any necessary configuration request so that we don't get into a state where
                         // we receive the configuration response before we enter the wait state.
-                        newRequest = new BuildRequest(
-                            submissionId: issuingEntry.Request.SubmissionId,
-                            nodeRequestId: GetNextBuildRequestId(),
-                            configurationId: request.Config.ConfigurationId,
-                            escapedTargets: request.Targets,
-                            hostServices: issuingEntry.Request.HostServices,
-                            parentBuildEventContext: issuingEntry.Request.CurrentTaskContext ?? issuingEntry.Request.BuildEventContext,
-                            parentRequest: issuingEntry.Request,
-                            buildRequestDataFlags: buildRequestDataFlags,
-                            requestedProjectState: null,
-                            skipStaticGraphIsolationConstraints: request.SkipStaticGraphIsolationConstraints);
+                        newRequest = CreateChildBuildRequest(issuingEntry, request, request.Config.ConfigurationId);
 
                         issuingEntry.WaitForResult(newRequest);
 
@@ -1258,26 +1334,14 @@ namespace Microsoft.Build.BackEnd
                     else
                     {
                         // We have a configuration, see if we already have results locally.
-                        newRequest = new BuildRequest(
-                            submissionId: issuingEntry.Request.SubmissionId,
-                            nodeRequestId: GetNextBuildRequestId(),
-                            configurationId: matchingConfig.ConfigurationId,
-                            escapedTargets: request.Targets,
-                            hostServices: issuingEntry.Request.HostServices,
-                            parentBuildEventContext: issuingEntry.Request.CurrentTaskContext ?? issuingEntry.Request.BuildEventContext,
-                            parentRequest: issuingEntry.Request,
-                            buildRequestDataFlags: buildRequestDataFlags,
-                            requestedProjectState: null,
-                            skipStaticGraphIsolationConstraints: request.SkipStaticGraphIsolationConstraints);
+                        newRequest = CreateChildBuildRequest(issuingEntry, request, matchingConfig.ConfigurationId);
 
-                        IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
-
-                        var response = resultsCache.SatisfyRequest(
-                            request: newRequest,
-                            configInitialTargets: matchingConfig.ProjectInitialTargets,
-                            configDefaultTargets: matchingConfig.ProjectDefaultTargets,
-                            skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(),
-                            allowedTopLevelTargets: BuildRequestConfiguration.GetIsolationAllowedTopLevelTargets(_componentHost.BuildParameters.ProjectIsolationMode, issuingEntry.RequestConfiguration, matchingConfig, newRequest));
+                        ResultsCacheResponse response = SatisfyRequestFromResultsCache(
+                            issuingEntry,
+                            newRequest,
+                            matchingConfig,
+                            matchingConfig.ProjectInitialTargets,
+                            matchingConfig.ProjectDefaultTargets);
 
                         if (response.Type == ResultsCacheResponseType.Satisfied)
                         {
@@ -1357,6 +1421,62 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Creates the request which the issuing entry makes for the specified configuration.
+        /// </summary>
+        /// <param name="issuingEntry">The entry issuing the request.</param>
+        /// <param name="request">The request to be issued.</param>
+        /// <param name="configurationId">The id of the configuration, which may be unresolved.</param>
+        /// <returns>The new request.</returns>
+        private BuildRequest CreateChildBuildRequest(BuildRequestEntry issuingEntry, FullyQualifiedBuildRequest request, int configurationId)
+        {
+            BuildRequestDataFlags buildRequestDataFlags = request.BuildRequestDataFlags;
+
+            if (issuingEntry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
+            {
+                // If the issuing build requested to ignore missing, empty, and invalid imports, this entry should also
+                buildRequestDataFlags |= BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports;
+            }
+
+            return new BuildRequest(
+                submissionId: issuingEntry.Request.SubmissionId,
+                nodeRequestId: GetNextBuildRequestId(),
+                configurationId: configurationId,
+                escapedTargets: request.Targets,
+                hostServices: issuingEntry.Request.HostServices,
+                parentBuildEventContext: issuingEntry.Request.CurrentTaskContext ?? issuingEntry.Request.BuildEventContext,
+                parentRequest: issuingEntry.Request,
+                buildRequestDataFlags: buildRequestDataFlags,
+                requestedProjectState: null,
+                skipStaticGraphIsolationConstraints: request.SkipStaticGraphIsolationConstraints);
+        }
+
+        /// <summary>
+        /// Looks up the results of a request with a resolved configuration in the results cache.
+        /// </summary>
+        /// <param name="issuingEntry">The entry issuing the request.</param>
+        /// <param name="request">The request.</param>
+        /// <param name="configuration">The configuration of the request.</param>
+        /// <param name="initialTargets">The initial targets of the configuration.</param>
+        /// <param name="defaultTargets">The default targets of the configuration.</param>
+        /// <returns>The response of the results cache.</returns>
+        private ResultsCacheResponse SatisfyRequestFromResultsCache(
+            BuildRequestEntry issuingEntry,
+            BuildRequest request,
+            BuildRequestConfiguration configuration,
+            List<string> initialTargets,
+            List<string> defaultTargets)
+        {
+            IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
+
+            return resultsCache.SatisfyRequest(
+                request: request,
+                configInitialTargets: initialTargets,
+                configDefaultTargets: defaultTargets,
+                skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(),
+                allowedTopLevelTargets: BuildRequestConfiguration.GetIsolationAllowedTopLevelTargets(_componentHost.BuildParameters.ProjectIsolationMode, issuingEntry.RequestConfiguration, configuration, request));
+        }
+
+        /// <summary>
         /// Retrieves a new configuration ID
         /// </summary>
         /// <returns>The next unused local configuration ID.</returns>
@@ -1382,18 +1502,34 @@ namespace Microsoft.Build.BackEnd
         /// Retrieves a new build request ID
         /// </summary>
         /// <returns>The next build request ID.</returns>
-        private int GetNextBuildRequestId()
-        {
-            unchecked
-            {
-                _nextBuildRequestId++;
-                if (_nextBuildRequestId < 0)
-                {
-                    _nextBuildRequestId = StartingBuildRequestId;
-                }
-            }
+        /// <remarks>
+        /// Thread safe, because the requests of an MSBuild task which are satisfied from the cache are created on the request
+        /// builder's thread.
+        /// </remarks>
+        private int GetNextBuildRequestId() => GetNextBuildRequestId(ref _nextBuildRequestId);
 
-            return _nextBuildRequestId;
+        /// <summary>
+        /// Atomically advances a build request ID counter, wrapping around to <see cref="StartingBuildRequestId"/> after
+        /// <see cref="int.MaxValue"/>.
+        /// </summary>
+        /// <param name="lastBuildRequestId">The counter holding the last build request ID handed out.</param>
+        /// <returns>The next build request ID.</returns>
+        internal static int GetNextBuildRequestId(ref int lastBuildRequestId)
+        {
+            int current = Volatile.Read(ref lastBuildRequestId);
+
+            while (true)
+            {
+                int next = current == int.MaxValue ? StartingBuildRequestId : current + 1;
+                int original = Interlocked.CompareExchange(ref lastBuildRequestId, next, current);
+
+                if (original == current)
+                {
+                    return next;
+                }
+
+                current = original;
+            }
         }
 
         /// <summary>

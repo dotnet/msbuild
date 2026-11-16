@@ -11,6 +11,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Unittest;
+using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -75,6 +76,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             public event BuildRequestBlockedDelegate OnBuildRequestBlocked;
 
             public event ResourceRequestDelegate OnResourceRequest;
+
+            public TrySatisfyBuildRequestsFromCacheDelegate TrySatisfyBuildRequestsFromCache { get; set; }
 
             public void BuildRequest(NodeLoggingContext context, BuildRequestEntry entry)
             {
@@ -499,6 +502,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestShutdown()
         {
+        }
+
+        [Fact]
+        public void GetNextBuildRequestIdWrapsAroundAfterMaxValue()
+        {
+            int lastBuildRequestId = int.MaxValue;
+
+            BuildRequestEngine.GetNextBuildRequestId(ref lastBuildRequestId).ShouldBe(1);
+            BuildRequestEngine.GetNextBuildRequestId(ref lastBuildRequestId).ShouldBe(2);
         }
 
         private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets)

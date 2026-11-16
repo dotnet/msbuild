@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -11,7 +12,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -2134,6 +2135,151 @@ namespace Microsoft.Build.UnitTests
             _testOutput.WriteLine(logger.FullLog);
             Assert.True(result);
             logger.AssertLogContains("message from referenced project");
+        }
+
+        /// <summary>
+        /// MSBuild task calls whose projects all have cached results return the cached outputs and failures, and log the
+        /// cached projects as children of the task. Unless change wave 18.14 is disabled, they log them on the thread that
+        /// runs the task, because the task continues without waiting for the engine.
+        /// </summary>
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void CallsSatisfiedFromCacheReturnCachedResults(bool multiThreaded, bool disableChangeWave)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            if (disableChangeWave)
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_14.ToString());
+                ChangeWaves.ResetStateForTests();
+            }
+
+            TransientTestFolder folder = env.CreateFolder();
+            string succeedingProject = env.CreateFile(folder, "succeeding.proj", """
+                <Project>
+                    <Target Name="GetInfo" Returns="@(Info)">
+                        <ItemGroup>
+                            <Info Include="info" Custom="value" />
+                        </ItemGroup>
+                    </Target>
+                </Project>
+                """).Path;
+            string failingProject = env.CreateFile(folder, "failing.proj", """
+                <Project>
+                    <Target Name="Fail">
+                        <Error Text="Failing on purpose." />
+                    </Target>
+                </Project>
+                """).Path;
+            string callerProject = env.CreateFile(folder, "caller.proj", """
+                <Project>
+                    <Target Name="CallSucceeding" Returns="@(CallOutputs)">
+                        <MSBuild Projects="succeeding.proj" Targets="GetInfo">
+                            <Output TaskParameter="TargetOutputs" ItemName="CallOutputs" />
+                        </MSBuild>
+                    </Target>
+                    <Target Name="CallFailing">
+                        <MSBuild Projects="failing.proj" Targets="Fail" />
+                    </Target>
+                </Project>
+                """).Path;
+
+            using var session = new Helpers.BuildManagerSession(env, new BuildParameters { MultiThreaded = multiThreaded });
+            session.BuildProjectFile(succeedingProject, ["GetInfo"]).OverallResult.ShouldBe(BuildResultCode.Success);
+            session.BuildProjectFile(failingProject, ["Fail"]).OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            BuildResult succeedingCall = session.BuildProjectFile(callerProject, ["CallSucceeding"]);
+            BuildResult failingCall = session.BuildProjectFile(callerProject, ["CallFailing"]);
+
+            succeedingCall.OverallResult.ShouldBe(BuildResultCode.Success);
+            ITaskItem output = succeedingCall.ResultsByTarget["CallSucceeding"].Items.ShouldHaveSingleItem();
+            output.ItemSpec.ShouldBe("info");
+            output.GetMetadata("Custom").ShouldBe("value");
+            output.GetMetadata("MSBuildSourceProjectFile").ShouldBe(succeedingProject, StringCompareShould.IgnoreCase);
+            output.GetMetadata("MSBuildSourceTargetName").ShouldBe("GetInfo");
+            failingCall.OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            AssertLoggedFromCache(session.Logger, succeedingProject, "GetInfo", TargetSkipReason.PreviouslyBuiltSuccessfully);
+            AssertLoggedFromCache(session.Logger, failingProject, "Fail", TargetSkipReason.PreviouslyBuiltUnsuccessfully);
+
+            void AssertLoggedFromCache(MockLogger logger, string projectPath, string targetName, TargetSkipReason skipReason)
+            {
+                ProjectStartedEventArgs cachedProject = logger.ProjectStartedEvents
+                    .Where(e => string.Equals(e.ProjectFile, projectPath, StringComparison.OrdinalIgnoreCase)
+                        && e.ParentProjectBuildEventContext.TaskId != BuildEventContext.InvalidTaskId)
+                    .ShouldHaveSingleItem();
+                TaskStartedEventArgs msbuildTask = logger.TaskStartedEvents
+                    .Where(e => e.BuildEventContext.Equals(cachedProject.ParentProjectBuildEventContext))
+                    .ShouldHaveSingleItem();
+                msbuildTask.TaskName.ShouldBe("MSBuild");
+
+                BuildEventArgs[] cachedProjectEvents = logger.AllBuildEvents
+                    .Where(e => e.BuildEventContext?.ProjectContextId == cachedProject.BuildEventContext.ProjectContextId)
+                    .ToArray();
+                cachedProjectEvents.OfType<TargetStartedEventArgs>().ShouldBeEmpty();
+                TargetSkippedEventArgs skippedTarget = cachedProjectEvents.OfType<TargetSkippedEventArgs>().ShouldHaveSingleItem();
+                skippedTarget.TargetName.ShouldBe(targetName);
+                skippedTarget.SkipReason.ShouldBe(skipReason);
+                skippedTarget.OriginalBuildEventContext.ShouldNotBeNull();
+                cachedProjectEvents.OfType<ProjectFinishedEventArgs>().ShouldHaveSingleItem()
+                    .Succeeded.ShouldBe(skipReason == TargetSkipReason.PreviouslyBuiltSuccessfully);
+
+                (cachedProject.ThreadId == msbuildTask.ThreadId).ShouldBe(!disableChangeWave);
+            }
+        }
+
+        /// <summary>
+        /// MSBuild task calls which also request projects without cached results build those projects, and log each
+        /// cached project once, whether it comes before or after them.
+        /// </summary>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CallsPartiallySatisfiedFromCacheLogEachCachedProjectOnce(bool multiThreaded)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            const string ReferencedProject = """
+                <Project>
+                    <Target Name="GetInfo" Returns="$(MSBuildProjectName)" />
+                </Project>
+                """;
+            TransientTestFolder folder = env.CreateFolder();
+            string cachedProject = env.CreateFile(folder, "cached.proj", ReferencedProject).Path;
+            env.CreateFile(folder, "first.proj", ReferencedProject);
+            env.CreateFile(folder, "last.proj", ReferencedProject);
+            string callerProject = env.CreateFile(folder, "caller.proj", """
+                <Project>
+                    <Target Name="Call" Returns="@(CallOutputs)" KeepDuplicateOutputs="true">
+                        <MSBuild Projects="cached.proj;last.proj" Targets="GetInfo" BuildInParallel="true">
+                            <Output TaskParameter="TargetOutputs" ItemName="CallOutputs" />
+                        </MSBuild>
+                        <MSBuild Projects="first.proj;cached.proj" Targets="GetInfo" BuildInParallel="true">
+                            <Output TaskParameter="TargetOutputs" ItemName="CallOutputs" />
+                        </MSBuild>
+                    </Target>
+                </Project>
+                """).Path;
+
+            using var session = new Helpers.BuildManagerSession(env, new BuildParameters { MultiThreaded = multiThreaded });
+            session.BuildProjectFile(cachedProject, ["GetInfo"]).OverallResult.ShouldBe(BuildResultCode.Success);
+            BuildResult result = session.BuildProjectFile(callerProject, ["Call"]);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            string[] expectedOutputs = ["cached", "last", "first", "cached"];
+            result.ResultsByTarget["Call"].Items.Select(item => item.ItemSpec).ShouldBe(expectedOutputs);
+
+            MockLogger logger = session.Logger;
+            logger.ProjectStartedEvents
+                .Count(e => string.Equals(e.ProjectFile, cachedProject, StringComparison.OrdinalIgnoreCase))
+                .ShouldBe(3);
+            logger.TargetStartedEvents.Count(e => e.TargetName == "GetInfo").ShouldBe(3);
+            logger.AllBuildEvents.OfType<TargetSkippedEventArgs>()
+                .Count(e => e.TargetName == "GetInfo" && e.SkipReason == TargetSkipReason.PreviouslyBuiltSuccessfully)
+                .ShouldBe(2);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.TelemetryInfra;
@@ -96,12 +97,27 @@ namespace Microsoft.Build.BackEnd.Logging
         /// of their results are available in the cache.
         /// </summary>
         internal void LogRequestHandledFromCache(BuildRequest request, BuildRequestConfiguration configuration, BuildResult result)
+            => LogRequestHandledFromCache(request, configuration, result, configuration.GetTargetsUsedToBuildRequest(request));
+
+        /// <summary>
+        /// Logs the project started/finished pair for projects which are skipped entirely because all
+        /// of their results are available in the cache.
+        /// </summary>
+        /// <param name="request">The request handled from the cache.</param>
+        /// <param name="configuration">The configuration of the request.</param>
+        /// <param name="result">The cached results of the request.</param>
+        /// <param name="targetsUsedToBuildRequest">The initial, and the requested or default, targets whose results the request uses.</param>
+        internal void LogRequestHandledFromCache(
+            BuildRequest request,
+            BuildRequestConfiguration configuration,
+            BuildResult result,
+            List<(string name, TargetBuiltReason reason)> targetsUsedToBuildRequest)
         {
             ProjectLoggingContext projectLoggingContext = LogProjectStarted(request, configuration);
 
             // When pulling a request from the cache, we want to make sure we log a target skipped event for any targets which
             // were used to build the request including default and initial targets.
-            foreach ((string name, TargetBuiltReason reason) target in configuration.GetTargetsUsedToBuildRequest(request))
+            foreach ((string name, TargetBuiltReason reason) target in targetsUsedToBuildRequest)
             {
                 var targetResult = result[target.name];
                 bool isFailure = targetResult.ResultCode == TargetResultCode.Failure;

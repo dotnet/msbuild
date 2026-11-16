@@ -144,6 +144,11 @@ namespace Microsoft.Build.BackEnd
         public event ResourceRequestDelegate OnResourceRequest;
 
         /// <summary>
+        /// The callback used to satisfy the requests of an MSBuild task from the results cache.
+        /// </summary>
+        public TrySatisfyBuildRequestsFromCacheDelegate TrySatisfyBuildRequestsFromCache { get; set; }
+
+        /// <summary>
         /// The current block type
         /// </summary>
         private enum BlockType
@@ -387,12 +392,38 @@ namespace Microsoft.Build.BackEnd
                         : BuildRequestDataFlags.None);
             }
 
-            // Send the requests off
-            BuildResult[] results = await StartNewBuildRequests(requests);
+            // Send the requests off, unless the results cache can satisfy all of them right away.
+            BuildResult[] results = TrySatisfyNewBuildRequestsFromCache(requests, waitForResults)
+                ?? await StartNewBuildRequests(requests);
 
             Assumed.Equal(requests.Length, results.Length, "# results != # requests");
 
             return results;
+        }
+
+        /// <summary>
+        /// Returns the results of requests issued by the MSBuild task when the results cache can satisfy all of them. This
+        /// request then continues without blocking, which avoids saving and restoring its operating environment and the
+        /// round trip through the engine work queue and back to a request builder thread.
+        /// </summary>
+        /// <param name="requests">The requests to satisfy.</param>
+        /// <param name="waitForResults">True if the caller waits for the results.</param>
+        /// <returns>The results in request order, or null if the requests must be issued to the engine.</returns>
+        private BuildResult[] TrySatisfyNewBuildRequestsFromCache(FullyQualifiedBuildRequest[] requests, bool waitForResults)
+        {
+            // Only the MSBuild task's callbacks qualify: they run in sequence with the rest of this request, whereas other
+            // tasks may call back from threads of their own. Legacy threading semantics keep their wait loop.
+            if (!_inMSBuildCallback
+                || !waitForResults
+                || requests.Length == 0
+                || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)
+                || _cancellationTokenSource.IsCancellationRequested
+                || IsBuilderUsingLegacyThreadingSemantics(_componentHost, _requestEntry))
+            {
+                return null;
+            }
+
+            return TrySatisfyBuildRequestsFromCache?.Invoke(_requestEntry, requests, _cancellationTokenSource.Token);
         }
 
         /// <summary>
