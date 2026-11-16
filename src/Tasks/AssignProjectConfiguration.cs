@@ -260,17 +260,13 @@ namespace Microsoft.Build.Tasks
         /// <returns>true if resolved successfully</returns>
         internal bool ResolveProject(ITaskItem projectRef, out ITaskItem resolvedProjectWithConfiguration)
         {
-            XmlElement projectConfigurationElement = null;
+            SolutionConfiguration.ProjectEntry projectEntry = null;
             string projectConfiguration = null;
 
             if (!String.IsNullOrEmpty(SolutionConfigurationContents))
             {
-                projectConfigurationElement = GetProjectElement(projectRef);
-
-                if (projectConfigurationElement != null)
-                {
-                    projectConfiguration = projectConfigurationElement.InnerText;
-                }
+                projectEntry = GetProjectEntry(projectRef);
+                projectConfiguration = projectEntry?.InnerText;
             }
 
             if (projectConfiguration == null && ResolveConfigurationPlatformUsingMappings)
@@ -298,7 +294,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            SetBuildInProjectAndReferenceOutputAssemblyMetadata(OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration, projectRef, projectConfigurationElement);
+            SetBuildInProjectAndReferenceOutputAssemblyMetadata(OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration, projectRef, projectEntry?.BuildProjectInSolution);
 
             if (!string.IsNullOrEmpty(projectConfiguration))
             {
@@ -327,16 +323,14 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given the project configuration blob and the project reference item, set the BuildInProject metadata and the ReferenceOutputAssembly metadata
-        /// based on the contents of the blob.
+        /// Given the BuildProjectInSolution attribute of the project's entry in the project configuration blob and the project reference item,
+        /// set the BuildInProject metadata and the ReferenceOutputAssembly metadata based on the contents of the blob.
+        /// The attribute value is an empty string if the entry doesn't have the attribute, and null if the project has no entry.
         /// </summary>
-        internal static void SetBuildInProjectAndReferenceOutputAssemblyMetadata(bool onlyReferenceAndBuildProjectsEnabledInSolutionConfiguration, ITaskItem resolvedProjectWithConfiguration, XmlElement projectConfigurationElement)
+        internal static void SetBuildInProjectAndReferenceOutputAssemblyMetadata(bool onlyReferenceAndBuildProjectsEnabledInSolutionConfiguration, ITaskItem resolvedProjectWithConfiguration, string buildProjectInSolution)
         {
-            if (projectConfigurationElement != null && resolvedProjectWithConfiguration != null && onlyReferenceAndBuildProjectsEnabledInSolutionConfiguration)
+            if (buildProjectInSolution != null && resolvedProjectWithConfiguration != null && onlyReferenceAndBuildProjectsEnabledInSolutionConfiguration)
             {
-                // The value of the specified attribute. An empty string is returned if a matching attribute is not found or if the attribute does not have a specified or default value.
-                string buildProjectInSolution = projectConfigurationElement.GetAttribute(SolutionConfiguration.BuildProjectInSolutionAttribute);
-
                 // We could not parse out what was in the attribute, act as if it was not set in the first place.
                 if (bool.TryParse(buildProjectInSolution, out bool buildProject))
                 {

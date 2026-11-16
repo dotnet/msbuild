@@ -92,7 +92,6 @@
     <Compile Remove="AppConfig_Tests.cs" />
     <Compile Remove="AspNetCompiler_Tests.cs" />
     <Compile Remove="AssemblyRegistrationCache_Tests.cs" />
-    <Compile Remove="AssignProjectConfiguration_Tests.cs" />
     <Compile Remove="AxImp_Tests.cs" />
     <Compile Remove="AxTlbBaseTask_Tests.cs" />
     <Compile Remove="CommandLine_Support.cs" />

@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections;
+using System.IO;
 using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -121,10 +123,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
             ITaskItem referenceItem = new TaskItem("TestItem");
-            XmlDocument doc = new XmlDocument();
-            XmlElement element = doc.CreateElement("TestElement");
-            element.SetAttribute("BuildProjectInSolution", "IAmReallyABadOne");
-            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
+            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, "IAmReallyABadOne");
             Assert.Empty(referenceItem.GetMetadata("BuildReference"));
             Assert.Empty(referenceItem.GetMetadata("ReferenceOutputAssembly"));
         }
@@ -142,9 +141,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
             ITaskItem referenceItem = new TaskItem("TestItem");
-            XmlDocument doc = new XmlDocument();
-            XmlElement element = doc.CreateElement("TestElement");
-            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
+            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, string.Empty);
             Assert.Empty(referenceItem.GetMetadata("BuildReference"));
             Assert.Empty(referenceItem.GetMetadata("ReferenceOutputAssembly"));
         }
@@ -161,10 +158,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
             ITaskItem referenceItem = new TaskItem("TestItem");
-            XmlDocument doc = new XmlDocument();
-            XmlElement element = doc.CreateElement("TestElement");
-            element.SetAttribute("BuildProjectInSolution", "true");
-            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
+            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, "true");
             Assert.Empty(referenceItem.GetMetadata("BuildReference"));
             Assert.Empty(referenceItem.GetMetadata("ReferenceOutputAssembly"));
         }
@@ -184,10 +178,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
             ITaskItem referenceItem = new TaskItem("TestItem");
-            XmlDocument doc = new XmlDocument();
-            XmlElement element = doc.CreateElement("TestElement");
-            element.SetAttribute("BuildProjectInSolution", "false");
-            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(false, referenceItem, element);
+            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(false, referenceItem, "false");
             Assert.Empty(referenceItem.GetMetadata("BuildReference"));
             Assert.Empty(referenceItem.GetMetadata("ReferenceOutputAssembly"));
         }
@@ -204,10 +195,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
             ITaskItem referenceItem = new TaskItem("TestItem");
-            XmlDocument doc = new XmlDocument();
-            XmlElement element = doc.CreateElement("TestElement");
-            element.SetAttribute("BuildProjectInSolution", "false");
-            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
+            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, "false");
             Assert.Equal("false", referenceItem.GetMetadata("BuildReference"));
             Assert.Equal("false", referenceItem.GetMetadata("ReferenceOutputAssembly"));
         }
@@ -228,30 +216,21 @@ namespace Microsoft.Build.UnitTests
             referenceItem.SetMetadata("BuildReference", "true");
             referenceItem.SetMetadata("ReferenceOutputAssembly", "true");
 
-            XmlDocument doc = new XmlDocument();
-            XmlElement element = doc.CreateElement("TestElement");
-            element.SetAttribute("BuildProjectInSolution", "false");
-            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
+            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, "false");
             Assert.Equal("true", referenceItem.GetMetadata("BuildReference"));
             Assert.Equal("true", referenceItem.GetMetadata("ReferenceOutputAssembly"));
 
             // Test the case where only ReferenceOutputAssembly is not set
             referenceItem = new TaskItem("TestItem");
             referenceItem.SetMetadata("BuildReference", "true");
-            doc = new XmlDocument();
-            element = doc.CreateElement("TestElement");
-            element.SetAttribute("BuildProjectInSolution", "false");
-            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
+            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, "false");
             Assert.Equal("true", referenceItem.GetMetadata("BuildReference"));
             Assert.Equal("false", referenceItem.GetMetadata("ReferenceOutputAssembly"));
 
             // Test the case where only BuildReference is not set
             referenceItem = new TaskItem("TestItem");
             referenceItem.SetMetadata("ReferenceOutputAssembly", "true");
-            doc = new XmlDocument();
-            element = doc.CreateElement("TestElement");
-            element.SetAttribute("BuildProjectInSolution", "false");
-            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
+            AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, "false");
             Assert.Equal("false", referenceItem.GetMetadata("BuildReference"));
             Assert.Equal("true", referenceItem.GetMetadata("ReferenceOutputAssembly"));
         }
@@ -340,6 +319,103 @@ namespace Microsoft.Build.UnitTests
             Assert.True(resolvedProjects.ContainsKey(@"CorrectProjectConfig|Platform"));
             Assert.True(resolvedProjects.ContainsKey(@"CorrectProjectConfig2|Platform"));
             Assert.Empty(unresolvedProjects); // "No unresolved refs expected for case 3"
+        }
+
+        [Fact]
+        public void TasksInTheSameBuildShareTheParsedSolutionConfiguration()
+        {
+            string projectPath = Path.Combine(Path.GetTempPath(), "Project", "Project.csproj");
+            string solutionConfiguration = CreateSolutionConfiguration(projectPath);
+            MockEngine engine = new MockEngine(_output);
+
+            ProjectElementAccessor first = CreateTask(engine, solutionConfiguration, projectPath);
+
+            // Each project receives its own instance of the XML.
+            ProjectElementAccessor second = CreateTask(engine, new string(solutionConfiguration.ToCharArray()), projectPath);
+
+            first.Execute().ShouldBeTrue();
+            second.Execute().ShouldBeTrue();
+
+            second.AssignedProjects.ShouldHaveSingleItem().GetMetadata("FullConfiguration").ShouldBe("Debug|AnyCPU");
+            second.GetProjectEntry(second.ProjectReferences[0]).ShouldBeSameAs(first.GetProjectEntry(first.ProjectReferences[0]));
+        }
+
+        [Fact]
+        public void RelativeSolutionConfigurationPathsAreResolvedAgainstEachTasksCurrentDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFolder firstDirectory = env.CreateFolder();
+            TransientTestFolder secondDirectory = env.CreateFolder();
+            string relativeProjectPath = Path.Combine("Project", "Project.csproj");
+            string solutionConfiguration = CreateSolutionConfiguration(relativeProjectPath);
+            MockEngine engine = new MockEngine(_output);
+
+            env.SetCurrentDirectory(firstDirectory.Path);
+            ProjectElementAccessor first = CreateTask(engine, solutionConfiguration, Path.GetFullPath(relativeProjectPath));
+            first.Execute().ShouldBeTrue();
+
+            env.SetCurrentDirectory(secondDirectory.Path);
+            ProjectElementAccessor second = CreateTask(engine, solutionConfiguration, Path.GetFullPath(relativeProjectPath));
+            second.Execute().ShouldBeTrue();
+
+            first.AssignedProjects.ShouldHaveSingleItem().GetMetadata("FullConfiguration").ShouldBe("Debug|AnyCPU");
+            second.AssignedProjects.ShouldHaveSingleItem().GetMetadata("FullConfiguration").ShouldBe("Debug|AnyCPU");
+        }
+
+        [Fact]
+        public void TasksInTheSameBuildDoNotShareProjectElements()
+        {
+            string projectPath = Path.Combine(Path.GetTempPath(), "Project", "Project.csproj");
+            string solutionConfiguration = CreateSolutionConfiguration(projectPath);
+            MockEngine engine = new MockEngine(_output);
+
+            ProjectElementAccessor first = CreateTask(engine, solutionConfiguration, projectPath);
+            first.Execute().ShouldBeTrue();
+
+            XmlElement firstElement = first.GetElement(first.ProjectReferences[0]);
+            firstElement.GetAttribute("AbsolutePath").ShouldBe(projectPath);
+            firstElement.InnerText.ShouldBe("Debug|AnyCPU");
+            firstElement.ParentNode.Name.ShouldBe("SolutionConfiguration");
+            firstElement.InnerText = "Release|x64";
+
+            // The task still sees changes to its own elements, regardless of their position in the document.
+            first.GetItem(first.ProjectReferences[0]).ShouldBe("Release|x64");
+            firstElement.ParentNode.RemoveChild(firstElement.ParentNode.FirstChild);
+            first.GetElement(first.ProjectReferences[0]).ShouldBeSameAs(firstElement);
+
+            ProjectElementAccessor second = CreateTask(engine, solutionConfiguration, projectPath);
+            second.Execute().ShouldBeTrue();
+
+            second.AssignedProjects.ShouldHaveSingleItem().GetMetadata("FullConfiguration").ShouldBe("Debug|AnyCPU");
+            XmlElement secondElement = second.GetElement(second.ProjectReferences[0]);
+            secondElement.ShouldNotBeSameAs(firstElement);
+            secondElement.InnerText.ShouldBe("Debug|AnyCPU");
+        }
+
+        private static string CreateSolutionConfiguration(string projectPath) =>
+            $$"""
+            <SolutionConfiguration>
+              <ProjectConfiguration Project="{11111111-1111-1111-1111-111111111111}">Release|AnyCPU</ProjectConfiguration>
+              <ProjectConfiguration Project="{22222222-2222-2222-2222-222222222222}" AbsolutePath="{{projectPath}}" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+            </SolutionConfiguration>
+            """;
+
+        private static ProjectElementAccessor CreateTask(MockEngine engine, string solutionConfiguration, string projectReference) =>
+            new ProjectElementAccessor
+            {
+                BuildEngine = engine,
+                SolutionConfigurationContents = solutionConfiguration,
+                ProjectReferences = [new TaskItem(projectReference)],
+            };
+
+        /// <summary>
+        /// Exposes the protected lookups that tasks deriving from <see cref="ResolveProjectBase"/> can use.
+        /// </summary>
+        private sealed class ProjectElementAccessor : AssignProjectConfiguration
+        {
+            public XmlElement GetElement(ITaskItem projectReference) => GetProjectElement(projectReference);
+
+            public string GetItem(ITaskItem projectReference) => GetProjectItem(projectReference);
         }
 
         #region Test Defaults

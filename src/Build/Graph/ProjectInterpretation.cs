@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
-using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -134,11 +133,11 @@ namespace Microsoft.Build.Graph
                 if (solutionConfiguration != null)
                 {
                     string projectGuid = projectReferenceItem.GetMetadataValue(ProjectMetadataName);
-                    if (solutionConfiguration.TryGetProjectByGuid(projectGuid, out XmlElement projectElement)
-                        || solutionConfiguration.TryGetProjectByAbsolutePath(projectReferenceFullPath, out projectElement))
+                    if (solutionConfiguration.TryGetProjectByGuid(projectGuid, out SolutionConfiguration.ProjectEntry projectEntry)
+                        || solutionConfiguration.TryGetProjectByAbsolutePath(projectReferenceFullPath, out projectEntry))
                     {
                         // Note: AssignProjectConfiguration sets various metadata on the ProjectReference item, but ultimately it just translates to the Configuration and Platform global properties on the MSBuild task.
-                        string projectConfiguration = projectElement.InnerText;
+                        string projectConfiguration = projectEntry.InnerText;
                         string[] configurationPlatformParts = projectConfiguration.Split(SolutionConfiguration.ConfigPlatformSeparator[0]);
                         SetProperty(referenceGlobalProperties, ConfigurationMetadataName, configurationPlatformParts[0]);
 
