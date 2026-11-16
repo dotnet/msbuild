@@ -20,9 +20,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private readonly IReadOnlyList<TaskResultCacheEvent>? _cachedEvents;
         private readonly TaskResultCacheEventCollector? _eventCollector;
         private readonly TaskLoggingContext _loggingContext;
-        private readonly string? _projectDirectory;
         private readonly TaskResultCacheSession? _session;
-        private readonly ITask? _task;
         private readonly string _taskName;
 
         private TaskResultCacheInvocation(
@@ -38,15 +36,11 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private TaskResultCacheInvocation(
             TaskLoggingContext loggingContext,
             string taskName,
-            TaskResultCacheSession session,
-            ITask task,
-            string projectDirectory)
+            TaskResultCacheSession session)
         {
             _loggingContext = loggingContext;
-            _projectDirectory = projectDirectory;
             _taskName = taskName;
             _session = session;
-            _task = task;
             _eventCollector = new TaskResultCacheEventCollector();
         }
 
@@ -78,14 +72,18 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             }
 
             ICollection<string> parameterNames = taskNode.ParametersForBuild.Keys;
+            bool hasDeclaredInputs = false;
+            bool hasDeclaredOutputs = false;
             foreach (string parameterName in parameterNames)
             {
-                if (MSBuildNameIgnoreCaseComparer.Default.Equals(parameterName, "InputFiles") ||
-                    MSBuildNameIgnoreCaseComparer.Default.Equals(parameterName, "OutputFiles"))
-                {
-                    LogFailure(loggingContext, taskNode.Name, "file-list properties must not be supplied as task parameters");
-                    return null;
-                }
+                hasDeclaredInputs |= MSBuildNameIgnoreCaseComparer.Default.Equals(parameterName, "DeclaredInputs");
+                hasDeclaredOutputs |= MSBuildNameIgnoreCaseComparer.Default.Equals(parameterName, "DeclaredOutputs");
+            }
+
+            if (!hasDeclaredInputs || !hasDeclaredOutputs)
+            {
+                LogFailure(loggingContext, taskNode.Name, "the task invocation must explicitly supply DeclaredInputs and DeclaredOutputs");
+                return null;
             }
 
             var fileDigestCache = (TaskResultCacheFileDigestCache)componentHost.GetComponent(
@@ -123,9 +121,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     return new TaskResultCacheInvocation(
                         loggingContext,
                         taskNode.Name,
-                        response.Session,
-                        task,
-                        buildRequestEntry.ProjectRootDirectory);
+                        response.Session);
 
                 default:
                     LogFailure(loggingContext, taskNode.Name, response.Reason);
@@ -180,23 +176,8 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 return;
             }
 
-            if (!TaskResultCacheSession.TryGetFilePaths(
-                    invocation._task!,
-                    "OutputFiles",
-                    invocation._projectDirectory!,
-                    out IReadOnlyList<string>? outputPaths,
-                    out string? reason))
-            {
-                LogFailure(
-                    invocation._loggingContext,
-                    invocation._taskName,
-                    reason);
-                return;
-            }
-
             TaskResultCacheStoreResponse response =
                 await invocation._session.TryStoreAsync(
-                    outputPaths,
                     invocation._eventCollector.Events,
                     cancellationToken);
             if (!response.Success)

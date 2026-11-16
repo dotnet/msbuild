@@ -75,7 +75,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private const string ManifestFileName = "manifest.bin";
         private const string ManifestMagic = "MSBuild Task Result Cache";
         private const int MaximumEventCount = 1_000_000;
-        private const int MaximumOutputCount = 1_000_000;
         private const int Sha256HashLength = 32;
         private const string TrimLockFileName = ".trim.lock";
         private static readonly TimeSpan s_trimInterval = TimeSpan.FromHours(1);
@@ -85,12 +84,14 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private readonly TaskResultCacheFileDigestCache _fileDigestCache;
         private readonly string _key;
         private readonly long _maximumCacheSizeBytes;
+        private readonly IReadOnlyList<string> _outputPaths;
 
         private TaskResultCacheSession(
             string cacheDirectory,
             string entryDirectory,
             string key,
             long maximumCacheSizeBytes,
+            IReadOnlyList<string> outputPaths,
             TaskResultCacheFileDigestCache fileDigestCache)
         {
             _cacheDirectory = cacheDirectory;
@@ -98,6 +99,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             _fileDigestCache = fileDigestCache;
             _key = key;
             _maximumCacheSizeBytes = maximumCacheSizeBytes;
+            _outputPaths = outputPaths;
         }
 
         internal string Key => _key;
@@ -191,6 +193,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 entryDirectory,
                 key,
                 maximumCacheSizeBytes,
+                keyResponse.OutputPaths!,
                 fileDigestCache);
 
             if (!Directory.Exists(entryDirectory))
@@ -221,7 +224,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         }
 
         internal async ValueTask<TaskResultCacheStoreResponse> TryStoreAsync(
-            IReadOnlyList<string> outputPaths,
             IReadOnlyList<TaskResultCacheEvent> events,
             CancellationToken cancellationToken)
         {
@@ -230,10 +232,10 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             try
             {
                 Directory.CreateDirectory(temporaryDirectory);
-                var outputs = new List<CachedOutput>(outputPaths.Count);
-                for (int i = 0; i < outputPaths.Count; i++)
+                var outputs = new List<CachedOutput>(_outputPaths.Count);
+                for (int i = 0; i < _outputPaths.Count; i++)
                 {
-                    string outputPath = outputPaths[i];
+                    string outputPath = _outputPaths[i];
                     if (Directory.Exists(outputPath))
                     {
                         return new TaskResultCacheStoreResponse(
@@ -346,6 +348,13 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     Path.Combine(_entryDirectory, ManifestFileName),
                     cancellationToken);
                 IReadOnlyList<CachedOutput> outputs = manifest.Outputs;
+                for (int i = 0; i < outputs.Count; i++)
+                {
+                    if (!String.Equals(outputs[i].Path, _outputPaths[i], StringComparison.Ordinal))
+                    {
+                        throw new InvalidDataException("The cached output paths do not match the invocation.");
+                    }
+                }
 
                 var temporaryFiles = new string?[outputs.Count];
                 var backupFiles = new string?[outputs.Count];
@@ -561,10 +570,15 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                         Reason: "The task assembly does not have a readable file location.");
                 }
 
-                if (!TryGetFileProperty(task, "OutputFiles", out _, out string? reason) ||
+                if (!TryGetFilePaths(
+                        task,
+                        "DeclaredOutputs",
+                        projectDirectory,
+                        out IReadOnlyList<string>? outputPaths,
+                        out string? reason) ||
                     !TryGetFilePaths(
                         task,
-                        "InputFiles",
+                        "DeclaredInputs",
                         projectDirectory,
                         out IReadOnlyList<string>? inputPaths,
                         out reason))
@@ -604,6 +618,12 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     return new TaskResultCacheKeyResponse(Success: false, Reason: reason);
                 }
 
+                writer.Write(outputPaths.Count);
+                for (int i = 0; i < outputPaths.Count; i++)
+                {
+                    writer.Write(outputPaths[i]);
+                }
+
                 writer.Write(inputPaths.Count);
                 for (int i = 0; i < inputPaths.Count; i++)
                 {
@@ -634,7 +654,8 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 hashStream.FlushFinalBlock();
                 return new TaskResultCacheKeyResponse(
                     Success: true,
-                    ToHex(hash.Hash!));
+                    ToHex(hash.Hash!),
+                    outputPaths);
             }
             catch (Exception e) when (IsExpectedCacheException(e) || e is TargetInvocationException)
             {
@@ -769,7 +790,11 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             }
         }
 
-        internal static bool TryGetFilePaths(
+        [UnconditionalSuppressMessage(
+            "Trimming",
+            "IL2075",
+            Justification = "Declared-IO cache binding reflects only over task types, which are already rooted by task loading.")]
+        private static bool TryGetFilePaths(
             ITask task,
             string propertyName,
             string projectDirectory,
@@ -780,15 +805,14 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             {
                 paths = null;
                 reason = null;
-                if (!TryGetFileProperty(task, propertyName, out PropertyInfo? property, out reason))
+                PropertyInfo? property = task.GetType().GetProperty(
+                    propertyName,
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
+                if (property?.GetGetMethod() is null ||
+                    property.GetIndexParameters().Length != 0 ||
+                    property.GetValue(task) is not ITaskItem[] items)
                 {
-                    return false;
-                }
-
-                if (property.GetValue(task) is not IEnumerable<string> values)
-                {
-                    reason =
-                        $"Task property \"{propertyName}\" must return a non-null IEnumerable<string>.";
+                    reason = $"Task property \"{propertyName}\" must be a readable ITaskItem array.";
                     return false;
                 }
 
@@ -796,10 +820,10 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     ? StringComparer.OrdinalIgnoreCase
                     : StringComparer.Ordinal;
                 var seen = new HashSet<string>(pathComparer);
-                var result = new List<string>();
-                foreach (string value in values)
+                var result = new List<string>(items.Length);
+                foreach (ITaskItem item in items)
                 {
-                    string path = FileUtilities.NormalizePath(projectDirectory, value);
+                    string path = FileUtilities.NormalizePath(projectDirectory, item.ItemSpec);
                     if (seen.Add(path))
                     {
                         result.Add(path);
@@ -813,40 +837,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
                 paths = null;
-                reason = e.InnerException?.Message ?? e.Message;
-                return false;
-            }
-        }
-
-        [UnconditionalSuppressMessage(
-            "Trimming",
-            "IL2075",
-            Justification = "Declared-IO cache binding reflects only over task types, which are already rooted by task loading.")]
-        private static bool TryGetFileProperty(
-            ITask task,
-            string propertyName,
-            [NotNullWhen(true)] out PropertyInfo? property,
-            out string? reason)
-        {
-            try
-            {
-                property = task.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
-                if (property?.GetGetMethod() is not null &&
-                    property.GetSetMethod() is null &&
-                    property.GetIndexParameters().Length == 0 &&
-                    typeof(IEnumerable<string>).IsAssignableFrom(property.PropertyType))
-                {
-                    reason = null;
-                    return true;
-                }
-
-                property = null;
-                reason = $"Task property \"{propertyName}\" must be a publicly readable IEnumerable<string> without a public setter.";
-                return false;
-            }
-            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-            {
-                property = null;
                 reason = e.InnerException?.Message ?? e.Message;
                 return false;
             }
@@ -913,7 +903,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             }
 
             int outputCount = reader.ReadInt32();
-            if (outputCount < 0 || outputCount > MaximumOutputCount)
+            if (outputCount != _outputPaths.Count)
             {
                 throw new InvalidDataException("The cache manifest output count is invalid.");
             }
@@ -1210,6 +1200,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private readonly record struct TaskResultCacheKeyResponse(
             bool Success,
             string? Key = null,
+            IReadOnlyList<string>? OutputPaths = null,
             string? Reason = null
         );
 

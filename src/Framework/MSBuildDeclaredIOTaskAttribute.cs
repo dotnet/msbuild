@@ -10,12 +10,12 @@ namespace Microsoft.Build.Framework;
 
 /// <summary>
 /// Marks a task class whose externally observable filesystem inputs and outputs are completely described
-/// by publicly readable <c>IEnumerable&lt;string&gt;</c> properties named <c>InputFiles</c> and
-/// <c>OutputFiles</c> without public setters.
+/// by its <c>DeclaredInputs</c> and <c>DeclaredOutputs</c> task parameters.
 /// </summary>
 /// <remarks>
-/// MSBuild reads <c>InputFiles</c> after binding task parameters and <c>OutputFiles</c> after successful execution.
-/// <c>OutputFiles</c> should include every path whose final presence or absence is part of the task result.
+/// Cacheable invocations must explicitly supply both parameters as <see cref="ITaskItem"/> arrays;
+/// explicit empty values represent empty lists. Both lists are captured before execution.
+/// <c>DeclaredOutputs</c> must include every path whose final presence or absence is part of the task result.
 /// Every supported invocation must satisfy this contract: its results must depend only on the task's
 /// parameters, declared inputs, and other values included in the cache key.
 /// This API is experimental and may change or be removed without preserving compatibility.
