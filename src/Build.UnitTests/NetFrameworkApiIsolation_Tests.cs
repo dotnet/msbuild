@@ -248,6 +248,11 @@ public class NetFrameworkApiIsolation_Tests
             type = type.GetElementType()!;
         }
 
+        if (type.IsGenericType && !type.IsGenericTypeDefinition && type.GetGenericArguments().Any(IsRemotingType))
+        {
+            return true;
+        }
+
         return type.Namespace?.StartsWith("System.Runtime.Remoting", StringComparison.Ordinal) == true;
     }
 

@@ -27,6 +27,10 @@ The in-proc node also runs, with these limits:
   .NET flavor of MSBuild. `GenerateResource` does not create an AppDomain either.
 - COM tasks (`ResolveComReference`, `RegisterAssembly`, `UnregisterAssembly`) and the ClickOnce signing
   tasks use .NET Framework-only APIs and fail.
+- `GenerateResource` fails for a `.resx` file with resources of types other than strings and primitives
+  (for example `System.Drawing.Point` or a bitmap): the resources are written with
+  `System.Resources.ResourceWriter`, which throws `PlatformNotSupportedException` for such values on
+  .NET. Out-of-proc nodes run the task on .NET Framework and are not affected.
 
 The host has to include the Windows Desktop runtime (for example with `<UseWPF>true</UseWPF>` or a
 `FrameworkReference` to `Microsoft.WindowsDesktop.App`): `Microsoft.Build.Framework` has an assembly
@@ -61,8 +65,9 @@ Code that can run in the .NET process follows this rule:
 
 `NetFrameworkApiIsolation_Tests.NetFrameworkOnlyApisAreReferencedOnlyFromIsolatedMethods` reads the IL of
 every method in `Microsoft.Build`, `Microsoft.Build.Framework`, `Microsoft.Build.Tasks.Core` and
-`Microsoft.Build.Utilities.Core` and fails when one of the APIs above is referenced from a method that is
-not marked `NoInlining` and is not listed as running only on .NET Framework. When the test reports a new
+`Microsoft.Build.Utilities.Core` and fails when one of the APIs above that .NET does not have is
+referenced from a method that is not marked `NoInlining` and is not listed as running only on .NET
+Framework. APIs that are present and throw, such as `AssemblyName.KeyPair`, are not detected by the test. When the test reports a new
 method, move the reference into a `NoInlining` method behind a `RuntimeCapabilities` check, or, if the
 method runs only in a .NET Framework process (an MSBuild.exe node, a task host, or a remoting callback),
 add it to `s_methodsThatRunOnlyOnNetFramework` with the reason.

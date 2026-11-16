@@ -79,7 +79,7 @@ internal static class TaskLoader
                 }
                 else
                 {
-                    taskAppDomain = CreateTaskAppDomain(loadedType, appDomainSetup, appDomainCreated, isOutOfProc);
+                    CreateTaskAppDomain(loadedType, appDomainSetup, appDomainCreated, isOutOfProc, out taskAppDomain);
                 }
             }
             else
@@ -144,10 +144,11 @@ internal static class TaskLoader
     /// Creates the AppDomain that a [LoadInSeparateAppDomain] task runs in. AppDomainSetup's
     /// configuration bytes and this AppDomain.CreateDomain overload do not exist on .NET, so they
     /// are referenced only from this method, which is not inlined into <see cref="CreateTask"/>.
-    /// See <see cref="RuntimeCapabilities"/>.
+    /// See <see cref="RuntimeCapabilities"/>. The AppDomain is assigned to <paramref name="taskAppDomain"/>
+    /// as soon as it is created, so that the caller unloads it when the rest of this method throws.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static AppDomain CreateTaskAppDomain(LoadedType loadedType, AppDomainSetup appDomainSetup, Action<AppDomain>? appDomainCreated, bool isOutOfProc)
+    private static void CreateTaskAppDomain(LoadedType loadedType, AppDomainSetup appDomainSetup, Action<AppDomain>? appDomainCreated, bool isOutOfProc, out AppDomain taskAppDomain)
     {
         // Our task depend on this name to be precisely that, so if you change it make sure
         // you also change the checks in the tasks run in separate AppDomains. Better yet, just don't change it.
@@ -173,18 +174,17 @@ internal static class TaskLoader
         AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver;
         s_resolverLoadedType = loadedType;
 
-        AppDomain taskAppDomain = AppDomain.CreateDomain(isOutOfProc ? "taskAppDomain (out-of-proc)" : "taskAppDomain (in-proc)", null, appDomainInfo);
+        AppDomain createdAppDomain = AppDomain.CreateDomain(isOutOfProc ? "taskAppDomain (out-of-proc)" : "taskAppDomain (in-proc)", null, appDomainInfo);
+        taskAppDomain = createdAppDomain;
 
         if (loadedType.LoadedAssembly != null)
         {
-            taskAppDomain.Load(loadedType.LoadedAssemblyName);
+            createdAppDomain.Load(loadedType.LoadedAssemblyName);
         }
 
         // Hook up last minute dumping of any exceptions
-        taskAppDomain.UnhandledException += DebugUtils.UnhandledExceptionHandler;
-        appDomainCreated?.Invoke(taskAppDomain);
-
-        return taskAppDomain;
+        createdAppDomain.UnhandledException += DebugUtils.UnhandledExceptionHandler;
+        appDomainCreated?.Invoke(createdAppDomain);
     }
 
     /// <summary>
