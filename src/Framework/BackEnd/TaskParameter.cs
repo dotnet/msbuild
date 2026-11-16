@@ -8,7 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 #if FEATURE_APPDOMAIN
-using System.Runtime.Remoting;
 using System.Security;
 #endif
 using Microsoft.Build.Collections;
@@ -855,7 +854,7 @@ namespace Microsoft.Build.BackEnd
                         .Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, ExpandIfFromItemDefinition(metadatum.Key, metadatum.Value)));
 
 #if FEATURE_APPDOMAIN
-                    if (RemotingServices.IsTransparentProxy(destinationItem))
+                    if (NetFrameworkApis.IsTransparentProxy(destinationItem))
                     {
                         // Linq is not serializable so materialize the collection before making the call.
                         metadataToImport = metadataToImport.ToList();

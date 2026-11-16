@@ -3353,7 +3353,7 @@ namespace Microsoft.Build.Execution
                 _buildParameters,
                 loggingService.LoggerDescriptions.ToArray()
 #if FEATURE_APPDOMAIN
-                , AppDomain.CurrentDomain.SetupInformation
+                , GetAppDomainSetupForNodes()
 #endif
                 , new LoggingNodeConfiguration(
                     loggingService.IncludeEvaluationMetaprojects,
@@ -3366,6 +3366,25 @@ namespace Microsoft.Build.Execution
 
             return _nodeConfiguration;
         }
+
+#if FEATURE_APPDOMAIN
+        /// <summary>
+        /// The AppDomainSetup that nodes and their [LoadInSeparateAppDomain] tasks use. On a runtime
+        /// without AppDomains (this .NET Framework assembly is loaded into a .NET process) there is
+        /// nothing to pass on, so null is returned, and BuildParameters.AppDomainSetup stays null in
+        /// the nodes of this process and in the packets sent from them.
+        /// </summary>
+        private static AppDomainSetup? GetAppDomainSetupForNodes()
+        {
+            if (RuntimeCapabilities.SupportsAppDomains)
+            {
+                return AppDomain.CurrentDomain.SetupInformation;
+            }
+
+            CommunicationsUtilities.Trace("The runtime has no AppDomains; nodes get no AppDomainSetup.");
+            return null;
+        }
+#endif
 
         /// <summary>
         /// Handler for thread exceptions. This handler will only get called if the exception did not previously

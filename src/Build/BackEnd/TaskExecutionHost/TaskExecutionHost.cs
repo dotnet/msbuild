@@ -14,9 +14,6 @@ using System.Reflection;
 #if NET
 using System.Runtime.CompilerServices;
 #endif
-#if FEATURE_APPDOMAIN
-using System.Runtime.Remoting;
-#endif
 using System.Text;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
@@ -836,7 +833,7 @@ namespace Microsoft.Build.BackEnd
                 foreach (TaskItem item in _remotedTaskItems)
                 {
                     // Tell remoting to forget connections to the taskitem
-                    RemotingServices.Disconnect(item);
+                    NetFrameworkApis.Disconnect(item);
                 }
             }
 

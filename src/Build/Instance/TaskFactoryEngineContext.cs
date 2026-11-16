@@ -8,6 +8,7 @@ using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using Microsoft.Build.Internal;
 
 #if FEATURE_APPDOMAIN
+using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
 #endif
@@ -361,6 +362,21 @@ namespace Microsoft.Build.BackEnd
             _loggingContext = null;
             _elementLocation = null;
 
+            // Without remoting the engine proxy is never sent across an AppDomain boundary, and there is no sponsor.
+            if (RuntimeCapabilities.SupportsRemoting)
+            {
+                ReleaseSponsor();
+            }
+        }
+
+        /// <summary>
+        /// Unregisters and closes the lease sponsor. The remoting lifetime types do not exist on .NET,
+        /// so they and <see cref="_sponsor"/> are referenced only from methods that are not inlined.
+        /// See <see cref="RuntimeCapabilities"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void ReleaseSponsor()
+        {
             // Clear out the sponsor (who is responsible for keeping the EngineProxy remoting lease alive until the task is done)
             // this will be null if the engineproxy was never sent across an appdomain boundry.
             if (_sponsor != null)

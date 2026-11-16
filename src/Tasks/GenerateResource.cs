@@ -22,7 +22,7 @@ using System.Resources.Extensions;
 using System.Reflection;
 using System.Runtime.InteropServices;
 #if FEATURE_APPDOMAIN
-using System.Runtime.Remoting;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 #endif
 using System.Runtime.Serialization;
@@ -791,7 +791,9 @@ namespace Microsoft.Build.Tasks
 
 #if FEATURE_APPDOMAIN
                         // Figure out whether a separate AppDomain is required because an assembly would be locked.
-                        bool needSeparateAppDomain = NeedSeparateAppDomain();
+                        // When the runtime cannot create AppDomains (this .NET Framework assembly is loaded into a
+                        // .NET process), the files are processed in this AppDomain, as in the .NET flavor of MSBuild.
+                        bool needSeparateAppDomain = RuntimeCapabilities.SupportsAppDomains && NeedSeparateAppDomain();
 
                         AppDomain appDomain = null;
 #endif
@@ -806,10 +808,7 @@ namespace Microsoft.Build.Tasks
                                 // create the list that we'll use to disconnect the taskitems once we're done
                                 _remotedTaskItems = new List<ITaskItem>();
 
-                                appDomain = AppDomain.CreateDomain(
-                                    "generateResourceAppDomain",
-                                    null,
-                                    AppDomain.CurrentDomain.SetupInformation);
+                                appDomain = CreateGenerateResourceAppDomain();
 
                                 object obj = appDomain.CreateInstanceFromAndUnwrap(
                                        typeof(ProcessResourceFiles).Module.FullyQualifiedName,
@@ -911,7 +910,7 @@ namespace Microsoft.Build.Tasks
                                         if (item is MarshalByRefObject marshalByRefObject)
                                         {
                                             // Tell remoting to forget connections to the taskitem
-                                            RemotingServices.Disconnect(marshalByRefObject);
+                                            NetFrameworkApis.Disconnect(marshalByRefObject);
                                         }
                                     }
                                 }
@@ -1809,6 +1808,20 @@ namespace Microsoft.Build.Tasks
         }
 
 #if FEATURE_APPDOMAIN
+        /// <summary>
+        /// Creates the AppDomain that resource files are processed in when one is needed. This
+        /// AppDomain.CreateDomain overload does not exist on .NET, so it is referenced only from this
+        /// method, which is not inlined into <see cref="Execute"/>. See <see cref="RuntimeCapabilities"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static AppDomain CreateGenerateResourceAppDomain()
+        {
+            return AppDomain.CreateDomain(
+                "generateResourceAppDomain",
+                null,
+                AppDomain.CurrentDomain.SetupInformation);
+        }
+
         /// <summary>
         /// Make the decision about whether a separate AppDomain is needed.
         /// If this algorithm is unsure about whether a separate AppDomain is

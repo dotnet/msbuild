@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+using System.Runtime.CompilerServices;
 using System.Security.Principal;
 #endif
 using System.Threading;
@@ -456,6 +457,8 @@ internal sealed partial class CoordinatorClient : IDisposable
             PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
             | PipeOptions.CurrentUserOnly
+#else
+            | RuntimeCapabilities.CurrentUserOnlyIfSupported
 #endif
         );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
@@ -466,7 +469,12 @@ internal sealed partial class CoordinatorClient : IDisposable
         {
             pipeStream.Connect(timeoutMs);
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-            ValidateRemotePipeOwner(pipeStream, output);
+            // When the runtime supports PipeOptions.CurrentUserOnly, the pipe was opened with it and
+            // Connect has already made this check (see RuntimeCapabilities.SupportsPipeOptionsCurrentUserOnly).
+            if (!RuntimeCapabilities.SupportsPipeOptionsCurrentUserOnly)
+            {
+                ValidateRemotePipeOwner(pipeStream, output);
+            }
 #endif
             return true;
         }
@@ -477,6 +485,9 @@ internal sealed partial class CoordinatorClient : IDisposable
     }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+    // Not inlined: .NET has PipeSecurity but not the PipeStream.GetAccessControl() instance method
+    // this .NET Framework assembly calls. See RuntimeCapabilities.SupportsPipeOptionsCurrentUserOnly.
+    [MethodImpl(MethodImplOptions.NoInlining)]
     private static void ValidateRemotePipeOwner(NamedPipeClientStream pipeStream, ICoordinatorDebugOutput output)
     {
         SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;

@@ -5,9 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-#if FEATURE_APPDOMAIN
-using System.Runtime.Remoting;
-#endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
@@ -338,7 +335,7 @@ namespace Microsoft.Build.BackEnd
                 bool needsSnapshot = false;
                 foreach (var item in items)
                 {
-                    if (RemotingServices.IsTransparentProxy(item))
+                    if (NetFrameworkApis.IsTransparentProxy(item))
                     {
                         needsSnapshot = true;
                         break;

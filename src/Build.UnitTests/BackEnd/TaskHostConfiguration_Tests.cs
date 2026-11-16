@@ -397,6 +397,31 @@ public class TaskHostConfiguration_Tests
             deserializedConfig.AppDomainSetup.GetConfigurationBytes().SequenceEqual(configBytes).ShouldBeTrue();
         }
     }
+
+    /// <summary>
+    /// A configuration without an AppDomainSetup, which a node in a process without AppDomains
+    /// sends, is written without configuration bytes, and on .NET Framework the task host that
+    /// reads it gets an AppDomainSetup without configuration bytes.
+    /// </summary>
+    [Fact]
+    public void TestTranslationWithoutAppDomainSetup()
+    {
+        TaskHostConfiguration config = CreateConfigurationWithEnvironment(null);
+        config.AppDomainSetup.ShouldBeNull();
+
+        // Set version to 0 for CLR4 (Framework-to-Framework) communication which supports AppDomain.
+        ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+        writeTranslator.NegotiatedPacketVersion = 0;
+        ((ITranslatable)config).Translate(writeTranslator);
+
+        ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+        readTranslator.NegotiatedPacketVersion = 0;
+        INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(readTranslator);
+
+        TaskHostConfiguration deserializedConfig = packet.ShouldBeOfType<TaskHostConfiguration>();
+        deserializedConfig.AppDomainSetup.ShouldNotBeNull();
+        deserializedConfig.AppDomainSetup.GetConfigurationBytes().ShouldBeNull();
+    }
 #endif
 
     /// <summary>
