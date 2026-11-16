@@ -61,7 +61,9 @@ internal static class FeatureSwitches
     /// <c>[FeatureGuard]</c> for <c>RequiresUnreferencedCode</c>, so the analyzer treats
     /// <c>if (EnableAllPropertyFunctions)</c> as guarding the trim-unsafe probing and no per-call
     /// suppression is required. In untrimmed builds, the legacy <c>MSBUILDENABLEALLPROPERTYFUNCTIONS</c>
-    /// environment variable still enables run-time type probing when the AppContext switch is unset. In
+    /// environment variable still enables run-time type probing when the AppContext switch is unset. The
+    /// variable is read through <see cref="Traits"/>, which snapshots the environment, rather than from the
+    /// process environment because this property is checked on every property-function call. In
     /// trimmed/AOT builds, the trimmer substitutes this property to <see langword="false"/> before the body
     /// runs, so that environment variable cannot re-open the removed probing path. The trimmed default is
     /// declared by a matching <c>RuntimeHostConfigurationOption</c> in Microsoft.Build.Framework.csproj and
@@ -73,7 +75,7 @@ internal static class FeatureSwitches
     internal static bool EnableAllPropertyFunctions =>
         AppContext.TryGetSwitch("Microsoft.Build.EnableAllPropertyFunctions", out bool isEnabled)
             ? isEnabled
-            : Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1";
+            : Traits.Instance.EnableAllPropertyFunctions;
 #pragma warning restore IL4000
 
     /// <summary>

@@ -520,7 +520,7 @@ and must have no `out` parameters.
 internal static bool EnableAllPropertyFunctions =>
   AppContext.TryGetSwitch("Microsoft.Build.EnableAllPropertyFunctions", out bool isEnabled)
     ? isEnabled
-    : Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1";
+    : Traits.Instance.EnableAllPropertyFunctions; // MSBUILDENABLEALLPROPERTYFUNCTIONS == "1"
 #pragma warning restore IL4000
 ```
 ```xml
@@ -533,9 +533,10 @@ de-genericized `Expander<P, I>.Function` partial), the `[FeatureGuard]` lets the
 assembly-probing run with **no per-call `[UnconditionalSuppressMessage]`** — it replaced a
 standing IL2026 suppression; the trimmer removes the whole branch from a trimmed/AOT build
 because the switch folds to `false`. In untrimmed builds the getter preserves the legacy
-`MSBUILDENABLEALLPROPERTYFUNCTIONS` behavior when the AppContext switch is unset; in trimmed/AOT
-builds the getter body is replaced with `false`, so the environment variable cannot re-enable the
-removed probing path.
+`MSBUILDENABLEALLPROPERTYFUNCTIONS` behavior when the AppContext switch is unset, reading the variable
+through the `Traits` environment snapshot because the gates check it on every property-function call;
+in trimmed/AOT builds the getter body is replaced with `false`, so the environment variable cannot
+re-enable the removed probing path.
 
 ### 6.4 The IL4000 gotcha (the definitive explanation)
 
