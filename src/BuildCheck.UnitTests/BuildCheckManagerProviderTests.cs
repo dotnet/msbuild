@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,6 +12,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -47,6 +49,53 @@ public class BuildCheckManagerTests
             .ShouldBeEquivalentTo(expectedMessages);
     }
 
+    [Fact]
+    public void DeferredEvalDiagnosticsAreDispatchedOnlyOnce()
+    {
+        var testedInstance = new BuildCheckManager();
+        BuildWarningEventArgs deferredWarning = CreateDeferrableWarning(evaluationId: 42);
+
+        ((IResultReporter)testedInstance).ReportResult(deferredWarning, new CheckContextMock(BuildEventContext.Invalid));
+
+        var checkContext = new CheckContextMock(new BuildEventContext(1, 2, 42, 3, 4, 5, 6));
+        testedInstance.StartProjectRequest(checkContext, "project.csproj");
+        testedInstance.StartProjectRequest(checkContext, "project.csproj");
+
+        checkContext.DispatchedEvents.ShouldHaveSingleItem().ShouldBe(deferredWarning);
+    }
+
+    [Fact]
+    public void DeferredEvalDiagnosticsCanBeReportedWhileBeingDispatched()
+    {
+        var testedInstance = new BuildCheckManager();
+        BuildWarningEventArgs deferredWarning = CreateDeferrableWarning(evaluationId: 42);
+        BuildWarningEventArgs lateWarning = CreateDeferrableWarning(evaluationId: 42);
+
+        ((IResultReporter)testedInstance).ReportResult(deferredWarning, new CheckContextMock(BuildEventContext.Invalid));
+
+        // Simulates a warning for the same evaluation id arriving while the deferred ones are being dispatched.
+        var checkContext = new CheckContextMock(
+            new BuildEventContext(1, 2, 42, 3, 4, 5, 6),
+            onDispatch: () => ((IResultReporter)testedInstance).ReportResult(lateWarning, new CheckContextMock(BuildEventContext.Invalid)));
+
+        testedInstance.StartProjectRequest(checkContext, "project.csproj");
+
+        checkContext.DispatchedEvents.ShouldHaveSingleItem().ShouldBe(deferredWarning);
+    }
+
+    private static BuildWarningEventArgs CreateDeferrableWarning(int evaluationId)
+        => new BuildWarningEventArgs(null, "BC0000", null, 0, 0, 0, 0, "message", null, null)
+        {
+            BuildEventContext = new BuildEventContext(
+                1,
+                2,
+                evaluationId,
+                BuildEventContext.InvalidProjectInstanceId,
+                BuildEventContext.InvalidProjectContextId,
+                BuildEventContext.InvalidTargetId,
+                BuildEventContext.InvalidTaskId),
+        };
+
     private void MockBuildCheckAcquisition(bool isCheckRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isCheckRuleExist));
 
     private void MockEnabledDataSourcesDefinition() => MockField("_enabledDataSources", new[] { true, true });
@@ -61,6 +110,39 @@ public class BuildCheckManagerTests
             mockedField.SetValue(_testedInstance, mockedValue);
         }
     }
+}
+
+internal sealed class CheckContextMock : ICheckContext
+{
+    private readonly Action? _onDispatch;
+
+    internal CheckContextMock(BuildEventContext buildEventContext, Action? onDispatch = null)
+    {
+        BuildEventContext = buildEventContext;
+        _onDispatch = onDispatch;
+    }
+
+    public BuildEventContext BuildEventContext { get; }
+
+    public List<BuildEventArgs> DispatchedEvents { get; } = new();
+
+    public void DispatchBuildEvent(BuildEventArgs buildEvent)
+    {
+        DispatchedEvents.Add(buildEvent);
+        _onDispatch?.Invoke();
+    }
+
+    public void DispatchAsComment(MessageImportance importance, string messageResourceName, params object?[] messageArgs) { }
+
+    public void DispatchAsCommentFromText(MessageImportance importance, string message) { }
+
+    public void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message) { }
+
+    public void DispatchAsWarningFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message) { }
+
+    public void DispatchFailedAcquisitionTelemetry(string assemblyName, Exception exception) { }
+
+    public void DispatchTelemetry(BuildCheckTracingData data) { }
 }
 
 internal sealed class ConfigurationProviderMock : IConfigurationProvider
