@@ -33,6 +33,8 @@ namespace Microsoft.Build.Logging
     {
         private const int StringReferenceCacheSize = 256; // Must remain a power of two.
         private const int MaxCachedStringLength = 4096;
+        private const int LargeStringReferenceCacheSize = 4; // Must remain a power of two.
+        private const int MaxCachedLargeStringLength = 131072;
 
         private readonly Stream originalStream;
 
@@ -91,6 +93,7 @@ namespace Microsoft.Build.Logging
         /// Avoid repeatedly hashing shared string instances without retaining the full string population.
         /// </summary>
         private readonly StringReferenceCacheEntry[] stringReferenceCache = new StringReferenceCacheEntry[StringReferenceCacheSize];
+        private readonly StringReferenceCacheEntry[] largeStringReferenceCache = new StringReferenceCacheEntry[LargeStringReferenceCacheSize];
 
         /// <summary>
         /// Hashtable used for deduplicating name-value lists. Same as strings.
@@ -1640,6 +1643,7 @@ namespace Microsoft.Build.Logging
             }
 
             int referenceCacheIndex = -1;
+            int largeReferenceCacheIndex = -1;
             if (text.Length <= MaxCachedStringLength)
             {
                 // The CLR caches the identity hash, so reference-cache hits avoid
@@ -1647,6 +1651,16 @@ namespace Microsoft.Build.Logging
                 int identityHash = RuntimeHelpers.GetHashCode(text);
                 referenceCacheIndex = identityHash & (StringReferenceCacheSize - 1);
                 ref StringReferenceCacheEntry cachedEntry = ref stringReferenceCache[referenceCacheIndex];
+                if (ReferenceEquals(cachedEntry.Text, text))
+                {
+                    return (cachedEntry.RecordId, cachedEntry.Hash);
+                }
+            }
+            else if (text.Length <= MaxCachedLargeStringLength)
+            {
+                // Large solution properties repeat often, but need a separate, tightly bounded retention budget.
+                largeReferenceCacheIndex = RuntimeHelpers.GetHashCode(text) & (LargeStringReferenceCacheSize - 1);
+                ref StringReferenceCacheEntry cachedEntry = ref largeStringReferenceCache[largeReferenceCacheIndex];
                 if (ReferenceEquals(cachedEntry.Text, text))
                 {
                     return (cachedEntry.RecordId, cachedEntry.Hash);
@@ -1667,6 +1681,13 @@ namespace Microsoft.Build.Logging
             if (referenceCacheIndex >= 0)
             {
                 ref StringReferenceCacheEntry cachedEntry = ref stringReferenceCache[referenceCacheIndex];
+                cachedEntry.RecordId = recordId;
+                cachedEntry.Hash = hash;
+                cachedEntry.Text = text;
+            }
+            else if (largeReferenceCacheIndex >= 0)
+            {
+                ref StringReferenceCacheEntry cachedEntry = ref largeStringReferenceCache[largeReferenceCacheIndex];
                 cachedEntry.RecordId = recordId;
                 cachedEntry.Hash = hash;
                 cachedEntry.Text = text;
