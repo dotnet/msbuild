@@ -3935,6 +3935,122 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             logger.AssertLogContains("[a;b;c=]");
         }
+
+        /// <summary>
+        /// Items whose batching metadata values are equal ignoring case share a batch, so item lists expanded in that batch
+        /// contain all of them.
+        /// </summary>
+        [Fact]
+        public void BatchedAddExpandsAllItemsOfTheBatch()
+        {
+            MockLogger logger = new MockLogger();
+            using ProjectFromString projectFromString = new(ObjectModelHelpers.CleanupFileContents(@"
+                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <ItemGroup>
+                        <R Include='a'><RA>a</RA></R>
+                        <R Include='b'><RA>rb</RA></R>
+                        <R Include='A'><RA>A</RA></R>
+                    </ItemGroup>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <Out Include=""@(R->'%(RA)')"">
+                                <OriginalPath Condition=""'%(R.Identity)' != '@(R->'%(RA)')'"">%(R.Identity)</OriginalPath>
+                            </Out>
+                        </ItemGroup>
+                        <Message Text=""[@(Out->'%(Identity)=%(OriginalPath)', ' ')]""/>
+                    </Target>
+               </Project>
+            "));
+            Project p = projectFromString.Project;
+            p.Build(new string[] { "t" }, new ILogger[] { logger });
+
+            logger.AssertLogContains("[a=a A=a rb=b]");
+        }
+
+        /// <summary>
+        /// Each batch sees the items as they were before the element executed, not the items added by earlier batches.
+        /// </summary>
+        [Fact]
+        public void BatchedAddDoesNotSeeItemsAddedByEarlierBatches()
+        {
+            MockLogger logger = new MockLogger();
+            using ProjectFromString projectFromString = new(ObjectModelHelpers.CleanupFileContents(@"
+                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <ItemGroup>
+                        <A Include='a1;a2;a3'/>
+                    </ItemGroup>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <B Include=""@(A->'%(Identity).b')"" Condition=""'@(B)' == '' and '%(A.Identity)' != ''""/>
+                        </ItemGroup>
+                        <Message Text='[@(B)]'/>
+                    </Target>
+               </Project>
+            "));
+            Project p = projectFromString.Project;
+            p.Build(new string[] { "t" }, new ILogger[] { logger });
+
+            logger.AssertLogContains("[a1.b;a2.b;a3.b]");
+        }
+
+        /// <summary>
+        /// A batched modify applies to the items of each batch, including items that were added and modified earlier in the
+        /// same element group.
+        /// </summary>
+        [Fact]
+        public void BatchedModifyOfItemsModifiedEarlier()
+        {
+            MockLogger logger = new MockLogger();
+            using ProjectFromString projectFromString = new(ObjectModelHelpers.CleanupFileContents(@"
+                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <A Include='a1;a2;a3'/>
+                            <A>
+                                <m>1</m>
+                            </A>
+                            <A Condition=""'%(A.Identity)' != 'a2'"">
+                                <m>%(A.Identity)</m>
+                            </A>
+                        </ItemGroup>
+                        <Message Text=""[@(A->'%(Identity)=%(m)')]""/>
+                    </Target>
+               </Project>
+            "));
+            Project p = projectFromString.Project;
+            p.Build(new string[] { "t" }, new ILogger[] { logger });
+
+            logger.AssertLogContains("[a1=a1;a2=1;a3=a3]");
+        }
+
+        /// <summary>
+        /// A modify of an item type that is not the batched item type modifies all its items in every batch.
+        /// </summary>
+        [Fact]
+        public void BatchedModifyOfAnotherItemType()
+        {
+            MockLogger logger = new MockLogger();
+            using ProjectFromString projectFromString = new(ObjectModelHelpers.CleanupFileContents(@"
+                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <ItemGroup>
+                        <A Include='a1;a2'/>
+                        <B Include='b1;b2'/>
+                    </ItemGroup>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <B Condition=""'%(A.Identity)' == 'a2'"">
+                                <m>%(A.Identity)</m>
+                            </B>
+                        </ItemGroup>
+                        <Message Text=""[@(B->'%(Identity)=%(m)')]""/>
+                    </Target>
+               </Project>
+            "));
+            Project p = projectFromString.Project;
+            p.Build(new string[] { "t" }, new ILogger[] { logger });
+
+            logger.AssertLogContains("[b1=a2;b2=a2]");
+        }
         //////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////

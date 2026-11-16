@@ -61,74 +61,41 @@ namespace Microsoft.Build.BackEnd
                 {
                     parameterValues ??= new List<string>();
                     GetBatchableValuesFromBuildItemGroupChild(parameterValues, child);
-                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, child.ItemType, _taskInstance.Location, LoggingContext);
+
+                    if (CanExecuteBatchesInOneScope(child))
+                    {
+                        buckets = BatchingEngine.PrepareBatchingBucketsOrBatches(
+                            parameterValues,
+                            lookup,
+                            child.ItemType,
+                            _taskInstance.Location,
+                            LoggingContext,
+                            out string batchedItemType,
+                            out List<BatchingEngine.ItemBatch> batches);
+
+                        if (buckets == null)
+                        {
+                            if (IsModify(child) && !MSBuildNameIgnoreCaseComparer.Default.Equals(batchedItemType, child.ItemType))
+                            {
+                                // A modify of items that are not batched reads them from each batch.
+                                buckets = BatchingEngine.CreateBuckets(batchedItemType, batches, lookup, LoggingContext);
+                            }
+                            else
+                            {
+                                ExecuteBatches(child, lookup, batchedItemType, batches);
+                                continue;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, child.ItemType, _taskInstance.Location, LoggingContext);
+                    }
 
                     // "Execute" each bucket
                     foreach (ItemBucket bucket in buckets)
                     {
-                        bool condition = ConditionEvaluator.EvaluateCondition(
-                            child.Condition,
-                            ParserOptions.AllowAll,
-                            bucket.Expander,
-                            ExpanderOptions.ExpandAll,
-                            Project.Directory,
-                            child.ConditionLocation,
-                            FileSystems.Default,
-                            LoggingContext);
-
-                        if (condition)
-                        {
-                            HashSet<string> keepMetadata = null;
-                            HashSet<string> removeMetadata = null;
-                            HashSet<string> matchOnMetadata = null;
-                            MatchOnMetadataOptions matchOnMetadataOptions = MatchOnMetadataConstants.MatchOnMetadataOptionsDefaultValue;
-
-                            if (!String.IsNullOrEmpty(child.KeepMetadata))
-                            {
-                                var keepMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.KeepMetadata, ExpanderOptions.ExpandAll, child.KeepMetadataLocation).ToList();
-                                if (keepMetadataEvaluated.Count > 0)
-                                {
-                                    keepMetadata = new HashSet<string>(keepMetadataEvaluated);
-                                }
-                            }
-
-                            if (!String.IsNullOrEmpty(child.RemoveMetadata))
-                            {
-                                var removeMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.RemoveMetadata, ExpanderOptions.ExpandAll, child.RemoveMetadataLocation).ToList();
-                                if (removeMetadataEvaluated.Count > 0)
-                                {
-                                    removeMetadata = new HashSet<string>(removeMetadataEvaluated);
-                                }
-                            }
-
-                            if (!String.IsNullOrEmpty(child.MatchOnMetadata))
-                            {
-                                var matchOnMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.MatchOnMetadata, ExpanderOptions.ExpandAll, child.MatchOnMetadataLocation).ToList();
-                                if (matchOnMetadataEvaluated.Count > 0)
-                                {
-                                    matchOnMetadata = new HashSet<string>(matchOnMetadataEvaluated);
-                                }
-
-                                Enum.TryParse(child.MatchOnMetadataOptions, out matchOnMetadataOptions);
-                            }
-
-                            if ((child.Include.Length != 0) ||
-                                (child.Exclude.Length != 0))
-                            {
-                                // It's an item -- we're "adding" items to the world
-                                ExecuteAdd(child, bucket, keepMetadata, removeMetadata, LoggingContext);
-                            }
-                            else if (child.Remove.Length != 0)
-                            {
-                                // It's a remove -- we're "removing" items from the world
-                                ExecuteRemove(child, bucket, matchOnMetadata, matchOnMetadataOptions);
-                            }
-                            else
-                            {
-                                // It's a modify -- changing existing items
-                                ExecuteModify(child, bucket, keepMetadata, removeMetadata, LoggingContext);
-                            }
-                        }
+                        ExecuteChild(child, bucket.Expander, bucket.BucketSequenceNumber, bucket.Lookup, bucket.Lookup);
                     }
                 }
                 finally
@@ -147,14 +114,147 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Executes a child element for each batch of the items of a single item type, with the results a bucket per batch
+        /// would have, but without creating a lookup scope and an expander for each batch.
+        /// </summary>
+        /// <remarks>
+        /// Like a bucket, each batch sees only its own items of the batched item type, and all other items as they were
+        /// before the child element executed: the changes of all batches are made in one scope, which is left once all
+        /// batches have executed, and neither modifies nor adds of the child element read the items that it changes.
+        /// </remarks>
+        private void ExecuteBatches(ProjectItemGroupTaskItemInstance child, Lookup lookup, string batchedItemType, List<BatchingEngine.ItemBatch> batches)
+        {
+            BatchItemProvider items = new(lookup, batchedItemType);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(lookup, items, null, FileSystems.Default, LoggingContext);
+
+            // Like a bucket, the clone must be made after the batched items were retrieved, so that it shares the table that
+            // maps clones of modified items to the originals.
+            Lookup batchesLookup = lookup.Clone();
+            Lookup.Scope scope = batchesLookup.EnterScope("ItemGroupIntrinsicTask.ExecuteBatches()");
+
+            try
+            {
+                for (int i = 0; i < batches.Count; i++)
+                {
+                    items.BatchItems = batches[i].Items;
+                    expander.Metadata = new StringMetadataTable(batches[i].Metadata);
+                    ExecuteChild(child, expander, i, items, batchesLookup);
+                }
+            }
+            finally
+            {
+                scope.LeaveScope();
+            }
+        }
+
+        /// <summary>
+        /// Whether the batches of a child element can execute in one lookup scope, because the child does not read the
+        /// items it changes. Removes, and adds that discard duplicates, read the items of the item type they change.
+        /// </summary>
+        private static bool CanExecuteBatchesInOneScope(ProjectItemGroupTaskItemInstance child)
+            => IsModify(child) || (child.Remove.Length == 0 && child.KeepDuplicates.Length == 0);
+
+        private static bool IsModify(ProjectItemGroupTaskItemInstance child)
+            => child.Include.Length == 0 && child.Exclude.Length == 0 && child.Remove.Length == 0;
+
+        /// <summary>
+        /// Executes a child element for one bucket or batch of items.
+        /// </summary>
+        /// <param name="child">The child element.</param>
+        /// <param name="expander">The expander for the bucket or batch.</param>
+        /// <param name="bucketSequenceNumber">The position of the bucket or batch in the order of execution.</param>
+        /// <param name="items">The items visible to the bucket or batch.</param>
+        /// <param name="lookup">The lookup that receives the changes.</param>
+        private void ExecuteChild(
+            ProjectItemGroupTaskItemInstance child,
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
+            int bucketSequenceNumber,
+            IItemProvider<ProjectItemInstance> items,
+            Lookup lookup)
+        {
+            bool condition = ConditionEvaluator.EvaluateCondition(
+                child.Condition,
+                ParserOptions.AllowAll,
+                expander,
+                ExpanderOptions.ExpandAll,
+                Project.Directory,
+                child.ConditionLocation,
+                FileSystems.Default,
+                LoggingContext);
+
+            if (condition)
+            {
+                HashSet<string> keepMetadata = null;
+                HashSet<string> removeMetadata = null;
+                HashSet<string> matchOnMetadata = null;
+                MatchOnMetadataOptions matchOnMetadataOptions = MatchOnMetadataConstants.MatchOnMetadataOptionsDefaultValue;
+
+                if (!String.IsNullOrEmpty(child.KeepMetadata))
+                {
+                    var keepMetadataEvaluated = expander.ExpandIntoStringListLeaveEscaped(child.KeepMetadata, ExpanderOptions.ExpandAll, child.KeepMetadataLocation).ToList();
+                    if (keepMetadataEvaluated.Count > 0)
+                    {
+                        keepMetadata = new HashSet<string>(keepMetadataEvaluated);
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(child.RemoveMetadata))
+                {
+                    var removeMetadataEvaluated = expander.ExpandIntoStringListLeaveEscaped(child.RemoveMetadata, ExpanderOptions.ExpandAll, child.RemoveMetadataLocation).ToList();
+                    if (removeMetadataEvaluated.Count > 0)
+                    {
+                        removeMetadata = new HashSet<string>(removeMetadataEvaluated);
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(child.MatchOnMetadata))
+                {
+                    var matchOnMetadataEvaluated = expander.ExpandIntoStringListLeaveEscaped(child.MatchOnMetadata, ExpanderOptions.ExpandAll, child.MatchOnMetadataLocation).ToList();
+                    if (matchOnMetadataEvaluated.Count > 0)
+                    {
+                        matchOnMetadata = new HashSet<string>(matchOnMetadataEvaluated);
+                    }
+
+                    Enum.TryParse(child.MatchOnMetadataOptions, out matchOnMetadataOptions);
+                }
+
+                if ((child.Include.Length != 0) ||
+                    (child.Exclude.Length != 0))
+                {
+                    // It's an item -- we're "adding" items to the world
+                    ExecuteAdd(child, expander, bucketSequenceNumber, lookup, keepMetadata, removeMetadata, LoggingContext);
+                }
+                else if (child.Remove.Length != 0)
+                {
+                    // It's a remove -- we're "removing" items from the world
+                    ExecuteRemove(child, expander, items, lookup, matchOnMetadata, matchOnMetadataOptions);
+                }
+                else
+                {
+                    // It's a modify -- changing existing items
+                    ExecuteModify(child, expander, items, lookup, keepMetadata, removeMetadata, LoggingContext);
+                }
+            }
+        }
+
+        /// <summary>
         /// Add items to the world. This is the in-target equivalent of an item include expression outside of a target.
         /// </summary>
         /// <param name="child">The item specification to evaluate and add.</param>
-        /// <param name="bucket">The batching bucket.</param>
+        /// <param name="expander">The expander for the bucket or batch.</param>
+        /// <param name="bucketSequenceNumber">The position of the bucket or batch in the order of execution.</param>
+        /// <param name="lookup">The lookup that receives the added items.</param>
         /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata names to keep.</param>
         /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata names to remove.</param>
         /// <param name="loggingContext">Context for logging</param>
-        private void ExecuteAdd(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, ISet<string> keepMetadata, ISet<string> removeMetadata, LoggingContext loggingContext = null)
+        private void ExecuteAdd(
+            ProjectItemGroupTaskItemInstance child,
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
+            int bucketSequenceNumber,
+            Lookup lookup,
+            ISet<string> keepMetadata,
+            ISet<string> removeMetadata,
+            LoggingContext loggingContext = null)
         {
             // First, collect up the appropriate metadata collections.  We need the one from the item definition, if any, and
             // the one we are using for this batching bucket.
@@ -162,13 +262,13 @@ namespace Microsoft.Build.BackEnd
             Project.ItemDefinitions.TryGetValue(child.ItemType, out itemDefinition);
 
             // The NestedMetadataTable will handle the aggregation of the different metadata collections
-            NestedMetadataTable metadataTable = new NestedMetadataTable(child.ItemType, bucket.Expander.Metadata, itemDefinition);
-            IMetadataTable originalMetadataTable = bucket.Expander.Metadata;
+            NestedMetadataTable metadataTable = new NestedMetadataTable(child.ItemType, expander.Metadata, itemDefinition);
+            IMetadataTable originalMetadataTable = expander.Metadata;
 
-            bucket.Expander.Metadata = metadataTable;
+            expander.Metadata = metadataTable;
 
             // Second, expand the item include and exclude, and filter existing metadata as appropriate.
-            List<ProjectItemInstance> itemsToAdd = ExpandItemIntoItems(child, bucket.Expander, keepMetadata, removeMetadata, loggingContext);
+            List<ProjectItemInstance> itemsToAdd = ExpandItemIntoItems(child, expander, keepMetadata, removeMetadata, loggingContext);
 
             // Third, expand the metadata.
             foreach (ProjectItemGroupTaskMetadataInstance metadataInstance in child.Metadata)
@@ -176,7 +276,7 @@ namespace Microsoft.Build.BackEnd
                 bool condition = ConditionEvaluator.EvaluateCondition(
                     metadataInstance.Condition,
                     ParserOptions.AllowAll,
-                    bucket.Expander,
+                    expander,
                     ExpanderOptions.ExpandAll,
                     Project.Directory,
                     metadataInstance.Location,
@@ -187,14 +287,14 @@ namespace Microsoft.Build.BackEnd
                 {
                     ExpanderOptions expanderOptions = ExpanderOptions.ExpandAll;
                     if (// If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
-                        bucket.BucketSequenceNumber == 0 &&
+                        bucketSequenceNumber == 0 &&
                         // Referring to unqualified metadata of other item (transform) is fine.
                         !ExpressionShredder.ContainsItemVectorMarker(child.Include))
                     {
                         expanderOptions |= ExpanderOptions.LogOnItemMetadataSelfReference;
                     }
 
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, metadataInstance.Location);
+                    string evaluatedValue = expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, metadataInstance.Location);
 
                     // This both stores the metadata so we can add it to all the items we just created later, and
                     // exposes this metadata to further metadata evaluations in subsequent loop iterations.
@@ -206,13 +306,13 @@ namespace Microsoft.Build.BackEnd
             ProjectItemInstance.SetMetadata(metadataTable.AddedMetadata, itemsToAdd); // Add in one operation for potential copy-on-write
 
             // Restore the original metadata table.
-            bucket.Expander.Metadata = originalMetadataTable;
+            expander.Metadata = originalMetadataTable;
 
             // Determine if we should NOT add duplicate entries
             bool keepDuplicates = ConditionEvaluator.EvaluateCondition(
                 child.KeepDuplicates,
                 ParserOptions.AllowAll,
-                bucket.Expander,
+                expander,
                 ExpanderOptions.ExpandAll,
                 Project.Directory,
                 child.KeepDuplicatesLocation,
@@ -238,7 +338,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Now add the items we created to the lookup.
-            bucket.Lookup.AddNewItemsOfItemType(child.ItemType, itemsToAdd, !keepDuplicates, logFunction);
+            lookup.AddNewItemsOfItemType(child.ItemType, itemsToAdd, !keepDuplicates, logFunction);
             // Add in one operation for potential copy-on-write
         }
 
@@ -247,12 +347,20 @@ namespace Microsoft.Build.BackEnd
         /// they can be reverted when the project is reset after the end of the build.
         /// </summary>
         /// <param name="child">The item specification to evaluate and remove.</param>
-        /// <param name="bucket">The batching bucket.</param>
+        /// <param name="expander">The expander for the bucket.</param>
+        /// <param name="items">The items visible to the bucket.</param>
+        /// <param name="lookup">The lookup that receives the removes.</param>
         /// <param name="matchOnMetadata">Metadata matching.</param>
         /// <param name="matchingOptions">Options matching.</param>
-        private void ExecuteRemove(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, HashSet<string> matchOnMetadata, MatchOnMetadataOptions matchingOptions)
+        private void ExecuteRemove(
+            ProjectItemGroupTaskItemInstance child,
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
+            IItemProvider<ProjectItemInstance> items,
+            Lookup lookup,
+            HashSet<string> matchOnMetadata,
+            MatchOnMetadataOptions matchingOptions)
         {
-            ICollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
+            ICollection<ProjectItemInstance> group = items.GetItems(child.ItemType);
             if (group == null)
             {
                 // No items of this type to remove
@@ -262,11 +370,11 @@ namespace Microsoft.Build.BackEnd
             List<ProjectItemInstance> itemsToRemove;
             if (matchOnMetadata == null)
             {
-                itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander);
+                itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, expander);
             }
             else
             {
-                itemsToRemove = FindItemsMatchingMetadataSpecification(group, child, bucket.Expander, matchOnMetadata, matchingOptions);
+                itemsToRemove = FindItemsMatchingMetadataSpecification(group, child, expander, matchOnMetadata, matchingOptions);
             }
 
             if (itemsToRemove != null)
@@ -284,7 +392,7 @@ namespace Microsoft.Build.BackEnd
                         child.Location);
                 }
 
-                bucket.Lookup.RemoveItems(child.ItemType, itemsToRemove);
+                lookup.RemoveItems(child.ItemType, itemsToRemove);
             }
         }
 
@@ -293,13 +401,22 @@ namespace Microsoft.Build.BackEnd
         /// they can be reverted when the project is reset after the end of the build.
         /// </summary>
         /// <param name="child">The item specification to evaluate and modify.</param>
-        /// <param name="bucket">The batching bucket.</param>
+        /// <param name="expander">The expander for the bucket or batch.</param>
+        /// <param name="items">The items visible to the bucket or batch.</param>
+        /// <param name="lookup">The lookup that receives the modifications.</param>
         /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata names to keep.</param>
         /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata names to remove.</param>
         /// <param name="loggingContext">Context for this operation.</param>
-        private void ExecuteModify(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, ISet<string> keepMetadata, ISet<string> removeMetadata, LoggingContext loggingContext = null)
+        private void ExecuteModify(
+            ProjectItemGroupTaskItemInstance child,
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
+            IItemProvider<ProjectItemInstance> items,
+            Lookup lookup,
+            ISet<string> keepMetadata,
+            ISet<string> removeMetadata,
+            LoggingContext loggingContext = null)
         {
-            ICollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
+            ICollection<ProjectItemInstance> group = items.GetItems(child.ItemType);
             if (group == null || group.Count == 0)
             {
                 // No items of this type to modify
@@ -330,7 +447,7 @@ namespace Microsoft.Build.BackEnd
                 bool condition = ConditionEvaluator.EvaluateCondition(
                     metadataInstance.Condition,
                     ParserOptions.AllowAll,
-                    bucket.Expander,
+                    expander,
                     ExpanderOptions.ExpandAll,
                     Project.Directory,
                     metadataInstance.ConditionLocation,
@@ -339,13 +456,13 @@ namespace Microsoft.Build.BackEnd
 
                 if (condition)
                 {
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance.Location);
+                    string evaluatedValue = expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance.Location);
                     metadataToSet[metadataInstance.Name] = Lookup.MetadataModification.CreateFromNewValue(evaluatedValue);
                 }
             }
 
             // Now apply the changes.  This must be done after filtering, since explicitly set metadata overrides filters.
-            bucket.Lookup.ModifyItems(child.ItemType, group, metadataToSet);
+            lookup.ModifyItems(child.ItemType, group, metadataToSet);
         }
 
         /// <summary>
@@ -668,6 +785,29 @@ namespace Microsoft.Build.BackEnd
                 child.Remove);
             MetadataTrie<ProjectPropertyInstance, ProjectItemInstance> metadataSet = new MetadataTrie<ProjectPropertyInstance, ProjectItemInstance>(matchingOptions, matchOnMetadata, itemSpec);
             return group.Where(item => metadataSet.Contains(matchOnMetadata.Select(m => item.GetMetadataValue(m)))).ToList();
+        }
+
+        /// <summary>
+        /// Provides the items visible to a batch: its own items of the batched item type, and all other items from the lookup.
+        /// </summary>
+        private sealed class BatchItemProvider : IItemProvider<ProjectItemInstance>
+        {
+            private readonly Lookup _lookup;
+            private readonly string _batchedItemType;
+
+            internal BatchItemProvider(Lookup lookup, string batchedItemType)
+            {
+                _lookup = lookup;
+                _batchedItemType = batchedItemType;
+            }
+
+            /// <summary>
+            /// The items of the batched item type in the current batch.
+            /// </summary>
+            internal List<ProjectItemInstance> BatchItems { get; set; }
+
+            public ICollection<ProjectItemInstance> GetItems(string itemType)
+                => MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, _batchedItemType) ? BatchItems : _lookup.GetItems(itemType);
         }
 
         /// <summary>

@@ -105,9 +105,73 @@ namespace Microsoft.Build.BackEnd
             string implicitBatchableItemType,
             ElementLocation elementLocation,
             LoggingContext loggingContext)
+            => PrepareBatchingBuckets(batchableObjectParameters, lookup, implicitBatchableItemType, elementLocation, loggingContext, returnSingleItemTypeBatches: false, out _, out _);
+
+        /// <summary>
+        /// Prepares buckets like <see cref="PrepareBatchingBuckets(List{string}, Lookup, string, ElementLocation, LoggingContext)"/>,
+        /// unless the batchable object batches the items of a single item type into more than one batch. Then it returns those
+        /// batches instead, without creating a lookup scope and an expander for each of them.
+        /// </summary>
+        /// <param name="batchableObjectParameters">The parameters of the batchable object.</param>
+        /// <param name="lookup">The lookup that provides the items.</param>
+        /// <param name="implicitBatchableItemType">Any item type that can be considered an implicit input to the batchable object.</param>
+        /// <param name="elementLocation">The location of the batchable object.</param>
+        /// <param name="loggingContext">The logging context for the expanders of the buckets.</param>
+        /// <param name="batchedItemType">The item type of the items in <paramref name="batches"/>.</param>
+        /// <param name="batches">The batches, in the order in which they are to be executed, or null if buckets are returned.</param>
+        /// <returns>The buckets, or null if <paramref name="batches"/> are returned instead.</returns>
+        internal static List<ItemBucket> PrepareBatchingBucketsOrBatches(
+            List<string> batchableObjectParameters,
+            Lookup lookup,
+            string implicitBatchableItemType,
+            ElementLocation elementLocation,
+            LoggingContext loggingContext,
+            out string batchedItemType,
+            out List<ItemBatch> batches)
+            => PrepareBatchingBuckets(batchableObjectParameters, lookup, implicitBatchableItemType, elementLocation, loggingContext, returnSingleItemTypeBatches: true, out batchedItemType, out batches);
+
+        /// <summary>
+        /// Creates a bucket for each batch of items of the specified item type.
+        /// </summary>
+        internal static List<ItemBucket> CreateBuckets(string batchedItemType, List<ItemBatch> batches, Lookup lookup, LoggingContext loggingContext)
+        {
+            FrozenSet<string> itemNames = new[] { batchedItemType }.ToFrozenSet(MSBuildNameIgnoreCaseComparer.Default);
+            var buckets = new List<ItemBucket>(batches.Count);
+
+            for (int i = 0; i < batches.Count; i++)
+            {
+                var bucket = new ItemBucket(itemNames, batches[i].Metadata, lookup, i);
+                if (loggingContext != null)
+                {
+                    bucket.Initialize(loggingContext);
+                }
+
+                foreach (ProjectItemInstance item in batches[i].Items)
+                {
+                    bucket.AddItem(item);
+                }
+
+                buckets.Add(bucket);
+            }
+
+            return buckets;
+        }
+
+        private static List<ItemBucket> PrepareBatchingBuckets(
+            List<string> batchableObjectParameters,
+            Lookup lookup,
+            string implicitBatchableItemType,
+            ElementLocation elementLocation,
+            LoggingContext loggingContext,
+            bool returnSingleItemTypeBatches,
+            out string batchedItemType,
+            out List<ItemBatch> batches)
         {
             Assumed.NotNull(batchableObjectParameters, "Need the parameters of the batchable object to determine if it can be batched.");
             Assumed.NotNull(lookup, "Need to specify the lookup.");
+
+            batchedItemType = null;
+            batches = null;
 
             ItemsAndMetadataPair pair = ExpressionShredder.GetReferencedItemNamesAndMetadata(batchableObjectParameters);
 
@@ -152,6 +216,23 @@ namespace Microsoft.Build.BackEnd
                         // figure out how to get data out of the hashtable without knowing any of the
                         // keys!
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotReferenceItemMetadataWithoutItemName", unqualifiedMetadataName);
+                    }
+                }
+                else if (returnSingleItemTypeBatches && itemListsToBeBatched.Count == 1)
+                {
+                    foreach (KeyValuePair<string, ICollection<ProjectItemInstance>> entry in itemListsToBeBatched)
+                    {
+                        // Use the previously-fetched items, if possible
+                        List<ItemBatch> itemBatches = BatchItems(entry.Value ?? lookup.GetItems(entry.Key), consumedMetadataReferences, elementLocation);
+
+                        if (itemBatches.Count > 1)
+                        {
+                            batchedItemType = entry.Key;
+                            batches = itemBatches;
+                            return null;
+                        }
+
+                        buckets = CreateBuckets(entry.Key, itemBatches, lookup, loggingContext);
                     }
                 }
                 else
@@ -391,6 +472,58 @@ namespace Microsoft.Build.BackEnd
             }
 
             return itemMetadataValues;
+        }
+
+        /// <summary>
+        /// Partitions items of a single item type into batches of items that have the same values for all the item
+        /// metadata consumed by the batchable object, like <see cref="BucketConsumedItems"/> does into buckets.
+        /// </summary>
+        private static List<ItemBatch> BatchItems(
+            ICollection<ProjectItemInstance> items,
+            Dictionary<string, MetadataReference> consumedMetadataReferences,
+            ElementLocation elementLocation)
+        {
+            var batches = new List<ItemBatch>();
+            Dictionary<Dictionary<string, string>, int> batchIndexes = new(MetadataValuesComparer.Instance);
+
+            foreach (ProjectItemInstance item in items)
+            {
+                Dictionary<string, string> itemMetadataValues = GetItemMetadataValues(item, consumedMetadataReferences, elementLocation);
+
+                if (batchIndexes.TryGetValue(itemMetadataValues, out int batchIndex))
+                {
+                    batches[batchIndex].Items.Add(item);
+                }
+                else
+                {
+                    batchIndexes.Add(itemMetadataValues, batches.Count);
+                    batches.Add(new ItemBatch(itemMetadataValues, [item]));
+                }
+            }
+
+            return batches;
+        }
+
+        /// <summary>
+        /// Items of a single item type that have the same values for all the item metadata consumed by a batchable object.
+        /// </summary>
+        internal readonly struct ItemBatch
+        {
+            internal ItemBatch(Dictionary<string, string> metadata, List<ProjectItemInstance> items)
+            {
+                Metadata = metadata;
+                Items = items;
+            }
+
+            /// <summary>
+            /// The values of the consumed metadata, keyed by their possibly qualified names, as for an <see cref="ItemBucket"/>.
+            /// </summary>
+            internal Dictionary<string, string> Metadata { get; }
+
+            /// <summary>
+            /// The items, in the order in which they were declared.
+            /// </summary>
+            internal List<ProjectItemInstance> Items { get; }
         }
 
         /// <summary>
