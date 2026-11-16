@@ -4051,6 +4051,49 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             logger.AssertLogContains("[b1=a2;b2=a2]");
         }
+
+        /// <summary>
+        /// With task-input logging, the items added by all batches of an item element are logged in one event, unless the
+        /// change wave is disabled, which logs an event per batch.
+        /// </summary>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BatchedAddLogsAddedItems(bool disableChangeWave)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            if (disableChangeWave)
+            {
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_14.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+            }
+
+            using ProjectFromString projectFromString = new(ObjectModelHelpers.CleanupFileContents(@"
+                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <ItemGroup>
+                        <A Include='a1;a2;a3'/>
+                    </ItemGroup>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <B Include=""@(A->'%(Identity).b')"" Condition=""'%(A.Identity)' != 'a2'""/>
+                        </ItemGroup>
+                    </Target>
+               </Project>
+            "));
+            MockLogger logger = new MockLogger();
+            BuildParameters parameters = new BuildParameters { LogTaskInputs = true, Loggers = [logger] };
+            BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, new BuildRequestData(projectFromString.Project.CreateProjectInstance(), ["t"]));
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            IEnumerable<string> loggedAdds = logger.AllBuildEvents
+                .OfType<TaskParameterEventArgs>()
+                .Where(e => e.Kind == TaskParameterMessageKind.AddItem && e.ItemType == "B")
+                .Select(e => string.Join(";", e.Items.Cast<ITaskItem>().Select(item => item.ItemSpec)));
+            string[] expected = disableChangeWave ? ["a1.b", "a3.b"] : ["a1.b;a3.b"];
+            loggedAdds.ShouldBe(expected);
+        }
         //////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////

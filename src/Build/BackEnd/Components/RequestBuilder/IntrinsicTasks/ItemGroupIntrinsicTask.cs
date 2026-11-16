@@ -132,18 +132,37 @@ namespace Microsoft.Build.BackEnd
             Lookup batchesLookup = lookup.Clone();
             Lookup.Scope scope = batchesLookup.EnterScope("ItemGroupIntrinsicTask.ExecuteBatches()");
 
+            // Log the items added by all batches in one event, rather than an event per batch.
+            List<ProjectItemInstance> addedItems =
+                LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && !IsModify(child) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)
+                    ? new List<ProjectItemInstance>()
+                    : null;
+
             try
             {
                 for (int i = 0; i < batches.Count; i++)
                 {
                     items.BatchItems = batches[i].Items;
                     expander.Metadata = new StringMetadataTable(batches[i].Metadata);
-                    ExecuteChild(child, expander, i, items, batchesLookup);
+                    ExecuteChild(child, expander, i, items, batchesLookup, addedItems);
                 }
             }
             finally
             {
                 scope.LeaveScope();
+
+                if (addedItems?.Count > 0)
+                {
+                    ItemGroupLoggingHelper.LogTaskParameter(
+                        LoggingContext,
+                        TaskParameterMessageKind.AddItem,
+                        parameterName: null,
+                        propertyName: null,
+                        child.ItemType,
+                        addedItems,
+                        logItemMetadata: true,
+                        child.Location);
+                }
             }
         }
 
@@ -165,12 +184,14 @@ namespace Microsoft.Build.BackEnd
         /// <param name="bucketSequenceNumber">The position of the bucket or batch in the order of execution.</param>
         /// <param name="items">The items visible to the bucket or batch.</param>
         /// <param name="lookup">The lookup that receives the changes.</param>
+        /// <param name="addedItems">If not null, receives the added items, which are then not logged.</param>
         private void ExecuteChild(
             ProjectItemGroupTaskItemInstance child,
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
             int bucketSequenceNumber,
             IItemProvider<ProjectItemInstance> items,
-            Lookup lookup)
+            Lookup lookup,
+            List<ProjectItemInstance> addedItems = null)
         {
             bool condition = ConditionEvaluator.EvaluateCondition(
                 child.Condition,
@@ -222,7 +243,7 @@ namespace Microsoft.Build.BackEnd
                     (child.Exclude.Length != 0))
                 {
                     // It's an item -- we're "adding" items to the world
-                    ExecuteAdd(child, expander, bucketSequenceNumber, lookup, keepMetadata, removeMetadata, LoggingContext);
+                    ExecuteAdd(child, expander, bucketSequenceNumber, lookup, keepMetadata, removeMetadata, addedItems, LoggingContext);
                 }
                 else if (child.Remove.Length != 0)
                 {
@@ -246,6 +267,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup">The lookup that receives the added items.</param>
         /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata names to keep.</param>
         /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata names to remove.</param>
+        /// <param name="addedItems">If not null, receives the added items, which are then not logged.</param>
         /// <param name="loggingContext">Context for logging</param>
         private void ExecuteAdd(
             ProjectItemGroupTaskItemInstance child,
@@ -254,6 +276,7 @@ namespace Microsoft.Build.BackEnd
             Lookup lookup,
             ISet<string> keepMetadata,
             ISet<string> removeMetadata,
+            List<ProjectItemInstance> addedItems,
             LoggingContext loggingContext = null)
         {
             // First, collect up the appropriate metadata collections.  We need the one from the item definition, if any, and
@@ -321,7 +344,12 @@ namespace Microsoft.Build.BackEnd
 
             Action<IList> logFunction = null;
 
-            if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd?.Count > 0)
+            if (addedItems != null)
+            {
+                // Batches that keep duplicates add all their items, which the caller logs together.
+                addedItems.AddRange(itemsToAdd);
+            }
+            else if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd?.Count > 0)
             {
                 logFunction = (itemList) =>
                 {
