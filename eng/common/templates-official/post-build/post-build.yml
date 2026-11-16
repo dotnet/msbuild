@@ -266,8 +266,14 @@ stages:
           PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
 
       - task: UseDotNet@2
+        displayName: Install .NET 8 SDK for post-build tooling
         inputs:
           version: 8.0.x
+          installationPath: $(Build.SourcesDirectory)/.dotnet
+
+      - task: UseDotNet@2
+        inputs:
+          version: 10.0.x
           installationPath: $(Build.SourcesDirectory)/.dotnet
 
       - task: AzureCLI@2
