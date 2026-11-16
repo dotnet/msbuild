@@ -72,7 +72,7 @@
     </Task>
   </UsingTask>
 
-  <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder;SetBinPaths;GatherNuGetDependencies">
+  <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder;SetBinPaths;SetBinPathsArm64;GatherNuGetDependencies">
     <LocateVisualStudioTask>
       <Output TaskParameter="VsInstallPath" PropertyName="AvailableVsInstallPath" />
     </LocateVisualStudioTask>
