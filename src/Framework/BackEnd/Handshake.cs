@@ -34,6 +34,11 @@ internal class Handshake
     private readonly int? _netTaskHostSaltDriveCaseVariant;
 
     /// <summary>
+    /// The Windows session of this process, or -1 until <see cref="GetCurrentProcessSessionId"/> first reads it.
+    /// </summary>
+    private static int s_currentProcessSessionId = -1;
+
+    /// <summary>
     ///  Initializes a new instance of the <see cref="Handshake"/> class with the specified node type.
     /// </summary>
     /// <param name="nodeType">
@@ -115,7 +120,7 @@ internal class Handshake
         CommunicationsUtilities.Trace($"Change wave salt is {changeWaveSalt}");
         CommunicationsUtilities.Trace($"Tools directory root is {toolsDirectory}");
 
-        // Get session ID if needed (expensive call)
+        // Get session ID if needed
         int sessionId = 0;
         if (includeSessionId && NativeMethods.IsWindows)
         {
@@ -123,8 +128,7 @@ internal class Handshake
             // On Unix, getsid() returns the session leader PID which differs per terminal,
             // preventing cross-terminal node reuse. Use 0 since Unix doesn't need
             // RDP-style session isolation.
-            using var currentProcess = Process.GetCurrentProcess();
-            sessionId = currentProcess.SessionId;
+            sessionId = GetCurrentProcessSessionId();
         }
 
         _handshakeComponents = IsNetTaskHost
@@ -134,6 +138,24 @@ internal class Handshake
 
     private bool IsNetTaskHost
         => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET | HandshakeOptions.TaskHost);
+
+    /// <summary>
+    /// Gets the Windows session of this process. A process cannot move to another session, so the session is read
+    /// only once: <see cref="Process.SessionId"/> takes a snapshot of every process on the machine, which costs
+    /// milliseconds, and the engine constructs a handshake for every task that it runs in a TaskHost.
+    /// </summary>
+    private static int GetCurrentProcessSessionId()
+    {
+        int sessionId = s_currentProcessSessionId;
+        if (sessionId < 0)
+        {
+            using Process currentProcess = Process.GetCurrentProcess();
+            sessionId = currentProcess.SessionId;
+            s_currentProcessSessionId = sessionId;
+        }
+
+        return sessionId;
+    }
 
     private bool IsTaskHost
         => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.TaskHost);
