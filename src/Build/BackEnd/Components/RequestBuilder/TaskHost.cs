@@ -1275,10 +1275,12 @@ namespace Microsoft.Build.BackEnd
                                 // We need to clone the task items because if we did not then we would be passing live references
                                 // out to the caller of the msbuild callback and any modifications they make to those items
                                 // would appear in the results cache.
-                                ITaskItem[] clonedTaskItem = new ITaskItem[resultEntry.Value.Items.Length];
-                                for (int j = 0; j < resultEntry.Value.Items.Length; j++)
+                                // Read the items once: each read of TargetResult.Items takes a lock.
+                                ITaskItem[] resultItems = resultEntry.Value.Items;
+                                ITaskItem[] clonedTaskItem = new ITaskItem[resultItems.Length];
+                                for (int j = 0; j < resultItems.Length; j++)
                                 {
-                                    clonedTaskItem[j] = ((TaskItem)resultEntry.Value.Items[j]).DeepClone();
+                                    clonedTaskItem[j] = ((TaskItem)resultItems[j]).DeepClone();
                                 }
 
                                 targetOutputsPerProject[i][resultEntry.Key] = clonedTaskItem;

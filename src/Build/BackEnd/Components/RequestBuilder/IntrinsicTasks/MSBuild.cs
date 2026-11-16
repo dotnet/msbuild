@@ -10,6 +10,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using EngineTaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using TargetOutputMetadata = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TargetOutputMetadata;
 
 // NOTE: This is nearly identical to the MSBuild task in Microsoft.Build.Tasks.  We are deprecating that task,
 // so this is the governing implementation.
@@ -668,6 +670,11 @@ namespace Microsoft.Build.BackEnd
                         {
                             if (targetOutputsPerProject[i].TryGetValue(targetName, out ITaskItem[] outputItemsFromTarget))
                             {
+                                // Compute the metadata that every output of this target gets from the project once, rather than per output.
+                                TargetOutputMetadata targetOutputMetadata = projects[i] != null && outputItemsFromTarget.Length > 0
+                                    ? TargetOutputMetadata.TryCreate(projects[i], targetName)
+                                    : null;
+
                                 foreach (ITaskItem outputItemFromTarget in outputItemsFromTarget)
                                 {
                                     // No need to rebase if the calling project is the same as the callee project
@@ -687,6 +694,15 @@ namespace Microsoft.Build.BackEnd
                                             {
                                                 log.LogWarningWithCodeFromResources(null, projects[i].ItemSpec, 0, 0, 0, 0, "MSBuild.CannotRebaseOutputItemPath", outputItemFromTarget.ItemSpec, e.Message);
                                             }
+                                        }
+
+                                        // Add the project's metadata, OriginalItemSpec, MSBuildSourceProjectFile and MSBuildSourceTargetName
+                                        // in one step when the output allows it. Otherwise, add them one at a time below.
+                                        if (targetOutputMetadata != null
+                                            && outputItemFromTarget is EngineTaskItem engineOutputItem
+                                            && engineOutputItem.TryAddTargetOutputMetadata(targetOutputMetadata))
+                                        {
+                                            continue;
                                         }
 
                                         // Copy the custom item metadata from the "Projects" items to these

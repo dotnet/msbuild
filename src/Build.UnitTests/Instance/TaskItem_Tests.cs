@@ -1,8 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -176,6 +178,112 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.True(parent.Equals(clone)); // "The parent and the clone should be equal"
             Assert.True(clone.Equals(parent)); // "The parent and the clone should be equal"
             Assert.False(object.ReferenceEquals(parent, clone)); // "The parent and the child should not be the same object"
+        }
+
+        /// <summary>
+        /// Metadata of a project item and a target output, as name=value pairs with escaped values. Null means that an
+        /// item has no metadata dictionary, and an empty array means that its dictionary is empty.
+        /// </summary>
+        public static TheoryData<string[], string[]> TargetOutputMetadataCases => new()
+        {
+            { ["A=projectA", "B=projectB"], ["B=outputB", "C=outputC"] },
+            { ["A=projectA", "B="], ["A=", "B=", "OriginalItemSpec=", "MSBuildSourceProjectFile=", "MSBuildSourceTargetName="] },
+            { ["OriginalItemSpec=projectOriginal", "MSBuildSourceProjectFile=projectSource.proj", "MSBuildSourceTargetName=ProjectTarget"], ["C=outputC"] },
+            { ["MSBuildSourceProjectFile="], ["OriginalItemSpec=outputOriginal", "MSBuildSourceProjectFile=outputSource.proj", "MSBuildSourceTargetName=OutputTarget"] },
+            { ["MSBuildSourceProjectFile="], ["C=outputC"] },
+            { ["Escaped=a%3Bb%25c"], ["Escaped=", "Other=x%3By"] },
+            { ["foo=projectFoo", "originalitemspec=projectOriginal", "msbuildsourcetargetname="], ["FOO=", "Bar=outputBar"] },
+            { ["A=projectA"], null },
+            { null, null },
+            { ["A=projectA"], [] },
+            { [], [] },
+            { null, ["C=outputC"] },
+        };
+
+        /// <summary>
+        /// Adding the MSBuild task's metadata to a target output in one step gives the same metadata as adding it one
+        /// metadatum at a time, as the MSBuild task does for the outputs that cannot take the one-step path.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(TargetOutputMetadataCases))]
+        public void TargetOutputMetadataMatchesAddingMetadataOneAtATime(string[] projectMetadata, string[] outputMetadata)
+        {
+            const string TargetName = "Target";
+            TaskItem projectItem = CreateItemWithMetadata("Callee.proj", projectMetadata);
+            TaskItem expected = CreateItemWithMetadata("output.dll", outputMetadata);
+            TaskItem actual = expected.DeepClone();
+
+            projectItem.CopyMetadataTo(expected);
+            if (string.IsNullOrEmpty(expected.GetMetadata("MSBuildSourceProjectFile")))
+            {
+                expected.SetMetadata("MSBuildSourceProjectFile", projectItem.GetMetadata("FullPath"));
+            }
+
+            if (string.IsNullOrEmpty(expected.GetMetadata("MSBuildSourceTargetName")))
+            {
+                expected.SetMetadata("MSBuildSourceTargetName", TargetName);
+            }
+
+            TaskItem.TargetOutputMetadata targetOutputMetadata = TaskItem.TargetOutputMetadata.TryCreate(projectItem, TargetName);
+            targetOutputMetadata.ShouldNotBeNull();
+            actual.TryAddTargetOutputMetadata(targetOutputMetadata).ShouldBeTrue();
+
+            actual.MetadataCollection.ShouldBe(expected.MetadataCollection, ignoreOrder: true);
+            actual.DirectMetadataCount.ShouldBe(expected.DirectMetadataCount);
+        }
+
+        /// <summary>
+        /// Items whose metadata cannot be updated in one step are left to take the MSBuild task's metadata one at a time.
+        /// </summary>
+        [Fact]
+        public void TargetOutputMetadataIsDeclinedWhenItemsNeedMetadataAddedOneAtATime()
+        {
+            ProjectItemDefinition projectItemDefinition = new(new Project(), "MyItem");
+            projectItemDefinition.SetMetadataValue("A", "definition");
+            List<ProjectItemDefinitionInstance> itemDefinitions = [new ProjectItemDefinitionInstance(projectItemDefinition)];
+            ImmutableDictionary<string, string> ordinalIgnoreCaseMetadata =
+                ImmutableDictionary.Create<string, string>(StringComparer.OrdinalIgnoreCase).Add("A", "a");
+            string projectDirectory = Path.GetTempPath();
+
+            TaskItem.TargetOutputMetadata.TryCreate(
+                new TaskItem("Callee.proj", "Callee.proj", null, itemDefinitions, projectDirectory, immutable: false, "caller.proj"), "Target").ShouldBeNull();
+            TaskItem.TargetOutputMetadata.TryCreate(
+                new TaskItem("Callee.proj", "Callee.proj", ordinalIgnoreCaseMetadata, null, projectDirectory, immutable: false, "caller.proj"), "Target").ShouldBeNull();
+            TaskItem.TargetOutputMetadata.TryCreate(CreateItemWithMetadata("Callee.proj", ["RecursiveDir=sub"]), "Target").ShouldBeNull();
+
+            TaskItem.TargetOutputMetadata targetOutputMetadata = TaskItem.TargetOutputMetadata.TryCreate(CreateItemWithMetadata("Callee.proj", ["A=a"]), "Target");
+            new TaskItem("output.dll", "output.dll", null, itemDefinitions, projectDirectory, immutable: false, "callee.proj")
+                .TryAddTargetOutputMetadata(targetOutputMetadata).ShouldBeFalse();
+            new TaskItem("output.dll", "output.dll", ordinalIgnoreCaseMetadata, null, projectDirectory, immutable: false, "callee.proj")
+                .TryAddTargetOutputMetadata(targetOutputMetadata).ShouldBeFalse();
+            new TaskItem("output.dll", "output.dll", null, null, projectDirectory, immutable: true, "callee.proj")
+                .TryAddTargetOutputMetadata(targetOutputMetadata).ShouldBeFalse();
+        }
+
+        private static TaskItem CreateItemWithMetadata(string itemSpec, string[] metadata)
+        {
+            TaskItem item = new(itemSpec, itemSpec, null, null, Path.GetTempPath(), immutable: false, "test.proj");
+
+            if (metadata is null)
+            {
+                return item;
+            }
+
+            if (metadata.Length == 0)
+            {
+                // Leave an empty, rather than missing, metadata dictionary.
+                item.SetMetadata("Removed", "value");
+                item.RemoveMetadata("Removed");
+                return item;
+            }
+
+            foreach (string metadatum in metadata)
+            {
+                int separator = metadatum.IndexOf('=');
+                item.SetMetadata(metadatum.Substring(0, separator), metadatum.Substring(separator + 1));
+            }
+
+            return item;
         }
 
         /// <summary>

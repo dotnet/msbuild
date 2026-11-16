@@ -1623,6 +1623,171 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
+            /// Adds to this target output the metadata that the MSBuild task attaches to the items returned by the
+            /// projects it builds. The result is the same as:
+            /// <code>
+            /// projectItem.CopyMetadataTo(this);
+            /// if (string.IsNullOrEmpty(GetMetadata("MSBuildSourceProjectFile"))) SetMetadata("MSBuildSourceProjectFile", projectItem.GetMetadata("FullPath"));
+            /// if (string.IsNullOrEmpty(GetMetadata("MSBuildSourceTargetName"))) SetMetadata("MSBuildSourceTargetName", targetName);
+            /// </code>
+            /// but the metadata of this item is replaced once, instead of once for each kind of metadata added.
+            /// </summary>
+            /// <param name="outputMetadata">The metadata added to every output of the target.</param>
+            /// <returns>
+            /// <see langword="false"/> if this item has to take the metadata one at a time instead, because it is
+            /// immutable, inherits item definition metadata, or stores its metadata in another kind of dictionary.
+            /// </returns>
+            internal bool TryAddTargetOutputMetadata(TargetOutputMetadata outputMetadata)
+            {
+                if (_isImmutable || _itemDefinitions != null)
+                {
+                    return false;
+                }
+
+                if (_directMetadata is null)
+                {
+                    // CopyMetadataTo would share the metadata of the project item, which already includes the rest.
+                    _directMetadata = outputMetadata.GetMetadata(outputHasSourceProjectFile: false);
+                    return true;
+                }
+
+                if (_directMetadata is not ImmutableDictionary<string, string> directMetadata
+                    || !ReferenceEquals(directMetadata.KeyComparer, MSBuildNameIgnoreCaseComparer.Default))
+                {
+                    return false;
+                }
+
+                ImmutableDictionary<string, string> metadataToAdd = outputMetadata.GetMetadata(
+                    outputHasSourceProjectFile: directMetadata.TryGetValue(ItemMetadataNames.msbuildSourceProjectFile, out string sourceProjectFile)
+                        && !string.IsNullOrEmpty(sourceProjectFile));
+
+                if (directMetadata.Count == 0)
+                {
+                    _directMetadata = metadataToAdd;
+                    return true;
+                }
+
+                // Like CopyMetadataTo, keep every non-empty value that this item already has.
+                ImmutableDictionary<string, string>.Builder builder = null;
+                foreach (KeyValuePair<string, string> metadatum in metadataToAdd)
+                {
+                    if (!directMetadata.TryGetValue(metadatum.Key, out string existingValue) || string.IsNullOrEmpty(existingValue))
+                    {
+                        builder ??= directMetadata.ToBuilder();
+                        builder[metadatum.Key] = metadatum.Value;
+                    }
+                }
+
+                if (builder != null)
+                {
+                    _directMetadata = builder.ToImmutable();
+                }
+
+                return true;
+            }
+
+            /// <summary>
+            /// The metadata that the MSBuild task adds to every item that a target returns: the custom metadata of the
+            /// item naming the project, OriginalItemSpec, MSBuildSourceProjectFile and MSBuildSourceTargetName.
+            /// It is computed once per project and target, for use with <see cref="TryAddTargetOutputMetadata"/>.
+            /// </summary>
+            internal sealed class TargetOutputMetadata
+            {
+                private readonly TaskItem _projectItem;
+
+                /// <summary>
+                /// The metadata to add. It contains a non-empty MSBuildSourceProjectFile only if the project item has one.
+                /// </summary>
+                private readonly ImmutableDictionary<string, string> _metadata;
+
+                private readonly bool _projectItemHasSourceProjectFile;
+
+                /// <summary>
+                /// <see cref="_metadata"/> with the full path of the project as MSBuildSourceProjectFile, created when first needed.
+                /// </summary>
+                private ImmutableDictionary<string, string> _metadataWithProjectFullPath;
+
+                private TargetOutputMetadata(TaskItem projectItem, ImmutableDictionary<string, string> metadata, bool projectItemHasSourceProjectFile)
+                {
+                    _projectItem = projectItem;
+                    _metadata = metadata;
+                    _projectItemHasSourceProjectFile = projectItemHasSourceProjectFile;
+                }
+
+                /// <summary>
+                /// Creates the metadata that the MSBuild task adds to the outputs of a target in the project named by
+                /// <paramref name="projectItem"/>.
+                /// </summary>
+                /// <returns>
+                /// <see langword="null"/> if the outputs have to take the metadata one at a time, because the project
+                /// item inherits item definition metadata, stores its metadata in another kind of dictionary, or has
+                /// metadata named like built-in metadata, whose values differ between outputs.
+                /// </returns>
+                internal static TargetOutputMetadata TryCreate(ITaskItem projectItem, string targetName)
+                {
+                    if (projectItem is not TaskItem taskItem || taskItem._itemDefinitions != null)
+                    {
+                        return null;
+                    }
+
+                    ImmutableDictionary<string, string> metadata;
+                    if (taskItem._directMetadata is null)
+                    {
+                        metadata = ImmutableDictionaryExtensions.EmptyMetadata;
+                    }
+                    else if (taskItem._directMetadata is ImmutableDictionary<string, string> directMetadata
+                        && ReferenceEquals(directMetadata.KeyComparer, MSBuildNameIgnoreCaseComparer.Default))
+                    {
+                        foreach (KeyValuePair<string, string> metadatum in directMetadata)
+                        {
+                            if (ItemSpecModifiers.IsItemSpecModifier(metadatum.Key))
+                            {
+                                return null;
+                            }
+                        }
+
+                        metadata = directMetadata;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+
+                    ImmutableDictionary<string, string>.Builder builder = metadata.ToBuilder();
+
+                    // CopyMetadataTo replaces any OriginalItemSpec it copies with the include of the project item.
+                    builder["OriginalItemSpec"] = taskItem._includeEscaped;
+
+                    if (!metadata.TryGetValue(ItemMetadataNames.msbuildSourceTargetName, out string sourceTargetName) || string.IsNullOrEmpty(sourceTargetName))
+                    {
+                        builder[ItemMetadataNames.msbuildSourceTargetName] = targetName;
+                    }
+
+                    bool projectItemHasSourceProjectFile = metadata.TryGetValue(ItemMetadataNames.msbuildSourceProjectFile, out string sourceProjectFile)
+                        && !string.IsNullOrEmpty(sourceProjectFile);
+
+                    return new TargetOutputMetadata(taskItem, builder.ToImmutable(), projectItemHasSourceProjectFile);
+                }
+
+                /// <summary>
+                /// Gets the metadata to add to an output.
+                /// </summary>
+                /// <param name="outputHasSourceProjectFile">Whether the output has a non-empty MSBuildSourceProjectFile.</param>
+                internal ImmutableDictionary<string, string> GetMetadata(bool outputHasSourceProjectFile)
+                {
+                    if (outputHasSourceProjectFile || _projectItemHasSourceProjectFile)
+                    {
+                        return _metadata;
+                    }
+
+                    // The full path is computed only when an output needs it, as it is when outputs take the metadata one at a time.
+                    return _metadataWithProjectFullPath ??= _metadata.SetItem(
+                        ItemMetadataNames.msbuildSourceProjectFile,
+                        _projectItem.GetMetadata(ItemSpecModifiers.FullPath));
+                }
+            }
+
+            /// <summary>
             /// ITaskItem implementation which returns a clone of the metadata on this object.
             /// Values returned are unescaped. To get the original escaped values, use ITaskItem2.CloneCustomMetadataEscaped instead.
             /// </summary>

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -11,7 +12,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -2134,6 +2135,70 @@ namespace Microsoft.Build.UnitTests
             _testOutput.WriteLine(logger.FullLog);
             Assert.True(result);
             logger.AssertLogContains("message from referenced project");
+        }
+
+        /// <summary>
+        /// Target outputs take each metadatum of the Projects item that they lack or have an empty value of, together
+        /// with OriginalItemSpec, MSBuildSourceProjectFile and MSBuildSourceTargetName, without changing the cached
+        /// results of the target.
+        /// </summary>
+        [Fact]
+        public void OutputItemsTakeProjectItemMetadataWithoutChangingCachedResults()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFolder folder = env.CreateFolder();
+            string calleePath = env.CreateFile(folder, "Callee.proj", """
+                <Project>
+                  <ItemGroup>
+                    <Out Include="out1" Shared="callee" Empty="" />
+                    <Out Include="out2" OriginalItemSpec="original" MSBuildSourceTargetName="CalleeTarget" />
+                    <Out Include="out3" />
+                  </ItemGroup>
+                  <Target Name="GetOut" Returns="@(Out)" />
+                </Project>
+                """).Path;
+            string callerPath = env.CreateFile(folder, "Caller.proj", """
+                <Project>
+                  <ItemGroup>
+                    <First Include="Callee.proj" Shared="caller" Empty="first" Escaped="a%3Bb" />
+                    <Second Include="Callee.proj" Empty="second" />
+                  </ItemGroup>
+                  <Target Name="Build">
+                    <MSBuild Projects="@(First)" Targets="GetOut">
+                      <Output TaskParameter="TargetOutputs" ItemName="FirstOut" />
+                    </MSBuild>
+                    <MSBuild Projects="@(Second)" Targets="GetOut">
+                      <Output TaskParameter="TargetOutputs" ItemName="SecondOut" />
+                    </MSBuild>
+                  </Target>
+                </Project>
+                """).Path;
+
+            ProjectInstance caller = new(callerPath);
+            caller.Build(["Build"], [new MockLogger(_testOutput)]).ShouldBeTrue();
+
+            Dictionary<string, ProjectItemInstance> firstOutputs = caller.GetItems("FirstOut").ToDictionary(item => item.EvaluatedInclude);
+            firstOutputs.Keys.ShouldBe(["out1", "out2", "out3"], ignoreOrder: true);
+            VerifyMetadata(firstOutputs["out1"], shared: "callee", empty: "first", escaped: "a;b", originalItemSpec: "Callee.proj", sourceTargetName: "GetOut");
+            VerifyMetadata(firstOutputs["out2"], shared: "caller", empty: "first", escaped: "a;b", originalItemSpec: "original", sourceTargetName: "CalleeTarget");
+            VerifyMetadata(firstOutputs["out3"], shared: "caller", empty: "first", escaped: "a;b", originalItemSpec: "Callee.proj", sourceTargetName: "GetOut");
+
+            // The second call is served from the results cache, which must not hold metadata added by the first call.
+            Dictionary<string, ProjectItemInstance> secondOutputs = caller.GetItems("SecondOut").ToDictionary(item => item.EvaluatedInclude);
+            secondOutputs.Keys.ShouldBe(["out1", "out2", "out3"], ignoreOrder: true);
+            VerifyMetadata(secondOutputs["out1"], shared: "callee", empty: "second", escaped: string.Empty, originalItemSpec: "Callee.proj", sourceTargetName: "GetOut");
+            VerifyMetadata(secondOutputs["out2"], shared: string.Empty, empty: "second", escaped: string.Empty, originalItemSpec: "original", sourceTargetName: "CalleeTarget");
+            VerifyMetadata(secondOutputs["out3"], shared: string.Empty, empty: "second", escaped: string.Empty, originalItemSpec: "Callee.proj", sourceTargetName: "GetOut");
+
+            void VerifyMetadata(ProjectItemInstance item, string shared, string empty, string escaped, string originalItemSpec, string sourceTargetName)
+            {
+                item.GetMetadataValue("Shared").ShouldBe(shared);
+                item.GetMetadataValue("Empty").ShouldBe(empty);
+                item.GetMetadataValue("Escaped").ShouldBe(escaped);
+                item.GetMetadataValue("OriginalItemSpec").ShouldBe(originalItemSpec);
+                item.GetMetadataValue("MSBuildSourceProjectFile").ShouldBe(calleePath);
+                item.GetMetadataValue("MSBuildSourceTargetName").ShouldBe(sourceTargetName);
+            }
         }
     }
 }
