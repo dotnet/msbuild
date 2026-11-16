@@ -246,6 +246,39 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Single(buckets);
         }
 
+        /// <summary>
+        /// Items whose batching metadata values differ only in case share a bucket even when they are not adjacent, and
+        /// buckets are returned in the order in which their first items are declared.
+        /// </summary>
+        [Fact]
+        public void BucketsFoldValuesIgnoringCaseInDeclarationOrder()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            List<string> parameters = ["%(File.Culture)"];
+
+            List<ProjectItemInstance> items = [];
+            foreach ((string include, string culture) in new[] { ("i1", "fr"), ("i2", "EN"), ("i3", "de"), ("i4", "en"), ("i5", "FR") })
+            {
+                ProjectItemInstance item = new(project, "File", include, project.FullPath);
+                item.SetMetadata("Culture", culture);
+                items.Add(item);
+            }
+
+            ItemDictionary<ProjectItemInstance> itemsByType = new();
+            itemsByType.ImportItems(items);
+
+            List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(
+                parameters,
+                CreateLookup(itemsByType, new PropertyDictionary<ProjectPropertyInstance>()),
+                MockElementLocation.Instance,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+
+            string[] expected = ["i1;i5", "i2;i4", "i3"];
+            Assert.Equal(
+                expected,
+                buckets.ConvertAll(bucket => bucket.Expander.ExpandIntoStringAndUnescape("@(File)", ExpanderOptions.ExpandItems, MockElementLocation.Instance)));
+        }
+
         [Fact]
         public void Simple()
         {

@@ -279,16 +279,9 @@ namespace Microsoft.Build.BackEnd
         /// have the same value set on all item metadata consumed by the object.
         /// </summary>
         /// <remarks>
-        /// PERF NOTE: Given n items and m batching metadata that produce l buckets, it is usually the case that n > l > m,
-        /// because a batchable object typically uses one or two item metadata to control batching, and only has a handful of
-        /// buckets. The number of buckets is typically only large if a batchable object is using single-item batching
-        /// (where l == n). Any algorithm devised for bucketing therefore, should try to minimize n and l in its complexity
-        /// equation. The algorithm below has a complexity of O(n*lg(l)*m/2) in its comparisons, and is effectively O(n) when
-        /// l is small, and O(n*lg(n)) in the worst case as l -> n. However, note that the comparison complexity is not the
-        /// same as the operational complexity for this algorithm. The operational complexity of this algorithm is actually
-        /// O(n*m + n*lg(l)*m/2 + n*l/2 + n + l), which is effectively O(n^2) in the worst case. The additional complexity comes
-        /// from the array and metadata operations that are performed. However, those operations are extremely cheap compared
-        /// to the comparison operations, which dominate the time spent in this method.
+        /// PERF NOTE: Given n items and m batching metadata, the matching bucket for each item is found by hashing its m
+        /// metadata values, so bucketing is O(n*m) even with single-item batching, where there is one bucket per item.
+        /// Buckets are created in the order in which their first item is found, which is the order in which they are executed.
         /// </remarks>
         /// <returns>List containing ItemBucket objects (can be empty), each one representing an execution batch.</returns>
         private static List<ItemBucket> BucketConsumedItems(
@@ -303,6 +296,7 @@ namespace Microsoft.Build.BackEnd
 
             var buckets = new List<ItemBucket>();
             FrozenSet<string> itemNames = itemListsToBeBatched.Keys.ToFrozenSet(MSBuildNameIgnoreCaseComparer.Default);
+            Dictionary<Dictionary<string, string>, int> bucketIndexes = new(MetadataValuesComparer.Instance);
 
             // Get and iterate through the list of item names that we're supposed to batch on.
             foreach (KeyValuePair<string, ICollection<ProjectItemInstance>> entry in itemListsToBeBatched)
@@ -321,18 +315,12 @@ namespace Microsoft.Build.BackEnd
                         // Get this item's values for all the metadata consumed by the batchable object.
                         Dictionary<string, string> itemMetadataValues = GetItemMetadataValues(item, consumedMetadataReferences, elementLocation);
 
-                        // put the metadata into a dummy bucket we can use for searching
-                        ItemBucket dummyBucket = ItemBucket.GetDummyBucketForComparisons(itemMetadataValues);
-
-                        // look through all previously created buckets to find a bucket whose items have the same values as
-                        // this item for all metadata consumed by the batchable object
-                        int matchingBucketIndex = buckets.BinarySearch(dummyBucket);
-
                         ItemBucket matchingBucket;
 
-                        // If we didn't find a bucket that matches this item, create a new one, adding
-                        // this item to the bucket.
-                        if (matchingBucketIndex >= 0)
+                        // Find the bucket whose items have the same values as this item for all metadata consumed by the
+                        // batchable object, or create one. New buckets are appended, so the first item declared in the
+                        // project file ends up in the first batch passed into the target/task.
+                        if (bucketIndexes.TryGetValue(itemMetadataValues, out int matchingBucketIndex))
                         {
                             matchingBucket = buckets[matchingBucketIndex];
                         }
@@ -344,35 +332,14 @@ namespace Microsoft.Build.BackEnd
                                 matchingBucket.Initialize(loggingContext);
                             }
 
-                            // make sure to put the new bucket into the appropriate location
-                            // in the sorted list as indicated by the binary search
-                            // NOTE: observe the ~ operator (bitwise complement) in front of
-                            // the index -- see MSDN for more information on the return value
-                            // from the List.BinarySearch() method
-                            buckets.Insert(~matchingBucketIndex, matchingBucket);
+                            bucketIndexes.Add(itemMetadataValues, buckets.Count);
+                            buckets.Add(matchingBucket);
                         }
 
                         // We already have a bucket for this type of item, so add this item to
                         // the bucket.
                         matchingBucket.AddItem(item);
                     }
-                }
-            }
-
-            // Put the buckets back in the order in which they were discovered, so that the first
-            // item declared in the project file ends up in the first batch passed into the target/task.
-            for (int i = 0; i < buckets.Count;)
-            {
-                ItemBucket currentBucket = buckets[i];
-                if (i == currentBucket.BucketSequenceNumber)
-                {
-                    // This bucket is in the right place, so just move on to the next one.
-                    ++i;
-                }
-                else
-                {
-                    buckets[i] = buckets[currentBucket.BucketSequenceNumber];
-                    buckets[currentBucket.BucketSequenceNumber] = currentBucket;
                 }
             }
 
@@ -424,6 +391,31 @@ namespace Microsoft.Build.BackEnd
             }
 
             return itemMetadataValues;
+        }
+
+        /// <summary>
+        /// Compares the values of the metadata consumed by a batchable object for two items. Items share a bucket
+        /// when every value matches ignoring case.
+        /// </summary>
+        private sealed class MetadataValuesComparer : IEqualityComparer<Dictionary<string, string>>
+        {
+            internal static readonly MetadataValuesComparer Instance = new();
+
+            public bool Equals(Dictionary<string, string> x, Dictionary<string, string> y)
+                => HashTableUtility.Compare(x, y) == 0;
+
+            public int GetHashCode(Dictionary<string, string> metadataValues)
+            {
+                // Independent of the order in which the values were added.
+                int hashCode = 0;
+                foreach (KeyValuePair<string, string> metadataValue in metadataValues)
+                {
+                    hashCode = unchecked(hashCode + (MSBuildNameIgnoreCaseComparer.Default.GetHashCode(metadataValue.Key)
+                        ^ (metadataValue.Value is null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(metadataValue.Value))));
+                }
+
+                return hashCode;
+            }
         }
 
         #endregion

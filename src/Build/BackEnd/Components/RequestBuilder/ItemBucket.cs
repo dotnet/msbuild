@@ -1,12 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared.FileSystem;
@@ -19,7 +17,7 @@ namespace Microsoft.Build.BackEnd
     /// This class represents a collection of items that are homogeneous w.r.t.
     /// a certain set of metadata.
     /// </summary>
-    internal struct ItemBucket : IComparable<ItemBucket>
+    internal struct ItemBucket
     {
         #region Member data
 
@@ -58,15 +56,6 @@ namespace Microsoft.Build.BackEnd
         #region Constructors
 
         /// <summary>
-        /// Private constructor for creating comparison bucket.
-        /// </summary>
-        private ItemBucket(Dictionary<string, string> metadata)
-        {
-            _metadata = metadata;
-            // do nothing
-        }
-
-        /// <summary>
         /// Creates an instance of this class using the given bucket data.
         /// </summary>
         /// <param name="itemNames">Item types being batched on: null indicates no batching is occurring</param>
@@ -103,42 +92,6 @@ namespace Microsoft.Build.BackEnd
         internal void Initialize(LoggingContext loggingContext)
         {
             _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_lookup, _lookup, new StringMetadataTable(_metadata), FileSystems.Default, loggingContext);
-        }
-
-        #endregion
-
-        #region Comparison methods
-
-        /// <summary>
-        /// Compares this item bucket against the given one. The comparison is
-        /// solely based on the values of the item metadata in the buckets.
-        /// </summary>
-        /// <param name="other"></param>
-        /// <returns>
-        /// -1, if this bucket is "less than" the second one
-        ///  0, if this bucket is equivalent to the second one
-        /// +1, if this bucket is "greater than" the second one
-        /// </returns>
-        public int CompareTo(ItemBucket other)
-        {
-            return HashTableUtility.Compare(_metadata, other._metadata);
-        }
-
-        /// <summary>
-        /// Constructs a token bucket object that can be compared against other
-        /// buckets. This dummy bucket is a patently invalid bucket, and cannot
-        /// be used for any other operations besides comparison.
-        /// </summary>
-        /// <remarks>
-        /// PERF NOTE: A dummy bucket is intentionally very light-weight, and it
-        /// allocates a minimum of memory compared to a real bucket.
-        /// </remarks>
-        /// <returns>An item bucket that is invalid for everything except comparisons.</returns>
-        internal static ItemBucket GetDummyBucketForComparisons(Dictionary<string, string> metadata)
-        {
-            ItemBucket bucket = new ItemBucket(metadata);
-
-            return bucket;
         }
 
         #endregion
