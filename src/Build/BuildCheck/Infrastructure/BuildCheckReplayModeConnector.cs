@@ -34,7 +34,15 @@ public static class BuildCheckReplayModeConnector
         var mergedEventSource = new EventArgsDispatcher();
 
         // Pass the events from replayEventSource to the mergedEventSource
-        replayEventSource.AnyEventRaised += (sender, e) => mergedEventSource.Dispatch(e);
+        replayEventSource.AnyEventRaised += (sender, e) =>
+        {
+            if (e is BuildFinishedEventArgs)
+            {
+                buildCheckManagerProvider.Instance.FlushDeferredDiagnostics(
+                    new CheckDispatchingContext(mergedEventSource, e.BuildEventContext ?? BuildEventContext.Invalid));
+            }
+            mergedEventSource.Dispatch(e);
+        };
 
         // Create BuildCheckBuildEventHandler that passes new events to the mergedEventSource
         var buildCheckEventHandler = new BuildCheckBuildEventHandler(

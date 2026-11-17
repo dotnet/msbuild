@@ -1361,6 +1361,15 @@ namespace Microsoft.Build.Execution
 
                     if (loggingService != null)
                     {
+                        if (_buildParameters!.IsBuildCheckEnabled)
+                        {
+                            // Some evaluations never execute. Preserve their diagnostics before loggers finish.
+                            WaitForAllLoggingServiceEventsToBeProcessed();
+                            var buildCheckProvider = (IBuildCheckManagerProvider)((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCheckManagerProvider);
+                            buildCheckProvider.Instance.FlushDeferredDiagnostics(new CheckLoggingContext(loggingService, BuildEventContext.Invalid));
+                            WaitForAllLoggingServiceEventsToBeProcessed();
+                        }
+
                         // Override the build success if the user specified /warnaserror and any errors were logged outside of a build submission.
                         if (exceptionsThrownInEndBuild ||
                             (_overallBuildSuccess && loggingService.HasBuildSubmissionLoggedErrors(BuildEventContext.InvalidSubmissionId)))

@@ -59,13 +59,6 @@ internal class CheckDispatchingContext : ICheckContext
         _eventDispatcher.Dispatch(buildEvent);
     }
 
-    public void DispatchAsWarningFromText(DiagnosticSubcategory subcategory, string? warningCode, string? helpKeyword, IElementLocation location, string message)
-    {
-        BuildWarningEventArgs buildEvent = EventsCreatorHelper.CreateWarningEventFromText(_eventContext, subcategory, warningCode, helpKeyword, location, message);
-
-        _eventDispatcher.Dispatch(buildEvent);
-    }
-
     public void DispatchFailedAcquisitionTelemetry(string assemblyName, Exception exception)
     // This is it - no action for replay mode.
     { }

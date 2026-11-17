@@ -957,6 +957,96 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
+    [InlineData("ErrorCustomCheck", "X01237", "warning", "something went wrong when executing registered action", "", true)]
+    [InlineData("ErrorCustomCheck", "X01237", "warning", "something went wrong when executing registered action", "-p:TreatWarningsAsErrors=true -p:MSBuildTreatWarningsAsErrors=true", false)]
+    [InlineData("ErrorCustomCheck", "X01237", "warning", "something went wrong when executing registered action", "-warnaserror", false)]
+    [InlineData("CustomCheck", "X01235", "not-a-severity", "Incorrect value provided in config for key severity", "", true)]
+    [InlineData("CustomCheck", "X01235", "not-a-severity", "Incorrect value provided in config for key severity", "-p:TreatWarningsAsErrors=true -p:MSBuildTreatWarningsAsErrors=true", false)]
+    [InlineData("CustomCheck", "X01235", "not-a-severity", "Incorrect value provided in config for key severity", "-warnaserror", false)]
+    [InlineData("CustomCheck", "X01235", "not-a-severity", "Incorrect value provided in config for key severity", "-p:TreatWarningsAsErrors=true -p:MSBuildTreatWarningsAsErrors=true", false, "Child.proj")]
+    [InlineData("ErrorCustomCheck", "X01236", "warning", "Something went wrong initializing", "-p:TreatWarningsAsErrors=true -p:MSBuildTreatWarningsAsErrors=true", false)]
+    [InlineData("ErrorCustomCheck", "X01238", "warning", "something went wrong when registering actions", "-p:TreatWarningsAsErrors=true -p:MSBuildTreatWarningsAsErrors=true", false)]
+    [InlineData("ErrorCustomCheck", "X01237", "warning", "something went wrong when executing registered action", "-graphBuild:NoBuild", true)]
+    [InlineData("CustomCheck", "X01235", "not-a-severity", "Incorrect value provided in config for key severity", "-graphBuild:NoBuild", true)]
+    public void CustomCheckFailuresHonorWarningPromotion(
+        string checkAssembly, string ruleId, string severity, string expectedMessage,
+        string additionalSwitches, bool expectedSuccess, string configPattern = "*.proj")
+    {
+        string assemblyPath = Path.Combine(AssemblyLocation, $"{checkAssembly}.dll");
+        File.Exists(assemblyPath).ShouldBeTrue("the real checker assembly must be built before running the probe");
+        TransientTestFolder folder = _env.CreateFolder(createFolder: true);
+        File.Copy(assemblyPath, Path.Combine(folder.Path, $"{checkAssembly}.dll"));
+        TransientTestFile project = _env.CreateFile(folder, "Driver.proj", $"""
+            <Project DefaultTargets="Build">
+              <PropertyGroup>
+                <_Registered>$([MSBuild]::RegisterBuildCheck('$(MSBuildThisFileDirectory){checkAssembly}.dll'))</_Registered>
+              </PropertyGroup>
+              <Target Name="Build">
+                <MSBuild Projects="$(MSBuildThisFileDirectory)Child.proj" Targets="Build" />
+              </Target>
+            </Project>
+            """);
+        _env.CreateFile(folder, "Child.proj", """
+            <Project>
+              <Target Name="Build" />
+            </Project>
+            """);
+        _env.CreateFile(folder, EditorConfigFileName, $"""
+            root = true
+
+            [{configPattern}]
+            build_check.{ruleId}.severity = {severity}
+            """);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"\"{project.Path}\" -check -m:1 -nr:false {additionalSwitches}", out bool success,
+            outputHelper: _env.Output, timeoutMilliseconds: timeoutInMilliseconds);
+
+        output.ShouldContain(expectedMessage);
+        output.ShouldContain("Dismounting check '");
+        output.ShouldNotContain("This check should have been disabled");
+        output.ShouldContain(expectedSuccess ? ": warning : " : ": error : ");
+        success.ShouldBe(expectedSuccess, output);
+    }
+
+    [Fact]
+    public void WorkerConfigurationFailureRemainsVisibleWhenEvaluationFails()
+    {
+        TransientTestFolder folder = _env.CreateFolder(createFolder: true);
+        TransientTestFile project = _env.CreateFile(folder, "Driver.proj", """
+            <Project DefaultTargets="Build">
+              <Target Name="Build">
+                <MSBuild Projects="$(MSBuildThisFileDirectory)Child.proj" Targets="Build" />
+              </Target>
+            </Project>
+            """);
+        _env.CreateFile(folder, "Child.proj", """
+            <Project>
+              <Import Project="Missing.props" />
+              <Target Name="Build" />
+            </Project>
+            """);
+        _env.CreateFile(folder, EditorConfigFileName, """
+            root = true
+
+            [Child.proj]
+            build_check.BC0201.severity = not-a-severity
+            """);
+        var environment = RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables();
+        environment["MSBUILDNOINPROCNODE"] = "1";
+
+        string output = RunnerUtilities.RunProcessAndGetOutput(
+            RunnerUtilities.BootstrapMSBuildExecutablePath, $"\"{project.Path}\" -check -m:1 -nr:false",
+            out bool success, outputHelper: _env.Output, timeoutMilliseconds: timeoutInMilliseconds,
+            environmentVariables: environment);
+
+        success.ShouldBeFalse(output);
+        output.ShouldContain("MSB4019");
+        output.ShouldContain("Incorrect value provided in config for key severity: 'not-a-severity'");
+        GetWarningsCount(output).ShouldBe(1);
+    }
+
+    [Theory]
     [InlineData("X01236", "ErrorOnInitializeCheck", "Something went wrong initializing")]
     [InlineData("X01237", "ErrorOnRegisteredAction", "something went wrong when executing registered action")]
     [InlineData("X01238", "ErrorWhenRegisteringActions", "something went wrong when registering actions")]

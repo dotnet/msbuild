@@ -147,26 +147,33 @@ public class BuildCheckManagerTests : IDisposable
         _testedInstance.SetDataSource(BuildCheckDataSource.EventArgs);
         _testedInstance.SetDataSource(BuildCheckDataSource.BuildExecution);
 
-        _logger.Warnings.Where(w => w.Code == "X01235").ShouldBeEmpty();
-        _logger.Errors.Where(e => e.Code == "X01235").ShouldBeEmpty();
+        var dispatcher = new EventArgsDispatcher();
+        var logger = new MockLogger(_output);
+        logger.Initialize(dispatcher);
+
+        logger.Warnings.Where(w => w.Code == "X01235").ShouldBeEmpty();
+        logger.Errors.Where(e => e.Code == "X01235").ShouldBeEmpty();
 
         AcquireAndEvaluate(first, 1);
-        _logger.Warnings.Count(w => w.Code == "X01235").ShouldBe(firstSeverity == "warning" ? 1 : 0);
-        _logger.Errors.Where(e => e.Code == "X01235").ShouldBeEmpty();
+        logger.Warnings.Count(w => w.Code == "X01235").ShouldBe(firstSeverity == "warning" ? 1 : 0);
+        logger.Errors.Where(e => e.Code == "X01235").ShouldBeEmpty();
 
         AcquireAndEvaluate(second, 2);
-        _logger.Warnings.Count(w => w.Code == "X01235").ShouldBe(expectedWarnings);
-        _logger.Errors.Count(e => e.Code == "X01235").ShouldBe(expectedErrors);
+        logger.Warnings.Count(w => w.Code == "X01235").ShouldBe(expectedWarnings);
+        logger.Errors.Count(e => e.Code == "X01235").ShouldBe(expectedErrors);
 
         void AcquireAndEvaluate(string projectPath, int evaluationId)
         {
-            var context = new CheckLoggingContext(_loggingService, new BuildEventContext(1, 2, evaluationId, evaluationId, BuildEventContext.InvalidProjectContextId, 6, 7));
+            var context = new CheckDispatchingContext(dispatcher,
+                new BuildEventContext(1, 2, evaluationId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, 6, 7));
             _testedInstance.ProcessCheckAcquisition(new CheckAcquisitionData(Path.Combine(AppContext.BaseDirectory, "CustomCheck.dll"), projectPath), context);
             _testedInstance.ProcessEvaluationFinishedEventArgs(context, new ProjectEvaluationFinishedEventArgs
             {
                 ProjectFile = projectPath,
                 BuildEventContext = context.BuildEventContext,
             });
+            var projectContext = new BuildEventContext(1, 2, evaluationId, evaluationId, evaluationId, 6, 7);
+            _testedInstance.StartProjectRequest(new CheckDispatchingContext(dispatcher, projectContext), projectPath);
         }
     }
 

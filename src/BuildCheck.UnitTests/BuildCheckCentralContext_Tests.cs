@@ -259,14 +259,6 @@ public class BuildCheckCentralContext_Tests
 
         public void DispatchAsCommentFromText(MessageImportance importance, string message) { }
 
-        public void DispatchAsWarningFromText(
-            DiagnosticSubcategory subcategory,
-            string? warningCode,
-            string? helpKeyword,
-            IElementLocation location,
-            string message)
-        { }
-
         public void DispatchFailedAcquisitionTelemetry(string assemblyName, Exception exception) { }
 
         public void DispatchTelemetry(BuildCheckTracingData data) { }
