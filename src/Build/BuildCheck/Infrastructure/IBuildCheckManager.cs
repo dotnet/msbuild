@@ -56,6 +56,8 @@ internal interface IBuildCheckManager
 
     void ProcessBuildFinished(ICheckContext analysisContext);
 
+    void FlushDeferredDiagnostics(ICheckContext checkContext);
+
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
     [RequiresUnreferencedCode("Loads custom build check assemblies from disk and reflects over their types, which is incompatible with trimming.")]

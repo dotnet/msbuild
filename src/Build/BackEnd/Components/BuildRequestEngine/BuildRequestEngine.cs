@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Utilities;
@@ -311,6 +312,15 @@ namespace Microsoft.Build.BackEnd
                         RaiseRequestComplete(entry.Request, result);
                     }
 
+                    IBuildCheckManagerProvider buildCheckProvider = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider);
+                    var buildCheckManager = buildCheckProvider!.Instance;
+                    // Preserve worker diagnostics even if deactivation failed. The coordinator flushes after its logging drain.
+                    if (_componentHost.BuildParameters.IsBuildCheckEnabled &&
+                        _nodeLoggingContext.BuildEventContext.NodeId != Scheduler.InProcNodeId)
+                    {
+                        buildCheckManager.FlushDeferredDiagnostics(new CheckLoggingContext(_nodeLoggingContext.LoggingService, _nodeLoggingContext.BuildEventContext));
+                    }
+
                     // Any exceptions which occurred while we are shutting down request builders should be thrown now so the outer handler
                     // can report them.
                     if (deactivateExceptions.Count > 0)
@@ -319,8 +329,6 @@ namespace Microsoft.Build.BackEnd
                         throw new AggregateException(deactivateExceptions);
                     }
 
-                    IBuildCheckManagerProvider buildCheckProvider = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider);
-                    var buildCheckManager = buildCheckProvider!.Instance;
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
                     // Flush and send the per-BuildRequestEngine telemetry data if any was collected.
                     _nodeLoggingContext.TelemetryCollector?.FinalizeProcessing(_nodeLoggingContext);
