@@ -734,10 +734,13 @@ namespace Microsoft.Build.BackEnd
             Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
 #if RUNTIME_TYPE_NETCORE
-            // Not cached: it depends on the Visual Studio Developer Command Prompt environment variables.
-            if (GetDeveloperCommandPromptTaskHost(hostContext) is { } developerCommandPromptTaskHost)
+            // Not cached: the Developer Command Prompt selection depends on environment variables.
+            switch (ResolveVisualStudioTaskHost(hostContext))
             {
-                return developerCommandPromptTaskHost.MSBuildExePath;
+                case VisualStudioTaskHostResolution.Found found:
+                    return found.MSBuildExePath;
+                case VisualStudioTaskHostResolution.NotFound or VisualStudioTaskHostResolution.MultipleFound:
+                    return null;
             }
 #endif
 
