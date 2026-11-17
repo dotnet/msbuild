@@ -724,6 +724,14 @@ namespace Microsoft.Build.BackEnd
         {
             Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
+#if RUNTIME_TYPE_NETCORE
+            // Not cached: it depends on the Visual Studio Developer Command Prompt environment variables.
+            if (TryGetVisualStudioTaskHostPath(hostContext, out string visualStudioMSBuildPath, out _))
+            {
+                return visualStudioMSBuildPath;
+            }
+#endif
+
             var toolName = GetTaskHostNameFromHostContext(hostContext);
 
             // Snapshot to locals so concurrent callers never read a null static
@@ -1169,8 +1177,95 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
+#if RUNTIME_TYPE_NETCORE
+            if (TryGetVisualStudioTaskHostPath(hostContext, out string visualStudioMSBuildPath, out string visualStudioToolsDirectory))
+            {
+                // The .NET Framework task host from Visual Studio computes its handshake from its own installation:
+                // the tools directory root it discovers from MSBUILD_EXE_PATH, and its own file version.
+                // MSBUILD_EXE_PATH is overridden because the .NET CLI sets it to the SDK's MSBuild.dll.
+                Version fileVersion = GetFileVersion(visualStudioMSBuildPath);
+                CommunicationsUtilities.Trace($"For a host context of {hostContext}, using Visual Studio MSBuild from {visualStudioMSBuildPath} (version {fileVersion}).");
+
+                return new NodeLaunchData(
+                    visualStudioMSBuildPath,
+                    BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)),
+                    new Handshake(hostContext, visualStudioToolsDirectory, fileVersion),
+                    new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["MSBUILD_EXE_PATH"] = visualStudioMSBuildPath,
+                    });
+            }
+#endif
+
             return new NodeLaunchData(GetMSBuildExecutablePathForNonNETRuntimes(hostContext), BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)), new Handshake(hostContext));
         }
+
+#if RUNTIME_TYPE_NETCORE
+        /// <summary>
+        /// Locates the .NET Framework MSBuild.exe of the Visual Studio installation described by the environment
+        /// of a Visual Studio Developer Command Prompt (as set up by VsDevCmd.bat or vcvars*.bat), so that .NET MSBuild
+        /// can run tasks that require the .NET Framework (<c>Runtime="CLR4"</c>) in a task host from that installation.
+        /// </summary>
+        /// <param name="hostContext">The handshake options of the requested task host.</param>
+        /// <param name="msbuildExePath">The full path to the MSBuild.exe to launch for the requested architecture.</param>
+        /// <param name="toolsDirectoryRoot">The MSBuild tools directory root of the Visual Studio installation, which the task host uses in its handshake.</param>
+        /// <returns><see langword="true"/> when a matching Visual Studio MSBuild.exe exists; otherwise, <see langword="false"/>.</returns>
+        internal static bool TryGetVisualStudioTaskHostPath(HandshakeOptions hostContext, out string msbuildExePath, out string toolsDirectoryRoot)
+        {
+            msbuildExePath = null;
+            toolsDirectoryRoot = null;
+
+            if (!NativeMethodsShared.IsWindows
+                || !Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost)
+                || Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET)
+                || Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
+            {
+                return false;
+            }
+
+            // Only the Visual Studio version matching this MSBuild is supported, as BuildEnvironmentHelper does for a Developer Command Prompt.
+            string visualStudioInstallDirectory = Environment.GetEnvironmentVariable("VSINSTALLDIR");
+            if (string.IsNullOrEmpty(visualStudioInstallDirectory)
+                || !string.Equals(Environment.GetEnvironmentVariable("VisualStudioVersion"), MSBuildConstants.CurrentVisualStudioVersion, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            string root;
+            try
+            {
+                // Match the tools directory root computed by the task host itself: a full path without a trailing separator.
+                root = Path.GetFullPath(Path.Combine(visualStudioInstallDirectory, "MSBuild", MSBuildConstants.CurrentToolsVersion, "Bin"))
+                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                return false;
+            }
+
+            string architectureDirectory = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.X64)
+                ? Path.Combine(root, "amd64")
+                : Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64)
+                    ? Path.Combine(root, "arm64")
+                    : root;
+
+            string candidate = Path.Combine(architectureDirectory, "MSBuild.exe");
+            if (!FileSystems.Default.FileExists(candidate))
+            {
+                return false;
+            }
+
+            msbuildExePath = candidate;
+            toolsDirectoryRoot = root;
+            return true;
+        }
+
+        private static Version GetFileVersion(string path)
+        {
+            FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(path);
+            return new Version(versionInfo.FileMajorPart, versionInfo.FileMinorPart, versionInfo.FileBuildPart, versionInfo.FilePrivatePart);
+        }
+#endif
 
         private static TaskHostLaunchIdentity CreateLaunchIdentity(NodeLaunchData launchData, string dotnetHostPath)
             => new(

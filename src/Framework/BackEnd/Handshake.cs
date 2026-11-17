@@ -60,6 +60,25 @@ internal class Handshake
     {
     }
 
+    /// <summary>
+    ///  Initializes a new instance of the <see cref="Handshake"/> class for a task host that is a different
+    ///  MSBuild installation than the current process, for example a .NET Framework (CLR4) task host in a
+    ///  Visual Studio installation launched from .NET MSBuild.
+    /// </summary>
+    /// <param name="nodeType">
+    ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
+    /// </param>
+    /// <param name="toolsDirectory">
+    ///  The tools directory root of the task host's MSBuild installation, used for the handshake salt calculation.
+    /// </param>
+    /// <param name="fileVersion">
+    ///  The file version of the task host's Microsoft.Build.Framework assembly, which the task host uses in its handshake.
+    /// </param>
+    public Handshake(HandshakeOptions nodeType, string toolsDirectory, Version fileVersion)
+        : this(nodeType, includeSessionId: true, toolsDirectory, fileVersion)
+    {
+    }
+
     // Helper method to validate handshake option presence
     internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option)
         => (hostContext & option) == option;
@@ -67,7 +86,7 @@ internal class Handshake
     // Source options of the handshake.
     internal HandshakeOptions HandshakeOptions { get; }
 
-    protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string? toolsDirectory)
+    protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string? toolsDirectory, Version? fileVersion = null)
     {
         HandshakeOptions = nodeType;
 
@@ -75,11 +94,14 @@ internal class Handshake
         Assumed.True(
             toolsDirectory is null || IsNetTaskHost || IsClr2TaskHost,
             $"{toolsDirectory} should only be provided for .NET or CLR2 TaskHost nodes.");
+        Assumed.True(fileVersion is null, "A file version should not have been provided.");
 #else
         // IsNetTaskHost covers the case when NET process spawns NET TaskHost.
+        // IsClr4TaskHost covers the case when NET process spawns a .NET Framework TaskHost from a Visual Studio installation.
         Assumed.True(
-            toolsDirectory is null || IsNetTaskHost,
+            toolsDirectory is null || IsNetTaskHost || IsClr4TaskHost,
             $"{toolsDirectory} should not have been provided.");
+        Assumed.True(fileVersion is null || IsClr4TaskHost, "A file version should only be provided for .NET Framework TaskHost nodes.");
 #endif
 
         toolsDirectory ??= BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
@@ -129,7 +151,7 @@ internal class Handshake
 
         _handshakeComponents = IsNetTaskHost
             ? CreateNetTaskHostComponents(options, salt, sessionId)
-            : CreateStandardComponents(options, salt, sessionId);
+            : CreateStandardComponents(options, salt, sessionId, fileVersion);
     }
 
     private bool IsNetTaskHost
@@ -211,6 +233,14 @@ internal class Handshake
 #if NETFRAMEWORK
     private bool IsClr2TaskHost
         => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2 | HandshakeOptions.TaskHost);
+#else
+    /// <summary>
+    /// A task host that is neither a .NET nor a CLR2 task host runs on .NET Framework 4.x.
+    /// </summary>
+    private bool IsClr4TaskHost
+        => IsTaskHost
+            && !IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET)
+            && !IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2);
 #endif
 
     private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(
@@ -222,12 +252,12 @@ internal class Handshake
         NetTaskHostHandshakeVersion,
         sessionId);
 
-    private static HandshakeComponents CreateStandardComponents(int options, int salt, int sessionId)
+    private static HandshakeComponents CreateStandardComponents(int options, int salt, int sessionId, Version? fileVersion)
     {
         // Read the file version from the assembly's AssemblyFileVersionAttribute rather than from the file on
         // disk: Assembly.Location is empty in a single-file/Native AOT host (and the on-disk read carries an
         // IL3000), while the attribute carries the same value and is preserved under trimming.
-        var fileVersion = new Version(
+        fileVersion ??= new Version(
             Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
 
         return new(

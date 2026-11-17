@@ -400,6 +400,39 @@ public class TaskHostConfiguration_Tests
 #endif
 
     /// <summary>
+    /// A .NET Framework (CLR4) task host reads packets without an extended header (version 0) and expects the
+    /// AppDomain configuration in them, including when the packet is sent by .NET MSBuild, which has none.
+    /// </summary>
+    [Fact]
+    public void TestTranslationForClr4TaskHostIncludesAppDomainConfiguration()
+    {
+        TaskHostConfiguration config = CreateConfigurationWithEnvironment(null);
+
+        ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+        writeTranslator.NegotiatedPacketVersion = 0;
+        ((ITranslatable)config).Translate(writeTranslator);
+        long version0Length = TranslationHelpers.GetWriteStreamLength();
+
+        ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+        readTranslator.NegotiatedPacketVersion = 0;
+        TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
+
+        deserializedConfig.LineNumberOfTask.ShouldBe(config.LineNumberOfTask);
+        deserializedConfig.ColumnNumberOfTask.ShouldBe(config.ColumnNumberOfTask);
+        deserializedConfig.ProjectFileOfTask.ShouldBe(config.ProjectFileOfTask);
+        deserializedConfig.TaskName.ShouldBe(config.TaskName);
+        deserializedConfig.TargetName.ShouldBe(config.TargetName);
+        deserializedConfig.ProjectFile.ShouldBe(config.ProjectFile);
+
+        // The only difference to a .NET task host (version 2) on the wire is the (null) AppDomain configuration:
+        // a single byte marking the absent array.
+        ITranslator netTaskHostWriter = TranslationHelpers.GetWriteTranslator();
+        netTaskHostWriter.NegotiatedPacketVersion = 2;
+        ((ITranslatable)CreateConfigurationWithEnvironment(null)).Translate(netTaskHostWriter);
+        TranslationHelpers.GetWriteStreamLength().ShouldBe(version0Length - 1);
+    }
+
+    /// <summary>
     /// Test serialization / deserialization when the parameter dictionary is empty.
     /// </summary>
     [Fact]

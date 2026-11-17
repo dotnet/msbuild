@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -159,5 +160,63 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             provider.ConnectionPersists(options, version).ShouldBeFalse();
         }
+
+#if RUNTIME_TYPE_NETCORE
+        [WindowsOnlyTheory]
+        [InlineData((int)HandshakeOptions.None, "")]
+        [InlineData((int)HandshakeOptions.X64, "amd64")]
+        [InlineData((int)HandshakeOptions.Arm64, "arm64")]
+        public void Clr4TaskHostIsLocatedInVisualStudioFromDeveloperCommandPrompt(int architecture, string architectureDirectory)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string visualStudioRoot = env.CreateFolder().Path;
+            string toolsDirectoryRoot = Path.Combine(visualStudioRoot, "MSBuild", "Current", "Bin");
+            string msbuildExePath = Path.Combine(toolsDirectoryRoot, architectureDirectory, "MSBuild.exe");
+            Directory.CreateDirectory(Path.GetDirectoryName(msbuildExePath)!);
+            File.WriteAllText(msbuildExePath, string.Empty);
+
+            // A Developer Command Prompt sets VSINSTALLDIR with a trailing separator.
+            env.SetEnvironmentVariable("VSINSTALLDIR", visualStudioRoot + Path.DirectorySeparatorChar);
+            env.SetEnvironmentVariable("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
+
+            HandshakeOptions clr4Context = HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse | (HandshakeOptions)architecture;
+
+            NodeProviderOutOfProcTaskHost.TryGetVisualStudioTaskHostPath(clr4Context, out string? foundPath, out string? foundToolsDirectoryRoot).ShouldBeTrue();
+            foundPath.ShouldBe(msbuildExePath);
+            foundToolsDirectoryRoot.ShouldBe(toolsDirectoryRoot);
+
+            NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(clr4Context).ShouldBe(msbuildExePath);
+
+            // Only the .NET Framework (CLR4) task host comes from Visual Studio.
+            NodeProviderOutOfProcTaskHost.TryGetVisualStudioTaskHostPath(clr4Context | HandshakeOptions.NET, out _, out _).ShouldBeFalse();
+            NodeProviderOutOfProcTaskHost.TryGetVisualStudioTaskHostPath(clr4Context | HandshakeOptions.CLR2, out _, out _).ShouldBeFalse();
+
+            // Only the Visual Studio version matching this MSBuild is used.
+            env.SetEnvironmentVariable("VisualStudioVersion", "17.0");
+            NodeProviderOutOfProcTaskHost.TryGetVisualStudioTaskHostPath(clr4Context, out _, out _).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Clr4TaskHostIsNotLocatedInVisualStudioOutsideDeveloperCommandPrompt()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("VSINSTALLDIR", null);
+            env.SetEnvironmentVariable("VisualStudioVersion", null);
+
+            NodeProviderOutOfProcTaskHost.TryGetVisualStudioTaskHostPath(HandshakeOptions.TaskHost | HandshakeOptions.X64, out string? path, out string? root).ShouldBeFalse();
+            path.ShouldBeNull();
+            root.ShouldBeNull();
+        }
+
+        [Fact]
+        public void Clr4TaskHostIsNotLocatedInVisualStudioWithoutMSBuildExe()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("VSINSTALLDIR", env.CreateFolder().Path);
+            env.SetEnvironmentVariable("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
+
+            NodeProviderOutOfProcTaskHost.TryGetVisualStudioTaskHostPath(HandshakeOptions.TaskHost | HandshakeOptions.X64, out _, out _).ShouldBeFalse();
+        }
+#endif
     }
 }

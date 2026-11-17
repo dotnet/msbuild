@@ -36,6 +36,8 @@ Some of the env variables listed here are unsupported, meaning there is no guara
   - Set this to force all tasks to run out of process (except inline tasks).
 - `MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC`
   - Set this to force all inline tasks to run out of process. It is not compatible with custom TaskFactories.
+- `VSINSTALLDIR` & `VisualStudioVersion`
+  - Set by a Visual Studio Developer Command Prompt. On Windows, MSBuild running on .NET uses the `MSBuild.exe` of this Visual Studio installation as the task host for tasks that require the .NET Framework (`Runtime="CLR4"`), when `VisualStudioVersion` matches the Visual Studio version of that MSBuild (`18.0`).
 - `MSBUILDFORCEMULTITHREADED=1`
   - Force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build). This overrides and ignores any `-multiThreaded` / `-mt` command-line switch.
 - `MSBUILDENABLEMULTITHREADED=1`

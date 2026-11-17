@@ -456,6 +456,14 @@ internal class TaskHostConfiguration : INodePacket
                 _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
             }
         }
+#else
+        // 0 = .NET Framework (CLR4) task host launched from .NET MSBuild, which expects the
+        // AppDomain configuration. .NET has no AppDomain configuration to send, so send none.
+        if (translator.NegotiatedPacketVersion == 0)
+        {
+            byte[] appDomainConfigBytes = null;
+            translator.Translate(ref appDomainConfigBytes);
+        }
 #endif
         translator.Translate(ref _lineNumberOfTask);
         translator.Translate(ref _columnNumberOfTask);
