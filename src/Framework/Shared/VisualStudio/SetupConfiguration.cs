@@ -7,7 +7,7 @@
 // Microsoft.VisualStudio.Setup.Configuration.Native.dll); declarations from the
 // Setup.Configuration type library.
 
-#if FEATURE_WINDOWSINTEROP && (FEATURE_VISUALSTUDIOSETUP || NET)
+#if FEATURE_WINDOWSINTEROP && FEATURE_VISUALSTUDIOSETUP
 
 using System;
 using System.Runtime.InteropServices;

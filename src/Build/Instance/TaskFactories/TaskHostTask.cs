@@ -913,11 +913,7 @@ namespace Microsoft.Build.BackEnd
         private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, Exception e)
         {
 #if RUNTIME_TYPE_NETCORE
-            NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution visualStudioResolution = NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(
-                requiredContext,
-                out string visualStudioMSBuildPath,
-                out _,
-                out IReadOnlyList<VisualStudioInstance> visualStudioInstallations);
+            NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution visualStudioResolution = NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(requiredContext);
             if (e is null)
             {
                 switch (visualStudioResolution)
@@ -926,7 +922,7 @@ namespace Microsoft.Build.BackEnd
                         _taskLoggingContext.LogError(_taskLocation, "TaskHostVisualStudioNotFound", _taskType.Type.Name, runtime, architecture, MSBuildConstants.CurrentVisualStudioVersion);
                         return;
 
-                    case NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.MultipleFound:
+                    case NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.MultipleFound multipleFound:
                         _taskLoggingContext.LogError(
                             _taskLocation,
                             "TaskHostMultipleVisualStudioFound",
@@ -934,7 +930,7 @@ namespace Microsoft.Build.BackEnd
                             runtime,
                             architecture,
                             MSBuildConstants.CurrentVisualStudioVersion,
-                            NodeProviderOutOfProcTaskHost.FormatVisualStudioInstallations(visualStudioInstallations));
+                            NodeProviderOutOfProcTaskHost.FormatVisualStudioInstallations(multipleFound.Installations));
                         return;
                 }
             }
@@ -954,7 +950,9 @@ namespace Microsoft.Build.BackEnd
             {
 #if RUNTIME_TYPE_NETCORE
                 // Report the Visual Studio MSBuild.exe that was launched, which may have been found through the Visual Studio setup API.
-                taskHostLocation = visualStudioMSBuildPath ?? NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
+                taskHostLocation = visualStudioResolution is NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found found
+                    ? found.MSBuildExePath
+                    : NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
 #else
                 taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
 #endif

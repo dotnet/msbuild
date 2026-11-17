@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-#if FEATURE_WINDOWSINTEROP && (FEATURE_VISUALSTUDIOSETUP || NET)
-#if NET
+#if FEATURE_WINDOWSINTEROP && FEATURE_VISUALSTUDIOSETUP
 using System.Runtime.Versioning;
-#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.VisualStudio;
 using Windows.Win32;
@@ -36,25 +34,9 @@ namespace Microsoft.Build.Shared
         /// <returns>Enumerable list of Visual Studio instances</returns>
         internal static IList<VisualStudioInstance> GetInstances()
         {
-#if FEATURE_VISUALSTUDIOSETUP
-            return QueryInstances();
-#else
-            return [];
-#endif
-        }
-
-        /// <summary>
-        /// Query the Visual Studio setup API for installed instances regardless of whether
-        /// <see cref="GetInstances"/> is enabled for the current build of MSBuild. On .NET this is
-        /// used to locate a Visual Studio installation whose <c>MSBuild.exe</c> can act as a
-        /// .NET Framework task host. Returns an empty list on non-Windows platforms or when the
-        /// setup API is unavailable.
-        /// </summary>
-        internal static IList<VisualStudioInstance> QueryInstances()
-        {
             var validInstances = new List<VisualStudioInstance>();
 
-#if FEATURE_WINDOWSINTEROP && (FEATURE_VISUALSTUDIOSETUP || NET)
+#if FEATURE_WINDOWSINTEROP && FEATURE_VISUALSTUDIOSETUP
             if (!NativeMethods.IsWindows)
             {
                 return validInstances;
@@ -82,7 +64,7 @@ namespace Microsoft.Build.Shared
             return validInstances;
         }
 
-#if FEATURE_WINDOWSINTEROP && (FEATURE_VISUALSTUDIOSETUP || NET)
+#if FEATURE_WINDOWSINTEROP && FEATURE_VISUALSTUDIOSETUP
         /// <summary>
         /// Try to obtain a top-level <see cref="ISetupConfiguration2"/> pointer. First attempts
         /// <c>CoCreateInstance</c> on the registered coclass; on
@@ -93,9 +75,7 @@ namespace Microsoft.Build.Shared
         /// failure is returned as a null scope — the caller treats absent VS Setup as an
         /// empty result, not an error.
         /// </summary>
-#if NET
         [SupportedOSPlatform("windows6.1")]
-#endif
         private static ComScope<ISetupConfiguration2> AcquireSetupConfiguration2()
         {
             Guid clsid = SetupConfiguration.CLSID_SetupConfiguration;

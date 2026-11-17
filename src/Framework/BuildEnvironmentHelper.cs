@@ -487,6 +487,18 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Gets the Visual Studio installations that can provide the build environment. Only .NET Framework MSBuild
+        /// adopts a Visual Studio installation found through the setup API; .NET MSBuild uses Visual Studio only to
+        /// host tasks that require the .NET Framework.
+        /// </summary>
+        private static IEnumerable<VisualStudioInstance> GetVisualStudioInstances()
+#if NETFRAMEWORK
+            => VisualStudioLocationHelper.GetInstances();
+#else
+            => [];
+#endif
+
+        /// <summary>
         /// Resets the current singleton instance (for testing).
         /// </summary>
         internal static void ResetInstance_ForUnitTestsOnly(Func<string> getProcessFromRunningProcess = null,
@@ -499,7 +511,7 @@ namespace Microsoft.Build.Shared
             s_getProcessFromRunningProcess = getProcessFromRunningProcess ?? GetProcessFromRunningProcess;
             s_getExecutingAssemblyPath = getExecutingAssemblyPath ?? GetExecutingAssemblyPath;
             s_getAppContextBaseDirectory = getAppContextBaseDirectory ?? GetAppContextBaseDirectory;
-            s_getVisualStudioInstances = getVisualStudioInstances ?? VisualStudioLocationHelper.GetInstances;
+            s_getVisualStudioInstances = getVisualStudioInstances ?? GetVisualStudioInstances;
             s_getEnvironmentVariable = getEnvironmentVariable ?? GetEnvironmentVariable;
             s_getSdkRootFromAppContext = getSdkRootFromAppContext ?? GetSdkRootFromAppContext;
 
@@ -523,7 +535,7 @@ namespace Microsoft.Build.Shared
         private static Func<string> s_getExecutingAssemblyPath = GetExecutingAssemblyPath;
         private static Func<string> s_getAppContextBaseDirectory = GetAppContextBaseDirectory;
         private static Func<string> s_getSdkRootFromAppContext = GetSdkRootFromAppContext;
-        private static Func<IEnumerable<VisualStudioInstance>> s_getVisualStudioInstances = VisualStudioLocationHelper.GetInstances;
+        private static Func<IEnumerable<VisualStudioInstance>> s_getVisualStudioInstances = GetVisualStudioInstances;
         private static Func<string, string> s_getEnvironmentVariable = GetEnvironmentVariable;
         private static Func<bool> s_runningTests = CheckIfRunningTests;
 
