@@ -1,7 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
@@ -11,6 +13,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -18,14 +21,16 @@ using static Microsoft.Build.Experimental.BuildCheck.Infrastructure.BuildCheckMa
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
-public class BuildCheckManagerTests
+public class BuildCheckManagerTests : IDisposable
 {
     private readonly IBuildCheckManager _testedInstance;
     private readonly ILoggingService _loggingService;
     private readonly MockLogger _logger;
+    private readonly ITestOutputHelper _output;
 
     public BuildCheckManagerTests(ITestOutputHelper output)
     {
+        _output = output;
         _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
         _logger = new MockLogger(output);
         _loggingService.RegisterLogger(_logger);
@@ -45,6 +50,77 @@ public class BuildCheckManagerTests
 
         _logger.AllBuildEvents.Where(be => be.GetType() == typeof(BuildMessageEventArgs)).Select(be => be.Message).ToArray()
             .ShouldBeEquivalentTo(expectedMessages);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ProcessCheckAcquisitionRunsCustomCheck(bool enableBuildExecution)
+    {
+        using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+        TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+        TransientTestFile project = testEnvironment.CreateFile(folder, "test.proj", "<Project />");
+        testEnvironment.CreateFile(folder, ".editorconfig", """
+            root = true
+
+            [*.proj]
+            build_check.X01235.severity = warning
+            """);
+
+        _testedInstance.SetDataSource(BuildCheckDataSource.EventArgs);
+        if (enableBuildExecution)
+        {
+            _testedInstance.SetDataSource(BuildCheckDataSource.BuildExecution);
+        }
+
+        var dispatcher = new EventArgsDispatcher();
+        var logger = new MockLogger(testEnvironment.Output);
+        logger.Initialize(dispatcher);
+        var eventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7);
+        var checkContext = new CheckDispatchingContext(dispatcher, eventContext);
+        var evaluationFinished = new ProjectEvaluationFinishedEventArgs
+        {
+            ProjectFile = project.Path,
+            BuildEventContext = eventContext,
+        };
+
+        logger.WarningCount.ShouldBe(0);
+        _testedInstance.ProcessCheckAcquisition(
+            new CheckAcquisitionData(Path.Combine(AppContext.BaseDirectory, "CustomCheck.dll"), project.Path), checkContext);
+        _testedInstance.ProcessEvaluationFinishedEventArgs(checkContext, evaluationFinished);
+
+        BuildWarningEventArgs warning = logger.Warnings.ShouldHaveSingleItem();
+        warning.Code.ShouldBe("X01235");
+        warning.Message.ShouldBe("Message format: Argument for the message format");
+        logger.AllBuildEvents.ShouldNotContain(e => e is BuildCheckAcquisitionEventArgs);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ProcessCheckAcquisitionWithoutEventArgsForwardsToCentralNode(bool enableBuildExecution)
+    {
+        if (enableBuildExecution)
+        {
+            _testedInstance.SetDataSource(BuildCheckDataSource.BuildExecution);
+        }
+
+        var acquisitionData = new CheckAcquisitionData("DummyPath", "ProjectPath");
+        var eventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7);
+        _logger.AllBuildEvents.ShouldBeEmpty();
+
+        _testedInstance.ProcessCheckAcquisition(acquisitionData, new CheckLoggingContext(_loggingService, eventContext));
+
+        var acquisitionEvent = _logger.AllBuildEvents.ShouldHaveSingleItem().ShouldBeOfType<BuildCheckAcquisitionEventArgs>();
+        acquisitionEvent.AcquisitionPath.ShouldBe(acquisitionData.AssemblyPath);
+        acquisitionEvent.ProjectPath.ShouldBe(acquisitionData.ProjectPath);
+        acquisitionEvent.BuildEventContext.ShouldBeSameAs(eventContext);
+    }
+
+    public void Dispose()
+    {
+        _testedInstance.Shutdown();
+        _loggingService.ShutdownComponent();
     }
 
     private void MockBuildCheckAcquisition(bool isCheckRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isCheckRuleExist));
