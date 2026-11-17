@@ -39,14 +39,14 @@ public class BuildCheckReplayModeConnectorTests(ITestOutputHelper output)
             BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
 
         logger.Warnings.ShouldBeEmpty();
-        source.Dispatch(new BuildStartedEventArgs("started", null));
+        source.Dispatch(new BuildStartedEventArgs("started", string.Empty));
         source.Dispatch(new ProjectEvaluationStartedEventArgs { ProjectFile = project.Path, BuildEventContext = context });
         source.Dispatch(new BuildCheckAcquisitionEventArgs(assemblyPath, project.Path) { BuildEventContext = context });
         source.Dispatch(new ProjectEvaluationFinishedEventArgs { ProjectFile = project.Path, BuildEventContext = context });
         source.Dispatch(new BuildFinishedEventArgs("finished", null, true));
 
         BuildWarningEventArgs warning = logger.Warnings.ShouldHaveSingleItem();
-        warning.Message.ShouldContain("something went wrong when executing registered action");
+        warning.Message.ShouldNotBeNull().ShouldContain("something went wrong when executing registered action");
         warning.BuildEventContext.ShouldBeSameAs(context);
         logger.AllBuildEvents.IndexOf(warning).ShouldBeLessThan(
             logger.AllBuildEvents.FindIndex(e => e is BuildFinishedEventArgs));

@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
@@ -176,6 +178,141 @@ public class BuildCheckManagerTests : IDisposable
             _testedInstance.StartProjectRequest(new CheckDispatchingContext(dispatcher, projectContext), projectPath);
         }
     }
+
+    [Theory]
+    [InlineData(10, BuildEventContext.InvalidProjectInstanceId)]
+    [InlineData(BuildEventContext.InvalidEvaluationId, 20)]
+    public void ProjectStartDispatchesOnlyMatchingDeferredWarnings(int evaluationId, int projectInstanceId)
+    {
+        var reporter = (IResultReporter)_testedInstance;
+        var projectContext = new BuildEventContext(1, 2, 10, 20, 30, 6, 7);
+        var dispatcher = new EventArgsDispatcher();
+        var logger = new MockLogger(_output);
+        logger.Initialize(dispatcher);
+        var checkContext = new CheckDispatchingContext(dispatcher, projectContext);
+        BuildWarningEventArgs matching = CreateDeferredWarning(evaluationId, projectInstanceId, "matching");
+        BuildWarningEventArgs unrelated = CreateDeferredWarning(11, 21, "unrelated");
+        logger.Warnings.ShouldBeEmpty();
+
+        reporter.ReportResult(matching, checkContext);
+        reporter.ReportResult(unrelated, checkContext);
+        logger.Warnings.ShouldBeEmpty();
+
+        _testedInstance.StartProjectRequest(checkContext, "matching.proj");
+
+        logger.Warnings.ShouldHaveSingleItem().ShouldBeSameAs(matching);
+        matching.BuildEventContext.ShouldNotBeNull().ProjectInstanceId.ShouldBe(projectContext.ProjectInstanceId);
+        matching.BuildEventContext.ProjectContextId.ShouldBe(projectContext.ProjectContextId);
+        unrelated.BuildEventContext.ShouldNotBeNull().ProjectContextId.ShouldBe(BuildEventContext.InvalidProjectContextId);
+
+        _testedInstance.StartProjectRequest(checkContext, "matching.proj");
+        logger.Warnings.ShouldHaveSingleItem();
+        _testedInstance.FlushDeferredDiagnostics(checkContext);
+        logger.Warnings.ShouldBe([matching, unrelated]);
+        _testedInstance.FlushDeferredDiagnostics(checkContext);
+        logger.Warnings.Count.ShouldBe(2);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DeferredWarningDispatchCanEnqueueAnotherWarning(bool projectStarts)
+    {
+        var reporter = (IResultReporter)_testedInstance;
+        var dispatcher = new EventArgsDispatcher();
+        var checkContext = new CheckDispatchingContext(dispatcher, new BuildEventContext(1, 2, 10, 20, 30, 6, 7));
+        BuildWarningEventArgs first = CreateDeferredWarning(10, BuildEventContext.InvalidProjectInstanceId, "first");
+        BuildWarningEventArgs second = CreateDeferredWarning(10, BuildEventContext.InvalidProjectInstanceId, "second");
+        List<BuildEventArgs> dispatched = [];
+        dispatcher.AnyEventRaised += (_, e) =>
+        {
+            dispatched.Add(e);
+            if (ReferenceEquals(e, first))
+            {
+                reporter.ReportResult(second, checkContext);
+            }
+        };
+        dispatched.ShouldBeEmpty();
+        reporter.ReportResult(first, checkContext);
+        dispatched.ShouldBeEmpty();
+
+        Drain();
+        dispatched.ShouldBe([first]);
+        Drain();
+        dispatched.ShouldBe([first, second]);
+        Drain();
+        dispatched.Count.ShouldBe(2);
+
+        void Drain()
+        {
+            if (projectStarts)
+            {
+                _testedInstance.StartProjectRequest(checkContext, "test.proj");
+            }
+            else
+            {
+                _testedInstance.FlushDeferredDiagnostics(checkContext);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task ConcurrentDeferredWarningDrainsPreserveEveryWarningOnce()
+    {
+        const int warningCount = 512;
+        var reporter = (IResultReporter)_testedInstance;
+        var dispatcher = new EventArgsDispatcher();
+        var checkContext = new CheckDispatchingContext(dispatcher, new BuildEventContext(1, 2, 10, 20, 30, 6, 7));
+        ConcurrentBag<BuildEventArgs> dispatched = [];
+        dispatcher.AnyEventRaised += (_, e) => dispatched.Add(e);
+        var start = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        List<Task> operations = [];
+        dispatched.ShouldBeEmpty();
+
+        for (int producer = 0; producer < 4; producer++)
+        {
+            int first = producer * warningCount / 4;
+            operations.Add(Task.Run(async () =>
+            {
+                await start.Task;
+                for (int i = first; i < first + warningCount / 4; i++)
+                {
+                    reporter.ReportResult(CreateDeferredWarning(10, BuildEventContext.InvalidProjectInstanceId, i.ToString()), checkContext);
+                }
+            }));
+        }
+        operations.Add(Task.Run(async () =>
+        {
+            await start.Task;
+            for (int i = 0; i < warningCount; i++)
+            {
+                _testedInstance.StartProjectRequest(checkContext, "test.proj");
+            }
+        }));
+        operations.Add(Task.Run(async () =>
+        {
+            await start.Task;
+            for (int i = 0; i < warningCount; i++)
+            {
+                _testedInstance.FlushDeferredDiagnostics(checkContext);
+            }
+        }));
+
+        start.SetResult(true);
+        await Task.WhenAll(operations);
+        _testedInstance.FlushDeferredDiagnostics(checkContext);
+
+        dispatched.Count.ShouldBe(warningCount);
+        dispatched.Select(e => int.Parse(e.Message.ShouldNotBeNull())).OrderBy(i => i).ShouldBe(Enumerable.Range(0, warningCount));
+        _testedInstance.FlushDeferredDiagnostics(checkContext);
+        dispatched.Count.ShouldBe(warningCount);
+    }
+
+    private static BuildWarningEventArgs CreateDeferredWarning(int evaluationId, int projectInstanceId, string message)
+        => new(null, "DEFER001", "test.proj", 0, 0, 0, 0, message, null, "BuildCheck")
+        {
+            BuildEventContext = new BuildEventContext(1, 2, evaluationId, projectInstanceId, BuildEventContext.InvalidProjectContextId, 6, 7),
+        };
 
     private void MockBuildCheckAcquisition(bool isCheckRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isCheckRuleExist));
 

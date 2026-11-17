@@ -71,6 +71,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly bool[] _enabledDataSources = new bool[(int)BuildCheckDataSource.ValuesCount];
         private readonly BuildEventsProcessor _buildEventsProcessor;
         private readonly IBuildCheckAcquisitionModule _acquisitionModule;
+        private readonly DeferredWarnings _deferredWarnings = new();
 
         internal BuildCheckManager()
         {
@@ -662,17 +663,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private void DispatchDeferredDiagnostics((int EvaluationId, int ProjectInstanceId) key, ICheckContext checkContext)
         {
-            List<BuildEventArgs> diagnostics;
-            lock (_deferredDiagnostics)
+            List<BuildWarningEventArgs>? diagnostics = _deferredWarnings.Take(key);
+            if (diagnostics is null)
             {
-                if (!_deferredDiagnostics.TryGetValue(key, out diagnostics!))
-                {
-                    return;
-                }
-                _deferredDiagnostics.Remove(key);
+                return;
             }
 
-            foreach (BuildEventArgs diagnostic in diagnostics)
+            foreach (BuildWarningEventArgs diagnostic in diagnostics)
             {
                 diagnostic.BuildEventContext = diagnostic.BuildEventContext!.WithInstanceIdAndContextId(checkContext.BuildEventContext);
                 checkContext.DispatchBuildEvent(diagnostic);
@@ -681,23 +678,14 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         public void FlushDeferredDiagnostics(ICheckContext checkContext)
         {
-            List<BuildEventArgs>[] pending;
-            lock (_deferredDiagnostics)
+            foreach (List<BuildWarningEventArgs> diagnostics in _deferredWarnings.TakeAll())
             {
-                pending = [.. _deferredDiagnostics.Values];
-                _deferredDiagnostics.Clear();
-            }
-
-            foreach (List<BuildEventArgs> diagnostics in pending)
-            {
-                foreach (BuildEventArgs diagnostic in diagnostics)
+                foreach (BuildWarningEventArgs diagnostic in diagnostics)
                 {
                     checkContext.DispatchBuildEvent(diagnostic);
                 }
             }
         }
-
-        private readonly Dictionary<(int EvaluationId, int ProjectInstanceId), List<BuildEventArgs>> _deferredDiagnostics = new();
 
         /// <summary>
         /// Registers the logic import by a project file.
@@ -727,7 +715,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 // project context known - warning policy is available
                 eventArgs.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId ||
                 // it's not a warning - no need to defer
-                eventArgs is not BuildWarningEventArgs)
+                eventArgs is not BuildWarningEventArgs warning)
             {
                 checkContext.DispatchBuildEvent(eventArgs);
                 return;
@@ -737,16 +725,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             var key = eventArgs.BuildEventContext.EvaluationId != BuildEventContext.InvalidEvaluationId
                 ? (eventArgs.BuildEventContext.EvaluationId, BuildEventContext.InvalidProjectInstanceId)
                 : (BuildEventContext.InvalidEvaluationId, eventArgs.BuildEventContext.ProjectInstanceId);
-            lock (_deferredDiagnostics)
-            {
-                if (!_deferredDiagnostics.TryGetValue(key, out var list))
-                {
-                    list = [];
-                    _deferredDiagnostics[key] = list;
-                }
-
-                list.Add(eventArgs);
-            }
+            _deferredWarnings.Enqueue(key, warning);
         }
 
         public void EndProjectRequest(
@@ -792,6 +771,48 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         public void Shutdown()
         { /* Too late here for any communication to the main node or for logging anything */ }
+
+        // Take operations transfer ownership of batches so logging never runs under the collection lock.
+        private sealed class DeferredWarnings
+        {
+            private readonly Dictionary<(int EvaluationId, int ProjectInstanceId), List<BuildWarningEventArgs>> _warnings = new();
+
+            internal void Enqueue((int EvaluationId, int ProjectInstanceId) key, BuildWarningEventArgs warning)
+            {
+                lock (_warnings)
+                {
+                    if (!_warnings.TryGetValue(key, out var warnings))
+                    {
+                        warnings = [];
+                        _warnings[key] = warnings;
+                    }
+                    warnings.Add(warning);
+                }
+            }
+
+            internal List<BuildWarningEventArgs>? Take((int EvaluationId, int ProjectInstanceId) key)
+            {
+                lock (_warnings)
+                {
+                    if (!_warnings.TryGetValue(key, out var warnings))
+                    {
+                        return null;
+                    }
+                    _warnings.Remove(key);
+                    return warnings;
+                }
+            }
+
+            internal List<BuildWarningEventArgs>[] TakeAll()
+            {
+                lock (_warnings)
+                {
+                    List<BuildWarningEventArgs>[] pending = [.. _warnings.Values];
+                    _warnings.Clear();
+                    return pending;
+                }
+            }
+        }
 
         private class CheckFactoryContext(
             CheckFactory factory,
