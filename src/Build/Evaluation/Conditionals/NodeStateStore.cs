@@ -40,19 +40,18 @@ internal struct NodeStateStore
             ThrowInvalidSlot(slot);
         }
 
-        StringNodeState[] states = _stringStates ??= ThreadLocalStringNodeStateBuffer.Acquire(_layout.StringSlotCount);
+        StringNodeState[] states = _stringStates ??= StringNodeStateBuffer.Acquire(_layout.StringSlotCount);
         return ref states[slot];
     }
 
     internal void Release()
     {
         StringNodeState[]? stringStates = _stringStates;
-        NodeStateLayout layout = _layout;
         this = default;
 
         if (stringStates is not null)
         {
-            ThreadLocalStringNodeStateBuffer.Release(stringStates, layout.StringSlotCount);
+            StringNodeStateBuffer.Release(stringStates);
         }
     }
 

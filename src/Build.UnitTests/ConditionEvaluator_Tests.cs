@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -553,45 +554,32 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
         node.TryVersionEvaluate(state, out _).ShouldBe(convertsToVersion);
     }
 
-    [Fact]
-    public async Task UndersizedConditionStateBufferRemainsAvailableForNestedEvaluation()
+    [Theory]
+    [InlineData(11)]
+    [InlineData(256)]
+    public void SmallConditionStateBuffersUseSharedPoolAndClearFullCapacity(int slots)
     {
-        await Task.Factory.StartNew(() =>
+        NodeStateStore.StringNodeState[] buffer = StringNodeStateBuffer.Acquire(slots);
+        for (int i = 0; i < buffer.Length; i++)
         {
-            NodeStateStore.StringNodeState[] small =
-                ThreadLocalStringNodeStateBuffer.Acquire(64);
-            ThreadLocalStringNodeStateBuffer.Release(small, 64);
+            buffer[i].ExpandedValue = "previous";
+        }
 
-            NodeStateStore.StringNodeState[] large =
-                ThreadLocalStringNodeStateBuffer.Acquire(128);
-            NodeStateStore.StringNodeState[]? nested = null;
-            try
+        StringNodeStateBuffer.Release(buffer);
+        NodeStateStore.StringNodeState[] reused =
+            ArrayPool<NodeStateStore.StringNodeState>.Shared.Rent(slots);
+        try
+        {
+            reused.ShouldBeSameAs(buffer);
+            foreach (NodeStateStore.StringNodeState state in reused)
             {
-                nested = ThreadLocalStringNodeStateBuffer.Acquire(64);
-                nested.ShouldBeSameAs(small);
-                nested.ShouldNotBeSameAs(large);
+                state.ExpandedValue.ShouldBeNull();
             }
-            finally
-            {
-                if (nested is not null)
-                {
-                    ThreadLocalStringNodeStateBuffer.Release(nested, 64);
-                }
-
-                ThreadLocalStringNodeStateBuffer.Release(large, 128);
-            }
-
-            NodeStateStore.StringNodeState[] reused =
-                ThreadLocalStringNodeStateBuffer.Acquire(128);
-            try
-            {
-                reused.ShouldBeSameAs(large);
-            }
-            finally
-            {
-                ThreadLocalStringNodeStateBuffer.Release(reused, 128);
-            }
-        }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
+        finally
+        {
+            ArrayPool<NodeStateStore.StringNodeState>.Shared.Return(reused, clearArray: true);
+        }
     }
 
     [Theory]
@@ -600,13 +588,13 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
     public void ConditionStateBuffersAreReusedAndIsolated(int slots)
     {
         NodeStateStore.StringNodeState[] first =
-            ThreadLocalStringNodeStateBuffer.Acquire(slots);
+            StringNodeStateBuffer.Acquire(slots);
         first[0].ExpandedValue = "first";
         first[slots - 1].ExpandedValue = "last";
-        ThreadLocalStringNodeStateBuffer.Release(first, slots);
+        StringNodeStateBuffer.Release(first);
 
         NodeStateStore.StringNodeState[] reused =
-            ThreadLocalStringNodeStateBuffer.Acquire(slots);
+            StringNodeStateBuffer.Acquire(slots);
         NodeStateStore.StringNodeState[]? nested = null;
         try
         {
@@ -616,12 +604,12 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
             reused[0].ExpandedValue = "outer";
             reused[slots - 1].ExpandedValue = "outer-last";
 
-            nested = ThreadLocalStringNodeStateBuffer.Acquire(slots);
+            nested = StringNodeStateBuffer.Acquire(slots);
             nested.ShouldNotBeSameAs(reused);
             nested[0].ExpandedValue.ShouldBeNull();
             nested[slots - 1].ExpandedValue.ShouldBeNull();
             nested[0].ExpandedValue = "inner";
-            ThreadLocalStringNodeStateBuffer.Release(nested, slots);
+            StringNodeStateBuffer.Release(nested);
             nested = null;
 
             reused[0].ExpandedValue.ShouldBe("outer");
@@ -631,10 +619,10 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
         {
             if (nested is not null)
             {
-                ThreadLocalStringNodeStateBuffer.Release(nested, slots);
+                StringNodeStateBuffer.Release(nested);
             }
 
-            ThreadLocalStringNodeStateBuffer.Release(reused, slots);
+            StringNodeStateBuffer.Release(reused);
         }
     }
 
