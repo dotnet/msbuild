@@ -229,7 +229,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(
                 HandshakeOptions.TaskHost | HandshakeOptions.X64,
                 () => [olderInstallation, installationWithoutMSBuild, installation])
-                .ShouldBe(new NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found(msbuildExePath, toolsDirectoryRoot));
+                .Value.ShouldBe(new NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found(msbuildExePath, toolsDirectoryRoot));
         }
 
         [Fact]
@@ -241,16 +241,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VisualStudioInstance olderInstallation = CreateVisualStudioInstallation(env, "Visual Studio Enterprise 2022", "17.14.0.0", out _, out _);
 
             NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(HandshakeOptions.TaskHost | HandshakeOptions.X64, () => [])
-                .ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound>();
+                .Value.ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound>();
 
             NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(HandshakeOptions.TaskHost | HandshakeOptions.X64, () => [olderInstallation])
-                .ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound>();
+                .Value.ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound>();
 
             // A Developer Command Prompt for an installation without MSBuild.exe falls back to the installations that have it.
             env.SetEnvironmentVariable("VSINSTALLDIR", env.CreateFolder().Path);
             env.SetEnvironmentVariable("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
             NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(HandshakeOptions.TaskHost | HandshakeOptions.X64, () => [])
-                .ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound>();
+                .Value.ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound>();
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
                 out string? code,
@@ -275,7 +275,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VisualStudioInstance buildTools = CreateVisualStudioInstallation(env, "Visual Studio Build Tools 2026", "18.1.22222.0", out _, out _);
 
             var multipleFound = NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(HandshakeOptions.TaskHost | HandshakeOptions.X64, () => [enterprise, buildTools])
-                .ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.MultipleFound>();
+                .Value.ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.MultipleFound>();
             multipleFound.Installations.ShouldBe([enterprise, buildTools]);
 
             string list = NodeProviderOutOfProcTaskHost.FormatVisualStudioInstallations(multipleFound.Installations);
@@ -310,7 +310,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(
                 HandshakeOptions.TaskHost | HandshakeOptions.X64,
                 () => throw new InvalidOperationException("Visual Studio installations should not be queried."))
-                .ShouldBe(new NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found(msbuildExePath, toolsDirectoryRoot));
+                .Value.ShouldBe(new NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found(msbuildExePath, toolsDirectoryRoot));
         }
 
         [Theory]
@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(
                 (HandshakeOptions)hostContext,
                 () => throw new InvalidOperationException("Visual Studio installations should not be queried."))
-                .ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotApplicable>();
+                .Value.ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotApplicable>();
         }
 
         private static void ClearDeveloperCommandPrompt(TestEnvironment env)

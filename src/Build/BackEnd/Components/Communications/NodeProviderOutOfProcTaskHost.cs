@@ -1218,19 +1218,19 @@ namespace Microsoft.Build.BackEnd
 #if RUNTIME_TYPE_NETCORE
         /// <summary>
         /// The outcome of locating a Visual Studio installation whose MSBuild.exe can run tasks that require
-        /// the .NET Framework (<c>Runtime="CLR4"</c>) for .NET MSBuild. The cases are closed: every outcome is one of the
-        /// nested records, and each carries only the information relevant to it.
+        /// the .NET Framework (<c>Runtime="CLR4"</c>) for .NET MSBuild. Every outcome is one of the nested case types,
+        /// and each carries only the information relevant to it.
         /// </summary>
-        internal abstract record VisualStudioTaskHostResolution
+        internal union VisualStudioTaskHostResolution(
+            VisualStudioTaskHostResolution.NotApplicable,
+            VisualStudioTaskHostResolution.Found,
+            VisualStudioTaskHostResolution.NotFound,
+            VisualStudioTaskHostResolution.MultipleFound)
         {
-            private VisualStudioTaskHostResolution()
-            {
-            }
-
             /// <summary>
             /// The requested task host is not a .NET Framework 4 task host on Windows, so Visual Studio is not used.
             /// </summary>
-            internal sealed record NotApplicable : VisualStudioTaskHostResolution
+            internal sealed record NotApplicable
             {
                 private NotApplicable()
                 {
@@ -1244,12 +1244,12 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             /// <param name="MSBuildExePath">The full path to the MSBuild.exe to launch for the requested architecture.</param>
             /// <param name="ToolsDirectoryRoot">The MSBuild tools directory root of the installation, which the task host uses in its handshake.</param>
-            internal sealed record Found(string MSBuildExePath, string ToolsDirectoryRoot) : VisualStudioTaskHostResolution;
+            internal sealed record Found(string MSBuildExePath, string ToolsDirectoryRoot);
 
             /// <summary>
             /// No Visual Studio installation with a suitable MSBuild.exe was found.
             /// </summary>
-            internal sealed record NotFound : VisualStudioTaskHostResolution
+            internal sealed record NotFound
             {
                 private NotFound()
                 {
@@ -1262,7 +1262,7 @@ namespace Microsoft.Build.BackEnd
             /// Several Visual Studio installations with a suitable MSBuild.exe were found, and the environment did not select one.
             /// </summary>
             /// <param name="Installations">The installations that could serve the request.</param>
-            internal sealed record MultipleFound(IReadOnlyList<VisualStudioInstance> Installations) : VisualStudioTaskHostResolution;
+            internal sealed record MultipleFound(IReadOnlyList<VisualStudioInstance> Installations);
         }
 
         private static readonly int s_currentVisualStudioMajorVersion = Version.Parse(MSBuildConstants.CurrentVisualStudioVersion).Major;
