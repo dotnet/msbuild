@@ -123,6 +123,53 @@ public class BuildCheckManagerTests : IDisposable
         _loggingService.ShutdownComponent();
     }
 
+    [Theory]
+    [InlineData("warning", "warning", 2, 0)]
+    [InlineData("none", "warning", 1, 0)]
+    [InlineData("warning", "error", 1, 1)]
+    [InlineData("warning", "none", 1, 0)]
+    public void RepeatedAcquisitionRunsOncePerProject(
+        string firstSeverity, string secondSeverity, int expectedWarnings, int expectedErrors)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder(createFolder: true);
+        env.CreateFile(folder, ".editorconfig", $"""
+            root = true
+
+            [first.csproj]
+            build_check.X01235.severity = {firstSeverity}
+
+            [second.csproj]
+            build_check.X01235.severity = {secondSeverity}
+            """);
+        string first = env.CreateFile(folder, "first.csproj", "<Project />").Path;
+        string second = env.CreateFile(folder, "second.csproj", "<Project />").Path;
+        _testedInstance.SetDataSource(BuildCheckDataSource.EventArgs);
+        _testedInstance.SetDataSource(BuildCheckDataSource.BuildExecution);
+
+        _logger.Warnings.Where(w => w.Code == "X01235").ShouldBeEmpty();
+        _logger.Errors.Where(e => e.Code == "X01235").ShouldBeEmpty();
+
+        AcquireAndEvaluate(first, 1);
+        _logger.Warnings.Count(w => w.Code == "X01235").ShouldBe(firstSeverity == "warning" ? 1 : 0);
+        _logger.Errors.Where(e => e.Code == "X01235").ShouldBeEmpty();
+
+        AcquireAndEvaluate(second, 2);
+        _logger.Warnings.Count(w => w.Code == "X01235").ShouldBe(expectedWarnings);
+        _logger.Errors.Count(e => e.Code == "X01235").ShouldBe(expectedErrors);
+
+        void AcquireAndEvaluate(string projectPath, int evaluationId)
+        {
+            var context = new CheckLoggingContext(_loggingService, new BuildEventContext(1, 2, evaluationId, evaluationId, BuildEventContext.InvalidProjectContextId, 6, 7));
+            _testedInstance.ProcessCheckAcquisition(new CheckAcquisitionData(Path.Combine(AppContext.BaseDirectory, "CustomCheck.dll"), projectPath), context);
+            _testedInstance.ProcessEvaluationFinishedEventArgs(context, new ProjectEvaluationFinishedEventArgs
+            {
+                ProjectFile = projectPath,
+                BuildEventContext = context.BuildEventContext,
+            });
+        }
+    }
+
     private void MockBuildCheckAcquisition(bool isCheckRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isCheckRuleExist));
 
     private void MockEnabledDataSourcesDefinition() => MockField("_enabledDataSources", new[] { true, true });

@@ -13,6 +13,32 @@ namespace Microsoft.Build.Framework.UnitTests
     public class BuildCheckTracingEventArgs_Tests
     {
         [Fact]
+        public void TracingDataMergesRepeatedRuleIds()
+        {
+            BuildCheckRuleTelemetryData first = new("id1", "check1", false, DiagnosticSeverity.Warning,
+                [DiagnosticSeverity.Warning], ["project1", "shared"],
+                2, 3, 5, false, TimeSpan.FromSeconds(7));
+            BuildCheckRuleTelemetryData second = new("id1", "check1", false, DiagnosticSeverity.Warning,
+                [DiagnosticSeverity.Error], ["project2", "shared"],
+                11, 13, 17, true, TimeSpan.FromSeconds(19));
+            BuildCheckRuleTelemetryData other = new("id2", "check2", true, DiagnosticSeverity.Error);
+            Dictionary<string, TimeSpan> infrastructureStats = new() { ["acquisition"] = TimeSpan.FromSeconds(23) };
+
+            first.RuleId.ShouldBe(second.RuleId);
+            first.RuleId.ShouldNotBe(other.RuleId);
+
+            BuildCheckTracingData data = new([first, other, second], infrastructureStats);
+
+            data.TelemetryData.Count.ShouldBe(2);
+            BuildCheckRuleTelemetryData expected = new("id1", "check1", false, DiagnosticSeverity.Warning,
+                [DiagnosticSeverity.Warning, DiagnosticSeverity.Error], ["project1", "shared", "project2"],
+                13, 16, 22, true, TimeSpan.FromSeconds(26));
+            data.TelemetryData["id1"].ShouldBeEquivalentTo(expected);
+            data.TelemetryData["id2"].ShouldBeEquivalentTo(other);
+            data.InfrastructureTracingData.ShouldBeEquivalentTo(infrastructureStats);
+        }
+
+        [Fact]
         public void SerializationDeserializationTest()
         {
             string key1 = "AA";
