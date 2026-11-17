@@ -912,6 +912,29 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, Exception e)
         {
+#if RUNTIME_TYPE_NETCORE
+            if (e is null)
+            {
+                switch (NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(requiredContext, out _, out _, out IReadOnlyList<VisualStudioInstance> visualStudioInstallations))
+                {
+                    case NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound:
+                        _taskLoggingContext.LogError(_taskLocation, "TaskHostVisualStudioNotFound", _taskType.Type.Name, runtime, architecture, MSBuildConstants.CurrentVisualStudioVersion);
+                        return;
+
+                    case NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.MultipleFound:
+                        _taskLoggingContext.LogError(
+                            _taskLocation,
+                            "TaskHostMultipleVisualStudioFound",
+                            _taskType.Type.Name,
+                            runtime,
+                            architecture,
+                            MSBuildConstants.CurrentVisualStudioVersion,
+                            NodeProviderOutOfProcTaskHost.FormatVisualStudioInstallations(visualStudioInstallations));
+                        return;
+                }
+            }
+#endif
+
             string taskHostLocation = null;
 
             if (Handshake.IsHandshakeOptionEnabled(requiredContext, HandshakeOptions.NET))

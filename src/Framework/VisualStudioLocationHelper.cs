@@ -3,7 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-#if FEATURE_WINDOWSINTEROP && FEATURE_VISUALSTUDIOSETUP
+#if FEATURE_WINDOWSINTEROP && (FEATURE_VISUALSTUDIOSETUP || NET)
+#if NET
+using System.Runtime.Versioning;
+#endif
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.VisualStudio;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -32,9 +36,30 @@ namespace Microsoft.Build.Shared
         /// <returns>Enumerable list of Visual Studio instances</returns>
         internal static IList<VisualStudioInstance> GetInstances()
         {
+#if FEATURE_VISUALSTUDIOSETUP
+            return QueryInstances();
+#else
+            return [];
+#endif
+        }
+
+        /// <summary>
+        /// Query the Visual Studio setup API for installed instances regardless of whether
+        /// <see cref="GetInstances"/> is enabled for the current build of MSBuild. On .NET this is
+        /// used to locate a Visual Studio installation whose <c>MSBuild.exe</c> can act as a
+        /// .NET Framework task host. Returns an empty list on non-Windows platforms or when the
+        /// setup API is unavailable.
+        /// </summary>
+        internal static IList<VisualStudioInstance> QueryInstances()
+        {
             var validInstances = new List<VisualStudioInstance>();
 
-#if FEATURE_WINDOWSINTEROP && FEATURE_VISUALSTUDIOSETUP
+#if FEATURE_WINDOWSINTEROP && (FEATURE_VISUALSTUDIOSETUP || NET)
+            if (!NativeMethods.IsWindows)
+            {
+                return validInstances;
+            }
+
             // No try/catch around the COM call chain by design: AcquireSetupConfiguration2
             // and PopulateInstances check HRESULTs inline and return gracefully on failure.
             // If a future maintainer introduces a ThrowOnFailure() in this path, add the
@@ -57,7 +82,7 @@ namespace Microsoft.Build.Shared
             return validInstances;
         }
 
-#if FEATURE_WINDOWSINTEROP && FEATURE_VISUALSTUDIOSETUP
+#if FEATURE_WINDOWSINTEROP && (FEATURE_VISUALSTUDIOSETUP || NET)
         /// <summary>
         /// Try to obtain a top-level <see cref="ISetupConfiguration2"/> pointer. First attempts
         /// <c>CoCreateInstance</c> on the registered coclass; on
@@ -68,6 +93,9 @@ namespace Microsoft.Build.Shared
         /// failure is returned as a null scope — the caller treats absent VS Setup as an
         /// empty result, not an error.
         /// </summary>
+#if NET
+        [SupportedOSPlatform("windows6.1")]
+#endif
         private static ComScope<ISetupConfiguration2> AcquireSetupConfiguration2()
         {
             Guid clsid = SetupConfiguration.CLSID_SetupConfiguration;
@@ -173,7 +201,7 @@ namespace Microsoft.Build.Shared
             using BSTR pathBstr = default;
 
             if (instance->GetInstallationVersion(&versionBstr).Failed
-                || !Version.TryParse(versionBstr.ToString(), out Version version))
+                || !Version.TryParse(versionBstr.ToString(), out Version? version))
             {
                 return false;
             }
