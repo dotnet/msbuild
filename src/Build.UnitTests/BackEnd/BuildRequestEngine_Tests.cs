@@ -358,9 +358,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 
         [Theory]
-        [InlineData(Scheduler.InProcNodeId, 0)]
-        [InlineData(2, 1)]
-        public void DeferredWarningsSurviveWorkerDeactivationFailure(int nodeId, int expectedWarnings)
+        [InlineData(Scheduler.InProcNodeId, true, 0)]
+        [InlineData(2, true, 0)]
+        [InlineData(2, false, 1)]
+        public void DeferredWarningsSurviveWorkerDeactivationFailure(int nodeId, bool isInProcNode, int expectedWarnings)
         {
             _host.BuildParameters.IsBuildCheckEnabled = true;
             var logging = LoggingService.CreateLoggingService(LoggerMode.Synchronous, nodeId);
@@ -373,7 +374,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _host.BuildCheckManagerProvider = provider;
             var manager = (BuildCheckManagerProvider.BuildCheckManager)provider.Instance;
             manager.SetDataSource(BuildCheckDataSource.BuildExecution);
-            if (nodeId == Scheduler.InProcNodeId)
+            if (isInProcNode)
             {
                 manager.SetDataSource(BuildCheckDataSource.EventArgs);
             }
@@ -383,7 +384,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var builder = (MockRequestBuilder)_host.RequestBuilder;
             builder.ThrowExceptionOnCancel = true;
             VerifyEngineStatus(BuildRequestEngineStatus.Uninitialized, true);
-            _engine.InitializeForBuild(new NodeLoggingContext(logging, nodeId, nodeId == Scheduler.InProcNodeId));
+            _engine.InitializeForBuild(new NodeLoggingContext(logging, nodeId, isInProcNode));
             VerifyEngineStatus(BuildRequestEngineStatus.Idle);
             var context = new BuildEventContext(0, nodeId, 42,
                 BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId,
@@ -409,6 +410,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     .Message.ShouldContain("ThrowExceptionOnCancel set.");
                 string[] failureLogs = Directory.GetFiles(debugPath.Path, "MSBuild_*.failure.txt", SearchOption.AllDirectories);
                 File.ReadAllText(failureLogs.ShouldHaveSingleItem()).ShouldContain("ThrowExceptionOnCancel set.");
+                logger.AllBuildEvents.ShouldNotContain(e => e is BuildCheckTracingEventArgs);
                 logger.Warnings.Count.ShouldBe(expectedWarnings);
                 if (expectedWarnings != 0)
                 {

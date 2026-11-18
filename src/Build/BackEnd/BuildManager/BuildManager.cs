@@ -1361,12 +1361,13 @@ namespace Microsoft.Build.Execution
 
                     if (loggingService != null)
                     {
-                        if (_buildParameters!.IsBuildCheckEnabled)
+                        Assumed.NotNull(_buildParameters);
+                        if (_buildParameters.IsBuildCheckEnabled)
                         {
                             // Some evaluations never execute. Preserve their diagnostics before loggers finish.
                             WaitForAllLoggingServiceEventsToBeProcessed();
-                            var buildCheckProvider = (IBuildCheckManagerProvider)((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCheckManagerProvider);
-                            buildCheckProvider.Instance.FlushDeferredDiagnostics(new CheckLoggingContext(loggingService, BuildEventContext.Invalid));
+                            var buildCheckProvider = _componentFactories.GetComponent<IBuildCheckManagerProvider>(BuildComponentType.BuildCheckManagerProvider);
+                            buildCheckProvider.Instance.FinalizeProcessing(new CheckLoggingContext(loggingService, BuildEventContext.Invalid));
                             WaitForAllLoggingServiceEventsToBeProcessed();
                         }
 
@@ -3740,6 +3741,8 @@ namespace Microsoft.Build.Execution
                 // Even if an exception is thrown, we want to make sure we null out the logging service so that
                 // we don't try to shut it down again in some other cleanup code.
                 _componentFactories.ReplaceFactory(BuildComponentType.LoggingService, (IBuildComponent?)null);
+                // The connector and in-process engines share this manager until logging has finished.
+                _componentFactories.ShutdownComponent(BuildComponentType.BuildCheckManagerProvider);
             }
         }
 

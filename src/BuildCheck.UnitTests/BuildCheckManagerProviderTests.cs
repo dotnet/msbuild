@@ -207,9 +207,9 @@ public class BuildCheckManagerTests : IDisposable
 
         _testedInstance.StartProjectRequest(checkContext, "matching.proj");
         logger.Warnings.ShouldHaveSingleItem();
-        _testedInstance.FlushDeferredDiagnostics(checkContext);
+        _testedInstance.FinalizeProcessing(checkContext);
         logger.Warnings.ShouldBe([matching, unrelated]);
-        _testedInstance.FlushDeferredDiagnostics(checkContext);
+        _testedInstance.FinalizeProcessing(checkContext);
         logger.Warnings.Count.ShouldBe(2);
     }
 
@@ -251,7 +251,7 @@ public class BuildCheckManagerTests : IDisposable
             }
             else
             {
-                _testedInstance.FlushDeferredDiagnostics(checkContext);
+                _testedInstance.FinalizeProcessing(checkContext);
             }
         }
     }
@@ -294,17 +294,17 @@ public class BuildCheckManagerTests : IDisposable
             await start.Task;
             for (int i = 0; i < warningCount; i++)
             {
-                _testedInstance.FlushDeferredDiagnostics(checkContext);
+                _testedInstance.FinalizeProcessing(checkContext);
             }
         }));
 
         start.SetResult(true);
         await Task.WhenAll(operations);
-        _testedInstance.FlushDeferredDiagnostics(checkContext);
+        _testedInstance.FinalizeProcessing(checkContext);
 
         dispatched.Count.ShouldBe(warningCount);
         dispatched.Select(e => int.Parse(e.Message.ShouldNotBeNull())).OrderBy(i => i).ShouldBe(Enumerable.Range(0, warningCount));
-        _testedInstance.FlushDeferredDiagnostics(checkContext);
+        _testedInstance.FinalizeProcessing(checkContext);
         dispatched.Count.ShouldBe(warningCount);
     }
 
