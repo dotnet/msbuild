@@ -738,7 +738,7 @@ namespace Microsoft.Build.BackEnd
             switch (ResolveVisualStudioTaskHost(hostContext))
             {
                 case VisualStudioTaskHostResolution.Found found:
-                    return found.MSBuildExePath;
+                    return found.TaskHostExecutablePath;
                 case VisualStudioTaskHostResolution.NotFound or VisualStudioTaskHostResolution.MultipleFound:
                     return null;
             }
@@ -929,12 +929,14 @@ namespace Microsoft.Build.BackEnd
             out bool parameterConversionUnsupported,
             out int hostProcessId,
             out bool wasNewlyCreated,
-            out NodeContext connection)
+            out NodeContext connection,
+            out VisualStudioTaskHostResolution visualStudioResolution)
         {
             parameterConversionUnsupported = false;
             hostProcessId = -1;
             wasNewlyCreated = false;
             connection = null;
+            visualStudioResolution = VisualStudioTaskHostResolution.NotApplicable.Instance;
             TaskHostNodeKey nodeKey = default;
 
             if (taskHostParameters.MSBuildAssemblyPath is null && taskHostParameters.DotnetHostPath is null)
@@ -978,7 +980,7 @@ namespace Microsoft.Build.BackEnd
             NodeLaunchData nodeLaunchData = default;
             if (nodeKey == default)
             {
-                nodeLaunchData = ResolveNodeLaunchConfiguration(requestedNodeKey.HandshakeOptions, taskHostParameters);
+                nodeLaunchData = ResolveNodeLaunchConfiguration(requestedNodeKey.HandshakeOptions, taskHostParameters, out visualStudioResolution);
                 if (nodeLaunchData.MSBuildLocation is null)
                 {
                     return false;
@@ -1173,8 +1175,13 @@ namespace Microsoft.Build.BackEnd
             return nodeContexts.Count == 1;
         }
 
-        private NodeLaunchData ResolveNodeLaunchConfiguration(HandshakeOptions hostContext, in TaskHostParameters taskHostParameters)
+        private NodeLaunchData ResolveNodeLaunchConfiguration(
+            HandshakeOptions hostContext,
+            in TaskHostParameters taskHostParameters,
+            out VisualStudioTaskHostResolution visualStudioResolution)
         {
+            visualStudioResolution = VisualStudioTaskHostResolution.NotApplicable.Instance;
+
             if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
             {
                 return ResolveAppHostOrFallback(GetMSBuildPath(taskHostParameters), taskHostParameters.DotnetHostPath, hostContext, IsNodeReuseEnabled(hostContext));
@@ -1184,20 +1191,7 @@ namespace Microsoft.Build.BackEnd
             if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
             {
 #if RUNTIME_TYPE_NETCORE
-                // The CLR2 task host from Visual Studio computes its handshake from its own directory and file version.
-                switch (ResolveVisualStudioTaskHost(hostContext))
-                {
-                    case VisualStudioTaskHostResolution.Found clr2Host:
-                        return new NodeLaunchData(
-                            clr2Host.MSBuildExePath,
-                            string.Empty,
-                            new Handshake(hostContext, clr2Host.ToolsDirectoryRoot, GetFileVersion(clr2Host.MSBuildExePath)));
-
-                    case VisualStudioTaskHostResolution.NotFound or VisualStudioTaskHostResolution.MultipleFound:
-                        // No launch data: TaskHostTask reports why no Visual Studio installation could be used.
-                        CommunicationsUtilities.Trace($"For a host context of {hostContext}, no single Visual Studio installation was found.");
-                        return default;
-                }
+                return ResolveVisualStudioTaskHostLaunchConfiguration(hostContext, out visualStudioResolution);
 #else
                 string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(hostContext);
                 string toolsDirectory = Path.GetDirectoryName(msbuildLocation) ?? string.Empty;
@@ -1207,40 +1201,57 @@ namespace Microsoft.Build.BackEnd
 #endif
 
 #if RUNTIME_TYPE_NETCORE
-            switch (ResolveVisualStudioTaskHost(hostContext))
-            {
-                case VisualStudioTaskHostResolution.Found found:
-                    // The .NET Framework task host from Visual Studio computes its handshake from its own installation:
-                    // the tools directory root it discovers from MSBUILD_EXE_PATH, and its own file version.
-                    // MSBUILD_EXE_PATH is overridden because the .NET CLI sets it to the SDK's MSBuild.dll.
-                    Version fileVersion = GetFileVersion(found.MSBuildExePath);
-                    CommunicationsUtilities.Trace($"For a host context of {hostContext}, using Visual Studio MSBuild from {found.MSBuildExePath} (version {fileVersion}).");
-
-                    return new NodeLaunchData(
-                        found.MSBuildExePath,
-                        BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)),
-                        new Handshake(hostContext, found.ToolsDirectoryRoot, fileVersion),
-                        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                        {
-                            ["MSBUILD_EXE_PATH"] = found.MSBuildExePath,
-                        });
-
-                case VisualStudioTaskHostResolution.NotFound or VisualStudioTaskHostResolution.MultipleFound:
-                    // No launch data: TaskHostTask reports why no Visual Studio installation could be used.
-                    CommunicationsUtilities.Trace($"For a host context of {hostContext}, no single Visual Studio installation was found.");
-                    return default;
-            }
-#endif
-
+            return ResolveVisualStudioTaskHostLaunchConfiguration(hostContext, out visualStudioResolution);
+#else
             return new NodeLaunchData(GetMSBuildExecutablePathForNonNETRuntimes(hostContext), BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)), new Handshake(hostContext));
+#endif
         }
 
 #if RUNTIME_TYPE_NETCORE
+        private NodeLaunchData ResolveVisualStudioTaskHostLaunchConfiguration(
+            HandshakeOptions hostContext,
+            out VisualStudioTaskHostResolution visualStudioResolution)
+        {
+            visualStudioResolution = ResolveVisualStudioTaskHost(hostContext);
+            if (visualStudioResolution is not VisualStudioTaskHostResolution.Found found)
+            {
+                CommunicationsUtilities.Trace($"For a host context of {hostContext}, no single Visual Studio installation was found.");
+                return default;
+            }
+
+            Version fileVersion = GetFileVersion(found.TaskHostExecutablePath);
+            bool isClr2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+
+            if (isClr2)
+            {
+                CommunicationsUtilities.Trace($"For a host context of {hostContext}, using Visual Studio task host from {found.TaskHostExecutablePath} (version {fileVersion}).");
+                return new NodeLaunchData(
+                    found.TaskHostExecutablePath,
+                    string.Empty,
+                    new Handshake(hostContext, found.HandshakeToolsDirectory, fileVersion));
+            }
+
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, using Visual Studio MSBuild from {found.TaskHostExecutablePath} (version {fileVersion}).");
+
+            // The .NET Framework task host computes its handshake from its installation. Override
+            // MSBUILD_EXE_PATH because the .NET CLI sets it to the SDK's MSBuild.dll.
+            return new NodeLaunchData(
+                found.TaskHostExecutablePath,
+                BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)),
+                new Handshake(hostContext, found.HandshakeToolsDirectory, fileVersion),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["MSBUILD_EXE_PATH"] = found.TaskHostExecutablePath,
+                });
+        }
+#endif
+
         /// <summary>
         /// The outcome of locating a Visual Studio installation whose task host can run tasks that require
         /// the .NET Framework for .NET MSBuild. Every outcome is one of the nested case types,
         /// and each carries only the information relevant to it.
         /// </summary>
+#if RUNTIME_TYPE_NETCORE
         internal union VisualStudioTaskHostResolution(
             VisualStudioTaskHostResolution.NotApplicable,
             VisualStudioTaskHostResolution.Found,
@@ -1262,12 +1273,12 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// A single Visual Studio installation was selected.
             /// </summary>
-            /// <param name="MSBuildExePath">The full path to the executable to launch for the requested runtime and architecture.</param>
-            /// <param name="ToolsDirectoryRoot">The directory used by the task host in its handshake.</param>
-            internal sealed record Found(string MSBuildExePath, string ToolsDirectoryRoot);
+            /// <param name="TaskHostExecutablePath">The full path to the executable to launch for the requested runtime and architecture.</param>
+            /// <param name="HandshakeToolsDirectory">The directory used by the task host in its handshake.</param>
+            internal sealed record Found(string TaskHostExecutablePath, string HandshakeToolsDirectory);
 
             /// <summary>
-            /// No Visual Studio installation with a suitable MSBuild.exe was found.
+            /// No Visual Studio installation with a suitable task-host executable was found.
             /// </summary>
             internal sealed record NotFound
             {
@@ -1279,32 +1290,28 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Several Visual Studio installations with a suitable MSBuild.exe were found, and the environment did not select one.
+            /// Several Visual Studio installations with a suitable task-host executable were found, and the environment did not select one.
             /// </summary>
             /// <param name="Installations">The installations that could serve the request.</param>
             internal sealed record MultipleFound(IReadOnlyList<VisualStudioInstance> Installations);
         }
+#else
+        internal abstract record VisualStudioTaskHostResolution
+        {
+            internal sealed record NotApplicable : VisualStudioTaskHostResolution
+            {
+                internal static NotApplicable Instance { get; } = new();
+            }
+        }
+#endif
 
+#if RUNTIME_TYPE_NETCORE
         private static readonly int s_currentVisualStudioMajorVersion = Version.Parse(MSBuildConstants.CurrentVisualStudioVersion).Major;
 
         /// <summary>
         /// Visual Studio installations reported by the Visual Studio setup API, queried at most once per build.
         /// </summary>
         private static IList<VisualStudioInstance> s_visualStudioInstances;
-
-        /// <summary>
-        /// Locates a .NET Framework task host in the Visual Studio installation described by the environment
-        /// of a Visual Studio Developer Command Prompt (as set up by VsDevCmd.bat or vcvars*.bat), so that .NET MSBuild
-        /// can run tasks that require the .NET Framework in a task host from that installation.
-        /// </summary>
-        /// <param name="hostContext">The handshake options of the requested task host.</param>
-        /// <returns>The task host of the Developer Command Prompt's installation, or <see langword="null"/> when there is none.</returns>
-        internal static VisualStudioTaskHostResolution.Found GetDeveloperCommandPromptTaskHost(HandshakeOptions hostContext)
-            => NativeMethodsShared.IsWindows
-                && IsVisualStudioTaskHostContext(hostContext)
-                && TryGetDeveloperCommandPromptInstallation(out string visualStudioInstallDirectory)
-                    ? FindTaskHostInInstallation(visualStudioInstallDirectory, hostContext)
-                    : null;
 
         /// <summary>
         /// Locates a task host in a Visual Studio installation to run tasks that require the .NET Framework.

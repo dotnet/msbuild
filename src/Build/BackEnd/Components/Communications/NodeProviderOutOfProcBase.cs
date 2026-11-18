@@ -435,13 +435,7 @@ namespace Microsoft.Build.BackEnd
                     // nodes because we should never be able to connect in this case.
                     if (Handshake.IsHandshakeOptionEnabled(nodeLaunchData.Handshake.HandshakeOptions, HandshakeOptions.CLR2))
                     {
-#if NETFRAMEWORK
-                        bool frameworkMissing = FrameworkLocationHelper.GetPathToDotNetFrameworkV35(Microsoft.Build.Utilities.DotNetFrameworkArchitecture.Current) is null;
-#else
-                        // FrameworkLocationHelper cannot find .NET Framework installations from .NET, so read the setup registry key directly.
-                        bool frameworkMissing = OperatingSystem.IsWindows()
-                            && !Equals(Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.5", "Install", null), 1);
-#endif
+                        bool frameworkMissing = !FrameworkLocationHelper.IsDotNetFrameworkV35AvailableForTaskHost();
                         if (frameworkMissing)
                         {
                             CommunicationsUtilities.Trace($"Failed to launch node from {msbuildLocation}. The required .NET Framework v3.5 is not installed or enabled. CommandLine: {commandLineArgs}");

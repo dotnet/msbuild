@@ -278,7 +278,7 @@ namespace Microsoft.Build.Execution
 
                 if (taskFactory != null && !retrievedFromCache)
                 {
-                    if (record.TaskFactoryAttributeName.Equals(RegisteredTaskRecord.AssemblyTaskFactory) || record.TaskFactoryAttributeName.Equals(RegisteredTaskRecord.TaskHostFactory))
+                    if (record.IsBuiltInTaskFactory)
                     {
                         targetLoggingContext.LogComment(MessageImportance.Low, "TaskFound", taskName, taskFactory.Name);
                     }
@@ -1117,7 +1117,7 @@ namespace Microsoft.Build.Execution
                     {
                         // If we are an AssemblyTaskFactory we can use the fact we are internal to the engine assembly to do some logging / exception throwing that regular factories cannot do,
                         // this is requried to remain compatible with orcas in terms of exceptions thrown / messages logged when a task cannot be found in an assembly.
-                        if (TaskFactoryAttributeName == AssemblyTaskFactory || TaskFactoryAttributeName == TaskHostFactory)
+                        if (IsBuiltInTaskFactory)
                         {
                             // Also we only need to check to see if the task name can be created by the factory if the taskName does not equal the Registered name
                             // and the identity parameters don't match the factory's declared parameters.
@@ -1213,8 +1213,8 @@ namespace Microsoft.Build.Execution
                     ITaskFactory factory = null;
                     LoadedType loadedType = null;
 
-                    bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
-                    bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
+                    bool isAssemblyTaskFactory = IsTaskFactory(AssemblyTaskFactory);
+                    bool isTaskHostFactory = IsTaskFactory(TaskHostFactory);
 
                     if (isTaskHostFactory)
                     {
@@ -1420,7 +1420,7 @@ namespace Microsoft.Build.Execution
             private ref TaskFactoryWrapper GetTaskFactoryInstance(in TaskHostParameters taskIdentityParameters)
             {
 #if NET
-                if ((TaskFactoryAttributeName == AssemblyTaskFactory || TaskFactoryAttributeName == TaskHostFactory)
+                if (IsBuiltInTaskFactory
                     && string.Equals(taskIdentityParameters.Runtime, XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
                 {
                     return ref _clr2TaskFactoryWrapperInstance;
@@ -1428,6 +1428,11 @@ namespace Microsoft.Build.Execution
 #endif
                 return ref _taskFactoryWrapperInstance;
             }
+
+            internal bool IsBuiltInTaskFactory => IsTaskFactory(AssemblyTaskFactory) || IsTaskFactory(TaskHostFactory);
+
+            private bool IsTaskFactory(string taskFactoryName)
+                => string.Equals(TaskFactoryAttributeName, taskFactoryName, StringComparison.OrdinalIgnoreCase);
 
             /// <summary>
             /// Keep track of the xml which will be sent to the inline task factory and the parameters if any which will also be passed in

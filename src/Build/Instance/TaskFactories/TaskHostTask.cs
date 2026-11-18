@@ -352,6 +352,8 @@ namespace Microsoft.Build.BackEnd
         public bool Execute()
         {
             MSBuildEventSource.Log.TaskHostDispatchStart(_taskType.Type.FullName);
+            NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution visualStudioResolution =
+                NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotApplicable.Instance;
             try
             {
                 _taskLoggingContext.LogComment(
@@ -405,7 +407,8 @@ namespace Microsoft.Build.BackEnd
                             out parameterConversionUnsupported,
                             out hostProcessId,
                             out wasNewlyCreated,
-                            out _taskHostConnection);
+                            out _taskHostConnection,
+                            out visualStudioResolution);
                     }
 
                     if (parameterConversionUnsupported)
@@ -458,16 +461,16 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
+                        LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null, visualStudioResolution);
                     }
                 }
                 catch (BuildAbortedException ex)
                 {
-                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, ex);
+                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, ex, visualStudioResolution);
                 }
                 catch (NodeFailedToLaunchException e)
                 {
-                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, e);
+                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, e, visualStudioResolution);
                 }
             }
             finally
@@ -910,10 +913,14 @@ namespace Microsoft.Build.BackEnd
         /// Since we log that we weren't able to connect to the task host in a couple of different places,
         /// extract it out into a separate method.
         /// </summary>
-        private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, Exception e)
+        private void LogErrorUnableToCreateTaskHost(
+            HandshakeOptions requiredContext,
+            string runtime,
+            string architecture,
+            Exception e,
+            NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution visualStudioResolution)
         {
 #if RUNTIME_TYPE_NETCORE
-            NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution visualStudioResolution = NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(requiredContext);
             if (e is null)
             {
                 switch (visualStudioResolution)
@@ -949,10 +956,13 @@ namespace Microsoft.Build.BackEnd
             else
             {
 #if RUNTIME_TYPE_NETCORE
-                // Report the Visual Studio MSBuild.exe that was launched, which may have been found through the Visual Studio setup API.
-                taskHostLocation = visualStudioResolution is NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found found
-                    ? found.MSBuildExePath
-                    : NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
+                taskHostLocation = visualStudioResolution switch
+                {
+                    NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found found => found.TaskHostExecutablePath,
+                    NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound
+                        or NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.MultipleFound => null,
+                    _ => NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext),
+                };
 #else
                 taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
 #endif

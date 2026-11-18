@@ -433,38 +433,30 @@ internal class TaskHostConfiguration : INodePacket
         TranslateBuildProcessEnvironment(translator);
         translator.TranslateCulture(ref _culture);
         translator.TranslateCulture(ref _uiCulture);
-#if FEATURE_APPDOMAIN
-        // The packet version is used to determine if the AppDomain configuration should be serialized.
-        // null = CLR2 (NET35) task host - supports AppDomain
-        // 0 = CLR4 (NET472) task host - supports AppDomain
-        // We serialize AppDomain for Framework task hosts (null or 0), but not for .NET (>= 2).
+        // The legacy CLR2 and CLR4 task hosts expect this packet slot; .NET uses the null slot for
+        // these host versions and ignores the payload.
         if (translator.NegotiatedPacketVersion is null or 0)
         {
             byte[] appDomainConfigBytes = null;
 
+#if FEATURE_APPDOMAIN
             // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
                 appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
             }
+#endif
 
             translator.Translate(ref appDomainConfigBytes);
 
+#if FEATURE_APPDOMAIN
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
                 _appDomainSetup = new AppDomainSetup();
                 _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
             }
-        }
-#else
-        // CLR2 (null) and CLR4 (0) task hosts expect AppDomain configuration.
-        // .NET has no AppDomain configuration to send, so send none.
-        if (translator.NegotiatedPacketVersion is null or 0)
-        {
-            byte[] appDomainConfigBytes = null;
-            translator.Translate(ref appDomainConfigBytes);
-        }
 #endif
+        }
         translator.Translate(ref _lineNumberOfTask);
         translator.Translate(ref _columnNumberOfTask);
         translator.Translate(ref _projectFileOfTask);

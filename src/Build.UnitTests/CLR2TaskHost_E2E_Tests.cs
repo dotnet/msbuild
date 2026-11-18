@@ -3,9 +3,9 @@
 
 using System;
 using System.IO;
-#if NET
 using System.Security;
 using Microsoft.Build.Shared;
+#if NET
 using Microsoft.Win32;
 #endif
 using Microsoft.Build.UnitTests;
@@ -88,11 +88,6 @@ public class CLR2TaskHost_E2E_Tests
         && File.Exists(Path.Combine(RunnerUtilities.BootstrapRootPath, "net472", "MSBuild", "Current", "Bin", "MSBuildTaskHost.exe"))
         && File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Microsoft.NET", "Framework", "v3.5", "Microsoft.Build.Tasks.v3.5.dll"));
 
-    public static bool Clr2CompilerAvailable =>
-        Clr2BootstrapAvailable
-        && File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Microsoft.NET", "Framework", "v2.0.50727", "csc.exe"))
-        && File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "assembly", "GAC_MSIL", "Microsoft.Build.Framework", "2.0.0.0__b03f5f7f11d50a3a", "Microsoft.Build.Framework.dll"));
-
     [Theory(Skip = "Requires .NET Framework 3.5 and the desktop bootstrap task host.", SkipUnless = nameof(Clr2BootstrapAvailable))]
     [InlineData(true, "x64", "amd64", false)]
     [InlineData(false, "x86", "", false)]
@@ -126,8 +121,10 @@ public class CLR2TaskHost_E2E_Tests
         output.ShouldContain("CLR2TaskHostSuccess");
     }
 
-    [Fact(Skip = "Requires .NET Framework 3.5, its compiler, and the desktop bootstrap task host.", SkipUnless = nameof(Clr2CompilerAvailable))]
-    public void Clr2InvocationDoesNotChangeLaterDefaultRuntime()
+ #endif
+
+    [WindowsNet35OnlyFact]
+    public void Clr2InvocationWithCaseInsensitiveFactoryDoesNotChangeLaterDefaultRuntime()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         SetUpVisualStudioTaskHost(env, "amd64");
@@ -162,7 +159,7 @@ public class CLR2TaskHost_E2E_Tests
         File.WriteAllText(projectPath, $"""
             <Project>
               <UsingTask TaskName="BaselineProcess" AssemblyFile="{escapedAssembly}" />
-              <UsingTask TaskName="ReportProcess" AssemblyFile="{escapedAssembly}" />
+              <UsingTask TaskName="ReportProcess" AssemblyFile="{escapedAssembly}" TaskFactory="assemblytaskfactory" />
               <Target Name="Build">
                 <BaselineProcess><Output TaskParameter="ProcessId" PropertyName="BaselinePid" /></BaselineProcess>
                 <ReportProcess MSBuildRuntime="CLR2" MSBuildArchitecture="x64"><Output TaskParameter="ProcessId" PropertyName="Clr2Pid" /></ReportProcess>
@@ -195,5 +192,4 @@ public class CLR2TaskHost_E2E_Tests
         env.SetEnvironmentVariable("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
         env.SetEnvironmentVariable("MSBUILDTASKHOST_EXE_NAME", null);
     }
-#endif
 }
