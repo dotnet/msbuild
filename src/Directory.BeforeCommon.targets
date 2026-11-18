@@ -68,6 +68,8 @@
     <!-- The Visual Studio setup API locates Visual Studio installations: .NET Framework MSBuild uses it to find its build environment,
          and .NET MSBuild uses it to find a .NET Framework task host. -->
     <DefineConstants Condition="'$(TargetFrameworkVersion)' != 'v3.5' and $([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) != '.NETStandard'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
+    <!-- .NET MSBuild runs CLR2 tasks in the .NET Framework 3.5 task host (MSBuildTaskHost.exe) of a Visual Studio installation. -->
+    <DefineConstants Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp'">$(DefineConstants);FEATURE_NET35_TASKHOST</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

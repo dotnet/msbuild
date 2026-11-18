@@ -1183,9 +1183,26 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_NET35_TASKHOST
             if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
             {
+#if RUNTIME_TYPE_NETCORE
+                // The CLR2 task host from Visual Studio computes its handshake from its own directory and file version.
+                switch (ResolveVisualStudioTaskHost(hostContext))
+                {
+                    case VisualStudioTaskHostResolution.Found clr2Host:
+                        return new NodeLaunchData(
+                            clr2Host.MSBuildExePath,
+                            string.Empty,
+                            new Handshake(hostContext, clr2Host.ToolsDirectoryRoot, GetFileVersion(clr2Host.MSBuildExePath)));
+
+                    case VisualStudioTaskHostResolution.NotFound or VisualStudioTaskHostResolution.MultipleFound:
+                        // No launch data: TaskHostTask reports why no Visual Studio installation could be used.
+                        CommunicationsUtilities.Trace($"For a host context of {hostContext}, no single Visual Studio installation was found.");
+                        return default;
+                }
+#else
                 string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(hostContext);
                 string toolsDirectory = Path.GetDirectoryName(msbuildLocation) ?? string.Empty;
                 return new NodeLaunchData(msbuildLocation, string.Empty, new Handshake(hostContext, toolsDirectory));
+#endif
             }
 #endif
 
@@ -1193,16 +1210,6 @@ namespace Microsoft.Build.BackEnd
             switch (ResolveVisualStudioTaskHost(hostContext))
             {
                 case VisualStudioTaskHostResolution.Found found:
-                    bool isClr2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
-                    if (isClr2)
-                    {
-                        Version taskHostVersion = GetFileVersion(found.MSBuildExePath);
-                        return new NodeLaunchData(
-                            found.MSBuildExePath,
-                            string.Empty,
-                            new Handshake(hostContext, found.ToolsDirectoryRoot, taskHostVersion));
-                    }
-
                     // The .NET Framework task host from Visual Studio computes its handshake from its own installation:
                     // the tools directory root it discovers from MSBUILD_EXE_PATH, and its own file version.
                     // MSBUILD_EXE_PATH is overridden because the .NET CLI sets it to the SDK's MSBuild.dll.

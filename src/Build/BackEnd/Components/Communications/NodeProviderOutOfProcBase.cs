@@ -23,12 +23,6 @@ using System.Security.Principal;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-#if FEATURE_NET35_TASKHOST
-using Microsoft.Build.Utilities;
-#endif
-#if RUNTIME_TYPE_NETCORE
-using Microsoft.Win32;
-#endif
 using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
@@ -434,18 +428,19 @@ namespace Microsoft.Build.BackEnd
                 int retries = NodeCreationRetries;
                 while (retries-- > 0)
                 {
-#if FEATURE_NET35_TASKHOST || RUNTIME_TYPE_NETCORE
+#if FEATURE_NET35_TASKHOST
                     // We will also check to see if .NET 3.5 is installed in the case where we need to launch a CLR2 OOP TaskHost.
                     // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
                     // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
                     // nodes because we should never be able to connect in this case.
                     if (Handshake.IsHandshakeOptionEnabled(nodeLaunchData.Handshake.HandshakeOptions, HandshakeOptions.CLR2))
                     {
-#if FEATURE_NET35_TASKHOST
-                        bool frameworkMissing = FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) is null;
+#if NETFRAMEWORK
+                        bool frameworkMissing = FrameworkLocationHelper.GetPathToDotNetFrameworkV35(Microsoft.Build.Utilities.DotNetFrameworkArchitecture.Current) is null;
 #else
+                        // FrameworkLocationHelper cannot find .NET Framework installations from .NET, so read the setup registry key directly.
                         bool frameworkMissing = OperatingSystem.IsWindows()
-                            && !Equals(Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.5", "Install", null), 1);
+                            && !Equals(Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.5", "Install", null), 1);
 #endif
                         if (frameworkMissing)
                         {
