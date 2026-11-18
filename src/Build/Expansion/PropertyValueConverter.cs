@@ -4,7 +4,9 @@
 using System;
 using System.Collections;
 using System.Globalization;
+using System.IO;
 using System.Runtime.CompilerServices;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
@@ -35,6 +37,8 @@ internal static class PropertyValueConverter
             : string.Empty,
 
         IEnumerable e => ConvertEnumerable(e),
+
+        FileSystemInfo info => PropertyFunctionReceiver.GetOriginalPath(info) ?? info.ToString(),
 
         // The fall back is always to just convert to a string directly.
         // Issue: https://github.com/dotnet/msbuild/issues/9757

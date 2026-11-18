@@ -6,6 +6,7 @@ using System.Collections.Frozen;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Evaluation;
@@ -71,7 +72,17 @@ internal static class PropertyFunctionReceiver
 #endif
     }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
 
-    internal static bool TryExecuteFileSystemInfoMember(FileSystemInfo receiver, string methodName, BindingFlags bindingFlags, object[] args, out object? result)
+    // Track by object identity: a nested property function can receive and return one of these
+    // objects. Weak keys let the result and its restriction state be collected together.
+    private static readonly ConditionalWeakTable<FileSystemInfo, string> s_restrictedFileSystemInfo = new();
+
+    internal static void TrackFileSystemInfo(FileSystemInfo receiver, string? originalPath)
+        => s_restrictedFileSystemInfo.GetValue(receiver, info => originalPath ?? info.ToString());
+
+    internal static string? GetOriginalPath(FileSystemInfo receiver)
+        => s_restrictedFileSystemInfo.TryGetValue(receiver, out string? path) ? path : null;
+
+    internal static bool TryExecuteFileSystemInfoMember(FileSystemInfo receiver, string? originalPath, string methodName, BindingFlags bindingFlags, object[] args, out object? result)
     {
         result = null;
         if (args.Length != 0 || !s_fileSystemInfoMembers.TryGetValue(methodName, out string? member))
@@ -83,7 +94,7 @@ internal static class PropertyFunctionReceiver
         {
             if (member == nameof(ToString) && (bindingFlags & BindingFlags.InvokeMethod) != 0)
             {
-                result = receiver.ToString();
+                result = originalPath ?? receiver.ToString();
                 return true;
             }
 

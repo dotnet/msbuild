@@ -105,6 +105,21 @@ public class PropertyFunctionReceiverRestriction_Tests
         Directory.Exists(Path.Combine(folder, "sub")).ShouldBeFalse();
     }
 
+    [Fact]
+    public void FileSystemInfoConstructors_PreserveRestrictionWhenPassedThroughAnotherFunction()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        using IDisposable restrict = SetSwitch(RestrictSwitch, false);
+        using IDisposable enableAll = SetSwitch(EnableAllSwitch, false);
+        (_, string file) = CreateFolderWithFile(env);
+        string prefix = $"""$([MSBuild]::GetRegistryValue('HKEY_CURRENT_USER\Software', '{Guid.NewGuid():N}', $([System.IO.FileInfo]::new('$(File)')))""";
+
+        Evaluate(prefix + ".Length)", ("File", file)).ShouldBe("7");
+        Should.Throw<InvalidProjectFileException>(() => Evaluate(prefix + ".Delete())", ("File", file)))
+            .ErrorCode.ShouldBe("MSB4185");
+        File.Exists(file).ShouldBeTrue();
+    }
+
     // ---- Restricted: side-effect-free receivers remain callable ----
 
     [Fact]

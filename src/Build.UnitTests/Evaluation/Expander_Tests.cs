@@ -5606,6 +5606,10 @@ $(
 
             ExpandWithThreadWorkingDirectory(env, "$([System.IO.FileInfo]::new('data.txt').Length)", workingDir, wrongDir)
                 .ShouldBe("7");
+            ExpandWithThreadWorkingDirectory(env, "$([System.IO.FileInfo]::new('data.txt').ToString())", workingDir)
+                .ShouldBe("data.txt");
+            ExpandWithThreadWorkingDirectory(env, "$([System.IO.FileInfo]::new('data.txt'))", workingDir)
+                .ShouldBe("data.txt");
             ExpandWithThreadWorkingDirectory(env, "$([System.IO.DirectoryInfo]::new('.').FullName)", workingDir)
                 .ShouldBe(workingDir);
         }
