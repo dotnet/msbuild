@@ -183,6 +183,22 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             new Handshake(options, toolsDirectory + "2", new Version(18, 1, 2, 3)).RetrieveHandshakeComponents().Salt.ShouldNotBe(components.Salt);
             new Handshake(options).RetrieveHandshakeComponents().Salt.ShouldNotBe(components.Salt);
         }
+
+        [Fact]
+        public void Clr2TaskHostHandshakeUsesExecutableDirectoryAndFileVersion()
+        {
+            HandshakeOptions options = HandshakeOptions.TaskHost | HandshakeOptions.CLR2 | HandshakeOptions.X64;
+            const string directory = @"C:\Visual Studio\MSBuild\Current\Bin\amd64";
+            Version version = new(18, 1, 2, 3);
+
+            HandshakeComponents components = new Handshake(options, directory, version).RetrieveHandshakeComponents();
+            components.FileVersionMajor.ShouldBe(18);
+            components.FileVersionMinor.ShouldBe(1);
+            components.FileVersionBuild.ShouldBe(2);
+            components.FileVersionPrivate.ShouldBe(3);
+            new Handshake(options, directory + "2", version).RetrieveHandshakeComponents().Salt.ShouldNotBe(components.Salt);
+            new Handshake(options, directory, new Version(18, 1, 2, 4)).RetrieveHandshakeComponents().FileVersionPrivate.ShouldNotBe(components.FileVersionPrivate);
+        }
 #endif
     }
 }

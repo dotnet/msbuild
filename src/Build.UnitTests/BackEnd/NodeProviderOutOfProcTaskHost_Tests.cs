@@ -187,13 +187,64 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(clr4Context).ShouldBe(msbuildExePath);
 
-            // Only the .NET Framework (CLR4) task host comes from Visual Studio.
+            // .NET task hosts do not come from Visual Studio.
             NodeProviderOutOfProcTaskHost.GetDeveloperCommandPromptTaskHost(clr4Context | HandshakeOptions.NET).ShouldBeNull();
-            NodeProviderOutOfProcTaskHost.GetDeveloperCommandPromptTaskHost(clr4Context | HandshakeOptions.CLR2).ShouldBeNull();
 
             // Only the Visual Studio version matching this MSBuild is used.
             env.SetEnvironmentVariable("VisualStudioVersion", "17.0");
             NodeProviderOutOfProcTaskHost.GetDeveloperCommandPromptTaskHost(clr4Context).ShouldBeNull();
+        }
+
+        [Theory]
+        [InlineData((int)HandshakeOptions.None, "")]
+        [InlineData((int)HandshakeOptions.X64, "amd64")]
+        public void Clr2TaskHostUsesItsOwnArchitectureDirectory(int architecture, string architectureDirectory)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string installation = env.CreateFolder().Path;
+            string hostDirectory = Path.Combine(installation, "MSBuild", "Current", "Bin", architectureDirectory);
+            Directory.CreateDirectory(hostDirectory);
+            string hostPath = Path.Combine(hostDirectory, "MSBuildTaskHost.exe");
+            File.WriteAllText(hostPath, string.Empty);
+            env.SetEnvironmentVariable("VSINSTALLDIR", installation);
+            env.SetEnvironmentVariable("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
+
+            var context = HandshakeOptions.TaskHost | HandshakeOptions.CLR2 | (HandshakeOptions)architecture;
+            NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(context, () => throw new InvalidOperationException())
+                .Value.ShouldBe(new NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found(hostPath, hostDirectory));
+        }
+
+        [Fact]
+        public void Clr2DiscoveryRequiresTheRequestedHostAndDoesNotSupportArm64()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            ClearDeveloperCommandPrompt(env);
+            VisualStudioInstance clr4Only = CreateVisualStudioInstallation(env, "CLR4 only", "18.0.11111.0", out _, out _);
+            string hostDirectory = Path.Combine(clr4Only.Path, "MSBuild", "Current", "Bin", "amd64");
+            HandshakeOptions context = HandshakeOptions.TaskHost | HandshakeOptions.CLR2 | HandshakeOptions.X64;
+
+            NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(context, () => [clr4Only])
+                .Value.ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound>();
+
+            File.WriteAllText(Path.Combine(hostDirectory, "MSBuildTaskHost.exe"), string.Empty);
+            NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(context, () => [clr4Only])
+                .Value.ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found>();
+
+            VisualStudioInstance second = CreateVisualStudioInstallation(env, "Second", "18.1.11111.0", out _, out _);
+            string secondHostDirectory = Path.Combine(second.Path, "MSBuild", "Current", "Bin", "amd64");
+            File.WriteAllText(Path.Combine(secondHostDirectory, "MSBuildTaskHost.exe"), string.Empty);
+            NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(context, () => [clr4Only, second])
+                .Value.ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.MultipleFound>()
+                .Installations.ShouldBe([clr4Only, second]);
+
+            env.SetEnvironmentVariable("VSINSTALLDIR", env.CreateFolder().Path);
+            env.SetEnvironmentVariable("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
+            NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(context, () => [clr4Only])
+                .Value.ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found>();
+
+            NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(
+                HandshakeOptions.TaskHost | HandshakeOptions.CLR2 | HandshakeOptions.Arm64, () => [clr4Only])
+                .Value.ShouldBeOfType<NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound>();
         }
 
         [Fact]
@@ -315,7 +366,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         [Theory]
         [InlineData((int)(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.X64))]
-        [InlineData((int)(HandshakeOptions.TaskHost | HandshakeOptions.CLR2))]
         [InlineData((int)(HandshakeOptions.NodeReuse | HandshakeOptions.X64))]
         public void VisualStudioIsNotUsedForOtherHosts(int hostContext)
         {

@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -430,6 +431,34 @@ public class TaskHostConfiguration_Tests
         netTaskHostWriter.NegotiatedPacketVersion = 2;
         ((ITranslatable)CreateConfigurationWithEnvironment(null)).Translate(netTaskHostWriter);
         TranslationHelpers.GetWriteStreamLength().ShouldBe(version0Length - 1);
+    }
+
+    [Fact]
+    public void Clr2ConfigurationContainsTheAppDomainSlotBeforeTheTaskLocation()
+    {
+        TaskHostConfiguration config = CreateConfigurationWithEnvironment(null);
+        ITranslator writer = TranslationHelpers.GetWriteTranslator();
+        writer.NegotiatedPacketVersion = null;
+        config.Translate(writer);
+
+        ITranslator reader = TranslationHelpers.GetReadTranslator();
+        int nodeId = 0;
+        string startupDirectory = null;
+        Dictionary<string, string> environment = null;
+        CultureInfo culture = null;
+        CultureInfo uiCulture = null;
+        byte[] appDomainConfigBytes = null;
+        int lineNumber = 0;
+        reader.Translate(ref nodeId);
+        reader.Translate(ref startupDirectory);
+        reader.TranslateDictionary(ref environment, StringComparer.OrdinalIgnoreCase);
+        reader.TranslateCulture(ref culture);
+        reader.TranslateCulture(ref uiCulture);
+        reader.Translate(ref appDomainConfigBytes);
+        reader.Translate(ref lineNumber);
+
+        appDomainConfigBytes.ShouldBeNull();
+        lineNumber.ShouldBe(config.LineNumberOfTask);
     }
 
     /// <summary>

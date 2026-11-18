@@ -297,8 +297,67 @@ internal class TypeLoader
             localAssemblies,
             runtimeAssemblies);
 #endif
-        return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
+        MetadataAssemblyResolver resolver = new PathAssemblyResolver(assembliesDictionary.Values);
+#if NET
+        if (OperatingSystem.IsWindows())
+        {
+            resolver = new LegacyGacMetadataResolver(resolver);
+        }
+#endif
+        return new MetadataLoadContext(resolver);
     }
+
+#if NET
+    // .NET cannot load the Framework GAC, but metadata inspection of out-of-process tasks
+    // may need their CLR2 dependencies, such as Microsoft.Build.Utilities.v3.5.
+    private sealed class LegacyGacMetadataResolver(MetadataAssemblyResolver primary) : MetadataAssemblyResolver
+    {
+        public override Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName)
+        {
+            Assembly assembly = primary.Resolve(context, assemblyName);
+            if (assembly is not null)
+            {
+                return assembly;
+            }
+
+            string path = GetClr2GacAssemblyPath(assemblyName);
+            return path is null ? null : context.LoadFromAssemblyPath(path);
+        }
+    }
+
+    internal static string GetClr2GacAssemblyPath(AssemblyName assemblyName)
+    {
+        if (!OperatingSystem.IsWindows()
+            || string.IsNullOrEmpty(assemblyName.Name)
+            || assemblyName.Name is "." or ".."
+            || assemblyName.Name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0
+            || assemblyName.Version is null
+            || assemblyName.GetPublicKeyToken() is not { Length: > 0 } token)
+        {
+            return null;
+        }
+
+        string culture = assemblyName.CultureName ?? string.Empty;
+        if (culture.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+        {
+            return null;
+        }
+
+        string identityDirectory = $"{assemblyName.Version}_{culture}_{Convert.ToHexString(token).ToLowerInvariant()}";
+        string gacRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "assembly");
+        string[] caches = ["GAC_MSIL", "GAC_32", "GAC_64", "GAC"];
+        foreach (string cache in caches)
+        {
+            string path = Path.Combine(gacRoot, cache, assemblyName.Name, identityDirectory, assemblyName.Name + ".dll");
+            if (File.Exists(path))
+            {
+                return path;
+            }
+        }
+
+        return null;
+    }
+#endif
 
     // MetadataLoadContext can expose a PropertyInfo even when resolving PropertyType fails because a
     // dependency is absent. Reading the PropertySig blob from the declaring assembly avoids resolving that

@@ -97,11 +97,11 @@ internal class Handshake
         Assumed.True(fileVersion is null, "A file version should not have been provided.");
 #else
         // IsNetTaskHost covers the case when NET process spawns NET TaskHost.
-        // IsClr4TaskHost covers the case when NET process spawns a .NET Framework TaskHost from a Visual Studio installation.
+        // A .NET Framework task host comes from a different Visual Studio installation.
         Assumed.True(
-            toolsDirectory is null || IsNetTaskHost || IsClr4TaskHost,
+            toolsDirectory is null || IsTaskHost,
             $"{toolsDirectory} should not have been provided.");
-        Assumed.True(fileVersion is null || IsClr4TaskHost, "A file version should only be provided for .NET Framework TaskHost nodes.");
+        Assumed.True(fileVersion is null || IsFrameworkTaskHost, "A file version should only be provided for .NET Framework TaskHost nodes.");
 #endif
 
         toolsDirectory ??= BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
@@ -235,12 +235,11 @@ internal class Handshake
         => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2 | HandshakeOptions.TaskHost);
 #else
     /// <summary>
-    /// A task host that is neither a .NET nor a CLR2 task host runs on .NET Framework 4.x.
+    /// A task host that is not a .NET task host runs on .NET Framework.
     /// </summary>
-    private bool IsClr4TaskHost
+    private bool IsFrameworkTaskHost
         => IsTaskHost
-            && !IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET)
-            && !IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2);
+            && !IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET);
 #endif
 
     private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(

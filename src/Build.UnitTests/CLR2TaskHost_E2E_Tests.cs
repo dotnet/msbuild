@@ -1,7 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
+#if NET
+using System.Security;
+using Microsoft.Build.Shared;
+using Microsoft.Win32;
+#endif
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -73,4 +79,121 @@ public class CLR2TaskHost_E2E_Tests
         // Verify the task actually ran by checking for its output.
         testOutput.ShouldContain("CLR2TaskHostSuccess", customMessage: "Exec task output should be visible, confirming it ran in CLR2 task host");
     }
+
+#if NET
+    public static bool Clr2BootstrapAvailable =>
+        OperatingSystem.IsWindows()
+        && Equals(Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.5", "Install", null), 1)
+        && File.Exists(Path.Combine(RunnerUtilities.BootstrapRootPath, "net472", "MSBuild", "Current", "Bin", "amd64", "MSBuildTaskHost.exe"))
+        && File.Exists(Path.Combine(RunnerUtilities.BootstrapRootPath, "net472", "MSBuild", "Current", "Bin", "MSBuildTaskHost.exe"))
+        && File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Microsoft.NET", "Framework", "v3.5", "Microsoft.Build.Tasks.v3.5.dll"));
+
+    public static bool Clr2CompilerAvailable =>
+        Clr2BootstrapAvailable
+        && File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Microsoft.NET", "Framework", "v2.0.50727", "csc.exe"))
+        && File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "assembly", "GAC_MSIL", "Microsoft.Build.Framework", "2.0.0.0__b03f5f7f11d50a3a", "Microsoft.Build.Framework.dll"));
+
+    [Theory(Skip = "Requires .NET Framework 3.5 and the desktop bootstrap task host.", SkipUnless = nameof(Clr2BootstrapAvailable))]
+    [InlineData(true, "x64", "amd64", false)]
+    [InlineData(false, "x86", "", false)]
+    [InlineData(true, "x64", "amd64", true)]
+    [InlineData(false, "x86", "", true)]
+    public void DotNetMSBuildRunsClr2TaskInVisualStudioTaskHost(bool useAssemblyFile, string architecture, string architectureDirectory, bool runtimeOnTask)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        SetUpVisualStudioTaskHost(env, architectureDirectory);
+
+        string taskAssembly = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Microsoft.NET", "Framework", "v3.5", "Microsoft.Build.Tasks.v3.5.dll");
+        string taskAssemblyAttribute = useAssemblyFile
+            ? $"""AssemblyFile="{SecurityElement.Escape(taskAssembly)}" """
+            : """AssemblyName="Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" """;
+        string taskFactoryAttribute = useAssemblyFile && !runtimeOnTask ? """TaskFactory="TaskHostFactory" """ : string.Empty;
+        string registrationRuntime = runtimeOnTask ? string.Empty : $"""Runtime="CLR2" Architecture="{architecture}" """;
+        string invocationRuntime = runtimeOnTask ? $"""MSBuildRuntime="CLR2" MSBuildArchitecture="{architecture}" """ : string.Empty;
+        string projectPath = Path.Combine(env.CreateFolder().Path, "Clr2Task.proj");
+        File.WriteAllText(projectPath, $"""
+            <Project>
+              <UsingTask TaskName="Microsoft.Build.Tasks.Exec" {taskAssemblyAttribute}
+                         {taskFactoryAttribute}{registrationRuntime} />
+              <Target Name="Build">
+                <Exec Command="echo CLR2TaskHostSuccess" {invocationRuntime} />
+              </Target>
+            </Project>
+            """);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"\"{projectPath}\" -v:n", out bool success, outputHelper: _output);
+        success.ShouldBeTrue(output);
+        output.ShouldContain("CLR2TaskHostSuccess");
+    }
+
+    [Fact(Skip = "Requires .NET Framework 3.5, its compiler, and the desktop bootstrap task host.", SkipUnless = nameof(Clr2CompilerAvailable))]
+    public void Clr2InvocationDoesNotChangeLaterDefaultRuntime()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        SetUpVisualStudioTaskHost(env, "amd64");
+        string folder = env.CreateFolder().Path;
+        string source = Path.Combine(folder, "ProcessTasks.cs");
+        string assembly = Path.Combine(folder, "ProcessTasks.dll");
+        string windows = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+        string compiler = Path.Combine(windows, "Microsoft.NET", "Framework", "v2.0.50727", "csc.exe");
+        string framework = Path.Combine(windows, "assembly", "GAC_MSIL", "Microsoft.Build.Framework", "2.0.0.0__b03f5f7f11d50a3a", "Microsoft.Build.Framework.dll");
+        File.WriteAllText(source, """
+            using System.Diagnostics;
+            using Microsoft.Build.Framework;
+            public class ReportProcess : ITask
+            {
+                private IBuildEngine engine;
+                private ITaskHost host;
+                private int processId;
+                public IBuildEngine BuildEngine { get { return engine; } set { engine = value; } }
+                public ITaskHost HostObject { get { return host; } set { host = value; } }
+                [Output] public int ProcessId { get { return processId; } set { processId = value; } }
+                public bool Execute() { processId = Process.GetCurrentProcess().Id; return true; }
+            }
+            public class BaselineProcess : ReportProcess { }
+            """);
+        string compileOutput = RunnerUtilities.ExecMSBuild(
+            compiler, $"/nologo /target:library /out:\"{assembly}\" /reference:\"{framework}\" \"{source}\"",
+            out bool compiled, outputHelper: _output);
+        compiled.ShouldBeTrue(compileOutput);
+
+        string projectPath = Path.Combine(folder, "MixedRuntime.proj");
+        string escapedAssembly = SecurityElement.Escape(assembly);
+        File.WriteAllText(projectPath, $"""
+            <Project>
+              <UsingTask TaskName="BaselineProcess" AssemblyFile="{escapedAssembly}" />
+              <UsingTask TaskName="ReportProcess" AssemblyFile="{escapedAssembly}" />
+              <Target Name="Build">
+                <BaselineProcess><Output TaskParameter="ProcessId" PropertyName="BaselinePid" /></BaselineProcess>
+                <ReportProcess MSBuildRuntime="CLR2" MSBuildArchitecture="x64"><Output TaskParameter="ProcessId" PropertyName="Clr2Pid" /></ReportProcess>
+                <ReportProcess><Output TaskParameter="ProcessId" PropertyName="DefaultPid" /></ReportProcess>
+                <Error Condition="'$(BaselinePid)' == '$(Clr2Pid)'" Text="CLR2 task ran in the current process." />
+                <Error Condition="'$(BaselinePid)' != '$(DefaultPid)'" Text="Default task ran out of process." />
+              </Target>
+            </Project>
+            """);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"\"{projectPath}\" -v:n", out bool success, outputHelper: _output);
+        success.ShouldBeTrue(output);
+    }
+
+    private static void SetUpVisualStudioTaskHost(TestEnvironment env, string architectureDirectory)
+    {
+        string visualStudioRoot = env.CreateFolder().Path;
+        string hostDirectory = Path.Combine(visualStudioRoot, "MSBuild", "Current", "Bin", architectureDirectory);
+        Directory.CreateDirectory(hostDirectory);
+
+        string bootstrapHostDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "net472", "MSBuild", "Current", "Bin", architectureDirectory);
+        foreach (string file in Directory.GetFiles(bootstrapHostDirectory, "MSBuildTaskHost.exe*"))
+        {
+            File.Copy(file, Path.Combine(hostDirectory, Path.GetFileName(file)));
+        }
+        File.Copy(
+            Path.Combine(bootstrapHostDirectory, "Microsoft.NET.StringTools.net35.dll"),
+            Path.Combine(hostDirectory, "Microsoft.NET.StringTools.net35.dll"));
+
+        env.SetEnvironmentVariable("VSINSTALLDIR", visualStudioRoot);
+        env.SetEnvironmentVariable("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
+        env.SetEnvironmentVariable("MSBUILDTASKHOST_EXE_NAME", null);
+    }
+#endif
 }

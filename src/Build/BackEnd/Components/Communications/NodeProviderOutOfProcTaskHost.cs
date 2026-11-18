@@ -1193,6 +1193,16 @@ namespace Microsoft.Build.BackEnd
             switch (ResolveVisualStudioTaskHost(hostContext))
             {
                 case VisualStudioTaskHostResolution.Found found:
+                    bool isClr2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+                    if (isClr2)
+                    {
+                        Version taskHostVersion = GetFileVersion(found.MSBuildExePath);
+                        return new NodeLaunchData(
+                            found.MSBuildExePath,
+                            string.Empty,
+                            new Handshake(hostContext, found.ToolsDirectoryRoot, taskHostVersion));
+                    }
+
                     // The .NET Framework task host from Visual Studio computes its handshake from its own installation:
                     // the tools directory root it discovers from MSBUILD_EXE_PATH, and its own file version.
                     // MSBUILD_EXE_PATH is overridden because the .NET CLI sets it to the SDK's MSBuild.dll.
@@ -1220,8 +1230,8 @@ namespace Microsoft.Build.BackEnd
 
 #if RUNTIME_TYPE_NETCORE
         /// <summary>
-        /// The outcome of locating a Visual Studio installation whose MSBuild.exe can run tasks that require
-        /// the .NET Framework (<c>Runtime="CLR4"</c>) for .NET MSBuild. Every outcome is one of the nested case types,
+        /// The outcome of locating a Visual Studio installation whose task host can run tasks that require
+        /// the .NET Framework for .NET MSBuild. Every outcome is one of the nested case types,
         /// and each carries only the information relevant to it.
         /// </summary>
         internal union VisualStudioTaskHostResolution(
@@ -1231,7 +1241,7 @@ namespace Microsoft.Build.BackEnd
             VisualStudioTaskHostResolution.MultipleFound)
         {
             /// <summary>
-            /// The requested task host is not a .NET Framework 4 task host on Windows, so Visual Studio is not used.
+            /// The requested task host is not a .NET Framework task host on Windows, so Visual Studio is not used.
             /// </summary>
             internal sealed record NotApplicable
             {
@@ -1245,8 +1255,8 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// A single Visual Studio installation was selected.
             /// </summary>
-            /// <param name="MSBuildExePath">The full path to the MSBuild.exe to launch for the requested architecture.</param>
-            /// <param name="ToolsDirectoryRoot">The MSBuild tools directory root of the installation, which the task host uses in its handshake.</param>
+            /// <param name="MSBuildExePath">The full path to the executable to launch for the requested runtime and architecture.</param>
+            /// <param name="ToolsDirectoryRoot">The directory used by the task host in its handshake.</param>
             internal sealed record Found(string MSBuildExePath, string ToolsDirectoryRoot);
 
             /// <summary>
@@ -1276,9 +1286,9 @@ namespace Microsoft.Build.BackEnd
         private static IList<VisualStudioInstance> s_visualStudioInstances;
 
         /// <summary>
-        /// Locates the .NET Framework MSBuild.exe of the Visual Studio installation described by the environment
+        /// Locates a .NET Framework task host in the Visual Studio installation described by the environment
         /// of a Visual Studio Developer Command Prompt (as set up by VsDevCmd.bat or vcvars*.bat), so that .NET MSBuild
-        /// can run tasks that require the .NET Framework (<c>Runtime="CLR4"</c>) in a task host from that installation.
+        /// can run tasks that require the .NET Framework in a task host from that installation.
         /// </summary>
         /// <param name="hostContext">The handshake options of the requested task host.</param>
         /// <returns>The task host of the Developer Command Prompt's installation, or <see langword="null"/> when there is none.</returns>
@@ -1290,8 +1300,8 @@ namespace Microsoft.Build.BackEnd
                     : null;
 
         /// <summary>
-        /// Locates the .NET Framework MSBuild.exe of a Visual Studio installation to run tasks that require the .NET Framework
-        /// (<c>Runtime="CLR4"</c>). The installation of a Visual Studio Developer Command Prompt is preferred; otherwise the
+        /// Locates a task host in a Visual Studio installation to run tasks that require the .NET Framework.
+        /// The installation of a Visual Studio Developer Command Prompt is preferred; otherwise the
         /// Visual Studio setup API is queried, and an installation is used only when it is the only one available.
         /// </summary>
         /// <param name="hostContext">The handshake options of the requested task host.</param>
@@ -1357,13 +1367,11 @@ namespace Microsoft.Build.BackEnd
             => s_visualStudioInstances ??= VisualStudioLocationHelper.GetInstances();
 
         /// <summary>
-        /// Only .NET Framework 4 task hosts are served by Visual Studio. .NET task hosts use the SDK, and .NET Framework 3.5
-        /// task hosts use MSBuildTaskHost.exe.
+        /// .NET Framework task hosts are served by Visual Studio; .NET task hosts use the SDK.
         /// </summary>
         private static bool IsVisualStudioTaskHostContext(HandshakeOptions hostContext)
             => Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost)
-                && !Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET)
-                && !Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+                && !Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET);
 
         /// <summary>
         /// Reads the Visual Studio installation directory set by a Developer Command Prompt. Only the Visual Studio
@@ -1377,9 +1385,9 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Gets the MSBuild.exe for the requested architecture within a Visual Studio installation.
+        /// Gets the task host for the requested runtime and architecture within a Visual Studio installation.
         /// </summary>
-        /// <returns>The task host in the installation, or <see langword="null"/> when its MSBuild.exe does not exist.</returns>
+        /// <returns>The task host in the installation, or <see langword="null"/> when it does not exist.</returns>
         private static VisualStudioTaskHostResolution.Found FindTaskHostInInstallation(string visualStudioInstallDirectory, HandshakeOptions hostContext)
         {
             if (string.IsNullOrEmpty(visualStudioInstallDirectory))
@@ -1399,15 +1407,21 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
+            bool isClr2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+            if (isClr2 && Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64))
+            {
+                return null;
+            }
+
             string architectureDirectory = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.X64)
                 ? Path.Combine(root, "amd64")
                 : Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64)
                     ? Path.Combine(root, "arm64")
                     : root;
 
-            string msbuildExePath = Path.Combine(architectureDirectory, "MSBuild.exe");
+            string msbuildExePath = Path.Combine(architectureDirectory, isClr2 ? TaskHostNameForClr2TaskHost : "MSBuild.exe");
             return FileSystems.Default.FileExists(msbuildExePath)
-                ? new VisualStudioTaskHostResolution.Found(msbuildExePath, root)
+                ? new VisualStudioTaskHostResolution.Found(msbuildExePath, isClr2 ? architectureDirectory : root)
                 : null;
         }
 

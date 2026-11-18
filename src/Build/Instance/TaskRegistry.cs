@@ -853,6 +853,12 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private TaskFactoryWrapper _taskFactoryWrapperInstance;
 
+#if NET
+            // A CLR2 invocation may require metadata-only loading from the legacy GAC.
+            // Keep it separate so later invocations can still load the task in the current process.
+            private TaskFactoryWrapper _clr2TaskFactoryWrapperInstance;
+#endif
+
             /// <summary>
             /// Cache of task names which can be created by the factory.
             /// When ever a taskName is checked against the factory we cache the result so we do not have to
@@ -1103,7 +1109,8 @@ namespace Microsoft.Build.Execution
 
                 try
                 {
-                    bool haveTaskFactory = GetTaskFactory(targetLoggingContext, elementLocation, taskProjectFile, isMultiThreadedBuild);
+                    bool haveTaskFactory = GetTaskFactory(targetLoggingContext, elementLocation, taskProjectFile, isMultiThreadedBuild, taskIdentityParameters);
+                    TaskFactoryWrapper taskFactoryWrapper = GetTaskFactoryInstance(taskIdentityParameters);
 
                     // Create task Factory will only actually create a factory once.
                     if (haveTaskFactory)
@@ -1123,7 +1130,7 @@ namespace Microsoft.Build.Execution
                             else
                             {
                                 // The method will handle exceptions related to asking if a task can be created and will throw an Invalid project file exception if there is a problem
-                                bool createable = ((AssemblyTaskFactory)_taskFactoryWrapperInstance.TaskFactory).TaskNameCreatableByFactory(taskName, taskIdentityParameters, taskProjectFile, targetLoggingContext, elementLocation);
+                                bool createable = ((AssemblyTaskFactory)taskFactoryWrapper.TaskFactory).TaskNameCreatableByFactory(taskName, taskIdentityParameters, taskProjectFile, targetLoggingContext, elementLocation);
 
                                 if (createable)
                                 {
@@ -1140,7 +1147,7 @@ namespace Microsoft.Build.Execution
                             // Wrap arbitrary task factory calls because we do not know what kind of error handling they are doing.
                             try
                             {
-                                bool createable = _taskFactoryWrapperInstance.IsCreatableByFactory(taskName);
+                                bool createable = taskFactoryWrapper.IsCreatableByFactory(taskName);
 
                                 if (createable)
                                 {
@@ -1159,7 +1166,7 @@ namespace Microsoft.Build.Execution
                                 UnhandledFactoryError +
 #endif
                                 e.ToString();
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _taskFactoryWrapperInstance.Name, message);
+                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, taskFactoryWrapper.Name, message);
                             }
                         }
                     }
@@ -1184,7 +1191,7 @@ namespace Microsoft.Build.Execution
             {
                 if (CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, isMultiThreadedBuild))
                 {
-                    return _taskFactoryWrapperInstance;
+                    return GetTaskFactoryInstance(taskIdentityParameters);
                 }
 
                 return null;
@@ -1195,10 +1202,11 @@ namespace Microsoft.Build.Execution
             /// </summary>
             /// <exception cref="InvalidProjectFileException">If the task factory could not be properly created an InvalidProjectFileException will be thrown</exception>
             [RequiresUnreferencedCode("Creates and loads a task factory by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
-            private bool GetTaskFactory(TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, string taskProjectFile, bool isMultiThreadedBuild)
+            private bool GetTaskFactory(TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, string taskProjectFile, bool isMultiThreadedBuild, in TaskHostParameters taskIdentityParameters)
             {
+                ref TaskFactoryWrapper taskFactoryWrapper = ref GetTaskFactoryInstance(taskIdentityParameters);
                 // see if we have already created the factory before, only create it once
-                if (_taskFactoryWrapperInstance == null)
+                if (taskFactoryWrapper == null)
                 {
                     AssemblyLoadInfo taskFactoryLoadInfo = TaskFactoryAssemblyLoadInfo;
                     Assumed.NotNull(taskFactoryLoadInfo, "TaskFactoryLoadInfo should never be null");
@@ -1227,7 +1235,7 @@ namespace Microsoft.Build.Execution
 
                         // Create an instance of the internal assembly task factory, it has the error handling built into its methods.
                         AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, launchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
+                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, launchTaskHost, targetLoggingContext, elementLocation, taskProjectFile, taskIdentityParameters);
                         factory = taskFactory;
                     }
                     else
@@ -1360,7 +1368,7 @@ namespace Microsoft.Build.Execution
 
                                 if (!initialized)
                                 {
-                                    _taskFactoryWrapperInstance = null;
+                                    taskFactoryWrapper = null;
                                     return false;
                                 }
                             }
@@ -1403,10 +1411,22 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters, Statistics);
+                    taskFactoryWrapper = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters, Statistics);
                 }
 
                 return true;
+            }
+
+            private ref TaskFactoryWrapper GetTaskFactoryInstance(in TaskHostParameters taskIdentityParameters)
+            {
+#if NET
+                if ((TaskFactoryAttributeName == AssemblyTaskFactory || TaskFactoryAttributeName == TaskHostFactory)
+                    && string.Equals(taskIdentityParameters.Runtime, XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
+                {
+                    return ref _clr2TaskFactoryWrapperInstance;
+                }
+#endif
+                return ref _taskFactoryWrapperInstance;
             }
 
             /// <summary>

@@ -457,9 +457,9 @@ internal class TaskHostConfiguration : INodePacket
             }
         }
 #else
-        // 0 = .NET Framework (CLR4) task host launched from .NET MSBuild, which expects the
-        // AppDomain configuration. .NET has no AppDomain configuration to send, so send none.
-        if (translator.NegotiatedPacketVersion == 0)
+        // CLR2 (null) and CLR4 (0) task hosts expect AppDomain configuration.
+        // .NET has no AppDomain configuration to send, so send none.
+        if (translator.NegotiatedPacketVersion is null or 0)
         {
             byte[] appDomainConfigBytes = null;
             translator.Translate(ref appDomainConfigBytes);

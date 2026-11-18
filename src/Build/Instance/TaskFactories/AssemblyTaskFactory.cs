@@ -245,7 +245,8 @@ namespace Microsoft.Build.BackEnd
             bool taskHostExplicitlyRequested,
             LoggingContext targetLoggingContext,
             ElementLocation elementLocation,
-            string taskProjectFile)
+            string taskProjectFile,
+            TaskHostParameters taskIdentityParameters = default)
         {
             ArgumentNullException.ThrowIfNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
@@ -263,6 +264,21 @@ namespace Microsoft.Build.BackEnd
                 ArgumentException.ThrowIfNullOrEmpty(taskName);
                 _taskName = taskName;
 
+#if NET
+                bool requiresClr2 = string.Equals(taskFactoryIdentityParameters.Runtime, XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(taskIdentityParameters.Runtime, XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase);
+                if (requiresClr2)
+                {
+                    taskHostParamsMatchCurrentProc = false;
+                }
+
+                if (loadInfo.AssemblyName is not null
+                    && requiresClr2
+                    && TypeLoader.GetClr2GacAssemblyPath(new AssemblyName(loadInfo.AssemblyName)) is { } gacPath)
+                {
+                    loadInfo = AssemblyLoadInfo.Create(null, gacPath);
+                }
+#endif
                 string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
                 using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, assemblyName);
                 _loadedType = _typeLoader.Load(taskName, loadInfo, targetLoggingContext.LogWarning, taskHostExplicitlyRequested, taskHostParamsMatchCurrentProc);

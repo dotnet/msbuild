@@ -26,6 +26,9 @@ using Microsoft.Build.Shared;
 #if FEATURE_NET35_TASKHOST
 using Microsoft.Build.Utilities;
 #endif
+#if RUNTIME_TYPE_NETCORE
+using Microsoft.Win32;
+#endif
 using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
@@ -431,15 +434,20 @@ namespace Microsoft.Build.BackEnd
                 int retries = NodeCreationRetries;
                 while (retries-- > 0)
                 {
-#if FEATURE_NET35_TASKHOST
+#if FEATURE_NET35_TASKHOST || RUNTIME_TYPE_NETCORE
                     // We will also check to see if .NET 3.5 is installed in the case where we need to launch a CLR2 OOP TaskHost.
                     // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
                     // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
                     // nodes because we should never be able to connect in this case.
-                    string taskHostNameForClr2TaskHost = Path.GetFileNameWithoutExtension(NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost);
-                    if (Path.GetFileNameWithoutExtension(msbuildLocation).Equals(taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
+                    if (Handshake.IsHandshakeOptionEnabled(nodeLaunchData.Handshake.HandshakeOptions, HandshakeOptions.CLR2))
                     {
-                        if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) == null)
+#if FEATURE_NET35_TASKHOST
+                        bool frameworkMissing = FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) is null;
+#else
+                        bool frameworkMissing = OperatingSystem.IsWindows()
+                            && !Equals(Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.5", "Install", null), 1);
+#endif
+                        if (frameworkMissing)
                         {
                             CommunicationsUtilities.Trace($"Failed to launch node from {msbuildLocation}. The required .NET Framework v3.5 is not installed or enabled. CommandLine: {commandLineArgs}");
 
