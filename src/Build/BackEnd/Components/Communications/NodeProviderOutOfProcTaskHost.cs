@@ -1251,7 +1251,6 @@ namespace Microsoft.Build.BackEnd
         /// the .NET Framework for .NET MSBuild. Every outcome is one of the nested case types,
         /// and each carries only the information relevant to it.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
         internal union VisualStudioTaskHostResolution(
             VisualStudioTaskHostResolution.NotApplicable,
             VisualStudioTaskHostResolution.Found,
@@ -1295,15 +1294,6 @@ namespace Microsoft.Build.BackEnd
             /// <param name="Installations">The installations that could serve the request.</param>
             internal sealed record MultipleFound(IReadOnlyList<VisualStudioInstance> Installations);
         }
-#else
-        internal abstract record VisualStudioTaskHostResolution
-        {
-            internal sealed record NotApplicable : VisualStudioTaskHostResolution
-            {
-                internal static NotApplicable Instance { get; } = new();
-            }
-        }
-#endif
 
 #if RUNTIME_TYPE_NETCORE
         private static readonly int s_currentVisualStudioMajorVersion = Version.Parse(MSBuildConstants.CurrentVisualStudioVersion).Major;
