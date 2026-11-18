@@ -585,6 +585,7 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
     [Theory]
     [InlineData(256)]
     [InlineData(258)]
+    [InlineData(4097)]
     public void ConditionStateBuffersAreReusedAndIsolated(int slots)
     {
         NodeStateStore.StringNodeState[] first =
