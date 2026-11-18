@@ -65,6 +65,7 @@ public delegate bool BinaryLogEventFilter(BinaryLogEventMetadata metadata);
 #if NETFRAMEWORK
 [Serializable]
 #endif
+// CodeQL [SM02227] False positive: static call-graph over-approximation via virtual ToString/Flush in VMR build; deserialization ctor only reads SerializationInfo values.
 public sealed class BinaryLogEventFilterException : Exception
 {
     /// <summary>
