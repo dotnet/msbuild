@@ -194,7 +194,7 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
             ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
             ElementLocation.Empty, fileSystem);
         Task<bool> first = Task.Factory.StartNew(
-            () => ConditionEvaluator.EvaluateParsedCondition(parsed, firstState),
+            () => firstState.Evaluate(parsed),
             CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         Task<bool>? second = null;
 
@@ -206,7 +206,7 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
                 ParsedCondition sameCondition = cached.GetOrParse(
                     condition, ParserOptions.AllowProperties, ElementLocation.Empty, null);
                 sameCondition.Root.ShouldBeSameAs(parsed.Root);
-                return ConditionEvaluator.EvaluateParsedCondition(sameCondition, secondState);
+                return secondState.Evaluate(sameCondition);
             }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             (await Task.WhenAny(second, Task.Delay(TimeSpan.FromSeconds(10)))).ShouldBeSameAs(second);
@@ -268,7 +268,7 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
             ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
             ElementLocation.Empty, fileSystem);
         Task<bool> first = Task.Factory.StartNew(
-            () => ConditionEvaluator.EvaluateParsedCondition(parsed, firstState),
+            () => firstState.Evaluate(parsed),
             CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         Task<bool>? second = null;
 
@@ -279,21 +279,21 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
                 ParsedCondition sameCondition = cached.GetOrParse(
                     condition, ParserOptions.AllowProperties, ElementLocation.Empty, null);
                 sameCondition.Root.ShouldBeSameAs(parsed.Root);
-                return ConditionEvaluator.EvaluateParsedCondition(sameCondition, secondState);
+                return secondState.Evaluate(sameCondition);
             }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             bothPopulated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
             secondThreadId.ShouldNotBe(firstThreadId);
             first.IsCompleted.ShouldBeFalse();
             second.IsCompleted.ShouldBeFalse();
-            firstState.NodeStates.GetString(0).ExpandedValue.ShouldBe("first");
-            secondState.NodeStates.GetString(0).ExpandedValue.ShouldBe("second");
+            firstState.GetCachedExpandedValue(0).ShouldBe("first");
+            secondState.GetCachedExpandedValue(0).ShouldBe("second");
 
             releaseSecond.Set();
             (await Task.WhenAny(second, Task.Delay(TimeSpan.FromSeconds(10)))).ShouldBeSameAs(second);
             (await second).ShouldBeFalse();
             first.IsCompleted.ShouldBeFalse();
-            firstState.NodeStates.GetString(0).ExpandedValue.ShouldBe("first");
+            firstState.GetCachedExpandedValue(0).ShouldBe("first");
         }
         finally
         {
@@ -326,12 +326,12 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
             condition, expander, ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
             ElementLocation.Empty, FileSystems.Default);
 
-        Should.Throw<InvalidProjectFileException>(() => ConditionEvaluator.EvaluateParsedCondition(parsed, state));
+        Should.Throw<InvalidProjectFileException>(() => state.Evaluate(parsed));
 
         properties.Set(ProjectPropertyInstance.Create("Value", "0"));
-        ConditionEvaluator.EvaluateParsedCondition(parsed, state).ShouldBeFalse();
+        state.Evaluate(parsed).ShouldBeFalse();
         properties.Set(ProjectPropertyInstance.Create("Value", "3"));
-        ConditionEvaluator.EvaluateParsedCondition(parsed, state).ShouldBeTrue();
+        state.Evaluate(parsed).ShouldBeTrue();
     }
 
     [Fact]
@@ -395,17 +395,22 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
             ElementLocation.Empty, fileSystem);
 
         A.CallTo(() => fileSystem.FileOrDirectoryExists(innerPath)).Returns(true);
+        string? outerBeforeNested = null;
+        bool? nestedResult = null;
+        string? outerAfterNested = null;
         A.CallTo(() => fileSystem.FileOrDirectoryExists(outerPath)).ReturnsLazily(() =>
         {
-            ref NodeStateStore.StringNodeState outer = ref outerState.NodeStates.GetString(0);
-            outer.ExpandedValue.ShouldBe("outer");
-            ConditionEvaluator.EvaluateParsedCondition(parsed, innerState).ShouldBeTrue();
-            outer.ExpandedValue.ShouldBe("outer");
+            outerBeforeNested = outerState.GetCachedExpandedValue(0);
+            nestedResult = innerState.Evaluate(parsed);
+            outerAfterNested = outerState.GetCachedExpandedValue(0);
             return true;
         });
 
-        ConditionEvaluator.EvaluateParsedCondition(parsed, outerState).ShouldBeTrue();
-        ConditionEvaluator.EvaluateParsedCondition(parsed, outerState).ShouldBeTrue();
+        outerState.Evaluate(parsed).ShouldBeTrue();
+        outerBeforeNested.ShouldBe("outer");
+        nestedResult.ShouldBe(true);
+        outerAfterNested.ShouldBe("outer");
+        outerState.Evaluate(parsed).ShouldBeTrue();
     }
 
     [Fact]
@@ -456,7 +461,7 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
                 ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
                 ElementLocation.Empty, FileSystems.Default);
 
-            ConditionEvaluator.EvaluateParsedCondition(parsed, state).ShouldBe(expected);
+            state.Evaluate(parsed).ShouldBe(expected);
         }
     }
 
@@ -524,7 +529,7 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
             ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
             ElementLocation.Empty, FileSystems.Default);
 
-        ConditionEvaluator.EvaluateParsedCondition(parsed, state).ShouldBeTrue();
+        state.Evaluate(parsed).ShouldBeTrue();
     }
 
     [Theory]

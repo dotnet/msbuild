@@ -259,27 +259,11 @@ namespace Microsoft.Build.Evaluation
             expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
             try
             {
-                return EvaluateParsedCondition(parsedExpression, state);
+                return state.Evaluate(parsedExpression);
             }
             finally
             {
                 expander.PropertiesUseTracker.ResetPropertyReadContext();
-            }
-        }
-
-        /// <summary>
-        /// Evaluates a parsed condition with private node state.
-        /// </summary>
-        internal static bool EvaluateParsedCondition(ParsedCondition parsedCondition, IConditionEvaluationState state)
-        {
-            state.NodeStates.Initialize(parsedCondition.StateLayout);
-            try
-            {
-                return parsedCondition.Root.Evaluate(state);
-            }
-            finally
-            {
-                state.NodeStates.Release();
             }
         }
 
@@ -320,12 +304,18 @@ namespace Microsoft.Build.Evaluation
         internal interface IConditionEvaluationState
         {
             /// <summary>
-            /// Gets the mutable node state owned by one active condition evaluation.
+            /// Gets a string node's expanded value cached by the current evaluation.
             /// </summary>
-            /// <remarks>
-            /// <see cref="EvaluateParsedCondition"/> initializes this store for its parsed layout and releases it in a finally block.
-            /// </remarks>
-            ref NodeStateStore NodeStates { get; }
+            /// <param name="slot">The string node's state slot.</param>
+            /// <returns>The cached value, or <see langword="null"/> if the node has not been expanded during this evaluation.</returns>
+            string? GetCachedExpandedValue(int slot);
+
+            /// <summary>
+            /// Caches a string node's expanded value for the rest of the current evaluation.
+            /// </summary>
+            /// <param name="slot">The string node's state slot.</param>
+            /// <param name="value">The expanded value.</param>
+            void SetCachedExpandedValue(int slot, string value);
 
             string Condition { get; }
 
@@ -379,7 +369,30 @@ namespace Microsoft.Build.Evaluation
             private readonly ExpanderOptions _expanderOptions;
             private NodeStateStore _nodeStates;
 
-            public ref NodeStateStore NodeStates => ref _nodeStates;
+            /// <inheritdoc />
+            public string? GetCachedExpandedValue(int slot) => _nodeStates.GetString(slot).ExpandedValue;
+
+            /// <inheritdoc />
+            public void SetCachedExpandedValue(int slot, string value) => _nodeStates.GetString(slot).ExpandedValue = value;
+
+            /// <summary>
+            /// Evaluates a parsed condition using node state private to this evaluation.
+            /// </summary>
+            /// <remarks>
+            /// Initializes the node state for the condition's layout and releases it afterward, including when evaluation throws.
+            /// </remarks>
+            internal bool Evaluate(ParsedCondition parsedCondition)
+            {
+                _nodeStates.Initialize(parsedCondition.StateLayout);
+                try
+                {
+                    return parsedCondition.Root.Evaluate(this);
+                }
+                finally
+                {
+                    _nodeStates.Release();
+                }
+            }
 
             /// <summary>
             /// Condition that was parsed. This does not belong here,

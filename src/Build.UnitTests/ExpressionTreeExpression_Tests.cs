@@ -434,7 +434,7 @@ namespace Microsoft.Build.UnitTests
         {
             Parser p = new Parser();
             ParsedCondition tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.Empty);
-            ConditionEvaluator.IConditionEvaluationState state =
+            ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> state =
                 new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                     expression,
                     _expander,
@@ -444,7 +444,7 @@ namespace Microsoft.Build.UnitTests
                     ElementLocation.Empty,
                     FileSystems.Default);
 
-            ConditionEvaluator.EvaluateParsedCondition(tree, state).ShouldBeTrue("expected true from '" + expression + "'");
+            state.Evaluate(tree).ShouldBeTrue("expected true from '" + expression + "'");
         }
 
         /// <summary>
@@ -458,7 +458,7 @@ namespace Microsoft.Build.UnitTests
         {
             Parser p = new Parser();
             ParsedCondition tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.Empty);
-            ConditionEvaluator.IConditionEvaluationState state =
+            ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> state =
                 new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                     expression,
                     _expander,
@@ -468,7 +468,7 @@ namespace Microsoft.Build.UnitTests
                     ElementLocation.Empty,
                     FileSystems.Default);
 
-            ConditionEvaluator.EvaluateParsedCondition(tree, state).ShouldBeFalse("expected false from '" + expression + "' and got true");
+            state.Evaluate(tree).ShouldBeFalse("expected false from '" + expression + "' and got true");
         }
 
         /// <summary>
@@ -490,7 +490,7 @@ namespace Microsoft.Build.UnitTests
                 Parser p = new Parser();
                 ParsedCondition tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.Empty);
 
-                ConditionEvaluator.IConditionEvaluationState state =
+                ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> state =
                     new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                         expression,
                         _expander,
@@ -500,7 +500,7 @@ namespace Microsoft.Build.UnitTests
                         ElementLocation.Empty,
                         FileSystems.Default);
 
-                ConditionEvaluator.EvaluateParsedCondition(tree, state);
+                state.Evaluate(tree);
             }
             catch (InvalidProjectFileException ex)
             {

@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -81,18 +80,18 @@ namespace Microsoft.Build.Evaluation
                 return _value.Length == 0;
             }
 
-            ref string cachedExpandedValue = ref GetCachedExpandedValue(state);
+            string cachedExpandedValue = state.GetCachedExpandedValue(StateSlot);
             if (cachedExpandedValue is null)
             {
                 switch (_value.Length)
                 {
                     case 0:
-                        cachedExpandedValue = String.Empty;
+                        state.SetCachedExpandedValue(StateSlot, String.Empty);
                         return true;
                     // If the length is 1 or 2, it can't possibly be a property, item, or metadata, and it isn't empty.
                     case 1:
                     case 2:
-                        cachedExpandedValue = _value;
+                        state.SetCachedExpandedValue(StateSlot, _value);
                         return false;
                     default:
                         if (_value[1] != '(' || (_value[0] != '$' && _value[0] != '%' && _value[0] != '@') || _value[_value.Length - 1] != ')')
@@ -115,6 +114,7 @@ namespace Microsoft.Build.Evaluation
                 // It didn't break early, the result is accurate,
                 // so store it so the work isn't done again.
                 cachedExpandedValue = expandBreakEarly;
+                state.SetCachedExpandedValue(StateSlot, cachedExpandedValue);
             }
 
             return cachedExpandedValue.Length == 0;
@@ -145,18 +145,15 @@ namespace Microsoft.Build.Evaluation
                 return _value;
             }
 
-            ref string cachedExpandedValue = ref GetCachedExpandedValue(state);
+            string cachedExpandedValue = state.GetCachedExpandedValue(StateSlot);
             if (cachedExpandedValue is null)
             {
                 cachedExpandedValue = state.ExpandIntoString(_value);
+                state.SetCachedExpandedValue(StateSlot, cachedExpandedValue);
             }
 
             return cachedExpandedValue;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ref string GetCachedExpandedValue(ConditionEvaluator.IConditionEvaluationState state) =>
-            ref state.NodeStates.GetString(StateSlot).ExpandedValue;
 
         /// <summary>
         /// Should this node be treated as an expansion of VisualStudioVersion, rather than
