@@ -291,6 +291,15 @@ types are unreachable under the restriction.
 | `$([System.Enum]::GetUnderlyingType('System.DayOfWeek'))` | MSB4186 | `string`→`Type` can't coerce; no way to obtain a `Type` |
 | `$(P.GetType().FullName)` | MSB4184 | `GetType` is the one denied instance method |
 
+### Filesystem metadata constructors
+
+`$([System.IO.FileInfo]::new('$(Path)').Length)` reads a file's size without reading
+its contents. `$([System.IO.DirectoryInfo]::new('$(Path)').Exists)` checks whether
+a directory exists. Neither expression requires `MSBUILDENABLEALLPROPERTYFUNCTIONS`.
+By default, chains starting with these constructors allow only read-only metadata
+and navigation on the filesystem objects they return, not methods such as `Delete`,
+`OpenWrite`, or `CreateSubdirectory`.
+
 ## 8. Implications and the constraining hook
 
 - **Reads are already a supported capability** (`File::ReadAllText`,

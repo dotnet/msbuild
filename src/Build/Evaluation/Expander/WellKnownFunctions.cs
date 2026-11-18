@@ -958,6 +958,18 @@ namespace Microsoft.Build.Evaluation.Expander
             return false;
         }
 
+        internal static bool TryExecuteFileSystemInfoConstructor(Type receiverType, out object? returnVal, object[] args)
+        {
+            if (args is [string path])
+            {
+                returnVal = receiverType == typeof(FileInfo) ? new FileInfo(path) : new DirectoryInfo(path);
+                return true;
+            }
+
+            returnVal = null;
+            return false;
+        }
+
         /// <summary>
         /// Shortcut to avoid calling into binding if we recognize some most common constructors.
         /// Analogous to TryExecuteWellKnownFunction but guaranteed to not throw.

@@ -29,6 +29,7 @@ namespace Microsoft.Build.UnitTests.Evaluation;
 public class PropertyFunctionReceiverRestriction_Tests
 {
     private const string RestrictSwitch = "Microsoft.Build.RestrictPropertyFunctionReceivers";
+    private const string EnableAllSwitch = "Microsoft.Build.EnableAllPropertyFunctions";
     private const string RestrictEnvVar = "MSBUILDRESTRICTPROPERTYFUNCTIONS";
 
     private static string Evaluate(string expression, params (string name, string value)[] properties)
@@ -66,6 +67,42 @@ public class PropertyFunctionReceiverRestriction_Tests
         string file = Path.Combine(folder, "data.txt");
         File.WriteAllText(file, "content");
         return (folder, file);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FileSystemInfoConstructors_ExposeReadOnlyMetadata(bool restrictReceivers)
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        using IDisposable restrict = SetSwitch(RestrictSwitch, restrictReceivers);
+        using IDisposable enableAll = SetSwitch(EnableAllSwitch, false);
+        (string folder, string file) = CreateFolderWithFile(env);
+        string emptyFile = Path.Combine(folder, "empty file.txt");
+        File.WriteAllText(emptyFile, string.Empty);
+
+        Evaluate("$([System.IO.FileInfo]::new('$(File)').Length)", ("File", emptyFile)).ShouldBe("0");
+        Evaluate("$([System.IO.FileInfo]::NEW('$(File)').length)", ("File", file)).ShouldBe("7");
+        Evaluate("$([System.IO.FileInfo]::new('$(File)').Directory.FullName)", ("File", file)).ShouldBe(folder);
+        Evaluate("$([System.IO.DirectoryInfo]::new('$(Folder)').Exists)", ("Folder", folder)).ShouldBe("True");
+    }
+
+    [Fact]
+    public void FileSystemInfoConstructors_BlockMutationWithoutGlobalRestriction()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        using IDisposable restrict = SetSwitch(RestrictSwitch, false);
+        using IDisposable enableAll = SetSwitch(EnableAllSwitch, false);
+        (string folder, string file) = CreateFolderWithFile(env);
+
+        Should.Throw<InvalidProjectFileException>(() =>
+            Evaluate("$([System.IO.FileInfo]::new('$(File)').Delete())", ("File", file)));
+        Should.Throw<InvalidProjectFileException>(() =>
+            Evaluate("$([System.IO.DirectoryInfo]::new('$(Folder)').Delete(true))", ("Folder", folder)));
+        Should.Throw<InvalidProjectFileException>(() =>
+            Evaluate("$([System.IO.FileInfo]::new('$(File)').Directory.CreateSubdirectory('sub'))", ("File", file)));
+        File.Exists(file).ShouldBeTrue();
+        Directory.Exists(Path.Combine(folder, "sub")).ShouldBeFalse();
     }
 
     // ---- Restricted: side-effect-free receivers remain callable ----

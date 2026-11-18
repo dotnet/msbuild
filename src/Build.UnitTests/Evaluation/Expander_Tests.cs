@@ -5596,6 +5596,20 @@ $(
             return expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
         }
 
+        [Fact]
+        public void FileSystemInfoConstructors_ResolveRelativePathsAgainstThreadWorkingDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string workingDir = env.CreateFolder().Path;
+            string wrongDir = env.CreateFolder().Path;
+            File.WriteAllText(Path.Combine(workingDir, "data.txt"), "content");
+
+            ExpandWithThreadWorkingDirectory(env, "$([System.IO.FileInfo]::new('data.txt').Length)", workingDir, wrongDir)
+                .ShouldBe("7");
+            ExpandWithThreadWorkingDirectory(env, "$([System.IO.DirectoryInfo]::new('.').FullName)", workingDir)
+                .ShouldBe(workingDir);
+        }
+
         /// <summary>
         /// Helper: set the process current directory and return it as the OS reports it. On macOS the test
         /// temp folder is reached through a symlink (/var -> /private/var), and only the reported form matches

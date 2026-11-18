@@ -366,12 +366,16 @@ internal partial class Expander<P, I>
             Justification = "_receiverType is reassigned from a runtime property value whose type is restricted to the property-function allowlist, whose members are preserved for trimming.")]
         [UnconditionalSuppressMessage("Trimming", "IL2080:UnrecognizedReflectionPattern",
             Justification = "_bindingFlags is masked to AllowedBindingFlags at construction, so it never carries BindingFlags.NonPublic; GetMethods(_bindingFlags) therefore binds only public methods of the property-function allowlist receiver, whose public members are preserved for trimming.")]
-        internal object Execute(object objectInstance, IPropertyProvider<P> properties, ExpanderOptions options, IElementLocation elementLocation)
+        internal object Execute(object objectInstance, IPropertyProvider<P> properties, ExpanderOptions options, IElementLocation elementLocation, bool restrictFileSystemInfoMembers = false)
         {
             Debug.Assert((options & ExpanderOptions.ExpandProperties) != 0, $"{ExpanderOptions.ExpandProperties} must be set.");
 
             object functionResult = String.Empty;
             object[] args = null;
+            bool isConstructor = string.Equals("new", _methodMethodName, StringComparison.OrdinalIgnoreCase);
+            bool isFileSystemInfoConstructor = isConstructor && objectInstance is null
+                && (_receiverType == typeof(System.IO.FileInfo) || _receiverType == typeof(System.IO.DirectoryInfo));
+            bool normalizeConstructorPath = isFileSystemInfoConstructor && !FeatureSwitches.EnableAllPropertyFunctions;
 
             try
             {
@@ -389,7 +393,7 @@ internal partial class Expander<P, I>
                 else
                 {
                     // Check that the function that we're going to call is valid to call
-                    if (!IsInstanceMethodAvailable(_receiverType, _methodMethodName))
+                    if (!IsInstanceMethodAvailable(_receiverType, _methodMethodName, restrictFileSystemInfoMembers))
                     {
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionMethodUnavailable", _methodMethodName, _receiverType.FullName);
                     }
@@ -427,7 +431,7 @@ internal partial class Expander<P, I>
                         // Directory and Path to Microsoft.IO.* in this file, but _receiverType
                         // from AvailableStaticMethods is always System.IO.*.
                         if (_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory)
-                            || _receiverType == typeof(System.IO.Path))
+                            || _receiverType == typeof(System.IO.Path) || (normalizeConstructorPath && n == 0))
                         {
                             argumentValue = FileUtilities.FixFilePath(argumentValue);
                         }
@@ -441,7 +445,7 @@ internal partial class Expander<P, I>
                         // MakeFullPathFromThreadWorkingDirectory returns null — this is a no-op.
                         // This must happen AFTER UnescapeAll so that the working directory path
                         // (a real filesystem path) is not corrupted by MSBuild unescape processing.
-                        if ((_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory))
+                        if ((_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory) || normalizeConstructorPath)
                             && IsFileOrDirectoryPathArgument(_methodMethodName, n))
                         {
                             AbsolutePath? resolved = FileUtilities.MakeFullPathFromThreadWorkingDirectory((string)args[n]);
@@ -495,7 +499,7 @@ internal partial class Expander<P, I>
 
                 // If we've been asked to construct an instance, then we
                 // need to locate an appropriate constructor and invoke it
-                if (String.Equals("new", _methodMethodName, StringComparison.OrdinalIgnoreCase))
+                if (isConstructor && !isFileSystemInfoConstructor)
                 {
                     if (!WellKnownFunctions.TryExecuteWellKnownConstructorNoThrow(_receiverType, out functionResult, args))
                     {
@@ -510,12 +514,17 @@ internal partial class Expander<P, I>
                     {
                         // First attempt to recognize some well-known functions to avoid binding
                         // and potential first-chance MissingMethodExceptions.
-                        wellKnownFunctionSuccess = WellKnownFunctions.TryExecuteWellKnownFunction(_methodMethodName, _receiverType, _fileSystem, out functionResult, objectInstance, args);
-
-                        if (!wellKnownFunctionSuccess)
+                        if (isFileSystemInfoConstructor)
                         {
-                            // Some well-known functions need evaluated value from properties.
-                            wellKnownFunctionSuccess = WellKnownFunctions.TryExecuteWellKnownFunctionWithPropertiesParam(_methodMethodName, _receiverType, _loggingContext, properties, out functionResult, objectInstance, args);
+                            wellKnownFunctionSuccess = WellKnownFunctions.TryExecuteFileSystemInfoConstructor(_receiverType, out functionResult, args);
+                        }
+                        else
+                        {
+                            wellKnownFunctionSuccess = (objectInstance is System.IO.FileSystemInfo info
+                                    && PropertyFunctionReceiver.TryExecuteFileSystemInfoMember(info, _methodMethodName, _bindingFlags, args, out functionResult))
+                                || WellKnownFunctions.TryExecuteWellKnownFunction(_methodMethodName, _receiverType, _fileSystem, out functionResult, objectInstance, args)
+                                // Some well-known functions need evaluated value from properties.
+                                || WellKnownFunctions.TryExecuteWellKnownFunctionWithPropertiesParam(_methodMethodName, _receiverType, _loggingContext, properties, out functionResult, objectInstance, args);
                         }
                     }
                     // we need to preserve the same behavior on exceptions as the actual binder
@@ -530,7 +539,11 @@ internal partial class Expander<P, I>
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.Message.Replace("\r\n", " "));
                     }
 
-                    if (!wellKnownFunctionSuccess)
+                    if (!wellKnownFunctionSuccess && isFileSystemInfoConstructor)
+                    {
+                        functionResult = LateBindExecute(null, BindingFlags.Public | BindingFlags.Instance, null, args, isConstructor: true);
+                    }
+                    else if (!wellKnownFunctionSuccess)
                     {
                         // Execute the function given converted arguments
                         // The only exception that we should catch to try a late bind here is missing method
@@ -585,7 +598,8 @@ internal partial class Expander<P, I>
                     options,
                     elementLocation,
                     _propertiesUseTracker,
-                    _fileSystem);
+                    _fileSystem,
+                    restrictFileSystemInfoMembers || isFileSystemInfoConstructor);
             }
 
             // Exceptions coming from the actual function called are wrapped in a TargetInvocationException
@@ -1151,7 +1165,7 @@ internal partial class Expander<P, I>
             return AvailableStaticMethods.GetTypeInformationFromTypeCache(receiverType.FullName, methodName) != null;
         }
 
-        private static bool IsInstanceMethodAvailable(Type receiverType, string methodName)
+        private static bool IsInstanceMethodAvailable(Type receiverType, string methodName, bool restrictFileSystemInfoMembers)
         {
             // The escape hatch opens everything (this preserves the historical behavior, including
             // allowing GetType). The feature switch also preserves the legacy
@@ -1174,7 +1188,10 @@ internal partial class Expander<P, I>
             // reflection are predictable and statically known. Under trimming
             // RestrictPropertyFunctionReceivers is substituted true, so the unrestricted 'return true'
             // below is removed, keeping the property-function path trim compatible.
-            if (FeatureSwitches.RestrictPropertyFunctionReceivers)
+            // The new constructors expose only read-only filesystem metadata, even in otherwise
+            // unrestricted builds. Do not change the behavior of existing chains such as GetParent().
+            if (FeatureSwitches.RestrictPropertyFunctionReceivers
+                || (restrictFileSystemInfoMembers && typeof(System.IO.FileSystemInfo).IsAssignableFrom(receiverType)))
             {
                 return PropertyFunctionReceiver.IsAllowed(receiverType, methodName);
             }

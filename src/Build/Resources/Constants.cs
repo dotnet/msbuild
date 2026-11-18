@@ -256,6 +256,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.IO.Directory::GetLastAccessTime", directoryType);
                         availableStaticMethods.TryAdd("System.IO.Directory::GetLastWriteTime", directoryType);
                         availableStaticMethods.TryAdd("System.IO.Directory::GetParent", directoryType);
+                        availableStaticMethods.TryAdd("System.IO.DirectoryInfo::new", new Tuple<string, Type>(null, typeof(DirectoryInfo)));
 
                         availableStaticMethods.TryAdd("System.IO.File::Exists", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::GetCreationTime", fileType);
@@ -266,6 +267,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.IO.File::GetLastWriteTimeUtc", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::ReadAllText", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::ReadAllBytes", fileType);
+                        availableStaticMethods.TryAdd("System.IO.FileInfo::new", new Tuple<string, Type>(null, typeof(FileInfo)));
 
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::GetCultureInfo", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::new", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request

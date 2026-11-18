@@ -429,10 +429,11 @@ internal partial class Expander<P, I>
             ExpanderOptions options,
             IElementLocation elementLocation,
             PropertiesUseTracker propertiesUseTracker,
-            IFileSystem fileSystem)
+            IFileSystem fileSystem,
+            bool restrictFileSystemInfoMembers)
         {
             PropertyExpander expander = new(properties, options, elementLocation, propertiesUseTracker, fileSystem);
-            return expander.ExpandPropertyBody(propertyBody, startIndex: 0, propertyBody.Length, propertyValue);
+            return expander.ExpandPropertyBody(propertyBody, startIndex: 0, propertyBody.Length, propertyValue, restrictFileSystemInfoMembers);
         }
 
         /// <summary>
@@ -445,10 +446,11 @@ internal partial class Expander<P, I>
         ///  The receiver value when recursively expanding an indexer; otherwise,
         ///  <see langword="null"/>.
         /// </param>
+        /// <param name="restrictFileSystemInfoMembers">Whether this chain started with a filesystem info constructor.</param>
         /// <returns>
         ///  The expanded property or property-function value.
         /// </returns>
-        private object ExpandPropertyBody(string propertyBody, int startIndex, int length, object propertyValue)
+        private object ExpandPropertyBody(string propertyBody, int startIndex, int length, object propertyValue, bool restrictFileSystemInfoMembers = false)
         {
             int bodyStartIndex = startIndex;
             int bodyLength = length;
@@ -509,7 +511,7 @@ internal partial class Expander<P, I>
                 try
                 {
                     // Static functions have no receiver, so propertyValue may be null.
-                    return function.Execute(propertyValue, _properties, _options, _elementLocation);
+                    return function.Execute(propertyValue, _properties, _options, _elementLocation, restrictFileSystemInfoMembers);
                 }
                 catch (Exception) when (_options.HasFlag(ExpanderOptions.LeavePropertiesUnexpandedOnError))
                 {
@@ -540,7 +542,8 @@ internal partial class Expander<P, I>
                     propertyBody,
                     indexerStart,
                     bodyStartIndex + bodyLength - indexerStart,
-                    propertyValue);
+                    propertyValue,
+                    restrictFileSystemInfoMembers);
             }
 
             ProjectErrorUtilities.ThrowInvalidProject(

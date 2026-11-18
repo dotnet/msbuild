@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Frozen;
 using System.Globalization;
+using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Evaluation;
@@ -58,14 +60,63 @@ internal static class PropertyFunctionReceiver
     /// </remarks>
     private static readonly FrozenSet<string> s_fileSystemInfoMembers = new[]
     {
-        "FullName", "Name", "Exists", "Extension", "Length", "DirectoryName",
-        "IsReadOnly", "LinkTarget", "ToString",
-        "Parent", "Root", "Directory",
-        "Attributes",
-        "CreationTime", "CreationTimeUtc",
-        "LastAccessTime", "LastAccessTimeUtc",
-        "LastWriteTime", "LastWriteTimeUtc",
+        nameof(FileSystemInfo.FullName), nameof(FileSystemInfo.Name), nameof(FileSystemInfo.Exists), nameof(FileSystemInfo.Extension),
+        nameof(FileInfo.Length), nameof(FileInfo.DirectoryName), nameof(FileInfo.IsReadOnly), nameof(ToString),
+        nameof(DirectoryInfo.Parent), nameof(DirectoryInfo.Root), nameof(FileInfo.Directory),
+        nameof(FileSystemInfo.Attributes), nameof(FileSystemInfo.CreationTime), nameof(FileSystemInfo.CreationTimeUtc),
+        nameof(FileSystemInfo.LastAccessTime), nameof(FileSystemInfo.LastAccessTimeUtc),
+        nameof(FileSystemInfo.LastWriteTime), nameof(FileSystemInfo.LastWriteTimeUtc),
+#if NET
+        nameof(FileSystemInfo.LinkTarget),
+#endif
     }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+
+    internal static bool TryExecuteFileSystemInfoMember(FileSystemInfo receiver, string methodName, BindingFlags bindingFlags, object[] args, out object? result)
+    {
+        result = null;
+        if (args.Length != 0 || !s_fileSystemInfoMembers.TryGetValue(methodName, out string? member))
+        {
+            return false;
+        }
+
+        if ((bindingFlags & BindingFlags.GetProperty) == 0)
+        {
+            if (member == nameof(ToString) && (bindingFlags & BindingFlags.InvokeMethod) != 0)
+            {
+                result = receiver.ToString();
+                return true;
+            }
+
+            return false;
+        }
+
+        switch (member)
+        {
+            case nameof(FileSystemInfo.FullName): result = receiver.FullName; break;
+            case nameof(FileSystemInfo.Name): result = receiver.Name; break;
+            case nameof(FileSystemInfo.Exists): result = receiver.Exists; break;
+            case nameof(FileSystemInfo.Extension): result = receiver.Extension; break;
+            case nameof(FileSystemInfo.Attributes): result = receiver.Attributes; break;
+            case nameof(FileSystemInfo.CreationTime): result = receiver.CreationTime; break;
+            case nameof(FileSystemInfo.CreationTimeUtc): result = receiver.CreationTimeUtc; break;
+            case nameof(FileSystemInfo.LastAccessTime): result = receiver.LastAccessTime; break;
+            case nameof(FileSystemInfo.LastAccessTimeUtc): result = receiver.LastAccessTimeUtc; break;
+            case nameof(FileSystemInfo.LastWriteTime): result = receiver.LastWriteTime; break;
+            case nameof(FileSystemInfo.LastWriteTimeUtc): result = receiver.LastWriteTimeUtc; break;
+#if NET
+            case nameof(FileSystemInfo.LinkTarget): result = receiver.LinkTarget; break;
+#endif
+            case nameof(FileInfo.Length) when receiver is FileInfo file: result = file.Length; break;
+            case nameof(FileInfo.DirectoryName) when receiver is FileInfo file: result = file.DirectoryName; break;
+            case nameof(FileInfo.Directory) when receiver is FileInfo file: result = file.Directory; break;
+            case nameof(FileInfo.IsReadOnly) when receiver is FileInfo file: result = file.IsReadOnly; break;
+            case nameof(DirectoryInfo.Parent) when receiver is DirectoryInfo directory: result = directory.Parent; break;
+            case nameof(DirectoryInfo.Root) when receiver is DirectoryInfo directory: result = directory.Root; break;
+            default: return false;
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// Returns <see langword="true"/> if an instance member named <paramref name="methodName"/> may
