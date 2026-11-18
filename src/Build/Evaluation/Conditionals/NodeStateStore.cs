@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Buffers;
+
 namespace Microsoft.Build.Evaluation;
 
 /// <summary>
@@ -40,7 +42,7 @@ internal struct NodeStateStore
             ThrowInvalidSlot(slot);
         }
 
-        StringNodeState[] states = _stringStates ??= StringNodeStateBuffer.Acquire(_layout.StringSlotCount);
+        StringNodeState[] states = _stringStates ??= ArrayPool<StringNodeState>.Shared.Rent(_layout.StringSlotCount);
         return ref states[slot];
     }
 
@@ -51,7 +53,8 @@ internal struct NodeStateStore
 
         if (stringStates is not null)
         {
-            StringNodeStateBuffer.Release(stringStates);
+            // Clear so pooled arrays neither keep expanded strings alive nor expose them to later evaluations.
+            ArrayPool<StringNodeState>.Shared.Return(stringStates, clearArray: true);
         }
     }
 

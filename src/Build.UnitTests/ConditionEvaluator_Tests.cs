@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -556,74 +555,48 @@ public class ConditionEvaluator_Tests(ITestOutputHelper output)
 
     [Theory]
     [InlineData(11)]
-    [InlineData(256)]
-    public void SmallConditionStateBuffersUseSharedPoolAndClearFullCapacity(int slots)
-    {
-        NodeStateStore.StringNodeState[] buffer = StringNodeStateBuffer.Acquire(slots);
-        for (int i = 0; i < buffer.Length; i++)
-        {
-            buffer[i].ExpandedValue = "previous";
-        }
-
-        StringNodeStateBuffer.Release(buffer);
-        NodeStateStore.StringNodeState[] reused =
-            ArrayPool<NodeStateStore.StringNodeState>.Shared.Rent(slots);
-        try
-        {
-            reused.ShouldBeSameAs(buffer);
-            foreach (NodeStateStore.StringNodeState state in reused)
-            {
-                state.ExpandedValue.ShouldBeNull();
-            }
-        }
-        finally
-        {
-            ArrayPool<NodeStateStore.StringNodeState>.Shared.Return(reused, clearArray: true);
-        }
-    }
-
-    [Theory]
-    [InlineData(256)]
-    [InlineData(258)]
     [InlineData(4097)]
-    public void ConditionStateBuffersAreReusedAndIsolated(int slots)
+    public void NodeStateStoresKeepNestedStatePrivateAndClearReleasedState(int slots)
     {
-        NodeStateStore.StringNodeState[] first =
-            StringNodeStateBuffer.Acquire(slots);
-        first[0].ExpandedValue = "first";
-        first[slots - 1].ExpandedValue = "last";
-        StringNodeStateBuffer.Release(first);
-
-        NodeStateStore.StringNodeState[] reused =
-            StringNodeStateBuffer.Acquire(slots);
-        NodeStateStore.StringNodeState[]? nested = null;
+        NodeStateStore outer = new();
+        outer.Initialize(new NodeStateLayout(slots));
         try
         {
-            reused.ShouldBeSameAs(first);
-            reused[0].ExpandedValue.ShouldBeNull();
-            reused[slots - 1].ExpandedValue.ShouldBeNull();
-            reused[0].ExpandedValue = "outer";
-            reused[slots - 1].ExpandedValue = "outer-last";
+            outer.GetString(0).ExpandedValue = "outer";
+            outer.GetString(slots - 1).ExpandedValue = "outer-last";
 
-            nested = StringNodeStateBuffer.Acquire(slots);
-            nested.ShouldNotBeSameAs(reused);
-            nested[0].ExpandedValue.ShouldBeNull();
-            nested[slots - 1].ExpandedValue.ShouldBeNull();
-            nested[0].ExpandedValue = "inner";
-            StringNodeStateBuffer.Release(nested);
-            nested = null;
+            NodeStateStore inner = new();
+            inner.Initialize(new NodeStateLayout(slots));
+            try
+            {
+                inner.GetString(0).ExpandedValue.ShouldBeNull();
+                inner.GetString(slots - 1).ExpandedValue.ShouldBeNull();
+                inner.GetString(0).ExpandedValue = "inner";
+                inner.GetString(slots - 1).ExpandedValue = "inner-last";
+            }
+            finally
+            {
+                inner.Release();
+            }
 
-            reused[0].ExpandedValue.ShouldBe("outer");
-            reused[slots - 1].ExpandedValue.ShouldBe("outer-last");
+            outer.GetString(0).ExpandedValue.ShouldBe("outer");
+            outer.GetString(slots - 1).ExpandedValue.ShouldBe("outer-last");
         }
         finally
         {
-            if (nested is not null)
-            {
-                StringNodeStateBuffer.Release(nested);
-            }
+            outer.Release();
+        }
 
-            StringNodeStateBuffer.Release(reused);
+        NodeStateStore next = new();
+        next.Initialize(new NodeStateLayout(slots));
+        try
+        {
+            next.GetString(0).ExpandedValue.ShouldBeNull();
+            next.GetString(slots - 1).ExpandedValue.ShouldBeNull();
+        }
+        finally
+        {
+            next.Release();
         }
     }
 
