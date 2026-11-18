@@ -14,9 +14,10 @@
     "dotnet": "11.0.100",
     "vs": {
       "version": "18.6"
-    }
+    },
+    "pinned": true
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "12.0.0-beta.26556.2"
+    "Microsoft.DotNet.Arcade.Sdk": "12.0.0-beta.26565.1"
   }
 }
