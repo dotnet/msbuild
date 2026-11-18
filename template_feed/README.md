@@ -3,7 +3,7 @@
 The package contains the template designed to streamline the creation of MSBuild check libraries.
 
 | Template name | Package Id | Short name | Description |
-| --- | --- | --- |
+| --- | --- | --- | --- |
 | MSBuild Custom Check Template | Microsoft.Build.Templates | `msbuildcheck` | A project for creating a MSBuild check library |
 
 The package is available for download from nuget.org.
