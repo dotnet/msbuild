@@ -53,7 +53,6 @@ internal struct NodeStateStore
 
         if (stringStates is not null)
         {
-            // Clear so pooled arrays neither keep expanded strings alive nor expose them to later evaluations.
             ArrayPool<StringNodeState>.Shared.Return(stringStates, clearArray: true);
         }
     }
