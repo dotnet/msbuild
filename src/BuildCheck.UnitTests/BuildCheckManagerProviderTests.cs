@@ -207,9 +207,9 @@ public class BuildCheckManagerTests : IDisposable
 
         _testedInstance.StartProjectRequest(checkContext, "matching.proj");
         logger.Warnings.ShouldHaveSingleItem();
-        _testedInstance.FlushDeferredDiagnostics(checkContext);
+        _testedInstance.FinalizeProcessing(checkContext);
         logger.Warnings.ShouldBe([matching, unrelated]);
-        _testedInstance.FlushDeferredDiagnostics(checkContext);
+        _testedInstance.FinalizeProcessing(checkContext);
         logger.Warnings.Count.ShouldBe(2);
     }
 
@@ -251,7 +251,7 @@ public class BuildCheckManagerTests : IDisposable
             }
             else
             {
-                _testedInstance.FlushDeferredDiagnostics(checkContext);
+                _testedInstance.FinalizeProcessing(checkContext);
             }
         }
     }
@@ -294,18 +294,84 @@ public class BuildCheckManagerTests : IDisposable
             await start.Task;
             for (int i = 0; i < warningCount; i++)
             {
-                _testedInstance.FlushDeferredDiagnostics(checkContext);
+                _testedInstance.FinalizeProcessing(checkContext);
             }
         }));
 
         start.SetResult(true);
         await Task.WhenAll(operations);
-        _testedInstance.FlushDeferredDiagnostics(checkContext);
+        _testedInstance.FinalizeProcessing(checkContext);
 
         dispatched.Count.ShouldBe(warningCount);
         dispatched.Select(e => int.Parse(e.Message.ShouldNotBeNull())).OrderBy(i => i).ShouldBe(Enumerable.Range(0, warningCount));
-        _testedInstance.FlushDeferredDiagnostics(checkContext);
+        _testedInstance.FinalizeProcessing(checkContext);
         dispatched.Count.ShouldBe(warningCount);
+    }
+
+    [Theory]
+    [InlineData("global", true, false)]
+    [InlineData("origin-project", true, false)]
+    [InlineData("unrelated-project", false, false)]
+    [InlineData("excluded", false, false)]
+    [InlineData("message", false, true)]
+    [InlineData("default", false, false)]
+    public void FailureWarningsUseMSBuildPolicyInTheirOriginatingContext(string policy, bool promotes, bool demotes)
+    {
+        const string code = "POL001";
+        var origin = new BuildEventContext(1, 2, 10, 20, BuildEventContext.InvalidProjectContextId, 6, 7);
+        var unrelated = new BuildEventContext(1, 2, 11, 21, 31, 6, 7);
+        var context = new CheckLoggingContext(_loggingService, origin);
+        _loggingService.ShouldTreatWarningAsError(origin, code).ShouldBeFalse();
+        _logger.AllBuildEvents.ShouldBeEmpty();
+        if (policy is "global" or "excluded" or "message")
+        {
+            _loggingService.WarningsAsErrors = new HashSet<string>();
+        }
+        if (policy is "origin-project" or "unrelated-project")
+        {
+            _loggingService.AddWarningsAsErrors(policy == "origin-project" ? origin : unrelated, new HashSet<string>());
+        }
+        if (policy == "excluded")
+        {
+            _loggingService.WarningsNotAsErrors = new HashSet<string> { code };
+        }
+        if (policy == "message")
+        {
+            _loggingService.WarningsAsMessages = new HashSet<string> { code };
+        }
+        var warning = new BuildWarningEventArgs(null, code, "test.proj", 3, 4, 3, 9, "infrastructure warning", null, "BuildCheck")
+        {
+            BuildEventContext = origin,
+        };
+        context.ShouldTreatWarningAsError(code).ShouldBe(promotes);
+
+        ((IResultReporter)_testedInstance).ReportFailure(warning, context);
+
+        _logger.Errors.Count.ShouldBe(promotes ? 1 : 0);
+        _logger.Warnings.ShouldBeEmpty();
+        if (!promotes)
+        {
+            _logger.AllBuildEvents.ShouldBeEmpty("MSBuild warning exclusions and message demotion retain the existing deferred path");
+        }
+        _testedInstance.FinalizeProcessing(context);
+
+        BuildEventArgs diagnostic = _logger.AllBuildEvents.ShouldHaveSingleItem();
+        diagnostic.BuildEventContext.ShouldBeSameAs(origin);
+        diagnostic.Message.ShouldBe(warning.Message);
+        if (demotes)
+        {
+            diagnostic.ShouldBeOfType<BuildMessageEventArgs>();
+        }
+        else if (promotes)
+        {
+            diagnostic.ShouldBeOfType<BuildErrorEventArgs>().Code.ShouldBe(code);
+        }
+        else
+        {
+            diagnostic.ShouldBeSameAs(warning);
+        }
+        _testedInstance.FinalizeProcessing(context);
+        _logger.AllBuildEvents.ShouldHaveSingleItem();
     }
 
     private static BuildWarningEventArgs CreateDeferredWarning(int evaluationId, int projectInstanceId, string message)

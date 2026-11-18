@@ -19,6 +19,13 @@ internal interface ICheckContext
     BuildEventContext BuildEventContext { get; }
 
     /// <summary>
+    /// Whether MSBuild logging currently treats this warning code as an error
+    /// in the originating context. Uses the warning settings currently available;
+    /// logging determines final severity when it processes the warning.
+    /// </summary>
+    bool ShouldTreatWarningAsError(string? warningCode);
+
+    /// <summary>
     /// Dispatch the instance of <see cref="BuildEventContext"/> as a comment.
     /// </summary>
     void DispatchAsComment(MessageImportance importance, string messageResourceName, params object?[] messageArgs);

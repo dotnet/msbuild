@@ -28,6 +28,10 @@ internal class CheckDispatchingContext : ICheckContext
 
     public BuildEventContext BuildEventContext => _eventContext;
 
+    // Replay dispatches events without a logging service to query;
+    // keep warnings on the existing deferred-reporting path.
+    public bool ShouldTreatWarningAsError(string? warningCode) => false;
+
     public void DispatchBuildEvent(BuildEventArgs buildEvent)
     {
         Assumed.NotNull(buildEvent);

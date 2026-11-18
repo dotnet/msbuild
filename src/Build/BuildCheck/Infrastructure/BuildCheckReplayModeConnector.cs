@@ -27,9 +27,9 @@ public static class BuildCheckReplayModeConnector
         buildManager.EnableBuildCheck();
 
         var buildCheckManagerProvider = ((IBuildComponentHost)buildManager)
-            .GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider;
+            .GetComponent<IBuildCheckManagerProvider>(BuildComponentType.BuildCheckManagerProvider);
 
-        buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
+        buildCheckManagerProvider.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
 
         var mergedEventSource = new EventArgsDispatcher();
 
@@ -38,7 +38,7 @@ public static class BuildCheckReplayModeConnector
         {
             if (e is BuildFinishedEventArgs)
             {
-                buildCheckManagerProvider.Instance.FlushDeferredDiagnostics(
+                buildCheckManagerProvider.Instance.FinalizeProcessing(
                     new CheckDispatchingContext(mergedEventSource, e.BuildEventContext ?? BuildEventContext.Invalid));
             }
             mergedEventSource.Dispatch(e);

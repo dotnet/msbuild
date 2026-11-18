@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.Shared;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
@@ -240,7 +239,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         }
                         catch (BuildCheckConfigurationException e)
                         {
-                            ReportResult(EventsCreatorHelper.CreateWarningEventFromText(
+                            ReportFailure(EventsCreatorHelper.CreateWarningEventFromText(
                                 checkContext.BuildEventContext,
                                 DiagnosticSubcategory.None,
                                 warningCode: null,
@@ -351,7 +350,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
                 catch (BuildCheckConfigurationException e)
                 {
-                    ReportResult(EventsCreatorHelper.CreateWarningEventFromText(
+                    ReportFailure(EventsCreatorHelper.CreateWarningEventFromText(
                         checkContext.BuildEventContext,
                         DiagnosticSubcategory.None,
                         warningCode: null,
@@ -536,21 +535,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             return new BuildCheckTracingData(_ruleTelemetryData.ToList(), _tracingReporter.GetInfrastructureTracingStats());
         }
 
-        public void FinalizeProcessing(LoggingContext loggingContext)
-        {
-            if (IsInProcNode)
-            {
-                // We do not want to send tracing stats from in-proc node
-                return;
-            }
-
-            var checkEventStats = CreateCheckTracingStats();
-
-            BuildCheckTracingEventArgs checkEventArg =
-                new(checkEventStats) { BuildEventContext = loggingContext.BuildEventContext };
-            loggingContext.LogBuildEvent(checkEventArg);
-        }
-
         private readonly ConcurrentDictionary<int, string> _projectsByInstanceId = new();
         private readonly ConcurrentDictionary<int, string> _projectsByEvaluationId = new();
         // We are receiving project imported data only from the logger events - hence always in a single threaded context
@@ -676,7 +660,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
-        public void FlushDeferredDiagnostics(ICheckContext checkContext)
+        public void FinalizeProcessing(ICheckContext checkContext)
         {
             foreach (List<BuildWarningEventArgs> diagnostics in _deferredWarnings.TakeAll())
             {
@@ -699,6 +683,21 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     out HashSet<string>? importedProjects))
             {
                 importedProjects.Add(importedFile);
+            }
+        }
+
+        public void ReportFailure(BuildWarningEventArgs warning, ICheckContext checkContext)
+        {
+            // Delaying an already-promotable warning can let the submission finish
+            // successfully before logging receives it. Logging determines final severity
+            // when it processes the warning.
+            if (checkContext.ShouldTreatWarningAsError(warning.Code))
+            {
+                checkContext.DispatchBuildEvent(warning);
+            }
+            else
+            {
+                ReportResult(warning, checkContext);
             }
         }
 
@@ -860,4 +859,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 internal interface IResultReporter
 {
     void ReportResult(BuildEventArgs result, ICheckContext checkContext);
+
+    void ReportFailure(BuildWarningEventArgs warning, ICheckContext checkContext);
 }

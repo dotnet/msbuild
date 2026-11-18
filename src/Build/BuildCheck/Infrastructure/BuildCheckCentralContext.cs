@@ -303,7 +303,7 @@ internal sealed class BuildCheckCentralContext
             }
             catch (Exception e)
             {
-                checkCallback.Item1.ReportWarning(EventsCreatorHelper.CreateWarningEventFromText(
+                checkCallback.Item1.ReportFailure(EventsCreatorHelper.CreateWarningEventFromText(
                     checkContext.BuildEventContext,
                     DiagnosticSubcategory.None,
                     warningCode: null,

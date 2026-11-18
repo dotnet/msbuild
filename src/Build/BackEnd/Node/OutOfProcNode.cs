@@ -534,6 +534,9 @@ namespace Microsoft.Build.Execution
             }
             finally
             {
+                // Release the provider through its factory so a reused node initializes a fresh manager.
+                _componentFactories.ShutdownComponent(BuildComponentType.BuildCheckManagerProvider);
+
                 // Shut down logging, which will cause all queued logging messages to be sent.
                 if (_loggingContext != null && _loggingService != null)
                 {

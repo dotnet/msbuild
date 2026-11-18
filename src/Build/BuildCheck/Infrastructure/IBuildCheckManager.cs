@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Framework;
 
@@ -56,8 +55,6 @@ internal interface IBuildCheckManager
 
     void ProcessBuildFinished(ICheckContext analysisContext);
 
-    void FlushDeferredDiagnostics(ICheckContext checkContext);
-
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
     [RequiresUnreferencedCode("Loads custom build check assemblies from disk and reflects over their types, which is incompatible with trimming.")]
@@ -67,7 +64,8 @@ internal interface IBuildCheckManager
 
     BuildCheckTracingData CreateCheckTracingStats();
 
-    void FinalizeProcessing(LoggingContext loggingContext);
+    // Dispatch diagnostics still waiting for a project request before this owner's logging finishes.
+    void FinalizeProcessing(ICheckContext checkContext);
 
     // All those to be called from RequestBuilder,
     //  but as well from the ConnectorLogger - as even if interleaved, it gives the info
