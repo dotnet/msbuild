@@ -22,11 +22,9 @@ internal struct NodeStateStore
         public string? ExpandedValue;
     }
 
-    // On .NET Framework, ArrayPool<T>.Shared takes a lock on every Rent and Return and has no per-thread cache.
-    // With 8 threads evaluating real conditions in parallel, using only Shared made evaluation about 2x slower,
-    // so each thread keeps one small buffer and falls back to Shared for nested or larger conditions.
-    private const int MaxThreadCachedLength = 256;
-
+    // On .NET Framework, ArrayPool<T>.Shared locks on every Rent and Return and has no per-thread cache,
+    // which made parallel evaluation about 2x slower. So each thread keeps its largest buffer,
+    // and Shared is used only when that buffer is missing, in use or too small.
     [ThreadStatic]
     private static StringNodeState[]? t_cachedStringStates;
 
@@ -85,7 +83,7 @@ internal struct NodeStateStore
         Array.Clear(states, 0, usedLength);
 
         StringNodeState[]? cached = t_cachedStringStates;
-        if (states.Length <= MaxThreadCachedLength && (cached is null || cached.Length < states.Length))
+        if (cached is null || cached.Length < states.Length)
         {
             t_cachedStringStates = states;
             if (cached is not null)
