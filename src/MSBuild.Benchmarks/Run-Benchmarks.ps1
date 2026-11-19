@@ -133,7 +133,26 @@ $ErrorActionPreference = 'Stop'
 # from DOTNET_INSTALL_DIR or PATH when it contains the requested SDK, and populates .dotnet only as a fallback.
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $dotnetExecutable = if ($env:OS -eq 'Windows_NT') { 'dotnet.exe' } else { 'dotnet' }
-$dotnetSdkVersion = (Get-Content (Join-Path $repoRoot 'global.json') -Raw | ConvertFrom-Json).tools.dotnet
+$globalJson = Get-Content (Join-Path $repoRoot 'global.json') -Raw | ConvertFrom-Json
+$dotnetSdkVersion = if ((Get-Member -InputObject $globalJson -Name 'tools') -and
+    $globalJson.tools -and
+    (Get-Member -InputObject $globalJson.tools -Name 'dotnet') -and
+    $globalJson.tools.dotnet)
+{
+    $globalJson.tools.dotnet
+}
+elseif ((Get-Member -InputObject $globalJson -Name 'sdk') -and
+    $globalJson.sdk -and
+    (Get-Member -InputObject $globalJson.sdk -Name 'version') -and
+    $globalJson.sdk.version)
+{
+    $globalJson.sdk.version
+}
+else
+{
+    throw "global.json must specify 'tools.dotnet' or 'sdk.version'."
+}
+
 $dotnetRoots = @($env:DOTNET_INSTALL_DIR)
 $installedDotnet = Get-Command $dotnetExecutable -CommandType Application -ErrorAction SilentlyContinue
 
