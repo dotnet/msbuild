@@ -3516,6 +3516,7 @@ namespace Microsoft.Build.CommandLine
                         // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
                         bool taskHostNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
                         byte parentPacketVersion = ProcessParentPacketVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ParentPacketVersion]);
+                        OutOfProcTaskHostNode.InitializeSerializationContract();
                         OutOfProcTaskHostNode taskHostNode = new();
                         shutdownReason = taskHostNode.Run(out nodeException, taskHostNodeReuse, parentPacketVersion);
                         break;

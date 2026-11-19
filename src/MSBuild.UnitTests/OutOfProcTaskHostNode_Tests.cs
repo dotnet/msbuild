@@ -197,7 +197,6 @@ namespace Microsoft.Build.UnitTests
         [InlineData("double-yield")]
         [InlineData("reacquire-first")]
         [InlineData("wrong-thread")]
-        [InlineData("build-while-yielded")]
         public void InvalidYieldSequencesFailLikeInProcTasks(string operation)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -223,12 +222,62 @@ namespace Microsoft.Build.UnitTests
             Action invalid = operation switch
             {
                 "double-yield" => state.Node.Yield,
-                "wrong-thread" => state.Node.Reacquire,
-                _ => () => state.Node.BuildProjectFile("other.proj", null, null, null),
+                _ => state.Node.Reacquire,
             };
             Should.Throw<InternalErrorException>(() => state.RunAs(context, invalid));
             endpoint.Packets.ShouldBeEmpty("An invalid call must not reach the worker node.");
             context.State.ShouldBe(TaskExecutionState.Yielded);
+        }
+
+        [Fact]
+        public void BuildProjectFileWhileYieldedReacquiresForTheNestedBuildAndYieldsAgain()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            state.SetField("_nodeEndpoint", endpoint.Node);
+            state.SetField("_parentPacketVersion", NodePacketTypeExtensions.PacketVersion);
+            state.SetField("_activeTaskCount", 1);
+            using TaskExecutionContext context = state.AddContext(parentTaskId: 5, yieldEnabled: true);
+            bool built = false;
+            System.Threading.Tasks.Task execution = System.Threading.Tasks.Task.Run(() => state.RunAs(context, () =>
+            {
+                state.Node.Yield();
+                built = state.Node.BuildProjectFile("other.proj", null, null, null);
+            }));
+
+            Next<TaskHostYieldRequest>(out int yieldId).Reacquire.ShouldBeFalse();
+            state.HandlePacket(new TaskHostYieldResponse(yieldId));
+            TaskHostYieldRequest reacquire = Next<TaskHostYieldRequest>(out int reacquireId);
+            reacquire.Reacquire.ShouldBeTrue("The nested build needs the node, as it did when Yield was a no-op.");
+            endpoint.Packets.ShouldBeEmpty("The build request must wait for the node.");
+            state.HandlePacket(new TaskHostYieldResponse(reacquireId));
+
+            Next<TaskHostBuildRequest>(out int buildId);
+            context.State.ShouldBe(TaskExecutionState.BlockedOnCallback);
+            state.HandlePacket(new TaskHostBuildResponse(buildId, true, null));
+
+            Next<TaskHostYieldRequest>(out int yieldAgainId).Reacquire.ShouldBeFalse("The task resumes yielded, as it called it.");
+            state.HandlePacket(new TaskHostYieldResponse(yieldAgainId));
+            execution.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            built.ShouldBeTrue();
+            context.State.ShouldBe(TaskExecutionState.Yielded);
+            state.GetField<int>("_activeTaskCount").ShouldBe(0);
+            state.GetField<int>("_blockedTaskCount").ShouldBe(0);
+            state.GetField<int>("_yieldedTaskCount").ShouldBe(1);
+
+            T Next<T>(out int requestId)
+                where T : INodePacket
+            {
+                SpinWait.SpinUntil(() => !endpoint.Packets.IsEmpty || execution.IsCompleted, TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                execution.Exception.ShouldBeNull();
+                endpoint.Packets.TryDequeue(out INodePacket? packet).ShouldBeTrue();
+                TaskHostTaskEnvelope envelope = packet.ShouldBeOfType<TaskHostTaskEnvelope>();
+                envelope.TaskId.ShouldBe(5);
+                T request = envelope.Packet.ShouldBeOfType<T>();
+                requestId = ((ITaskHostCallbackPacket)request).RequestId;
+                return request;
+            }
         }
 
         [Fact]

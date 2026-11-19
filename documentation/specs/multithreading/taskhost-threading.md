@@ -187,8 +187,9 @@ The child enforces the in-process contract: `Yield` twice, `Reacquire` without `
 ### Limitations
 
 - A yielded task gives up the process environment and current directory, as an in-process task does. While it is yielded, it must not read or change process-wide state, such as environment variables, the current directory, `Console`, or static fields. Tools that it starts must get their environment and working directory explicitly. The TaskHost cannot enforce this rule. Legacy tasks that break it are not safe to overlap.
-- `BuildProjectFile` and other callbacks that block for a nested build are not supported while a task is yielded.
+- `BuildProjectFile` from a yielded task keeps the behavior from before TaskHost yielding, when `Yield` was a no-op: the child reacquires the node for the task, runs the nested build, and then yields again. The task stays yielded and must still call `Reacquire`. (An in-process task that does this fails the build with an internal error, MSB0001, because the scheduler requires the request to be executing.)
 - After a per-task cancel, the TaskHost exits only after all of its task contexts finish.
+- If the build is cancelled while a hosted task is in `Reacquire`, the task gets the engine's exception as a `GenericBuildTransferredException`. Its `ToString` keeps the original type name, for example `Microsoft.Build.Exceptions.BuildAbortedException`. An in-process task gets the `BuildAbortedException` itself.
 
 ## TaskHost Lifecycle
 
