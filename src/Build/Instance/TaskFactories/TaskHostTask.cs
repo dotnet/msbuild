@@ -132,6 +132,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _taskExecutionSucceeded = false;
 
+        private bool _yielded;
+
         /// <summary>
         /// Whether this task host may be launched with node reuse, so that it does not exit at the
         /// end of the build. False only when <c>TaskFactory="TaskHostFactory"</c> was explicitly
@@ -225,6 +227,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostYieldRequest, TaskHostYieldRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -379,6 +382,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 TaskHostConfiguration hostConfiguration = CreateConfiguration(taskLocation);
+                bool taskHostAcquired = false;
 
                 try
                 {
@@ -419,6 +423,7 @@ namespace Microsoft.Build.BackEnd
 
                     if (_connectedToTaskHost)
                     {
+                        taskHostAcquired = true;
                         _taskLoggingContext.LogComment(
                             MessageImportance.Low,
                             "TaskHostDetails",
@@ -451,11 +456,19 @@ namespace Microsoft.Build.BackEnd
                         }
                         finally
                         {
-                            lock (_taskHostLock)
+                            try
                             {
-                                _taskHostProvider.DisconnectFromHost(_taskHostConnection, this);
-                                _connectedToTaskHost = false;
-                                _taskHostConnection = null;
+                                // Completion, exceptions and disconnect must not leave the scheduler yielded.
+                                ReacquireIfYielded();
+                            }
+                            finally
+                            {
+                                lock (_taskHostLock)
+                                {
+                                    _taskHostProvider.DisconnectFromHost(_taskHostConnection, this);
+                                    _connectedToTaskHost = false;
+                                    _taskHostConnection = null;
+                                }
                             }
                         }
                     }
@@ -464,7 +477,7 @@ namespace Microsoft.Build.BackEnd
                         LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null, visualStudioResolution);
                     }
                 }
-                catch (BuildAbortedException ex)
+                catch (BuildAbortedException ex) when (!taskHostAcquired)
                 {
                     LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, ex, visualStudioResolution);
                 }
@@ -647,10 +660,12 @@ namespace Microsoft.Build.BackEnd
             switch (packet.Type)
             {
                 case NodePacketType.TaskHostTaskComplete:
+                    ReacquireIfYielded();
                     HandleTaskHostTaskComplete(packet as TaskHostTaskComplete);
                     taskFinished = true;
                     break;
                 case NodePacketType.NodeShutdown:
+                    ReacquireIfYielded();
                     HandleNodeShutdown(packet as NodeShutdown);
                     taskFinished = true;
                     break;
@@ -662,6 +677,9 @@ namespace Microsoft.Build.BackEnd
                     break;
                 case NodePacketType.TaskHostCoresRequest:
                     HandleCoresRequest(packet as TaskHostCoresRequest);
+                    break;
+                case NodePacketType.TaskHostYieldRequest:
+                    HandleYieldRequest((TaskHostYieldRequest)packet);
                     break;
                 case NodePacketType.TaskHostBuildRequest:
                     HandleBuildRequest(packet as TaskHostBuildRequest);
@@ -840,6 +858,54 @@ namespace Microsoft.Build.BackEnd
 
             var response = new TaskHostCoresResponse(request.RequestId, grantedCores);
             _taskHostConnection.SendData(response);
+        }
+
+        private void HandleYieldRequest(TaskHostYieldRequest request)
+        {
+            Exception failure = null;
+            try
+            {
+                if (request.Reacquire)
+                {
+                    Assumed.True(_yielded, "Cannot call Reacquire() before Yield().");
+                    ReacquireIfYielded();
+                }
+                else
+                {
+                    Assumed.False(_yielded, "Cannot call Yield() while yielding.");
+                    // Pin before notifying the scheduler: it can immediately dispatch more work.
+                    _taskHostProvider.SetHostYielded(_taskHostConnection, this, true);
+                    try
+                    {
+                        ((IBuildEngine3)_buildEngine).Yield();
+                        _yielded = true;
+                    }
+                    catch
+                    {
+                        _taskHostProvider.SetHostYielded(_taskHostConnection, this, false);
+                        throw;
+                    }
+                }
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                failure = ex;
+            }
+
+            _taskHostConnection.SendData(new TaskHostYieldResponse(request.RequestId, failure));
+        }
+
+        private void ReacquireIfYielded()
+        {
+            if (!_yielded)
+            {
+                return;
+            }
+
+            // An aborted request must not retry reacquisition from the Execute finally block.
+            _yielded = false;
+            ((IBuildEngine3)_buildEngine).Reacquire();
+            _taskHostProvider.SetHostYielded(_taskHostConnection, this, false);
         }
 
         /// <summary>

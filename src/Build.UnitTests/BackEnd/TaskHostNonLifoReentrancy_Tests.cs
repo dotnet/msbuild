@@ -27,9 +27,10 @@ public sealed class TaskHostNonLifoReentrancy_Tests(ITestOutputHelper output)
     private static readonly string[] s_resultFiles = ["A-child-ready", "B-child-ready", "A.result", "B.result", "root.results"];
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void NestedBuildCallbacks_CompleteForOriginalTask(bool multiThreaded)
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void NestedBuildCallbacks_CompleteForOriginalTask(bool multiThreaded, bool disableYield)
     {
         string mode = multiThreaded ? "mt" : "normal";
         (string evidenceDir, string binlog) = CreateEvidenceDirectory(multiThreaded);
@@ -38,7 +39,7 @@ public sealed class TaskHostNonLifoReentrancy_Tests(ITestOutputHelper output)
         env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
         env.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "0");
         env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", null);
-        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableYield ? "18.14" : null);
         env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
         string salt = Guid.NewGuid().ToString("N");
         env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", salt);
@@ -73,8 +74,8 @@ public sealed class TaskHostNonLifoReentrancy_Tests(ITestOutputHelper output)
             (int aPid, int bPid) = AssertParentBoundResults(runDir, log);
             if (multiThreaded)
             {
-                aPid.ShouldBe(bPid, "Both real nested invocations must use the same TaskHost.");
-                AssertTaskHostIdentity(log, aPid);
+                (aPid == bPid).ShouldBe(disableYield, "Only legacy nested tasks can share an occupied process.");
+                AssertTaskHostIdentity(log, aPid, bPid);
             }
 
             outcome = "PASS: graph, parent-bound results, traces and applicable TaskHost assertions completed.";
@@ -232,7 +233,7 @@ public sealed class TaskHostNonLifoReentrancy_Tests(ITestOutputHelper output)
         }
     }
 
-    private static void AssertTaskHostIdentity(string log, int pid)
+    private static void AssertTaskHostIdentity(string log, int aPid, int bPid)
     {
         // Use the localized resources, including the diagnostic task-event suffix, rather than English text.
         string details = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
@@ -248,15 +249,16 @@ public sealed class TaskHostNonLifoReentrancy_Tests(ITestOutputHelper output)
         dispatches.Length.ShouldBe(2, log);
         foreach (Match dispatch in dispatches)
         {
-            int.Parse(dispatch.Groups["host"].Value, CultureInfo.InvariantCulture).ShouldBe(pid);
+            int pid = int.Parse(dispatch.Groups["host"].Value, CultureInfo.InvariantCulture);
+            pid.ShouldBeOneOf(aPid, bPid);
             int caller = int.Parse(dispatch.Groups["caller"].Value, CultureInfo.InvariantCulture);
             caller.ShouldBeGreaterThan(0);
-            caller.ShouldNotBe(pid, "The shared process must be an external TaskHost, not the caller.");
+            caller.ShouldNotBe(pid, "The process must be an external TaskHost, not the caller.");
         }
         dispatches[0].Groups["caller"].Value.ShouldBe(dispatches[1].Groups["caller"].Value);
         dispatches[0].Groups["task"].Value.ShouldNotBe(dispatches[1].Groups["task"].Value);
 
-        // Within this shared host/caller, correlate each role's call and return to one dispatch task ID.
+        // Correlate each role's call and return to one dispatch task ID.
         // Full project/target event contexts remain in the binlog; parent result files are the ownership oracle.
         string taskSuffix = Regex.Escape(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TaskMessageWithId", "MESSAGE", "TASKID"))
             .Replace("MESSAGE", "PROBEMESSAGE").Replace("TASKID", "(?<task>[0-9]+)");
@@ -264,6 +266,7 @@ public sealed class TaskHostNonLifoReentrancy_Tests(ITestOutputHelper output)
         for (int i = 0; i < 2; i++)
         {
             string role = i == 0 ? "A" : "B";
+            int pid = i == 0 ? aPid : bPid;
             string message = $@"PROBE role={role} pid={pid} tid=[0-9]+ stage=CALL_CHILD[^\r\n]*?";
             Match call = Regex.Matches(log, taskSuffix.Replace("PROBEMESSAGE", message)).Cast<Match>().ShouldHaveSingleItem();
             roleTaskIds[i] = call.Groups["task"].Value;

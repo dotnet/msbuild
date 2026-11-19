@@ -228,7 +228,7 @@ internal enum NodePacketType : byte
 
     // Packet types 0x17-0x1F reserved for future core functionality
 
-    #region TaskHost callback packets (0x20-0x27)
+    #region TaskHost callback packets (0x20-0x29)
     // These support bidirectional callbacks from TaskHost to parent for IBuildEngine implementations
 
     /// <summary>
@@ -266,7 +266,20 @@ internal enum NodePacketType : byte
     /// </summary>
     TaskHostConsoleConfiguration = 0x26,
 
-    // 0x27 reserved for future TaskHost callback packet types
+    /// <summary>
+    /// Requests Yield or Reacquire on the owning worker node.
+    /// </summary>
+    TaskHostYieldRequest = 0x27,
+
+    /// <summary>
+    /// Acknowledges completion of Yield or Reacquire.
+    /// </summary>
+    TaskHostYieldResponse = 0x28,
+
+    /// <summary>
+    /// Sets the parent's yield policy before configuring a task.
+    /// </summary>
+    TaskHostYieldConfiguration = 0x29,
 
     #endregion
 

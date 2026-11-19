@@ -20,7 +20,7 @@
   <Target Name="TestTaskHostReuse" BeforeTargets="Build">
     <!-- This task runs in an OOP TaskHost, reports its PID, and calls BuildProjectFile on ChildProject.
          The child project also uses a task via TaskHostFactory with the same runtime, so the same
-         OOP TaskHost process should be reused (while the parent task is blocked on BuildProjectFile callback). -->
+         host launch configuration should be inherited. Yield-capable hosts use separate processes. -->
     <Microsoft.Build.UnitTests.BackEnd.BuildProjectFileAndReportPidTask
         ProjectFile="$(ChildProjectPath)"
         Properties="ExampleTaskPath=$(ExampleTaskPath)">

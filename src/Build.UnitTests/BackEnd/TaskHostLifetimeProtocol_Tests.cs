@@ -23,6 +23,60 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
     private readonly ITestOutputHelper _output = output;
 
     [Theory]
+    [InlineData(8, false, false)]
+    [InlineData(9, false, true)]
+    [InlineData(9, true, false)]
+    public void OccupiedHostSlotsRespectCapabilityAndChangeWave(byte version, bool disableWave, bool exclusive)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableWave ? "18.14" : null);
+        ChangeWaves.ResetStateForTests();
+        using Process process = Process.GetCurrentProcess();
+        using ControlledReadStream firstPipe = new();
+        using ControlledReadStream secondPipe = new();
+        using CountdownEvent terminated = new(2);
+        var provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(
+            BuildComponentType.OutOfProcTaskHostNodeProvider);
+        provider.InitializeComponent(new MockHost());
+        TaskHostNodeKey firstKey = new(HandshakeOptions.TaskHost, 1);
+        TaskHostNodeKey secondKey = firstKey with { HostSlot = 1 };
+        NodeProviderOutOfProcBase.NodeContext first = new(
+            1, process, firstPipe, provider, id => { provider.NodeContextTerminated(id); terminated.Signal(); }, version);
+        NodeProviderOutOfProcBase.NodeContext second = new(
+            2, process, secondPipe, provider, id => { provider.NodeContextTerminated(id); terminated.Signal(); }, version);
+        provider.NodeContextCreated(first, firstKey);
+        provider.NodeContextCreated(second, secondKey);
+        PacketRecordingHandler firstHandler = new();
+        PacketRecordingHandler secondHandler = new();
+        try
+        {
+            provider.TryAttachTaskHandler(first, firstHandler).ShouldBeTrue();
+            provider.TryAttachTaskHandler(second, secondHandler).ShouldBeTrue();
+            provider.GetAvailableHostSlot(firstKey).HostSlot.ShouldBe(exclusive ? 2 : 0);
+
+            provider.SetHostYielded(first, firstHandler, true);
+            provider.TryAttachTaskHandler(first, new PacketRecordingHandler()).ShouldBeFalse();
+            provider.SetHostYielded(second, secondHandler, true);
+            provider.GetAvailableHostSlot(firstKey).HostSlot.ShouldBe(2);
+
+            provider.DisconnectFromHost(second, secondHandler);
+            provider.GetAvailableHostSlot(firstKey).ShouldBe(secondKey, "An idle secondary slot must be reused.");
+            provider.NodeContextTerminated(first.NodeId);
+            provider.GetAvailableHostSlot(firstKey).ShouldBe(secondKey, "A gap in slot IDs must not cause another process launch.");
+            provider.DisconnectFromHost(first, firstHandler);
+            provider.TaskHandlerRegistrationCount.ShouldBe(0);
+        }
+        finally
+        {
+            firstPipe.CompleteRead();
+            secondPipe.CompleteRead();
+            terminated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            first.WaitForSendCompletion(10_000).ShouldBeTrue();
+            second.WaitForSendCompletion(10_000).ShouldBeTrue();
+        }
+    }
+
+    [Theory]
     [InlineData(4)]
     [InlineData(5)]
     [InlineData(6)]
