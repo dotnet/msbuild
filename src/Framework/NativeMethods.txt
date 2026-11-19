@@ -75,6 +75,7 @@ GetShortPathName
 GetStdHandle
 GetSystemInfo
 GetVolumeInformationByHandle
+GetVolumeNameForVolumeMountPoint
 GlobalMemoryStatusEx
 HANDLE
 HRESULT

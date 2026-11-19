@@ -7,7 +7,10 @@ using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Versioning;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
@@ -23,6 +26,8 @@ public sealed class DirectoryJournal_Tests(ITestOutputHelper output)
     private readonly ITestOutputHelper _output = output;
     public static bool WindowsSymbolicLinksAvailable =>
         WindowsTemporaryDirectoryAvailable && new RequiresSymbolicLinksFactAttribute().Skip is null;
+    public static bool WindowsJournalAndSymbolicLinksAvailable =>
+        WindowsJournalAvailable && WindowsSymbolicLinksAvailable;
     public static bool WindowsTemporaryDirectoryAvailable =>
         Microsoft.Build.Framework.NativeMethods.IsWindows && DirectoryJournal.IsSupportedPath(Path.GetTempPath());
     public static bool WindowsJournalAvailable
@@ -33,6 +38,153 @@ public sealed class DirectoryJournal_Tests(ITestOutputHelper output)
             var journal = new DirectoryJournal();
             try { return journal.TryRead(Path.GetTempPath(), out _); }
             finally { journal.Clear(); }
+        }
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData("NTFS", true, true)]
+    [InlineData("ReFS", true, true)]
+    [InlineData("refs", true, true)]
+    [InlineData("NTFS", false, false)]
+    [InlineData("ReFS", false, false)]
+    [InlineData("FAT32", true, false)]
+    [InlineData("", true, false)]
+    public void VolumeAdmissionRequiresASupportedFilesystemAndJournalCapability(string fileSystem, bool journalSupported, bool expected)
+    {
+        uint flags = journalSupported ? PInvoke.FILE_SUPPORTS_USN_JOURNAL : 0;
+        DirectoryJournal.IsSupportedFileSystem(fileSystem.AsSpan(), flags).ShouldBe(expected);
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData("NTFS")]
+    [InlineData("ReFS")]
+    public void NativeVolumeAdmissionPreservesInactiveJournalFallback(string fileSystem)
+    {
+        string fixtureRoot = GetNativeFixtureRoot(fileSystem);
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string path = env.CreateFolder(Path.Combine(fixtureRoot, "msbuild-journal-" + Guid.NewGuid().ToString("N"))).Path;
+        var journal = new DirectoryJournal();
+        try
+        {
+            DirectoryStampStatus status = journal.Read(path, out _, out DirectoryJournal.RejectionReason rejection);
+            if (status == DirectoryStampStatus.Available)
+            {
+                rejection.ShouldBe(DirectoryJournal.RejectionReason.None);
+            }
+            else
+            {
+                rejection.ShouldBeOneOf(DirectoryJournal.RejectionReason.JournalInactive, DirectoryJournal.RejectionReason.AccessDenied);
+                journal.Read(path, out _, out DirectoryJournal.RejectionReason cached).ShouldBe(DirectoryStampStatus.Unavailable);
+                cached.ShouldBe(rejection);
+            }
+            _output.WriteLine($"Native {fileSystem} admission: {status}, {rejection}.");
+        }
+        finally { journal.Clear(); }
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData("NTFS")]
+    [InlineData("ReFS")]
+    public void NativeJournalInvalidatesCreateRenameAndDelete(string fileSystem)
+    {
+        string fixtureRoot = GetNativeFixtureRoot(fileSystem);
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string path = env.CreateFolder(Path.Combine(fixtureRoot, "msbuild-journal-" + Guid.NewGuid().ToString("N"))).Path;
+        var journal = new DirectoryJournal();
+        try
+        {
+            if (journal.Read(path, out _, out DirectoryJournal.RejectionReason rejection) != DirectoryStampStatus.Available)
+            {
+                rejection.ShouldBeOneOf(DirectoryJournal.RejectionReason.JournalInactive, DirectoryJournal.RejectionReason.AccessDenied);
+                Assert.Skip($"Native {fileSystem} journal is not accessible and active: {rejection}.");
+            }
+            void CheckMutation(Action mutate)
+            {
+                journal.Read(path, out DirectoryChangeStamp before).ShouldBe(DirectoryStampStatus.Available);
+                mutate();
+                journal.Read(path, out DirectoryChangeStamp after).ShouldBe(DirectoryStampStatus.Available);
+                after.ShouldNotBe(before);
+            }
+            string first = Path.Combine(path, "first.cs");
+            string second = Path.Combine(path, "second.cs");
+            CheckMutation(() => File.WriteAllText(first, ""));
+            CheckMutation(() => File.Move(first, second));
+            CheckMutation(() => File.Delete(second));
+        }
+        finally { journal.Clear(); }
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData("NTFS")]
+    [InlineData("ReFS")]
+    public void NativeBatchedGlobBypassesDependencyScansAndInvalidatesAfterMembershipChanges(string fileSystem)
+    {
+        string fixtureRoot = GetNativeFixtureRoot(fileSystem);
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDDIRECTORYCACHEEXCLUDEROOTS", null);
+        string root = env.CreateFolder(Path.Combine(fixtureRoot, "msbuild-batched-" + Guid.NewGuid().ToString("N"))).Path;
+        var cache = new DirectoryListingCache();
+        try
+        {
+            DirectoryListingCache first = cache.CreateEvaluationCache();
+            if (!first.TryReadDirectoryChangeTime(root, out DirectoryChangeStamp stamp))
+            {
+                Assert.Skip($"Native {fileSystem} journal is not accessible and active.");
+            }
+            IReadOnlyList<string> snapshot = first.Store(root, FileMatcher.FileSystemEntity.Files, [], stamp);
+            GlobResultExperiment initial = GlobResultExperiment.Create(first)!;
+            var collector = new GlobResultExperiment.Collector();
+            initial.RecordListing(collector, root, FileMatcher.FileSystemEntity.Files, snapshot);
+            initial.Store("batched", [], FileMatcher.SearchAction.RunSearch, null, collector);
+            GlobResultExperiment next = GlobResultExperiment.Create(cache.CreateEvaluationCache())!;
+            var journal = (DirectoryJournal)typeof(DirectoryListingCache)
+                .GetField("_journal", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(cache)!;
+            DirectorySnapshotStatus RejectScan(string _, FileMatcher.FileSystemEntity __, IReadOnlyList<string> ___)
+                => throw new InvalidOperationException("The batched hit must not scan dependency snapshots.");
+            bool RejectExistence(string _) => throw new InvalidOperationException("The batched hit must not probe existence dependencies.");
+
+            next.TryGet("batched", RejectScan, RejectExistence, out _).ShouldBeTrue();
+            long nativeReads = journal.GetStatistics().NativeReads;
+            long batches = journal.GetStatistics().Batches;
+            next.TryGet("batched", RejectScan, RejectExistence, out _).ShouldBeTrue();
+            journal.GetStatistics().NativeReads.ShouldBe(nativeReads);
+            journal.GetStatistics().Batches.ShouldBeGreaterThan(batches);
+
+            File.WriteAllText(Path.Combine(root, "New.cs"), "");
+            GlobResultExperiment afterChange = GlobResultExperiment.Create(cache.CreateEvaluationCache())!;
+            afterChange.TryGet("batched", RejectScan, RejectExistence, out _).ShouldBeFalse();
+            journal.GetStatistics().InvalidatedSubscriptions.ShouldBeGreaterThan(0);
+        }
+        finally
+        {
+            cache.Clear();
+        }
+    }
+
+    [Fact(Skip = "Requires an accessible NTFS or ReFS change journal.", SkipType = typeof(DirectoryJournal_Tests), SkipUnless = nameof(WindowsJournalAvailable))]
+    public void NativeBatchedGlobsDoNotMixNewSharedResultsWithOlderEvaluationSnapshots()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDDIRECTORYCACHEEXCLUDEROOTS", null);
+        string root = env.CreateFolder().Path;
+        File.WriteAllText(Path.Combine(root, "Old.cs"), "");
+        var cache = new DirectoryListingCache();
+        FileMatcher Matcher() => new(FileSystems.Default,
+            new ConcurrentDictionary<string, IReadOnlyList<string>>(), directoryListingCache: cache);
+        try
+        {
+            FileMatcher oldEvaluation = Matcher();
+            oldEvaluation.GetFiles(root, "O*.cs").FileList.Length.ShouldBe(1);
+            File.WriteAllText(Path.Combine(root, "New.cs"), "");
+            Matcher().GetFiles(root, "N*.cs").FileList.Length.ShouldBe(1);
+
+            oldEvaluation.GetFiles(root, "N*.cs").FileList.ShouldBeEmpty(
+                "A new shared result must not replace the older directory snapshot already observed in this evaluation.");
+            Matcher().GetFiles(root, "N*.cs").FileList.Length.ShouldBe(1);
+        }
+        finally
+        {
+            cache.Clear();
         }
     }
 
@@ -56,6 +208,117 @@ public sealed class DirectoryJournal_Tests(ITestOutputHelper output)
         state.TryGetVersion(@"C:\new", out long currentNew).ShouldBeTrue();
         currentOld.ShouldNotBe(oldVersion);
         currentNew.ShouldNotBe(newVersion);
+    }
+
+    [WindowsOnlyFact]
+    public void ReverseSubscriptionsInvalidateOnlyDependentGlobsAndDetachAllTheirEdges()
+    {
+        var state = CreateState();
+        state.Track(@"C:\", new(1), usn: 0, enumerated: false);
+        state.Track(@"C:\input", new(10), usn: 0);
+        state.Track(@"C:\other", new(20), usn: 0);
+        state.TryAnchor(@"C:\input").ShouldBeTrue();
+        state.TryAnchor(@"C:\other").ShouldBeTrue();
+        state.TryGetVersion(@"C:\input", out long inputVersion).ShouldBeTrue();
+        state.TryGetVersion(@"C:\other", out long otherVersion).ShouldBeTrue();
+        var journal = new DirectoryJournal();
+        using var dependent = new DirectoryJournal.Subscription(journal);
+        using var unaffected = new DirectoryJournal.Subscription(journal);
+        var reader = new FakeReader();
+        state.Subscribe(@"C:\input", new(state.Epoch, 10, 0, inputVersion), dependent, reader).ShouldBeTrue();
+        state.Subscribe(@"C:\other", new(state.Epoch, 20, 0, otherVersion), dependent, reader).ShouldBeTrue();
+        state.Subscribe(@"C:\other", new(state.Epoch, 20, 0, otherVersion), unaffected, reader).ShouldBeTrue();
+
+        state.ApplyBuffer(Buffer(64, Entry(0, new(30), new(10), PInvoke.USN_REASON_FILE_CREATE))).ShouldBeTrue();
+
+        dependent.Valid.ShouldBeFalse();
+        dependent.Nodes.ShouldBeEmpty("Invalidation must detach reverse edges on all dependencies, not only the changed one.");
+        unaffected.Valid.ShouldBeTrue();
+        state.TryGetVersion(@"C:\other", out long after).ShouldBeTrue();
+        after.ShouldBe(otherVersion);
+        unaffected.Dispose();
+        unaffected.Nodes.ShouldBeEmpty();
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData(PInvoke.USN_REASON_RENAME_OLD_NAME)]
+    [InlineData(PInvoke.USN_REASON_REPARSE_POINT_CHANGE)]
+    [InlineData(PInvoke.USN_REASON_FILE_DELETE)]
+    public void AncestorChangesInvalidateReverseSubscriptionsForDescendants(uint reason)
+    {
+        var state = CreateState();
+        state.Track(@"C:\", new(1), usn: 0, enumerated: false);
+        state.Track(@"C:\input", new(10), usn: 0, enumerated: false);
+        state.Track(@"C:\input\child", new(11), usn: 0);
+        state.TryAnchor(@"C:\input\child").ShouldBeTrue();
+        state.TryGetVersion(@"C:\input\child", out long version).ShouldBeTrue();
+        using var subscription = new DirectoryJournal.Subscription(new DirectoryJournal());
+        state.Subscribe(@"C:\input\child", new(state.Epoch, 11, 0, version), subscription, new FakeReader()).ShouldBeTrue();
+
+        state.ApplyBuffer(Buffer(64, Entry(0, new(10), new(1), reason))).ShouldBeTrue();
+
+        subscription.Valid.ShouldBeFalse();
+        subscription.Nodes.ShouldBeEmpty();
+    }
+
+    [WindowsOnlyFact]
+    public void LostHistoryInvalidatesAllReverseSubscriptions()
+    {
+        var state = CreateState();
+        state.Track(@"C:\", new(1), usn: 0, enumerated: false);
+        state.Track(@"C:\input", new(10), usn: 0);
+        state.TryAnchor(@"C:\input").ShouldBeTrue();
+        state.TryGetVersion(@"C:\input", out long version).ShouldBeTrue();
+        using var subscription = new DirectoryJournal.Subscription(new DirectoryJournal());
+        state.Subscribe(@"C:\input", new(state.Epoch, 10, 0, version), subscription, new FakeReader()).ShouldBeTrue();
+
+        state.ObserveHead(new() { UsnJournalID = 2, NextUsn = 64 }).ShouldBeFalse();
+
+        state.Disabled.ShouldBeTrue();
+        subscription.Valid.ShouldBeFalse();
+        subscription.Nodes.ShouldBeEmpty();
+    }
+
+    [WindowsOnlyFact]
+    public void RegistrationRejectsOldStampsAndCatchesChangesAfterReverseEdgesAreAdded()
+    {
+        var state = CreateState();
+        state.Track(@"C:\", new(1), usn: 0, enumerated: false);
+        state.Track(@"C:\input", new(10), usn: 0);
+        state.TryAnchor(@"C:\input").ShouldBeTrue();
+        state.TryGetVersion(@"C:\input", out long before).ShouldBeTrue();
+        state.ApplyBuffer(Buffer(64, Entry(0, new(30), new(10), PInvoke.USN_REASON_FILE_CREATE))).ShouldBeTrue();
+        using var stale = new DirectoryJournal.Subscription(new DirectoryJournal());
+        state.Subscribe(@"C:\input", new(state.Epoch, 10, 0, before), stale, new FakeReader()).ShouldBeFalse();
+
+        state.TryGetVersion(@"C:\input", out long after).ShouldBeTrue();
+        using var current = new DirectoryJournal.Subscription(new DirectoryJournal());
+        state.Subscribe(@"C:\input", new(state.Epoch, 10, 0, after), current, new FakeReader()).ShouldBeTrue();
+        state.ApplyBuffer(Buffer(128, Entry(64, new(31), new(10), PInvoke.USN_REASON_FILE_CREATE))).ShouldBeTrue();
+        current.Valid.ShouldBeFalse();
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void UnclosedOrUnavailableQualificationRecordsRequireNativeGuards(bool recordAvailable, bool closed)
+    {
+        var state = new DirectoryJournal.JournalState(new() { UsnJournalID = 1, NextUsn = 128 });
+        state.Track(@"C:\", new(1), usn: 0, enumerated: false);
+        state.Track(@"C:\input", new(10), usn: 64);
+        state.TryAnchor(@"C:\input").ShouldBeTrue();
+        state.TryGetVersion(@"C:\input", out long version).ShouldBeTrue();
+        var reader = new FakeReader
+        {
+            ReadBuffer = _ => recordAvailable
+                ? Buffer(128, Entry(64, new(10), new(1), PInvoke.USN_REASON_REPARSE_POINT_CHANGE
+                    | (closed ? PInvoke.USN_REASON_CLOSE : 0)))
+                : Buffer(128),
+        };
+        using var subscription = new DirectoryJournal.Subscription(new DirectoryJournal());
+        state.Subscribe(@"C:\input", new(state.Epoch, 10, 0, version), subscription, reader).ShouldBeTrue();
+        subscription.Guards.ContainsKey(@"C:\input").ShouldBe(!recordAvailable || !closed);
     }
 
     [WindowsOnlyTheory]
@@ -335,6 +598,36 @@ public sealed class DirectoryJournal_Tests(ITestOutputHelper output)
     }
 
     [WindowsOnlyFact]
+    public void ValidatedResolvedPathsReuseCurrentHeadQualificationsUntilMembershipChanges()
+    {
+        var journal = new DirectoryJournal();
+        var state = new DirectoryJournal.JournalState(new()
+        {
+            UsnJournalID = 1,
+            FirstUsn = 64,
+            NextUsn = 128,
+        });
+        var reader = new FakeReader
+        {
+            Head = _ => new() { UsnJournalID = 1, FirstUsn = 64, NextUsn = state.Cursor },
+        };
+        int walks = 0;
+        bool Walk(string _) { walks++; return true; }
+        DirectoryStampStatus Qualify() => journal.Qualify(@"C:\fixture", Guid.Empty, new(10), state,
+            reader, Walk, out _, resolvedPathValidated: true);
+
+        Qualify().ShouldBe(DirectoryStampStatus.Available);
+        Qualify().ShouldBe(DirectoryStampStatus.Available);
+        walks.ShouldBe(1);
+
+        state.ApplyBuffer(Buffer(192, Entry(128, new(20), new(10), PInvoke.USN_REASON_FILE_CREATE))).ShouldBeTrue();
+        Qualify().ShouldBe(DirectoryStampStatus.Available);
+        walks.ShouldBe(2);
+        Qualify().ShouldBe(DirectoryStampStatus.Available);
+        walks.ShouldBe(2);
+    }
+
+    [WindowsOnlyFact]
     public void BasicInformationChangesDoNotInvalidateNameOnlyListings()
     {
         var state = CreateState();
@@ -386,6 +679,95 @@ public sealed class DirectoryJournal_Tests(ITestOutputHelper output)
         state.Disabled.ShouldBeFalse();
         DirectoryJournal.CatchUp(state, reader, @"C:\fixture", new(10), out _).ShouldBe(DirectoryStampStatus.Unavailable);
         state.Disabled.ShouldBeTrue();
+    }
+
+    [WindowsOnlyFact]
+    public async Task CapabilityChecksDoNotWaitForNativeValidation()
+    {
+        using var entered = new ManualResetEventSlim();
+        using var release = new ManualResetEventSlim();
+        var journal = new DirectoryJournal((string _, out DirectoryChangeStamp stamp, out DirectoryJournal.RejectionReason reason) =>
+        {
+            entered.Set();
+            release.Wait(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+            stamp = default;
+            reason = DirectoryJournal.RejectionReason.None;
+            return DirectoryStampStatus.Unavailable;
+        });
+        Task<bool> validation = Task.Run(() => journal.TryRead(@"C:\fixture", out _));
+        Task<bool>? capability = null;
+        bool completed = false;
+        try
+        {
+            entered.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            capability = Task.Run(() => journal.CanAttemptSharing(@"D:\unrelated"));
+            completed = await Task.WhenAny(capability, Task.Delay(TimeSpan.FromSeconds(5))) == capability;
+        }
+        finally
+        {
+            release.Set();
+            await validation;
+            if (capability is not null) { await capability; }
+        }
+
+        completed.ShouldBeTrue("A capability probe must not wait behind native journal validation.");
+        capability!.Result.ShouldBeTrue();
+    }
+
+    [WindowsOnlyFact]
+    public async Task DirectoryReadsDoNotSerializeIndependentNativeValidation()
+    {
+        using var entered = new ManualResetEventSlim();
+        using var release = new ManualResetEventSlim();
+        var journal = new DirectoryJournal((string path, out DirectoryChangeStamp stamp, out DirectoryJournal.RejectionReason reason) =>
+        {
+            if (path.StartsWith("C:", StringComparison.OrdinalIgnoreCase))
+            {
+                entered.Set();
+                release.Wait(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+            }
+            stamp = default;
+            reason = DirectoryJournal.RejectionReason.None;
+            return DirectoryStampStatus.Available;
+        });
+        Task<bool> blocked = Task.Run(() => journal.TryRead(@"C:\fixture", out _));
+        Task<bool>? independent = null;
+        bool completed = false;
+        try
+        {
+            entered.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            independent = Task.Run(() => journal.TryRead(@"D:\unrelated", out _));
+            completed = await Task.WhenAny(independent, Task.Delay(TimeSpan.FromSeconds(5))) == independent;
+        }
+        finally
+        {
+            release.Set();
+            await blocked;
+            if (independent is not null) { await independent; }
+        }
+
+        completed.ShouldBeTrue("Independent directory opens and metadata reads must not hold the shared journal-state lock.");
+        independent!.Result.ShouldBeTrue();
+        journal.GetStatistics().NativeReads.ShouldBe(2);
+        journal.GetStatistics().Stamps.ShouldBe(2);
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData(0)]
+    [InlineData(128)]
+    public void IdleCatchUpQueriesTheHeadOnlyOnce(long checkpoint)
+    {
+        USN_JOURNAL_DATA_V0 info = new() { UsnJournalID = 1, NextUsn = checkpoint };
+        var state = new DirectoryJournal.JournalState(info);
+        var reader = new FakeReader
+        {
+            Head = _ => info,
+            ReadBuffer = _ => throw new InvalidOperationException("An up-to-date checkpoint must not replay records."),
+        };
+
+        DirectoryJournal.CatchUp(state, reader, @"C:\fixture", new(10), out _)
+            .ShouldBe(DirectoryStampStatus.Available);
+        reader.Queries.ShouldBe(1);
     }
 
     [WindowsOnlyFact]
@@ -583,13 +965,33 @@ public sealed class DirectoryJournal_Tests(ITestOutputHelper output)
     }
 
     [WindowsOnlyFact]
-    public void RecordParserPreservesCaptured128BitRefsIdentitiesWithoutAdmittingRefs()
+    public void RecordParserPreservesCaptured128BitRefsIdentities()
     {
         byte[] fixture = Convert.FromBase64String("UAAAAAMAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAgBMAC4AAAA=");
         DirectoryJournal.TryParse(fixture, out DirectoryJournal.Record record).ShouldBeTrue();
         record.Id.ShouldBe(new(0, 0x600));
         record.Parent.ShouldBe(record.Id);
         record.Attributes.ShouldBe(0x10u);
+    }
+
+    [WindowsOnlyFact]
+    public void RefsMembershipChangesDistinguishTheHighBitsOfParentIdentities()
+    {
+        var state = CreateState();
+        DirectoryJournal.DirectoryId parent = new(10, 0x600);
+        DirectoryJournal.DirectoryId otherParent = new(10, 0x601);
+        state.Track(@"Q:\fixture", parent);
+        state.Track(@"Q:\other", otherParent);
+        state.TryGetVersion(@"Q:\fixture", out long before).ShouldBeTrue();
+        state.TryGetVersion(@"Q:\other", out long otherBefore).ShouldBeTrue();
+
+        state.ApplyBuffer(Buffer(128,
+            Entry(0, new(20, 0x700), parent, PInvoke.USN_REASON_FILE_CREATE | PInvoke.USN_REASON_CLOSE, major: 3))).ShouldBeTrue();
+
+        state.TryGetVersion(@"Q:\fixture", out long after).ShouldBeTrue();
+        state.TryGetVersion(@"Q:\other", out long otherAfter).ShouldBeTrue();
+        after.ShouldBeGreaterThan(before);
+        otherAfter.ShouldBe(otherBefore);
     }
 
     [WindowsOnlyFact]
@@ -625,7 +1027,7 @@ public sealed class DirectoryJournal_Tests(ITestOutputHelper output)
             Entry(32, new(30), new(20), PInvoke.USN_REASON_FILE_CREATE))).ShouldBeFalse();
     }
 
-    [Fact(Skip = "Requires an accessible NTFS change journal.", SkipType = typeof(DirectoryJournal_Tests), SkipUnless = nameof(WindowsJournalAvailable))]
+    [Fact(Skip = "Requires an accessible NTFS or ReFS change journal.", SkipType = typeof(DirectoryJournal_Tests), SkipUnless = nameof(WindowsJournalAvailable))]
     public void NativeUnrelatedRenamePreservesSharedGlobButMembershipAndAncestorChangesInvalidateIt()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
@@ -702,7 +1104,60 @@ public sealed class DirectoryJournal_Tests(ITestOutputHelper output)
         DirectoryJournal.IsSupportedPath(path).ShouldBeTrue();
     }
 
+    [Fact(Skip = "Requires an accessible NTFS change journal.", SkipType = typeof(DirectoryJournal_Tests), SkipUnless = nameof(WindowsJournalAvailable))]
+    public void NativeUnchangedDirectoriesReuseAncestorQualification()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string path = env.CreateFolder().Path;
+        var journal = new DirectoryJournal();
+        try
+        {
+            journal.TryRead(path, out DirectoryChangeStamp before).ShouldBeTrue();
+            long walks = journal.GetStatistics().AncestorWalks;
+            walks.ShouldBeGreaterThan(0);
+            journal.TryRead(path, out DirectoryChangeStamp after).ShouldBeTrue();
+            after.ShouldBe(before);
+            journal.GetStatistics().AncestorWalks.ShouldBe(walks);
+
+            File.WriteAllText(Path.Combine(path, "New.cs"), "");
+            journal.TryRead(path, out after).ShouldBeTrue();
+            after.ShouldNotBe(before);
+            journal.GetStatistics().AncestorWalks.ShouldBeGreaterThan(walks);
+        }
+        finally
+        {
+            journal.Clear();
+        }
+    }
+
 #if FEATURE_SYMLINK_TARGET
+    [Fact(Skip = "Requires an accessible NTFS journal and Windows symbolic links.", SkipType = typeof(DirectoryJournal_Tests), SkipUnless = nameof(WindowsJournalAndSymbolicLinksAvailable))]
+    public void NativeResolvedPathChecksRejectReparseAncestorsAfterQualification()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string root = env.CreateFolder().Path;
+        string input = Directory.CreateDirectory(Path.Combine(root, "input")).FullName;
+        string child = Directory.CreateDirectory(Path.Combine(input, "child")).FullName;
+        string target = Path.Combine(root, "target");
+        var journal = new DirectoryJournal();
+        try
+        {
+            journal.TryRead(child, out DirectoryChangeStamp before).ShouldBeTrue();
+            journal.TryRead(child, out _).ShouldBeTrue();
+            Directory.Move(input, target);
+            journal.TryRead(Path.Combine(target, "child"), out DirectoryChangeStamp moved).ShouldBeTrue();
+            moved.IdentityLow.ShouldBe(before.IdentityLow);
+            moved.IdentityHigh.ShouldBe(before.IdentityHigh);
+
+            Directory.CreateSymbolicLink(input, target);
+            journal.TryRead(child, out _).ShouldBeFalse("A matching directory ID must not bypass the resolved-path check.");
+        }
+        finally
+        {
+            journal.Clear();
+        }
+    }
+
     [Fact(Skip = "Requires Windows symbolic-link support.", SkipType = typeof(DirectoryJournal_Tests), SkipUnless = nameof(WindowsSymbolicLinksAvailable))]
     public void ReparseAncestorsPreventSharingOnOtherwiseOrdinaryDirectories()
     {
@@ -721,6 +1176,19 @@ public sealed class DirectoryJournal_Tests(ITestOutputHelper output)
 
     private static DirectoryJournal.JournalState CreateState()
         => new(new USN_JOURNAL_DATA_V0 { UsnJournalID = 1 });
+
+    private static string GetNativeFixtureRoot(string fileSystem)
+    {
+        string variable = $"MSBUILD_DIRECTORY_CACHE_TEST_{fileSystem.ToUpperInvariant()}_ROOT";
+        string? configured = Environment.GetEnvironmentVariable(variable);
+        if (string.IsNullOrEmpty(configured))
+        {
+            Assert.Skip($"Set {variable} to an existing {fileSystem} fixture directory.");
+        }
+        string path = Path.GetFullPath(configured!);
+        new DriveInfo(Path.GetPathRoot(path)!).DriveFormat.ShouldBe(fileSystem);
+        return path;
+    }
 
     private sealed class FakeReader : DirectoryJournal.IJournalReader
     {

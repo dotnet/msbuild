@@ -22,11 +22,18 @@ internal readonly record struct DirectoryChangeStamp(
     ulong IdentityLow,
     ulong IdentityHigh,
     long Value,
-    uint Nanoseconds = 0)
+    uint Nanoseconds = 0,
+    long ModifiedSeconds = 0,
+    uint ModifiedNanoseconds = 0,
+    long Size = 0,
+    uint Mode = 0,
+    uint Generation = 0)
 {
     internal bool IsOldEnoughToCache(DateTime utcNow)
     {
-        long minimumAgeTicks = GetMinimumAgeTicks(Nanoseconds);
+        if (Nanoseconds >= 1_000_000_000 || ModifiedNanoseconds >= 1_000_000_000) { return false; }
+        // Timestamp precision does not establish update granularity, including on multigrain kernels.
+        const long minimumAgeTicks = TimeSpan.TicksPerSecond + 50 * TimeSpan.TicksPerMillisecond;
         const long unixEpochTicks = 621355968000000000;
         long cutoff = utcNow.Ticks - unixEpochTicks - minimumAgeTicks;
         long seconds = Math.DivRem(cutoff, TimeSpan.TicksPerSecond, out long ticks);
@@ -36,18 +43,9 @@ internal readonly record struct DirectoryChangeStamp(
             ticks += TimeSpan.TicksPerSecond;
         }
 
-        return Value < seconds || (Value == seconds && Nanoseconds <= ticks * 100);
+        return (Value < seconds || (Value == seconds && Nanoseconds <= ticks * 100))
+            && (ModifiedSeconds < seconds || (ModifiedSeconds == seconds && ModifiedNanoseconds <= ticks * 100));
     }
-
-    // Follow Bazel's TimestampGranularityMonitor (bazelbuild/bazel@fad396b9a3d1):
-    // whole seconds need 1 s + 50 ms slack, whole milliseconds need 1 ms, finer ctime needs no delay.
-    // Instead of waiting at command end, age-rejected or future stamps use fresh enumeration.
-    private static long GetMinimumAgeTicks(uint nanoseconds) => nanoseconds switch
-    {
-        0 => TimeSpan.TicksPerSecond + 50 * TimeSpan.TicksPerMillisecond,
-        _ when nanoseconds % 1_000_000 == 0 => TimeSpan.TicksPerMillisecond,
-        _ => 0,
-    };
 }
 
 internal static partial class DirectoryChangeTime
@@ -59,16 +57,20 @@ internal static partial class DirectoryChangeTime
     {
         unsupportedFileSystem = false;
 #if NET
-        if (NativeMethods.IsLinux)
+        try
         {
-            try
+            if (NativeMethods.IsLinux)
             {
                 return ReadLinux(path, out stamp, out unsupportedFileSystem);
             }
-            catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException)
+            if (NativeMethods.IsOSX)
             {
-                DebugTrace.WriteLine($"Directory change-time validation is unavailable: {ex.Message}", category: nameof(DirectoryChangeTime));
+                return ReadMacOS(path, out stamp, out unsupportedFileSystem);
             }
+        }
+        catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException)
+        {
+            DebugTrace.WriteLine($"Directory change-time validation is unavailable: {ex.Message}", category: nameof(DirectoryChangeTime));
         }
 #endif
         stamp = default;
@@ -77,11 +79,14 @@ internal static partial class DirectoryChangeTime
 
 #if NET
     [Flags]
-    private enum StatxFields : uint
+    internal enum StatxFields : uint
     {
         Type = 0x1,
+        Mode = 0x2,
+        ModificationTime = 0x40,
         ChangeTime = 0x80,
         Identity = 0x100,
+        Size = 0x200,
         MountId = 0x1000,
     }
 
@@ -92,15 +97,14 @@ internal static partial class DirectoryChangeTime
         ForceSync = 0x2000,
     }
 
-    private enum UnixFileType : ushort
+    internal enum UnixFileType : ushort
     {
         Directory = 0x4000,
         Mask = 0xF000,
     }
 
-    // statx has a fixed 256-byte ABI; request type, identity and ctime, not mtime.
     [StructLayout(LayoutKind.Explicit, Size = 256)]
-    private struct StatxData
+    internal struct StatxData
     {
         [FieldOffset(0)]
         internal StatxFields Fields;
@@ -108,10 +112,16 @@ internal static partial class DirectoryChangeTime
         internal UnixFileType FileType;
         [FieldOffset(32)]
         internal ulong Identity;
+        [FieldOffset(40)]
+        internal ulong Size;
         [FieldOffset(96)]
         internal long ChangeSeconds;
         [FieldOffset(104)]
         internal uint ChangeNanoseconds;
+        [FieldOffset(112)]
+        internal long ModifiedSeconds;
+        [FieldOffset(120)]
+        internal uint ModifiedNanoseconds;
         [FieldOffset(136)]
         internal uint DeviceMajor;
         [FieldOffset(140)]
@@ -131,7 +141,7 @@ internal static partial class DirectoryChangeTime
         stamp = default;
         unsupportedFileSystem = false;
         const int currentDirectory = -100; // AT_FDCWD
-        const StatxFields required = StatxFields.Type | StatxFields.ChangeTime | StatxFields.Identity | StatxFields.MountId;
+        const StatxFields required = RequiredLinuxFields;
         int length = Encoding.UTF8.GetByteCount(path);
         using BufferScope<byte> buffer = new(stackalloc byte[512], checked(length + 1));
         Encoding.UTF8.GetBytes(path.AsSpan(), buffer.AsSpan());
@@ -163,11 +173,20 @@ internal static partial class DirectoryChangeTime
             TraceFailure(path, error);
             return MissingOrUnavailable(error);
         }
-        if ((data.Fields & required) != required
+        return CreateLinuxStamp(data, out stamp);
+    }
+
+    internal const StatxFields RequiredLinuxFields = StatxFields.Type | StatxFields.Mode
+        | StatxFields.ChangeTime | StatxFields.ModificationTime | StatxFields.Identity | StatxFields.Size | StatxFields.MountId;
+
+    internal static DirectoryStampStatus CreateLinuxStamp(in StatxData data, out DirectoryChangeStamp stamp)
+    {
+        stamp = default;
+        if ((data.Fields & RequiredLinuxFields) != RequiredLinuxFields
             || (data.FileType & UnixFileType.Mask) != UnixFileType.Directory
-            || data.ChangeNanoseconds >= 1_000_000_000)
+            || data.Identity == 0 || data.MountId == 0 || data.Size > long.MaxValue
+            || data.ChangeNanoseconds >= 1_000_000_000 || data.ModifiedNanoseconds >= 1_000_000_000)
         {
-            DebugTrace.WriteLine($"Directory change-time metadata is incomplete for '{path}'.", category: nameof(DirectoryChangeTime));
             return DirectoryStampStatus.Unavailable;
         }
         stamp = new DirectoryChangeStamp(
@@ -175,15 +194,110 @@ internal static partial class DirectoryChangeTime
             data.Identity,
             data.MountId,
             data.ChangeSeconds,
-            data.ChangeNanoseconds);
+            data.ChangeNanoseconds,
+            data.ModifiedSeconds,
+            data.ModifiedNanoseconds,
+            (long)data.Size,
+            (uint)data.FileType);
         return DirectoryStampStatus.Available;
     }
+
+    [StructLayout(LayoutKind.Explicit, Size = 144)]
+    internal struct MacOSStatData
+    {
+        [FieldOffset(0)]
+        internal uint Device;
+        [FieldOffset(4)]
+        internal UnixFileType FileType;
+        [FieldOffset(8)]
+        internal ulong Identity;
+        [FieldOffset(48)]
+        internal long ModifiedSeconds;
+        [FieldOffset(56)]
+        internal long ModifiedNanoseconds;
+        [FieldOffset(64)]
+        internal long ChangeSeconds;
+        [FieldOffset(72)]
+        internal long ChangeNanoseconds;
+        [FieldOffset(96)]
+        internal long Size;
+        [FieldOffset(120)]
+        internal uint Generation;
+    }
+
+    [LibraryImport("libSystem.B.dylib", EntryPoint = "lstat$INODE64", SetLastError = true)]
+    private static unsafe partial int LStatMacOSX64(byte* path, MacOSStatData* result);
+
+    [LibraryImport("libSystem.B.dylib", EntryPoint = "lstat", SetLastError = true)]
+    private static unsafe partial int LStatMacOSArm64(byte* path, MacOSStatData* result);
+
+    [LibraryImport("libSystem.B.dylib", EntryPoint = "statfs$INODE64", SetLastError = true)]
+    private static unsafe partial int StatfsMacOSX64(byte* path, void* result);
+
+    [LibraryImport("libSystem.B.dylib", EntryPoint = "statfs", SetLastError = true)]
+    private static unsafe partial int StatfsMacOSArm64(byte* path, void* result);
+
+    private static unsafe DirectoryStampStatus ReadMacOS(string path, out DirectoryChangeStamp stamp, out bool unsupportedFileSystem)
+    {
+        stamp = default;
+        unsupportedFileSystem = false;
+        Architecture architecture = RuntimeInformation.ProcessArchitecture;
+        if (architecture is not (Architecture.X64 or Architecture.Arm64)) { return DirectoryStampStatus.Unavailable; }
+        int length = Encoding.UTF8.GetByteCount(path);
+        using BufferScope<byte> buffer = new(stackalloc byte[512], checked(length + 1));
+        Encoding.UTF8.GetBytes(path.AsSpan(), buffer.AsSpan());
+        buffer[length] = 0;
+        // Darwin's 64-bit statfs ABI includes two 1024-byte mount-path fields.
+        using BufferScope<byte> fileSystem = new(stackalloc byte[256], 2168);
+        MacOSStatData data;
+        fixed (byte* pointer = buffer)
+        {
+            fixed (byte* information = fileSystem)
+            {
+                int result = architecture == Architecture.X64
+                    ? StatfsMacOSX64(pointer, information) : StatfsMacOSArm64(pointer, information);
+                if (result != 0) { return MissingOrUnavailable(Marshal.GetLastPInvokeError()); }
+            }
+            ReadOnlySpan<byte> name = fileSystem.AsSpan().Slice(72, 16);
+            int terminator = name.IndexOf((byte)0);
+            if (terminator < 0 || !IsSupportedMacOSFileSystem(name.Slice(0, terminator),
+                MemoryMarshal.Read<uint>(fileSystem.AsSpan().Slice(64))))
+            {
+                unsupportedFileSystem = true;
+                return DirectoryStampStatus.Unavailable;
+            }
+
+            int status = architecture == Architecture.X64
+                ? LStatMacOSX64(pointer, &data) : LStatMacOSArm64(pointer, &data);
+            if (status != 0) { return MissingOrUnavailable(Marshal.GetLastPInvokeError()); }
+        }
+        return CreateMacOSStamp(data, MemoryMarshal.Read<ulong>(fileSystem.AsSpan().Slice(48)), out stamp);
+    }
+
+    internal static DirectoryStampStatus CreateMacOSStamp(in MacOSStatData data, ulong volumeId, out DirectoryChangeStamp stamp)
+    {
+        stamp = default;
+        if ((data.FileType & UnixFileType.Mask) != UnixFileType.Directory
+            || data.Identity == 0 || data.Size < 0
+            || data.ChangeNanoseconds is < 0 or >= 1_000_000_000
+            || data.ModifiedNanoseconds is < 0 or >= 1_000_000_000)
+        {
+            return DirectoryStampStatus.Unavailable;
+        }
+        stamp = new DirectoryChangeStamp(data.Device, data.Identity, volumeId,
+            data.ChangeSeconds, (uint)data.ChangeNanoseconds, data.ModifiedSeconds,
+            (uint)data.ModifiedNanoseconds, data.Size, (uint)data.FileType, data.Generation);
+        return DirectoryStampStatus.Available;
+    }
+
+    internal static bool IsSupportedMacOSFileSystem(ReadOnlySpan<byte> name, uint flags)
+        => (flags & 0x1000) != 0 && (name.SequenceEqual("apfs"u8) || name.SequenceEqual("hfs"u8));
 
     private static DirectoryStampStatus MissingOrUnavailable(int error)
         => error is 2 or 20 ? DirectoryStampStatus.Missing : DirectoryStampStatus.Unavailable;
 
     // Filesystem identification is an admission policy, not proof of timestamp uniqueness.
-    private static bool IsSupportedLinuxFileSystem(uint type) => type is
+    internal static bool IsSupportedLinuxFileSystem(uint type) => type is
         0xEF53       // ext2/ext3/ext4
         or 0x58465342 // XFS
         or 0x9123683E // Btrfs

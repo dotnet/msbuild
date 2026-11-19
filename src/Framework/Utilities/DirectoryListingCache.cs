@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+#if FEATURE_WINDOWSINTEROP
+using System.Threading;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -28,7 +31,14 @@ internal sealed class DirectoryListingCache
     private readonly Dictionary<string, StampRead>? _evaluationStamps;
 #if FEATURE_WINDOWSINTEROP
     private readonly DirectoryJournal? _journal;
+    private readonly bool _nativeJournal;
+    private long _journalEvaluationVersion = -1;
 #endif
+
+    internal interface ISubscription : IDisposable
+    {
+        DirectorySnapshotStatus Validate(DirectoryListingCache cache);
+    }
 
     internal DirectoryListingCache() : this((DirectoryStampReader?)null)
     {
@@ -60,6 +70,7 @@ internal sealed class DirectoryListingCache
         if (NativeMethods.IsWindows)
         {
             _journal = new DirectoryJournal();
+            _nativeJournal = readStamp is null;
         }
 #endif
         _readStamp = readStamp ?? ReadNativeStamp;
@@ -76,6 +87,7 @@ internal sealed class DirectoryListingCache
         _evaluationStamps = new(StringComparer.Ordinal);
 #if FEATURE_WINDOWSINTEROP
         _journal = owner._journal;
+        _nativeJournal = owner._nativeJournal;
 #endif
     }
 
@@ -85,11 +97,59 @@ internal sealed class DirectoryListingCache
 
     internal DirectoryListingCache ForEvaluation() => _owner is not null ? this : CreateEvaluationCache();
 
+    internal bool TrySubscribe(ImmutableArray<GlobResultExperiment.Dependency> dependencies, out ISubscription? subscription)
+    {
+        subscription = null;
+#if FEATURE_WINDOWSINTEROP
+        if (NativeMethods.IsWindows && _nativeJournal && _journal is not null)
+        {
+            Dictionary<string, DirectoryChangeStamp> stamps = new(StringComparer.OrdinalIgnoreCase);
+            foreach (GlobResultExperiment.Dependency dependency in dependencies)
+            {
+                string path = dependency.Path;
+                DirectoryChangeStamp stamp;
+                if (dependency.Kind >= 0)
+                {
+                    if (!_listings.TryGetValue((path, (FileMatcher.FileSystemEntity)dependency.Kind), out Listing listing)
+                        || !ReferenceEquals(listing.Entries, dependency.Entries)) { return false; }
+                    stamp = listing.ChangeTime;
+                }
+                else if (dependency.Exists)
+                {
+                    if (!TryReadDirectoryChangeTime(path, out stamp)) { return false; }
+                }
+                else
+                {
+                    if (!TryNormalizeProbePath(path, out string fullPath)
+                        || !_missingPaths.TryGetValue(fullPath, out MissingPath missing)) { return false; }
+                    path = missing.Parent;
+                    stamp = missing.Stamp;
+                }
+                if (stamps.TryGetValue(path, out DirectoryChangeStamp previous) && previous != stamp) { return false; }
+                stamps[path] = stamp;
+            }
+            subscription = _journal.Subscribe(stamps);
+            return subscription is not null;
+        }
+#endif
+        return true;
+    }
+
+#if FEATURE_WINDOWSINTEROP
+    internal bool ObserveJournalVersion(long version)
+    {
+        if (_evaluationStamps is null) { return true; }
+        long previous = Interlocked.CompareExchange(ref _journalEvaluationVersion, version, -1);
+        return previous == -1 || previous == version;
+    }
+#endif
+
     internal bool CanStore(DirectoryChangeStamp stamp, DateTime utcNow)
         => NativeMethods.IsWindows || stamp.IsOldEnoughToCache(utcNow);
 
     internal IReadOnlyList<string> Store(string directory, FileMatcher.FileSystemEntity kind, IReadOnlyList<string> entries, DirectoryChangeStamp changeTime)
     {
+        using var attribution = CacheAttribution.Measure(CacheAttribution.Op.ListingStore, directory);
         var key = (directory, kind);
         IReadOnlyList<string>? snapshot = null;
         while (true)
@@ -113,14 +173,17 @@ internal sealed class DirectoryListingCache
 
     internal bool TryGet(string directory, FileMatcher.FileSystemEntity kind, [NotNullWhen(true)] out IReadOnlyList<string>? entries)
     {
+        using var attribution = CacheAttribution.Measure(CacheAttribution.Op.ListingLookup, directory);
         if (_listings.TryGetValue((directory, kind), out Listing listing)
             && IsUpToDate(directory, listing))
         {
             entries = listing.Entries;
+            CacheAttribution.Count(CacheAttribution.Op.ListingHit);
             return true;
         }
 
         entries = null;
+        CacheAttribution.Count(CacheAttribution.Op.ListingMiss);
         return false;
     }
 
@@ -142,6 +205,7 @@ internal sealed class DirectoryListingCache
 
     private DirectorySnapshotStatus Validate(string directory, Listing listing)
     {
+        using var attribution = CacheAttribution.Measure(CacheAttribution.Op.ListingValidate, directory);
         DirectoryStampStatus status = ReadStamp(directory, out DirectoryChangeStamp current);
         if (status == DirectoryStampStatus.Unavailable)
         {
@@ -251,15 +315,18 @@ internal sealed class DirectoryListingCache
 
     private DirectoryStampStatus ReadStamp(string directory, out DirectoryChangeStamp changeTime)
     {
+        using var attribution = CacheAttribution.Measure(CacheAttribution.Op.Stamp, directory);
         if (_evaluationStamps is null) { return ReadUncachedStamp(directory, out changeTime); }
-        lock (_evaluationStamps)
+        using (CacheAttribution.Lock(_evaluationStamps, CacheAttribution.Op.MemoWait, CacheAttribution.Op.MemoHold))
         {
             if (!_evaluationStamps.TryGetValue(directory, out StampRead read))
             {
+                CacheAttribution.Count(CacheAttribution.Op.StampMemoMiss);
                 DirectoryStampStatus status = ReadUncachedStamp(directory, out DirectoryChangeStamp stamp);
                 read = new(status, stamp);
                 _evaluationStamps.Add(directory, read);
             }
+            else { CacheAttribution.Count(CacheAttribution.Op.StampMemoHit); }
             changeTime = read.Stamp;
             return read.Status;
         }
@@ -267,6 +334,7 @@ internal sealed class DirectoryListingCache
 
     private DirectoryStampStatus ReadUncachedStamp(string directory, out DirectoryChangeStamp changeTime)
     {
+        using var attribution = CacheAttribution.Measure(CacheAttribution.Op.NativeStamp, directory);
         try
         {
             if (!CanAttemptSharing(directory))
@@ -275,7 +343,14 @@ internal sealed class DirectoryListingCache
                 return DirectoryStampStatus.Unavailable;
             }
 
-            return _readStamp(directory, out changeTime);
+            DirectoryStampStatus status = _readStamp(directory, out changeTime);
+#if FEATURE_WINDOWSINTEROP
+            if (NativeMethods.IsWindows && _nativeJournal && _journal is not null)
+            {
+                ObserveJournalVersion(_journal.ChangeVersion);
+            }
+#endif
+            return status;
         }
         catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
         {
@@ -323,6 +398,9 @@ internal sealed class DirectoryListingCache
         if (_owner is not null)
         {
             lock (_evaluationStamps!) { _evaluationStamps.Clear(); }
+#if FEATURE_WINDOWSINTEROP
+            Interlocked.Exchange(ref _journalEvaluationVersion, -1);
+#endif
             _owner.Clear();
             return;
         }

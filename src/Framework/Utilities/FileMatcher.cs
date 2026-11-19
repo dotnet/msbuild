@@ -354,6 +354,8 @@ namespace Microsoft.Build.Shared
             string projectDirectory,
             bool stripProjectDirectory)
         {
+            using var attribution = CacheAttribution.Measure(CacheAttribution.Op.Filter, projectDirectory);
+            attribution.Units(entries.Count);
             IEnumerable<string> filteredEntries = pattern is not null && !IsAllFilesWildcard(pattern)
                 ? entries.Where(entry => IsFileNameMatch(entry, pattern))
                 : entries;
@@ -455,9 +457,10 @@ namespace Microsoft.Build.Shared
 
         private static IReadOnlyList<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory, out bool succeeded)
         {
+            using var attribution = CacheAttribution.Measure(CacheAttribution.Op.Enumeration, path);
             succeeded = false;
             path = FileUtilities.FixFilePath(path);
-            return entityType switch
+            var result = entityType switch
             {
                 FileSystemEntity.Files => GetAccessibleFiles(fileSystem, path, pattern, projectDirectory, stripProjectDirectory, out succeeded),
                 FileSystemEntity.Directories => GetAccessibleDirectories(fileSystem, path, pattern, out succeeded),
@@ -465,6 +468,8 @@ namespace Microsoft.Build.Shared
 
                 _ => Assumed.Unreachable<IReadOnlyList<string>>("Unexpected filesystem entity type."),
             };
+            attribution.Units(result.Count);
+            return result;
         }
 
         /// <summary>
@@ -1827,6 +1832,7 @@ namespace Microsoft.Build.Shared
             string filespecUnescaped,
             List<string>? excludeSpecsUnescaped = null)
         {
+            using var attribution = CacheAttribution.Measure(CacheAttribution.Op.GlobTotal, projectDirectoryUnescaped);
             // For performance. Short-circuit iff there is no wildcard.
             if (!HasWildcards(filespecUnescaped))
             {
@@ -1926,6 +1932,7 @@ namespace Microsoft.Build.Shared
 
         private bool DirectoryExistsForGlob(string path, GlobResultExperiment.Collector collector)
         {
+            using var attribution = CacheAttribution.Measure(CacheAttribution.Op.Existence, path);
             bool exists = _fileSystem.DirectoryExists(path);
             _globResultExperiment?.RecordExistence(collector, path, exists, _fileSystem);
             return exists;
@@ -2321,6 +2328,7 @@ namespace Microsoft.Build.Shared
             DriverSelection selection,
             GlobResultExperiment.Collector? collector = null)
         {
+            using var attribution = CacheAttribution.Measure(CacheAttribution.Op.GlobCompute, projectDirectoryUnescaped);
             return selection.Driver switch
             {
                 FileMatcherDriver.Legacy => GetFilesImplementation(
@@ -2910,6 +2918,7 @@ namespace Microsoft.Build.Shared
 #if NET || FEATURE_MSIOREDIST
                 if (useDirectEnumeration)
                 {
+                    using var directAttribution = CacheAttribution.Measure(CacheAttribution.Op.DirectTraversal, state.BaseDirectory);
                     using OptimizedFileSystemEnumerator enumerator = new(
                         state.BaseDirectory,
                         projectDirectoryUnescaped,

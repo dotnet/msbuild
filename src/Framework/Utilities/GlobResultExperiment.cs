@@ -44,7 +44,14 @@ internal sealed class GlobResultExperiment
 
     internal static void Clear(DirectoryListingCache cache)
     {
-        if (SharedStates.TryGetValue(cache.Shared, out SharedState? state)) { state.Results.Clear(); }
+        if (SharedStates.TryGetValue(cache.Shared, out SharedState? state))
+        {
+            lock (state.Gate)
+            {
+                foreach (Entry entry in state.Results.Values) { entry.Subscription?.Dispose(); }
+                state.Results.Clear();
+            }
+        }
     }
 
     internal void RecordListing(Collector? collector, string path, FileMatcher.FileSystemEntity kind, IReadOnlyList<string> entries)
@@ -79,10 +86,24 @@ internal sealed class GlobResultExperiment
 
     internal bool TryGet(string key, SnapshotValidator validateSnapshot, Func<string, bool> directoryExists, out string[] files)
     {
+        using var attribution = CacheAttribution.Measure(CacheAttribution.Op.GlobLookup);
         Interlocked.Increment(ref _lookups);
         if (_shared.Results.TryGetValue(key, out Entry? entry))
         {
-            DirectorySnapshotStatus status = Validate(entry.Dependencies, validateSnapshot, directoryExists);
+            DirectorySnapshotStatus status;
+            if (entry.Subscription is { } subscription)
+            {
+                using var validation = CacheAttribution.Measure(CacheAttribution.Op.GlobValidate);
+                validation.Units(1);
+                long started = Stopwatch.GetTimestamp();
+                status = subscription.Validate(_listings);
+                Interlocked.Increment(ref _probes);
+                Interlocked.Add(ref _probeTicks, Stopwatch.GetTimestamp() - started);
+            }
+            else
+            {
+                status = Validate(entry.Dependencies, validateSnapshot, directoryExists);
+            }
             if (status == DirectorySnapshotStatus.Valid)
             {
                 Interlocked.Increment(ref _hits);
@@ -92,7 +113,13 @@ internal sealed class GlobResultExperiment
             if (status == DirectorySnapshotStatus.Mismatch)
             {
                 Interlocked.Increment(ref _invalidated);
-                ((ICollection<KeyValuePair<string, Entry>>)_shared.Results).Remove(new KeyValuePair<string, Entry>(key, entry));
+                lock (_shared.Gate)
+                {
+                    if (((ICollection<KeyValuePair<string, Entry>>)_shared.Results).Remove(new(key, entry)))
+                    {
+                        entry.Subscription?.Dispose();
+                    }
+                }
             }
         }
         files = [];
@@ -101,6 +128,8 @@ internal sealed class GlobResultExperiment
 
     private DirectorySnapshotStatus Validate(ImmutableArray<Dependency> dependencies, SnapshotValidator validateSnapshot, Func<string, bool> directoryExists)
     {
+        using var attribution = CacheAttribution.Measure(CacheAttribution.Op.GlobValidate);
+        attribution.Units(dependencies.Length);
         DirectorySnapshotStatus result = DirectorySnapshotStatus.Valid;
         foreach (Dependency dependency in dependencies)
         {
@@ -133,6 +162,7 @@ internal sealed class GlobResultExperiment
 
     internal void Store(string key, string[] files, FileMatcher.SearchAction action, string? failure, Collector collector)
     {
+        using var attribution = CacheAttribution.Measure(CacheAttribution.Op.GlobStore);
         if (failure is not null || action is not (FileMatcher.SearchAction.None
             or FileMatcher.SearchAction.RunSearch or FileMatcher.SearchAction.ReturnEmptyList)
             || !collector.Admissible)
@@ -155,12 +185,24 @@ internal sealed class GlobResultExperiment
             dependencies.Add(dependency);
         }
         if (dependencies.Count == 0) { return; }
-        if (_shared.Results.TryAdd(key, new Entry(files, dependencies.MoveToImmutable())))
+        ImmutableArray<Dependency> captured = dependencies.MoveToImmutable();
+        DirectoryListingCache.ISubscription? subscription = null;
+        try
         {
-            Interlocked.Increment(ref _stores);
-            Interlocked.Add(ref _dependencies, collector.Dependencies.Count);
-            Interlocked.Add(ref _resultEntries, files.Length);
+            if (!_listings.TrySubscribe(captured, out subscription)) { return; }
+            lock (_shared.Gate)
+            {
+                // Result-cache locks may enter the journal; journal invalidation never calls the result cache.
+                if (_shared.Results.TryAdd(key, new Entry(files, captured, subscription)))
+                {
+                    subscription = null;
+                    Interlocked.Increment(ref _stores);
+                    Interlocked.Add(ref _dependencies, collector.Dependencies.Count);
+                    Interlocked.Add(ref _resultEntries, files.Length);
+                }
+            }
         }
+        finally { subscription?.Dispose(); }
     }
 
     internal sealed class Collector
@@ -180,14 +222,16 @@ internal sealed class GlobResultExperiment
     }
 
     internal readonly record struct Dependency(string Path, int Kind, IReadOnlyList<string>? Entries, bool Exists);
-    private sealed class Entry(string[] files, ImmutableArray<Dependency> dependencies)
+    private sealed class Entry(string[] files, ImmutableArray<Dependency> dependencies, DirectoryListingCache.ISubscription? subscription)
     {
         internal readonly string[] Files = files;
         internal readonly ImmutableArray<Dependency> Dependencies = dependencies;
+        internal readonly DirectoryListingCache.ISubscription? Subscription = subscription;
     }
 
     private sealed class SharedState
     {
+        internal readonly object Gate = new();
         internal readonly ConcurrentDictionary<string, Entry> Results = new(StringComparer.Ordinal);
     }
 }
