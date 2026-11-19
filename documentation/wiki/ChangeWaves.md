@@ -38,6 +38,7 @@ Change wave checks around features will be removed in the release that accompani
 ### 18.14
 - [AssignTargetPath recognizes forward slashes in relative path specifiers and correctly handles relative paths outside the root folder cone on Windows.](https://github.com/dotnet/msbuild/pull/15267)
 - [AddToWin32Manifest preserves the generated manifest's timestamp when its contents are unchanged, allowing CoreCompile to skip unchanged builds with PreferNativeArm64 enabled.](https://github.com/dotnet/msbuild/issues/15417) Set `MSBUILDDISABLEFEATURESFROMVERSION=18.14` to retain unconditional manifest writes.
+- Out-of-process TaskHost tasks can call `IBuildEngine3.Yield` and `Reacquire`. Overlapping yielded tasks share one TaskHost process, and their packets are routed by task ID. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.14` to make `Yield` a no-op in TaskHosts and keep single-task routing.
 
 ### 18.13
 - [Task hosts preserve ordinary task-environment variables while retaining Windows bitness adjustments.](https://github.com/dotnet/msbuild/pull/15032)

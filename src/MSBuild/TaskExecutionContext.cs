@@ -13,7 +13,7 @@ namespace Microsoft.Build.CommandLine
     /// <summary>
     /// Represents the execution context for a single task running in the TaskHost.
     /// Multiple contexts may exist when a task blocks on a BuildProjectFile callback
-    /// and a nested task is dispatched to the same process.
+    /// or yields with IBuildEngine3.Yield, and another task is dispatched to the same process.
     /// </summary>
     /// <remarks>
     /// When Task A calls BuildProjectFile and blocks, Task B may be dispatched
@@ -97,6 +97,36 @@ namespace Microsoft.Build.CommandLine
         public ConcurrentDictionary<int, TaskCompletionSource<INodePacket>> PendingCallbackRequests { get; } = new();
 
         /// <summary>
+        /// The task identifier assigned by the owning worker node (from <see cref="TaskHostTaskIdentity"/>), or 0 when
+        /// the owning worker node does not route packets by task. Outgoing per-task packets are wrapped in a
+        /// <see cref="TaskHostTaskEnvelope"/> with this identifier when it is not 0.
+        /// </summary>
+        public int ParentTaskId { get; set; }
+
+        /// <summary>
+        /// Whether the owning worker node supports <c>IBuildEngine3.Yield</c> and <c>Reacquire</c> for this task.
+        /// </summary>
+        public bool YieldEnabled { get; set; }
+
+        /// <summary>
+        /// The managed thread that called <c>Yield</c>, or -1 when the task is not yielded. <c>Reacquire</c> must be
+        /// called on the same thread, as in the in-process node.
+        /// </summary>
+        public int YieldThreadId { get; set; } = -1;
+
+        /// <summary>
+        /// Whether the owning worker node asked to cancel only this task.
+        /// </summary>
+        public bool CancelRequested { get; set; }
+
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// File accesses that this task reported. Tasks that overlap in one task host keep separate lists.
+        /// </summary>
+        public System.Collections.Generic.List<Microsoft.Build.Experimental.FileAccess.FileAccessData> FileAccessData { get; } = new();
+#endif
+
+        /// <summary>
         /// Creates a new task execution context.
         /// </summary>
         public TaskExecutionContext(int taskId, TaskHostConfiguration configuration)
@@ -125,6 +155,11 @@ namespace Microsoft.Build.CommandLine
         Executing,
         /// <summary>Task is blocked waiting for a callback response (e.g., BuildProjectFile).</summary>
         BlockedOnCallback,
+        /// <summary>
+        /// Task called <c>IBuildEngine3.Yield</c> and continues to run without owning the process environment or
+        /// current directory. Other tasks can execute in the same task host until the task calls <c>Reacquire</c>.
+        /// </summary>
+        Yielded,
         /// <summary>Task has finished execution.</summary>
         Completed,
     }

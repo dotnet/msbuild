@@ -138,15 +138,33 @@ namespace Microsoft.Build.CommandLine
         private int _blockedTaskCount;
 
         /// <summary>
+        /// Number of tasks that called <c>IBuildEngine3.Yield</c> and did not reacquire yet. Like a blocked task,
+        /// a yielded task does not prevent new tasks from being scheduled to this TaskHost, but unlike a blocked
+        /// task it continues to run.
+        /// </summary>
+        private int _yieldedTaskCount;
+
+        /// <summary>
+        /// The identity that the owning worker node sent for the next <see cref="TaskHostConfiguration"/>.
+        /// </summary>
+        private TaskHostTaskIdentity _pendingTaskIdentity;
+
+        /// <summary>
+        /// Set when the owning worker node canceled one task by identity. The node shuts down without reuse
+        /// after all of its tasks complete, as it does for a legacy cancellation.
+        /// </summary>
+        private bool _perTaskCancellationRequested;
+
+        /// <summary>
         /// The event which is set when a task has completed.
         /// </summary>
         private AutoResetEvent _taskCompleteEvent;
 
         /// <summary>
-        /// The completed task packet waiting to be sent by the main thread.
-        /// Distinct results must survive coalesced completion event signals.
+        /// The completed task packets (possibly wrapped in a <see cref="TaskHostTaskEnvelope"/>) waiting to be
+        /// sent by the main thread. Distinct results must survive coalesced completion event signals.
         /// </summary>
-        private readonly ConcurrentQueue<TaskHostTaskComplete> _taskCompletePackets = new();
+        private readonly ConcurrentQueue<INodePacket> _taskCompletePackets = new();
 
         /// <summary>
         /// The event which is set when a task is cancelled
@@ -292,6 +310,9 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostCoresResponse, TaskHostCoresResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostBuildResponse, TaskHostBuildResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostConsoleConfiguration, TaskHostConsoleConfiguration.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostTaskIdentity, TaskHostTaskIdentity.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostTaskCancel, TaskHostTaskCancel.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostYieldResponse, TaskHostYieldResponse.FactoryForDeserialization, this);
             EngineServices = new EngineServicesImpl(this);
         }
 
@@ -643,18 +664,89 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// No-op. Explicit yield is not supported in the OOP TaskHost.
-        /// Nested task dispatch uses BuildProjectFile callback blocking instead.
+        /// Implementation of IBuildEngine3.Yield. When the owning worker node supports it, the scheduler can run other
+        /// tasks while this task continues, possibly in this same TaskHost process. The task must not use the process
+        /// environment, the current directory, or other build state until it calls <see cref="Reacquire"/>.
+        /// Otherwise, this is a no-op.
         /// </summary>
         public void Yield()
         {
+            TaskExecutionContext context = GetCurrentTaskContext();
+            if (context is null || !context.YieldEnabled)
+            {
+                return;
+            }
+
+            Assumed.True(context.YieldThreadId == -1, "Cannot call Yield() while yielding.");
+            Assumed.Equal(context.State, TaskExecutionState.Executing, "Cannot call Yield() unless the task is executing.");
+
+            // Release the process environment before the parent can schedule another task here.
+            SaveOperatingEnvironment(context);
+            context.State = TaskExecutionState.Yielded;
+            Interlocked.Increment(ref _yieldedTaskCount);
+            Interlocked.Decrement(ref _activeTaskCount);
+
+            TaskHostYieldResponse response;
+            try
+            {
+                response = SendCallbackRequestAndWaitForResponse<TaskHostYieldResponse>(new TaskHostYieldRequest(reacquire: false));
+            }
+            catch
+            {
+                ReturnFromFailedYield(context);
+                throw;
+            }
+
+            if (response.Exception is not null)
+            {
+                ReturnFromFailedYield(context);
+                throw response.Exception;
+            }
+
+            context.YieldThreadId = Environment.CurrentManagedThreadId;
         }
 
         /// <summary>
-        /// No-op. See <see cref="Yield"/>.
+        /// Implementation of IBuildEngine3.Reacquire. Returns only after the scheduler made the owning request active
+        /// again. Otherwise, this is a no-op.
         /// </summary>
         public void Reacquire()
         {
+            TaskExecutionContext context = GetCurrentTaskContext();
+            if (context is null || !context.YieldEnabled)
+            {
+                return;
+            }
+
+            Assumed.True(context.YieldThreadId != -1, "Cannot call Reacquire() before Yield().");
+            Assumed.Equal(context.YieldThreadId, Environment.CurrentManagedThreadId, "Cannot call Reacquire() on a different thread than Yield().");
+
+            // The task is not yielded after this point, even if the parent fails to reacquire (for example, because
+            // the build was canceled). In that case the task stays inactive and gets the exception.
+            context.YieldThreadId = -1;
+
+            TaskHostYieldResponse response = SendCallbackRequestAndWaitForResponse<TaskHostYieldResponse>(new TaskHostYieldRequest(reacquire: true));
+            if (response.Exception is not null)
+            {
+                throw response.Exception;
+            }
+
+            Interlocked.Decrement(ref _yieldedTaskCount);
+            Interlocked.Increment(ref _activeTaskCount);
+            RestoreOperatingEnvironment(context);
+            context.State = TaskExecutionState.Executing;
+        }
+
+        /// <summary>
+        /// Makes the task active again when the owning worker node did not yield. The node was not released, so no
+        /// other task ran and the saved environment is still current.
+        /// </summary>
+        private void ReturnFromFailedYield(TaskExecutionContext context)
+        {
+            Interlocked.Decrement(ref _yieldedTaskCount);
+            Interlocked.Increment(ref _activeTaskCount);
+            RestoreOperatingEnvironment(context);
+            context.State = TaskExecutionState.Executing;
         }
 
         #endregion // IBuildEngine3 Implementation
@@ -803,7 +895,18 @@ namespace Microsoft.Build.CommandLine
             /// <param name="fileAccessData">The file access to report.</param>
             public void ReportFileAccess(FileAccessData fileAccessData)
             {
-                _taskHost._fileAccessData.Add(fileAccessData);
+                TaskExecutionContext context = _taskHost.GetCurrentTaskContext();
+                if (context is not null)
+                {
+                    lock (context.FileAccessData)
+                    {
+                        context.FileAccessData.Add(fileAccessData);
+                    }
+                }
+                else
+                {
+                    _taskHost._fileAccessData.Add(fileAccessData);
+                }
             }
 #endif
         }
@@ -971,6 +1074,12 @@ namespace Microsoft.Build.CommandLine
                 case NodePacketType.TaskHostTaskCancelled:
                     _taskCancelledEvent.Set();
                     break;
+                case NodePacketType.TaskHostTaskIdentity:
+                    _pendingTaskIdentity = (TaskHostTaskIdentity)packet;
+                    break;
+                case NodePacketType.TaskHostTaskCancel:
+                    CancelTaskById(((TaskHostTaskCancel)packet).TaskId);
+                    break;
                 case NodePacketType.NodeBuildComplete:
                     HandleNodeBuildComplete(packet as NodeBuildComplete);
                     break;
@@ -982,6 +1091,7 @@ namespace Microsoft.Build.CommandLine
                 case NodePacketType.TaskHostIsRunningMultipleNodesResponse:
                 case NodePacketType.TaskHostCoresResponse:
                 case NodePacketType.TaskHostBuildResponse:
+                case NodePacketType.TaskHostYieldResponse:
                     HandleCallbackResponse(packet);
                     break;
             }
@@ -1064,7 +1174,7 @@ namespace Microsoft.Build.CommandLine
             try
             {
                 // Send the request packet to the owning worker node
-                _nodeEndpoint.SendData(request);
+                _nodeEndpoint.SendData(WrapForParentRouting(context, (INodePacket)request));
 
                 // Block until the response arrives (via HandleCallbackResponse -> TCS.SetResult)
                 // or the connection is lost (via OnLinkStatusChanged -> TCS.TrySetException).
@@ -1086,6 +1196,13 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Wraps a per-task packet so the owning worker node delivers it to the task's own handler. Tasks in one
+        /// TaskHost overlap when they yield, so the most recently connected handler is not always the sender.
+        /// </summary>
+        private static INodePacket WrapForParentRouting(TaskExecutionContext context, INodePacket packet)
+            => context is { ParentTaskId: not 0 } ? new TaskHostTaskEnvelope(context.ParentTaskId, packet) : packet;
+
+        /// <summary>
         /// Marks this task as blocked on a callback so the node can accept nested tasks.
         /// Saves the current operating environment before blocking.
         /// </summary>
@@ -1094,6 +1211,8 @@ namespace Microsoft.Build.CommandLine
             var context = GetCurrentTaskContext();
             if (context is not null)
             {
+                // A yielded task does not own the node, so it cannot also release it for a nested build.
+                Assumed.True(context.State != TaskExecutionState.Yielded, "Cannot call BuildProjectFile() while yielded. Call Reacquire() first.");
                 SaveOperatingEnvironment(context);
                 context.State = TaskExecutionState.BlockedOnCallback;
             }
@@ -1158,6 +1277,14 @@ namespace Microsoft.Build.CommandLine
             int taskId = Interlocked.Increment(ref _nextLocalTaskId);
 
             var context = new TaskExecutionContext(taskId, configuration);
+
+            // The owning worker node sends the identity immediately before the configuration it describes.
+            if (_pendingTaskIdentity is not null)
+            {
+                context.ParentTaskId = _pendingTaskIdentity.TaskId;
+                context.YieldEnabled = _pendingTaskIdentity.YieldEnabled && CallbacksSupported;
+                _pendingTaskIdentity = null;
+            }
 
             if (!_taskContexts.TryAdd(taskId, context))
             {
@@ -1235,9 +1362,9 @@ namespace Microsoft.Build.CommandLine
             // callbacks) don't prevent accepting a new nested task configuration.
             Assumed.Zero(_activeTaskCount, $"Why are we getting a TaskHostConfiguration packet while a task is actively executing? activeTaskCount={_activeTaskCount}");
 
-            if (_blockedTaskCount > 0)
+            if (_blockedTaskCount > 0 || _yieldedTaskCount > 0)
             {
-                CommunicationsUtilities.Trace($"Nested task {taskHostConfiguration.TaskName} dispatched while {_blockedTaskCount} tasks are blocked on callbacks.");
+                CommunicationsUtilities.Trace($"Task {taskHostConfiguration.TaskName} dispatched while {_blockedTaskCount} tasks are blocked on callbacks and {_yieldedTaskCount} tasks are yielded.");
             }
 
             _currentConfiguration = taskHostConfiguration;
@@ -1302,7 +1429,7 @@ namespace Microsoft.Build.CommandLine
         {
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
-                while (_taskCompletePackets.TryDequeue(out TaskHostTaskComplete packet))
+                while (_taskCompletePackets.TryDequeue(out INodePacket packet))
                 {
                     _consoleOutWriter?.Flush();
                     _consoleErrorWriter?.Flush();
@@ -1310,9 +1437,9 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            // Only clear _currentConfiguration when no tasks remain (active or blocked).
+            // Only clear _currentConfiguration when no tasks remain (active, blocked, or yielded).
             // A blocked task still needs the config for logging via EffectiveConfiguration.
-            if (_activeTaskCount == 0 && _blockedTaskCount == 0)
+            if (_activeTaskCount == 0 && _blockedTaskCount == 0 && _yieldedTaskCount == 0)
             {
                 _currentConfiguration = null;
             }
@@ -1321,7 +1448,8 @@ namespace Microsoft.Build.CommandLine
             // If so, now that we've completed the task, we want to shut down
             // this node -- with no reuse, since we don't know whether the
             // task we canceled left the node in a good state or not.
-            if (_taskCancelledEvent.WaitOne(0))
+            // A task canceled by identity may share this node with other tasks, which must finish first.
+            if (_taskCancelledEvent.WaitOne(0) || (_perTaskCancellationRequested && _taskContexts.IsEmpty))
             {
                 _shutdownReason = NodeEngineShutdownReason.BuildComplete;
                 _shutdownEvent.Set();
@@ -1337,43 +1465,7 @@ namespace Microsoft.Build.CommandLine
             // multiple tasks may be active on the same TaskHost process.
             foreach (var kvp in _taskContexts)
             {
-                var context = kvp.Value;
-                lock (context)
-                {
-                    var ctxWrapper = context.TaskWrapper;
-                    if (context.State == TaskExecutionState.Completed || ctxWrapper is null || ctxWrapper.CancelPending)
-                    {
-                        continue;
-                    }
-
-                    // Cancellation runs on the packet-processing thread, not the task's Execute thread.
-                    var previousContext = _currentTaskContext.Value;
-#if FEATURE_APPDOMAIN
-                    object previousContextId = CallContext.LogicalGetData(TaskContextIdSlot);
-#endif
-                    try
-                    {
-                        _currentTaskContext.Value = context;
-#if FEATURE_APPDOMAIN
-                        CallContext.LogicalSetData(TaskContextIdSlot, context.TaskId);
-#endif
-                        ctxWrapper.CancelTask();
-                    }
-                    finally
-                    {
-                        _currentTaskContext.Value = previousContext;
-#if FEATURE_APPDOMAIN
-                        if (previousContextId is null)
-                        {
-                            CallContext.FreeNamedDataSlot(TaskContextIdSlot);
-                        }
-                        else
-                        {
-                            CallContext.LogicalSetData(TaskContextIdSlot, previousContextId);
-                        }
-#endif
-                    }
-                }
+                CancelContext(kvp.Value);
             }
 
             if (Environment.GetEnvironmentVariable("MSBUILDTASKHOSTABORTTASKONCANCEL") == "1")
@@ -1388,6 +1480,87 @@ namespace Microsoft.Build.CommandLine
                         {
                             t.Abort();
                         }
+                    }
+#endif
+                }
+            }
+        }
+
+        /// <summary>
+        /// Cancels the one task that the owning worker node identified. Other tasks that share this TaskHost (for
+        /// example, yielded tasks of other requests) continue.
+        /// </summary>
+        private void CancelTaskById(int parentTaskId)
+        {
+            foreach (var kvp in _taskContexts)
+            {
+                TaskExecutionContext context = kvp.Value;
+                if (context.ParentTaskId != parentTaskId)
+                {
+                    continue;
+                }
+
+                _perTaskCancellationRequested = true;
+                context.CancelRequested = true;
+                CancelContext(context);
+
+#if FEATURE_THREAD_ABORT
+                if (Environment.GetEnvironmentVariable("MSBUILDTASKHOSTABORTTASKONCANCEL") == "1")
+                {
+                    lock (context)
+                    {
+                        Thread t = context.ExecutingThread;
+                        if (context.State is TaskExecutionState.Executing or TaskExecutionState.Yielded && t is not null && t.IsAlive)
+                        {
+                            t.Abort();
+                        }
+                    }
+                }
+#endif
+                return;
+            }
+
+            // The task already completed; its completion packet is on its way to the owning worker node.
+            CommunicationsUtilities.Trace($"Ignoring cancellation for task {parentTaskId}, which is not running in this TaskHost.");
+        }
+
+        /// <summary>
+        /// Calls <see cref="ICancelableTask.Cancel"/> for one task, with the task's context on this thread.
+        /// </summary>
+        private void CancelContext(TaskExecutionContext context)
+        {
+            lock (context)
+            {
+                var ctxWrapper = context.TaskWrapper;
+                if (context.State == TaskExecutionState.Completed || ctxWrapper is null || ctxWrapper.CancelPending)
+                {
+                    return;
+                }
+
+                // Cancellation runs on the packet-processing thread, not the task's Execute thread.
+                var previousContext = _currentTaskContext.Value;
+#if FEATURE_APPDOMAIN
+                object previousContextId = CallContext.LogicalGetData(TaskContextIdSlot);
+#endif
+                try
+                {
+                    _currentTaskContext.Value = context;
+#if FEATURE_APPDOMAIN
+                    CallContext.LogicalSetData(TaskContextIdSlot, context.TaskId);
+#endif
+                    ctxWrapper.CancelTask();
+                }
+                finally
+                {
+                    _currentTaskContext.Value = previousContext;
+#if FEATURE_APPDOMAIN
+                    if (previousContextId is null)
+                    {
+                        CallContext.FreeNamedDataSlot(TaskContextIdSlot);
+                    }
+                    else
+                    {
+                        CallContext.LogicalSetData(TaskContextIdSlot, previousContextId);
                     }
 #endif
                 }
@@ -1469,6 +1642,8 @@ namespace Microsoft.Build.CommandLine
             // A cancellation that arrived as the build was ending would otherwise still be signalled
             // and would spin the next build's wait loop.
             _taskCancelledEvent.Reset();
+            _perTaskCancellationRequested = false;
+            _pendingTaskIdentity = null;
 
             // Release the build directory while idle; Windows holds a handle to the current directory.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
@@ -1697,6 +1872,7 @@ namespace Microsoft.Build.CommandLine
 
                 bool canSkipEnvironmentApply = _lastAppliedConfigEnvironment is not null
                     && _blockedTaskCount == 0
+                    && _yieldedTaskCount == 0
                     && _activeTaskCount == 1
                     && CommunicationsUtilities.AreDictionariesEquivalent(taskConfiguration.BuildProcessEnvironment, _lastAppliedConfigEnvironment);
 
@@ -1761,15 +1937,32 @@ namespace Microsoft.Build.CommandLine
             finally
             {
                 TaskHostTaskComplete taskCompletePacket = null;
+#if FEATURE_REPORTFILEACCESSES
+                List<FileAccessData> fileAccessData = taskContext?.FileAccessData ?? _fileAccessData;
+#endif
                 try
                 {
                     // BlockForCallback/ResumeAfterCallback are always paired, so a task
                     // should never be in BlockedOnCallback state when it completes.
                     Assumed.True(taskContext is null || taskContext.State != TaskExecutionState.BlockedOnCallback, "Task completed while still in BlockedOnCallback state.");
 
-                    Interlocked.Decrement(ref _activeTaskCount);
+                    // A task can return without calling Reacquire. It does not own the process environment then:
+                    // another task can be executing in this process. Report the environment that the task had
+                    // when it yielded, and do not change the process environment.
+                    bool completedWhileYielded = taskContext?.State == TaskExecutionState.Yielded;
+                    IDictionary<string, string> currentEnvironment;
+                    if (completedWhileYielded)
+                    {
+                        Interlocked.Decrement(ref _yieldedTaskCount);
+                        taskContext.YieldThreadId = -1;
+                        currentEnvironment = taskContext.SavedEnvironment ?? taskConfiguration.BuildProcessEnvironment;
+                    }
+                    else
+                    {
+                        Interlocked.Decrement(ref _activeTaskCount);
+                        currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+                    }
 
-                    IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
                     bool environmentUnchangedByTask =
@@ -1779,7 +1972,7 @@ namespace Microsoft.Build.CommandLine
                     taskCompletePacket = new TaskHostTaskComplete(
                         taskResult,
 #if FEATURE_REPORTFILEACCESSES
-                        _fileAccessData,
+                        fileAccessData,
 #endif
                         currentEnvironment);
 
@@ -1796,9 +1989,11 @@ namespace Microsoft.Build.CommandLine
                     }
 #endif
 
-                    bool canSkipEnvironmentRestore = environmentUnchangedByTask
-                        && _blockedTaskCount == 0
-                        && ReferenceEquals(_lastAppliedConfigEnvironment, taskConfiguration.BuildProcessEnvironment);
+                    bool canSkipEnvironmentRestore = completedWhileYielded
+                        || (environmentUnchangedByTask
+                            && _blockedTaskCount == 0
+                            && _yieldedTaskCount == 0
+                            && ReferenceEquals(_lastAppliedConfigEnvironment, taskConfiguration.BuildProcessEnvironment));
 
                     if (!canSkipEnvironmentRestore)
                     {
@@ -1813,14 +2008,17 @@ namespace Microsoft.Build.CommandLine
                     taskCompletePacket = new TaskHostTaskComplete(
                         new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
 #if FEATURE_REPORTFILEACCESSES
-                        _fileAccessData,
+                        fileAccessData,
 #endif
                         null);
                 }
                 finally
                 {
 #if FEATURE_REPORTFILEACCESSES
-                    _fileAccessData = new List<FileAccessData>();
+                    if (taskContext is null)
+                    {
+                        _fileAccessData = new List<FileAccessData>();
+                    }
 #endif
 
                     if (taskContext is not null)
@@ -1843,7 +2041,7 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     // The task has now fully completed executing.
-                    _taskCompletePackets.Enqueue(taskCompletePacket);
+                    _taskCompletePackets.Enqueue(WrapForParentRouting(taskContext, taskCompletePacket));
                     // Guard against ObjectDisposedException if HandleShutdown already disposed
                     // the event (can happen if thread.Join timed out during shutdown).
                     try
@@ -2008,7 +2206,7 @@ namespace Microsoft.Build.CommandLine
 
                 TaskHostConfiguration configuration = EffectiveConfiguration;
                 LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(configuration.NodeId, e));
-                _nodeEndpoint.SendData(logMessage);
+                _nodeEndpoint.SendData(WrapForParentRouting(GetCurrentTaskContext(), logMessage));
             }
         }
 

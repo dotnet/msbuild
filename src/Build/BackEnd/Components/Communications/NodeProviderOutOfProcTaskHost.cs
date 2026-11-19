@@ -139,6 +139,19 @@ namespace Microsoft.Build.BackEnd
         private ConcurrentDictionary<int, Stack<INodePacketHandler>> _nodeIdToPacketHandlerStack;
 
         /// <summary>
+        /// Handlers of tasks that have a task ID, keyed by that ID. Task hosts that negotiate
+        /// <see cref="NodePacketTypeExtensions.TaskHostYieldMinVersion"/> wrap each task-scoped packet in a
+        /// <see cref="TaskHostTaskEnvelope"/>, so tasks that overlap in one process (for example, because
+        /// one of them yielded) receive only their own packets, independent of the handler stack order.
+        /// </summary>
+        private ConcurrentDictionary<int, TaskHandlerRegistration> _taskIdToHandler;
+
+        /// <summary>
+        /// Source of task IDs. Zero means "no task ID".
+        /// </summary>
+        private int _nextTaskId;
+
+        /// <summary>
         /// Communication node IDs explicitly enabled for console forwarding.
         /// </summary>
         private HashSet<int> _consoleForwardingNodeIds;
@@ -436,6 +449,7 @@ namespace Microsoft.Build.BackEnd
             _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
             _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
             _nodeIdToPacketHandlerStack = new ConcurrentDictionary<int, Stack<INodePacketHandler>>();
+            _taskIdToHandler = new ConcurrentDictionary<int, TaskHandlerRegistration>();
             _consoleForwardingNodeIds = [];
             _consoleOutputForwarded = false;
             _activeNodes = [];
@@ -457,6 +471,11 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostYieldRequest, TaskHostYieldRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(
+                NodePacketType.TaskHostTaskEnvelope,
+                translator => TaskHostTaskEnvelope.FactoryForDeserialization(translator, _localPacketFactory.DeserializePacket),
+                this);
         }
 
         /// <summary>
@@ -593,6 +612,8 @@ namespace Microsoft.Build.BackEnd
                             shutdownHandlers.Clear();
                         }
                     }
+
+                    RemoveTaskIdRegistrations(node);
                 }
 
                 // Nested and blocked tasks all need the failure, not just the top of the stack.
@@ -624,6 +645,22 @@ namespace Microsoft.Build.BackEnd
 
                         _consoleOutputForwarded |= !string.IsNullOrEmpty(consoleWrite.Text);
                     }
+                }
+
+                return;
+            }
+
+            if (packet is TaskHostTaskEnvelope envelope)
+            {
+                if (_taskIdToHandler.TryGetValue(envelope.TaskId, out TaskHandlerRegistration registration)
+                    && registration.NodeId == node)
+                {
+                    registration.Handler.PacketReceived(node, envelope.Packet);
+                }
+                else
+                {
+                    // The task already disconnected (for example, after cancellation). Never deliver to another task.
+                    CommunicationsUtilities.Trace($"Dropping {envelope.Packet.Type} for task {envelope.TaskId} from node {node}: the task is not attached.");
                 }
 
                 return;
@@ -930,12 +967,15 @@ namespace Microsoft.Build.BackEnd
             out int hostProcessId,
             out bool wasNewlyCreated,
             out NodeContext connection,
-            out VisualStudioTaskHostResolution visualStudioResolution)
+            out VisualStudioTaskHostResolution visualStudioResolution,
+            out int taskId,
+            bool yieldEnabled = false)
         {
             parameterConversionUnsupported = false;
             hostProcessId = -1;
             wasNewlyCreated = false;
             connection = null;
+            taskId = 0;
             visualStudioResolution = VisualStudioTaskHostResolution.NotApplicable.Instance;
             TaskHostNodeKey nodeKey = default;
 
@@ -1046,6 +1086,15 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
+                if (UsesTaskIdRouting(context))
+                {
+                    // The task ID must be registered before the configuration is sent, because the host may
+                    // reply with task-scoped packets immediately.
+                    taskId = AllocateTaskId();
+                    _taskIdToHandler[taskId] = new TaskHandlerRegistration(context.NodeId, handler);
+                    context.SendData(new TaskHostTaskIdentity(taskId, yieldEnabled));
+                }
+
                 context.SendData(configuration);
                 connection = context;
                 return true;
@@ -1053,9 +1102,69 @@ namespace Microsoft.Build.BackEnd
             catch
             {
                 DisconnectFromHost(context, handler);
+                taskId = 0;
                 throw;
             }
         }
+
+        /// <summary>
+        /// Whether tasks on this connection get task IDs, task-scoped routing, and Yield/Reacquire.
+        /// Requires both sides to support it and is behind <see cref="ChangeWaves.Wave18_14"/>.
+        /// </summary>
+        internal static bool UsesTaskIdRouting(NodeContext context)
+            => context.NegotiatedPacketVersion >= NodePacketTypeExtensions.TaskHostYieldMinVersion
+                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14);
+
+        private int AllocateTaskId()
+        {
+            int taskId;
+            do
+            {
+                taskId = Interlocked.Increment(ref _nextTaskId);
+            }
+            while (taskId == 0);
+
+            return taskId;
+        }
+
+        /// <summary>
+        /// Number of tasks registered for task-ID routing. For tests.
+        /// </summary>
+        internal int TaskIdRegistrationCount => _taskIdToHandler.Count;
+
+        /// <summary>
+        /// Registers a handler for task-ID routing without sending a configuration. For tests.
+        /// </summary>
+        internal int RegisterTaskIdForTests(NodeContext context, INodePacketHandler handler)
+        {
+            int taskId = AllocateTaskId();
+            _taskIdToHandler[taskId] = new TaskHandlerRegistration(context.NodeId, handler);
+            return taskId;
+        }
+
+        private void RemoveTaskIdRegistrations(int nodeId)
+        {
+            foreach (KeyValuePair<int, TaskHandlerRegistration> registration in _taskIdToHandler)
+            {
+                if (registration.Value.NodeId == nodeId)
+                {
+                    _taskIdToHandler.TryRemove(registration.Key, out _);
+                }
+            }
+        }
+
+        private void RemoveTaskIdRegistrations(int nodeId, INodePacketHandler handler)
+        {
+            foreach (KeyValuePair<int, TaskHandlerRegistration> registration in _taskIdToHandler)
+            {
+                if (registration.Value.NodeId == nodeId && ReferenceEquals(registration.Value.Handler, handler))
+                {
+                    _taskIdToHandler.TryRemove(registration.Key, out _);
+                }
+            }
+        }
+
+        private readonly record struct TaskHandlerRegistration(int NodeId, INodePacketHandler Handler);
 
         /// <summary>
         /// Selects the existing handler whose build callback has reacquired the owning node.
@@ -1097,6 +1206,7 @@ namespace Microsoft.Build.BackEnd
             lock (_activeNodes)
             {
                 int nodeId = context.NodeId;
+                RemoveTaskIdRegistrations(nodeId, handler);
 
                 if (_nodeIdToPacketHandlerStack.TryGetValue(nodeId, out Stack<INodePacketHandler> handlerStack))
                 {
@@ -1620,6 +1730,7 @@ namespace Microsoft.Build.BackEnd
             {
                 RetireNode(nodeId);
                 _nodeIdToPacketHandlerStack.TryRemove(nodeId, out _);
+                RemoveTaskIdRegistrations(nodeId);
             }
         }
 
