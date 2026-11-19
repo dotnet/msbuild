@@ -719,7 +719,8 @@ namespace Microsoft.Build.UnitTests
             {
                 try
                 {
-                    Process.GetProcessById(_processId).KillTree(1000);
+                    using Process process = Process.GetProcessById(_processId);
+                    process.KillTree(1000);
                 }
                 catch
                 {
