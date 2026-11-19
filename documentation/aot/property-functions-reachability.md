@@ -218,14 +218,20 @@ the overload silently fail to bind.
 - **`Equals` / `CompareTo`**: the single argument is `Convert.ChangeType`-d to the
   receiver's runtime type so comparisons line up
   ([Expander.cs#L4162](../../src/Build/Evaluation/Expander.cs#L4162)).
-- **`File` / `Directory` / `Path` receivers**: string args run through
-  `FileUtilities.FixFilePath`, and `File`/`Directory` path args are made absolute
+- **`File` / `Directory` / `Path` receivers and `FileInfo` / `DirectoryInfo`
+  constructors**: string args run through `FileUtilities.FixFilePath`, and
+  `File`/`Directory` path args and the constructor path arg are made absolute
   against the thread working directory in `-mt` mode
   ([Expander.cs#L4128](../../src/Build/Evaluation/Expander.cs#L4128)).
 - **`new`**: routed to a constructor (`TryExecuteWellKnownConstructorNoThrow` or
   `LateBindExecute` as a constructor). Only public constructors on the resolved
   receiver type are eligible, so object construction is limited to allowlisted
   types (e.g. `[System.Globalization.CultureInfo]::new('en-US')`).
+  `[System.IO.FileInfo]::new(path)` and `[System.IO.DirectoryInfo]::new(path)` are
+  admitted by `IsStaticMethodAvailable` and constructed directly by
+  `TryExecuteWellKnownConstructorNoThrow`; members on the result follow the
+  normal instance-receiver rules (the read-only `FileSystemInfo` allowlist when
+  receivers are restricted).
 - **`out _`**: out-parameters are defaulted and passed through `GetMethodResult`.
 
 ### 5.4 Binding is public-only
@@ -290,15 +296,6 @@ types are unreachable under the restriction.
 | `$([System.Diagnostics.Process]::GetCurrentProcess().Id)` | MSB4212 | type not allowlisted and not in corelib |
 | `$([System.Enum]::GetUnderlyingType('System.DayOfWeek'))` | MSB4186 | `string`→`Type` can't coerce; no way to obtain a `Type` |
 | `$(P.GetType().FullName)` | MSB4184 | `GetType` is the one denied instance method |
-
-### Filesystem metadata constructors
-
-`$([System.IO.FileInfo]::new('$(Path)').Length)` reads a file's size without reading
-its contents. `$([System.IO.DirectoryInfo]::new('$(Path)').Exists)` checks whether
-a directory exists. Neither expression requires `MSBUILDENABLEALLPROPERTYFUNCTIONS`.
-By default, chains starting with these constructors allow only read-only metadata
-and navigation on the filesystem objects they return, not methods such as `Delete`,
-`OpenWrite`, or `CreateSubdirectory`.
 
 ## 8. Implications and the constraining hook
 

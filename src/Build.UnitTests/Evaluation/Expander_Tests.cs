@@ -4022,6 +4022,34 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// FileInfo and DirectoryInfo constructors are available without MSBUILDENABLEALLPROPERTYFUNCTIONS,
+        /// and their path argument is unescaped before the constructor is called.
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionFileSystemInfoConstructors()
+        {
+            using var env = TestEnvironment.Create(_output);
+            string folder = env.CreateFolder(createFolder: true).Path;
+            string emptyFile = Path.Combine(folder, "empty;file.txt");
+            string file = Path.Combine(folder, "data.txt");
+            File.WriteAllText(emptyFile, string.Empty);
+            File.WriteAllText(file, "content");
+
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            pg.Set(ProjectPropertyInstance.Create("EmptyFile", EscapingUtilities.Escape(emptyFile)));
+            pg.Set(ProjectPropertyInstance.Create("File", file));
+            pg.Set(ProjectPropertyInstance.Create("Folder", folder));
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            string Expand(string expression) => expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Expand("$([System.IO.FileInfo]::new('$(EmptyFile)').Length)").ShouldBe("0");
+            Expand("$([System.IO.FileInfo]::NEW('$(File)').Length)").ShouldBe("7");
+            Expand("$([System.IO.DirectoryInfo]::new('$(Folder)').Exists)").ShouldBe("True");
+            Expand("$([System.IO.FileInfo]::new('$(File)').Directory.FullName)").ShouldBe(folder);
+        }
+
+        /// <summary>
         /// Expand intrinsic property function calls a static arithmetic method
         /// </summary>
         [Fact]
@@ -5596,24 +5624,6 @@ $(
             return expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
         }
 
-        [Fact]
-        public void FileSystemInfoConstructors_ResolveRelativePathsAgainstThreadWorkingDirectory()
-        {
-            using TestEnvironment env = TestEnvironment.Create();
-            string workingDir = env.CreateFolder().Path;
-            string wrongDir = env.CreateFolder().Path;
-            File.WriteAllText(Path.Combine(workingDir, "data.txt"), "content");
-
-            ExpandWithThreadWorkingDirectory(env, "$([System.IO.FileInfo]::new('data.txt').Length)", workingDir, wrongDir)
-                .ShouldBe("7");
-            ExpandWithThreadWorkingDirectory(env, "$([System.IO.FileInfo]::new('data.txt').ToString())", workingDir)
-                .ShouldBe("data.txt");
-            ExpandWithThreadWorkingDirectory(env, "$([System.IO.FileInfo]::new('data.txt'))", workingDir)
-                .ShouldBe("data.txt");
-            ExpandWithThreadWorkingDirectory(env, "$([System.IO.DirectoryInfo]::new('.').FullName)", workingDir)
-                .ShouldBe(workingDir);
-        }
-
         /// <summary>
         /// Helper: set the process current directory and return it as the OS reports it. On macOS the test
         /// temp folder is reached through a symlink (/var -> /private/var), and only the reported form matches
@@ -5900,6 +5910,22 @@ $(
             result.ShouldBe(bool.TrueString);
             var acquisition = logger.AllBuildEvents.ShouldHaveSingleItem().ShouldBeOfType<BuildCheckAcquisitionEventArgs>();
             acquisition.AcquisitionPath.ShouldBe(Path.Combine(correctDir.Path, "check.dll"));
+        }
+
+        [Fact]
+        public void FileSystemInfoConstructors_RelativePath_ResolveFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "notes.txt"), "correct");
+            File.WriteAllText(Path.Combine(wrongDir.Path, "notes.txt"), "wrong content");
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.FileInfo]::new('notes.txt').Length)", correctDir.Path, wrongDir.Path).ShouldBe("7");
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.DirectoryInfo]::new('.').FullName)", correctDir.Path, wrongDir.Path).ShouldBe(correctDir.Path);
         }
 
         [Fact]
