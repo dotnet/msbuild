@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" Link="EnvironmentProvider.cs" />
     <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" />
   </ItemGroup>
 

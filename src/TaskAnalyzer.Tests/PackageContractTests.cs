@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using NuGet.Packaging;
@@ -58,7 +59,6 @@ public sealed class PackageContractTests
             VerifyFrameworkPackage(frameworkPackage);
             VerifyMatchingIcons(analyzerPackage, frameworkPackage);
             await VerifyExplicitPackageReferenceActivatesAnalyzer(
-                repositoryRoot,
                 packageOutput,
                 analyzerPackage.NuspecReader.GetIdentity().Version.ToNormalizedString());
         }
@@ -111,7 +111,6 @@ public sealed class PackageContractTests
     }
 
     private async Task VerifyExplicitPackageReferenceActivatesAnalyzer(
-        string repositoryRoot,
         string packageOutput,
         string packageVersion)
     {
@@ -166,7 +165,6 @@ public sealed class PackageContractTests
             """);
 
         string output = await RunDotNet(
-            repositoryRoot,
             consumerDirectory,
             "build",
             "Consumer.csproj",
@@ -189,7 +187,6 @@ public sealed class PackageContractTests
             """);
 
         output = await RunDotNet(
-            repositoryRoot,
             consumerDirectory,
             "build",
             "Consumer.csproj",
@@ -207,7 +204,6 @@ public sealed class PackageContractTests
             "\nmsbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true\n");
 
         output = await RunDotNet(
-            repositoryRoot,
             consumerDirectory,
             "build",
             "Consumer.csproj",
@@ -219,46 +215,46 @@ public sealed class PackageContractTests
         output.ShouldContain("warning MSBuildTask0004");
         output.ShouldContain("warning MSBuildTask0005");
 
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Environment.GetEnvironmentVariable(\"KEY\")", "", [], "warning", 0);
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Reflection.Assembly.Load(\"Unsafe\")", "", [], "warning", 0);
-        output = await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        output = await VerifyTransitiveSeverity(consumerDirectory,
             "System.Reflection.Assembly.Load(\"Unsafe\")", "dotnet_diagnostic.MSBuildTask0004.severity = error",
             [], "warning", 1);
         output.ShouldContain("error MSBuildTask0004");
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Environment.GetEnvironmentVariable(\"KEY\")", "",
             ["-p:TreatWarningsAsErrors=true", "-p:WarningsNotAsErrors=MSBuildTask0002"], "error", 1);
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Environment.GetEnvironmentVariable(\"KEY\")", "dotnet_diagnostic.MSBuildTask0002.severity = none",
             ["-p:TreatWarningsAsErrors=true", "-p:WarningsNotAsErrors=MSBuildTask0005"], "warning", 0);
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0001.severity = warning",
             ["-p:NoWarn=MSBuildTask0001"], "warning", 0);
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0001.severity = warning",
             ["-p:WarningsAsErrors=MSBuildTask0001"], "warning", 1);
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Environment.GetEnvironmentVariable(\"KEY\")", "",
             ["-p:NoWarn=MSBuildTask0005"], null, 0);
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0005.severity = none",
             [], null, 0);
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0005.severity = error",
             [], "error", 1);
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Reflection.Assembly.Load(\"Unsafe\")", "dotnet_analyzer_diagnostic.severity = warning",
             [], "warning", 0);
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Reflection.Assembly.Load(\"Unsafe\")",
             """
             dotnet_analyzer_diagnostic.severity = error
             dotnet_analyzer_diagnostic.category-MSBuild.TaskAuthoring.severity = warning
             """,
             [], "warning", 0);
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Reflection.Assembly.Load(\"Unsafe\")",
             """
             dotnet_analyzer_diagnostic.severity = warning
@@ -270,13 +266,12 @@ public sealed class PackageContractTests
             is_global = true
             dotnet_diagnostic.MSBuildTask0005.severity = error
             """);
-        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(consumerDirectory,
             "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0005.severity = default",
             [], "warning", 0);
     }
 
     private async Task<string> VerifyTransitiveSeverity(
-        string repositoryRoot,
         string consumerDirectory,
         string unsafeCall,
         string configuration,
@@ -310,7 +305,7 @@ public sealed class PackageContractTests
             [*.cs]
             {{configuration}}
             """);
-        string output = await RunDotNet(repositoryRoot, consumerDirectory, expectedExitCode,
+        string output = await RunDotNet(consumerDirectory, expectedExitCode,
             ["build", "Consumer.csproj", "--nologo", "--disable-build-servers", "--no-restore", "-t:Rebuild", .. compilerArguments]);
 
         if (expectedSeverity is null)
@@ -335,7 +330,6 @@ public sealed class PackageContractTests
         if (metadataOnly)
         {
             await RunDotNet(
-                repositoryRoot,
                 repositoryRoot,
                 "restore",
                 projectPath,
@@ -373,24 +367,22 @@ public sealed class PackageContractTests
             ];
         }
 
-        await RunDotNet(repositoryRoot, repositoryRoot, arguments);
+        await RunDotNet(repositoryRoot, arguments);
     }
 
     private Task<string> RunDotNet(
-        string repositoryRoot,
         string workingDirectory,
-        params string[] arguments) => RunDotNet(repositoryRoot, workingDirectory, 0, arguments);
+        params string[] arguments) => RunDotNet(workingDirectory, 0, arguments);
 
     private async Task<string> RunDotNet(
-        string repositoryRoot,
         string workingDirectory,
         int expectedExitCode,
         params string[] arguments)
     {
-        string dotnetRoot = Path.Combine(repositoryRoot, ".dotnet");
-        string dotnetPath = Path.Combine(
-            dotnetRoot,
-            OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet");
+        string dotnetPath = EnvironmentProvider.GetDotnetExePath()
+            ?? throw new InvalidOperationException("Could not locate the dotnet host.");
+        string dotnetRoot = Path.GetDirectoryName(dotnetPath)
+            ?? throw new InvalidOperationException($"Could not determine the dotnet root from '{dotnetPath}'.");
         var startInfo = new ProcessStartInfo(dotnetPath)
         {
             WorkingDirectory = workingDirectory,
@@ -400,7 +392,7 @@ public sealed class PackageContractTests
         };
 
         // The two-stage CI build launches tests with paths from the stage 1 bootstrap.
-        // Let this dotnet invocation recompute its MSBuild paths from the repository-local SDK.
+        // Let this dotnet invocation recompute its MSBuild paths from the selected SDK.
         startInfo.Environment.Remove("MSBUILD_EXE_PATH");
         startInfo.Environment.Remove("MSBuildSDKsPath");
         startInfo.Environment.Remove("MSBuildExtensionsPath");
