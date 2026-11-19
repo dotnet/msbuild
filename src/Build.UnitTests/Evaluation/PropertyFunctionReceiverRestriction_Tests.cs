@@ -62,10 +62,9 @@ public class PropertyFunctionReceiverRestriction_Tests
 
     private static (string folder, string file) CreateFolderWithFile(TestEnvironment env)
     {
-        string folder = env.CreateFolder().Path;
-        string file = Path.Combine(folder, "data.txt");
-        File.WriteAllText(file, "content");
-        return (folder, file);
+        TransientTestFolder folder = env.CreateFolder();
+        TransientTestFile file = env.CreateFile(folder, "data.txt", "content");
+        return (folder.Path, file.Path);
     }
 
     // ---- Restricted: side-effect-free receivers remain callable ----
