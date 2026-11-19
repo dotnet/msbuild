@@ -4029,16 +4029,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void PropertyFunctionFileSystemInfoConstructors()
         {
             using var env = TestEnvironment.Create(_output);
-            string folder = env.CreateFolder(createFolder: true).Path;
-            string emptyFile = Path.Combine(folder, "empty;file.txt");
-            string file = Path.Combine(folder, "data.txt");
-            File.WriteAllText(emptyFile, string.Empty);
-            File.WriteAllText(file, "content");
+            var folder = env.CreateFolder(createFolder: true);
+            var emptyFile = folder.CreateFile("empty;file.txt", contents: string.Empty);
+            var file = folder.CreateFile("data.txt", "content");
 
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("EmptyFile", EscapingUtilities.Escape(emptyFile)));
-            pg.Set(ProjectPropertyInstance.Create("File", file));
-            pg.Set(ProjectPropertyInstance.Create("Folder", folder));
+            pg.Set(ProjectPropertyInstance.Create("EmptyFile", EscapingUtilities.Escape(emptyFile.Path)));
+            pg.Set(ProjectPropertyInstance.Create("File", file.Path));
+            pg.Set(ProjectPropertyInstance.Create("Folder", folder.Path));
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
             string Expand(string expression) => expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
@@ -4046,7 +4044,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Expand("$([System.IO.FileInfo]::new('$(EmptyFile)').Length)").ShouldBe("0");
             Expand("$([System.IO.FileInfo]::NEW('$(File)').Length)").ShouldBe("7");
             Expand("$([System.IO.DirectoryInfo]::new('$(Folder)').Exists)").ShouldBe("True");
-            Expand("$([System.IO.FileInfo]::new('$(File)').Directory.FullName)").ShouldBe(folder);
+            Expand("$([System.IO.FileInfo]::new('$(File)').Directory.FullName)").ShouldBe(folder.Path);
         }
 
         /// <summary>
@@ -5919,8 +5917,8 @@ $(
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
-            File.WriteAllText(Path.Combine(correctDir.Path, "notes.txt"), "correct");
-            File.WriteAllText(Path.Combine(wrongDir.Path, "notes.txt"), "wrong content");
+            correctDir.CreateFile("notes.txt", "correct");
+            wrongDir.CreateFile("notes.txt", "wrong content");
 
             ExpandWithThreadWorkingDirectory(env,
                 "$([System.IO.FileInfo]::new('notes.txt').Length)", correctDir.Path, wrongDir.Path).ShouldBe("7");

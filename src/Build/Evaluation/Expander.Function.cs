@@ -1151,18 +1151,13 @@ internal partial class Expander<P, I>
                 return true;
             }
 
-            if (IsFileSystemInfoConstructor(receiverType, methodName))
-            {
-                return true;
-            }
-
             return AvailableStaticMethods.GetTypeInformationFromTypeCache(receiverType.FullName, methodName) != null;
         }
 
         /// <summary>
         /// Returns <see langword="true"/> for <c>[System.IO.FileInfo]::new(...)</c> and
-        /// <c>[System.IO.DirectoryInfo]::new(...)</c>. These constructors are dispatched by
-        /// <see cref="WellKnownFunctions.TryExecuteWellKnownConstructorNoThrow"/>.
+        /// <c>[System.IO.DirectoryInfo]::new(...)</c>, whose path argument is resolved like
+        /// <c>System.IO.File</c> and <c>System.IO.Directory</c> path arguments.
         /// </summary>
         private static bool IsFileSystemInfoConstructor(Type receiverType, string methodName)
             => (receiverType == typeof(System.IO.FileInfo) || receiverType == typeof(System.IO.DirectoryInfo))

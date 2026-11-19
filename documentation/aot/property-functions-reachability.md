@@ -228,7 +228,8 @@ the overload silently fail to bind.
   receiver type are eligible, so object construction is limited to allowlisted
   types (e.g. `[System.Globalization.CultureInfo]::new('en-US')`).
   `[System.IO.FileInfo]::new(path)` and `[System.IO.DirectoryInfo]::new(path)` are
-  admitted by `IsStaticMethodAvailable` and constructed directly by
+  allowlisted as `::new` entries in `AvailableStaticMethods` (like `CultureInfo::new`)
+  and constructed directly by
   `TryExecuteWellKnownConstructorNoThrow`; members on the result follow the
   normal instance-receiver rules (the read-only `FileSystemInfo` allowlist when
   receivers are restricted).

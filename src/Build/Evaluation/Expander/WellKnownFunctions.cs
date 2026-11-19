@@ -992,9 +992,10 @@ namespace Microsoft.Build.Evaluation.Expander
                         returnVal = receiverType == typeof(FileInfo) ? new FileInfo(path) : new DirectoryInfo(path);
                         return true;
                     }
-                    catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                     {
-                        // Fall back to the binder, which reports invalid paths as property function errors.
+                        // Fall back to the binder, which reports the failure as a property function error.
+                        // Execute does not guard this call, so an escaping exception would be misreported as MSB4186.
                     }
                 }
             }
