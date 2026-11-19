@@ -1609,7 +1609,7 @@ namespace Microsoft.Build.BackEnd
                 using CancellationTokenSource timeout = new(timeoutMilliseconds);
                 try
                 {
-                    await process.WaitForExitStatusAsync(timeout.Token).ConfigureAwait(false);
+                    await process.WaitForExitAsync(timeout.Token).ConfigureAwait(false);
                     return true;
                 }
                 catch (OperationCanceledException) when (timeout.IsCancellationRequested)
