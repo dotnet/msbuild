@@ -1,4 +1,4 @@
-# Precompute Expansion Plans
+# Precompute Compute-Phase Properties and Items
 
 ## Status
 
@@ -15,8 +15,9 @@ Compute work often produces properties and items that later work consumes:
 - a compute task writes properties and items through `<Output />`;
 - a property or item operation inside a target is assigned to the compute phase, for example to glob files that only exist during compute.
 
-Properties and items in targets are parsed and expanded once, during precompute. 
-When they run in the compute phase, the result is captured as an expansion plan: a minimal representation that compute expands efficiently once compute-phase properties and items are available.
+Tasks and property and item operations in compute work are expanded the same way, in two passes.
+Precompute expands everything it can and leaves references to compute-phase values in place.
+Compute expands the result again with the normal code once compute-phase values are available.
 
 ### Existing Behavior
 
@@ -46,10 +47,16 @@ A property or item becomes compute-phase when compute work writes it:
 `Phase` on a property or item element accepts `Precompute`, the default, and `Compute`.
 It is only supported on elements inside a target; work that must observe compute results moves into a target.
 The phase is never inferred: an operation that references a compute-phase value must itself be marked `Phase="Compute"`, so each error points at the operation that needs a decision.
-`Phase` becomes a reserved attribute on item elements in all modes, so it can no longer be used to set metadata named `Phase`.
+
+`Phase` only has meaning when precompute is enabled:
+
+- On an item element, a `Phase` attribute is parsed as metadata, as it is today.
+  Normal builds keep that metadata; precompute treats the attribute as the phase and does not set the metadata.
+- On a property element, a `Phase` attribute is accepted and ignored by normal builds.
+  Property elements reject unknown attributes today, so this does not change any valid project.
 
 A property or item can start as precompute and later become compute-phase.
-Its precompute value at that point carries into the compute phase:
+Its value at that point, its *original precompute value*, carries into the compute phase:
 
 ```xml
 <Foo Include="X" />
@@ -75,52 +82,70 @@ A property or item name that depends on a compute-phase value, such as `@($(CFoo
 ### Precompute Substitutions
 
 Precompute runs targets as a normal build does.
-Every precompute property and item operation runs immediately, so graph-shaping state, such as the `Compile` items that feed a target's `Inputs`, is fully known when the graph is built.
+Every precompute task and property and item operation runs immediately, so graph-shaping state, such as the `Compile` items that feed a target's `Inputs`, is fully known when the graph is built.
 
 Compute tasks and compute operations are captured into the target's compute node instead of running.
-Capturing parses and expands their expressions once, as far as precompute can.
 
-### Expansion Plans
+### Two-Pass Expansion
 
-Inside compute work, precompute substitutes references to precompute values: precompute properties, and precompute items with their metadata.
-Everything else is left for compute: references to compute-phase values and every operation, such as transforms, item functions, wildcards, and condition functions.
-What remains is an expansion plan, stored in the graph.
+Each attribute of compute work is expanded twice:
 
-| Expression in compute work | Expansion plan |
+- **Pass 1 (precompute)** runs the normal expander and substitutes precompute values.
+  References to compute-phase values are left as text, together with any transform, item function, separator, or property function applied to them.
+- **Pass 2 (compute)** runs the normal expander, condition evaluator, intrinsic task, or task parameter binding on the pass 1 result, with the compute-phase values the node imports.
+
+| Expression in compute work | Pass 1 result |
 | --- | --- |
-| `$(P)` | P's value |
-| `@(P)` | P's items, with metadata |
-| `@(C)` | a reference to C |
-| `@(C);@(P)` | a reference to C, then P's items |
-| `@(C->'$(P)\%(Filename)')` | a transform over C, with P's value in the template |
-| `@(P->'%(Filename).obj')` | a transform over P's items, run during compute |
-| `$(OutDir)gen\*.cs` | a wildcard, expanded during compute |
+| `$(PFoo)` | PFoo's value if it is plain, otherwise `$(__PFoo)` |
+| `$(CFoo)` | `$(CFoo)` |
+| `$(PFoo.ToUpper())` | the function's result if it is plain, otherwise a temporary holding it |
+| `$([MSBuild]::NormalizeDirectory($(CFoo)))` | unchanged |
+| `$([MSBuild]::NormalizeDirectory($(CFoo), $(PFoo)))` | `$([MSBuild]::NormalizeDirectory($(CFoo), $(__PFoo)))`, with `__PFoo` holding PFoo's value |
+| `@(PFoo)` | `@(__PFoo)`, a snapshot of PFoo's items with metadata |
+| `@(CFoo)` | `@(CFoo)` |
+| `@(PFoo);@(CFoo)` | `@(__PFoo);@(CFoo)` |
+| `@(PFoo->'%(Filename).obj')` | `@(__PFoo)`, holding the transformed items with the metadata they copy from PFoo's items |
+| `@(CFoo->'$(PFoo)\%(Filename)')` | `@(CFoo->'pfoo\%(Filename)')` if PFoo is plain, otherwise `@(CFoo->'$(__PFoo)\%(Filename)')` |
+| `@(CFoo->Count())`, `@(CFoo, ',')` | unchanged |
+| `$(PFoo)` whose value is `@(PBar)` | `$(__PFoo)`, holding `@(__PBar)`, a snapshot of PBar, as the item pass would find it in a normal build |
+| `$(CFoo)` whose original precompute value is `@(PBar)` | `$(CFoo)`; the original value is stored as `@(__PBar)`, so pass 2 expands it to PBar's items if no compute write replaces it, such as when a conditional compute write's condition is false |
+| `%(PFoo.Culture)` in a precompute batch | the bucket's value, with `%` escaped |
+| `$(OutDir)gen\*.cs` | `bin\gen\*.cs`; the wildcard is expanded in pass 2 |
+| `@($(CFoo))` | error; item type names must be known during precompute |
 
-Here `P` is a precompute property or item and `C` is compute-phase.
+Here `PFoo` and `PBar` are precompute properties or items and `CFoo` is compute-phase.
 
-Running operations during compute matches a normal build, because they see the same precompute values.
-It also lets them see files that compute produces, without a list of which MSBuild functions are safe to run early.
+Pass 2 is the normal code on equivalent text, so expansion during compute behaves as in a normal build, including property functions, transforms, item functions, wildcards, and item syntax in property values.
 
-Compute runs each node in a fresh MSBuild process, without the project or its state.
-Capturing a plan, instead of saving the original text and parsing and expanding it again during compute, provides:
+Anything pass 1 evaluates sees the file system as it is during precompute, as precompute tasks do.
+Work that must observe files produced during compute, such as `Exists()` or `%(ModifiedTime)` on generated files, belongs in a compute property or item, which pass 2 evaluates.
 
-- **Efficiency.** Compute only fills in compute-phase values and runs the remaining operations.
-- **Correct escaping.** Substituted values stay separate from syntax, so a literal `%24(Foo)` is never expanded as `$(Foo)`.
-- **Self-containment.** A plan names exactly the compute-phase values it reads; everything else is already substituted.
-- **Determinism.** A plan is a small, canonical description of the work, suitable as part of the node's identity.
+#### Temporaries
+
+Pass 2 rescans the pass 1 text, which a normal build never does with a substituted value, so pass 1 writes a precompute value as text only when pass 2 cannot read syntax in it:
+
+1. A precompute property value is written as text if it is plain: it contains none of `$`, `%`, `@`, or `'`, and does not start with `(`.
+   Any other value is stored in the node as a temporary compute-phase property, and pass 1 writes a reference to it.
+   Pass 2 substitutes the temporary once, at the stage a normal build substitutes the value, so every character keeps the meaning it has in a normal build.
+2. Every precompute property in a property function left for pass 2 is a temporary, because a normal build parses the function before substituting values.
+3. Metadata from a precompute batch is written as text, with `%` written as `%25` unless it starts a `%XX` escape, and in a condition `'` written as `%27`.
+   A normal build expands properties and items after metadata, as pass 1 does, and never reads a metadata value's `%`, or in a condition its `'`, as syntax.
+4. An item expression of precompute items with no compute-phase reference or temporary is evaluated in pass 1, including its transforms and item functions, and replaced by a temporary item type holding its result items, so their metadata survives pass 2.
+   In any other item expression, a precompute item type is replaced by a snapshot of its items.
+5. A temporary property whose value contains item syntax has its precompute item types replaced by snapshots, so pass 2 expands them as the item pass of a normal build would at that point.
+   This includes the original precompute value of a property that becomes compute-phase.
+
+A temporary is named `__P` followed by the property or item it holds, such as `__PSchema` for `Schema`, with a suffix if the same name is captured more than once in a node.
+A temporary captures the value at the point it is read, so a later change to the same name, including the name becoming compute-phase, does not affect it.
 
 ### Conditions
 
-Conditions on compute work may reference compute-phase values.
-Precompute evaluates what it can, with the same short-circuit rules as a normal build:
+The phase of the whole element determines when its condition is evaluated and when its wildcards are expanded.
 
-- false AND unknown is false;
-- true AND unknown keeps the unknown part;
-- true OR unknown is true;
-- false OR unknown keeps the unknown part.
-
-A condition that is false during precompute drops its task or operation.
-Any remaining condition is evaluated during compute.
+- A precompute element's condition is evaluated during precompute; reading a compute-phase value is an error.
+- A compute element's condition goes through pass 1.
+  If the result reads no compute-phase value, it is evaluated during precompute: false drops the element, true removes the condition.
+  Otherwise the whole condition is evaluated during compute, with normal short-circuit semantics.
 
 ### Compute Nodes and Values
 
@@ -132,17 +157,23 @@ A node produces the compute-phase properties and items it writes, and consumes t
 It depends on the nodes that produce what it consumes.
 Values flow between nodes in precompute order:
 
-- a property's value is its latest producer's value;
-- a node that reads an item type loads its full value and publishes the full value if it also writes it;
-- a node that only adds to an item type does not load it, does not depend on its earlier producers, and publishes only the items it adds;
-- an item's value is the latest full value followed by the items added after it, in order.
+- a node that reads or writes a compute-phase property or item type imports its full value from the latest producer;
+- a node that writes it exports its full value and becomes the latest producer.
+
+A node that only adds items still imports and depends on the earlier value.
+This adds dependencies a normal build does not need, but keeps the value flow simple.
+
+A possible refinement is to skip the import for a node that only adds.
+Pass 1 already scans each step for the compute-phase names it reads.
+If no step in a node references `@(Type)` and none removes, modifies, or deduplicates `Type`, the node does not import it, its exported items are exactly the items it adds, and readers append them after the latest full value.
+This restores independent producers using information precompute already collects, at the cost of a second kind of export.
 
 A missing value is an error; a produced empty value is valid.
 
 ### Compute Execution
 
 The node executor imports the compute-phase values the node consumes.
-For each step it evaluates the remaining condition, fills the plan's references with imported values, runs the remaining operations with the same expansion code as a normal build, including expanding items after properties, and then runs the task or applies the operation.
+It initializes the node's temporaries, then runs each step's pass 2: it evaluates the remaining condition and runs the task or the property or item operation with the normal code.
 Items created during compute receive the project's item definitions, captured during precompute.
 The node then exports the values it produces.
 
@@ -184,25 +215,35 @@ The node then exports the values it produces.
 
 1. `GenDir` is a precompute property, so it is set to `bin\gen\` immediately.
 2. `GenTask` is a compute task, so it is captured.
-   `OutputDirectory` becomes `bin\gen\`, and `Sources` becomes the `Schema` items.
+   `OutputDirectory` becomes `bin\gen\`, and `Sources` becomes `@(__PSchema)`, a snapshot of `Schema`.
    Its `<Output />` makes `GenManifest` compute-phase.
 3. `Gen` is a compute operation, so it is captured.
    Its wildcard is left for compute, because the generated files do not exist yet.
    `Gen` becomes compute-phase.
-4. `GenRefs` transforms `Gen`, which is now compute-phase, so the transform is left for compute.
+4. `GenRefs` transforms `Gen`, which is now compute-phase, so `@(Gen->'%(Filename).ref')` is left as text.
    `GenRefs` becomes compute-phase.
 5. `FileWrites` is a precompute operation, so it runs immediately.
    If it referenced `@(Gen)`, it would be an error.
 
-`Build` then captures `Csc`.
-Its condition and parameters mix precompute values with references to `GenManifest`, `Gen`, and `GenRefs`.
+`Build` then captures `Csc`:
+
+```text
+Condition:      '$(GenManifest)' != ''
+Sources:        @(__PCompile);@(Gen)      __PCompile = snapshot of Compile
+References:     @(GenRefs)
+OutputAssembly: bin\app.dll
+```
+
+The condition reads `GenManifest`, so it is evaluated during compute.
 
 #### Graph
 
 - `Generate` node
+  - Temporaries: `__PSchema`.
   - Steps: `GenTask`, `Gen`, `GenRefs`.
   - Produces: `GenManifest`, `Gen`, `GenRefs`.
 - `Build` node
+  - Temporaries: `__PCompile`.
   - Steps: `Csc`.
   - Consumes: `GenManifest`, `Gen`, `GenRefs`.
   - Depends on: `Generate`.
@@ -215,235 +256,129 @@ The `Generate` node runs `GenTask` and sets `GenManifest`.
 It expands `bin\gen\*.cs`, applies the exclude, and creates `Gen` items with `Origin` and the item definitions for `Gen`.
 It transforms `Gen` into `GenRefs` and exports all three values.
 
-The `Build` node imports them, evaluates its condition, finishes each parameter, and runs `Csc`.
+The `Build` node imports them, evaluates its condition, expands each parameter, and runs `Csc`.
 
 ### Limitations
 
-The following are errors in this version:
+The following table summarizes what compute work supports when precompute is enabled:
 
-- **Property functions in compute work.**
-  They cannot be represented in a plan yet; running them during compute requires changes to the property function implementation.
-  Condition functions such as `Exists` are supported.
-- **Batching over compute-phase items**, for targets, tasks, and operations.
-  Batching over precompute items is resolved during precompute.
-  A later version could support compute target batching with a container node that expands during compute into one child node per batch.
-- **`Phase` on `PropertyGroup` and `ItemGroup`**, and a separate deferred condition attribute.
-  A single `Condition` is partially evaluated instead.
-- **Compute-phase values in target `Returns`.**
-- **Compute-phase values in task attributes other than parameters and `Condition`**, such as `ContinueOnError`.
+| Feature | Supported | Notes |
+| --- | --- | --- |
+| Property functions, transforms, item functions on compute-phase values | Yes | Run in pass 2 by the normal expander |
+| Wildcards in compute item operations | Yes | Expanded in pass 2, so they see files produced during compute |
+| Compute item `Remove`, metadata-only modifications, and item modifiers | Yes | Pass 2 runs `ItemGroupIntrinsicTask` unchanged |
+| Conditions reading compute-phase values | Yes | Evaluated whole during compute |
+| Task and operation batching over precompute items | Yes | Resolved during precompute |
+| Task and operation batching over compute-phase items only | Yes | Done in pass 2 |
+| Batching over both precompute and compute-phase items | No | Buckets would mix values from both phases |
+| Target batching over compute-phase items | No | Target batches are graph nodes, so their number must be known during precompute |
+| Compute-phase values in task attributes other than parameters and `Condition` | No | Such as `ContinueOnError` |
+| `Phase` on `PropertyGroup` and `ItemGroup` | No | Phase is set per operation |
 
-### Open Questions
+When precompute is enabled, the unsupported cases are errors.
+Target batching over compute-phase items could later be supported with a container node that expands during compute into one child node per batch.
 
-#### Compute item operations beyond `Include`
+Other differences from a normal build:
 
-Compute item operations support `Include`, `Exclude`, and metadata.
-Whether, when, and how to support `Remove`, metadata-only modifications, and the `KeepMetadata`, `RemoveMetadata`, `KeepDuplicates`, and `MatchOnMetadata` modifiers is not yet decided; until then they are errors.
-
-These operations read the type's full value, so they fit the value flow described above.
-Supporting them requires compute to run the existing `ItemGroupIntrinsicTask` remove, modify, and duplicate-matching logic on specs resolved from plans.
+- A condition that reads a compute-phase value is evaluated whole during compute and is never partially evaluated during precompute, so it still produces a compute step even if a precompute part would make it false.
+  The existing condition nodes only evaluate to true or false, and partial evaluation needs an unknown result.
+  A possible improvement is to walk only the `and`, `or`, and `not` nodes of the parsed condition, evaluate subtrees that read no compute-phase value with the existing code, and drop the step if the result is false, keeping the original condition text otherwise.
 
 ### Considerations
 
-- **Non-Precompute Compatibility**: Behavior and performance are unchanged when precompute mode is not enabled, except that `Phase` is reserved on item elements.
-- **Precompute Compatibility**: Compute work produces the same results as a normal build; anything that cannot be represented is an error.
-- **Code Sharing**: Precompute and compute use the same expansion code as a normal build; there is no second implementation.
+- **Non-Precompute Compatibility**: Behavior and performance are unchanged when precompute is not enabled.
+  This takes priority over the elegance of precompute syntax.
+- **Precompute Compatibility**: Compute work produces the same results as a normal build except as listed above.
+  Restrictions that only apply when precompute is enabled are acceptable when the patterns they reject are rare.
+- **Code Sharing**: Both passes use the normal expansion, condition, intrinsic task, and task binding code; there is no second implementation.
 
 ## Implementation
-
-### Implementation Options
-
-Two ways of structuring the code are considered; the sections after this one describe Option 2, the intended plan.
-
-#### Option 1: Substitute escaped values, reparse during compute
-
-This would be similar to the prototype and purely meant to unblock other work by making minimal changes to how property expansion and item expressions work today.
-Precompute substitutes every value it knows into the operation's text, escaped so that a reparse cannot find new syntax in it.
-Compute reparses that text with the normal expander, evaluator, and intrinsic task code.
-There are no plan types.
-
-- **Precompute output**, per compute operation and bucket:
-  - Bucket metadata and precompute property values, including property function results, are substituted as the normal passes produce them, with `$` written as `%24`, and `'` written as `%27` in condition text.
-    A normal build never rescans a value for `$(`, so this changes nothing.
-  - `@(` and `;` in values are left as is, because a normal build's item pass sees them too.
-  - References to compute-phase properties and all item expressions stay as text, with snapshots of the precompute item types they name.
-  - Property functions that read a compute-phase value are an error.
-- **Conditions:** a condition that reads no compute-phase name after substitution is evaluated during precompute; otherwise it is evaluated whole during compute.
-- **Compute:** builds a `Lookup` from the snapshots and imported values, then runs the existing intrinsic task logic on the substituted element with no batching.
-  The final unescape restores the original characters, as in a normal build.
-  The compute-phase names an operation reads are found by scanning its text.
-- **Known limitation:** a substituted value containing a literal `%(` outside an item transform is expanded as metadata by the compute reparse, where a normal build leaves it literal.
-  Inside a transform template, such as `@(Compile->'$(ObjTemplate)')`, it behaves as in a normal build.
-
-Pros: very little new code; normal build semantics; most values collapse into the text.
-Cons: compute reparses each operation; item expressions stay as references; the literal `%(` limitation above; conditions that read compute-phase values are not partially evaluated.
-
-#### Option 2: One build-and-execute path (intended)
-
-Every expression and condition is built by the existing parsers and passes into an `ExpansionResult` or a condition tree, then executed.
-A normal build never defers anything, so its result is always a value or an ordinary tree.
-
-- **Expander:**
-  - The passes write into a shared struct result builder instead of handing strings to each other.
-    Known text goes into the pooled string builder as today; deferred parts allocate only when one appears, so a normal build allocates nothing extra.
-  - The deferral decision is a struct type parameter: one that never defers for a normal build, and one backed by compute-phase state for precompute.
-    Each is compiled separately, so the normal build has no added checks.
-  - Execution builds item expression captures from plan nodes and runs the normal item pass, which also covers item syntax in a carried precompute value.
-  - Splitting and itemizing becomes one step shared by both; the existing entry points become wrappers that return the value.
-- **Conditions:**
-  - The condition plan is the normal `GenericExpressionNode` tree.
-  - Each node gains partial evaluation, returning true, false, or a remaining node using its own short-circuit and comparison logic, and serialization.
-  - Leaves hold source text and an optional plan; compute evaluates the remaining tree as a normal build would.
-- **Intrinsic tasks:**
-  - One loop produces a condition result and an `ExpansionResult` per operation, then applies it immediately or records a compute step.
-  - The add path is split into stages that both a normal build and compute call: fragments to items, metadata, then adding to `Lookup`.
-
-Pros: no duplicated logic; a normal build and precompute differ only in the deferral policy.
-Cons: broader changes to the property and item expanders, the condition nodes, and `ItemGroupIntrinsicTask`; the items entry point is a hot path in normal builds and needs benchmarking.
 
 ### Compute-Phase State
 
 `Lookup` records compute-phase property names and item types, and the precompute value each had when it became compute-phase.
 
 `Lookup` also enforces precompute reference errors.
-Reading a compute-phase property, or the items of a compute-phase item type, through `Lookup` is an error.
+Reading a compute-phase property, or the items of a compute-phase item type, through `Lookup` is an error, except from pass 1.
 This covers every precompute reader, including those that bypass `Expander`, such as `BatchingEngine` and `ItemGroupIntrinsicTask`.
-Only the plan entry points described below check whether a name is compute-phase before reading it.
 
 The state exists only during precompute.
-Outside precompute the check is a single null test, and evaluation does not use `Lookup`.
+Outside precompute the check is a single null test.
 
-### Expander Entry Points
+### Pass 1
 
-The existing expansion methods, such as `ExpandIntoStringLeaveEscaped` and `ExpandIntoItemsLeaveEscaped`, keep their signatures and behavior.
+Pass 1 is the existing expander with a pass 1 mode that `Lookup`'s compute-phase state turns on:
 
-Compute work uses new entry points that return either a value or a plan:
+- The property pass leaves a reference to a compute-phase property as its original text.
+  A property function whose receiver or arguments read a compute-phase value is left as its original text, with precompute properties inside it replaced by temporaries.
+  Any other precompute value is written as text if it is plain, and as a temporary otherwise.
+- The metadata pass leaves metadata of compute-phase items as its original text.
+- The item pass leaves an item expression over a compute-phase item type, or containing a compute-phase reference or temporary, as its text, with a precompute item type replaced by a snapshot.
+  After the property pass, the only `$(` left is a compute-phase reference or a temporary, so this is read from the text.
+  Any other item expression, including its transforms and item functions, is evaluated and replaced by a reference to a temporary holding its result items.
 
-```csharp
-internal readonly struct ExpansionResult
-{
-    public string? Value { get; }            // fully expanded, escaped
-    public ExpansionPlanNode? Plan { get; }
-}
+The property and item passes take a writer, `IExpansionWriter`, that decides what each part of the expression writes.
+A normal build uses a writer that does exactly what the passes did before, so its code is unchanged.
 
-internal ExpansionResult ExpandOrPlanIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation location);
-internal ExpansionResult ExpandOrPlanIntoItemsLeaveEscaped(string expression, ExpanderOptions options, IElementLocation location);
-```
+The existing entry points keep their signatures and behavior outside pass 1.
+Pass 1 reports property reads and writes to the existing tracking, such as `PropertiesUseTracker` and BuildCheck, where they are captured.
 
-- The string entry point is used for property values, metadata values, and condition operands.
-  It expands a plain `@(P)` to text, as string expansion does today.
-- The items entry point is used for item `Include` and `Exclude` and for compute task parameters.
-  It keeps every item expression in the plan, so precompute items keep their metadata.
-  A task parameter's type is not known until the task is loaded during compute, so compute decides whether the parameter becomes items or a string.
+### Compute Steps
 
-The new entry points run the same metadata, property, and item passes once, and build the plan from what they find.
-The existing entry points are unchanged.
+A compute step is the element's existing instance with its attributes replaced by their pass 1 results:
 
-The new entry points report property reads and writes to the existing tracking, such as `PropertiesUseTracker` and BuildCheck, as normal expansion does.
-A reference to a compute-phase property is reported as a read where it is captured, even though its value is not read until compute, and a compute write is reported as a write where it is captured.
+- property operations use `ProjectPropertyGroupTaskPropertyInstance`;
+- item operations use `ProjectItemGroupTaskItemInstance`;
+- tasks use `ProjectTaskInstance`, with each parameter's pass 1 result.
 
-### Capturing Plans
+Each step keeps its condition, if it was not resolved during precompute, and its source locations.
+Bucket metadata from precompute batching is substituted in pass 1, so steps carry no batching state.
 
-Precompute parses each expression once and builds plan nodes directly:
+The node payload holds its steps, its temporaries as `ProjectPropertyInstance` and `ProjectItemInstance` values, the compute-phase values it imports, an item definition table for the item types it creates, and the project's defining file.
+All of these already implement `ITranslatable`.
 
-- The metadata pass is unchanged; batching over compute-phase items is an error, so metadata is always known.
-- The property pass substitutes precompute property values, so the item pass sees the same text as in a normal build.
-  A reference to a compute-phase property becomes a `PropertyReference`.
-  If the property's carried precompute value contains item syntax, the item types it references are recorded on the `PropertyReference`, as snapshots or references.
-  Property functions in compute work are an error.
-- The item pass parses item expressions with `ExpressionShredder` as it does today.
-  Each item expression becomes an `ItemExpression` whose step arguments and separator are plans, so a compute-phase property inside a transform template, such as `@(Foo->'$(ComputeDir)%(Filename)')`, is a `PropertyReference` in the step.
-  A plain `@(P)` in the string entry point is expanded to text.
-- The remaining text becomes literals.
+The compute-phase names a step reads are found by scanning its pass 1 text for property and item references.
+Over-approximating only adds a graph dependency.
 
-A compute-phase reference where a name is expected, as in `@($(CFoo))`, is an error.
-No transform, item function, or property function runs on a compute-phase value during precompute.
+### Compute Execution
 
-### Consuming Plans
+During compute, the node builds a `Lookup` from its temporaries and imports.
+It runs each step with the normal code: `PropertyGroupIntrinsicTask` or `ItemGroupIntrinsicTask` for property and item operations, and normal parameter expansion and binding for tasks.
+Items created during compute look up their item definitions by item type, as they would in the project instance.
+The node then exports the values it produces.
 
-- A string consumer concatenates the plan's parts; item expressions produce their usual string form.
-- An item consumer splits literal text and property values on `;`, as item expansion does after property expansion.
-  A fragment that is exactly one item expression produces items with their metadata.
-  Any other fragment produces an item spec; item `Include` and `Exclude` specs are expanded with `FileMatcher`.
-  An item expression that shares a fragment with other text is an error.
-
-### Condition Plans
-
-`ConditionEvaluator` separates parsing a condition from evaluating it.
-One entry point parses a condition into a `GenericExpressionNode` tree; another evaluates a tree with a given evaluation state.
-The existing entry point keeps its parsed-tree cache and calls both.
-
-Precompute parses each condition into the existing tree, captures each expandable operand as a plan, and folds subtrees whose operands are known, using the short-circuit rules above.
-Function calls are never folded.
-Operands are string plans, except function arguments, which are item plans of the argument after its path is fixed, as in a normal build.
-A remaining condition becomes a `ConditionPlan`; each leaf keeps its source text and its plan.
-
-During compute, the remaining condition is rebuilt as a `GenericExpressionNode` tree.
-Each `StringExpressionNode` leaf keeps its source text and expands its plan only when the evaluator reads it, so short-circuited operands are never expanded.
-Checks that depend on source text, such as the empty-operand shortcut and the `$(MSBuildToolsVersion)` version comparison, behave as in a normal build.
-`ConditionEvaluator` then evaluates the tree with its normal semantics.
-
-Outside precompute a leaf has no plan; each leaf expansion costs one null check and evaluation allocates nothing new.
-
-### Plan Execution
-
-Compute walks the plan nodes; it does not parse or rescan text:
-
-- `PropertyReference` nodes are filled with imported escaped values;
-- `ItemExpression` nodes become `ItemExpressionCapture` instances built from their fields, with step arguments and separators filled the same way, and run through the existing transform and item function code;
-- an item consumer splits literal text and property values on `;` while walking the nodes, using the same rule as `SemiColonTokenizer`, and item specs are expanded with the existing item-spec and `FileMatcher` logic.
-
-The one exception is a carried precompute value with item syntax: after the value is filled in, its item syntax is expanded with the items recorded on the `PropertyReference`, as the item pass would in a normal build.
-Values produced during compute contain no item syntax.
-
-### Serialized Types
-
-The node payload adds these types, all implementing `ITranslatable`:
-
-```csharp
-LiteralPlanNode           { string EscapedValue }
-PropertyReferencePlanNode { string Name; ItemExpressionPlanNode[]? ItemInputs }
-ItemExpressionPlanNode    { string ItemType; ProjectItemInstance[]? Items; ItemExpressionStep[] Steps; ExpansionPlanNode? Separator }
-ConcatPlanNode            { ExpansionPlanNode[] Parts }
-
-ItemExpressionStep        { string? FunctionName; ExpansionPlanNode? Arguments }   // null FunctionName = transform
-
-ConditionPlan             { ConditionPlanKind Kind; ConditionPlan[] Children; string? Text; ExpansionPlanNode? Operand }   // Text: leaf source text or function name
-
-ComputePropertyOperation  { string Name; ExpansionPlanNode Value; ConditionPlan? Condition; ElementLocation Location }
-ComputeItemOperation      { string ItemType; ExpansionPlanNode Include; ExpansionPlanNode? Exclude; ComputeMetadata[] Metadata;
-                            ConditionPlan? Condition; ElementLocation Location }
-ComputeMetadata           { string Name; ExpansionPlanNode Value; ConditionPlan? Condition }
-```
-
-An `ItemExpressionPlanNode` always records its item type; it reads either that compute-phase item type or, when `Items` is set, a snapshot of precompute items.
-`ItemInputs` holds the items for item syntax in a property's carried precompute value.
-Step arguments and the separator are argument text, such as a transform template, with compute-phase properties as references.
-
-| Type | New or reused | Use |
-| --- | --- | --- |
-| Plan nodes, `ItemExpressionStep` | New | Expansion plans; rebuilt as `ItemExpressionCapture` during compute |
-| `ConditionPlan` | New | Remaining conditions; rebuilt as `GenericExpressionNode` during compute |
-| `ComputePropertyOperation`, `ComputeItemOperation`, `ComputeMetadata` | New | Node steps for compute operations |
-| `ProjectItemInstance` | Reused | Precompute item snapshots; exported and imported items |
-| `ProjectPropertyInstance` | Reused | Exported and imported properties |
-| `ProjectItemDefinitionInstance` | Reused | Node table of item definitions for items created during compute |
-| `PropertyDictionary`, `ItemDictionary` | Reused | Export and import tables |
-| `ElementLocation` | Reused | Source locations for compute-time errors |
-
-Compute task steps hold parameter plans and a condition plan.
-
-Each node also holds the project's defining file and an item definition table for every item type its operations and task outputs create.
-Items created during compute look up their definition by item type, as they would in the project instance.
-
-Plan nodes use a `byte` kind tag and one factory switch, following `TaskParameter`.
-The graph format version covers plan kinds; an unknown kind is an error.
-This version does not deduplicate strings or items.
+Because pass 2 runs `ItemGroupIntrinsicTask` unchanged, compute item operations support `Remove`, metadata-only modifications, and the item modifiers.
+Every step that reads or writes an item type imports its full value, so these follow the value flow described above.
 
 ### Differences from the Prototype
 
-- The prototype stores compute property and item elements as raw text and reruns them during compute against a rebuilt `Lookup`; this design stores plans.
-- The prototype substitutes compute-phase values into task parameters as `$(Name)` and `@(Type)` text and re-expands it during compute; this design stores references.
+- The prototype stores compute property and item elements as raw text and fully expands them during compute; pass 1 now expands them as far as precompute can, as the prototype already does for task parameters.
+- The prototype loses metadata when precompute items are written into compute text; temporaries keep it.
 - The prototype transports values as JSON, losing escaping and item definitions; this design uses existing instance translation.
-- The prototype splits conditions into `Condition` and `DeferredCondition`; this design partially evaluates a single `Condition`.
-- The prototype batches compute property and item operations during compute; this design makes it an error.
+- The prototype splits conditions into `Condition` and `DeferredCondition`; this design uses a single `Condition` whose evaluation follows the element's phase.
+- The prototype batches compute property and item operations during compute; this design does too, except for batching over both phases.
 
+## Future: Expansion Plans
+
+Pass 2 reparses text during compute.
+A later version can replace the pass 1 text with expansion plans: structured, translatable results that compute finishes without reparsing.
+
+### Key Ideas
+
+- Expansion produces a result that is either a value or a plan, built up as the passes run.
+  A normal build never defers anything, so its result is always a value.
+- A plan is a small tree of translatable nodes: literals, references to compute-phase properties, item expressions over a compute-phase item type or a precompute snapshot, and concatenations.
+- Precompute values are folded into literals, and literals are never rescanned, so escaping needs no special rules.
+- Conditions are parsed into the normal condition tree and partially evaluated with normal short-circuit rules; the remaining tree is pruned, serialized, and evaluated during compute.
+- Compute walks the plan and calls the normal item and condition code, without parsing.
+- The deferral decision is a struct type parameter, so a normal build has no added checks.
+
+### Challenges
+
+- **Expansion and evaluation are coupled.**
+  The expander passes hand strings to each other, condition parsing and evaluation run together, and intrinsic tasks expand and apply in one loop.
+  These must be separated before results can be captured.
+- **Risk to normal builds.**
+  The changes touch hot, core parts of the expander, condition evaluator, and intrinsic tasks, and need benchmarking.
+- **Duplicated code.**
+  Building plan code beside the existing code avoids that risk but repeats its control flow, and the copies can drift.
