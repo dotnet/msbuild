@@ -38,21 +38,41 @@ public sealed class TaskHostCancellation_Tests
     }
 
     [Theory]
-    [InlineData(nameof(CancellationContextTask), false)]
+    [InlineData(8, true)]
+    [InlineData(9, false)]
+    public void YieldRemainsANoOpUntilEnabledByCapableParent(byte version, bool enabled)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        OutOfProcTaskHostNode node = new();
+        typeof(OutOfProcTaskHostNode).GetField("_parentPacketVersion", InstanceFields)!.SetValue(node, version);
+        typeof(OutOfProcTaskHostNode).GetField("_yieldingEnabled", InstanceFields)!.SetValue(node, enabled);
+
+        // No endpoint or task context exists: neither method can send a callback in legacy mode.
+        node.Yield();
+        node.Yield();
+        node.Reacquire();
+        node.Reacquire();
+    }
+
+    [Theory]
+    [InlineData(nameof(CancellationContextTask), false, false)]
+    [InlineData(nameof(CancellationContextTask), false, true)]
 #if NETFRAMEWORK
-    [InlineData(nameof(IsolatedCancellationContextTask), true)]
+    [InlineData(nameof(IsolatedCancellationContextTask), true, false)]
+    [InlineData(nameof(IsolatedCancellationContextTask), true, true)]
 #endif
-    public void CancelCallbackCanSetAllowFailureWithoutError(string taskName, bool isolated)
+    public void CancelCallbackCanSetAllowFailureWithoutError(string taskName, bool isolated, bool yield)
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
         TransientTestFile cancelled = env.CreateFile("cancelled.txt", string.Empty);
         TransientTestFile binlog = env.CreateFile("cancellation.binlog", string.Empty);
         TransientTestFile project = env.CreateFile("cancellation.proj", $"""
             <Project>
               <UsingTask TaskName="{taskName}" AssemblyFile="{typeof(CancellationContextTask).Assembly.Location}" TaskFactory="TaskHostFactory" />
               <Target Name="Build">
-                <{taskName} ResultFile="{cancelled.Path}" />
+                <{taskName} ResultFile="{cancelled.Path}" YieldBeforeWaiting="{yield}" />
               </Target>
             </Project>
             """);
@@ -302,6 +322,7 @@ public sealed class TaskHostCancellation_Tests
         public IBuildEngine BuildEngine { get; set; } = null!;
         public ITaskHost HostObject { get; set; } = null!;
         public string ResultFile { get; set; } = null!;
+        public bool YieldBeforeWaiting { get; set; }
 
         public bool Execute()
         {
@@ -309,6 +330,10 @@ public sealed class TaskHostCancellation_Tests
             using Process process = Process.GetCurrentProcess();
             log.LogMessage(MessageImportance.High, "CancellationTaskPid={0}", process.Id);
             log.LogMessage(MessageImportance.High, "CancellationTaskIsolated={0}", !AppDomain.CurrentDomain.IsDefaultAppDomain());
+            if (YieldBeforeWaiting)
+            {
+                ((IBuildEngine3)BuildEngine).Yield();
+            }
             log.LogMessage(MessageImportance.High, ReadyMessage);
             if (!_cancelled.Wait(TimeSpan.FromSeconds(15)))
             {

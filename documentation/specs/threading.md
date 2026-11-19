@@ -15,3 +15,27 @@ When a project is _yielded_, the node is also yielded. The scheduler may then de
 The scheduler limits the amount of total work being done, including both executing and yielded nodes, to attempt to avoid starting too much parallel work and bogging down the operating system. As a result, it's rare for a single node to have more than two or three RequestBuilder threads, though there is no hard bound on the number of threads in a single node.
 
 If multiple RequestBuilder threads have been started and are idle in a single worker node, any of them may be used when a request is assigned to that node (or unblocked).
+
+## Yielding from a TaskHost
+
+Starting with change wave 18.14, TaskHosts with protocol version 9 support `IBuildEngine3.Yield()` and `Reacquire()` callbacks.
+Older peers retain the previous no-op behavior.
+Set `MSBUILDDISABLEFEATURESFROMVERSION=18.14` to restore that behavior.
+The parent sends its yield policy before each task configuration, so reused hosts honor the parent's change wave.
+
+The parent forwards these callbacks on the task's execution thread.
+`Reacquire()` returns only after the scheduler grants the node, and releases requested cores through the normal task-engine contract.
+The task must call `Reacquire()` on the thread that called `Yield()`.
+Repeated yields and reacquisition without a preceding yield are invalid, as with in-process tasks.
+If a task completes or disconnects while yielded, the parent reacquires before processing its result or releasing its handler.
+
+A yielded task still occupies its host process.
+The provider allocates another matching host slot when other work needs that host kind, then reuses idle slots.
+Yield-capable hosts also use separate processes for nested build callbacks.
+Otherwise, an outer callback could resume in the same process while its inner task remains yielded.
+Legacy peers keep the existing callback handler stacks and nested-task behavior.
+
+Explicit yield does not change the host's active-task count or exchange its process environment.
+Each overlapping task therefore retains its own environment and current directory, including while external tools run.
+This isolation requires additional host processes and memory.
+The scheduler still controls node and core allocation.

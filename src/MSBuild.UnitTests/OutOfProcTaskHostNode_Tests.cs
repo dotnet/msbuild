@@ -43,6 +43,106 @@ namespace Microsoft.Build.UnitTests
             _output = output;
         }
 
+        [Fact]
+        public void YieldPolicyComesFromTheParentForEachTask()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            const BindingFlags members = BindingFlags.Instance | BindingFlags.NonPublic;
+            Action<INodePacket> handlePacket = (Action<INodePacket>)typeof(OutOfProcTaskHostNode)
+                .GetMethod("HandlePacket", members)!.CreateDelegate(typeof(Action<INodePacket>), state.Node);
+            var createContext = (Func<TaskHostConfiguration, TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
+                .GetMethod("CreateTaskContext", members)!.CreateDelegate(typeof(Func<TaskHostConfiguration, TaskExecutionContext>), state.Node);
+            var configuration = (TaskHostConfiguration)Activator.CreateInstance(typeof(TaskHostConfiguration), nonPublic: true)!;
+
+            handlePacket(new TaskHostYieldConfiguration(true));
+            using TaskExecutionContext enabled = createContext(configuration);
+            handlePacket(new TaskHostYieldConfiguration(false));
+            using TaskExecutionContext disabled = createContext(configuration);
+
+            enabled.YieldingEnabled.ShouldBeTrue("A later nested configuration must not change its outer task's policy.");
+            disabled.YieldingEnabled.ShouldBeFalse("Reused processes must honor the new parent's opt-out.");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReacquireWaitsForAcknowledgmentAndUnblocksOnCancellationOrDisconnect(bool disconnect)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+            RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            state.SetField("_nodeEndpoint", endpoint.Node);
+            state.SetField("_parentPacketVersion", NodePacketTypeExtensions.PacketVersion);
+            state.SetField("_activeTaskCount", 1);
+            using TaskExecutionContext context = new(1,
+                (TaskHostConfiguration)Activator.CreateInstance(typeof(TaskHostConfiguration), nonPublic: true)!);
+            context.State = TaskExecutionState.Executing;
+            context.YieldingEnabled = true;
+            const BindingFlags members = BindingFlags.Instance | BindingFlags.NonPublic;
+            var contexts = (ConcurrentDictionary<int, TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
+                .GetField("_taskContexts", members)!.GetValue(state.Node)!;
+            contexts[context.TaskId] = context;
+            var current = (AsyncLocal<TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
+                .GetField("_currentTaskContext", members)!.GetValue(state.Node)!;
+            Action<INodePacket> handlePacket = (Action<INodePacket>)typeof(OutOfProcTaskHostNode)
+                .GetMethod("HandlePacket", members)!.CreateDelegate(typeof(Action<INodePacket>), state.Node);
+            ImmediateDisconnectEndpoint failureEndpoint = new();
+            state.SubscribeToLinkStatus(failureEndpoint);
+            System.Threading.Tasks.Task execution = System.Threading.Tasks.Task.Run(() =>
+            {
+                current.Value = context;
+                state.Node.Yield();
+                state.Node.Reacquire();
+            });
+
+            try
+            {
+                TaskHostYieldRequest yield = NextRequest();
+                yield.Reacquire.ShouldBeFalse();
+                execution.IsCompleted.ShouldBeFalse("Yield must wait for the worker's acknowledgment.");
+                context.State.ShouldBe(TaskExecutionState.Executing, "Explicit yield must not permit nested tasks in this process.");
+                handlePacket(new TaskHostYieldResponse(yield.RequestId));
+
+                TaskHostYieldRequest reacquire = NextRequest();
+                reacquire.Reacquire.ShouldBeTrue();
+                execution.IsCompleted.ShouldBeFalse("Reacquire must not return before the worker reacquires its node.");
+                if (disconnect)
+                {
+                    failureEndpoint.FailConnection();
+                }
+                else
+                {
+                    handlePacket(new TaskHostYieldResponse(reacquire.RequestId, new Microsoft.Build.Exceptions.BuildAbortedException()));
+                }
+
+                SpinWait.SpinUntil(() => execution.IsCompleted, TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                if (disconnect)
+                {
+                    Should.Throw<InvalidOperationException>(() => execution.GetAwaiter().GetResult());
+                }
+                else
+                {
+                    Should.Throw<Microsoft.Build.Exceptions.BuildAbortedException>(() => execution.GetAwaiter().GetResult());
+                }
+                context.PendingCallbackRequests.ShouldBeEmpty();
+            }
+            finally
+            {
+                failureEndpoint.FailConnection();
+                SpinWait.SpinUntil(() => execution.IsCompleted, TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            }
+
+            TaskHostYieldRequest NextRequest()
+            {
+                SpinWait.SpinUntil(() => !endpoint.Packets.IsEmpty, TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                endpoint.Packets.TryDequeue(out INodePacket? packet).ShouldBeTrue();
+                return packet.ShouldBeOfType<TaskHostYieldRequest>();
+            }
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -331,16 +431,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData(false, nameof(FailureFlagTask))]
-        [InlineData(true, nameof(FailureFlagTask))]
+        [InlineData(false, nameof(FailureFlagTask), false)]
+        [InlineData(true, nameof(FailureFlagTask), false)]
+        [InlineData(true, nameof(FailureFlagTask), true)]
 #if NETFRAMEWORK
-        [InlineData(false, nameof(IsolatedFailureFlagTask))]
-        [InlineData(true, nameof(IsolatedFailureFlagTask))]
+        [InlineData(false, nameof(IsolatedFailureFlagTask), false)]
+        [InlineData(true, nameof(IsolatedFailureFlagTask), false)]
+        [InlineData(true, nameof(IsolatedFailureFlagTask), true)]
 #endif
-        public void AllowFailureWithoutError_IsolatedForEachTask(bool runNested, string taskName)
+        public void AllowFailureWithoutError_IsolatedForEachTask(bool runNested, string taskName, bool reuseNestedHost)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", reuseNestedHost ? "18.14" : null);
             TransientTestFile project = env.CreateFile("failureFlag.proj", $"""
                 <Project>
                   <UsingTask TaskName="{taskName}" AssemblyFile="{typeof(FailureFlagTask).Assembly.Location}" TaskFactory="TaskHostFactory" />
@@ -365,9 +468,10 @@ namespace Microsoft.Build.UnitTests
             success.ShouldBeTrue(output);
             taskPids.Count.ShouldBe(runNested ? 3 : 2);
             string hostPid = taskPids[0].Groups[1].Value;
-            foreach (Match match in taskPids)
+            taskPids[^1].Groups[1].Value.ShouldBe(hostPid, "Sequential calls must reuse an idle host.");
+            if (runNested)
             {
-                match.Groups[1].Value.ShouldBe(hostPid, "all calls must use the same TaskHost");
+                (taskPids[1].Groups[1].Value == hostPid).ShouldBe(reuseNestedHost);
             }
 
             Match clientPid = Regex.Match(output, @"Process ID is (\d+)");

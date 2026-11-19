@@ -427,11 +427,14 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldContain("/nodereuse:True");
         }
 
-        [WindowsFullFrameworkOnlyFact]
-        public void NetTaskHost_TaskHostProcessReuse_SameProcessForNestedBuild()
+        [WindowsFullFrameworkOnlyTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void NetTaskHost_NestedBuildInheritsLaunchConfiguration(bool disableYield)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableYield ? "18.14" : null);
 
             var coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
             env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", coreDirectory);
@@ -444,18 +447,18 @@ namespace Microsoft.Build.Engine.UnitTests
 
             successTestTask.ShouldBeTrue();
 
-            // Both the parent task and child task should report TASKHOST_PID
-            // Extract PIDs from output and verify they match (same process reused)
             var parentPidMatch = System.Text.RegularExpressions.Regex.Match(testTaskOutput, @"PARENT_TASKHOST_PID=(\d+)");
-            var childPidMatch = System.Text.RegularExpressions.Regex.Match(testTaskOutput, @"CHILD_TASKHOST_PID=(\d+)");
+            var childPidMatches = System.Text.RegularExpressions.Regex.Matches(testTaskOutput, @"CHILD_TASKHOST_PID=(\d+)");
 
             parentPidMatch.Success.ShouldBeTrue("Should find PARENT_TASKHOST_PID in output");
-            childPidMatch.Success.ShouldBeTrue("Should find CHILD_TASKHOST_PID in output");
+            childPidMatches.Count.ShouldBe(2, "Both nested levels must inherit the explicit host SDK.");
 
             string parentPid = parentPidMatch.Groups[1].Value;
-            string childPid = childPidMatch.Groups[1].Value;
-
-            parentPid.ShouldBe(childPid, $"Parent PID ({parentPid}) and child PID ({childPid}) should match -- same TaskHost process should be reused for nested build");
+            foreach (System.Text.RegularExpressions.Match child in childPidMatches)
+            {
+                (parentPid == child.Groups[1].Value).ShouldBe(disableYield, "Only legacy callbacks may reuse an occupied process.");
+            }
+            (childPidMatches[0].Groups[1].Value == childPidMatches[1].Groups[1].Value).ShouldBe(disableYield);
         }
 
 #if NET

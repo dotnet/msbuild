@@ -237,6 +237,7 @@ namespace Microsoft.Build.CommandLine
         /// Used to determine if the worker node supports callback packets.
         /// </summary>
         private byte _parentPacketVersion;
+        private bool _yieldingEnabled;
 
         /// <summary>
         /// Minimum packet version required for IBuildEngine callback support.
@@ -290,6 +291,8 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesResponse, TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostCoresResponse, TaskHostCoresResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostYieldResponse, TaskHostYieldResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostYieldConfiguration, TaskHostYieldConfiguration.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostBuildResponse, TaskHostBuildResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostConsoleConfiguration, TaskHostConsoleConfiguration.FactoryForDeserialization, this);
             EngineServices = new EngineServicesImpl(this);
@@ -643,18 +646,61 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// No-op. Explicit yield is not supported in the OOP TaskHost.
-        /// Nested task dispatch uses BuildProjectFile callback blocking instead.
+        /// Yields the owning node without making this task's process available for other tasks.
         /// </summary>
         public void Yield()
         {
+            if (_parentPacketVersion < NodePacketTypeExtensions.TaskHostYieldMinVersion)
+            {
+                return;
+            }
+
+            TaskExecutionContext context = GetCurrentTaskContext();
+            if (!(context?.YieldingEnabled ?? _yieldingEnabled))
+            {
+                return;
+            }
+            Assumed.NotNull(context);
+            lock (context.YieldLock)
+            {
+                Assumed.Equal(context.YieldThreadId, -1, "Cannot call Yield() while yielding.");
+                SendYieldRequest(reacquire: false);
+                context.YieldThreadId = Environment.CurrentManagedThreadId;
+            }
         }
 
         /// <summary>
-        /// No-op. See <see cref="Yield"/>.
+        /// Waits until the owning node has actually been reacquired.
         /// </summary>
         public void Reacquire()
         {
+            if (_parentPacketVersion < NodePacketTypeExtensions.TaskHostYieldMinVersion)
+            {
+                return;
+            }
+
+            TaskExecutionContext context = GetCurrentTaskContext();
+            if (!(context?.YieldingEnabled ?? _yieldingEnabled))
+            {
+                return;
+            }
+            Assumed.NotNull(context);
+            lock (context.YieldLock)
+            {
+                Assumed.NotEqual(context.YieldThreadId, -1, "Cannot call Reacquire() before Yield().");
+                Assumed.Equal(context.YieldThreadId, Environment.CurrentManagedThreadId, "Reacquire() must run on the thread that called Yield().");
+                SendYieldRequest(reacquire: true);
+                context.YieldThreadId = -1;
+            }
+        }
+
+        private void SendYieldRequest(bool reacquire)
+        {
+            TaskHostYieldResponse response = SendCallbackRequestAndWaitForResponse<TaskHostYieldResponse>(new TaskHostYieldRequest(reacquire));
+            if (response.Exception is not null)
+            {
+                throw response.Exception;
+            }
         }
 
         #endregion // IBuildEngine3 Implementation
@@ -977,10 +1023,14 @@ namespace Microsoft.Build.CommandLine
                 case NodePacketType.TaskHostConsoleConfiguration:
                     InitializeConsoleRedirection();
                     break;
+                case NodePacketType.TaskHostYieldConfiguration:
+                    _yieldingEnabled = ((TaskHostYieldConfiguration)packet).Enabled;
+                    break;
 
                 // Callback response packets - route to pending request
                 case NodePacketType.TaskHostIsRunningMultipleNodesResponse:
                 case NodePacketType.TaskHostCoresResponse:
+                case NodePacketType.TaskHostYieldResponse:
                 case NodePacketType.TaskHostBuildResponse:
                     HandleCallbackResponse(packet);
                     break;
@@ -1158,6 +1208,7 @@ namespace Microsoft.Build.CommandLine
             int taskId = Interlocked.Increment(ref _nextLocalTaskId);
 
             var context = new TaskExecutionContext(taskId, configuration);
+            context.YieldingEnabled = _yieldingEnabled;
 
             if (!_taskContexts.TryAdd(taskId, context))
             {

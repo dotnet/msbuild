@@ -42,11 +42,13 @@ namespace Microsoft.Build.BackEnd
     /// Whether the task host forwards console output. Hosts with different forwarding behavior must not share a connection.
     /// </param>
     /// <param name="LaunchIdentity">The effective executable, arguments, and runtime host used to launch the task host.</param>
+    /// <param name="HostSlot">Distinguishes processes occupied by overlapping yielded tasks of the same host kind.</param>
     internal readonly record struct TaskHostNodeKey(
         HandshakeOptions HandshakeOptions,
         int NodeId,
         bool ForwardConsoleOutput = false,
-        TaskHostLaunchIdentity? LaunchIdentity = null);
+        TaskHostLaunchIdentity? LaunchIdentity = null,
+        int HostSlot = 0);
     /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
     /// which act as child nodes for the build system.
@@ -137,6 +139,17 @@ namespace Microsoft.Build.BackEnd
         /// since resumption need not follow dispatch order.
         /// </summary>
         private ConcurrentDictionary<int, Stack<INodePacketHandler>> _nodeIdToPacketHandlerStack;
+
+        // Acquisition is serialized separately from lifecycle callbacks. Never hold _activeNodes
+        // while launching a process: NodeContextCreated needs that lock on the connection thread.
+        private readonly LockType _hostAcquisitionLock = new();
+
+        // Protected by _activeNodes, like the handler stacks. A yielded task keeps running and
+        // owns the process environment; unlike a blocked build callback it cannot admit nested tasks.
+        private readonly Dictionary<int, INodePacketHandler> _yieldedHosts = [];
+
+        // Retain the selected SDK, handshake and environment when a nested callback needs another process.
+        private readonly Dictionary<int, NodeLaunchData> _nodeLaunchData = [];
 
         /// <summary>
         /// Communication node IDs explicitly enabled for console forwarding.
@@ -456,6 +469,7 @@ namespace Microsoft.Build.BackEnd
             // TaskHostTask handler via the handler stack.
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostYieldRequest, TaskHostYieldRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
         }
 
@@ -932,23 +946,46 @@ namespace Microsoft.Build.BackEnd
             out NodeContext connection,
             out VisualStudioTaskHostResolution visualStudioResolution)
         {
+            lock (_hostAcquisitionLock)
+            {
+                return AcquireAndSetUpHostCore(
+                    requestedNodeKey, factory, handler, configuration, taskHostParameters,
+                    requiresParameterConversion, out parameterConversionUnsupported, out hostProcessId,
+                    out wasNewlyCreated, out connection, out visualStudioResolution);
+            }
+        }
+
+        private bool AcquireAndSetUpHostCore(
+            TaskHostNodeKey requestedNodeKey,
+            INodePacketFactory factory,
+            INodePacketHandler handler,
+            TaskHostConfiguration configuration,
+            in TaskHostParameters taskHostParameters,
+            bool requiresParameterConversion,
+            out bool parameterConversionUnsupported,
+            out int hostProcessId,
+            out bool wasNewlyCreated,
+            out NodeContext connection,
+            out VisualStudioTaskHostResolution visualStudioResolution)
+        {
             parameterConversionUnsupported = false;
             hostProcessId = -1;
             wasNewlyCreated = false;
             connection = null;
             visualStudioResolution = VisualStudioTaskHostResolution.NotApplicable.Instance;
             TaskHostNodeKey nodeKey = default;
+            NodeLaunchData nodeLaunchData = default;
 
             if (taskHostParameters.MSBuildAssemblyPath is null && taskHostParameters.DotnetHostPath is null)
             {
                 KeyValuePair<TaskHostNodeKey, NodeContext>? reusableConnection = null;
                 foreach (KeyValuePair<TaskHostNodeKey, NodeContext> existing in _nodeContexts)
                 {
-                    // A nested request without explicit launch paths may reuse only its unique active outer host.
-                    if ((existing.Key with { LaunchIdentity = requestedNodeKey.LaunchIdentity }) == requestedNodeKey
+                    // Inherit only when all matching outer hosts agree on the launch configuration.
+                    if ((existing.Key with { LaunchIdentity = requestedNodeKey.LaunchIdentity, HostSlot = requestedNodeKey.HostSlot }) == requestedNodeKey
                         && HasActiveTaskHandler(existing.Value.NodeId))
                     {
-                        if (reusableConnection.HasValue)
+                        if (reusableConnection is { } previous && previous.Key.LaunchIdentity != existing.Key.LaunchIdentity)
                         {
                             reusableConnection = null;
                             break;
@@ -961,23 +998,36 @@ namespace Microsoft.Build.BackEnd
                 if (reusableConnection is { } reusable)
                 {
                     nodeKey = reusable.Key;
+                    if (RequiresExclusiveHost(reusable.Value))
+                    {
+                        lock (_activeNodes)
+                        {
+                            if (!_nodeLaunchData.TryGetValue(reusable.Value.NodeId, out nodeLaunchData))
+                            {
+                                return false;
+                            }
+                            nodeKey = GetAvailableHostSlot(nodeKey with { HostSlot = 0 });
+                        }
+                    }
                 }
             }
 
             bool HasActiveTaskHandler(int nodeId)
             {
-                if (!_nodeIdToPacketHandlerStack.TryGetValue(nodeId, out Stack<INodePacketHandler> handlers))
+                lock (_activeNodes)
                 {
-                    return false;
-                }
+                    if (!_nodeIdToPacketHandlerStack.TryGetValue(nodeId, out Stack<INodePacketHandler> handlers))
+                    {
+                        return false;
+                    }
 
-                lock (handlers)
-                {
-                    return handlers.Count > 0;
+                    lock (handlers)
+                    {
+                        return handlers.Count > 0;
+                    }
                 }
             }
 
-            NodeLaunchData nodeLaunchData = default;
             if (nodeKey == default)
             {
                 nodeLaunchData = ResolveNodeLaunchConfiguration(requestedNodeKey.HandshakeOptions, taskHostParameters, out visualStudioResolution);
@@ -990,6 +1040,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     LaunchIdentity = CreateLaunchIdentity(nodeLaunchData, taskHostParameters.DotnetHostPath),
                 };
+
+                lock (_activeNodes)
+                {
+                    nodeKey = GetAvailableHostSlot(nodeKey);
+                }
             }
 
             if (!_nodeContexts.ContainsKey(nodeKey))
@@ -1046,6 +1101,12 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
+                if (context.NegotiatedPacketVersion >= NodePacketTypeExtensions.TaskHostYieldMinVersion)
+                {
+                    // TaskHost change-wave state can predate this parent, so send the parent's policy.
+                    context.SendData(new TaskHostYieldConfiguration(ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)));
+                }
+
                 context.SendData(configuration);
                 connection = context;
                 return true;
@@ -1054,6 +1115,64 @@ namespace Microsoft.Build.BackEnd
             {
                 DisconnectFromHost(context, handler);
                 throw;
+            }
+        }
+
+        // A yield-capable nested task needs its own process even before it calls Yield:
+        // its blocked outer task could otherwise resume while the inner task is yielded.
+        private static bool RequiresExclusiveHost(NodeContext context) =>
+            context.NegotiatedPacketVersion >= NodePacketTypeExtensions.TaskHostYieldMinVersion
+            && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14);
+
+        internal TaskHostNodeKey GetAvailableHostSlot(TaskHostNodeKey nodeKey)
+        {
+            lock (_activeNodes)
+            {
+                TaskHostNodeKey? available = null;
+                foreach (KeyValuePair<TaskHostNodeKey, NodeContext> existing in _nodeContexts)
+                {
+                    if ((existing.Key with { HostSlot = nodeKey.HostSlot }) == nodeKey
+                        && !IsOccupied(existing.Value)
+                        && (!available.HasValue || existing.Key.HostSlot < available.Value.HostSlot))
+                    {
+                        available = existing.Key;
+                    }
+                }
+
+                if (available.HasValue)
+                {
+                    return available.Value;
+                }
+
+                while (_nodeContexts.ContainsKey(nodeKey))
+                {
+                    nodeKey = nodeKey with { HostSlot = nodeKey.HostSlot + 1 };
+                }
+
+                return nodeKey;
+            }
+
+            bool IsOccupied(NodeContext context) =>
+                _yieldedHosts.ContainsKey(context.NodeId)
+                || (RequiresExclusiveHost(context)
+                    && _nodeIdToPacketHandlerStack.TryGetValue(context.NodeId, out Stack<INodePacketHandler> handlers)
+                    && handlers.Count > 0);
+        }
+
+        internal void SetHostYielded(NodeContext context, INodePacketHandler handler, bool yielded)
+        {
+            lock (_activeNodes)
+            {
+                if (yielded)
+                {
+                    Assumed.True(_nodeIdToNodeKey.ContainsKey(context.NodeId), "Cannot yield a disconnected host.");
+                    _yieldedHosts.Add(context.NodeId, handler);
+                }
+                else if (_yieldedHosts.TryGetValue(context.NodeId, out INodePacketHandler owner)
+                    && ReferenceEquals(owner, handler))
+                {
+                    _yieldedHosts.Remove(context.NodeId);
+                }
             }
         }
 
@@ -1097,6 +1216,7 @@ namespace Microsoft.Build.BackEnd
             lock (_activeNodes)
             {
                 int nodeId = context.NodeId;
+                SetHostYielded(context, handler, false);
 
                 if (_nodeIdToPacketHandlerStack.TryGetValue(nodeId, out Stack<INodePacketHandler> handlerStack))
                 {
@@ -1160,7 +1280,14 @@ namespace Microsoft.Build.BackEnd
             int communicationNodeId = Interlocked.Increment(ref _nextNodeId);
 
             // Create callbacks that capture the TaskHostNodeKey
-            void OnNodeContextCreated(NodeContext context) => NodeContextCreated(context, nodeKey);
+            void OnNodeContextCreated(NodeContext context)
+            {
+                lock (_activeNodes)
+                {
+                    _nodeLaunchData[context.NodeId] = nodeLaunchData;
+                    NodeContextCreated(context, nodeKey);
+                }
+            }
 
             CommunicationsUtilities.Trace($"For a host context of {hostContext}, spawning executable from {nodeLaunchData.MSBuildLocation}.");
 
@@ -1590,7 +1717,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_activeNodes)
             {
-                if (!TryActivateNode(context))
+                if (_yieldedHosts.ContainsKey(context.NodeId) || !TryActivateNode(context))
                 {
                     return false;
                 }
@@ -1628,6 +1755,8 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_activeNodes)
             {
+                _yieldedHosts.Remove(nodeId);
+                _nodeLaunchData.Remove(nodeId);
                 if (_nodeIdToNodeKey.TryRemove(nodeId, out TaskHostNodeKey nodeKey))
                 {
                     _nodeContexts.TryRemove(nodeKey, out _);

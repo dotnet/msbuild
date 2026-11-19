@@ -25,6 +25,8 @@ public sealed class TaskHostOwnerLifetime_Tests(ITestOutputHelper output)
     {
         using TestEnvironment env = TestEnvironment.Create(output);
         env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+        // Exercise the legacy handler stack where a nested task can kill its outer task's host.
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "18.14");
         env.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "0");
         env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
         env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");

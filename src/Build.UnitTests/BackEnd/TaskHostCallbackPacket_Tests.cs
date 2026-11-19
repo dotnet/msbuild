@@ -17,6 +17,40 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class TaskHostCallbackPacket_Tests
     {
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void YieldConfigurationRoundTrip(bool enabled)
+        {
+            new TaskHostYieldConfiguration(enabled).Translate(TranslationHelpers.GetWriteTranslator());
+            var result = (TaskHostYieldConfiguration)TaskHostYieldConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            result.Enabled.ShouldBe(enabled);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void YieldRequestRoundTrip(bool reacquire)
+        {
+            TaskHostYieldRequest request = new(reacquire) { RequestId = 42 };
+            request.Translate(TranslationHelpers.GetWriteTranslator());
+            var result = (TaskHostYieldRequest)TaskHostYieldRequest.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            result.RequestId.ShouldBe(42);
+            result.Reacquire.ShouldBe(reacquire);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void YieldResponseRoundTrip(bool failed)
+        {
+            TaskHostYieldResponse response = new(42, failed ? new InvalidOperationException("callback failure") : null);
+            response.Translate(TranslationHelpers.GetWriteTranslator());
+            var result = (TaskHostYieldResponse)TaskHostYieldResponse.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            result.RequestId.ShouldBe(42);
+            result.Exception?.Message.ShouldBe(failed ? "callback failure" : null);
+        }
+
         [Fact]
         public void TaskHostIsRunningMultipleNodesRequest_RoundTrip_Serialization()
         {

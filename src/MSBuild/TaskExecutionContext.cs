@@ -44,6 +44,16 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         public TaskExecutionState State { get; set; }
 
+        /// <summary>
+        /// The thread that explicitly yielded, or -1 when not yielded.
+        /// Explicit yield does not make this process available for nested tasks.
+        /// </summary>
+        public int YieldThreadId { get; set; } = -1;
+
+        public object YieldLock { get; } = new();
+
+        public bool YieldingEnabled { get; set; }
+
         /// <summary>Whether this task may fail without logging an error.</summary>
         public bool AllowFailureWithoutError { get; set; }
 
