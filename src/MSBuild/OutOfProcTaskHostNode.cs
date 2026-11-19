@@ -282,6 +282,20 @@ namespace Microsoft.Build.CommandLine
         private TaskHostConfiguration EffectiveConfiguration => GetCurrentConfiguration();
 
         /// <summary>
+        /// Initializes the build-exception serialization contract for a TaskHost process. Yield responses
+        /// can carry build exceptions (for example, an aborted Reacquire), and deserializing one without a
+        /// contract faults the packet pump. Engine exception types are not constructible from this assembly,
+        /// so they arrive as <see cref="Framework.BuildException.GenericBuildTransferredException"/>, which keeps
+        /// the remote type name and message. Call this only at TaskHost process entry: the contract is
+        /// first-writer-wins, and an in-process engine must keep its full allowlist.
+        /// </summary>
+        internal static void InitializeSerializationContract()
+            => Framework.BuildException.BuildExceptionSerializationHelper.InitializeSerializationContract(
+                new Framework.BuildException.BuildExceptionSerializationHelper.TypeConstructionTuple(
+                    typeof(Framework.BuildException.GenericBuildTransferredException),
+                    (message, inner) => new Framework.BuildException.GenericBuildTransferredException(message, inner)));
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         public OutOfProcTaskHostNode()
@@ -642,24 +656,42 @@ namespace Microsoft.Build.CommandLine
                 toolsVersion,
                 returnTargetOutputs);
 
-            // Block while the callback is processed so the node can accept nested tasks.
-            BlockForCallback();
+            // A yielded task does not own the node, but before yielding was supported here, Yield was a no-op and
+            // such builds worked. Keep them working: own the node for the nested build, then yield it again.
+            TaskExecutionContext yieldedContext = GetCurrentTaskContext() is { State: TaskExecutionState.Yielded } c ? c : null;
+            if (yieldedContext is not null)
+            {
+                ReacquireYieldedContext(yieldedContext);
+            }
+
             bool success = false;
             try
             {
-                var response = SendCallbackRequestAndWaitForResponse<TaskHostBuildResponse>(request);
-                var result = response.ToBuildEngineResult();
-                success = result.Result;
-                return result;
+                // Block while the callback is processed so the node can accept nested tasks.
+                BlockForCallback();
+                try
+                {
+                    var response = SendCallbackRequestAndWaitForResponse<TaskHostBuildResponse>(request);
+                    var result = response.ToBuildEngineResult();
+                    success = result.Result;
+                    return result;
+                }
+                finally
+                {
+                    if (MSBuildEventSource.Log.IsEnabled())
+                    {
+                        MSBuildEventSource.Log.TaskHostBuildProjectFileStop(projectFilesJoined!, success);
+                    }
+
+                    ResumeAfterCallback();
+                }
             }
             finally
             {
-                if (MSBuildEventSource.Log.IsEnabled())
+                if (yieldedContext is not null)
                 {
-                    MSBuildEventSource.Log.TaskHostBuildProjectFileStop(projectFilesJoined!, success);
+                    YieldContext(yieldedContext);
                 }
-
-                ResumeAfterCallback();
             }
         }
 
@@ -680,6 +712,15 @@ namespace Microsoft.Build.CommandLine
             Assumed.True(context.YieldThreadId == -1, "Cannot call Yield() while yielding.");
             Assumed.Equal(context.State, TaskExecutionState.Executing, "Cannot call Yield() unless the task is executing.");
 
+            YieldContext(context);
+            context.YieldThreadId = Environment.CurrentManagedThreadId;
+        }
+
+        /// <summary>
+        /// Releases the process environment and asks the owning worker node to yield the task's request.
+        /// </summary>
+        private void YieldContext(TaskExecutionContext context)
+        {
             // Release the process environment before the parent can schedule another task here.
             SaveOperatingEnvironment(context);
             context.State = TaskExecutionState.Yielded;
@@ -702,8 +743,6 @@ namespace Microsoft.Build.CommandLine
                 ReturnFromFailedYield(context);
                 throw response.Exception;
             }
-
-            context.YieldThreadId = Environment.CurrentManagedThreadId;
         }
 
         /// <summary>
@@ -724,7 +763,14 @@ namespace Microsoft.Build.CommandLine
             // The task is not yielded after this point, even if the parent fails to reacquire (for example, because
             // the build was canceled). In that case the task stays inactive and gets the exception.
             context.YieldThreadId = -1;
+            ReacquireYieldedContext(context);
+        }
 
+        /// <summary>
+        /// Waits until the owning worker node made the task's request active again, then restores the task's environment.
+        /// </summary>
+        private void ReacquireYieldedContext(TaskExecutionContext context)
+        {
             TaskHostYieldResponse response = SendCallbackRequestAndWaitForResponse<TaskHostYieldResponse>(new TaskHostYieldRequest(reacquire: true));
             if (response.Exception is not null)
             {
@@ -1211,8 +1257,8 @@ namespace Microsoft.Build.CommandLine
             var context = GetCurrentTaskContext();
             if (context is not null)
             {
-                // A yielded task does not own the node, so it cannot also release it for a nested build.
-                Assumed.True(context.State != TaskExecutionState.Yielded, "Cannot call BuildProjectFile() while yielded. Call Reacquire() first.");
+                // Callbacks from a yielded task reacquire first (see BuildProjectFilesInParallel).
+                Assumed.True(context.State != TaskExecutionState.Yielded, "Cannot block for a callback while yielded.");
                 SaveOperatingEnvironment(context);
                 context.State = TaskExecutionState.BlockedOnCallback;
             }
