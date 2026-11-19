@@ -77,6 +77,21 @@ public sealed class PropertyFunctionAotTests
         Assert.AreEqual("ab", EvaluateToValue("$([System.String]::Concat('a', 'b'))"));
     }
 
+    [TestMethod]
+    public void FileSystemInfoConstructors_InstanceMembersWorkUnderAot()
+    {
+        using var directory = new TempDirectory();
+        string file = Path.Combine(directory.Path, "data.txt");
+        File.WriteAllText(file, "content");
+
+        Assert.AreEqual("7", EvaluateToValue($"$([System.IO.FileInfo]::new('{file}').Length)"));
+        Assert.AreEqual(directory.Path, EvaluateToValue($"$([System.IO.FileInfo]::new('{file}').Directory.FullName)"));
+        Assert.AreEqual(directory.Path, EvaluateToValue($"$([System.IO.DirectoryInfo]::new('{directory.Path}').FullName)"));
+        Assert.AreEqual("True", EvaluateToValue($"$([System.IO.DirectoryInfo]::new('{directory.Path}').Exists)"));
+        Assert.AreEqual(Path.GetPathRoot(directory.Path), EvaluateToValue($"$([System.IO.DirectoryInfo]::new('{directory.Path}').Root.FullName)"));
+        Assert.AreEqual(directory.Path, EvaluateToValue($"$([System.IO.Directory]::GetParent('{file}').FullName)"));
+    }
+
     /// <summary>
     /// Evaluates a single property-function expression as a project property and returns the resolved value.
     /// </summary>

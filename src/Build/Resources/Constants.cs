@@ -149,15 +149,17 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Fill up the dictionary for first use
         /// </summary>
-        // Preserve the PropertyFunctionMembers set on every type in the property-function allowlist
-        // below. Property functions dispatch over the allowlisted receiver type by reflection (see
-        // Expander.Function), and receiver types are restricted to this allowlist unless the
-        // MSBUILDENABLEALLPROPERTYFUNCTIONS feature switch is enabled. Preserving these members is what
+        // Preserve the PropertyFunctionMembers set on the types in the property-function allowlist
+        // below and on FileInfo/DirectoryInfo, whose constructors are allowed by IsStaticMethodAvailable.
+        // DirectoryInfo instances are also reachable through Directory.GetParent. Property functions dispatch
+        // over these types by reflection (see Expander.Function). Preserving these members is what
         // makes the IL2072/IL2074/IL2080/IL2096 suppressions in Expander honest under trimming. Keep in
-        // sync with the entries added below.
+        // sync with the entries added below and other permitted receiver types.
         [DynamicDependency(PropertyFunctionMembers, typeof(Environment))]
         [DynamicDependency(PropertyFunctionMembers, typeof(Directory))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(DirectoryInfo))]
         [DynamicDependency(PropertyFunctionMembers, typeof(File))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(FileInfo))]
         [DynamicDependency(PropertyFunctionMembers, typeof(RuntimeInformation))]
         [DynamicDependency(PropertyFunctionMembers, typeof(OSPlatform))]
         [DynamicDependency(PropertyFunctionMembers, typeof(CultureInfo))]

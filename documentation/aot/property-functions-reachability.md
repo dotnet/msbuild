@@ -372,6 +372,9 @@ What shipped:
   `DirectoryName`) that excludes every state-mutating member (`Open*`, `Create*`, `CopyTo`, `MoveTo`,
   `Delete`, ...), so the common `$([System.IO.Directory]::GetParent($(X)).Parent.FullName)` idiom keeps
   working while `FileInfo.OpenWrite`/`Delete` become unreachable.
+- `DynamicDependency` entries in [`Constants.cs`](../../src/Build/Resources/Constants.cs) preserve
+  the public reflection surface of `FileInfo` and `DirectoryInfo`, including members reached through
+  their constructors and `Directory.GetParent`, in trimmed and Native AOT hosts.
 
 **Why a feature switch (not a `Trait` or a `ChangeWave`):** a `Trait` is a runtime environment read the
 trimmer keeps, so it could not satisfy "no runtime re-enablement under trimming"; a
