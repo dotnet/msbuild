@@ -251,7 +251,8 @@ public sealed partial class InvocationCache
 
                 string parentDirectory = Path.GetDirectoryName(entryDirectory)!;
                 Directory.CreateDirectory(parentDirectory);
-                stagingDirectory = Path.Combine(parentDirectory, inputHash + "." + Guid.NewGuid().ToString("N") + ".tmp");
+                // Avoid repeating the key so staging does not exceed legacy Windows path limits before the final entry does.
+                stagingDirectory = Path.Combine(parentDirectory, Guid.NewGuid().ToString("N") + ".tmp");
                 Directory.CreateDirectory(stagingDirectory);
 
                 string diagnosticsPath = Path.Combine(stagingDirectory, "diagnostics");

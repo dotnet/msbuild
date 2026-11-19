@@ -114,7 +114,7 @@ public sealed class InvocationCache_Tests
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         string root = env.CreateFolder().Path;
-        var cache = new InvocationCache(Path.Combine(root, "cache"), new TestTask { BuildEngine = new MockEngine() }.Log, "Test");
+        var cache = new InvocationCache(Path.Combine(root, "cache"), new TestTask { BuildEngine = new MockEngine(_output) }.Log, "Test");
         string output = Path.Combine(root, "output");
         Directory.CreateDirectory(output);
         string file = Path.Combine(output, "result");
@@ -435,7 +435,7 @@ public sealed class InvocationCache_Tests
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         string root = env.CreateFolder().Path;
-        var cache = new InvocationCache(Path.Combine(root, "cache"), new TestTask { BuildEngine = new MockEngine() }.Log, "Test");
+        var cache = new InvocationCache(Path.Combine(root, "cache"), new TestTask { BuildEngine = new MockEngine(_output) }.Log, "Test");
         string file = Path.Combine(root, "result");
         File.WriteAllText(file, "cached");
         InvocationOutputs outputs = InvocationOutputs.FromFiles(file);
@@ -686,7 +686,7 @@ public sealed class InvocationCache_Tests
             : "/bin/sh";
 
         protected override string GenerateCommandLineCommands() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? $"/d /c \"echo first&echo warning CACHE0001: warning&echo.&echo last&echo stderr 1>&2&exit /b {ToolExitCode}\""
+            ? $"/d /c \"echo first&echo warning CACHE0001: warning&echo.&echo last&1>&2 echo stderr&exit /b {ToolExitCode}\""
             : $"-c \"echo first; echo 'warning CACHE0001: warning'; echo; echo last; echo stderr >&2; exit {ToolExitCode}\"";
 
         protected override InvocationDescription? DescribeInvocation(string pathToTool, string responseFileCommands, string commandLineCommands)
