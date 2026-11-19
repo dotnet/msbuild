@@ -43,6 +43,211 @@ namespace Microsoft.Build.UnitTests
             _output = output;
         }
 
+        [Fact]
+        public void TaskIdentityAppliesOnlyToTheNextTask()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            state.SetField("_parentPacketVersion", NodePacketTypeExtensions.PacketVersion);
+            var configuration = (TaskHostConfiguration)Activator.CreateInstance(typeof(TaskHostConfiguration), nonPublic: true)!;
+
+            state.HandlePacket(new TaskHostTaskIdentity(5, yieldEnabled: true));
+            using TaskExecutionContext identified = state.CreateTaskContext(configuration);
+            using TaskExecutionContext legacy = state.CreateTaskContext(configuration);
+            state.HandlePacket(new TaskHostTaskIdentity(6, yieldEnabled: false));
+            using TaskExecutionContext noYield = state.CreateTaskContext(configuration);
+
+            identified.ParentTaskId.ShouldBe(5);
+            identified.YieldEnabled.ShouldBeTrue();
+            legacy.ParentTaskId.ShouldBe(0, "A configuration without an identity uses legacy routing.");
+            legacy.YieldEnabled.ShouldBeFalse();
+            noYield.ParentTaskId.ShouldBe(6);
+            noYield.YieldEnabled.ShouldBeFalse("A worker that cannot yield (no IBuildEngine3) keeps Yield a no-op.");
+        }
+
+        [Fact]
+        public void YieldIsANoOpWithoutCapableParent()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            using TaskExecutionContext context = state.AddContext(parentTaskId: 0, yieldEnabled: false);
+
+            // No endpoint exists, so any callback would fail. Legacy sequences are not validated.
+            state.RunAs(context, () =>
+            {
+                state.Node.Yield();
+                state.Node.Yield();
+                state.Node.Reacquire();
+                state.Node.Reacquire();
+            });
+            context.State.ShouldBe(TaskExecutionState.Executing);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void YieldReleasesTheProcessAndReacquireWaitsForTheWorker(bool disconnect)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            state.SetField("_nodeEndpoint", endpoint.Node);
+            state.SetField("_parentPacketVersion", NodePacketTypeExtensions.PacketVersion);
+            state.SetField("_activeTaskCount", 1);
+            using TaskExecutionContext context = state.AddContext(parentTaskId: 7, yieldEnabled: true);
+            ImmediateDisconnectEndpoint failureEndpoint = new();
+            state.SubscribeToLinkStatus(failureEndpoint);
+            System.Threading.Tasks.Task execution = System.Threading.Tasks.Task.Run(() => state.RunAs(context, () =>
+            {
+                state.Node.Yield();
+                state.Node.Reacquire();
+            }));
+
+            try
+            {
+                TaskHostYieldRequest yield = NextRequest();
+                yield.Reacquire.ShouldBeFalse();
+                execution.IsCompleted.ShouldBeFalse("Yield must wait for the worker's acknowledgment.");
+                context.State.ShouldBe(TaskExecutionState.Yielded, "The process is released before the worker can schedule another task here.");
+                state.GetField<int>("_activeTaskCount").ShouldBe(0);
+                state.GetField<int>("_yieldedTaskCount").ShouldBe(1);
+                state.HandlePacket(new TaskHostYieldResponse(yield.RequestId));
+
+                TaskHostYieldRequest reacquire = NextRequest();
+                reacquire.Reacquire.ShouldBeTrue();
+                execution.IsCompleted.ShouldBeFalse("Reacquire must not return before the worker reacquires its node.");
+                if (disconnect)
+                {
+                    failureEndpoint.FailConnection();
+                }
+                else
+                {
+                    state.HandlePacket(new TaskHostYieldResponse(reacquire.RequestId, new Microsoft.Build.Exceptions.BuildAbortedException()));
+                }
+
+                SpinWait.SpinUntil(() => execution.IsCompleted, TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                if (disconnect)
+                {
+                    Should.Throw<InvalidOperationException>(() => execution.GetAwaiter().GetResult());
+                }
+                else
+                {
+                    Should.Throw<Microsoft.Build.Exceptions.BuildAbortedException>(() => execution.GetAwaiter().GetResult());
+                }
+
+                // The task did not get the process back; it completes as a yielded task.
+                context.State.ShouldBe(TaskExecutionState.Yielded);
+                state.GetField<int>("_activeTaskCount").ShouldBe(0);
+                context.PendingCallbackRequests.ShouldBeEmpty();
+            }
+            finally
+            {
+                failureEndpoint.FailConnection();
+                SpinWait.SpinUntil(() => execution.IsCompleted, TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            }
+
+            TaskHostYieldRequest NextRequest()
+            {
+                SpinWait.SpinUntil(() => !endpoint.Packets.IsEmpty, TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                endpoint.Packets.TryDequeue(out INodePacket? packet).ShouldBeTrue();
+                TaskHostTaskEnvelope envelope = packet.ShouldBeOfType<TaskHostTaskEnvelope>();
+                envelope.TaskId.ShouldBe(7, "Requests from a shared TaskHost must identify their task.");
+                return envelope.Packet.ShouldBeOfType<TaskHostYieldRequest>();
+            }
+        }
+
+        [Fact]
+        public void SuccessfulReacquireRestoresTheTasksEnvironment()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            state.SetField("_nodeEndpoint", endpoint.Node);
+            state.SetField("_parentPacketVersion", NodePacketTypeExtensions.PacketVersion);
+            state.SetField("_activeTaskCount", 1);
+            const string variable = "MSBUILD_TASKHOST_YIELD_UNIT_TEST";
+            env.SetEnvironmentVariable(variable, "first");
+            using TaskExecutionContext context = state.AddContext(parentTaskId: 3, yieldEnabled: true);
+            System.Threading.Tasks.Task execution = System.Threading.Tasks.Task.Run(() => state.RunAs(context, () =>
+            {
+                state.Node.Yield();
+                state.Node.Reacquire();
+                Environment.GetEnvironmentVariable(variable).ShouldBe("first");
+            }));
+
+            Respond();
+            // Another task that ran here while the first was yielded changed the process environment.
+            Environment.SetEnvironmentVariable(variable, "second");
+            Respond();
+            execution.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            context.State.ShouldBe(TaskExecutionState.Executing);
+            state.GetField<int>("_activeTaskCount").ShouldBe(1);
+            state.GetField<int>("_yieldedTaskCount").ShouldBe(0);
+
+            void Respond()
+            {
+                SpinWait.SpinUntil(() => !endpoint.Packets.IsEmpty, TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                endpoint.Packets.TryDequeue(out INodePacket? packet).ShouldBeTrue();
+                var request = (TaskHostYieldRequest)packet.ShouldBeOfType<TaskHostTaskEnvelope>().Packet;
+                state.HandlePacket(new TaskHostYieldResponse(request.RequestId));
+            }
+        }
+
+        [Theory]
+        [InlineData("double-yield")]
+        [InlineData("reacquire-first")]
+        [InlineData("wrong-thread")]
+        [InlineData("build-while-yielded")]
+        public void InvalidYieldSequencesFailLikeInProcTasks(string operation)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            state.SetField("_nodeEndpoint", endpoint.Node);
+            state.SetField("_parentPacketVersion", NodePacketTypeExtensions.PacketVersion);
+            state.SetField("_activeTaskCount", 1);
+            using TaskExecutionContext context = state.AddContext(parentTaskId: 4, yieldEnabled: true);
+            if (operation == "reacquire-first")
+            {
+                Should.Throw<InternalErrorException>(() => state.RunAs(context, state.Node.Reacquire));
+                endpoint.Packets.ShouldBeEmpty();
+                return;
+            }
+
+            System.Threading.Tasks.Task yield = System.Threading.Tasks.Task.Run(() => state.RunAs(context, state.Node.Yield));
+            SpinWait.SpinUntil(() => !endpoint.Packets.IsEmpty, TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            endpoint.Packets.TryDequeue(out INodePacket? packet).ShouldBeTrue();
+            state.HandlePacket(new TaskHostYieldResponse(((TaskHostTaskEnvelope)packet!).Packet.ShouldBeOfType<TaskHostYieldRequest>().RequestId));
+            yield.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+
+            Action invalid = operation switch
+            {
+                "double-yield" => state.Node.Yield,
+                "wrong-thread" => state.Node.Reacquire,
+                _ => () => state.Node.BuildProjectFile("other.proj", null, null, null),
+            };
+            Should.Throw<InternalErrorException>(() => state.RunAs(context, invalid));
+            endpoint.Packets.ShouldBeEmpty("An invalid call must not reach the worker node.");
+            context.State.ShouldBe(TaskExecutionState.Yielded);
+        }
+
+        [Fact]
+        public void CancellationByTaskIdCancelsOnlyThatTask()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            using TaskExecutionContext yielded = state.AddContext(parentTaskId: 1, yieldEnabled: true);
+            yielded.State = TaskExecutionState.Yielded;
+            using TaskExecutionContext active = state.AddContext(parentTaskId: 2, yieldEnabled: true);
+
+            state.HandlePacket(new TaskHostTaskCancel(2));
+            state.HandlePacket(new TaskHostTaskCancel(99));
+
+            active.CancelRequested.ShouldBeTrue();
+            yielded.CancelRequested.ShouldBeFalse("A task that shares the process must keep running.");
+            state.GetField<ManualResetEvent>("_taskCancelledEvent").WaitOne(0).ShouldBeFalse("Per-task cancellation must not cancel every task.");
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -249,8 +454,47 @@ namespace Microsoft.Build.UnitTests
                 set => SetField("_shutdownReason", value);
             }
 
-            internal ConcurrentQueue<TaskHostTaskComplete> PendingCompletions =>
-                (ConcurrentQueue<TaskHostTaskComplete>)typeof(OutOfProcTaskHostNode).GetField("_taskCompletePackets", InstanceMembers)!.GetValue(Node)!;
+            internal ConcurrentQueue<INodePacket> PendingCompletions =>
+                (ConcurrentQueue<INodePacket>)typeof(OutOfProcTaskHostNode).GetField("_taskCompletePackets", InstanceMembers)!.GetValue(Node)!;
+
+            internal void HandlePacket(INodePacket packet) => ((Action<INodePacket>)typeof(OutOfProcTaskHostNode)
+                .GetMethod("HandlePacket", InstanceMembers)!.CreateDelegate(typeof(Action<INodePacket>), Node))(packet);
+
+            internal TaskExecutionContext CreateTaskContext(TaskHostConfiguration configuration) => ((Func<TaskHostConfiguration, TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
+                .GetMethod("CreateTaskContext", InstanceMembers)!.CreateDelegate(typeof(Func<TaskHostConfiguration, TaskExecutionContext>), Node))(configuration);
+
+            internal T GetField<T>(string name) => (T)typeof(OutOfProcTaskHostNode).GetField(name, InstanceMembers)!.GetValue(Node)!;
+
+            /// <summary>
+            /// Adds an executing task context, as if the node had received its configuration.
+            /// </summary>
+            internal TaskExecutionContext AddContext(int parentTaskId, bool yieldEnabled)
+            {
+                TaskExecutionContext context = CreateTaskContext(
+                    (TaskHostConfiguration)Activator.CreateInstance(typeof(TaskHostConfiguration), nonPublic: true)!);
+                context.ParentTaskId = parentTaskId;
+                context.YieldEnabled = yieldEnabled;
+                context.State = TaskExecutionState.Executing;
+                return context;
+            }
+
+            /// <summary>
+            /// Runs <paramref name="action"/> as the task of <paramref name="context"/> on the current thread.
+            /// </summary>
+            internal void RunAs(TaskExecutionContext context, Action action)
+            {
+                var current = GetField<AsyncLocal<TaskExecutionContext>>("_currentTaskContext");
+                TaskExecutionContext? previous = current.Value;
+                current.Value = context;
+                try
+                {
+                    action();
+                }
+                finally
+                {
+                    current.Value = previous!;
+                }
+            }
 
             internal RedirectedNodeState(Action<string> output, Action<string> error)
             {

@@ -165,6 +165,31 @@ Each task gets a `TaskExecutionContext` stored in `_taskContexts` (ConcurrentDic
 
 On .NET Framework, callbacks from a task in another AppDomain carry its task ID in the logical call context. The TaskHost uses that ID to find the same per-task state.
 
+## Yield and Reacquire (Task-ID Routing)
+
+When both peers use packet version 9 or later and change wave 18.14 is enabled, the parent sends a `TaskHostTaskIdentity` packet before each `TaskHostConfiguration`. The identity gives the task a parent task ID that is unique in the parent process. Older peers, the CLR2 `MSBuildTaskHost`, and builds with the 18.14 wave disabled do not use this protocol. For them, `Yield` and `Reacquire` are no-ops and routing is unchanged.
+
+### Packet routing
+
+- The child wraps each task-scoped packet (log events, callback requests, completion) in a `TaskHostTaskEnvelope` that holds the parent task ID. The provider unwraps the envelope and sends the inner packet to the handler registered for that ID. Packets without an envelope go to the most recent handler, as before.
+- The parent does not wrap responses. The child matches each response to its request through the request ID, which is unique in the process.
+- `TaskHostTaskCancel` cancels one task by ID. The legacy `TaskHostTaskCancelled` packet still cancels all tasks.
+
+### Yield flow
+
+1. The task calls `Yield` on its own thread. The child saves the task's environment and current directory, marks the context as yielded, and sends `TaskHostYieldRequest`.
+2. The parent calls the real `IBuildEngine3.Yield`. The scheduler can then start another task on the same worker node, and that task can use the same TaskHost process.
+3. The yielded task continues to run. Only one non-yielded task runs in a TaskHost at a time. Yielded tasks can run at the same time as it.
+4. `Reacquire` sends a request and blocks until the parent's `IBuildEngine3.Reacquire` returns. Only then does the parent send the response, so the task does not continue before the scheduler gives it its node back. The child then restores the task's environment and current directory.
+
+The child enforces the in-process contract: `Yield` twice, `Reacquire` without `Yield`, or `Reacquire` on a different thread throws. If a task completes, throws, or is cancelled while yielded, the parent reacquires on its behalf before it reports the result. If a disconnect occurs while a task is yielded or reacquiring, the parent unblocks the task and removes all of its registrations.
+
+### Limitations
+
+- A yielded task gives up the process environment and current directory, as an in-process task does. While it is yielded, it must not read or change process-wide state, such as environment variables, the current directory, `Console`, or static fields. Tools that it starts must get their environment and working directory explicitly. The TaskHost cannot enforce this rule. Legacy tasks that break it are not safe to overlap.
+- `BuildProjectFile` and other callbacks that block for a nested build are not supported while a task is yielded.
+- After a per-task cancel, the TaskHost exits only after all of its task contexts finish.
+
 ## TaskHost Lifecycle
 
 A TaskHost normally runs one task at a time. While that task waits for a nested

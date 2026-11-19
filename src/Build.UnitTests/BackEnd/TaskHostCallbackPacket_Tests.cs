@@ -17,6 +17,64 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class TaskHostCallbackPacket_Tests
     {
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void YieldRequestRoundTrip(bool reacquire)
+        {
+            TaskHostYieldRequest request = new(reacquire) { RequestId = 42 };
+            request.Translate(TranslationHelpers.GetWriteTranslator());
+            var result = (TaskHostYieldRequest)TaskHostYieldRequest.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            result.RequestId.ShouldBe(42);
+            result.Reacquire.ShouldBe(reacquire);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void YieldResponseRoundTrip(bool failed)
+        {
+            TaskHostYieldResponse response = new(42, failed ? new InvalidOperationException("callback failure") : null);
+            response.Translate(TranslationHelpers.GetWriteTranslator());
+            var result = (TaskHostYieldResponse)TaskHostYieldResponse.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            result.RequestId.ShouldBe(42);
+            result.Exception?.Message.ShouldBe(failed ? "callback failure" : null);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TaskIdentityAndCancelRoundTrip(bool yieldEnabled)
+        {
+            new TaskHostTaskIdentity(17, yieldEnabled).Translate(TranslationHelpers.GetWriteTranslator());
+            var identity = (TaskHostTaskIdentity)TaskHostTaskIdentity.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            identity.TaskId.ShouldBe(17);
+            identity.YieldEnabled.ShouldBe(yieldEnabled);
+
+            new TaskHostTaskCancel(23).Translate(TranslationHelpers.GetWriteTranslator());
+            ((TaskHostTaskCancel)TaskHostTaskCancel.FactoryForDeserialization(TranslationHelpers.GetReadTranslator())).TaskId.ShouldBe(23);
+        }
+
+        [Fact]
+        public void TaskEnvelopeCarriesTheTaskIdAndTheInnerPacket()
+        {
+            BuildMessageEventArgs message = new("yielded task log", null, null, MessageImportance.High);
+            new TaskHostTaskEnvelope(5, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(3, message)))
+                .Translate(TranslationHelpers.GetWriteTranslator());
+
+            var envelope = (TaskHostTaskEnvelope)TaskHostTaskEnvelope.FactoryForDeserialization(
+                TranslationHelpers.GetReadTranslator(),
+                (type, translator) =>
+                {
+                    type.ShouldBe(NodePacketType.LogMessage);
+                    return LogMessagePacket.FactoryForDeserialization(translator);
+                });
+
+            envelope.TaskId.ShouldBe(5);
+            var inner = envelope.Packet.ShouldBeOfType<LogMessagePacket>();
+            inner.NodeBuildEvent!.Value.Key.ShouldBe(3);
+            inner.NodeBuildEvent.Value.Value.Message.ShouldBe("yielded task log");
+        }
         [Fact]
         public void TaskHostIsRunningMultipleNodesRequest_RoundTrip_Serialization()
         {

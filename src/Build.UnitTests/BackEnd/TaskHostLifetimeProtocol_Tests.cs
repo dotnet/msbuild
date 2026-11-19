@@ -224,6 +224,7 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
                 out _,
                 out bool wasNewlyCreated,
                 out NodeProviderOutOfProcBase.NodeContext connection,
+                out _,
                 out _).ShouldBeFalse();
 
             parameterConversionUnsupported.ShouldBeTrue();
@@ -395,6 +396,92 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
             last.Packets[^1].Type.ShouldBe(NodePacketType.NodeShutdown);
             provider.TryReactivateTaskHandler(context, last).ShouldBeFalse();
             provider.TaskHandlerRegistrationCount.ShouldBe(0);
+        }
+        finally
+        {
+            pipe.CompleteRead();
+            terminated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            context.WaitForSendCompletion(10_000).ShouldBeTrue();
+        }
+    }
+
+    [Fact]
+    public void TaskEnvelopesReachOnlyTheirOwnTaskInASharedHost()
+    {
+        using Process process = Process.GetCurrentProcess();
+        using ControlledReadStream pipe = new();
+        using ManualResetEventSlim terminated = new();
+        var provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(
+            BuildComponentType.OutOfProcTaskHostNodeProvider);
+        provider.InitializeComponent(new MockHost());
+        NodeProviderOutOfProcBase.NodeContext context = new(
+            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
+            NodePacketTypeExtensions.PacketVersion);
+        provider.NodeContextCreated(context, new TaskHostNodeKey(HandshakeOptions.TaskHost, 1));
+        PacketRecordingHandler yielded = new();
+        PacketRecordingHandler active = new();
+        try
+        {
+            // A yielded task's handler is below the active task's handler on the legacy stack.
+            provider.TryAttachTaskHandler(context, yielded).ShouldBeTrue();
+            int yieldedId = provider.RegisterTaskIdForTests(context, yielded);
+            provider.TryAttachTaskHandler(context, active).ShouldBeTrue();
+            int activeId = provider.RegisterTaskIdForTests(context, active);
+
+            INodePacket yieldedPacket = new TaskHostYieldRequest(reacquire: true) { RequestId = 1 };
+            INodePacket activePacket = new TaskHostCoresRequest(1, false);
+            provider.PacketReceived(1, new TaskHostTaskEnvelope(yieldedId, yieldedPacket));
+            provider.PacketReceived(1, new TaskHostTaskEnvelope(activeId, activePacket));
+            yielded.Packets.ShouldHaveSingleItem().ShouldBeSameAs(yieldedPacket);
+            active.Packets.ShouldHaveSingleItem().ShouldBeSameAs(activePacket);
+
+            // Unknown tasks and packets from another connection are dropped, not delivered to the top handler.
+            provider.PacketReceived(1, new TaskHostTaskEnvelope(activeId + 100, activePacket));
+            provider.PacketReceived(2, new TaskHostTaskEnvelope(yieldedId, yieldedPacket));
+            yielded.Packets.Count.ShouldBe(1);
+            active.Packets.Count.ShouldBe(1);
+
+            // Disconnecting the active task does not make its late packets reach the yielded task.
+            provider.DisconnectFromHost(context, active);
+            provider.TaskIdRegistrationCount.ShouldBe(1);
+            provider.PacketReceived(1, new TaskHostTaskEnvelope(activeId, activePacket));
+            yielded.Packets.Count.ShouldBe(1);
+            active.Packets.Count.ShouldBe(1);
+
+            provider.PacketReceived(1, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+            yielded.Packets[^1].Type.ShouldBe(NodePacketType.NodeShutdown);
+            provider.TaskIdRegistrationCount.ShouldBe(0);
+            provider.TaskHandlerRegistrationCount.ShouldBe(0);
+        }
+        finally
+        {
+            pipe.CompleteRead();
+            terminated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            context.WaitForSendCompletion(10_000).ShouldBeTrue();
+        }
+    }
+
+    [Theory]
+    [InlineData(8, false, false)]
+    [InlineData(9, false, true)]
+    [InlineData(9, true, false)]
+    public void TaskIdRoutingRequiresCapabilityAndChangeWave(byte version, bool disableWave, bool expected)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableWave ? "18.14" : null);
+        ChangeWaves.ResetStateForTests();
+        using Process process = Process.GetCurrentProcess();
+        using ControlledReadStream pipe = new();
+        using ManualResetEventSlim terminated = new();
+        var provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(
+            BuildComponentType.OutOfProcTaskHostNodeProvider);
+        provider.InitializeComponent(new MockHost());
+        NodeProviderOutOfProcBase.NodeContext context = new(
+            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); }, version);
+        provider.NodeContextCreated(context, new TaskHostNodeKey(HandshakeOptions.TaskHost, 1));
+        try
+        {
+            NodeProviderOutOfProcTaskHost.UsesTaskIdRouting(context).ShouldBe(expected);
         }
         finally
         {

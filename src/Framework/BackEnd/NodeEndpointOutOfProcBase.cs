@@ -863,7 +863,8 @@ internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
                             INodePacket packet;
                             while (localPacketQueue.TryDequeue(out packet))
                             {
-                                bool isLogPacket = packet.Type == NodePacketType.LogMessage;
+                                bool isLogPacket = packet.Type == NodePacketType.LogMessage
+                                    || (packet is TaskHostTaskEnvelope envelope && envelope.Packet.Type == NodePacketType.LogMessage);
                                 if (!isLogPacket)
                                 {
                                     // Deliver preceding logs before serializing or sending control traffic.

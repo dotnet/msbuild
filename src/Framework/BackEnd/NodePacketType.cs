@@ -228,7 +228,7 @@ internal enum NodePacketType : byte
 
     // Packet types 0x17-0x1F reserved for future core functionality
 
-    #region TaskHost callback packets (0x20-0x27)
+    #region TaskHost callback packets (0x20-0x2B)
     // These support bidirectional callbacks from TaskHost to parent for IBuildEngine implementations
 
     /// <summary>
@@ -266,7 +266,30 @@ internal enum NodePacketType : byte
     /// </summary>
     TaskHostConsoleConfiguration = 0x26,
 
-    // 0x27 reserved for future TaskHost callback packet types
+    /// <summary>
+    /// Request from TaskHost to owning worker node to Yield or Reacquire on behalf of one task.
+    /// </summary>
+    TaskHostYieldRequest = 0x27,
+
+    /// <summary>
+    /// Response from owning worker node after Yield or Reacquire completed in the scheduler.
+    /// </summary>
+    TaskHostYieldResponse = 0x28,
+
+    /// <summary>
+    /// Assigns the owning worker node's task ID to the next <see cref="TaskHostConfiguration"/>.
+    /// </summary>
+    TaskHostTaskIdentity = 0x29,
+
+    /// <summary>
+    /// Cancels one task, identified by its task ID, in a TaskHost that runs several tasks.
+    /// </summary>
+    TaskHostTaskCancel = 0x2A,
+
+    /// <summary>
+    /// Wraps a task-scoped packet from TaskHost with the task ID it belongs to.
+    /// </summary>
+    TaskHostTaskEnvelope = 0x2B,
 
     #endregion
 
