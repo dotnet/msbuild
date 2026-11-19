@@ -396,7 +396,7 @@ public sealed class PackageContractTests
             WorkingDirectory = workingDirectory,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            UseShellExecute = false,
+            InheritedHandles = [],
         };
 
         // The two-stage CI build launches tests with paths from the stage 1 bootstrap.
@@ -423,29 +423,27 @@ public sealed class PackageContractTests
             startInfo.ArgumentList.Add(argument);
         }
 
-        using Process process = Process.Start(startInfo)
-            ?? throw new InvalidOperationException($"Failed to start '{dotnetPath}'.");
-        Task<string> standardOutput = process.StandardOutput.ReadToEndAsync();
-        Task<string> standardError = process.StandardError.ReadToEndAsync();
+        using Process process = Process.Start(startInfo)!;
+        Task<(string StandardOutput, string StandardError)> capturedOutput = process.ReadAllTextAsync();
 
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+        ProcessExitStatus status;
         try
         {
-            await process.WaitForExitAsync(timeout.Token);
+            status = await process.WaitForExitStatusAsync(timeout.Token);
         }
         catch (OperationCanceledException) when (timeout.IsCancellationRequested)
         {
             process.Kill(entireProcessTree: true);
-            await process.WaitForExitAsync();
+            await process.WaitForExitStatusAsync();
             throw new TimeoutException($"dotnet {string.Join(' ', arguments)} exceeded five minutes.");
         }
 
-        string output = await standardOutput;
-        string error = await standardError;
+        (string output, string error) = await capturedOutput;
         _output.WriteLine(output);
         _output.WriteLine(error);
 
-        process.ExitCode.ShouldBe(expectedExitCode, $"dotnet {string.Join(' ', arguments)} returned an unexpected exit code.");
+        status.ExitCode.ShouldBe(expectedExitCode, $"dotnet {string.Join(' ', arguments)} returned an unexpected exit code.");
         return $"{output}{Environment.NewLine}{error}";
     }
 
