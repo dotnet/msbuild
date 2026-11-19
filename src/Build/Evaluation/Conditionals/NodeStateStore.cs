@@ -22,8 +22,12 @@ internal struct NodeStateStore
         public string? ExpandedValue;
     }
 
+    // Covers real conditions: the largest found in the SDK, Visual Studio and NuGet packages needs 78 slots.
+    // Larger buffers go back to Shared, so an unusually large condition cannot pin a big buffer on every thread.
+    private const int MaxThreadCachedLength = 256;
+
     // On .NET Framework, ArrayPool<T>.Shared locks on every Rent and Return and has no per-thread cache,
-    // which made parallel evaluation about 2x slower. So each thread keeps its largest buffer,
+    // which made parallel evaluation about 2x slower. So each thread keeps one buffer,
     // and Shared is used only when that buffer is missing, in use or too small.
     [ThreadStatic]
     private static StringNodeState[]? t_cachedStringStates;
@@ -83,7 +87,7 @@ internal struct NodeStateStore
         Array.Clear(states, 0, usedLength);
 
         StringNodeState[]? cached = t_cachedStringStates;
-        if (cached is null || cached.Length < states.Length)
+        if (states.Length <= MaxThreadCachedLength && (cached is null || cached.Length < states.Length))
         {
             t_cachedStringStates = states;
             if (cached is not null)
