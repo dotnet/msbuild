@@ -648,6 +648,26 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void TaskEnvironment_GetProcessStartInfo_DoesNotRestoreRemovedVariables()
+        {
+            string testVarName = $"MSBUILD_REMOVED_{Guid.NewGuid():N}";
+            Environment.SetEnvironmentVariable(testVarName, "ambient");
+            TaskEnvironment taskEnvironment = CreateTaskEnvironment(MultithreadedEnvironmentName);
+
+            try
+            {
+                taskEnvironment.SetEnvironmentVariable(testVarName, null);
+
+                taskEnvironment.GetProcessStartInfo().Environment.ContainsKey(testVarName).ShouldBeFalse();
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
+                Environment.SetEnvironmentVariable(testVarName, null);
+            }
+        }
+
+        [Fact]
         public void TaskEnvironment_StubEnvironment_ShouldAffectSystemEnvironment()
         {
             string testVarName = $"MSBUILD_STUB_ISOLATION_TEST_{Guid.NewGuid():N}";
