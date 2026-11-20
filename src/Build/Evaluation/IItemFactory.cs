@@ -67,6 +67,6 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Applies the supplied metadata to the destination items.
         /// </summary>
-        void SetMetadata(IEnumerable<KeyValuePair<ProjectMetadataElement, string>> metadata, IEnumerable<T> destinationItems);
+        void SetMetadata(EvaluatedMetadataTable metadata, IEnumerable<T> destinationItems);
     }
 }

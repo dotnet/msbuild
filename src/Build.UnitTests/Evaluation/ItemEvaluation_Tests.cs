@@ -2,11 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Threading;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -724,6 +730,177 @@ namespace Microsoft.Build.UnitTests.Evaluation
             };
 
             ObjectModelHelpers.AssertItems(new[] { $"{prefix}foo" }, items, expectedMetadata);
+        }
+
+        [Fact]
+        public void EvaluatedMetadataTableSnapshotsNamesAndUpdatesAnExistingIndex()
+        {
+            ProjectRootElement root = ProjectRootElement.Create();
+            ProjectItemElement item = root.AddItemGroup().AddItem("I", "item");
+            ProjectMetadataElement first = item.AddMetadata("First", "one");
+            ProjectMetadataElement second = item.AddMetadata("Second", "two");
+            var table = new EvaluatedMetadataTable("I", 2);
+
+            table.SetValue(first, "one");
+            first.Name = "Renamed";
+
+            table.GetEscapedValue("First").ShouldBe("one");
+            table.GetEscapedValue("i", "FIRST").ShouldBe("one");
+            table.GetEscapedValueIfPresent("", "First").ShouldBeNull();
+            table.GetEscapedValueIfPresent("Other", "First").ShouldBeNull();
+            table.GetEscapedValueIfPresent(null, "Missing").ShouldBeNull();
+
+            second.Name = "fIrSt";
+            table.SetValue(second, string.Empty);
+
+            table.GetEscapedValueIfPresent(null, "FIRST").ShouldBe(string.Empty);
+            table.Count.ShouldBe(2);
+            table[0].Element.ShouldBeSameAs(first);
+            table[0].Name.ShouldBe("First");
+            table[1].Name.ShouldBe("fIrSt");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void InvariantMetadataPreservesDuplicateCasingAcrossObjectModels(bool projectInstance)
+        {
+            ProjectRootElement root = ProjectRootElement.Create();
+            ProjectItemElement item = root.AddItemGroup().AddItem("I", "item");
+            item.AddMetadata("Alpha", "one").ExpressedAsAttribute = true;
+            item.AddMetadata("aLPHA", "two");
+
+            string value = projectInstance
+                ? ProjectInstance.FromProjectRootElement(root, new ProjectOptions()).GetItems("I").ShouldHaveSingleItem().GetMetadataValue("alpha")
+                : new Project(root, null, null, ProjectCollection.GlobalProjectCollection).GetItems("I").ShouldHaveSingleItem().GetMetadataValue("alpha");
+
+            value.ShouldBe("two");
+        }
+
+        [Fact]
+        public void ProjectItemFactoryRetainsLiveXmlName()
+        {
+            ProjectRootElement projectRoot = ProjectRootElement.Create();
+            ProjectItemElement itemElement = projectRoot.AddItemGroup().AddItem("I", "item");
+            var project = new Project(projectRoot, null, null, ProjectCollection.GlobalProjectCollection);
+            ProjectItem destinationItem = project.GetItems("I").ShouldHaveSingleItem();
+
+            ProjectRootElement metadataRoot = ProjectRootElement.Create();
+            ProjectMetadataElement metadata = metadataRoot.AddItemGroup().AddItem("Source", "item").AddMetadata("First", "one");
+            var table = new EvaluatedMetadataTable("I", 1);
+            table.SetValue(metadata, "one");
+            metadata.Name = "Renamed";
+
+            var factory = new ProjectItem.ProjectItemFactory(project, itemElement);
+            factory.SetMetadata(table, [destinationItem]);
+
+            destinationItem.GetMetadataValue("First").ShouldBeEmpty();
+            destinationItem.GetMetadataValue("Renamed").ShouldBe("one");
+        }
+
+        [Fact]
+        public void InvariantMetadataRetainsLiveXmlNameForProjectInstanceFactory()
+        {
+            const string enableAllPropertyFunctionsSwitch = "Microsoft.Build.EnableAllPropertyFunctions";
+            bool switchWasSet = AppContext.TryGetSwitch(enableAllPropertyFunctionsSwitch, out bool enableAllPropertyFunctions);
+            AppContext.SetSwitch(enableAllPropertyFunctionsSwitch, true);
+
+            try
+            {
+                ProjectRootElement root = ProjectRootElement.Create();
+                ProjectItemElement item = root.AddItemGroup().AddItem("I", "item");
+                ProjectMetadataElement first = item.AddMetadata("First", "one");
+                string propertyFunction = $"$([{typeof(MetadataRenamePropertyFunction).AssemblyQualifiedName}]::Rename())";
+                item.AddMetadata("Trigger", propertyFunction);
+
+                using MetadataRenamePropertyFunction.Scope mutation = MetadataRenamePropertyFunction.Begin(first);
+                ProjectItemInstance evaluatedItem = ProjectInstance.FromProjectRootElement(root, new ProjectOptions()).GetItems("I").ShouldHaveSingleItem();
+
+                mutation.CallCount.ShouldBe(2);
+                first.Name.ShouldBe("Renamed");
+                evaluatedItem.GetMetadataValue("First").ShouldBeEmpty();
+                evaluatedItem.GetMetadataValue("Renamed").ShouldBe("one");
+                evaluatedItem.GetMetadataValue("Trigger").ShouldBe("renamed");
+            }
+            finally
+            {
+                MetadataRenamePropertyFunction.End();
+                RestoreAppContextSwitch(enableAllPropertyFunctionsSwitch, switchWasSet, enableAllPropertyFunctions);
+            }
+        }
+
+        private static void RestoreAppContextSwitch(string switchName, bool wasSet, bool value)
+        {
+            if (wasSet)
+            {
+                AppContext.SetSwitch(switchName, value);
+                return;
+            }
+
+            foreach (FieldInfo field in typeof(AppContext).GetFields(BindingFlags.NonPublic | BindingFlags.Static))
+            {
+                if (field.GetValue(null) is IDictionary switches)
+                {
+                    lock (switches)
+                    {
+                        if (switches.Contains(switchName))
+                        {
+                            switches.Remove(switchName);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static class MetadataRenamePropertyFunction
+    {
+        private static readonly AsyncLocal<Scope> s_scope = new();
+
+        internal static Scope Begin(ProjectMetadataElement metadata)
+        {
+            var scope = new Scope(metadata);
+            s_scope.Value = scope;
+            return scope;
+        }
+
+        public static string Rename()
+        {
+            Scope scope = s_scope.Value ?? throw new InvalidOperationException("No metadata rename scope is active.");
+            scope.Rename();
+            return "renamed";
+        }
+
+        internal static void End()
+        {
+            s_scope.Value = null;
+        }
+
+        internal sealed class Scope : IDisposable
+        {
+            private readonly ProjectMetadataElement _metadata;
+
+            internal Scope(ProjectMetadataElement metadata)
+            {
+                _metadata = metadata;
+            }
+
+            internal int CallCount { get; private set; }
+
+            internal void Rename()
+            {
+                CallCount++;
+                if (CallCount == 2)
+                {
+                    _metadata.Name = "Renamed";
+                }
+            }
+
+            public void Dispose()
+            {
+                End();
+            }
         }
     }
 }

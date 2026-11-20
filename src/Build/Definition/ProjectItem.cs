@@ -1013,13 +1013,14 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Applies the supplied metadata to the destination item.
             /// </summary>
-            public void SetMetadata(IEnumerable<KeyValuePair<ProjectMetadataElement, string>> metadata, IEnumerable<ProjectItem> destinationItems)
+            public void SetMetadata(EvaluatedMetadataTable metadata, IEnumerable<ProjectItem> destinationItems)
             {
                 foreach (IItem<ProjectMetadata> item in destinationItems)
                 {
-                    foreach (KeyValuePair<ProjectMetadataElement, string> metadatum in metadata)
+                    for (int i = 0; i < metadata.Count; i++)
                     {
-                        item.SetMetadata(metadatum.Key, metadatum.Value);
+                        EvaluatedMetadataEntry metadatum = metadata[i];
+                        item.SetMetadata(metadatum.Element, metadatum.EscapedValue);
                     }
                 }
             }

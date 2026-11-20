@@ -34,6 +34,10 @@ Multiple sets are combined with OR. Some sets are umbrellas for narrower sets:
 | `ExpressionShredder` | `ExpressionShredderThroughput` |
 | `Items` | `ItemEvaluation` |
 
+`InvariantMetadata` selects the bounded item-evaluation benchmarks for metadata shared across all
+items produced by an item operation, including Project and ProjectInstance factory paths and a
+per-item metadata-reference fallback control.
+
 Scaling sets remain separate. For example, `-Set MetadataExpansion` excludes
 `MetadataExpansionScaling`. The cross-cutting `Scaling` set contains both property- and
 metadata-expansion scaling benchmarks. `PropertyBagCardinality` varies the number of unreferenced
