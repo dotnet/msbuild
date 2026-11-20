@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
+using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 
 #nullable disable
@@ -141,7 +141,7 @@ namespace Microsoft.Build
                         return Strings.WeakIntern(charBuffer.AsSpan(0, charsRead));
                     }
 
-                    resultBuffer ??= ArrayPool<char>.Shared.Rent(stringLength); // Actual string length in chars may be smaller.
+                    resultBuffer ??= BufferPool<char>.Shared.Rent(stringLength); // Actual string length in chars may be smaller.
                     charsRead += _decoder.GetChars(rawBuffer, rawPosition, n, resultBuffer, charsRead);
 
                     currPos += n;
@@ -162,7 +162,7 @@ namespace Microsoft.Build
                 // resultBuffer shall always be either Rented or null
                 if (resultBuffer != null)
                 {
-                    ArrayPool<char>.Shared.Return(resultBuffer);
+                    BufferPool<char>.Shared.Return(resultBuffer);
                 }
             }
         }

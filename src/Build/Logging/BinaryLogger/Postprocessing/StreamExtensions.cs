@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
 using System.IO;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Logging
 {
@@ -28,8 +28,8 @@ namespace Microsoft.Build.Logging
                 return 0;
             }
 
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
-            using var _ = new CleanupScope(() => ArrayPool<byte>.Shared.Return(buffer));
+            byte[] buffer = BufferPool<byte>.Shared.Rent(4096);
+            using var _ = new CleanupScope(() => BufferPool<byte>.Shared.Return(buffer));
             return SkipBytes(stream, bytesCount, buffer);
         }
 

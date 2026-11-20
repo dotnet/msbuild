@@ -5,6 +5,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -34,7 +35,7 @@ namespace Microsoft.Build.Tasks
         private const int ShaBufferSize = 512;
 
         // Size of chunks in which ItemSpecs would be cut.
-        // We have chosen this length so itemSpecChunkByteBuffer rented from ArrayPool will be close but not bigger than 512.
+        // We have chosen this length so itemSpecChunkByteBuffer rented from BufferPool will be close but not bigger than 512.
         private const int MaxInputChunkLength = 169;
 
         /// <summary>
@@ -73,8 +74,8 @@ namespace Microsoft.Build.Tasks
 
                     try
                     {
-                        shaBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(ShaBufferSize);
-                        itemSpecChunkByteBuffer = System.Buffers.ArrayPool<byte>.Shared.Rent(s_encoding.GetMaxByteCount(MaxInputChunkLength));
+                        shaBuffer = BufferPool<byte>.Shared.Rent(ShaBufferSize);
+                        itemSpecChunkByteBuffer = BufferPool<byte>.Shared.Rent(s_encoding.GetMaxByteCount(MaxInputChunkLength));
 
                         int shaBufferPosition = 0;
                         for (int i = 0; i < ItemsToHash.Length; i++)
@@ -112,11 +113,11 @@ namespace Microsoft.Build.Tasks
                     {
                         if (shaBuffer != null)
                         {
-                            System.Buffers.ArrayPool<byte>.Shared.Return(shaBuffer);
+                            BufferPool<byte>.Shared.Return(shaBuffer);
                         }
                         if (itemSpecChunkByteBuffer != null)
                         {
-                            System.Buffers.ArrayPool<byte>.Shared.Return(itemSpecChunkByteBuffer);
+                            BufferPool<byte>.Shared.Return(itemSpecChunkByteBuffer);
                         }
                     }
                 }

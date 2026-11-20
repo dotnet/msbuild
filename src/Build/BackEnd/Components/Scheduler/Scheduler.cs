@@ -19,6 +19,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.TelemetryInfra;
+using Microsoft.Build.Utilities;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
@@ -66,10 +67,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Often we will need to copy requests into a buffer to avoid modifying the target collection while we
         /// enumerate due to semi-recursive calls in the Scheduler.
-        /// Avoid ArrayPool.Shared here as its backed by a different implementation which will evict our arrays (likely
+        /// Avoid BufferPool.Shared and ArrayPool.Shared here as its backed by a different implementation which will evict our arrays (likely
         /// due to exceeding the threshold from these recursive calls).
         /// </summary>
-        private ArrayPool<SchedulableRequest> _requestBufferPool = ArrayPool<SchedulableRequest>.Create();
+        private ArrayPool<SchedulableRequest> _requestBufferPool = BufferPool<SchedulableRequest>.Create();
 
         /// <summary>
         /// Content of the environment variable  MSBUILDSCHEDULINGUNLIMITED
@@ -601,7 +602,7 @@ namespace Microsoft.Build.BackEnd
             _schedulingData = new SchedulingData();
             _availableNodes = new Dictionary<int, NodeInfo>(8);
             _pendingRequestCoresCallbacks = new Queue<TaskCompletionSource<int>>();
-            _requestBufferPool = ArrayPool<SchedulableRequest>.Create();
+            _requestBufferPool = BufferPool<SchedulableRequest>.Create();
             _currentInProcNodeCount = 0;
             _currentOutOfProcNodeCount = 0;
 

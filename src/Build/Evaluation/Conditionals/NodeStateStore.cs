@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Evaluation;
 
@@ -21,16 +21,6 @@ internal struct NodeStateStore
     {
         public string? ExpandedValue;
     }
-
-    // Covers real conditions: the largest found in the SDK, Visual Studio and NuGet packages needs 78 slots.
-    // Larger buffers go back to Shared, so an unusually large condition cannot pin a big buffer on every thread.
-    private const int MaxThreadCachedLength = 256;
-
-    // On .NET Framework, ArrayPool<T>.Shared locks on every Rent and Return and has no per-thread cache,
-    // which made parallel evaluation about 2x slower. So each thread keeps one buffer,
-    // and Shared is used only when that buffer is missing, in use or too small.
-    [ThreadStatic]
-    private static StringNodeState[]? t_cachedStringStates;
 
     private NodeStateLayout _layout;
     private StringNodeState[]? _stringStates;
@@ -53,7 +43,7 @@ internal struct NodeStateStore
             ThrowInvalidSlot(slot);
         }
 
-        StringNodeState[] states = _stringStates ??= RentStringStates(_layout.StringSlotCount);
+        StringNodeState[] states = _stringStates ??= BufferPool<StringNodeState>.Shared.Rent(_layout.StringSlotCount);
         return ref states[slot];
     }
 
@@ -65,40 +55,10 @@ internal struct NodeStateStore
 
         if (stringStates is not null)
         {
-            ReturnStringStates(stringStates, usedLength);
+            // Only slots below the layout's slot count can be written.
+            Array.Clear(stringStates, 0, usedLength);
+            BufferPool<StringNodeState>.Shared.Return(stringStates);
         }
-    }
-
-    private static StringNodeState[] RentStringStates(int length)
-    {
-        StringNodeState[]? cached = t_cachedStringStates;
-        if (cached is not null && cached.Length >= length)
-        {
-            t_cachedStringStates = null;
-            return cached;
-        }
-
-        return ArrayPool<StringNodeState>.Shared.Rent(length);
-    }
-
-    private static void ReturnStringStates(StringNodeState[] states, int usedLength)
-    {
-        // Only slots below the layout's slot count can be written.
-        Array.Clear(states, 0, usedLength);
-
-        StringNodeState[]? cached = t_cachedStringStates;
-        if (states.Length <= MaxThreadCachedLength && (cached is null || cached.Length < states.Length))
-        {
-            t_cachedStringStates = states;
-            if (cached is not null)
-            {
-                ArrayPool<StringNodeState>.Shared.Return(cached);
-            }
-
-            return;
-        }
-
-        ArrayPool<StringNodeState>.Shared.Return(states);
     }
 
     private readonly void ThrowInvalidSlot(int slot)
