@@ -7,7 +7,9 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
+using Task = System.Threading.Tasks.Task;
 
 #nullable disable
 
@@ -223,13 +225,114 @@ namespace Microsoft.Build.UnitTests
             projectOutputs.Add("{2F6BBCC3-7111-4116-A68B-000000000000}", Path.Combine("obj", "managed.dll"));
             projectOutputs.Add("{2F6BBCC3-7111-4116-A68B-34CFC76F37C5}", Path.Combine("obj", "unmanaged.dll"));
 
-            TestUnresolvedReferencesHelper(projectRefs, projectOutputs, path => (path == Path.Combine("obj", "managed.dll")), out unresolvedOutputs, out resolvedOutputs);
+            TestUnresolvedReferencesHelper(projectRefs, projectOutputs, path => path == Path.GetFullPath(Path.Combine("obj", "managed.dll")), out unresolvedOutputs, out resolvedOutputs);
 
             Assert.NotNull(resolvedOutputs);
             Assert.True(resolvedOutputs.Contains(Path.Combine("obj", "managed.dll")));
             Assert.True(resolvedOutputs.Contains(Path.Combine("obj", "unmanaged.dll")));
             Assert.Equal("true", ((ITaskItem)resolvedOutputs[Path.Combine("obj", "managed.dll")]).GetMetadata("ManagedAssembly"));
             Assert.NotEqual("true", ((ITaskItem)resolvedOutputs[Path.Combine("obj", "unmanaged.dll")]).GetMetadata("ManagedAssembly"));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ConcurrentRelativeOutputsUseEachProjectDirectory(bool resolveByGuid)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFolder managedProject = env.CreateFolder();
+            TransientTestFolder nativeProject = env.CreateFolder();
+            string relativeOutputPath = Path.Combine("obj", "reference.dll");
+            string relativeProjectPath = Path.Combine("obj", "..", "reference.vcxproj");
+
+            Directory.CreateDirectory(Path.Combine(managedProject.Path, "obj"));
+            Directory.CreateDirectory(Path.Combine(nativeProject.Path, "obj"));
+            File.Copy(typeof(ResolveNonMSBuildProjectOutput).Assembly.Location, Path.Combine(managedProject.Path, relativeOutputPath));
+            File.WriteAllText(Path.Combine(nativeProject.Path, relativeOutputPath), "Not a managed assembly.");
+
+            ResolveNonMSBuildProjectOutput CreateTask(TransientTestFolder projectDirectory, string projectGuid, string name)
+            {
+                return new ResolveNonMSBuildProjectOutput
+                {
+                    BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory.Path),
+                    ProjectReferences =
+                    [
+                        CreateReferenceItem(
+                            Path.Combine(projectDirectory.Path, "reference.vcxproj"),
+                            resolveByGuid ? projectGuid : null,
+                            null,
+                            name),
+                        CreateReferenceItem(
+                            Path.Combine(projectDirectory.Path, "unresolved.csproj"),
+                            null,
+                            null,
+                            name + "-unresolved")
+                    ],
+                    PreresolvedProjectOutputs = $"""
+                        <VSIDEResolvedNonMSBuildProjectOutputs>
+                          <ProjectRef Project="{projectGuid}" AbsolutePath="{relativeProjectPath}">{relativeOutputPath}</ProjectRef>
+                        </VSIDEResolvedNonMSBuildProjectOutputs>
+                        """
+                };
+            }
+
+            ResolveNonMSBuildProjectOutput managedTask = CreateTask(managedProject, "{11111111-1111-1111-1111-111111111111}", "managed");
+            ResolveNonMSBuildProjectOutput nativeTask = CreateTask(nativeProject, "{22222222-2222-2222-2222-222222222222}", "native");
+
+            bool[] results = await Task.WhenAll(Task.Run(managedTask.Execute), Task.Run(nativeTask.Execute));
+            results.ShouldBe([true, true]);
+
+            ITaskItem managedOutput = managedTask.ResolvedOutputPaths.ShouldHaveSingleItem();
+            managedOutput.ItemSpec.ShouldBe(relativeOutputPath);
+            managedOutput.GetMetadata("Name").ShouldBe("managed");
+            managedOutput.GetMetadata("ManagedAssembly").ShouldBe("true");
+            managedTask.UnresolvedProjectReferences.ShouldHaveSingleItem().ShouldBeSameAs(managedTask.ProjectReferences[1]);
+
+            ITaskItem nativeOutput = nativeTask.ResolvedOutputPaths.ShouldHaveSingleItem();
+            nativeOutput.ItemSpec.ShouldBe(relativeOutputPath);
+            nativeOutput.GetMetadata("Name").ShouldBe("native");
+            nativeOutput.GetMetadata("ManagedAssembly").ShouldBeEmpty();
+            nativeTask.UnresolvedProjectReferences.ShouldHaveSingleItem().ShouldBeSameAs(nativeTask.ProjectReferences[1]);
+
+            ((MockEngine)managedTask.BuildEngine).Errors.ShouldBe(0);
+            ((MockEngine)managedTask.BuildEngine).Warnings.ShouldBe(0);
+            ((MockEngine)nativeTask.BuildEngine).Errors.ShouldBe(0);
+            ((MockEngine)nativeTask.BuildEngine).Warnings.ShouldBe(0);
+        }
+
+        [WindowsOnlyFact]
+        public void FallbackEnvironmentPreservesDriveRelativePaths()
+        {
+            string drive = Path.GetPathRoot(Environment.CurrentDirectory).Equals(@"C:\", StringComparison.OrdinalIgnoreCase) ? "D:" : "C:";
+            string projectPath = drive + "reference.vcxproj";
+            string outputPath = drive + "reference.dll";
+            string expectedAssemblyPath = Path.GetFullPath(outputPath);
+            string probedAssemblyPath = null;
+
+            var task = new ResolveNonMSBuildProjectOutput
+            {
+                BuildEngine = new MockEngine(_output),
+                ProjectReferences = [new TaskItem(Path.GetFullPath(projectPath))],
+                PreresolvedProjectOutputs = $"""
+                    <VSIDEResolvedNonMSBuildProjectOutputs>
+                      <ProjectRef Project="33333333-3333-3333-3333-333333333333" AbsolutePath="{projectPath}">{outputPath}</ProjectRef>
+                    </VSIDEResolvedNonMSBuildProjectOutputs>
+                    """,
+                GetAssemblyName = path =>
+                {
+                    probedAssemblyPath = path;
+                    return null;
+                }
+            };
+
+            task.Execute().ShouldBeTrue();
+
+            probedAssemblyPath.ShouldBe(expectedAssemblyPath);
+            ITaskItem output = task.ResolvedOutputPaths.ShouldHaveSingleItem();
+            output.ItemSpec.ShouldBe(outputPath);
+            output.GetMetadata("ManagedAssembly").ShouldBe("true");
+            task.UnresolvedProjectReferences.ShouldBeEmpty();
         }
 
         /// <summary>
