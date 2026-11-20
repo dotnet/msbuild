@@ -15,7 +15,7 @@ Compute work often produces properties and items that later work consumes:
 - a compute task writes properties and items through `<Output />`;
 - a property or item operation inside a target is assigned to the compute phase, for example to glob files that only exist during compute.
 
-Tasks and property and item operations in compute work are expanded the same way, in two passes.
+Tasks and property and item operations in compute work are expanded the same way, in two phases.
 Precompute expands everything it can and leaves references to compute-phase values in place.
 Compute expands the result again with the normal code once compute-phase values are available.
 
@@ -292,7 +292,7 @@ Other differences from a normal build:
   This takes priority over the elegance of precompute syntax.
 - **Precompute Compatibility**: Compute work produces the same results as a normal build except as listed above.
   Restrictions that only apply when precompute is enabled are acceptable when the patterns they reject are rare.
-- **Code Sharing**: Both passes use the normal expansion, condition, intrinsic task, and task binding code; there is no second implementation.
+- **Code Sharing**: Both phases use the normal expansion, condition, intrinsic task, and task binding code; there is no second implementation.
 
 ## Implementation
 
