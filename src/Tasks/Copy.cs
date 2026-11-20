@@ -14,7 +14,9 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 #if FEATURE_WINDOWSINTEROP
+using Microsoft.Win32.SafeHandles;
 using Windows.Win32.Foundation;
+using Windows.Win32.Storage.FileSystem;
 #endif
 
 #nullable disable
@@ -319,11 +321,16 @@ namespace Microsoft.Build.Tasks
                 MakeFileWriteable(destinationFileState, true);
             }
 
+            // We delete the destination first so that the copy below replaces the directory entry
+            // instead of writing *through* a hard or symbolic link and modifying whatever the link
+            // points at - e.g. a file in the NuGet global packages folder. See #8273.
+            bool destinationDeleteAttempted = false;
             if (!Traits.Instance.EscapeHatches.CopyWithoutDelete &&
                 destinationFileState.FileExists &&
                 !destinationFileState.IsReadOnly)
             {
                 FileUtilities.DeleteNoThrow(destinationFileState.Path);
+                destinationDeleteAttempted = true;
             }
 
             bool symbolicLinkCreated = false;
@@ -374,6 +381,21 @@ namespace Microsoft.Build.Tasks
             // then let's copy the file
             if (!hardLinkCreated && !symbolicLinkCreated)
             {
+                // DeleteNoThrow swallows its failures. If the delete above did not actually remove
+                // the destination, File.Copy(..., overwrite: true) could write through a surviving
+                // link and silently corrupt its target. On Unix, conservatively refuse any surviving
+                // destination because we cannot establish its hard-link count.
+                // Refuse instead, and let DoCopyWithRetries surface it like any other locked destination.
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12) &&
+                    destinationDeleteAttempted &&
+                    DestinationCannotBeSafelyOverwritten(destinationFileState.Path))
+                {
+                    destinationFileState.Reset();
+                    throw new IOException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                        "Copy.DestinationNotDeleted",
+                        destinationFileState.Path.OriginalValue));
+                }
+
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileState.Path, destinationFileState.Path);
 
@@ -394,6 +416,87 @@ namespace Microsoft.Build.Tasks
 
             return true;
         }
+
+        /// <summary>
+        /// Returns true when <paramref name="path"/> survived the attempt to delete it and cannot
+        /// be established to be safe to overwrite in place. On Windows, checks for symbolic links,
+        /// reparse points and multiple hard links. On Unix, conservatively refuses any surviving file.
+        /// </summary>
+        /// <remarks>
+        /// Checks existence after every attempted delete. Attribute and hard-link checks are only
+        /// reached when the destination still exists.
+        /// </remarks>
+        private static bool DestinationCannotBeSafelyOverwritten(string path)
+        {
+            if (!FileSystems.Default.FileExists(path))
+            {
+                // The delete worked. File.Copy will create a fresh directory entry.
+                return false;
+            }
+
+            try
+            {
+                if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) == FileAttributes.ReparsePoint)
+                {
+                    // A symbolic link (or another reparse point we must not write through).
+                    return true;
+                }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // Could not read the attributes; fall through to the hard link check.
+            }
+
+#if FEATURE_WINDOWSINTEROP
+            if (NativeMethodsShared.IsWindows)
+            {
+                return HasMultipleHardLinks(path);
+            }
+#endif
+
+            // On Unix the BCL does not expose the hard-link count. For example, a non-writable
+            // containing directory can prevent unlink() while still permitting an in-place copy
+            // into a writable file. Conservatively refuse any surviving destination rather than
+            // risk changing the contents of other names sharing it.
+            return true;
+        }
+
+#if FEATURE_WINDOWSINTEROP
+        /// <summary>
+        /// Returns true when more than one directory entry points at the file's record, i.e. the
+        /// file is one of several hard links. Returns true as well when that cannot be determined,
+        /// since this is only called when we already failed to delete the destination.
+        /// </summary>
+        private static unsafe bool HasMultipleHardLinks(string path)
+        {
+            try
+            {
+                // Query metadata without requiring read-data access, which may be denied by
+                // the destination's sharing mode or ACL even when an in-place copy is allowed.
+#pragma warning disable CA1416 // Only reached on Windows; see the caller.
+                HANDLE nativeHandle = Windows.Win32.PInvoke.CreateFile(
+                    path,
+                    0,
+                    FILE_SHARE_MODE.FILE_SHARE_READ | FILE_SHARE_MODE.FILE_SHARE_WRITE | FILE_SHARE_MODE.FILE_SHARE_DELETE,
+                    null,
+                    FILE_CREATION_DISPOSITION.OPEN_EXISTING,
+                    FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_NORMAL,
+                    HANDLE.Null);
+
+                using SafeFileHandle handle = new((IntPtr)nativeHandle.Value, ownsHandle: true);
+                return handle.IsInvalid ||
+                    !Windows.Win32.PInvoke.GetFileInformationByHandle(
+                        (HANDLE)handle.DangerousGetHandle(),
+                        out BY_HANDLE_FILE_INFORMATION info) ||
+                    info.nNumberOfLinks > 1;
+#pragma warning restore CA1416
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                return true;
+            }
+        }
+#endif
 
         private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, out bool linkCreated, ref string errorMessage, Func<string, string, string, bool> createLink)
         {
