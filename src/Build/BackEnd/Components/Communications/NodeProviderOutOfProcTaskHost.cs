@@ -633,6 +633,14 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            if (packet.Type == NodePacketType.LogMessage)
+            {
+                // A task (typically from a background thread) logged after it returned and its
+                // completion was already processed. Drop the event, matching the in-proc TaskHost.
+                CommunicationsUtilities.Trace($"PacketReceived: dropping LogMessage from node {node} that arrived after its task completed.");
+                return;
+            }
+
             Assumed.Unreachable($"PacketReceived: no handler for node {node}, unexpected packet type {packet.Type}");
         }
 

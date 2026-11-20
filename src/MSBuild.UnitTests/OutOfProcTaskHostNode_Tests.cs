@@ -199,6 +199,60 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EventsLoggedAfterTaskCompletesAreDropped(bool taskCompleted)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
+            RedirectedNodeState nodeState = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            nodeState.SetField("_nodeEndpoint", endpoint.Node);
+            using TaskExecutionContext context = new(
+                1,
+                new TaskHostConfiguration(
+                    nodeId: 1,
+                    startupDirectory: Directory.GetCurrentDirectory(),
+                    buildProcessEnvironment: null,
+                    culture: CultureInfo.CurrentCulture,
+                    uiCulture: CultureInfo.CurrentUICulture,
+                    hostServices: null,
+#if FEATURE_APPDOMAIN
+                    appDomainSetup: null,
+#endif
+                    lineNumberOfTask: 1,
+                    columnNumberOfTask: 1,
+                    projectFileOfTask: "project.proj",
+                    continueOnError: false,
+                    taskName: "LateLogger",
+                    taskLocation: "LateLogger.dll",
+                    targetName: "Build",
+                    projectFile: "project.proj",
+                    isTaskInputLoggingEnabled: false,
+                    taskParameters: null,
+                    globalParameters: null,
+                    warningsAsErrors: null,
+                    warningsNotAsErrors: null,
+                    warningsAsMessages: null))
+            {
+                State = taskCompleted ? TaskExecutionState.Completed : TaskExecutionState.Executing,
+            };
+
+            // Log from a separate thread with the task's context flowed to it, as a background
+            // thread started by the task would.
+            Thread logger = new(() =>
+            {
+                ((AsyncLocal<TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
+                    .GetField("_currentTaskContext", BindingFlags.Instance | BindingFlags.NonPublic)!
+                    .GetValue(nodeState.Node)!).Value = context;
+                nodeState.Node.LogMessageEvent(new BuildMessageEventArgs("late message", null, "LateLogger", MessageImportance.Low));
+            });
+            logger.Start();
+            logger.Join();
+
+            endpoint.Packets.Count.ShouldBe(taskCompleted ? 0 : 1);
+        }
+
         private sealed class ImmediateDisconnectEndpoint : INodeEndpoint
         {
             public event LinkStatusChangedDelegate? OnLinkStatusChanged;
