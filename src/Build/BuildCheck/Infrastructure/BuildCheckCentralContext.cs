@@ -258,6 +258,7 @@ internal sealed class BuildCheckCentralContext
     {
         string projectFullPath = checkData.ProjectFilePath;
         List<CheckWrapper>? checksToRemove = null;
+        bool anyCheckThrottled = false;
         (CheckWrapper, Action<BuildCheckDataContext<T>>)[] callbacksSnapshot = registeredCallbacks.Snapshot;
 
         foreach (var checkCallback in callbacksSnapshot)
@@ -299,6 +300,9 @@ internal sealed class BuildCheckCentralContext
             try
             {
                 checkCallback.Item2(context);
+
+                // A check becomes throttled only while it reports results from its own action.
+                anyCheckThrottled |= checkCallback.Item1.IsThrottled;
             }
             catch (Exception e)
             {
@@ -314,6 +318,10 @@ internal sealed class BuildCheckCentralContext
             }
         }
 
-        _removeChecks(checksToRemove, checkContext);
+        // Removing checks scans the whole check registry, so only do it when there is something to remove.
+        if (checksToRemove is not null || anyCheckThrottled)
+        {
+            _removeChecks(checksToRemove, checkContext);
+        }
     }
 }

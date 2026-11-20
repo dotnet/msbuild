@@ -579,9 +579,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     return true;
                 }
             }
-            else if (_projectsByInstanceId.Count == 1)
+            else if (TryGetSingleValue(_projectsByInstanceId, out string? instanceProjectFullPath))
             {
-                projectFullPath = _projectsByInstanceId.FirstOrDefault().Value;
+                projectFullPath = instanceProjectFullPath!;
                 // This is for a rare possibility of a race where other thread removed the item (between the if check and fetch here).
                 // We currently do not support multiple projects in parallel in a single node anyway.
                 if (!string.IsNullOrEmpty(projectFullPath))
@@ -589,9 +589,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     return true;
                 }
             }
-            else if (_projectsByEvaluationId.Count == 1)
+            else if (TryGetSingleValue(_projectsByEvaluationId, out string? evaluationProjectFullPath))
             {
-                projectFullPath = _projectsByEvaluationId.FirstOrDefault().Value;
+                projectFullPath = evaluationProjectFullPath!;
                 if (!string.IsNullOrEmpty(projectFullPath))
                 {
                     return true;
@@ -600,6 +600,29 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             projectFullPath = string.Empty;
             return false;
+        }
+
+        /// <summary>
+        /// Returns whether the dictionary has exactly one entry, and that entry's value. It enumerates the dictionary
+        /// because <see cref="ConcurrentDictionary{TKey, TValue}.Count"/> takes every lock in the dictionary.
+        /// </summary>
+        private static bool TryGetSingleValue(ConcurrentDictionary<int, string> projects, out string? value)
+        {
+            bool found = false;
+            value = null;
+            foreach ((_, string projectFullPath) in projects)
+            {
+                if (found)
+                {
+                    value = null;
+                    return false;
+                }
+
+                found = true;
+                value = projectFullPath;
+            }
+
+            return found;
         }
 
         public void ProjectFirstEncountered(
