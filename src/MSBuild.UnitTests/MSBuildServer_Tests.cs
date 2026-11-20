@@ -191,11 +191,13 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string? dir = Path.GetDirectoryName(markerFile.Path);
             using var watcher = new System.IO.FileSystemWatcher(dir!);
-            using ManualResetEvent mre = new ManualResetEvent(false);
+
+            // Not a disposable event: on macOS a late FSEvents callback can arrive after a disposed event and crash the test host.
+            var buildStarted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             watcher.Created += (o, e) =>
             {
                 _output.WriteLine($"The marker file {markerFile.Path} was created. The build task has been started.");
-                mre.Set();
+                buildStarted.TrySetResult(true);
             };
             watcher.Filter = Path.GetFileName(markerFile.Path);
             watcher.EnableRaisingEvents = true;
@@ -206,7 +208,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // The server will soon be in use; make sure we don't try to use it before that happens.
             _output.WriteLine("Waiting for the server to be in use.");
-            mre.WaitOne();
+            buildStarted.Task.Wait();
             _output.WriteLine("It's OK to go ahead.");
 
             Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
@@ -236,6 +238,10 @@ namespace Microsoft.Build.Engine.UnitTests
         public void CanShutdownServerProcess(bool byBuildManager)
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
+            // Use a server dedicated to this test, so it can't pick up a server left running by another test.
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+            UseNativeTempDirectoryForChildProcesses();
 
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
 
@@ -353,5 +359,33 @@ namespace Microsoft.Build.Engine.UnitTests
             Match match = regex.Match(searchString);
             return int.Parse(match.Groups[1].Value);
         }
+
+        /// <summary>
+        /// Starting with .NET 10.0.13, named mutexes are user-scoped by default, and on macOS the runtime keeps them under the
+        /// TMPDIR it reads from the native process environment. The test assembly fixture changes TMPDIR only in the managed
+        /// environment, which child processes inherit, so the server would create its mutexes where this process never looks
+        /// and <see cref="MSBuildClient.ShutdownServer"/> would report "not running" without shutting it down.
+        /// Give child processes this process's native TMPDIR so both sides use the same mutex directory.
+        /// </summary>
+        private void UseNativeTempDirectoryForChildProcesses()
+        {
+#if !NETFRAMEWORK
+            if (!OperatingSystem.IsMacOS())
+            {
+                return;
+            }
+
+            string? nativeTempDirectory = System.Runtime.InteropServices.Marshal.PtrToStringUTF8(NativeGetEnvironmentVariable("TMPDIR"));
+            if (!string.IsNullOrEmpty(nativeTempDirectory))
+            {
+                _env.SetEnvironmentVariable("TMPDIR", nativeTempDirectory);
+            }
+#endif
+        }
+
+#if !NETFRAMEWORK
+        [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "getenv")]
+        private static extern IntPtr NativeGetEnvironmentVariable([System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPUTF8Str)] string name);
+#endif
     }
 }
