@@ -28,6 +28,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static readonly bool logging = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSPLOG"));
         internal static readonly string logPath = GetLogPath();
         private static readonly char[] s_fileNameInvalidChars = { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
+        private static readonly object s_logFileLock = new();
         private static StreamWriter s_logFileWriter;
 #if !RUNTIME_TYPE_NETCORE
         // Major, Minor, Build and Revision of CLR v2.0
@@ -475,32 +476,35 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return;
             }
 
-            if (s_logFileWriter == null)
+            lock (s_logFileLock)
             {
-                try
+                if (s_logFileWriter is null)
                 {
-                    s_logFileWriter = new StreamWriter(Path.Combine(logPath, "Microsoft.Build.Tasks.log"), false);
+                    try
+                    {
+                        s_logFileWriter = new StreamWriter(Path.Combine(logPath, "Microsoft.Build.Tasks.log"), false);
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        return;
+                    }
+                    catch (ArgumentException)
+                    {
+                        return;
+                    }
+                    catch (IOException)
+                    {
+                        return;
+                    }
+                    catch (SecurityException)
+                    {
+                        return;
+                    }
                 }
-                catch (UnauthorizedAccessException)
-                {
-                    return;
-                }
-                catch (ArgumentException)
-                {
-                    return;
-                }
-                catch (IOException)
-                {
-                    return;
-                }
-                catch (SecurityException)
-                {
-                    return;
-                }
-            }
 
-            s_logFileWriter.WriteLine(text);
-            s_logFileWriter.Flush();
+                s_logFileWriter.WriteLine(text);
+                s_logFileWriter.Flush();
+            }
         }
 
         public static void WriteLogFile(string filename, Stream s)
