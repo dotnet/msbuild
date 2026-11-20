@@ -53,6 +53,8 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         /// </summary>
         public void RegisterTaskObject(object key, object obj, RegisteredTaskObjectLifetime lifetime, bool allowEarlyCollection)
         {
+            // allowEarlyCollection is intentionally ignored: objects are never collected early, so a registered
+            // object is kept until it is unregistered or its lifetime ends. The parameter stays for compatibility.
             ConcurrentDictionary<object, object> dict = GetCollectionForLifetime(lifetime, dontCreate: false);
 
             dict?.TryAdd(key, obj);
