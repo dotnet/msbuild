@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using MSBuild.Bootstrap.Utils.Tasks;
@@ -22,6 +23,31 @@ namespace Microsoft.Build.UnitTests
         {
             _output = output;
         }
+
+#if NET
+        [UnixOnlyFact]
+        [UnsupportedOSPlatform("windows")]
+        public void ExecuteRunsInstallerWithoutChangingPermissions()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFolder folder = env.CreateFolder(createFolder: true);
+            TransientTestFile script = env.CreateFile(folder, "dotnet-install.sh", "printf 'INSTALLER_RAN\\n'\nexit 0\n");
+            const UnixFileMode permissions = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+            File.SetUnixFileMode(script.Path, permissions);
+            MockEngine engine = new(_output);
+            InstallDotNetCoreTask task = new()
+            {
+                BuildEngine = engine,
+                DotNetInstallScriptRootPath = folder.Path,
+                InstallDir = Path.Combine(folder.Path, "sdk"),
+                Version = "test"
+            };
+
+            task.Execute().ShouldBeTrue(engine.Log);
+            engine.Log.ShouldContain("INSTALLER_RAN");
+            File.GetUnixFileMode(script.Path).ShouldBe(permissions);
+        }
+#endif
 
         [Fact]
         public async Task DownloadScriptAsyncRetriesTransientTransportFailure()

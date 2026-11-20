@@ -10,6 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -2609,6 +2610,44 @@ namespace ConsoleApplication4
         }
     }
 
+    public class FileTrackerProcessTests(ITestOutputHelper output)
+    {
+        private readonly ITestOutputHelper _output = output;
+
+        [WindowsOnlyFact]
+        public void RunCommandWithLog_DrainsBothPipesBeforeWaiting()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFile executable = env.CreateFile("pipe-writer.exe");
+            FileTrackerTestHelper.CompileCSharpExecutable("""
+                using System;
+                using System.Threading;
+                class Program
+                {
+                    static int Main()
+                    {
+                        Thread watchdog = new Thread(() =>
+                        {
+                            Thread.Sleep(10000);
+                            Environment.Exit(99);
+                        });
+                        watchdog.IsBackground = true;
+                        watchdog.Start();
+                        Console.Out.Write(new string('O', 32768));
+                        Console.Error.Write(new string('E', 32768));
+                        return 7;
+                    }
+                }
+                """, executable.Path);
+
+            int exitCode = FileTrackerTestHelper.RunCommandWithLog(executable.Path, "", out string log);
+
+            exitCode.ShouldBe(7, "the pipe writer must finish before its deadlock watchdog");
+            log.ShouldContain(new string('O', 32768));
+            log.ShouldContain(new string('E', 32768));
+        }
+    }
+
     internal static class FileTrackerTestHelper
     {
         public static int RunCommand(string command, string arguments)
@@ -2632,12 +2671,28 @@ namespace ConsoleApplication4
 
             si.UseShellExecute = false;
             si.CreateNoWindow = true;
-            Process p = Process.Start(si);
+            using Process p = new() { StartInfo = si };
+            StringBuilder standardOutput = new();
+            StringBuilder standardError = new();
+            if (printOutput)
+            {
+                p.OutputDataReceived += (_, e) => standardOutput.AppendLine(e.Data);
+                p.ErrorDataReceived += (_, e) => standardError.AppendLine(e.Data);
+            }
+
+            p.Start();
+            if (printOutput)
+            {
+                // Both pipes must be drained while the process runs, otherwise it can block on a full pipe.
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
+            }
+
             p.WaitForExit();
 
             if (printOutput)
             {
-                outputAsLog = "StdOut: \n" + p.StandardOutput.ReadToEnd() + "\nStdErr: \n" + p.StandardError.ReadToEnd();
+                outputAsLog = "StdOut: \n" + standardOutput + "\nStdErr: \n" + standardError;
                 Console.Write(outputAsLog);
             }
 

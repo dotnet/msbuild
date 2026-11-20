@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -237,13 +238,21 @@ namespace Microsoft.Build.UnitTests.Shared
                 AdjustForShellExecution(ref process, ref parameters);
             }
 
+#if NET11_0_OR_GREATER
+            using Microsoft.Win32.SafeHandles.SafeFileHandle nullInput = File.OpenNullHandle();
+#endif
             var psi = new ProcessStartInfo(process)
             {
                 CreateNoWindow = true,
+#if NET11_0_OR_GREATER
+                StandardInputHandle = nullInput,
+                InheritedHandles = [],
+#else
                 RedirectStandardInput = true,
+                UseShellExecute = false,
+#endif
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                UseShellExecute = false,
                 Arguments = parameters
             };
 
@@ -263,7 +272,7 @@ namespace Microsoft.Build.UnitTests.Shared
                     }
                 }
             }
-            string output = string.Empty;
+            StringBuilder output = new();
             int pid = -1;
 
             using (var p = new Process { EnableRaisingEvents = true, StartInfo = psi })
@@ -272,8 +281,11 @@ namespace Microsoft.Build.UnitTests.Shared
                 {
                     if (args != null && args.Data != null)
                     {
-                        WriteOutput(args.Data);
-                        output += args.Data + "\r\n";
+                        lock (output)
+                        {
+                            WriteOutput(args.Data);
+                            output.Append(args.Data).Append("\r\n");
+                        }
                     }
                 };
 
@@ -285,15 +297,26 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.Start();
                 p.BeginOutputReadLine();
                 p.BeginErrorReadLine();
+#if !NET11_0_OR_GREATER
                 p.StandardInput.Dispose();
+#endif
 
                 TimeSpan timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
                 Stopwatch sw = Stopwatch.StartNew();
                 if (Traits.Instance.DebugUnitTests)
                 {
+#if NET11_0_OR_GREATER
+                    p.WaitForExitStatus();
+#else
                     p.WaitForExit();
+#endif
                 }
-                else if (!p.WaitForExit(timeoutMilliseconds))
+                else if (
+#if NET11_0_OR_GREATER
+                    !p.TryWaitForExitStatus(timeout, out _))
+#else
+                    !p.WaitForExit(timeoutMilliseconds))
+#endif
                 {
                     // Let's not create a unit test for which we need more than requested timeout to execute.
                     // Please consider carefully if you would like to increase the timeout.
@@ -330,12 +353,12 @@ namespace Microsoft.Build.UnitTests.Shared
 
             if (attachProcessId)
             {
-                output += "Process ID is " + pid + "\r\n";
+                output.AppendLine($"Process ID is {pid}");
                 WriteOutput("Process ID is " + pid + "\r\n");
                 WriteOutput("==============");
             }
 
-            return output;
+            return output.ToString();
 
             void WriteOutput(string data)
             {

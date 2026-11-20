@@ -1555,6 +1555,12 @@ namespace Microsoft.Build.BackEnd
                 {
                     CommunicationsUtilities.Trace($"Waiting for node with pid = {_process.Id} to exit");
 
+#if NET11_0_OR_GREATER
+                    if (await WaitForExitAsync(_process, TimeoutForWaitForExit).ConfigureAwait(false))
+                    {
+                        return;
+                    }
+#else
                     // .NET 5 introduces a real WaitForExitAsyc.
                     // This is a poor man's implementation that uses polling.
                     int timeout = TimeoutForWaitForExit;
@@ -1572,6 +1578,7 @@ namespace Microsoft.Build.BackEnd
                         // Double delay up to 500ms.
                         delay = Math.Min(delay * 2, 500);
                     }
+#endif
                 }
 
                 // Kill the child and do a blocking wait.
@@ -1583,8 +1590,34 @@ namespace Microsoft.Build.BackEnd
                     _process.Id);
                 CommunicationsUtilities.Trace($"Killing node with pid = {_process.Id}");
 
+#if NET11_0_OR_GREATER
+                // Keep tree termination and the bounded cleanup wait, not the single-child kill helper's unbounded wait.
+                _process.Kill(entireProcessTree: true);
+                await WaitForExitAsync(_process, 5000).ConfigureAwait(false);
+#else
                 _process.KillTree(timeoutMilliseconds: 5000);
+#endif
             }
+
+#if NET11_0_OR_GREATER
+            /// <summary>
+            /// Waits up to <paramref name="timeoutMilliseconds"/> for the process to exit.
+            /// </summary>
+            /// <returns><see langword="true"/> if the process exited; <see langword="false"/> if the wait timed out.</returns>
+            private static async Task<bool> WaitForExitAsync(Process process, int timeoutMilliseconds)
+            {
+                using CancellationTokenSource timeout = new(timeoutMilliseconds);
+                try
+                {
+                    await process.WaitForExitAsync(timeout.Token).ConfigureAwait(false);
+                    return true;
+                }
+                catch (OperationCanceledException) when (timeout.IsCancellationRequested)
+                {
+                    return false;
+                }
+            }
+#endif
 
             private bool ProcessHeaderBytesRead(int bytesRead)
             {

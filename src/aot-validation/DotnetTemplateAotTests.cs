@@ -190,7 +190,7 @@ public sealed class DotnetTemplateAotTests
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            UseShellExecute = false,
+            InheritedHandles = [],
             WorkingDirectory = outputDirectory,
         };
         startInfo.ArgumentList.Add("new");
@@ -212,19 +212,18 @@ public sealed class DotnetTemplateAotTests
         Task<string> standardOutput = process.StandardOutput.ReadToEndAsync();
         Task<string> standardError = process.StandardError.ReadToEndAsync();
 
-        if (!process.WaitForExit(milliseconds: 120_000))
+        if (!process.TryWaitForExitStatus(TimeSpan.FromMinutes(2), out _))
         {
             process.Kill(entireProcessTree: true);
             Assert.Fail($"`dotnet new {template}` did not complete within the timeout.");
         }
 
-        // Ensure the redirected streams are fully flushed before reading their results.
-        process.WaitForExit();
+        ProcessExitStatus status = process.WaitForExitStatus();
 
         Assert.AreEqual(
             0,
-            process.ExitCode,
-            $"`dotnet new {template}` failed (exit {process.ExitCode}).{Environment.NewLine}"
+            status.ExitCode,
+            $"`dotnet new {template}` failed (exit {status.ExitCode}).{Environment.NewLine}"
                 + $"stdout:{Environment.NewLine}{standardOutput.GetAwaiter().GetResult()}{Environment.NewLine}"
                 + $"stderr:{Environment.NewLine}{standardError.GetAwaiter().GetResult()}");
     }
