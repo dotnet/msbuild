@@ -63,65 +63,48 @@ namespace Microsoft.Build.Tasks
         {
             if (ItemsToHash?.Length > 0)
             {
-                using (var sha = CreateHashAlgorithm())
+                using var sha = CreateHashAlgorithm();
+
+                // Buffer in which bytes of the strings are to be stored until their number reaches the limit size.
+                // Once the limit is reached, the sha.TransformBlock is to be run on all the bytes of this buffer.
+                using var shaBufferScope = BufferPool<byte>.Shared.Rent(ShaBufferSize, out byte[] shaBuffer);
+
+                // Buffer in which bytes of items' ItemSpec are to be stored.
+                int itemSpecChunkByteBufferSize = s_encoding.GetMaxByteCount(MaxInputChunkLength);
+                using var itemSpecBufferScope = BufferPool<byte>.Shared.Rent(itemSpecChunkByteBufferSize, out byte[] itemSpecChunkByteBuffer);
+
+                int shaBufferPosition = 0;
+                for (int i = 0; i < ItemsToHash.Length; i++)
                 {
-                    // Buffer in which bytes of the strings are to be stored until their number reaches the limit size.
-                    // Once the limit is reached, the sha.TransformBlock is to be run on all the bytes of this buffer.
-                    byte[] shaBuffer = null;
+                    string itemSpec = IgnoreCase ? ItemsToHash[i].ItemSpec.ToUpperInvariant() : ItemsToHash[i].ItemSpec;
 
-                    // Buffer in which bytes of items' ItemSpec are to be stored.
-                    byte[] itemSpecChunkByteBuffer = null;
-
-                    try
+                    // Slice the itemSpec string into chunks of reasonable size and add them to sha buffer.
+                    for (int itemSpecPosition = 0; itemSpecPosition < itemSpec.Length; itemSpecPosition += MaxInputChunkLength)
                     {
-                        shaBuffer = BufferPool<byte>.Shared.Rent(ShaBufferSize);
-                        itemSpecChunkByteBuffer = BufferPool<byte>.Shared.Rent(s_encoding.GetMaxByteCount(MaxInputChunkLength));
+                        int charsToProcess = Math.Min(itemSpec.Length - itemSpecPosition, MaxInputChunkLength);
+                        int byteCount = s_encoding.GetBytes(itemSpec, itemSpecPosition, charsToProcess, itemSpecChunkByteBuffer, 0);
 
-                        int shaBufferPosition = 0;
-                        for (int i = 0; i < ItemsToHash.Length; i++)
-                        {
-                            string itemSpec = IgnoreCase ? ItemsToHash[i].ItemSpec.ToUpperInvariant() : ItemsToHash[i].ItemSpec;
-
-                            // Slice the itemSpec string into chunks of reasonable size and add them to sha buffer.
-                            for (int itemSpecPosition = 0; itemSpecPosition < itemSpec.Length; itemSpecPosition += MaxInputChunkLength)
-                            {
-                                int charsToProcess = Math.Min(itemSpec.Length - itemSpecPosition, MaxInputChunkLength);
-                                int byteCount = s_encoding.GetBytes(itemSpec, itemSpecPosition, charsToProcess, itemSpecChunkByteBuffer, 0);
-
-                                shaBufferPosition = AddBytesToShaBuffer(sha, shaBuffer, shaBufferPosition, ShaBufferSize, itemSpecChunkByteBuffer, byteCount);
-                            }
-
-                            shaBufferPosition = AddBytesToShaBuffer(sha, shaBuffer, shaBufferPosition, ShaBufferSize, s_itemSeparatorCharacterBytes, s_itemSeparatorCharacterBytes.Length);
-                        }
-
-                        sha.TransformFinalBlock(shaBuffer, 0, shaBufferPosition);
-
-#if NET
-                        HashResult = Convert.ToHexStringLower(sha.Hash);
-#else
-                        using (var stringBuilder = new ReuseableStringBuilder(sha.HashSize))
-                        {
-                            foreach (var b in sha.Hash)
-                            {
-                                stringBuilder.Append(b.ToString("x2"));
-                            }
-                            HashResult = stringBuilder.ToString();
-                        }
-#endif
+                        shaBufferPosition = AddBytesToShaBuffer(sha, shaBuffer, shaBufferPosition, ShaBufferSize, itemSpecChunkByteBuffer, byteCount);
                     }
-                    finally
-                    {
-                        if (shaBuffer != null)
-                        {
-                            BufferPool<byte>.Shared.Return(shaBuffer);
-                        }
-                        if (itemSpecChunkByteBuffer != null)
-                        {
-                            BufferPool<byte>.Shared.Return(itemSpecChunkByteBuffer);
-                        }
-                    }
+
+                    shaBufferPosition = AddBytesToShaBuffer(sha, shaBuffer, shaBufferPosition, ShaBufferSize, s_itemSeparatorCharacterBytes, s_itemSeparatorCharacterBytes.Length);
                 }
+
+                sha.TransformFinalBlock(shaBuffer, 0, shaBufferPosition);
+#if NET
+                HashResult = Convert.ToHexStringLower(sha.Hash);
+#else
+                using (var stringBuilder = new ReuseableStringBuilder(sha.HashSize))
+                {
+                    foreach (var b in sha.Hash)
+                    {
+                        stringBuilder.Append(b.ToString("x2"));
+                    }
+                    HashResult = stringBuilder.ToString();
+                }
+#endif
             }
+
             return true;
         }
 

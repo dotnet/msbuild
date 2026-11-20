@@ -28,8 +28,7 @@ namespace Microsoft.Build.Logging
                 return 0;
             }
 
-            byte[] buffer = BufferPool<byte>.Shared.Rent(4096);
-            using var _ = new CleanupScope(() => BufferPool<byte>.Shared.Return(buffer));
+            using var _ = BufferPool<byte>.Shared.Rent(4096, out byte[] buffer);
             return SkipBytes(stream, bytesCount, buffer);
         }
 
