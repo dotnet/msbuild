@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.Build.Collections;
 using Shouldly;
 using Xunit;
@@ -52,6 +53,54 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 actualCount++;
             }
             actualCount.ShouldBe(expectedCount);
+        }
+
+        [Fact]
+        public void FiltersBeforeCopyingAndPreservesSnapshotSemantics()
+        {
+            List<string> values = ["a", "b", "c"];
+            List<string> copied = [];
+            var enumerable = new CopyOnReadEnumerable<string, string>(values, values, value =>
+            {
+                Monitor.IsEntered(values).ShouldBeTrue();
+                copied.Add(value);
+                return value.ToUpperInvariant();
+            });
+            var filtered = enumerable.Filter(value =>
+            {
+                Monitor.IsEntered(values).ShouldBeTrue();
+                return value != "b";
+            });
+            copied.ShouldBeEmpty();
+
+            using var enumerator = filtered.GetEnumerator();
+            copied.ShouldBe(["a", "c"]);
+            values.Add("d");
+
+            enumerator.MoveNext().ShouldBeTrue();
+            enumerator.Current.ShouldBe("A");
+            enumerator.MoveNext().ShouldBeTrue();
+            enumerator.Current.ShouldBe("C");
+            enumerator.MoveNext().ShouldBeFalse();
+
+            filtered.ShouldBe(["A", "C", "D"]);
+            copied.ShouldBe(["a", "c", "a", "c", "d"]);
+            enumerable.ShouldBe(["A", "B", "C", "D"]);
+        }
+
+        [Fact]
+        public void FiltersWithNoMatchesDoNotCopyItems()
+        {
+            List<int> values = [1, 2, 3];
+            int copies = 0;
+            var enumerable = new CopyOnReadEnumerable<int, int>(values, values, value =>
+            {
+                copies++;
+                return value;
+            });
+
+            enumerable.Filter(static _ => false).ShouldBeEmpty();
+            copies.ShouldBe(0);
         }
     }
 }
