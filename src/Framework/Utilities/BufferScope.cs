@@ -2,13 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
 using System.Diagnostics;
 
 namespace Microsoft.Build.Utilities;
 
 /// <summary>
-///  Allows renting a buffer from <see cref="ArrayPool{T}"/> with a using statement. Can be used directly as if it
+///  Allows renting a buffer from <see cref="BufferPool{T}.Shared"/> with a using statement. Can be used directly as if it
 ///  were a <see cref="Span{T}"/>.
 /// </summary>
 internal ref struct BufferScope<T>
@@ -22,7 +21,7 @@ internal ref struct BufferScope<T>
     /// <param name="minimumLength">The required minimum length.</param>
     public BufferScope(int minimumLength)
     {
-        _array = ArrayPool<T>.Shared.Rent(minimumLength);
+        _array = BufferPool<T>.Shared.Rent(minimumLength);
         _span = _array;
     }
 
@@ -49,11 +48,11 @@ internal ref struct BufferScope<T>
     /// </remarks>
     /// <param name="initialBuffer">
     ///  The initial buffer to use. If not large enough for <paramref name="minimumLength"/>, a buffer will be rented
-    ///  from the shared <see cref="ArrayPool{T}"/>.
+    ///  from <see cref="BufferPool{T}.Shared"/>.
     /// </param>
     /// <param name="minimumLength">
     ///  The required minimum length. If the <paramref name="initialBuffer"/> is not large enough, this will rent from
-    ///  the shared <see cref="ArrayPool{T}"/>.
+    ///  <see cref="BufferPool{T}.Shared"/>.
     /// </param>
     public BufferScope(Span<T> initialBuffer, int minimumLength)
     {
@@ -64,7 +63,7 @@ internal ref struct BufferScope<T>
         }
         else
         {
-            _array = ArrayPool<T>.Shared.Rent(minimumLength);
+            _array = BufferPool<T>.Shared.Rent(minimumLength);
             _span = _array;
         }
     }
@@ -95,7 +94,7 @@ internal ref struct BufferScope<T>
     {
         Debug.Assert(capacity > _span.Length);
 
-        T[] newArray = ArrayPool<T>.Shared.Rent(capacity);
+        T[] newArray = BufferPool<T>.Shared.Rent(capacity);
         if (copy)
         {
             _span.CopyTo(newArray);
@@ -103,7 +102,7 @@ internal ref struct BufferScope<T>
 
         if (_array is not null)
         {
-            ArrayPool<T>.Shared.Return(_array, clearArray: TypeInfo<T>.IsReferenceOrContainsReferences());
+            BufferPool<T>.Shared.Return(_array, clearArray: TypeInfo<T>.IsReferenceOrContainsReferences());
         }
 
         _array = newArray;
@@ -169,7 +168,7 @@ internal ref struct BufferScope<T>
         => _span.GetEnumerator();
 
     /// <summary>
-    ///  Releases the rented array back to the <see cref="ArrayPool{T}"/> if one was rented.
+    ///  Releases the rented array back to <see cref="BufferPool{T}.Shared"/> if one was rented.
     /// </summary>
     public void Dispose()
     {
@@ -178,7 +177,7 @@ internal ref struct BufferScope<T>
 
         if (_array is not null)
         {
-            ArrayPool<T>.Shared.Return(_array, clearArray: TypeInfo<T>.IsReferenceOrContainsReferences());
+            BufferPool<T>.Shared.Return(_array, clearArray: TypeInfo<T>.IsReferenceOrContainsReferences());
         }
 
         _array = null;

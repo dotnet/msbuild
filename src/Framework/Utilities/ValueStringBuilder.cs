@@ -15,7 +15,6 @@
 //   - Polyfilled Span<char>.Replace for net472 with a manual loop.
 
 using System;
-using System.Buffers;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -53,7 +52,7 @@ internal ref struct ValueStringBuilder
     /// <param name="initialCapacity">The initial capacity for the string builder.</param>
     public ValueStringBuilder(int initialCapacity)
     {
-        _arrayToReturnToPool = ArrayPool<byte>.Shared.Rent(initialCapacity * sizeof(char));
+        _arrayToReturnToPool = BufferPool<byte>.Shared.Rent(initialCapacity * sizeof(char));
         _chars = MemoryMarshal.Cast<byte, char>((Span<byte>)_arrayToReturnToPool);
         _length = 0;
     }
@@ -417,7 +416,7 @@ internal ref struct ValueStringBuilder
             Math.Min((uint)_chars.Length * 2, ArrayMaxLength));
 
         // Make sure to let Rent throw an exception if the caller has a bug and the desired capacity is negative.
-        byte[] poolArray = ArrayPool<byte>.Shared.Rent(newCapacity * sizeof(char));
+        byte[] poolArray = BufferPool<byte>.Shared.Rent(newCapacity * sizeof(char));
 
         _chars[.._length].CopyTo(MemoryMarshal.Cast<byte, char>((Span<byte>)poolArray));
 
@@ -426,7 +425,7 @@ internal ref struct ValueStringBuilder
         _arrayToReturnToPool = poolArray;
         if (toReturn is not null)
         {
-            ArrayPool<byte>.Shared.Return(toReturn);
+            BufferPool<byte>.Shared.Return(toReturn);
         }
     }
 
@@ -449,7 +448,7 @@ internal ref struct ValueStringBuilder
 
         if (toReturn is not null)
         {
-            ArrayPool<byte>.Shared.Return(toReturn);
+            BufferPool<byte>.Shared.Return(toReturn);
         }
     }
 
