@@ -13,6 +13,8 @@ The evaluation engine (`Evaluator.cs`, `Expander.cs`, `LazyItemEvaluator.cs`) is
 * Undefined metadata and empty-string metadata must be treated equivalently.
 * Property precedence is last-write-wins within the import chain.
 * Gate evaluation behavior changes behind a [ChangeWave](../../documentation/wiki/ChangeWaves.md).
+* Evaluation-local filesystem caches assume filesystem stability for that evaluation: reuse observed existence/search results and directory stamps instead of repeatedly probing for each glob or listing kind.
+* Cross-evaluation reuse still requires dependency validation. Preserve new-snapshot publication fences, explicit `SharingPolicy.Shared` lifetimes, and separate file-content/access checks; directory membership alone does not validate those.
 
 ## Expander Safety
 

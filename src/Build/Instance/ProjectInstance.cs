@@ -3340,7 +3340,10 @@ namespace Microsoft.Build.Execution
 
             Assumed.Equal(EvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
 
-            evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
+            evaluationContext = evaluationContext?.ContextForNewProject()
+                ?? (buildParameters.DirectoryListingCache is not null
+                    ? EvaluationContext.CreateForBuild(buildParameters.DirectoryListingCache)
+                    : EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated));
 
             Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
                 data: this,

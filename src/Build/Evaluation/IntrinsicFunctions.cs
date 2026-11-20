@@ -533,8 +533,11 @@ namespace Microsoft.Build.Evaluation
         /// <param name="path">The path to check</param>
         /// <returns></returns>
         public static bool FileExists(string path)
+            => FileExists(path, null);
+
+        internal static bool FileExists(string path, IFileSystem fileSystem)
         {
-            return FileUtilities.FileExistsNoThrow(FixSeparatorsAndResolveAgainstThreadWorkingDirectory(path));
+            return FileUtilities.FileExistsNoThrow(FixSeparatorsAndResolveAgainstThreadWorkingDirectory(path), fileSystem);
         }
 
         /// <summary>
@@ -543,8 +546,11 @@ namespace Microsoft.Build.Evaluation
         /// <param name="path">The path to check</param>
         /// <returns></returns>
         public static bool DirectoryExists(string path)
+            => DirectoryExists(path, null);
+
+        internal static bool DirectoryExists(string path, IFileSystem fileSystem)
         {
-            return FileUtilities.DirectoryExistsNoThrow(FixSeparatorsAndResolveAgainstThreadWorkingDirectory(path));
+            return FileUtilities.DirectoryExistsNoThrow(FixSeparatorsAndResolveAgainstThreadWorkingDirectory(path), fileSystem);
         }
 
         /// <summary>

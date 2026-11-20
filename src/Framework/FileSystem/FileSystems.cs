@@ -14,6 +14,22 @@ namespace Microsoft.Build.Shared.FileSystem
     {
         public static IFileSystem Default = GetFileSystem();
 
+        internal static bool SupportsDirectoryCache(IFileSystem fileSystem)
+        {
+            while (fileSystem is CachingFileSystemWrapper wrapper)
+            {
+                fileSystem = wrapper.UnderlyingFileSystem;
+            }
+
+#if FEATURE_WINDOWSINTEROP
+            if (NativeMethods.IsWindows && fileSystem is MSBuildOnWindowsFileSystem or WindowsFileSystem)
+            {
+                return true;
+            }
+#endif
+            return fileSystem.GetType() == typeof(ManagedFileSystem);
+        }
+
         private static IFileSystem GetFileSystem()
         {
 #if FEATURE_WINDOWSINTEROP

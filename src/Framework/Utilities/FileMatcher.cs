@@ -153,6 +153,9 @@ namespace Microsoft.Build.Shared
         private readonly Lazy<ConcurrentDictionary<string, object>> _cachedGlobExpansionsLock = new(() => new ConcurrentDictionary<string, object>(StringComparer.Ordinal));
 
         private readonly GetFileSystemEntries _getFileSystemEntries;
+        private readonly GlobResultExperiment _globResultExperiment;
+        private readonly GetFileSystemEntries _getRawDirectoryEntries;
+        private readonly GlobResultExperiment.SnapshotValidator _validateDirectorySnapshot;
 
         /// <summary>
         /// The Default FileMatcher does not cache directory enumeration.
@@ -163,7 +166,8 @@ namespace Microsoft.Build.Shared
             IFileSystem fileSystem,
             ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null,
             FileMatcherImplementation implementation = FileMatcherImplementation.Auto,
-            FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto) : this(
+            FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto,
+            DirectoryListingCache directoryListingCache = null) : this(
             fileSystem,
             (entityType, path, pattern, projectDirectory, stripProjectDirectory) => GetAccessibleFileSystemEntries(
                 fileSystem,
@@ -175,7 +179,12 @@ namespace Microsoft.Build.Shared
             fileEntryExpansionCache,
             implementation,
             allowDirectEnumeration: true,
-            caseFolding)
+            caseFolding,
+            FileSystems.SupportsDirectoryCache(fileSystem) ? directoryListingCache : null,
+            directoryListingCache is not null && FileSystems.SupportsDirectoryCache(fileSystem)
+                ? (FileSystemEntity entityType, string path, out bool succeeded) =>
+                    GetAccessibleFileSystemEntries(fileSystem, entityType, path, "*", null, false, out succeeded)
+                : null)
         {
         }
 
@@ -185,7 +194,9 @@ namespace Microsoft.Build.Shared
             ConcurrentDictionary<string, IReadOnlyList<string>> getFileSystemDirectoryEntriesCache = null,
             FileMatcherImplementation implementation = FileMatcherImplementation.Auto,
             bool allowDirectEnumeration = false,
-            FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto)
+            FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto,
+            DirectoryListingCache directoryListingCache = null,
+            GetFileSystemEntriesWithStatus getFileSystemEntriesWithStatus = null)
         {
             if (Traits.Instance.MSBuildCacheFileEnumerations)
             {
@@ -201,35 +212,156 @@ namespace Microsoft.Build.Shared
             _implementation = implementation;
             _caseFolding = caseFolding;
             _allowDirectEnumeration = allowDirectEnumeration;
-            _usesFileSystemEntryCache = getFileSystemDirectoryEntriesCache is not null;
-
-            _getFileSystemEntries = getFileSystemDirectoryEntriesCache == null
-                ? getFileSystemEntries
-                : (type, path, pattern, directory, stripProjectDirectory) =>
+            if (directoryListingCache is not null && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+            {
+                if (fileSystem is CachingFileSystemWrapper { DirectoryListingCache: { } local }
+                    && ReferenceEquals(local.Shared, directoryListingCache.Shared))
                 {
-                    // Always hit the filesystem with "*" pattern, cache the results, and do the filtering here.
-                    string cacheKey = type switch
+                    directoryListingCache = local;
+                }
+                else if (getFileSystemDirectoryEntriesCache is not null)
+                {
+                    directoryListingCache = directoryListingCache.ForEvaluation();
+                }
+            }
+            _globResultExperiment = directoryListingCache is not null && getFileSystemEntriesWithStatus is not null
+                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+                ? GlobResultExperiment.Create(directoryListingCache)
+                : null;
+            if (directoryListingCache is not null && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+            {
+                _usesFileSystemEntryCache = true;
+                _getFileSystemEntries = CreateDirectoryListingEnumeration(
+                    directoryListingCache,
+                    getFileSystemEntries,
+                    getFileSystemDirectoryEntriesCache,
+                    getFileSystemEntriesWithStatus,
+                    out _getRawDirectoryEntries,
+                    out _validateDirectorySnapshot);
+            }
+            else if (getFileSystemDirectoryEntriesCache is not null)
+            {
+                _usesFileSystemEntryCache = true;
+                _getFileSystemEntries = CreateFileEntryExpansionEnumeration(getFileSystemDirectoryEntriesCache, getFileSystemEntries);
+            }
+            else
+            {
+                _usesFileSystemEntryCache = false;
+                _getFileSystemEntries = getFileSystemEntries;
+            }
+        }
+
+        private static GetFileSystemEntries CreateDirectoryListingEnumeration(
+            DirectoryListingCache cache,
+            GetFileSystemEntries enumerate,
+            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache,
+            GetFileSystemEntriesWithStatus enumerateWithStatus,
+            out GetFileSystemEntries rawEntries,
+            out GlobResultExperiment.SnapshotValidator validateSnapshot)
+        {
+            GetFileSystemEntries getEntries = (type, path, pattern, directory, stripProjectDirectory) =>
+            {
+                if (!cache.TryGet(path, type, out var entries))
+                {
+                    bool hasChangeTime = cache.TryReadDirectoryChangeTime(path, out DirectoryChangeStamp before)
+                        && cache.CanStore(before, DateTime.UtcNow);
+                    bool enumerationSucceeded = false;
+                    entries = enumerateWithStatus is not null
+                        ? enumerateWithStatus(type, path, out enumerationSucceeded)
+                        : enumerate(type, path, "*", directory, false);
+                    if (hasChangeTime
+                        // An empty result is reusable only when enumeration completed, not when access was denied.
+                        && (entries.Count != 0 || enumerationSucceeded)
+                        && cache.TryReadDirectoryChangeTimeAfterEnumeration(path, out DirectoryChangeStamp after)
+                        && before == after)
                     {
-                        FileSystemEntity.Files => "F",
-                        FileSystemEntity.Directories => "D",
-                        FileSystemEntity.FilesAndDirectories => "A",
-                        _ => throw new NotImplementedException()
-                    } + ";" + path;
-                    IReadOnlyList<string> allEntriesForPath = getFileSystemDirectoryEntriesCache.GetOrAdd(
-                            cacheKey,
-                            s => getFileSystemEntries(
-                                type,
-                                path,
-                                "*",
-                                directory,
-                                false));
-                    IEnumerable<string> filteredEntriesForPath = (pattern != null && !IsAllFilesWildcard(pattern))
-                        ? allEntriesForPath.Where(o => IsFileNameMatch(o, pattern))
-                        : allEntriesForPath;
-                    return stripProjectDirectory
-                        ? RemoveProjectDirectory(filteredEntriesForPath, directory).ToList()
-                        : filteredEntriesForPath.ToList();
+                        entries = cache.Store(path, type, entries, before);
+                    }
+                }
+
+                return entries;
+            };
+
+            rawEntries = fileEntryExpansionCache is null
+                ? getEntries
+                : (type, path, pattern, directory, strip) =>
+                {
+                    string key = GetDirectoryEntryCacheKey(type, path);
+                    if (fileEntryExpansionCache.TryGetValue(key, out var entries)) { return entries; }
+                    return fileEntryExpansionCache.GetOrAdd(key, _ => getEntries(type, path, "*", directory, false));
                 };
+            GetFileSystemEntries acquireRaw = rawEntries;
+            validateSnapshot = (path, type, snapshot) =>
+            {
+                string key = GetDirectoryEntryCacheKey(type, path);
+                if (fileEntryExpansionCache is not null && fileEntryExpansionCache.TryGetValue(key, out var current))
+                {
+                    return ReferenceEquals(current, snapshot)
+                        ? DirectorySnapshotStatus.Valid
+                        : cache.IsSnapshot(path, type, snapshot) ? DirectorySnapshotStatus.Unavailable : DirectorySnapshotStatus.Mismatch;
+                }
+                DirectorySnapshotStatus status = cache.TryValidate(path, type, snapshot);
+                if (status == DirectorySnapshotStatus.Valid && fileEntryExpansionCache is not null)
+                {
+                    current = fileEntryExpansionCache.GetOrAdd(key, snapshot);
+                    if (!ReferenceEquals(current, snapshot))
+                    {
+                        return cache.IsSnapshot(path, type, snapshot) ? DirectorySnapshotStatus.Unavailable : DirectorySnapshotStatus.Mismatch;
+                    }
+                }
+                return status;
+            };
+            return (type, path, pattern, directory, strip) =>
+                FilterDirectoryEntries(acquireRaw(type, path, pattern, directory, strip), pattern, directory, strip);
+        }
+
+        private static GetFileSystemEntries CreateFileEntryExpansionEnumeration(
+            ConcurrentDictionary<string, IReadOnlyList<string>> cache,
+            GetFileSystemEntries enumerate)
+        {
+            return (type, path, pattern, directory, stripProjectDirectory) =>
+            {
+                string cacheKey = GetDirectoryEntryCacheKey(type, path);
+                IReadOnlyList<string> entries = cache.GetOrAdd(
+                    cacheKey,
+                    _ => enumerate(type, path, "*", directory, false));
+
+                return FilterDirectoryEntries(entries, pattern, directory, stripProjectDirectory);
+            };
+        }
+
+        private static string GetDirectoryEntryCacheKey(FileSystemEntity type, string path)
+            => (type switch
+            {
+                FileSystemEntity.Files => "F",
+                FileSystemEntity.Directories => "D",
+                FileSystemEntity.FilesAndDirectories => "A",
+                _ => throw new NotImplementedException()
+            }) + ";" + path;
+
+        private IReadOnlyList<string> GetEntriesForGlob(FileSystemEntity kind, string path, string pattern, string directory, bool strip,
+            GlobResultExperiment.Collector collector)
+        {
+            if (collector is null) { return _getFileSystemEntries(kind, path, pattern, directory, strip); }
+            IReadOnlyList<string> entries = _getRawDirectoryEntries(kind, path, pattern, directory, strip);
+            _globResultExperiment.RecordListing(collector, path, kind, entries);
+            return FilterDirectoryEntries(entries, pattern, directory, strip);
+        }
+
+        private static IReadOnlyList<string> FilterDirectoryEntries(
+            IReadOnlyList<string> entries,
+            string pattern,
+            string projectDirectory,
+            bool stripProjectDirectory)
+        {
+            using var attribution = CacheAttribution.Measure(CacheAttribution.Op.Filter, projectDirectory);
+            attribution.Units(entries.Count);
+            IEnumerable<string> filteredEntries = pattern is not null && !IsAllFilesWildcard(pattern)
+                ? entries.Where(entry => IsFileNameMatch(entry, pattern))
+                : entries;
+            return stripProjectDirectory
+                ? RemoveProjectDirectory(filteredEntries, projectDirectory).ToList()
+                : filteredEntries.ToList();
         }
 
         /// <summary>
@@ -253,6 +385,8 @@ namespace Microsoft.Build.Shared
         /// <param name="stripProjectDirectory"></param>
         /// <returns>An enumerable of filesystem entries.</returns>
         internal delegate IReadOnlyList<string> GetFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory);
+
+        internal delegate IReadOnlyList<string> GetFileSystemEntriesWithStatus(FileSystemEntity entityType, string path, out bool succeeded);
 
         internal static void ClearCaches()
         {
@@ -319,16 +453,23 @@ namespace Microsoft.Build.Shared
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns></returns>
         private static IReadOnlyList<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
+            => GetAccessibleFileSystemEntries(fileSystem, entityType, path, pattern, projectDirectory, stripProjectDirectory, out _);
+
+        private static IReadOnlyList<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory, out bool succeeded)
         {
+            using var attribution = CacheAttribution.Measure(CacheAttribution.Op.Enumeration, path);
+            succeeded = false;
             path = FileUtilities.FixFilePath(path);
-            return entityType switch
+            var result = entityType switch
             {
-                FileSystemEntity.Files => GetAccessibleFiles(fileSystem, path, pattern, projectDirectory, stripProjectDirectory),
-                FileSystemEntity.Directories => GetAccessibleDirectories(fileSystem, path, pattern),
-                FileSystemEntity.FilesAndDirectories => GetAccessibleFilesAndDirectories(fileSystem, path, pattern),
+                FileSystemEntity.Files => GetAccessibleFiles(fileSystem, path, pattern, projectDirectory, stripProjectDirectory, out succeeded),
+                FileSystemEntity.Directories => GetAccessibleDirectories(fileSystem, path, pattern, out succeeded),
+                FileSystemEntity.FilesAndDirectories => GetAccessibleFilesAndDirectories(fileSystem, path, pattern, out succeeded),
 
                 _ => Assumed.Unreachable<IReadOnlyList<string>>("Unexpected filesystem entity type."),
             };
+            attribution.Units(result.Count);
+            return result;
         }
 
         /// <summary>
@@ -338,18 +479,22 @@ namespace Microsoft.Build.Shared
         /// <param name="path"></param>
         /// <param name="pattern"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
+        /// <param name="succeeded">Whether enumeration completed rather than being skipped or denied.</param>
         /// <returns>An enumerable of matching file system entries (can be empty).</returns>
-        private static IReadOnlyList<string> GetAccessibleFilesAndDirectories(IFileSystem fileSystem, string path, string pattern)
+        private static IReadOnlyList<string> GetAccessibleFilesAndDirectories(IFileSystem fileSystem, string path, string pattern, out bool succeeded)
         {
+            succeeded = false;
             if (fileSystem.DirectoryExists(path))
             {
                 try
                 {
-                    return (ShouldEnforceMatching(pattern)
+                    var entries = (ShouldEnforceMatching(pattern)
                         ? fileSystem.EnumerateFileSystemEntries(path, pattern)
                             .Where(o => IsFileNameMatch(o, pattern))
                         : fileSystem.EnumerateFileSystemEntries(path, pattern))
                         .ToList();
+                    succeeded = true;
+                    return entries;
                 }
                 // for OS security
                 catch (UnauthorizedAccessException)
@@ -403,14 +548,17 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectory">The project directory</param>
         /// <param name="stripProjectDirectory"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
+        /// <param name="succeeded">Whether enumeration completed without a suppressed security failure.</param>
         /// <returns>Files that can be accessed.</returns>
         private static IReadOnlyList<string> GetAccessibleFiles(
             IFileSystem fileSystem,
             string path,
             string filespec,     // can be null
             string projectDirectory,
-            bool stripProjectDirectory)
+            bool stripProjectDirectory,
+            out bool succeeded)
         {
+            succeeded = false;
             try
             {
                 // look in current directory if no path specified
@@ -446,7 +594,9 @@ namespace Microsoft.Build.Shared
                     files = RemoveInitialDotSlash(files);
                 }
 
-                return files.ToList();
+                var entries = files.ToList();
+                succeeded = true;
+                return entries;
             }
             catch (System.Security.SecurityException)
             {
@@ -469,12 +619,15 @@ namespace Microsoft.Build.Shared
         /// <param name="path">The path.</param>
         /// <param name="pattern">Pattern to match</param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
+        /// <param name="succeeded">Whether enumeration completed without a suppressed security failure.</param>
         /// <returns>Accessible directories.</returns>
         private static IReadOnlyList<string> GetAccessibleDirectories(
             IFileSystem fileSystem,
             string path,
-            string pattern)
+            string pattern,
+            out bool succeeded)
         {
+            succeeded = false;
             try
             {
                 IEnumerable<string> directories = null;
@@ -502,7 +655,9 @@ namespace Microsoft.Build.Shared
                     directories = RemoveInitialDotSlash(directories);
                 }
 
-                return directories.ToList();
+                var entries = directories.ToList();
+                succeeded = true;
+                return entries;
             }
             catch (System.Security.SecurityException)
             {
@@ -909,6 +1064,7 @@ namespace Microsoft.Build.Shared
         /// <param name="searchesToExclude">Patterns to exclude from the results</param>
         /// <param name="searchesToExcludeInSubdirs">exclude patterns that might activate farther down the directory tree. Keys assume paths are normalized with forward slashes and no trailing slashes</param>
         /// <param name="taskOptions">Options for tuning the parallelization of subdirectories</param>
+        /// <param name="collector">Raw listing dependencies for shared glob reuse.</param>
         private void GetFilesRecursive(
             ConcurrentStack<List<string>> listOfFiles,
             RecursionState recursionState,
@@ -916,7 +1072,8 @@ namespace Microsoft.Build.Shared
             bool stripProjectDirectory,
             IList<RecursionState> searchesToExclude,
             Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs,
-            TaskOptions taskOptions)
+            TaskOptions taskOptions,
+            GlobResultExperiment.Collector collector)
         {
 #if FEATURE_SYMLINK_TARGET
             // This is a pretty quick, simple check, but it misses some cases:
@@ -932,6 +1089,7 @@ namespace Microsoft.Build.Shared
                 FileSystemInfo linkTarget = Directory.ResolveLinkTarget(recursionState.BaseDirectory, returnFinalTarget: true);
                 if (linkTarget is not null && IsSubdirectoryOf(recursionState.BaseDirectory, linkTarget.FullName, FileUtilities.PathComparison))
                 {
+                    collector?.Reject();
                     return;
                 }
             }
@@ -988,7 +1146,7 @@ namespace Microsoft.Build.Shared
 
             List<string> files = null;
             foreach (string file in GetFilesForStep(nextStep, recursionState, projectDirectory,
-                stripProjectDirectory))
+                stripProjectDirectory, collector))
             {
                 if (excludeNextSteps != null)
                 {
@@ -1078,7 +1236,8 @@ namespace Microsoft.Build.Shared
                     stripProjectDirectory,
                     newSearchesToExclude,
                     searchesToExcludeInSubdirs,
-                    taskOptions);
+                    taskOptions,
+                    collector);
             };
 
             // Calcuate the MaxDegreeOfParallelism value in order to prevent too much tasks being running concurrently.
@@ -1106,7 +1265,7 @@ namespace Microsoft.Build.Shared
             // Use a foreach to avoid the overhead of Parallel.ForEach when we are not running in parallel
             if (dop < 2)
             {
-                foreach (string subdir in _getFileSystemEntries(FileSystemEntity.Directories, recursionState.BaseDirectory, nextStep.DirectoryPattern, null, false))
+                foreach (string subdir in GetEntriesForGlob(FileSystemEntity.Directories, recursionState.BaseDirectory, nextStep.DirectoryPattern, null, false, collector))
                 {
                     processSubdirectory(subdir);
                 }
@@ -1114,7 +1273,7 @@ namespace Microsoft.Build.Shared
             else
             {
                 Parallel.ForEach(
-                    _getFileSystemEntries(FileSystemEntity.Directories, recursionState.BaseDirectory, nextStep.DirectoryPattern, null, false),
+                    GetEntriesForGlob(FileSystemEntity.Directories, recursionState.BaseDirectory, nextStep.DirectoryPattern, null, false, collector),
                     new ParallelOptions { MaxDegreeOfParallelism = dop },
                     processSubdirectory);
             }
@@ -1140,7 +1299,8 @@ namespace Microsoft.Build.Shared
             RecursiveStepResult stepResult,
             RecursionState recursionState,
             string projectDirectory,
-            bool stripProjectDirectory)
+            bool stripProjectDirectory,
+            GlobResultExperiment.Collector collector)
         {
             if (!stepResult.ConsiderFiles)
             {
@@ -1162,8 +1322,8 @@ namespace Microsoft.Build.Shared
                 filespec = recursionState.SearchData.Filespec;
             }
 
-            IEnumerable<string> files = _getFileSystemEntries(FileSystemEntity.Files, recursionState.BaseDirectory,
-                filespec, projectDirectory, stripProjectDirectory);
+            IEnumerable<string> files = GetEntriesForGlob(FileSystemEntity.Files, recursionState.BaseDirectory,
+                filespec, projectDirectory, stripProjectDirectory, collector);
 
             if (!stepResult.NeedsToProcessEachFile)
             {
@@ -1672,6 +1832,7 @@ namespace Microsoft.Build.Shared
             string filespecUnescaped,
             List<string>? excludeSpecsUnescaped = null)
         {
+            using var attribution = CacheAttribution.Measure(CacheAttribution.Op.GlobTotal, projectDirectoryUnescaped);
             // For performance. Short-circuit iff there is no wildcard.
             if (!HasWildcards(filespecUnescaped))
             {
@@ -1690,7 +1851,7 @@ namespace Microsoft.Build.Shared
                     category: nameof(FileMatcher));
             }
 
-            if (_cachedGlobExpansions == null)
+            if (_cachedGlobExpansions == null || string.IsNullOrEmpty(projectDirectoryUnescaped))
             {
                 return GetFilesForImplementation(
                     projectDirectoryUnescaped,
@@ -1723,11 +1884,24 @@ namespace Microsoft.Build.Shared
                                 enumerationKey,
                                 (_) =>
                                 {
+                                    bool share = CanShareGlob(projectDirectoryUnescaped, filespecUnescaped);
+                                    if (share && _globResultExperiment is not null
+                                        && _globResultExperiment.TryGet(enumerationKey, _validateDirectorySnapshot, _fileSystem.DirectoryExists, out string[] sharedFiles))
+                                    {
+                                        return sharedFiles;
+                                    }
+                                    var collector = share ? new GlobResultExperiment.Collector() : null;
                                     (fileList, action, excludeFileSpec, globFailure) = GetFilesForImplementation(
                                         projectDirectoryUnescaped,
                                         filespecUnescaped,
                                         excludeSpecsUnescaped,
-                                        selection);
+                                        selection,
+                                        collector);
+
+                                    if (collector is not null && _globResultExperiment is not null)
+                                    {
+                                        _globResultExperiment.Store(enumerationKey, fileList, action, globFailure, collector);
+                                    }
 
                                     return fileList;
                                 });
@@ -1740,7 +1914,29 @@ namespace Microsoft.Build.Shared
 
             return (filesToReturn, action, excludeFileSpec, globFailure);
         }
+
+        private bool CanShareGlob(string? projectDirectory, string filespec)
+        {
+            if (_globResultExperiment is null || string.IsNullOrEmpty(projectDirectory)) { return false; }
+            try
+            {
+                string? directory = Path.IsPathRooted(filespec) ? Path.GetPathRoot(filespec) : projectDirectory;
+                return directory is not null && directory.Length != 0 && _globResultExperiment.CanAttemptSharing(directory);
+            }
+            catch (Exception ex) when (IsIoRelatedExceptionOrAggregate(ex))
+            {
+                return false;
+            }
+        }
 #nullable disable
+
+        private bool DirectoryExistsForGlob(string path, GlobResultExperiment.Collector collector)
+        {
+            using var attribution = CacheAttribution.Measure(CacheAttribution.Op.Existence, path);
+            bool exists = _fileSystem.DirectoryExists(path);
+            _globResultExperiment?.RecordExistence(collector, path, exists, _fileSystem);
+            return exists;
+        }
 
         private static string ComputeFileEnumerationCacheKey(
             string projectDirectoryUnescaped,
@@ -1817,7 +2013,8 @@ namespace Microsoft.Build.Shared
             string filespecUnescaped,
             out bool stripProjectDirectory,
             out RecursionState result,
-            bool createGlobFileMatch = true)
+            bool createGlobFileMatch = true,
+            GlobResultExperiment.Collector collector = null)
         {
             stripProjectDirectory = false;
             result = new RecursionState();
@@ -1867,7 +2064,7 @@ namespace Microsoft.Build.Shared
              * If the fixed directory part doesn't exist, then this means no files should be
              * returned.
              */
-            if (fixedDirectoryPart.Length > 0 && !_fileSystem.DirectoryExists(fixedDirectoryPart))
+            if (fixedDirectoryPart.Length > 0 && !DirectoryExistsForGlob(fixedDirectoryPart, collector))
             {
                 return SearchAction.ReturnEmptyList;
             }
@@ -2128,20 +2325,24 @@ namespace Microsoft.Build.Shared
             string? projectDirectoryUnescaped,
             string filespecUnescaped,
             List<string>? excludeSpecsUnescaped,
-            DriverSelection selection)
+            DriverSelection selection,
+            GlobResultExperiment.Collector? collector = null)
         {
+            using var attribution = CacheAttribution.Measure(CacheAttribution.Op.GlobCompute, projectDirectoryUnescaped);
             return selection.Driver switch
             {
                 FileMatcherDriver.Legacy => GetFilesImplementation(
                     projectDirectoryUnescaped,
                     filespecUnescaped,
-                    excludeSpecsUnescaped),
+                    excludeSpecsUnescaped,
+                    collector),
                 FileMatcherDriver.OptimizedCallback or FileMatcherDriver.OptimizedDirect =>
                     GetFilesOptimizedImplementation(
                     projectDirectoryUnescaped,
                     filespecUnescaped,
                     excludeSpecsUnescaped,
-                    selection.Driver),
+                    selection.Driver,
+                    collector),
                 _ => throw new NotSupportedException(selection.Driver.ToString()),
             };
         }
@@ -2601,14 +2802,16 @@ namespace Microsoft.Build.Shared
             string? projectDirectoryUnescaped,
             string filespecUnescaped,
             List<string>? excludeSpecsUnescaped,
-            FileMatcherDriver driver)
+            FileMatcherDriver driver,
+            GlobResultExperiment.Collector? collector)
         {
             SearchAction action = GetFileSearchData(
                 projectDirectoryUnescaped,
                 filespecUnescaped,
                 out bool stripProjectDirectory,
                 out RecursionState state,
-                createGlobFileMatch: false);
+                createGlobFileMatch: false,
+                collector: collector);
 
             if (action == SearchAction.ReturnEmptyList)
             {
@@ -2627,7 +2830,7 @@ namespace Microsoft.Build.Shared
 
             if (action == SearchAction.LogDriveEnumeratingWildcard)
             {
-                return GetFilesImplementation(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+                return GetFilesImplementation(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped, collector);
             }
 
             if (action != SearchAction.RunSearch)
@@ -2668,7 +2871,8 @@ namespace Microsoft.Build.Shared
                         excludeSpec,
                         out _,
                         out RecursionState excludeState,
-                        createGlobFileMatch: false);
+                        createGlobFileMatch: false,
+                        collector: collector);
 
                     if (excludeAction == SearchAction.ReturnFileSpec)
                     {
@@ -2681,7 +2885,7 @@ namespace Microsoft.Build.Shared
                     }
                     else if (excludeAction == SearchAction.LogDriveEnumeratingWildcard)
                     {
-                        return GetFilesImplementation(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+                        return GetFilesImplementation(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped, collector);
                     }
                     else if (excludeAction == SearchAction.RunSearch)
                     {
@@ -2707,12 +2911,14 @@ namespace Microsoft.Build.Shared
             {
                 if (ShouldSkipRecursiveDirectory(state.BaseDirectory))
                 {
+                    collector?.Reject();
                     return ([], trackedAction, trackedExcludeFileSpec, null);
                 }
 
 #if NET || FEATURE_MSIOREDIST
                 if (useDirectEnumeration)
                 {
+                    using var directAttribution = CacheAttribution.Measure(CacheAttribution.Op.DirectTraversal, state.BaseDirectory);
                     using OptimizedFileSystemEnumerator enumerator = new(
                         state.BaseDirectory,
                         projectDirectoryUnescaped,
@@ -2754,6 +2960,7 @@ namespace Microsoft.Build.Shared
             {
                 if (ShouldSkipRecursiveDirectory(directory))
                 {
+                    collector?.Reject();
                     return;
                 }
 
@@ -2777,12 +2984,13 @@ namespace Microsoft.Build.Shared
                         }
                     }
 
-                    IReadOnlyList<string> filesInDirectory = _getFileSystemEntries(
+                    IReadOnlyList<string> filesInDirectory = GetEntriesForGlob(
                         FileSystemEntity.Files,
                         directory,
                         state.SearchData.Filespec,
                         projectDirectoryUnescaped,
-                        stripProjectDirectory);
+                        stripProjectDirectory,
+                        collector);
 
                     foreach (string file in filesInDirectory)
                     {
@@ -2815,12 +3023,13 @@ namespace Microsoft.Build.Shared
                     return;
                 }
 
-                IReadOnlyList<string> subdirectories = _getFileSystemEntries(
+                IReadOnlyList<string> subdirectories = GetEntriesForGlob(
                     FileSystemEntity.Directories,
                     directory,
                     null,
                     null,
-                    false);
+                    false,
+                    collector);
 
                 int maxDegreeOfParallelism = Math.Min(
                     subdirectories.Count,
@@ -3380,11 +3589,13 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
+        /// <param name="collector">Raw listing dependencies for shared glob reuse.</param>
         /// <returns>The search action, array of files, Exclude file spec (if applicable), and glob failure message (if applicable).</returns>
         private (string[] FileList, SearchAction Action, string ExcludeFileSpec, string? globFailureEvent) GetFilesImplementation(
             string? projectDirectoryUnescaped,
             string filespecUnescaped,
-            List<string>? excludeSpecsUnescaped)
+            List<string>? excludeSpecsUnescaped,
+            GlobResultExperiment.Collector? collector)
         {
             // UNDONE (perf): Short circuit the complex processing when we only have a path and a wildcarded filename
 
@@ -3392,7 +3603,7 @@ namespace Microsoft.Build.Shared
              * Analyze the file spec and get the information we need to do the matching.
              */
             var action = GetFileSearchData(projectDirectoryUnescaped, filespecUnescaped,
-                out bool stripProjectDirectory, out RecursionState state);
+                out bool stripProjectDirectory, out RecursionState state, collector: collector);
 
             if (action == SearchAction.ReturnEmptyList)
             {
@@ -3430,7 +3641,7 @@ namespace Microsoft.Build.Shared
                 {
                     // This is ignored, we always use the include pattern's value for stripProjectDirectory
                     var excludeAction = GetFileSearchData(projectDirectoryUnescaped, excludeSpec,
-                        out _, out RecursionState excludeState);
+                        out _, out RecursionState excludeState, collector: collector);
 
                     if (excludeAction == SearchAction.ReturnFileSpec)
                     {
@@ -3604,7 +3815,8 @@ namespace Microsoft.Build.Shared
                     stripProjectDirectory,
                     searchesToExclude,
                     searchesToExcludeInSubdirs,
-                    taskOptions);
+                    taskOptions,
+                    collector);
             }
             catch (Exception ex) when (IsIoRelatedExceptionOrAggregate(ex))
             {
@@ -3626,7 +3838,7 @@ namespace Microsoft.Build.Shared
         }
 #nullable disable
 
-        private static bool IsIoRelatedExceptionOrAggregate(Exception exception) =>
+        internal static bool IsIoRelatedExceptionOrAggregate(Exception exception) =>
             ExceptionHandling.IsIoRelatedException(exception)
             || (exception is AggregateException aggregateException
                 && aggregateException.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException));

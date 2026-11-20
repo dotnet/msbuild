@@ -11,8 +11,10 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Evaluation.Expander;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Unittest;
 using Shouldly;
@@ -28,9 +30,10 @@ namespace Microsoft.Build.UnitTests.Definition
     /// </summary>
     public class ProjectEvaluationContext_Tests : IDisposable
     {
-        public ProjectEvaluationContext_Tests()
+        public ProjectEvaluationContext_Tests(ITestOutputHelper output)
         {
-            _env = TestEnvironment.Create();
+            _output = output;
+            _env = TestEnvironment.Create(output);
 
             _resolver = new SdkUtilities.ConfigurableMockSdkResolver(
                 new Dictionary<string, SdkResult>
@@ -47,6 +50,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private readonly SdkUtilities.ConfigurableMockSdkResolver _resolver;
         private readonly TestEnvironment _env;
+        private readonly ITestOutputHelper _output;
 
         private static void SetResolverForContext(EvaluationContext context, SdkResolver resolver)
         {
@@ -998,6 +1002,281 @@ namespace Microsoft.Build.UnitTests.Definition
                 });
 
             evaluationCount.ShouldBe(2);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ExistencePropertyFunctionsReuseTheEvaluationLocalFileSystem(bool enableWave)
+        {
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", enableWave ? null : "18.13");
+            ChangeWaves.ResetStateForTests();
+            string root = _env.CreateFolder().Path;
+            string file = Path.Combine(root, "present");
+            string missing = Path.Combine(root, "missing");
+            string directory = Directory.CreateDirectory(Path.Combine(root, "directory")).FullName;
+            File.WriteAllText(file, "");
+            var source = new CountingFileSystem();
+            string xml = $"""
+                <Project>
+                  <PropertyGroup>
+                    <File>$([MSBuild]::FileExists('{file}'))</File>
+                    <FileAgain>$([System.IO.File]::Exists('{file}'))</FileAgain>
+                    <Missing>$([MSBuild]::FileExists('{missing}'))</Missing>
+                    <MissingAgain>$([System.IO.File]::Exists('{missing}'))</MissingAgain>
+                    <Directory>$([MSBuild]::DirectoryExists('{directory}'))</Directory>
+                    <DirectoryAgain>$([System.IO.Directory]::Exists('{directory}'))</DirectoryAgain>
+                    <ConditionResult Condition="Exists('{file}') And !Exists('{missing}')">yes</ConditionResult>
+                  </PropertyGroup>
+                </Project>
+                """;
+            Project Evaluate()
+            {
+                var context = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared)
+                    .ContextWithFileSystem(new CachingFileSystemWrapper(source));
+                ProjectCollection collection = _env.CreateProjectCollection().Collection;
+                collection.RegisterLogger(new MockLogger(_output));
+                using XmlReader reader = XmlReader.Create(new StringReader(xml));
+                return Project.FromXmlReader(reader, new ProjectOptions
+                {
+                    ProjectCollection = collection,
+                    EvaluationContext = context,
+                });
+            }
+
+            Project first = Evaluate();
+            first.GetPropertyValue("File").ShouldBe("True");
+            first.GetPropertyValue("FileAgain").ShouldBe("True");
+            first.GetPropertyValue("Missing").ShouldBe("False");
+            first.GetPropertyValue("MissingAgain").ShouldBe("False");
+            first.GetPropertyValue("Directory").ShouldBe("True");
+            first.GetPropertyValue("DirectoryAgain").ShouldBe("True");
+            first.GetPropertyValue("ConditionResult").ShouldBe("yes");
+            source.Calls(file, "file").ShouldBe(enableWave ? 1 : 0);
+            source.Calls(missing, "file").ShouldBe(enableWave ? 1 : 0);
+            source.Calls(directory, "directory").ShouldBe(enableWave ? 1 : 0);
+            source.Calls(file, "any").ShouldBe(enableWave ? 0 : 1);
+            source.Calls(missing, "any").ShouldBe(1);
+
+            File.Delete(file);
+            File.WriteAllText(missing, "");
+            Directory.Delete(directory);
+            first.ExpandString($"$([System.IO.File]::Exists('{file}'))").ShouldBe(enableWave ? "True" : "False");
+            first.ExpandString($"$([System.IO.File]::Exists('{missing}'))").ShouldBe(enableWave ? "False" : "True");
+            first.ExpandString($"$([System.IO.Directory]::Exists('{directory}'))").ShouldBe(enableWave ? "True" : "False");
+            Project second = Evaluate();
+            second.GetPropertyValue("File").ShouldBe("False");
+            second.GetPropertyValue("FileAgain").ShouldBe("False");
+            second.GetPropertyValue("Missing").ShouldBe("True");
+            second.GetPropertyValue("MissingAgain").ShouldBe("True");
+            second.GetPropertyValue("Directory").ShouldBe("False");
+            second.GetPropertyValue("DirectoryAgain").ShouldBe("False");
+            second.GetPropertyValue("ConditionResult").ShouldBeEmpty();
+            source.Calls(file, "file").ShouldBe(enableWave ? 2 : 0);
+            source.Calls(directory, "directory").ShouldBe(enableWave ? 2 : 0);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BclExistenceFunctionsDeferEmbeddedNullPathsToBinding(bool enableWave)
+        {
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", enableWave ? null : "18.13");
+            ChangeWaves.ResetStateForTests();
+            string directory = _env.CreateFolder().Path;
+            string file = Path.Combine(directory, "present");
+            File.WriteAllText(file, "");
+            var fileSystem = new CachingFileSystemWrapper(FileSystems.Default);
+            (Type Type, string Path)[] probes = [(typeof(File), file + "\0suffix"), (typeof(Directory), directory + "\0suffix")];
+
+            foreach ((Type type, string path) in probes)
+            {
+                WellKnownFunctions.TryExecuteWellKnownFunction(nameof(File.Exists), type, fileSystem,
+                    out object result, null, [path]).ShouldBeFalse();
+                result.ShouldBeNull();
+            }
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BclExistenceFunctionsPreserveLongPathBindingBehavior(bool enableWave)
+        {
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", enableWave ? null : "18.13");
+            ChangeWaves.ResetStateForTests();
+            string segment = new('a', 100);
+            string root = _env.CreateFolder().Path;
+            string relative = Path.Combine(segment, segment, new string('b', 50));
+            string directory = Path.Combine(root, relative);
+            Directory.CreateDirectory(@"\\?\" + directory);
+            _env.SetCurrentDirectory(root);
+            var fileSystem = new CachingFileSystemWrapper(FileSystems.Default);
+            string[] paths = [directory, Path.Combine(directory, "missing"), relative, Path.Combine(relative, "missing")];
+
+            foreach (string path in paths)
+            {
+                WellKnownFunctions.TryExecuteWellKnownFunction(nameof(Directory.Exists), typeof(Directory),
+                    fileSystem, out object result, null, [path]).ShouldBeFalse();
+                result.ShouldBeNull();
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BclExistenceFunctionsDeferExpectedFileSystemFailuresToBinding(bool enableWave)
+        {
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", enableWave ? null : "18.13");
+            ChangeWaves.ResetStateForTests();
+            string directory = _env.CreateFolder().Path;
+            string file = Path.Combine(directory, "present");
+            File.WriteAllText(file, "");
+            Exception[] failures = [new IOException(), new UnauthorizedAccessException(), new PathTooLongException(), new ArgumentException()];
+            (Type Type, string Path)[] probes = [(typeof(File), file), (typeof(Directory), directory)];
+            foreach (Exception failure in failures)
+            {
+                var fileSystem = new CachingFileSystemWrapper(new ThrowingExistenceFileSystem(failure));
+                foreach ((Type type, string path) in probes)
+                {
+                    WellKnownFunctions.TryExecuteWellKnownFunction(nameof(File.Exists), type, fileSystem,
+                        out object result, null, [path]).ShouldBeFalse();
+                    result.ShouldBeNull();
+                }
+            }
+        }
+
+        [Fact]
+        public void BclExistenceFunctionsCacheRelativePathsByTheirResolvedLocation()
+        {
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+            string first = _env.CreateFolder().Path;
+            string second = _env.CreateFolder().Path;
+            File.WriteAllText(Path.Combine(first, "present"), "");
+            var fileSystem = new CachingFileSystemWrapper(FileSystems.Default);
+
+            _env.SetCurrentDirectory(first);
+            WellKnownFunctions.TryExecuteWellKnownFunction(nameof(File.Exists), typeof(File), fileSystem,
+                out object present, null, ["present"]).ShouldBeTrue();
+            present.ShouldBe(true);
+
+            _env.SetCurrentDirectory(second);
+            WellKnownFunctions.TryExecuteWellKnownFunction(nameof(File.Exists), typeof(File), fileSystem,
+                out object missing, null, ["present"]).ShouldBeTrue();
+            missing.ShouldBe(false);
+        }
+
+        [Fact]
+        public void SharedNamespaceReuseRefreshesUpwardSearchImportsAndContentsBetweenEvaluations()
+        {
+            string root = _env.CreateFolder().Path;
+            string projectDirectory = Directory.CreateDirectory(Path.Combine(root, "subdirectory", "project")).FullName;
+            string imports = Directory.CreateDirectory(Path.Combine(root, "imports")).FullName;
+            string nearest = Path.Combine(root, "nearest.props");
+            string later = Path.Combine(root, "later.props");
+            string imported = Path.Combine(imports, "base.props");
+            string projectPath = Path.Combine(projectDirectory, "test.proj");
+            File.WriteAllText(nearest, "<Project />");
+            File.WriteAllText(imported, "<Project><PropertyGroup><ImportedValue>first</ImportedValue></PropertyGroup></Project>");
+            File.WriteAllText(projectPath, $"""
+                <Project>
+                  <PropertyGroup>
+                    <Nearest>$([MSBuild]::GetPathOfFileAbove('nearest.props', '$(MSBuildProjectDirectory)'))</Nearest>
+                    <NearestDirectory>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildProjectDirectory)', 'nearest.props'))</NearestDirectory>
+                    <Missing Condition="!Exists('{later}')">yes</Missing>
+                  </PropertyGroup>
+                  <Import Project="{Path.Combine(imports, "*.props")}" />
+                  <Import Project="{later}" Condition="Exists('{later}')" />
+                </Project>
+                """);
+            long version = 1;
+            DirectoryStampStatus Read(string directory, out DirectoryChangeStamp stamp)
+            {
+                stamp = new(1, 2, 3, version);
+                return Directory.Exists(directory) ? DirectoryStampStatus.Available : DirectoryStampStatus.Missing;
+            }
+            var cache = new DirectoryListingCache(Read);
+            Project Evaluate()
+            {
+                ProjectCollection collection = _env.CreateProjectCollection().Collection;
+                collection.RegisterLogger(new MockLogger(_output));
+                return Project.FromFile(projectPath, new ProjectOptions
+                {
+                    ProjectCollection = collection,
+                    EvaluationContext = EvaluationContext.CreateForBuild(cache),
+                });
+            }
+
+            Project first = Evaluate();
+            first.GetPropertyValue("Nearest").ShouldBe(nearest);
+            first.GetPropertyValue("NearestDirectory").ShouldBe(root);
+            first.GetPropertyValue("ImportedValue").ShouldBe("first");
+            first.GetPropertyValue("Missing").ShouldBe("yes");
+            long hits = GlobResultExperiment.GetStatistics()[1];
+            Evaluate().GetPropertyValue("ImportedValue").ShouldBe("first");
+            GlobResultExperiment.GetStatistics()[1].ShouldBeGreaterThan(hits);
+
+            File.WriteAllText(imported, "<Project><PropertyGroup><ImportedValue>updated-content</ImportedValue></PropertyGroup></Project>");
+            Evaluate().GetPropertyValue("ImportedValue").ShouldBe("updated-content",
+                "Unchanged membership must not reuse imported XML contents.");
+
+            string closer = Path.Combine(projectDirectory, "nearest.props");
+            File.WriteAllText(closer, "<Project />");
+            File.WriteAllText(later, "<Project><PropertyGroup><ConditionalValue>present</ConditionalValue></PropertyGroup></Project>");
+            File.Delete(imported);
+            File.WriteAllText(Path.Combine(imports, "replacement.props"),
+                "<Project><PropertyGroup><ImportedValue>replacement</ImportedValue></PropertyGroup></Project>");
+            version++;
+            Project changed = Evaluate();
+            changed.GetPropertyValue("Nearest").ShouldBe(closer);
+            changed.GetPropertyValue("NearestDirectory").ShouldBe(projectDirectory);
+            changed.GetPropertyValue("ImportedValue").ShouldBe("replacement");
+            changed.GetPropertyValue("ConditionalValue").ShouldBe("present");
+            changed.GetPropertyValue("Missing").ShouldBeEmpty();
+
+            File.Delete(closer);
+            File.Delete(later);
+            version++;
+            Project removed = Evaluate();
+            removed.GetPropertyValue("Nearest").ShouldBe(nearest);
+            removed.GetPropertyValue("ConditionalValue").ShouldBeEmpty();
+            removed.GetPropertyValue("Missing").ShouldBe("yes");
+        }
+
+        private sealed class ThrowingExistenceFileSystem(Exception failure) : ManagedFileSystem
+        {
+            public override bool FileExists(string path) => throw failure;
+
+            public override bool DirectoryExists(string path) => throw failure;
+        }
+
+        private sealed class CountingFileSystem : ManagedFileSystem
+        {
+            private readonly Dictionary<(string Path, string Kind), int> _calls = [];
+
+            internal int Calls(string path, string kind)
+                => _calls.TryGetValue((path, kind), out int count) ? count : 0;
+
+            private void Count(string path, string kind)
+                => _calls[(path, kind)] = Calls(path, kind) + 1;
+
+            public override bool FileExists(string path)
+            {
+                Count(path, "file");
+                return File.Exists(path);
+            }
+
+            public override bool DirectoryExists(string path)
+            {
+                Count(path, "directory");
+                return Directory.Exists(path);
+            }
+
+            public override bool FileOrDirectoryExists(string path)
+            {
+                Count(path, "any");
+                return File.Exists(path) || Directory.Exists(path);
+            }
         }
 
         private void EvaluateProjects(IEnumerable<string> projectContents, EvaluationContext context, Action<Project> afterEvaluationAction)
