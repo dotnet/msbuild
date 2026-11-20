@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Threading;
@@ -14,6 +15,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Win32.SafeHandles;
+using Shouldly;
 using Xunit;
 #if FEATURE_WINDOWSINTEROP
 using Windows.Win32;
@@ -182,16 +184,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
                                                  new FileWriteInfo("c.cs", _twoDaysAgo)
                                              };
 
+            string definingProjectEscaped = EscapingUtilities.Escape(Path.Combine(project.Directory, "import%3B.targets"));
             List<ProjectItemInstance> items = new List<ProjectItemInstance>();
-            items.Add(new ProjectItemInstance(project, "Items", "a.cs", project.FullPath));
-            items.Add(new ProjectItemInstance(project, "Items", "b.cs", project.FullPath));
+            items.Add(new ProjectItemInstance(project, "Items", "a.cs", definingProjectEscaped, sourceLineNumber: 12, sourceColumnNumber: 3));
+            items.Add(new ProjectItemInstance(project, "Items", "b.cs", definingProjectEscaped, sourceLineNumber: 15, sourceColumnNumber: 3));
 
             ItemDictionary<ProjectItemInstance> itemsByName = new ItemDictionary<ProjectItemInstance>();
             itemsByName.ImportItems(items);
 
-            DependencyAnalysisResult result = PerformDependencyAnalysisTestHelper(filesToAnalyze, itemsByName, inputs, outputs);
+            DependencyAnalysisResult result = PerformDependencyAnalysisTestHelper(
+                filesToAnalyze, itemsByName, inputs, outputs, out var changedInputs, out var upToDateInputs);
 
-            Assert.Equal(DependencyAnalysisResult.IncrementalBuild, result); // "Should only build partially."
+            result.ShouldBe(DependencyAnalysisResult.IncrementalBuild);
+            changedInputs["Items"].Single().GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("15");
+            upToDateInputs["Items"].Single().GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("12");
+            foreach (ProjectItemInstance item in changedInputs["Items"].Concat(upToDateInputs["Items"]))
+            {
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(EscapingUtilities.UnescapeAll(definingProjectEscaped));
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("3");
+            }
         }
 
         /// <summary>

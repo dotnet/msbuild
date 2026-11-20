@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -44,6 +45,33 @@ namespace Microsoft.Build.UnitTests
             to.GetMetadata(ItemSpecModifiers.Filename).ShouldBe("Monkey");
             to.GetMetadata(ItemSpecModifiers.Extension).ShouldBe(".txt");
             to.GetMetadata(ItemSpecModifiers.RelativeDir).ShouldBe(string.Empty);
+        }
+
+        [Theory]
+        [InlineData("location.proj", "17", "9")]
+        [InlineData("location%3B;$(literal)@'().proj", "17", "9")]
+        [InlineData("location%3B;$(literal)@'().proj", "", "")]
+        public void ConstructWithSourceLocationMetadata(string locationFileName, string line, string column)
+        {
+            string locationFile = Path.Combine(Path.GetTempPath(), "source", locationFileName);
+            ITaskItem source = new TaskItemWithSourceLocation(locationFile, line, column);
+            source.SetMetadata("Custom", "value%3B");
+
+            for (int copy = 0; copy < 2; copy++)
+            {
+                TaskItem item = new(source);
+
+                item.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(line);
+                item.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(column);
+                item.CloneCustomMetadata().Contains(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeFalse();
+                item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(locationFile);
+                ((ITaskItem2)item).GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath)
+                    .ShouldBe(EscapingUtilities.Escape(locationFile));
+                item.ItemSpec.ShouldBe(source.ItemSpec);
+                item.GetMetadata("Custom").ShouldBe("value;");
+
+                source = item;
+            }
         }
 
         // Make sure metadata can be cloned from an existing ITaskItem
@@ -340,6 +368,38 @@ namespace Microsoft.Build.UnitTests
             var actualMetadata = metadataContainer.EnumerateMetadata().OrderBy(metadata => metadata.Key).ToList();
             var expectedMetadata = metadata.OrderBy(metadata => metadata.Value).ToList();
             Assert.True(actualMetadata.SequenceEqual(expectedMetadata));
+        }
+
+        private sealed class TaskItemWithSourceLocation(string definingProject, string line, string column) : ITaskItem
+        {
+            private TaskItem Item { get; } = new("Monkey.txt");
+
+            public string ItemSpec
+            {
+                get => Item.ItemSpec;
+                set => Item.ItemSpec = value;
+            }
+
+            public ICollection MetadataNames => Item.MetadataNames;
+
+            public int MetadataCount => Item.MetadataCount;
+
+            public string GetMetadata(string metadataName) =>
+                MSBuildNameIgnoreCaseComparer.Default.Equals(metadataName, ItemSpecModifiers.DefiningProjectFullPath)
+                    ? definingProject
+                    : MSBuildNameIgnoreCaseComparer.Default.Equals(metadataName, ItemSpecModifiers.DefiningProjectLineNumber)
+                        ? line
+                        : MSBuildNameIgnoreCaseComparer.Default.Equals(metadataName, ItemSpecModifiers.DefiningProjectColumnNumber)
+                            ? column
+                            : Item.GetMetadata(metadataName);
+
+            public void SetMetadata(string metadataName, string metadataValue) => Item.SetMetadata(metadataName, metadataValue);
+
+            public void RemoveMetadata(string metadataName) => Item.RemoveMetadata(metadataName);
+
+            public void CopyMetadataTo(ITaskItem destinationItem) => Item.CopyMetadataTo(destinationItem);
+
+            public IDictionary CloneCustomMetadata() => Item.CloneCustomMetadata();
         }
 
 #if FEATURE_APPDOMAIN
