@@ -84,6 +84,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private const uint DefaultQueueCapacity = 200000;
 
+        private const int LoggingEventNotificationBatchSize = 64;
+        private const int LoggingEventNotificationIdle = 0;
+        private const int LoggingEventNotificationScheduled = 1;
+        private const int LoggingEventNotificationActive = 2;
+
         /// <summary>
         /// The memory assumed to be held by each queued event when deciding whether the queue may grow.
         /// An event takes about 144 bytes plus 2 bytes per character of its message, so this covers an average
@@ -284,6 +289,18 @@ namespace Microsoft.Build.BackEnd.Logging
         private AutoResetEvent _enqueueEvent;
 
         /// <summary>
+        /// Number of events queued since the logging queue was last observed empty.
+        /// </summary>
+        private int _loggingEventsSinceLastDrain;
+
+        /// <summary>
+        /// Whether the logging thread is idle, coalescing a batch, or draining.
+        /// </summary>
+        private int _loggingEventNotificationState;
+
+        private bool _isLoggingThreadWaitingForEvents;
+
+        /// <summary>
         /// CTS for stopping logging event processing.
         /// </summary>
         private CancellationTokenSource _loggingEventProcessingCancellation;
@@ -403,6 +420,20 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Coalescing delay, overridable per instance for deterministic tests.
+        /// </summary>
+        internal int LoggingEventNotificationDelay { get; set; } = 16;
+
+        /// <summary>
+        /// Whether the logging thread is idle with its notification counters reset.
+        /// </summary>
+        internal bool IsLoggingThreadWaitingForEvents => Volatile.Read(ref _isLoggingThreadWaitingForEvents);
+
+        internal Action BeforeLoggingQueueEmptyCheck { get; set; }
+
+        internal Action BeforeLoggingQueueSignalReset { get; set; }
 
         /// <summary>
         /// Router of the build engine runtime execution information.
@@ -972,7 +1003,8 @@ namespace Microsoft.Build.BackEnd.Logging
                         // 1. Shutdown forwarding loggers so that any events they have left to forward can get into the queue
                         foreach (ILogger logger in _loggers)
                         {
-                            if (logger is IForwardingLogger)
+                            // The central forwarder has no buffer and must keep routing queued local events until the drain completes.
+                            if (logger is IForwardingLogger and not CentralForwardingLogger)
                             {
                                 ShutdownLogger(logger);
                             }
@@ -1415,7 +1447,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
 
                     eventQueue.Enqueue(buildEvent);
-                    enqueueEvent.Set();
+                    NotifyLoggingEventProcessor(enqueueEvent);
                 }
                 catch (ObjectDisposedException)
                 {
@@ -1551,14 +1583,47 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void WaitForLoggingToProcessEvents()
         {
-            while (_eventQueue?.IsEmpty == false)
+            ConcurrentQueue<object> eventQueue = _eventQueue;
+            AutoResetEvent enqueueEvent = _enqueueEvent;
+            ManualResetEvent emptyQueueEvent = _emptyQueueEvent;
+            Thread loggingEventProcessingThread = _loggingEventProcessingThread;
+            if (eventQueue is null ||
+                enqueueEvent is null ||
+                emptyQueueEvent is null ||
+                loggingEventProcessingThread is null ||
+                !loggingEventProcessingThread.IsAlive)
             {
-                _emptyQueueEvent?.WaitOne();
+                return;
             }
-            // To avoid race condition when last message has been removed from queue but
-            //   not yet fully processed (handled by loggers), we need to make sure _emptyQueueEvent
-            //   is set as it is guaranteed to be in set state no sooner than after event has been processed.
-            _emptyQueueEvent?.WaitOne();
+
+            try
+            {
+                RequestImmediateLoggingEventProcessing(enqueueEvent);
+
+                // Observe the queue before the signal: a stale idle signal followed by the last dequeue
+                // could otherwise let the drain return while that event's callback is still running.
+                // The consumer resets the signal before dequeuing and sets it only after callbacks finish.
+                while (loggingEventProcessingThread.IsAlive)
+                {
+                    BeforeLoggingQueueEmptyCheck?.Invoke();
+                    if (eventQueue.IsEmpty)
+                    {
+                        if (emptyQueueEvent.WaitOne(millisecondsTimeout: 50))
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        // May return early on a stale signal; the loop re-checks the queue.
+                        emptyQueueEvent.WaitOne(millisecondsTimeout: 50);
+                    }
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // Shutdown disposed the wait handles after the local references were captured.
+            }
         }
 
         /// <summary>
@@ -1615,6 +1680,35 @@ namespace Microsoft.Build.BackEnd.Logging
 
         private readonly record struct WarningsConfigKey(int InstanceId, int ContextId);
 
+        private void NotifyLoggingEventProcessor(AutoResetEvent enqueueEvent)
+        {
+            if (Interlocked.Increment(ref _loggingEventsSinceLastDrain) >= LoggingEventNotificationBatchSize)
+            {
+                RequestImmediateLoggingEventProcessing(enqueueEvent);
+                return;
+            }
+
+            if (Interlocked.CompareExchange(
+                    ref _loggingEventNotificationState,
+                    LoggingEventNotificationScheduled,
+                    LoggingEventNotificationIdle) ==
+                LoggingEventNotificationIdle)
+            {
+                enqueueEvent.Set();
+            }
+        }
+
+        private void RequestImmediateLoggingEventProcessing(AutoResetEvent enqueueEvent)
+        {
+            if (Interlocked.Exchange(
+                    ref _loggingEventNotificationState,
+                    LoggingEventNotificationActive) !=
+                LoggingEventNotificationActive)
+            {
+                enqueueEvent.Set();
+            }
+        }
+
         /// <summary>
         /// Create a logging thread to process the logging queue.
         /// </summary>
@@ -1654,13 +1748,39 @@ namespace Microsoft.Build.BackEnd.Logging
                         else
                         {
                             emptyQueueEvent?.Set();
+                            Interlocked.Exchange(
+                                ref _loggingEventsSinceLastDrain,
+                                0);
+                            Interlocked.Exchange(
+                                ref _loggingEventNotificationState,
+                                LoggingEventNotificationIdle);
 
                             // Wait for next event, or finish.
                             if (!completeAdding.IsCancellationRequested && eventQueue.IsEmpty)
                             {
+                                Volatile.Write(ref _isLoggingThreadWaitingForEvents, true);
                                 WaitHandle.WaitAny(waitHandlesForNextEvent);
+                                Volatile.Write(ref _isLoggingThreadWaitingForEvents, false);
+
+                                if (!completeAdding.IsCancellationRequested &&
+                                    Volatile.Read(ref _loggingEventNotificationState) ==
+                                    LoggingEventNotificationScheduled)
+                                {
+                                    WaitHandle.WaitAny(
+                                        waitHandlesForNextEvent,
+                                        LoggingEventNotificationDelay);
+                                }
                             }
 
+                            if (!eventQueue.IsEmpty ||
+                                completeAdding.IsCancellationRequested)
+                            {
+                                Interlocked.Exchange(
+                                    ref _loggingEventNotificationState,
+                                    LoggingEventNotificationActive);
+                            }
+
+                            BeforeLoggingQueueSignalReset?.Invoke();
                             emptyQueueEvent.Reset();
                         }
                     } while (!eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
