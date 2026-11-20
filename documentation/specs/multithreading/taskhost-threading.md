@@ -169,6 +169,23 @@ On .NET Framework, callbacks from a task in another AppDomain carry its task ID 
 
 When both peers use packet version 9 or later and change wave 18.14 is enabled, the parent sends a `TaskHostTaskIdentity` packet before each `TaskHostConfiguration`. The identity gives the task a parent task ID that is unique in the parent process. Older peers, the CLR2 `MSBuildTaskHost`, and builds with the 18.14 wave disabled do not use this protocol. For them, `Yield` and `Reacquire` are no-ops and routing is unchanged.
 
+### Why nested-callback support is not sufficient
+
+The TaskHost already lets a second task run in the same process while a first task waits in `BuildProjectFile`. That support depends on two conditions: the waiting task's thread is blocked, and the nested task finishes before the waiting task continues (last in, first out). `Yield` breaks both conditions, because a yielded task continues to run. These examples show where the nested-callback design fails without the changes in this section.
+
+| Scenario | Nested-callback behavior | Result without task-ID routing |
+| --- | --- | --- |
+| Task A (in project P1) yields and starts `CL.exe`. The scheduler starts task B (in project P2) in the same TaskHost. A finishes first. | The provider sends each packet to the handler on the top of the node's handler stack, which is B's. | A's `TaskHostTaskComplete` and its outputs go to B's `TaskHostTask`. B reports A's result, and A's `TaskHostTask` never completes. |
+| A, while yielded, logs warnings from its tool output while B runs. | Log packets also go to the top handler. | A's warnings are attributed to P2 in the build log and binlog. |
+| Tasks A, B, and C overlap in that start order. B finishes first. | The provider removes B's handler. C's handler stays on the top of the stack. | A's packets go to C. |
+| The child receives B's `TaskHostConfiguration` while A runs. | The child asserts that no task is active (`Assumed.Zero(_activeTaskCount, ...)`). Only tasks blocked in a callback are excluded from that count. | A yielded task is active, so the TaskHost fails the assertion. Without a separate yielded state, the node cannot accept the overlapping task at all. |
+| B's configuration sets the process environment and current directory to P2's values while A runs. | `BlockForCallback` saves A's environment, and `ResumeAfterCallback` restores it after A's callback returns. A's thread is blocked between those two points, so it never sees P2's values. | A's thread is not blocked. A tool that A starts after B begins inherits P2's environment variables and directory. Relative paths that A resolves through the process current directory resolve against P2. Task-ID routing does not prevent this. It is the reason for the first limitation below: a yielded task must get its environment and directory from its own saved state, not from the process. |
+| A calls `Reacquire`. | No equivalent operation. The `BuildProjectFile` response returns when the nested results are ready, not when the scheduler gives the node back. | A response that only confirms receipt would let A continue while B still occupies the node, so A would run more tasks than the scheduler allows. `Reacquire` must wait for `IBuildEngine3.Reacquire` in the parent to return. |
+| The parent cancels A's request, but not B's. | `TaskHostTaskCancelled` cancels every task in the TaskHost. | B is cancelled too. A per-task `TaskHostTaskCancel` is necessary. |
+| The base branch, with no other changes. | `Yield` and `Reacquire` are no-ops in the TaskHost. | The scheduler never frees the node while a hosted tool runs. In the 104-project native C++ benchmark at `-m:8` (normal mode, Option A prototype), the median clean build time was 113 s with TaskHost yielding disabled and 47 s with it enabled. |
+
+The nested-callback support provides parts that this design reuses: the per-task `TaskExecutionContext` map, callback request IDs that are unique in the process, and reuse of a TaskHost for more than one task. This section adds the parts that make true overlap possible: task-ID envelopes, a yielded state separate from the callback-blocked state, saving and restoring each task's environment around its yielded interval, a `Reacquire` that waits for the scheduler, and per-task cancellation.
+
 ### Packet routing
 
 - The child wraps each task-scoped packet (log events, callback requests, completion) in a `TaskHostTaskEnvelope` that holds the parent task ID. The provider unwraps the envelope and sends the inner packet to the handler registered for that ID. Packets without an envelope go to the most recent handler, as before.
