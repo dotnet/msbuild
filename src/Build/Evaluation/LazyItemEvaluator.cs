@@ -36,6 +36,7 @@ namespace Microsoft.Build.Evaluation
         private readonly IItemFactory<I, I> _itemFactory;
         private readonly LoggingContext _loggingContext;
         private readonly EvaluationProfiler _evaluationProfiler;
+        private readonly EvaluationInstrumentation.GlobbingMeasurement _globbingMeasurement;
 
         private int _nextElementOrder = 0;
 
@@ -49,15 +50,22 @@ namespace Microsoft.Build.Evaluation
 
         protected FileMatcher FileMatcher => EvaluationContext.FileMatcher;
 
-        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
+        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext, EvaluationInstrumentation.GlobbingMeasurement globbingMeasurement = null)
         {
             _outerEvaluatorData = data;
-            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext, loggingContext);
+            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext, loggingContext)
+            {
+                GlobbingMeasurement = globbingMeasurement,
+            };
             _evaluatorData = new EvaluatorData(_outerEvaluatorData, _itemLists);
-            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext, loggingContext);
+            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext, loggingContext)
+            {
+                GlobbingMeasurement = globbingMeasurement,
+            };
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;
+            _globbingMeasurement = globbingMeasurement;
 
             EvaluationContext = evaluationContext;
         }
