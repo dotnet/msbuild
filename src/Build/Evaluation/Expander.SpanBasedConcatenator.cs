@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
 
 #nullable disable
@@ -22,8 +23,13 @@ internal partial class Expander<P, I>
     /// conversion. In other cases values are stringified and attempted to be interpreted as file paths
     /// before concatenation.
     /// </remarks>
-    private struct SpanBasedConcatenator : IDisposable
+    private struct SpanBasedConcatenator(IFileSystem fileSystem) : IDisposable
     {
+        /// <summary>
+        /// The file system used to check whether values look like file paths.
+        /// </summary>
+        private readonly IFileSystem _fileSystem = fileSystem;
+
         /// <summary>
         /// The backing <see cref="SpanBasedStringBuilder"/>, null until the second value is added.
         /// </summary>
@@ -56,7 +62,7 @@ internal partial class Expander<P, I>
             FlushFirstValueIfNeeded();
             if (_builder != null)
             {
-                _builder.Append(FileUtilities.MaybeAdjustFilePath(obj.ToString()));
+                _builder.Append(FileUtilities.MaybeAdjustFilePath(obj.ToString(), fileSystem: _fileSystem));
             }
             else
             {
@@ -73,7 +79,7 @@ internal partial class Expander<P, I>
             FlushFirstValueIfNeeded();
             if (_builder != null)
             {
-                _builder.Append(FileUtilities.MaybeAdjustFilePath(span));
+                _builder.Append(FileUtilities.MaybeAdjustFilePath(span, fileSystem: _fileSystem));
             }
             else
             {
@@ -95,11 +101,11 @@ internal partial class Expander<P, I>
             CheckDisposed();
             if (_firstObject != null)
             {
-                return (_firstObject is string stringValue) ? FileUtilities.MaybeAdjustFilePath(stringValue) : _firstObject;
+                return (_firstObject is string stringValue) ? FileUtilities.MaybeAdjustFilePath(stringValue, fileSystem: _fileSystem) : _firstObject;
             }
             return _firstSpan.IsEmpty
                 ? _builder?.ToString() ?? string.Empty
-                : FileUtilities.MaybeAdjustFilePath(_firstSpan).ToString();
+                : FileUtilities.MaybeAdjustFilePath(_firstSpan, fileSystem: _fileSystem).ToString();
         }
 
         /// <summary>
@@ -127,16 +133,16 @@ internal partial class Expander<P, I>
             if (_firstObject != null)
             {
                 _builder = Strings.GetSpanBasedStringBuilder();
-                _builder.Append(FileUtilities.MaybeAdjustFilePath(_firstObject.ToString()));
+                _builder.Append(FileUtilities.MaybeAdjustFilePath(_firstObject.ToString(), fileSystem: _fileSystem));
                 _firstObject = null;
             }
             else if (!_firstSpan.IsEmpty)
             {
                 _builder = Strings.GetSpanBasedStringBuilder();
 #if FEATURE_SPAN
-                _builder.Append(FileUtilities.MaybeAdjustFilePath(_firstSpan));
+                _builder.Append(FileUtilities.MaybeAdjustFilePath(_firstSpan, fileSystem: _fileSystem));
 #else
-                _builder.Append(FileUtilities.MaybeAdjustFilePath(_firstSpan.ToString()));
+                _builder.Append(FileUtilities.MaybeAdjustFilePath(_firstSpan.ToString(), fileSystem: _fileSystem));
 #endif
                 _firstSpan = new ReadOnlyMemory<char>();
             }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -940,6 +941,23 @@ public class FileUtilities_Tests
             }
             Directory.SetCurrentDirectory(oldCWD);
         }
+    }
+
+    [UnixOnlyFact]
+    public void LooksLikeUnixFilePathChecksTheGivenFileSystem()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        TransientTestFolder baseDirectory = env.CreateFolder();
+        string directory = Path.Combine(baseDirectory.Path, "first");
+        Directory.CreateDirectory(directory);
+        CachingFileSystemWrapper fileSystem = new(FileSystems.Default);
+
+        FileUtilities.LooksLikeUnixFilePath("first/file.txt", baseDirectory.Path, fileSystem).ShouldBeTrue();
+
+        // Only the caching file system still reports the deleted directory.
+        Directory.Delete(directory);
+        FileUtilities.LooksLikeUnixFilePath("first/file.txt", baseDirectory.Path, fileSystem).ShouldBeTrue();
+        FileUtilities.LooksLikeUnixFilePath("first/file.txt", baseDirectory.Path).ShouldBeFalse();
     }
 
     [UnixOnlyFact]

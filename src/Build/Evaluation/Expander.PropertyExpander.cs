@@ -304,7 +304,7 @@ internal partial class Expander<P, I>
             }
 
             return propertyValue is string stringValue
-                ? FileUtilities.MaybeAdjustFilePath(stringValue)
+                ? FileUtilities.MaybeAdjustFilePath(stringValue, fileSystem: _fileSystem)
                 : propertyValue;
         }
 
@@ -326,7 +326,7 @@ internal partial class Expander<P, I>
             // so that we can either maintain the object's type in the event
             // that we have a single component, or convert to a string
             // if concatenation is required.
-            using SpanBasedConcatenator results = new();
+            using SpanBasedConcatenator results = new(_fileSystem);
 
             // The index is the zero-based index into the expression,
             // where we've essentially read up to and copied into the target string.

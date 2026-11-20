@@ -16,10 +16,18 @@ namespace Microsoft.Build.Shared.FileSystem
         private readonly ConcurrentDictionary<string, bool> _fileExistenceCache = new();
         private readonly ConcurrentDictionary<string, bool> _fileOrDirectoryExistenceCache = new();
         private readonly ConcurrentDictionary<string, DateTime> _lastWriteTimeCache = new();
+        private readonly Func<string, bool> _directoryExists;
+        private readonly Func<string, bool> _fileExists;
+        private readonly Func<string, bool> _fileOrDirectoryExists;
+        private readonly Func<string, DateTime> _getLastWriteTimeUtc;
 
         public CachingFileSystemWrapper(IFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
+            _directoryExists = fileSystem.DirectoryExists;
+            _fileExists = fileSystem.FileExists;
+            _fileOrDirectoryExists = fileSystem.FileOrDirectoryExists;
+            _getLastWriteTimeUtc = fileSystem.GetLastWriteTimeUtc;
         }
 
         public bool SupportsDirectEnumeration =>
@@ -34,7 +42,7 @@ namespace Microsoft.Build.Shared.FileSystem
                 return true;
             }
 
-            return _fileOrDirectoryExistenceCache.GetOrAdd(path, p => _fileSystem.FileOrDirectoryExists(p));
+            return _fileOrDirectoryExistenceCache.GetOrAdd(path, _fileOrDirectoryExists);
         }
 
         public FileAttributes GetAttributes(string path)
@@ -44,17 +52,17 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public DateTime GetLastWriteTimeUtc(string path)
         {
-            return _lastWriteTimeCache.GetOrAdd(path, p => _fileSystem.GetLastWriteTimeUtc(p));
+            return _lastWriteTimeCache.GetOrAdd(path, _getLastWriteTimeUtc);
         }
 
         public bool DirectoryExists(string path)
         {
-            return _directoryExistenceCache.GetOrAdd(path, p => _fileSystem.DirectoryExists(p));
+            return _directoryExistenceCache.GetOrAdd(path, _directoryExists);
         }
 
         public bool FileExists(string path)
         {
-            return _fileExistenceCache.GetOrAdd(path, p => _fileSystem.FileExists(p));
+            return _fileExistenceCache.GetOrAdd(path, _fileExists);
         }
 
         public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)

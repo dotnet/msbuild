@@ -711,9 +711,9 @@ namespace Microsoft.Build.Framework
         /// Use a native shared method to massage file path. If the file is adjusted,
         /// that qualifies is as a path.
         ///
-        /// @baseDirectory is just passed to LooksLikeUnixFilePath, to help with the check
+        /// @baseDirectory and @fileSystem are just passed to LooksLikeUnixFilePath, to help with the check
         /// </summary>
-        internal static string MaybeAdjustFilePath(string value, string baseDirectory = "")
+        internal static string MaybeAdjustFilePath(string value, string baseDirectory = "", IFileSystem? fileSystem = null)
         {
             var comparisonType = StringComparison.Ordinal;
 
@@ -728,14 +728,14 @@ namespace Microsoft.Build.Framework
             }
 
             // For Unix-like systems, we may want to convert backslashes to slashes
-            return AdjustUnixFilePath(value.AsSpan(), baseDirectory) ?? value;
+            return AdjustUnixFilePath(value.AsSpan(), baseDirectory, fileSystem) ?? value;
         }
 
         /// <summary>
         /// If on Unix, convert backslashes to slashes for strings that resemble paths.
         /// This overload takes and returns ReadOnlyMemory of characters.
         /// </summary>
-        internal static ReadOnlyMemory<char> MaybeAdjustFilePath(ReadOnlyMemory<char> value, string baseDirectory = "")
+        internal static ReadOnlyMemory<char> MaybeAdjustFilePath(ReadOnlyMemory<char> value, string baseDirectory = "", IFileSystem? fileSystem = null)
         {
             if (NativeMethods.IsWindows || value.IsEmpty)
             {
@@ -762,13 +762,13 @@ namespace Microsoft.Build.Framework
             }
 
             // For Unix-like systems, we may want to convert backslashes to slashes
-            return AdjustUnixFilePath(value.Span, baseDirectory)?.AsMemory() ?? value;
+            return AdjustUnixFilePath(value.Span, baseDirectory, fileSystem)?.AsMemory() ?? value;
         }
 
         /// <summary>
         /// Converts backslashes to slashes, and returns the result if it looks like a Unix file path; otherwise null.
         /// </summary>
-        private static string? AdjustUnixFilePath(ReadOnlySpan<char> value, string baseDirectory)
+        private static string? AdjustUnixFilePath(ReadOnlySpan<char> value, string baseDirectory, IFileSystem? fileSystem)
         {
             const int StackBufferLength = 256;
             Span<char> buffer = value.Length <= StackBufferLength
@@ -779,7 +779,7 @@ namespace Microsoft.Build.Framework
             Span<char> newValue = ConvertToUnixSlashes(buffer.Slice(0, value.Length));
 
             // Find the part of the name we want to check, that is remove quotes, if present
-            return newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory)
+            return newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory, fileSystem)
                 ? newValue.ToString()
                 : null;
         }
@@ -832,12 +832,12 @@ namespace Microsoft.Build.Framework
         /// first segment exists and is a directory.
         ///
         /// If @baseDirectory is not null, then look for the first segment exists under
-        /// that
+        /// that. The existence checks use @fileSystem, or the default file system if it is null.
         /// </summary>
-        internal static bool LooksLikeUnixFilePath(string value, string baseDirectory = "")
-            => LooksLikeUnixFilePath(value.AsSpan(), baseDirectory);
+        internal static bool LooksLikeUnixFilePath(string value, string baseDirectory = "", IFileSystem? fileSystem = null)
+            => LooksLikeUnixFilePath(value.AsSpan(), baseDirectory, fileSystem);
 
-        internal static bool LooksLikeUnixFilePath(ReadOnlySpan<char> value, string baseDirectory = "")
+        internal static bool LooksLikeUnixFilePath(ReadOnlySpan<char> value, string baseDirectory = "", IFileSystem? fileSystem = null)
         {
             if (NativeMethods.IsWindows)
             {
@@ -858,9 +858,10 @@ namespace Microsoft.Build.Framework
             // Check for actual files or directories under / that get missed by the above logic
             bool shouldCheckFileOrDirectory = !shouldCheckDirectory && value.Length > 0 && value[0] == '/';
             ReadOnlySpan<char> directory = value.Slice(0, directoryLength);
+            fileSystem ??= DefaultFileSystem;
 
-            return (shouldCheckDirectory && DefaultFileSystem.DirectoryExists(Path.Combine(baseDirectory, directory.ToString())))
-                || (shouldCheckFileOrDirectory && DefaultFileSystem.FileOrDirectoryExists(value.ToString()));
+            return (shouldCheckDirectory && fileSystem.DirectoryExists(Path.Combine(baseDirectory, directory.ToString())))
+                || (shouldCheckFileOrDirectory && fileSystem.FileOrDirectoryExists(value.ToString()));
         }
 
         /// <summary>
