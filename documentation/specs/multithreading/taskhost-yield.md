@@ -42,8 +42,27 @@ Both prototypes forward `Yield` and `Reacquire` across the TaskHost boundary wit
 - **Reacquire ordering.** The parent sends the response to `TaskHostYieldRequest(reacquire: true)` only after the real `IBuildEngine3.Reacquire()` returns. The task cannot continue before the scheduler gives its node back.
 - **Scheduler accounting.** The parent calls the real `IBuildEngine3.Yield()` and `Reacquire()`. Node and core accounting, including the release of requested cores on `Reacquire` (see [resource management](../resource-management.md)), use the existing scheduler paths.
 - **Contract enforcement.** As in the in-process engine, these calls throw: `Yield` twice, `Reacquire` without `Yield`, and `Reacquire` on a thread other than the one that called `Yield`.
-- **Unbalanced exit.** If a task completes or throws while yielded, the parent reacquires for the task before it processes the result.
+- **Unbalanced exit.** If a task completes or throws while yielded, the parent must reacquire for the task before it processes the result. See [Reacquire before completion](#reacquire-before-completion).
 - **No hangs.** Cancellation, or loss of the connection, while a task waits in `Reacquire` must unblock the task and release its registrations.
+
+### Reacquire before completion
+
+The engine requires a request to be reacquired after a real `Yield` and before the request reports its result. However, the engine does not check this when a task ends:
+
+- A successful local completion requires the request entry to be `Active` (`BuildRequestEntry.Complete`). The scheduler requires the request to be `Executing` when it records any result, including a failure (`Scheduler.ReportResult`).
+- When a task ends, `TaskBuilder` calls `TaskHost.MarkAsInactive`, which does not check the yield state.
+- In a test with the .NET 11 RC1 SDK at `-m:1`, an in-process task that returned while yielded made the build hang after later tasks ran. A failing task in the same state caused internal error MSB0001, because the request was `Yielding` instead of `Executing`.
+
+Out-of-process `Yield` is a no-op today, so a hosted task that never reacquires still succeeds. When `Yield` is forwarded, the TaskHost implementation must preserve that invariant itself:
+
+- The parent tracks whether each task is yielded. Option B tracks this per task ID, because one host can contain several yielded tasks.
+- The parent reacquires for the task on every exit path: completion, exception, host crash or disconnect, and cancellation. It does this before it applies outputs or environment changes from the task. In the prototypes, `TaskHostTask.ReacquireIfYielded` does this.
+- This reacquire waits for the scheduler to give the node back. Cancellation during the wait must not hang. A failed reacquire, for example `BuildAbortedException`, is recorded and reported after host cleanup.
+
+Two related decisions are separate from this design:
+
+- **Report unbalanced tasks?** Both prototypes keep a task that returns while yielded successful, which matches today's TaskHost behavior. A new error or warning would break builds that succeed today, including `-warnaserror` builds. If a diagnostic is added, it should be a message or be opt-in. The parent must reacquire even when the task fails, because the scheduler also requires `Executing` for failed results.
+- **Engine-level handling.** A clear engine check, or an automatic reacquire in `TaskBuilder`, would fix the in-process hang and could centralize some cleanup. It would not remove the TaskHost protocol, task-ID routing, or cancellation handling. The hook must run before task results are applied, which is earlier than `MarkAsInactive`. It must also call `Reacquire` on the thread that called `Yield`, and it must handle cancellation. This is a separate change that affects in-process tasks.
 
 The main difference between the options is how they isolate the process state of tasks that run at the same time, and how they protect that isolation.
 
@@ -236,3 +255,4 @@ Option B must also add the shared-state guard test from the [recommendation](#re
 
 - Should Option B allow a task to request a separate TaskHost when it cannot follow the shared-state rule?
 - What causes the observed no-op time differences, and does enabling yield affect them?
+- Should the engine check, or automatically fix, a task that returns while yielded? This applies to in-process tasks and TaskHosts. See [Reacquire before completion](#reacquire-before-completion).
