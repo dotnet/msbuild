@@ -1139,6 +1139,33 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Returns true when the calling code flows from a task that has already completed,
+        /// e.g. a background thread started by the task that logs after Execute() returned,
+        /// and no other task is running that the event could legitimately belong to.
+        /// </summary>
+        private bool IsLoggingFromCompletedTask()
+        {
+            // A thread captured by an earlier task may be logging on behalf of the current one.
+            if (!_taskContexts.IsEmpty)
+            {
+                return false;
+            }
+
+            TaskExecutionContext context = _currentTaskContext.Value;
+            if (context is not null)
+            {
+                return context.State == TaskExecutionState.Completed;
+            }
+
+#if FEATURE_APPDOMAIN
+            // The context is removed from the table when the task completes.
+            return CallContext.LogicalGetData(TaskContextIdSlot) is int;
+#else
+            return false;
+#endif
+        }
+
+        /// <summary>
         /// Gets the configuration for the currently executing task on this thread.
         /// On task threads, returns the per-task context configuration.
         /// On the main communication thread (e.g., infrastructure logging), the context
@@ -1992,6 +2019,14 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void SendBuildEvent(BuildEventArgs e)
         {
+            if (IsLoggingFromCompletedTask())
+            {
+                // The task has been logging on another thread and has not terminated this logging
+                // before it returned. Drop the event, matching the in-proc TaskHost: the parent
+                // has already processed the task's completion and may have no handler for it.
+                return;
+            }
+
             if (_nodeEndpoint?.LinkStatus == LinkStatus.Active)
             {
 #pragma warning disable SYSLIB0050
