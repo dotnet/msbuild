@@ -80,7 +80,10 @@ The implementation of the binary logger is here:
 https://source.dot.net/#Microsoft.Build/Logging/BinaryLogger/BinaryLogger.cs
 https://github.com/dotnet/msbuild/blob/main/src/Build/Logging/BinaryLogger/BinaryLogger.cs
 
-It is a `GZipStream`-compressed binary stream of serialized `BuildEventArgs` objects. The event args objects are serialized and deserialized using:
+It is a `GZipStream`-compressed binary stream of serialized `BuildEventArgs` objects.
+The logger uses fast lossless gzip compression to favor build speed over the smallest
+possible file size. All events and embedded project/import contents are preserved.
+The event args objects are serialized and deserialized using:
  * https://source.dot.net/#Microsoft.Build/Logging/BinaryLogger/BuildEventArgsWriter.cs
  * https://source.dot.net/#Microsoft.Build/Logging/BinaryLogger/BuildEventArgsReader.cs
 
