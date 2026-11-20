@@ -17,6 +17,12 @@ namespace Microsoft.Build.UnitTests
     {
         private const string StubEnvironmentName = "Stub";
         private const string MultithreadedEnvironmentName = "Multithreaded";
+        private readonly ITestOutputHelper _output;
+
+        public TaskEnvironment_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         public static TheoryData<string> EnvironmentTypes =>
             new TheoryData<string>
@@ -645,6 +651,27 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable(testVarName, null);
                 Directory.SetCurrentDirectory(originalDirectory);
             }
+        }
+
+        [Fact]
+        public void TaskEnvironment_GetProcessStartInfo_ExcludesRemovedAndHostOnlyVariables()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            const string RemovedVariable = "TASK_ENVIRONMENT_REMOVED_VARIABLE";
+            const string AddedAfterSnapshot = "TASK_ENVIRONMENT_HOST_ONLY_VARIABLE";
+            env.SetEnvironmentVariable(RemovedVariable, "host-value");
+            env.SetEnvironmentVariable(AddedAfterSnapshot, null);
+            using var driver = new MultiThreadedTaskEnvironmentDriver(env.DefaultTestDirectory.Path);
+            var taskEnvironment = new TaskEnvironment(driver);
+            taskEnvironment.SetEnvironmentVariable(RemovedVariable, null);
+            env.SetEnvironmentVariable(AddedAfterSnapshot, "host-only");
+
+            var startInfo = taskEnvironment.GetProcessStartInfo();
+
+            startInfo.Environment.ContainsKey(RemovedVariable).ShouldBeFalse();
+            startInfo.Environment.ContainsKey(AddedAfterSnapshot).ShouldBeFalse();
+            Environment.GetEnvironmentVariable(RemovedVariable).ShouldBe("host-value");
+            Environment.GetEnvironmentVariable(AddedAfterSnapshot).ShouldBe("host-only");
         }
 
         [Fact]

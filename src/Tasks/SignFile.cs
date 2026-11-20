@@ -23,8 +23,11 @@ namespace Microsoft.Build.Tasks
     /// It can sign ClickOnce manifests as well as exe's.
     /// </summary>
     [SupportedOSPlatform("windows")]
-    public sealed class SignFile : Task
+    [MSBuildMultiThreadableTask]
+    public sealed class SignFile : Task, IMultiThreadableTask
     {
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
         public SignFile()
             : base(AssemblyResources.PrimaryResources, "MSBuild.")
         {
@@ -54,15 +57,17 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(SignFile));
                 return false;
             }
+            AbsolutePath signingTargetPath = TaskEnvironment.GetAbsolutePathOrEmpty(SigningTarget.ItemSpec);
             try
             {
                 SecurityUtilities.SignFile(
                     CertificateThumbprint,
                     TimestampUrl == null ? null : new Uri(TimestampUrl),
-                    SigningTarget.ItemSpec,
+                    signingTargetPath,
                     TargetFrameworkVersion,
                     TargetFrameworkIdentifier,
-                    DisallowMansignTimestampFallback);
+                    DisallowMansignTimestampFallback,
+                    TaskEnvironment);
                 return true;
             }
             catch (ArgumentException ex) when (ex.ParamName.Equals("certThumbprint"))
@@ -70,9 +75,9 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("SignFile.CertNotInStore");
                 return false;
             }
-            catch (FileNotFoundException ex)
+            catch (FileNotFoundException)
             {
-                Log.LogErrorWithCodeFromResources("SignFile.TargetFileNotFound", ex.FileName);
+                Log.LogErrorWithCodeFromResources("SignFile.TargetFileNotFound", signingTargetPath.OriginalValue);
                 return false;
             }
             catch (ApplicationException ex)

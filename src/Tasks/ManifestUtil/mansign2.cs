@@ -244,39 +244,9 @@ namespace System.Deployment.Internal.CodeSigning
         internal const string SignedXmlRequiresUnreferencedCodeMessage = "SignedXml resolves transform and digest algorithm implementations by name; they may be trimmed.";
         internal const string SignedXmlRequiresDynamicCodeMessage = "SignedXml uses XmlDsigXsltTransform, which relies on XslCompiledTransform and is not supported with Native AOT.";
 
-        [RequiresUnreferencedCode(SignedXmlRequiresUnreferencedCodeMessage)]
-        [RequiresDynamicCode(SignedXmlRequiresDynamicCodeMessage)]
-        internal ManifestSignedXml2()
-            : base()
+        static ManifestSignedXml2()
         {
-            init();
-        }
-        [RequiresUnreferencedCode(SignedXmlRequiresUnreferencedCodeMessage)]
-        [RequiresDynamicCode(SignedXmlRequiresDynamicCodeMessage)]
-        internal ManifestSignedXml2(XmlElement elem)
-            : base(elem)
-        {
-            init();
-        }
-        [RequiresUnreferencedCode(SignedXmlRequiresUnreferencedCodeMessage)]
-        [RequiresDynamicCode(SignedXmlRequiresDynamicCodeMessage)]
-        internal ManifestSignedXml2(XmlDocument document)
-            : base(document)
-        {
-            init();
-        }
-
-        [RequiresUnreferencedCode(SignedXmlRequiresUnreferencedCodeMessage)]
-        [RequiresDynamicCode(SignedXmlRequiresDynamicCodeMessage)]
-        internal ManifestSignedXml2(XmlDocument document, bool verify)
-            : base(document)
-        {
-            _verify = verify;
-            init();
-        }
-
-        private void init()
-        {
+            // Publish the legacy URI mappings once, before concurrent signers can use them.
             CryptoConfig.AddAlgorithm(typeof(RSAPKCS1SHA256SignatureDescription),
                                Sha256SignatureMethodUri);
 
@@ -291,6 +261,33 @@ namespace System.Deployment.Internal.CodeSigning
             CryptoConfig.AddAlgorithm(typeof(SHA256Cng),
                                Sha256DigestMethod);
 #endif
+        }
+
+        [RequiresUnreferencedCode(SignedXmlRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignedXmlRequiresDynamicCodeMessage)]
+        internal ManifestSignedXml2()
+            : base()
+        {
+        }
+        [RequiresUnreferencedCode(SignedXmlRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignedXmlRequiresDynamicCodeMessage)]
+        internal ManifestSignedXml2(XmlElement elem)
+            : base(elem)
+        {
+        }
+        [RequiresUnreferencedCode(SignedXmlRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignedXmlRequiresDynamicCodeMessage)]
+        internal ManifestSignedXml2(XmlDocument document)
+            : base(document)
+        {
+        }
+
+        [RequiresUnreferencedCode(SignedXmlRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignedXmlRequiresDynamicCodeMessage)]
+        internal ManifestSignedXml2(XmlDocument document, bool verify)
+            : base(document)
+        {
+            _verify = verify;
         }
 
         public override XmlElement GetIdElement(XmlDocument document, string idValue)
@@ -579,10 +576,12 @@ namespace System.Deployment.Internal.CodeSigning
             {
                 XmlReaderSettings settings = new XmlReaderSettings();
                 settings.DtdProcessing = DtdProcessing.Parse;
+#pragma warning disable MSBuildTask0005 // Reads XML from the StringReader; BaseURI is not a file input.
                 using (XmlReader reader = XmlReader.Create(stringReader, settings, manifestDom.BaseURI))
                 {
                     normalizedDom.Load(reader);
                 }
+#pragma warning restore MSBuildTask0005
             }
 
             XmlDsigExcC14NTransform exc = new XmlDsigExcC14NTransform();

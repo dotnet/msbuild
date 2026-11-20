@@ -4,6 +4,7 @@
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <BuildAnalyzer Condition="'$(BuildAnalyzer)' == ''">true</BuildAnalyzer>
     <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
          older TFMs (net472, netstandard2.0) from emitting NETSDK1210. -->
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
@@ -575,7 +576,7 @@
   </ItemGroup>
   <!-- Thread-safe task analyzer: runs during Tasks compilation to catch unsafe API usage -->
   <ItemGroup Condition="'$(BuildAnalyzer)' == 'true'">
-    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
     <GlobalAnalyzerConfigFiles Include="$(MSBuildThisFileDirectory)TaskAnalyzer.globalconfig" />
   </ItemGroup>
   <PropertyGroup Condition="'$(BuildAnalyzer)' == 'true'">
