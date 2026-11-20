@@ -92,6 +92,21 @@ public sealed class PropertyFunctionAotTests
         Assert.AreEqual(directory.Path, EvaluateToValue($"$([System.IO.Directory]::GetParent('{file}').FullName)"));
     }
 
+    [TestMethod]
+    public void RestrictedReceiverChains_RemainAvailableUnderAot()
+    {
+        Assert.AreEqual("b", EvaluateToValue(
+            "$([System.Text.RegularExpressions.Regex]::Matches('abc', '(b)')[0].Groups[1].Captures[0].Value)"));
+        Assert.AreEqual("WINDOWS", EvaluateToValue(
+            "$([System.Runtime.InteropServices.OSPlatform]::Windows.ToString())"));
+
+        using var directory = new TempDirectory();
+        InvalidProjectFileException ex = EvaluateExpectingFailure(
+            $"$([System.IO.DirectoryInfo]::new('{directory.Path}').Delete())");
+        Assert.AreEqual("MSB4185", ex.ErrorCode);
+        Assert.IsTrue(Directory.Exists(directory.Path));
+    }
+
     /// <summary>
     /// Evaluates a single property-function expression as a project property and returns the resolved value.
     /// </summary>

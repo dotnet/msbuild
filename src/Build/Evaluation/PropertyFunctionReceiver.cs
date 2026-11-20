@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Frozen;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Evaluation;
@@ -13,8 +14,8 @@ namespace Microsoft.Build.Evaluation;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Used when the <c>RestrictPropertyFunctionReceivers</c> feature switch (in Microsoft.Build.Framework) is
-/// enabled. It limits dotting to a curated, bounded set of receiver types so the members reachable by
+/// Used when Change Wave 18.14 or the <c>RestrictPropertyFunctionReceivers</c> feature switch is enabled.
+/// It limits dotting to a curated, bounded set of receiver types so the members reachable by
 /// reflection are predictable and statically known, which keeps the property-function path trim compatible.
 /// </para>
 /// <para>
@@ -41,7 +42,9 @@ internal static class PropertyFunctionReceiver
         typeof(string), typeof(decimal),
         typeof(DateTime), typeof(DateTimeOffset), typeof(TimeSpan),
         typeof(Guid), typeof(Version), typeof(CultureInfo),
-        typeof(Uri), typeof(Regex), typeof(Match), typeof(Group), typeof(Capture),
+        typeof(Uri), typeof(OSPlatform),
+        typeof(Regex), typeof(Match), typeof(Group), typeof(Capture),
+        typeof(MatchCollection), typeof(GroupCollection), typeof(CaptureCollection),
     }.ToFrozenSet();
 
     /// <summary>
