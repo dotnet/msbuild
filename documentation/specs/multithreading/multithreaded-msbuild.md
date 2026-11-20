@@ -303,8 +303,8 @@ cleanup and logging callbacks, before output caches are serialized. A normal or 
 allows cache serialization; a late warning promoted to an error fails `EndBuild` and prevents serialization.
 The host directory captured before logger initialization is restored when the build ends.
 `BuildManager` resolves relative output-cache paths for CLI and API builds before entering the sentinel;
-the CLI resolves its entry-project path before constructing requests inside that scope. Loggers must
-not change the process current directory. Failures to enable strict mode, recover its directory,
+the CLI resolves its entry-project path before constructing requests inside that scope.
+Loggers must not change the process current directory. Failures to enable strict mode, recover its directory,
 or restore the host directory fail the build; they do not silently disable checks.
 After successful restoration, MSBuild attempts to remove the scope's own temporary directory.
 Locked leftovers are not reused by later builds. Cleanup is best-effort and does not replace
@@ -335,6 +335,18 @@ Unannotated tasks retain their TaskHost working directory, but can still receive
 absolute path from project or engine code. When constructing a nested task, pass the parent's
 `TaskEnvironment` to it. Child MSBuild processes also use strict checks when they run
 multi-threaded and change wave 18.12 is enabled. A change-wave setting does not itself enable MT.
+
+## Evaluation working directory
+
+Under `-mt`, relative paths that evaluation resolves against the current directory, for example in
+property functions, resolve as in a non-MT build. For project files they resolve against the startup
+directory. For solution wrappers and static graphs they resolve against the directory the build
+started in. This applies with or without strict mode. MSBuild uses an async-local directory for this,
+not the process CWD, and restores it before targets and tasks run, which still use the project directory.
+
+Two cases still differ from non-MT, as before this change. When `SaveOperatingEnvironment` is false,
+or the startup directory no longer exists, project-file evaluation under `-mt` stays project-relative,
+while non-MT uses the process current directory. This includes evaluation done by a project cache.
 
 ## Interaction with `DisableInProcNode`
 

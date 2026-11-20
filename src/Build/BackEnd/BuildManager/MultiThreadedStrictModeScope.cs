@@ -43,6 +43,8 @@ internal sealed class MultiThreadedStrictModeScope
 
     internal string SentinelDirectory { get; }
 
+    internal string BuildEntryDirectory => _directoryToRestore;
+
     internal static MultiThreadedStrictModeScope? ActiveScope => Volatile.Read(ref s_activeScope);
 
     internal static CurrentDirectorySnapshot CaptureCurrentDirectory()
