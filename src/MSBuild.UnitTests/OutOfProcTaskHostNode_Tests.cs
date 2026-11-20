@@ -200,16 +200,43 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void EventsLoggedAfterTaskCompletesAreDropped(bool taskCompleted)
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void EventsLoggedAfterTaskCompletesAreDropped(bool taskCompleted, bool otherTaskActive)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
             RedirectedNodeState nodeState = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
             nodeState.SetField("_nodeEndpoint", endpoint.Node);
-            using TaskExecutionContext context = new(
-                1,
+            using TaskExecutionContext context = CreateTaskContext(1, taskCompleted ? TaskExecutionState.Completed : TaskExecutionState.Executing);
+            using TaskExecutionContext otherContext = CreateTaskContext(2, TaskExecutionState.Executing);
+            if (otherTaskActive)
+            {
+                ((ConcurrentDictionary<int, TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
+                    .GetField("_taskContexts", BindingFlags.Instance | BindingFlags.NonPublic)!
+                    .GetValue(nodeState.Node)!).TryAdd(otherContext.TaskId, otherContext).ShouldBeTrue();
+            }
+
+            // Log from a separate thread with the task's context flowed to it, as a background
+            // thread started by the task would.
+            Thread logger = new(() =>
+            {
+                ((AsyncLocal<TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
+                    .GetField("_currentTaskContext", BindingFlags.Instance | BindingFlags.NonPublic)!
+                    .GetValue(nodeState.Node)!).Value = context;
+                nodeState.Node.LogMessageEvent(new BuildMessageEventArgs("late message", null, "LateLogger", MessageImportance.Low));
+            });
+            logger.Start();
+            logger.Join();
+
+            // While another task is running, a thread captured by an earlier task may be logging on its behalf.
+            endpoint.Packets.Count.ShouldBe(taskCompleted && !otherTaskActive ? 0 : 1);
+        }
+
+        private static TaskExecutionContext CreateTaskContext(int taskId, TaskExecutionState state) =>
+            new(
+                taskId,
                 new TaskHostConfiguration(
                     nodeId: 1,
                     startupDirectory: Directory.GetCurrentDirectory(),
@@ -235,23 +262,8 @@ namespace Microsoft.Build.UnitTests
                     warningsNotAsErrors: null,
                     warningsAsMessages: null))
             {
-                State = taskCompleted ? TaskExecutionState.Completed : TaskExecutionState.Executing,
+                State = state,
             };
-
-            // Log from a separate thread with the task's context flowed to it, as a background
-            // thread started by the task would.
-            Thread logger = new(() =>
-            {
-                ((AsyncLocal<TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
-                    .GetField("_currentTaskContext", BindingFlags.Instance | BindingFlags.NonPublic)!
-                    .GetValue(nodeState.Node)!).Value = context;
-                nodeState.Node.LogMessageEvent(new BuildMessageEventArgs("late message", null, "LateLogger", MessageImportance.Low));
-            });
-            logger.Start();
-            logger.Join();
-
-            endpoint.Packets.Count.ShouldBe(taskCompleted ? 0 : 1);
-        }
 
         private sealed class ImmediateDisconnectEndpoint : INodeEndpoint
         {
