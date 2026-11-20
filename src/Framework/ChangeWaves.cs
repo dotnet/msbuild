@@ -201,7 +201,7 @@ namespace Microsoft.Build.Framework
 
         private static bool TryParseVersion(string stringVersion, out Version version)
         {
-#if FEATURE_NET35_TASKHOST
+#if NETFRAMEWORK
             try
             {
                 version = new Version(stringVersion);

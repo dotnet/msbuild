@@ -23,9 +23,6 @@ using System.Security.Principal;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-#if FEATURE_NET35_TASKHOST
-using Microsoft.Build.Utilities;
-#endif
 using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
@@ -436,10 +433,10 @@ namespace Microsoft.Build.BackEnd
                     // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
                     // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
                     // nodes because we should never be able to connect in this case.
-                    string taskHostNameForClr2TaskHost = Path.GetFileNameWithoutExtension(NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost);
-                    if (Path.GetFileNameWithoutExtension(msbuildLocation).Equals(taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
+                    if (Handshake.IsHandshakeOptionEnabled(nodeLaunchData.Handshake.HandshakeOptions, HandshakeOptions.CLR2))
                     {
-                        if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) == null)
+                        bool frameworkMissing = !FrameworkLocationHelper.IsDotNetFrameworkV35AvailableForTaskHost();
+                        if (frameworkMissing)
                         {
                             CommunicationsUtilities.Trace($"Failed to launch node from {msbuildLocation}. The required .NET Framework v3.5 is not installed or enabled. CommandLine: {commandLineArgs}");
 

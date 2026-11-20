@@ -223,7 +223,8 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
                 out bool parameterConversionUnsupported,
                 out _,
                 out bool wasNewlyCreated,
-                out NodeProviderOutOfProcBase.NodeContext connection).ShouldBeFalse();
+                out NodeProviderOutOfProcBase.NodeContext connection,
+                out _).ShouldBeFalse();
 
             parameterConversionUnsupported.ShouldBeTrue();
             wasNewlyCreated.ShouldBeFalse();

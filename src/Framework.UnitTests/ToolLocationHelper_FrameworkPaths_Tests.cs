@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 #if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
@@ -307,6 +308,32 @@ public sealed partial class ToolLocationHelper_Tests
         Should.Throw<InternalErrorException>(
             () => ToolLocationHelper.GetPathToBuildTools(ToolLocationHelper.CurrentToolsVersion, architecture));
     }
+
+#if RUNTIME_TYPE_NETCORE
+    [Fact]
+    public void IsDotNetFrameworkV35AvailableForTaskHost_UsesRegistryOnDotNet()
+    {
+        bool expected = OperatingSystem.IsWindows()
+            && Equals(Microsoft.Win32.Registry.GetValue(
+                @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.5",
+                "Install",
+                null), 1);
+
+        FrameworkLocationHelper.IsDotNetFrameworkV35AvailableForTaskHost().ShouldBe(expected);
+    }
+#endif
+
+#if FEATURE_WIN32_REGISTRY
+    [Fact]
+    public void IsDotNetFrameworkV35AvailableForTaskHost_ValidatesDesktopFrameworkPath()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        env.SetEnvironmentVariable("COMPLUS_INSTALLROOT", env.CreateFolder().Path);
+        env.SetEnvironmentVariable("COMPLUS_VERSION", "v3.5");
+
+        FrameworkLocationHelper.IsDotNetFrameworkV35AvailableForTaskHost().ShouldBeFalse();
+    }
+#endif
 
     [Fact]
     public void TestGetDotNetFrameworkSdkRootRegistryKey()

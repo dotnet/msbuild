@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 #if FEATURE_WINDOWSINTEROP && FEATURE_VISUALSTUDIOSETUP
+using System.Runtime.Versioning;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.VisualStudio;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -35,6 +37,11 @@ namespace Microsoft.Build.Shared
             var validInstances = new List<VisualStudioInstance>();
 
 #if FEATURE_WINDOWSINTEROP && FEATURE_VISUALSTUDIOSETUP
+            if (!NativeMethods.IsWindows)
+            {
+                return validInstances;
+            }
+
             // No try/catch around the COM call chain by design: AcquireSetupConfiguration2
             // and PopulateInstances check HRESULTs inline and return gracefully on failure.
             // If a future maintainer introduces a ThrowOnFailure() in this path, add the
@@ -68,6 +75,7 @@ namespace Microsoft.Build.Shared
         /// failure is returned as a null scope — the caller treats absent VS Setup as an
         /// empty result, not an error.
         /// </summary>
+        [SupportedOSPlatform("windows6.1")]
         private static ComScope<ISetupConfiguration2> AcquireSetupConfiguration2()
         {
             Guid clsid = SetupConfiguration.CLSID_SetupConfiguration;
@@ -173,7 +181,7 @@ namespace Microsoft.Build.Shared
             using BSTR pathBstr = default;
 
             if (instance->GetInstallationVersion(&versionBstr).Failed
-                || !Version.TryParse(versionBstr.ToString(), out Version version))
+                || !Version.TryParse(versionBstr.ToString(), out Version? version))
             {
                 return false;
             }

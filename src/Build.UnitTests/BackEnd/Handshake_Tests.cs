@@ -159,5 +159,46 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             waveSetKey.ShouldBe(unsetKey);
         }
+
+#if !NETFRAMEWORK
+        /// <summary>
+        /// A .NET Framework (CLR4) task host launched from .NET MSBuild comes from a Visual Studio installation,
+        /// so the handshake has to use that installation's tools directory and file version, not this process's.
+        /// </summary>
+        [Fact]
+        public void Clr4TaskHostHandshakeUsesExplicitToolsDirectoryAndFileVersion()
+        {
+            HandshakeOptions options = HandshakeOptions.TaskHost | HandshakeOptions.X64;
+            const string toolsDirectory = @"C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin";
+
+            Handshake handshake = new(options, toolsDirectory, new Version(18, 1, 2, 3));
+            HandshakeComponents components = handshake.RetrieveHandshakeComponents();
+
+            components.FileVersionMajor.ShouldBe(18);
+            components.FileVersionMinor.ShouldBe(1);
+            components.FileVersionBuild.ShouldBe(2);
+            components.FileVersionPrivate.ShouldBe(3);
+
+            new Handshake(options, toolsDirectory, new Version(18, 1, 2, 3)).GetKey().ShouldBe(handshake.GetKey());
+            new Handshake(options, toolsDirectory + "2", new Version(18, 1, 2, 3)).RetrieveHandshakeComponents().Salt.ShouldNotBe(components.Salt);
+            new Handshake(options).RetrieveHandshakeComponents().Salt.ShouldNotBe(components.Salt);
+        }
+
+        [Fact]
+        public void Clr2TaskHostHandshakeUsesExecutableDirectoryAndFileVersion()
+        {
+            HandshakeOptions options = HandshakeOptions.TaskHost | HandshakeOptions.CLR2 | HandshakeOptions.X64;
+            const string directory = @"C:\Visual Studio\MSBuild\Current\Bin\amd64";
+            Version version = new(18, 1, 2, 3);
+
+            HandshakeComponents components = new Handshake(options, directory, version).RetrieveHandshakeComponents();
+            components.FileVersionMajor.ShouldBe(18);
+            components.FileVersionMinor.ShouldBe(1);
+            components.FileVersionBuild.ShouldBe(2);
+            components.FileVersionPrivate.ShouldBe(3);
+            new Handshake(options, directory + "2", version).RetrieveHandshakeComponents().Salt.ShouldNotBe(components.Salt);
+            new Handshake(options, directory, new Version(18, 1, 2, 4)).RetrieveHandshakeComponents().FileVersionPrivate.ShouldNotBe(components.FileVersionPrivate);
+        }
+#endif
     }
 }
