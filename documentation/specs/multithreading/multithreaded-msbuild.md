@@ -223,6 +223,8 @@ deactivate Project1
 
 With a sidecar TaskHost per node, tasks will get the same constraints and freedoms they have today: while running, they will get a consistent view of process state including environment and current working directory, they are free to mutate that state, and they will not be disturbed by concurrent task execution in the same process unless they `Yield()`. The fact that much of the MSBuild-level state is maintained and manipulated in a different process than the tasks themselves are running in should not be observable by a task, since they are generally unable to observe that MSBuild-level state except through task inputs and `IBuildEngine` APIs that we will continue to support.
 
+`Yield()` and `Reacquire()` are currently no-ops in TaskHosts, so tasks such as the C++ `CL` and `MIDL` tasks keep their node while external tools run. [Yield and Reacquire in TaskHosts](taskhost-yield.md) compares designs that forward these calls, and how each one isolates the process state of yielded tasks.
+
 ## Thread-safe tasks
 
 To mark that a task is multithreaded-MSBuild-aware, we use the `MSBuildMultiThreadableTaskAttribute` attribute. Tasks may also implement the `IMultiThreadableTask` interface to gain access to the `TaskEnvironment` object with information about the task invocation, including the current environment and working directory.
