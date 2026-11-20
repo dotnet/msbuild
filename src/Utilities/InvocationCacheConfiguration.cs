@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Utilities;
 
@@ -42,7 +43,7 @@ public sealed class InvocationCacheConfiguration
         PathEnvironmentVariable = pathEnvironmentVariable;
     }
 
-    internal static string? GetDefaultCacheDirectory(string toolName)
+    internal static string? GetDefaultCacheDirectory(string toolName, TaskEnvironment environment)
     {
         string cacheDirectoryName = toolName.ToLowerInvariant();
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -56,7 +57,7 @@ public sealed class InvocationCacheConfiguration
         bool isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
         if (!isMacOS)
         {
-            string? cacheHome = Environment.GetEnvironmentVariable("XDG_CACHE_HOME");
+            string? cacheHome = environment.GetEnvironmentVariable("XDG_CACHE_HOME");
             if (!string.IsNullOrEmpty(cacheHome) && Path.IsPathRooted(cacheHome))
             {
                 return Path.Combine(cacheHome, cacheDirectoryName);

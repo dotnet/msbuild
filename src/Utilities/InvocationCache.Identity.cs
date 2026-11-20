@@ -15,12 +15,13 @@ namespace Microsoft.Build.Utilities;
 
 public sealed partial class InvocationCache
 {
-    internal static bool TryComputeKey(TaskLoggingHelper log, string toolName, InvocationDescription invocation, out string key)
+    internal static bool TryComputeKey(TaskLoggingHelper log, string toolName, InvocationDescription invocation,
+        string workingDirectory, out string key)
     {
         key = string.Empty;
         try
         {
-            key = ComputeKey(invocation);
+            key = ComputeKey(invocation, workingDirectory);
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
@@ -31,12 +32,15 @@ public sealed partial class InvocationCache
     }
 
     internal static string ComputeKey(InvocationDescription invocation)
+        => ComputeKey(invocation, Environment.CurrentDirectory);
+
+    internal static string ComputeKey(InvocationDescription invocation, string workingDirectory)
     {
         using var sha256 = SHA256.Create();
         using var data = new MemoryStream();
         using var writer = new BinaryWriter(data, Encoding.UTF8, leaveOpen: true);
         writer.Write("invocation-cache-key-v1");
-        writer.Write(Environment.CurrentDirectory);
+        writer.Write(Path.GetFullPath(workingDirectory));
         writer.Write(RuntimeInformation.OSDescription);
         writer.Write(RuntimeInformation.ProcessArchitecture.ToString());
         writer.Write(CultureInfo.CurrentCulture.Name);

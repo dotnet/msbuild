@@ -115,15 +115,38 @@ public sealed partial class InvocationCache
     /// Only exit code zero is stored, independently of logged errors. Output declarations
     /// are validated before execution. Execution and logging exceptions propagate without retry.
     /// The caller owns diagnostic replay.
+    /// The process current directory contributes to invocation identity.
     /// </remarks>
     public bool TryExecuteCached(InvocationDescription invocation, Func<InvocationResult> execute,
         out InvocationResult result)
+        => TryExecuteCached(invocation, execute, Environment.CurrentDirectory, out result);
+
+    /// <summary>
+    /// Restores or executes an invocation using its effective working directory for cache identity.
+    /// </summary>
+    /// <param name="invocation">The complete input, context, and output description.</param>
+    /// <param name="execute">Executes the tool, preparing outputs and capturing raw diagnostics.</param>
+    /// <param name="workingDirectory">
+    /// The directory used by the tool, resolved relative to the process current directory if relative.
+    /// </param>
+    /// <param name="result">The restored or executed result, or an exit code of -1 on bypass.</param>
+    /// <returns>
+    /// True if a result was restored or execution was attempted; false if input identity
+    /// could not be computed, in which case the callback was not invoked.
+    /// </returns>
+    /// <remarks>
+    /// This method does not change the callback's working directory. The caller is responsible
+    /// for executing in the specified directory and replaying diagnostics.
+    /// Only exit code zero is stored. Execution and logging exceptions propagate without retry.
+    /// </remarks>
+    public bool TryExecuteCached(InvocationDescription invocation, Func<InvocationResult> execute,
+        string workingDirectory, out InvocationResult result)
     {
         result = new InvocationResult(-1);
         ValidateOutputs(invocation.Outputs);
 
         DateTime outputTimestampUtc = DateTime.UtcNow;
-        if (!TryComputeKey(_log, _toolName, invocation, out string key))
+        if (!TryComputeKey(_log, _toolName, invocation, workingDirectory, out string key))
         {
             return false;
         }

@@ -15,8 +15,9 @@ For context, see https://github.com/dotnet/msbuild/pull/6148
 
 `InvocationCache` and `CachedToolTask` are ported from the [shared invocation cache used by
 ILLink in dotnet/runtime](https://github.com/dotnet/runtime/tree/ab27f20941c/src/tasks/Common/InvocationCache).
-The port preserves runtime's implementation, including keys, storage format, writer locks,
-diagnostics, environment configuration, fallback, and purge behavior. The namespace is
+Storage format, writer locks, diagnostics, fallback, and purge follow runtime's implementation.
+Cache configuration and working-directory identity also support MSBuild's task-local environment.
+The namespace is
 `Microsoft.Build.Utilities`; types needed by consumers are public, and the two
 `CachedToolTask` discovery hooks are protected rather than private protected.
 Public cache types have `[Experimental("MSBUILD001")]`. Neither the API nor the storage
@@ -28,6 +29,14 @@ Only `true` in the configured enablement environment variable enables caching; a
 alone does not. Without a path override, storage uses the platform's user cache directory.
 Disabled caching skips discovery and cache I/O. Return null from `DescribeInvocation`
 for unsupported invocations.
+
+`CachedToolTask` reads enablement and path overrides from its `TaskEnvironment`, resolving
+relative cache paths against the task's project directory. Its key includes the task's project
+directory or the resolved `GetWorkingDirectory()` override, matching normal `ToolTask` execution.
+Standalone factory overloads retain process-environment defaults; environment-aware overloads
+accept a `TaskEnvironment`, including task-local `XDG_CACHE_HOME` on Linux. Callers that own
+execution can supply its effective working directory to `TryExecuteCached`; that overload uses
+the directory for identity but does not change where the callback executes.
 
 For callers that own execution and diagnostic replay directly:
 
@@ -62,7 +71,7 @@ return ExecuteNormally();
 
 The caller inventories every relevant input and toolchain file. Key computation hashes file
 contents with SHA-256 and includes ordered absolute paths, missing-input markers, output paths,
-explicit context values, the current directory, OS, process architecture, and cultures.
+explicit context values, the effective working directory, OS, process architecture, and cultures.
 Pass effective arguments and relevant environment settings as context; dependencies are not
 discovered automatically. Keep inputs stable through discovery, hashing, and execution.
 `TryExecuteCached` returns false without executing on recoverable input-identity failures.

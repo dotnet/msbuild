@@ -48,7 +48,7 @@ public abstract class CachedToolTask : ToolTask
         out int exitCode)
     {
         exitCode = -1;
-        InvocationCache? cache = InvocationCache.TryCreateFromEnvironment(Log, CacheConfiguration);
+        InvocationCache? cache = InvocationCache.TryCreateFromEnvironment(Log, CacheConfiguration, TaskEnvironment);
         if (cache is null)
         {
             return false;
@@ -63,7 +63,11 @@ public abstract class CachedToolTask : ToolTask
         var result = new InvocationResult(-1);
         try
         {
-            if (!cache.TryExecuteCached(invocation, ExecuteAndCapture, out result))
+            string workingDirectory = GetWorkingDirectory();
+            workingDirectory = string.IsNullOrEmpty(workingDirectory)
+                ? TaskEnvironment.ProjectDirectory.Value
+                : TaskEnvironment.GetAbsolutePath(workingDirectory).Value;
+            if (!cache.TryExecuteCached(invocation, ExecuteAndCapture, workingDirectory, out result))
             {
                 return false;
             }

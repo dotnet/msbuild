@@ -18,8 +18,24 @@ public sealed partial class InvocationCache
     /// <param name="configuration">The tool name and environment variable names.</param>
     /// <returns>The cache, or <see langword="null"/> if disabled or the path cannot be resolved.</returns>
     public static InvocationCache? TryCreateFromEnvironment(TaskLoggingHelper log, InvocationCacheConfiguration configuration)
+        => TryCreateFromEnvironment(log, configuration, TaskEnvironment.Fallback);
+
+    /// <summary>
+    /// Creates a cache using the specified task's environment variables and project directory.
+    /// </summary>
+    /// <param name="log">The task logger for cache diagnostics.</param>
+    /// <param name="configuration">The tool name and environment variable names.</param>
+    /// <param name="environment">The environment used to read settings and resolve relative cache paths.</param>
+    /// <returns>The cache, or <see langword="null"/> if disabled or the path cannot be resolved.</returns>
+    public static InvocationCache? TryCreateFromEnvironment(TaskLoggingHelper log,
+        InvocationCacheConfiguration configuration, TaskEnvironment environment)
     {
-        string? setting = Environment.GetEnvironmentVariable(configuration.EnabledEnvironmentVariable);
+        if (environment is null)
+        {
+            throw new ArgumentNullException(nameof(environment));
+        }
+
+        string? setting = environment.GetEnvironmentVariable(configuration.EnabledEnvironmentVariable);
         if (string.IsNullOrEmpty(setting))
         {
             return null;
@@ -31,7 +47,9 @@ public sealed partial class InvocationCache
             return null;
         }
 
-        return enabled ? TryCreate(Environment.GetEnvironmentVariable(configuration.PathEnvironmentVariable), log, configuration.ToolName) : null;
+        return enabled
+            ? TryCreate(environment.GetEnvironmentVariable(configuration.PathEnvironmentVariable), log, configuration.ToolName, environment)
+            : null;
     }
 
     /// <summary>
@@ -42,10 +60,27 @@ public sealed partial class InvocationCache
     /// <param name="toolName">The tool name.</param>
     /// <returns>The cache, or <see langword="null"/> if the path cannot be resolved.</returns>
     public static InvocationCache? TryCreate(string? cacheDirectory, TaskLoggingHelper log, string toolName)
+        => TryCreate(cacheDirectory, log, toolName, TaskEnvironment.Fallback);
+
+    /// <summary>
+    /// Resolves a cache path using the specified task environment without creating storage.
+    /// </summary>
+    /// <param name="cacheDirectory">The override path, or null or empty to use the platform default.</param>
+    /// <param name="log">The task logger for cache diagnostics.</param>
+    /// <param name="toolName">The tool name.</param>
+    /// <param name="environment">The environment used for default settings and relative path resolution.</param>
+    /// <returns>The cache, or <see langword="null"/> if the path cannot be resolved.</returns>
+    public static InvocationCache? TryCreate(string? cacheDirectory, TaskLoggingHelper log,
+        string toolName, TaskEnvironment environment)
     {
+        if (environment is null)
+        {
+            throw new ArgumentNullException(nameof(environment));
+        }
+
         if (string.IsNullOrEmpty(cacheDirectory))
         {
-            cacheDirectory = InvocationCacheConfiguration.GetDefaultCacheDirectory(toolName);
+            cacheDirectory = InvocationCacheConfiguration.GetDefaultCacheDirectory(toolName, environment);
         }
 
         if (cacheDirectory is null)
@@ -56,7 +91,7 @@ public sealed partial class InvocationCache
 
         try
         {
-            string fullPath = Path.GetFullPath(cacheDirectory);
+            string fullPath = environment.GetAbsolutePath(cacheDirectory).Value;
             if (File.Exists(fullPath))
             {
                 throw new IOException($"Cache location is a file: '{fullPath}'.");

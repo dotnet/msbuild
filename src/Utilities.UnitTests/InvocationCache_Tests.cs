@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -318,6 +319,20 @@ public sealed class InvocationCache_Tests
     }
 
     [Fact]
+    public void KeyUsesExplicitWorkingDirectoryWithoutChangingProcessDirectory()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string root = env.CreateFolder().Path;
+        env.SetCurrentDirectory(root);
+        var invocation = new InvocationDescription(InvocationInputs.FromFiles(), [], InvocationOutputs.FromFiles());
+
+        string processKey = InvocationCache.ComputeKey(invocation);
+        InvocationCache.ComputeKey(invocation, root).ShouldBe(processKey);
+        InvocationCache.ComputeKey(invocation, Path.Combine(root, "other")).ShouldNotBe(processKey);
+        Environment.CurrentDirectory.ShouldBe(root);
+    }
+
+    [Fact]
     public void DifferentOutputContractsCannotRestoreTheSameEntry()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
@@ -571,6 +586,24 @@ public sealed class InvocationCache_Tests
         Directory.GetFileSystemEntries(root).ShouldBeEmpty();
     }
 
+    [LinuxOnlyFact]
+    public void ConfigurationUsesTaskLocalXdgCacheHome()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string root = env.CreateFolder().Path;
+        env.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, "true");
+        env.SetEnvironmentVariable(TestCachedToolTask.PathVariable, null);
+        env.SetEnvironmentVariable("XDG_CACHE_HOME", Path.Combine(root, "process"));
+        TaskEnvironment taskEnvironment = env.WithTransientTestState(new TransientTaskEnvironment(root)).Environment;
+        taskEnvironment.SetEnvironmentVariable("XDG_CACHE_HOME", Path.Combine(root, "task"));
+        var task = new TestTask { BuildEngine = new MockEngine(_output) };
+
+        InvocationCache? cache = InvocationCache.TryCreateFromEnvironment(task.Log, TestCachedToolTask.Configuration, taskEnvironment);
+        cache.ShouldNotBeNull();
+        cache!.CacheDirectory.ShouldBe(Path.Combine(root, "task", "test"));
+        Directory.GetFileSystemEntries(root).ShouldBeEmpty();
+    }
+
     [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]
@@ -662,6 +695,86 @@ public sealed class InvocationCache_Tests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
+    public void ToolTaskUsesTaskLocalCacheConfiguration(bool enabled)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string root = env.CreateFolder().Path;
+        env.SetCurrentDirectory(root);
+        string projectDirectory = Path.Combine(root, "project");
+        Directory.CreateDirectory(projectDirectory);
+        string processCache = Path.Combine(root, "process-cache");
+        env.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, (!enabled).ToString());
+        env.SetEnvironmentVariable(TestCachedToolTask.PathVariable, processCache);
+        TaskEnvironment taskEnvironment = env.WithTransientTestState(new TransientTaskEnvironment(projectDirectory)).Environment;
+        taskEnvironment.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, enabled.ToString());
+        taskEnvironment.SetEnvironmentVariable(TestCachedToolTask.PathVariable, "task-cache");
+        var invocation = new InvocationDescription(InvocationInputs.FromFiles(), [], InvocationOutputs.FromFiles());
+
+        for (int i = 0; i < 2; i++)
+        {
+            var task = new TestCachedToolTask
+            {
+                BuildEngine = new MockEngine(_output),
+                TaskEnvironment = taskEnvironment,
+                Description = invocation,
+                Execution = () => 0
+            };
+
+            task.Run().ShouldBe(0);
+            task.Descriptions.ShouldBe(enabled ? 1 : 0);
+            task.Executions.ShouldBe(enabled && i == 1 ? 0 : 1);
+        }
+
+        Directory.Exists(Path.Combine(projectDirectory, "task-cache")).ShouldBe(enabled);
+        Directory.Exists(processCache).ShouldBeFalse();
+        Directory.Exists(Path.Combine(root, "task-cache")).ShouldBeFalse();
+    }
+
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    public void ToolTaskKeysUseEffectiveWorkingDirectory(bool overrideWorkingDirectory, bool useTaskEnvironment)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string root = env.CreateFolder().Path;
+        env.SetCurrentDirectory(root);
+        env.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, "true");
+        env.SetEnvironmentVariable(TestCachedToolTask.PathVariable, Path.Combine(root, "cache"));
+        string projectDirectory = Path.Combine(root, "project");
+        Directory.CreateDirectory(Path.Combine(projectDirectory, "first"));
+        Directory.CreateDirectory(Path.Combine(projectDirectory, "second"));
+        var invocation = new InvocationDescription(InvocationInputs.FromFiles(), [], InvocationOutputs.FromFiles());
+
+        for (int i = 0; i < 3; i++)
+        {
+            string directoryName = i == 1 ? "second" : "first";
+            TaskEnvironment taskEnvironment = useTaskEnvironment
+                ? env.WithTransientTestState(new TransientTaskEnvironment(
+                    overrideWorkingDirectory ? projectDirectory : Path.Combine(projectDirectory, directoryName))).Environment
+                : TaskEnvironment.Fallback;
+            var task = new TestCachedToolTask
+            {
+                BuildEngine = new MockEngine(_output),
+                TaskEnvironment = taskEnvironment,
+                Description = invocation,
+                WorkingDirectoryOverride = overrideWorkingDirectory
+                    ? useTaskEnvironment ? directoryName : Path.Combine("project", directoryName)
+                    : null
+            };
+
+            task.Execute().ShouldBeTrue();
+            task.Executions.ShouldBe(i == 2 ? 0 : 1);
+            if (i != 2)
+            {
+                task.WorkingDirectoryUsed.ShouldBe(Path.Combine(projectDirectory, directoryName));
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
     public void PurgeHonorsLastUseAndIgnoresUnpublishedEntries(bool expired)
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
@@ -689,6 +802,22 @@ public sealed class InvocationCache_Tests
         public override bool Execute() => true;
     }
 
+    private sealed class TransientTaskEnvironment : TransientTestState
+    {
+        private readonly string? _previousDirectory = Microsoft.Build.Framework.FileUtilities.CurrentThreadWorkingDirectory;
+
+        internal TaskEnvironment Environment { get; }
+
+        internal TransientTaskEnvironment(string projectDirectory) =>
+            Environment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory);
+
+        public override void Revert()
+        {
+            Environment.Dispose();
+            Microsoft.Build.Framework.FileUtilities.CurrentThreadWorkingDirectory = _previousDirectory;
+        }
+    }
+
     private sealed class TestCachedToolTask : CachedToolTask
     {
         private TaskLoggingHelper? _additionalLog;
@@ -704,12 +833,15 @@ public sealed class InvocationCache_Tests
         internal int Executions { get; private set; }
         internal List<string> ReplayedLines { get; } = [];
         internal bool LogAdditionalErrorOnReplay { get; set; }
+        internal string? WorkingDirectoryOverride { get; set; }
+        internal string? WorkingDirectoryUsed { get; private set; }
 
         internal int Run() => ExecuteTool("tool", "response", "command");
 
         protected override string ToolName => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "cmd.exe" : "sh";
         protected override InvocationCacheConfiguration CacheConfiguration => Configuration;
         protected override bool HasLoggedErrors => base.HasLoggedErrors || (_additionalLog?.HasLoggedErrors ?? false);
+        protected override string GetWorkingDirectory() => WorkingDirectoryOverride ?? string.Empty;
 
         protected override string GenerateFullPathToTool() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), ToolName)
@@ -729,6 +861,12 @@ public sealed class InvocationCache_Tests
         {
             Executions++;
             return Execution is not null ? Execution() : base.ExecuteToolCore(pathToTool, responseFileCommands, commandLineCommands);
+        }
+
+        protected override Process StartToolProcess(Process process)
+        {
+            WorkingDirectoryUsed = process.StartInfo.WorkingDirectory;
+            return base.StartToolProcess(process);
         }
 
         protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
