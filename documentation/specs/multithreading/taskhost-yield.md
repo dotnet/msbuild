@@ -18,7 +18,7 @@ MSBuild runs a task in an out-of-process TaskHost (`OutOfProcTaskHostNode`) when
 - multithreaded mode (`-mt`) moves a non-thread-safe task out of the worker node; or
 - `MSBUILDFORCEALLTASKSOUTOFPROC` is set.
 
-In a TaskHost, `Yield` and `Reacquire` are no-ops. The scheduler cannot use the node while the compiler runs, so native C++ builds lose most of their parallelism in `-mt` mode and under `dotnet build`.
+In a TaskHost, `Yield` and `Reacquire` are no-ops. The scheduler cannot use the node while the compiler runs. This can increase native C++ build times in `-mt` mode and under `dotnet build`.
 
 ### Measurements
 
@@ -31,7 +31,7 @@ A native C++ workload of 104 projects, built with `-m:8`. Values are medians.
 | `dotnet build` (CLR4 TaskHost, no yield) | 117.7 s | 11.9 s |
 | `dotnet build -mt` (no yield) | 113.0 s | 9.6 s |
 
-`YieldDuringToolExecution` is the cause. With it disabled, in-process clean builds took 66.1–95.8 s, compared with 35.5–37.7 s when it was enabled.
+The `YieldDuringToolExecution` comparison supports the importance of yielding for clean builds. With it disabled, in-process clean builds took 66.1–95.8 s, compared with 35.5–37.7 s when it was enabled.
 
 ## Requirements common to both options
 
@@ -49,7 +49,7 @@ The main difference between the options is how they isolate the process state of
 
 ## Option A: process-level isolation
 
-Prototype: branch `baronfel-taskhost-yielding`, commit `1499e7d2e3`.
+Prototype: [branch `baronfel-taskhost-yielding`](https://github.com/dotnet/msbuild/tree/baronfel-taskhost-yielding), [commit `1499e7d2e3`](https://github.com/dotnet/msbuild/commit/1499e7d2e3415428ee70239a87d0fbbc3e0436f1).
 
 A TaskHost that contains a yielded, still-running task stays occupied. If other work needs a TaskHost of the same kind, the provider assigns another host slot (`TaskHostNodeKey.HostSlot`), which starts another process. Idle slots are reused.
 
@@ -63,7 +63,7 @@ sequenceDiagram
     T1->>WN: TaskHostYieldRequest(Yield)
     WN->>SC: IBuildEngine3.Yield()
     WN-->>T1: TaskHostYieldResponse
-    Note over T1: Compiler runs. Slot 0 stays occupied.
+    Note over T1: Compiler runs in a separate process. Slot 0 stays occupied.
     SC->>WN: Run another task
     WN->>T2: TaskHostConfiguration (new or idle slot)
     T1->>WN: TaskHostYieldRequest(Reacquire)
@@ -80,27 +80,29 @@ sequenceDiagram
 
 ### Behavior
 
-- Each running task has its own process. The environment, current directory, `Console`, and static fields are not shared, so tasks cannot interfere with each other.
+- Each running task has its own TaskHost process. The environment, current directory, `Console`, and static fields are isolated from other tasks. External resources, such as files, can still be shared.
 - A yield-capable host runs the nested tasks of a `BuildProjectFile` callback in a separate process. Otherwise the outer task could resume in the same process while an inner task is still yielded. This removes the existing reuse of the process for nested tasks.
 
 ## Option B: shared TaskHosts with task-ID routing
 
-Prototype: branch `baronfel-taskhost-yielding-option-b`, commit `1bd382fdcc`.
+Prototype: [branch `baronfel-taskhost-yielding-option-b`](https://github.com/dotnet/msbuild/tree/baronfel-taskhost-yielding-option-b), [commit `1bd382fdcc`](https://github.com/dotnet/msbuild/commit/1bd382fdcc707651a8b091e4cf52415c595bcd4f).
 
-There is one TaskHost per (worker node, runtime) key, as today. Each host runs at most one non-yielded task, plus any number of yielded tasks. Yielded tasks continue to run in the same process as the new task.
+There is one TaskHost per (worker node, runtime) key, as today. Each host runs at most one non-yielded task, plus any number of yielded tasks. Yielded tasks can continue to run in the same TaskHost process as the new task. An external compiler runs in its own process, not in the TaskHost.
 
 ```mermaid
 sequenceDiagram
     participant T1 as Task 1 (shared TaskHost)
+    participant C as Compiler (external process)
     participant WN as Worker node
     participant SC as Scheduler
     participant T2 as Task 2 (same TaskHost)
 
+    T1->>C: Start compiler
     T1->>T1: Save environment and current directory
     T1->>WN: Envelope(1, TaskHostYieldRequest(Yield))
     WN->>SC: IBuildEngine3.Yield()
     WN-->>T1: TaskHostYieldResponse (by RequestId)
-    Note over T1: Compiler runs in the shared process
+    Note over T1,C: Task 1 waits. The compiler runs in a separate process.
     SC->>WN: Run another task
     WN->>T2: TaskHostTaskIdentity(2) + TaskHostConfiguration
     T2-->>WN: Envelope(2, log / callback / complete)
@@ -127,7 +129,7 @@ sequenceDiagram
 
 ### Risks and limitations
 
-- **Shared process state.** While yielded, a task must not read or change process-wide state: environment variables, the current directory, `Console`, or static fields. Tools that it starts must get their environment and working directory explicitly. The TaskHost cannot enforce this. A task that breaks the rule can now affect other tasks in the same host. In-process yielded tasks have the same rule, but before this feature the TaskHost isolated them from each other.
+- **Shared process state.** While yielded, a task must not read or change process-wide state: environment variables, the current directory, `Console`, or static fields. A tool started while the task is yielded must get its intended environment and working directory explicitly. The TaskHost cannot enforce this rule. A task that breaks it can affect other tasks in the same host. In-process yielded tasks have the same rule, but explicit TaskHost yields did not previously allow this overlap.
 - `Console` redirection is shared by all tasks in the host.
 - After a per-task cancel, the host exits only after all of its task contexts finish.
 - Log messages that arrive after an abort can be lost.
@@ -138,9 +140,9 @@ sequenceDiagram
 
 ### Performance
 
-Measured with `dotnet build -m:8` on the same workload.
+Measured with `dotnet build -m:8` on the same workload. Times are elapsed wall-clock times. CPU utilization was not measured. Process counts and peak process-tree RSS are for clean builds.
 
-Normal mode, 4 rounds of each option, run at the same time:
+Normal mode, 4 rounds of each option. Runs were sequential, with variant order varied across rounds:
 
 | Configuration | Clean | No-op | TaskHost processes | Peak process-tree RSS |
 |---|---:|---:|---:|---:|
@@ -148,7 +150,7 @@ Normal mode, 4 rounds of each option, run at the same time:
 | Option B | 40.17 s | 9.94 s | 8 | 2.37 GB |
 | Yield disabled | ~103–104 s | — | 8 | 2.06 GB |
 
-`-mt` mode, 2 rounds of each option:
+`-mt` mode, 2 rounds of each option. Runs were sequential: A then B in the first round, B then A in the second:
 
 | Configuration | Clean | No-op | TaskHost processes | Peak process-tree RSS |
 |---|---:|---:|---:|---:|
@@ -159,29 +161,31 @@ Notes:
 
 - Both options remove most of the clean-build regression. The `-mt` clean build goes from about 113 s to 36–41 s, which is close to in-process `MSBuild.exe` (39.2 s).
 - The baselines in [Measurements](#measurements) were captured on a different day, and the sample counts are small.
-- The remaining no-op difference from `MSBuild.exe` (8–14 s compared with 3.3 s) is TaskHost overhead. Yield does not affect it.
+- The `-mt` prototype no-op builds took about 8–15 s, compared with 3.3 s for the earlier in-process `MSBuild.exe` baseline. These measurements do not establish the cause or whether yield affects no-op performance.
 
 ### Summary
 
 | Axis | Option A: process isolation | Option B: shared hosts, task-ID routing |
 |---|---|---|
-| **Safety** | Strong. Each running task has its own process state. No new interference between tasks. | Weaker. Yielded tasks share process state, and the rule cannot be enforced. One bad task, or a host crash, affects other tasks in the host. |
+| **Safety** | Stronger process-state isolation. Each running task has its own TaskHost process, although external resources can still be shared. | Weaker. Yielded tasks share process state, and the rule cannot be enforced. A task that breaks the rule or a host crash can affect other tasks in the host. |
 | **Implementation** | Small protocol change (yield request, response, and policy). Adds host-slot management, and nested callbacks no longer reuse the process. | Larger protocol change: identity, envelopes, per-task cancel, and routing by task ID. Needs environment save and restore, and more complex cancel and drain logic. |
-| **CPU performance** | Clean build matches B in normal mode, but is ~5 s slower in `-mt`. No-op is slower in `-mt` (14–15 s compared with 8 s) because more processes start. | Best clean and no-op times in both modes. |
+| **CPU / build time** | The clean build took 41.80 s in normal mode and about 40.8 s in `-mt`. The `-mt` no-op runs took 13.61–14.93 s. | The clean build took 40.17 s in normal mode and 35.56–35.95 s in `-mt`. The `-mt` no-op runs took 7.95–8.12 s. |
 | **Memory** | Highest. 26–30 TaskHosts, 3.31 GB in normal mode and 2304 MiB in `-mt`. Grows with the number of overlapping yielded tasks. | 8 TaskHosts, as without yield. 2.37 GB in normal mode and 1345 MiB in `-mt`. |
 
 ## Recommendation
 
-Use **Option B**, but only with these mitigations:
+Use **Option B** if its shared-state risk is acceptable, and require these mitigations:
 
-1. **Shared-state guard test.** Add a test that runs overlapping yielded tasks in one TaskHost and fails if a yielded task changes the environment, the current directory, or `Console`, or if the change is visible to the other task. Run it with the real CPPTasks `CL` and `MIDL` yield paths, because these are the main reason for the feature.
-2. **Diagnostics.** When a task returns from `Reacquire`, compare the process state with the state that the host saved and restored. Log a low-importance message, or an `EventSource` event, when they differ. This finds tasks that break the rule without adding a new warning.
-3. **Opt-out.** Keep the change wave 18.14 opt-out. Do not remove it until the shared-state risk has been shown to be low in real builds.
-4. **Robust host.** Keep the serialization-contract fix and the tests that kill or cancel a host while a task waits in `Reacquire`, so that one failure cannot strand the other tasks in the host.
+1. **Shared-state guard tests.** Run representative yielding tasks alongside controlled probe tasks in one TaskHost, including the CPPTasks `CL` and `MIDL` paths where feasible. Sample selected environment, current-directory, and `Console` state at synchronized checkpoints. Check restoration and observable interference against the test expectations. Include an intentional mutation at a checkpoint to verify that the probe detects that case. These tests cover selected values and interleavings, not all tasks, static fields, or transient changes between checkpoints.
+2. **Restoration diagnostics.** After `Reacquire`, compare selected restored environment and current-directory values with the saved snapshot. Report mismatches through a low-importance message or an `EventSource` event. A mismatch shows that sampled state differs, but does not identify the source. A match does not rule out transient changes or interference that occurred before restoration. The comparison does not cover `Console` or static fields.
+3. **Opt-out.** Keep the change wave 18.14 opt-out so builds can return to the previous behavior if shared-state interference is suspected.
+4. **Robust host.** Keep the serialization-contract fix and tests that kill or cancel a host while a task waits in `Reacquire`. These tests cover the corresponding paths that could strand sibling tasks.
 
-Option B is faster and uses less memory in both modes. The difference is largest in `-mt` mode, which will be the main user of this feature. Option A starts more processes, and its process count and memory grow with the build's parallelism. Option B's main risk is shared process state, which is the rule that in-process yielded tasks already follow. The first well-known users are `ToolTask`-based tasks with `YieldDuringToolExecution`. `ToolTask` starts the tool before it calls `Yield`. While yielded, it only waits for the tool and logs its output.
+Neither the tests nor the diagnostics enforce isolation. They cannot guarantee safety for arbitrary tasks. If that residual risk is unacceptable, choose Option A.
 
-If the guard test or field data show that common tasks break the rule, use Option A, or add a per-task setting that makes Option B behave like Option A for those tasks.
+In these measurements, Option B had lower clean-build elapsed times and peak RSS in both modes. The samples are small. Option A needs more TaskHost processes when yielded tasks overlap. Option B's main risk is shared process state. In-process yielded tasks must follow the same rule. `ToolTask` starts its external tool in a separate process before calling `Yield`. While yielded, it waits, logs output, and handles cancellation or timeout.
+
+If tests or field observations expose unacceptable interference, use Option A or assess a per-task isolation setting.
 
 ## Validation
 
@@ -206,5 +210,5 @@ Option B must also add the shared-state guard test from the [recommendation](#re
 
 ## Open questions
 
-- Should Option B use a separate TaskHost for a task that changes process state (for example, by a task attribute or by detection after `Reacquire`)?
-- How can no-op TaskHost overhead be reduced? It is now the largest difference from in-process `MSBuild.exe`, and it is not related to yield.
+- Should Option B allow a task to request a separate TaskHost when it cannot follow the shared-state rule?
+- What causes the observed no-op time differences, and does enabling yield affect them?
