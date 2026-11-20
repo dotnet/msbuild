@@ -943,6 +943,24 @@ public class FileUtilities_Tests
     }
 
     [UnixOnlyFact]
+    public void MaybeAdjustFilePathConvertsLongValue()
+    {
+        string filePath = ObjectModelHelpers.CreateFileInTempProjectDirectory("first/file.txt", String.Empty);
+        string baseDirectory = Path.GetDirectoryName(Path.GetDirectoryName(filePath));
+        string value = "first\\" + new string('a', 300) + "\\file.txt";
+
+        try
+        {
+            FileUtilities.MaybeAdjustFilePath(value, baseDirectory).ShouldBe(value.Replace('\\', '/'));
+            FileUtilities.MaybeAdjustFilePath(value.AsMemory(), baseDirectory).ToString().ShouldBe(value.Replace('\\', '/'));
+        }
+        finally
+        {
+            File.Delete(filePath);
+        }
+    }
+
+    [UnixOnlyFact]
     public void RelativePathMaybeAdjustFilePathWithBaseDirectory()
     {
         // <tmp_dir>/first/second/file.txt
@@ -998,6 +1016,30 @@ public class FileUtilities_Tests
         {
             FileUtilities.CurrentThreadWorkingDirectory = null;
             Directory.SetCurrentDirectory(oldCWD);
+            File.Delete(filePath);
+        }
+    }
+
+    /// <summary>
+    /// A value without backslashes is returned as is, without checking the file system, because an adjustment would not change it.
+    /// </summary>
+    [UnixOnlyFact]
+    public void MaybeAdjustFilePath_ReturnsValueWithoutBackslashesUnchanged()
+    {
+        string filePath = ObjectModelHelpers.CreateFileInTempProjectDirectory("first/second/file.txt", string.Empty);
+        string baseDirectory = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(filePath)));
+
+        try
+        {
+            // The first segment exists, so the value looks like a path.
+            string value = "first/second/file.txt";
+            FileUtilities.MaybeAdjustFilePath(value, baseDirectory).ShouldBeSameAs(value);
+
+            ReadOnlyMemory<char> memory = "prefix first/second/file.txt".AsMemory(7);
+            FileUtilities.MaybeAdjustFilePath(memory, baseDirectory).Equals(memory).ShouldBeTrue();
+        }
+        finally
+        {
             File.Delete(filePath);
         }
     }

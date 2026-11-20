@@ -718,20 +718,17 @@ namespace Microsoft.Build.Framework
             var comparisonType = StringComparison.Ordinal;
 
             // Don't bother with arrays or properties or network paths, or those that
-            // have no slashes.
+            // have no backslashes, which an adjustment would leave unchanged.
             if (NativeMethods.IsWindows || string.IsNullOrEmpty(value)
                 || value.StartsWith("$(", comparisonType) || value.StartsWith("@(", comparisonType)
-                || value.StartsWith("\\\\", comparisonType))
+                || value.StartsWith("\\\\", comparisonType)
+                || value.IndexOf('\\') < 0)
             {
                 return value;
             }
 
             // For Unix-like systems, we may want to convert backslashes to slashes
-            Span<char> newValue = ConvertToUnixSlashes(value.ToCharArray());
-
-            // Find the part of the name we want to check, that is remove quotes, if present
-            bool shouldAdjust = newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory);
-            return shouldAdjust ? newValue.ToString() : value;
+            return AdjustUnixFilePath(value.AsSpan(), baseDirectory) ?? value;
         }
 
         /// <summary>
@@ -758,12 +755,33 @@ namespace Microsoft.Build.Framework
                 }
             }
 
+            // An adjustment only converts backslashes, so a value without one is left unchanged.
+            if (value.Span.IndexOf('\\') < 0)
+            {
+                return value;
+            }
+
             // For Unix-like systems, we may want to convert backslashes to slashes
-            Span<char> newValue = ConvertToUnixSlashes(value.ToArray());
+            return AdjustUnixFilePath(value.Span, baseDirectory)?.AsMemory() ?? value;
+        }
+
+        /// <summary>
+        /// Converts backslashes to slashes, and returns the result if it looks like a Unix file path; otherwise null.
+        /// </summary>
+        private static string? AdjustUnixFilePath(ReadOnlySpan<char> value, string baseDirectory)
+        {
+            const int StackBufferLength = 256;
+            Span<char> buffer = value.Length <= StackBufferLength
+                ? stackalloc char[StackBufferLength]
+                : new char[value.Length];
+
+            value.CopyTo(buffer);
+            Span<char> newValue = ConvertToUnixSlashes(buffer.Slice(0, value.Length));
 
             // Find the part of the name we want to check, that is remove quotes, if present
-            bool shouldAdjust = newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory);
-            return shouldAdjust ? newValue.ToString().AsMemory() : value;
+            return newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory)
+                ? newValue.ToString()
+                : null;
         }
 
         private static Span<char> ConvertToUnixSlashes(Span<char> path)
