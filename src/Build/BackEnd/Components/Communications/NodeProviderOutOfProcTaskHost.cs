@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -313,7 +314,7 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            List<NodeContext> contextsToShutDown = [.. _nodeContexts.Values];
+            List<NodeContext> contextsToShutDown = [.. _nodeContexts.EnumerateValues()];
 
             // Processes that could not be connected to are skipped for the rest of a build; clear
             // that for the next one, or a pooled task host this process failed to claim once is
@@ -1377,6 +1378,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        public IEnumerable<Process> GetProcesses() => _nodeContexts.Values.Select(context => context.Process);
+        public IEnumerable<Process> GetProcesses() => _nodeContexts.EnumerateValues().Select(static context => context.Process);
     }
 }

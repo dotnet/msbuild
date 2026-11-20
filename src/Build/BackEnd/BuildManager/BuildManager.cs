@@ -20,6 +20,7 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -1843,7 +1844,7 @@ namespace Microsoft.Build.Execution
                             _hasProjectCacheServiceInitializedVsScenario = true;
 
                             _projectCacheService!.InitializePluginsForVsScenario(
-                                ProjectCacheDescriptors.Values,
+                                ProjectCacheDescriptors.EnumerateValues(),
                                 resolvedConfiguration,
                                 submission.BuildRequestData.TargetNames,
                                 _executionCancellationTokenSource!.Token);

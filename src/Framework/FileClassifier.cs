@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Microsoft.Build.Collections;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Shared;
@@ -223,7 +224,7 @@ namespace Microsoft.Build.Framework
             => assemblyName.StartsWith(MicrosoftAssemblyPrefixSpan, StringComparison.OrdinalIgnoreCase);
 
         private static bool IsInLocationList(string filePath, IReadOnlyList<string> locations)
-            => GetFirstMatchingLocationfromList(filePath, locations) is not null;
+            => GetFirstMatchingLocationFromList(filePath, locations) is not null;
 
         /// <summary>
         ///     Try add path into set of known immutable paths.
@@ -241,13 +242,12 @@ namespace Microsoft.Build.Framework
 
                 if (_knownImmutableDirectories.TryAdd(d, d))
                 {
-                    _knownImmutableDirectoriesSnapshot = new List<string>(_knownImmutableDirectories.Values);
+                    _knownImmutableDirectoriesSnapshot = [.. _knownImmutableDirectories.EnumerateValues()];
 
                     // Add the location to the build in logic locations - but create a new readonly destination
                     if (!isCustomLogicLocation)
                     {
-                        _knownBuiltInLogicDirectoriesSnapshot =
-                            _knownBuiltInLogicDirectoriesSnapshot.Append(d).ToArray();
+                        _knownBuiltInLogicDirectoriesSnapshot = [.. _knownBuiltInLogicDirectoriesSnapshot.Append(d)];
                     }
                 }
             }
@@ -388,13 +388,13 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public bool IsMicrosoftPackageInNugetCache(string filePath)
         {
-            string? containingNugetCache = GetFirstMatchingLocationfromList(filePath, _nugetCacheLocations);
+            string? containingNugetCache = GetFirstMatchingLocationFromList(filePath, _nugetCacheLocations);
 
             return containingNugetCache != null &&
                    IsMicrosoftAssembly(filePath.AsSpan(containingNugetCache.Length));
         }
 
-        private static string? GetFirstMatchingLocationfromList(string filePath, IReadOnlyList<string> locations)
+        private static string? GetFirstMatchingLocationFromList(string filePath, IReadOnlyList<string> locations)
         {
             if (string.IsNullOrEmpty(filePath))
             {

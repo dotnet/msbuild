@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Internal;
 
 #if FEATURE_THREAD_CULTURE
@@ -169,7 +170,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Flag indicating if the nodes should prepare for reuse.</param>
         public void ShutdownConnectedNodes(bool enableReuse)
         {
-            foreach (NodeContext nodeContext in _nodeContexts.Values)
+            foreach (NodeContext nodeContext in _nodeContexts.EnumerateValues())
             {
                 nodeContext._inProcNodeEndpoint.SendData(new NodeBuildComplete(enableReuse));
             }
@@ -404,7 +405,7 @@ namespace Microsoft.Build.BackEnd
             if (status == LinkStatus.Active)
             {
                 bool foundEndpoint = false;
-                foreach (NodeContext nodeContext in _nodeContexts.Values)
+                foreach (NodeContext nodeContext in _nodeContexts.EnumerateValues())
                 {
                     if (endpoint == nodeContext._inProcNodeEndpoint)
                     {
@@ -451,7 +452,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (disposing)
                 {
-                    foreach (NodeContext nodeContext in _nodeContexts.Values)
+                    foreach (NodeContext nodeContext in _nodeContexts.EnumerateValues())
                     {
                         if (nodeContext._endpointConnectedEvent != null)
                         {

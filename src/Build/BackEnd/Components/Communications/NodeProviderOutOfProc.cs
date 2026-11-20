@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -146,7 +147,7 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownConnectedNodes(bool enableReuse)
         {
             // Send the build completion message to the nodes, causing them to shutdown or reset.
-            var contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
+            var contextsToShutDown = new List<NodeContext>(_nodeContexts.EnumerateValues());
 
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
         }
@@ -211,7 +212,7 @@ namespace Microsoft.Build.BackEnd
 
         public IEnumerable<Process> GetProcesses()
         {
-            return _nodeContexts.Values.Select(context => context.Process);
+            return _nodeContexts.EnumerateValues().Select(static context => context.Process);
         }
     }
 }

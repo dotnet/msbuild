@@ -269,6 +269,11 @@ namespace Microsoft.Build.BackEnd.Logging
         private ConcurrentQueue<object> _eventQueue;
 
         /// <summary>
+        /// Number of events in <see cref="_eventQueue"/>, kept separately because counting a concurrent queue is not cheap.
+        /// </summary>
+        private int _eventQueueCount;
+
+        /// <summary>
         /// Event set when message is consumed from queue.
         /// </summary>
         private AutoResetEvent _dequeueEvent;
@@ -553,7 +558,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Used for hang diagnostics to determine if the logging pipeline is backed up.
         /// Returns 0 for synchronous logging or when the queue is not available.
         /// </summary>
-        public int EventQueueCount => _eventQueue?.Count ?? 0;
+        public int EventQueueCount => _eventQueue is null ? 0 : Volatile.Read(ref _eventQueueCount);
 
         /// <summary>
         /// Get of warnings to treat as errors.  An empty non-null set will treat all warnings as errors.
@@ -1403,7 +1408,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     // Block until queue is not full.
                     long capacity;
-                    while (eventQueue.Count >= (capacity = Volatile.Read(ref _queueCapacity)))
+                    while (Volatile.Read(ref _eventQueueCount) >= (capacity = Volatile.Read(ref _queueCapacity)))
                     {
                         // A full queue grows if there is memory for it, otherwise block and wait for dequeue event.
                         // With a growing queue the wait is limited: nothing is dequeued while the logger is stuck, and
@@ -1414,6 +1419,8 @@ namespace Microsoft.Build.BackEnd.Logging
                         }
                     }
 
+                    // Count the event before it can be dequeued, so the count never goes below zero.
+                    Interlocked.Increment(ref _eventQueueCount);
                     eventQueue.Enqueue(buildEvent);
                     enqueueEvent.Set();
                 }
@@ -1621,6 +1628,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private void StartLoggingEventProcessing()
         {
             _eventQueue = new ConcurrentQueue<object>();
+            _eventQueueCount = 0;
             _dequeueEvent = new AutoResetEvent(false);
             _emptyQueueEvent = new ManualResetEvent(false);
             _enqueueEvent = new AutoResetEvent(false);
@@ -1648,6 +1656,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     {
                         if (eventQueue.TryDequeue(out object ev))
                         {
+                            Interlocked.Decrement(ref _eventQueueCount);
                             LoggingEventProcessor(ev);
                             dequeueEvent?.Set();
                         }
@@ -1687,6 +1696,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _loggingEventProcessingCancellation?.Dispose();
 
             _eventQueue = null;
+            _eventQueueCount = 0;
 
             _dequeueEvent = null;
             _enqueueEvent = null;

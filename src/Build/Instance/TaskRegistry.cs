@@ -373,7 +373,8 @@ namespace Microsoft.Build.Execution
                         else
                         {
                             // otherwise, check the "short list" of everything else included here to see if one of them matches
-                            foreach (RegisteredTaskRecord record in taskRecords.Values)
+                            // Enumerate the dictionary itself: Values takes every lock and copies the values.
+                            foreach (RegisteredTaskRecord record in taskRecords.EnumerateValues())
                             {
                                 // Just return the first one that actually matches.  There may be nulls in here as well, if we've previously attempted to
                                 // find a variation on this task record and failed.  In that case, since it wasn't an exact match (otherwise it would have

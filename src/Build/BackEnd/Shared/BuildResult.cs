@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
@@ -613,7 +614,7 @@ namespace Microsoft.Build.Execution
         {
             Assumed.Positive(targetsToKeep.Count, $"{nameof(targetsToKeep)} should contain at least one target.");
 
-            foreach (string target in _resultsByTarget?.Keys ?? [])
+            foreach (string target in _resultsByTarget?.EnumerateKeys() ?? [])
             {
                 if (!targetsToKeep.Contains(target))
                 {

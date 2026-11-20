@@ -113,21 +113,22 @@ namespace Microsoft.NET.StringTools
                     // running Scavenge at the same time.
                     if (Interlocked.CompareExchange(ref _scavengeThreshold, int.MaxValue, scavengeThreshold) == scavengeThreshold)
                     {
+                        int remaining = _count;
                         try
                         {
                             // Get rid of unused handles.
-                            Scavenge();
+                            remaining = Scavenge();
                         }
                         finally
                         {
                             // And do this again when the number of handles reaches double the current after-scavenge number.
-                            _scavengeThreshold = _weakHandlesByHashCode.Count * 2;
+                            _scavengeThreshold = remaining * 2;
 
                             // This count is not exact, since there can be some Interlocked.Increment(ref _count);
                             // calls happening due to this not being behind a lock.
                             // e.g. code checks if (_stringsByHashCode.TryAdd(hashCode, handle)), we set the _count here and the code increments
                             // however since this is just a threshold to scavenge, it should be fine to be off by few even if that happens.
-                            _count = _weakHandlesByHashCode.Count;
+                            _count = remaining;
                         }
                     }
                 }
@@ -141,8 +142,10 @@ namespace Microsoft.NET.StringTools
         /// Iterates over the cache and removes unused GC handles, i.e. handles that don't reference live strings.
         /// This is expensive so try to call such that the cost is amortized to O(1) per GetOrCreateEntry() invocation.
         /// </summary>
-        public void Scavenge()
+        /// <returns>The approximate number of handles left in the cache.</returns>
+        public int Scavenge()
         {
+            int remaining = 0;
             foreach (KeyValuePair<int, StringWeakHandle> entry in _weakHandlesByHashCode)
             {
                 // We can safely dereference entry.Value as the caller guarantees that Scavenge runs only on one thread.
@@ -156,9 +159,19 @@ namespace Microsoft.NET.StringTools
                         {
                             removedHandle.Free();
                         }
+                        else
+                        {
+                            remaining++;
+                        }
                     }
                 }
+                else
+                {
+                    remaining++;
+                }
             }
+
+            return remaining;
         }
 
         /// <summary>

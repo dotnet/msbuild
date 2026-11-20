@@ -281,7 +281,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_resultsByConfiguration)
             {
-                foreach (BuildResult resultToCache in _resultsByConfiguration.Values)
+                foreach (BuildResult resultToCache in _resultsByConfiguration.EnumerateValues())
                 {
                     resultToCache.CacheIfPossible();
                 }
@@ -434,7 +434,7 @@ namespace Microsoft.Build.BackEnd
 
         public IEnumerator<BuildResult> GetEnumerator()
         {
-            return _resultsByConfiguration.Values.GetEnumerator();
+            return _resultsByConfiguration.EnumerateValues().GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
