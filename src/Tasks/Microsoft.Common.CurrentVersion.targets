@@ -3885,13 +3885,32 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <CoreCompileCache Include="$(DefineConstants)" />
       <CoreCompileCache Include="$(LangVersion)" />
       <CoreCompileCache Include="$(Deterministic)" />
-      <CoreCompileCache Include="$(PathMap)" />
+      <!--
+        Under DeterministicSourcePaths the PathMap is derived from SourceRoot and each key is an
+        absolute checkout path, so hashing the raw property would reintroduce the location
+        dependence that the mapping below removes. The mapping's effect on the compilation is
+        already captured by the mapped @(Compile)/@(ReferencePath) entries, so the raw property is
+        only hashed in the legacy (non-deterministic) case.
+      -->
+      <CoreCompileCache Include="$(PathMap)" Condition="'$(DeterministicSourcePaths)' != 'true'" />
       <CoreCompileCache Include="@(_CoreCompileResourceInputs)"/>
     </ItemGroup>
 
+    <!--
+      When the compiler is already producing location-independent output (DeterministicSourcePaths), apply the
+      same PathMap to the hashed inputs so this incremental cache is likewise independent of the checkout
+      location. This lets the compile stay up to date when identical sources are built under a different root
+      (for example a cache seeded from another machine/agent). Empty by default, so the hash is unchanged for
+      normal builds.
+    -->
+    <PropertyGroup>
+      <_CoreCompileDependencyCachePathMap Condition="'$(DeterministicSourcePaths)' == 'true'">$(PathMap)</_CoreCompileDependencyCachePathMap>
+    </PropertyGroup>
+
     <Hash
       ItemsToHash="@(CoreCompileCache)"
-      IgnoreCase="$([MSBuild]::ValueOrDefault(`$(CoreCompileCacheIgnoreCase)`, `true`))">
+      IgnoreCase="$([MSBuild]::ValueOrDefault(`$(CoreCompileCacheIgnoreCase)`, `true`))"
+      PathMap="$(_CoreCompileDependencyCachePathMap)">
       <Output TaskParameter="HashResult" PropertyName="CoreCompileDependencyHash" />
     </Hash>
 
