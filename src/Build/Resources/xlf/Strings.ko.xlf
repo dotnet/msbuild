@@ -1155,6 +1155,11 @@ Errors: {3}</source>
         <target state="translated">SDK "{0}"이(가) "{1}" 확인자에 의해 "{2}" 위치 및 "{3}" 버전으로 확인되었습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TargetPreviouslySkippedDueToFalseCondition">
+        <source>Target "{0}" skipped. Previously skipped because its condition evaluated to false.</source>
+        <target state="new">Target "{0}" skipped. Previously skipped because its condition evaluated to false.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">"{0}" 작업에서 코어 {1}개를 요청했고 코어 {2}개를 획득했으며 지금 총 {3}개의 코어를 보유하고 있습니다.</target>

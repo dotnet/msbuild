@@ -268,6 +268,11 @@ namespace Microsoft.Build.Framework
 
         public bool EnableTargetOutputLogging = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDTARGETOUTPUTLOGGING");
 
+        /// <summary>
+        /// Reuse targets skipped because their condition evaluated to false.
+        /// </summary>
+        public readonly bool CacheConditionFalseTargets = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDCACHECONDITIONFALSETARGETS");
+
         // for VS17.14
         public readonly bool SlnParsingWithSolutionPersistenceOptIn = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE"));
 

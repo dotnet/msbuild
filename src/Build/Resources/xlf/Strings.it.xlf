@@ -1155,6 +1155,11 @@ Errori: {3}</target>
         <target state="translated">L'SDK "{0}" è stato correttamente risolto dal resolver "{1}" nel percorso "{2}" e nella versione "{3}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="TargetPreviouslySkippedDueToFalseCondition">
+        <source>Target "{0}" skipped. Previously skipped because its condition evaluated to false.</source>
+        <target state="new">Target "{0}" skipped. Previously skipped because its condition evaluated to false.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">L'attività "{0}" ha richiesto {1} core, ha acquisito {2} core e ora contiene {3} core in totale.</target>

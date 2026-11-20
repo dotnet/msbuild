@@ -171,6 +171,119 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(TargetResultCode.Skipped, resultsCache.GetResultForRequest(entry.Request)["SkipCondition"].ResultCode);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ConditionFalseTargetIsReevaluatedUnlessCachingIsEnabled(bool cacheConditionFalseTargets)
+        {
+            // Conditional is visited before EnableConditional adds the item that makes its condition true.
+            // Parent then pushes Conditional onto the target stack a second time.
+            ProjectInstance project = CreateTestProject(@"
+                <Target Name='Conditional' Condition=""'@(EnableTask_Item)' != ''"">
+                    <ConditionalTask />
+                </Target>
+                <Target Name='EnableConditional'>
+                    <EnableTask />
+                </Target>
+                <Target Name='Parent' DependsOnTargets='Conditional'>
+                    <ParentTask />
+                </Target>");
+            _host.BuildParameters.CacheConditionFalseTargets = cacheConditionFalseTargets;
+            TargetBuilder builder = (TargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
+            IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+            (string name, TargetBuiltReason reason)[] targets =
+            {
+                ("Conditional", TargetBuiltReason.None),
+                ("EnableConditional", TargetBuiltReason.None),
+                ("Parent", TargetBuiltReason.None),
+            };
+            BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, targets), cache[1], CreateStubTaskEnvironment());
+
+            BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, targets, CreateStandardLookup(project), CancellationToken.None).Result;
+
+            Assert.Equal(TargetResultCode.Success, result["Parent"].ResultCode);
+            Assert.Equal(cacheConditionFalseTargets ? TargetResultCode.Skipped : TargetResultCode.Success, result["Conditional"].ResultCode);
+            if (cacheConditionFalseTargets)
+            {
+                Assert.Equal(TargetSkipReason.ConditionWasFalse, ((TargetResult)result["Conditional"]).SkipReason);
+                Assert.True(((TargetResult)result["Conditional"]).IsSuccessfulConditionFalse);
+                Assert.False(((TargetResult)result["Conditional"]).IsPreviouslyConditionFalse);
+            }
+
+            AssertTaskExecutionOrder(cacheConditionFalseTargets ? new string[] { "EnableTask", "ParentTask" } : new string[] { "EnableTask", "ConditionalTask", "ParentTask" });
+        }
+
+        [Fact]
+        public void ReusingTargetsPreservesTheirOriginalSkipReasons()
+        {
+            ProjectInstance project = CreateTestProject(@"
+                <Target Name='Executed'>
+                    <ExecutedTask />
+                </Target>
+                <Target Name='UpToDate' Inputs='testProject.proj' Outputs='testProject.proj' />
+                <Target Name='Parent' DependsOnTargets='Executed;UpToDate'>
+                    <ParentTask />
+                </Target>");
+            TargetBuilder builder = (TargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
+            IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+            (string name, TargetBuiltReason reason)[] targets =
+            {
+                ("Executed", TargetBuiltReason.None),
+                ("UpToDate", TargetBuiltReason.None),
+                ("Parent", TargetBuiltReason.None),
+            };
+            BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, targets), cache[1], CreateStubTaskEnvironment());
+
+            BuildResult result = builder.BuildTargets(
+                GetProjectLoggingContext(entry),
+                entry,
+                this,
+                targets,
+                CreateStandardLookup(project),
+                CancellationToken.None).Result;
+
+            Assert.Equal(TargetSkipReason.None, ((TargetResult)result["Executed"]).SkipReason);
+            Assert.Equal(TargetSkipReason.OutputsUpToDate, ((TargetResult)result["UpToDate"]).SkipReason);
+            AssertTaskExecutionOrder(new string[] { "ExecutedTask", "ParentTask" });
+        }
+
+        [Fact]
+        public void StoppedConditionFalseTargetIsNotReused()
+        {
+            ProjectInstance project = CreateTestProject(@"
+                <Target Name='Conditional'>
+                    <ConditionalTask />
+                </Target>");
+            _host.BuildParameters.CacheConditionFalseTargets = true;
+            TargetBuilder builder = (TargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
+            IConfigCache configCache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+            IResultsCache resultsCache = (IResultsCache)_host.GetComponent(BuildComponentType.ResultsCache);
+            (string name, TargetBuiltReason reason)[] targets =
+            {
+                ("Conditional", TargetBuiltReason.None),
+            };
+            BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, targets), configCache[1], CreateStubTaskEnvironment());
+            BuildResult cachedResult = new BuildResult(entry.Request);
+            cachedResult.AddResultsForTarget(
+                "Conditional",
+                new TargetResult(
+                    Array.Empty<ProjectItemInstance.TaskItem>(),
+                    new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Stop, null),
+                    skipReason: TargetSkipReason.ConditionWasFalse));
+            resultsCache.AddResult(cachedResult);
+
+            BuildResult result = builder.BuildTargets(
+                GetProjectLoggingContext(entry),
+                entry,
+                this,
+                targets,
+                CreateStandardLookup(project),
+                CancellationToken.None).Result;
+
+            Assert.Equal(TargetResultCode.Success, result["Conditional"].ResultCode);
+            AssertTaskExecutionOrder(new string[] { "ConditionalTask" });
+        }
+
         /// <summary>
         /// This test is currently ignored because the error tasks aren't implemented yet (due to needing the task builder.)
         /// </summary>

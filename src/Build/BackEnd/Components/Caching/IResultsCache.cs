@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
@@ -41,9 +41,9 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Attempts to satisfy the request from the cache.  The request can be satisfied only if:
-        /// 1. All specified targets in the request have non-skipped results in the cache.
-        /// 2. All initial targets in the configuration for the request have non-skipped results in the cache.
-        /// 3. If there are no specified targets, then all default targets in the request must have non-skipped results
+        /// 1. All specified targets in the request have reusable results in the cache.
+        /// 2. All initial targets in the configuration for the request have reusable results in the cache.
+        /// 3. If there are no specified targets, then all default targets in the request must have reusable results
         ///    in the cache.
         /// </summary>
         /// <param name="request">The request whose results we should return</param>
@@ -53,13 +53,15 @@ namespace Microsoft.Build.BackEnd
         /// If true, then as long as there is a result in the cache (regardless of whether it was skipped or not), this method
         /// will return "Satisfied". In most cases this should be false, but it may be set to true in a situation where there is no
         /// chance of re-execution (which is the usual response to missing / skipped targets), and the caller just needs the data.</param>
+        /// <param name="cacheConditionFalseTargets">If true, cached targets skipped because their condition evaluated to false
+        /// satisfy the request without reevaluating the condition.</param>
         /// <param name="allowedTopLevelTargets">When non-null, the request is only considered satisfiable if all of its explicitly
         /// requested targets (or the configuration's default targets when no targets are specified) are contained in this set.
         /// Used to enforce isolation constraints deterministically: a cross-project reference in an isolated build may only be
         /// satisfied from the cache for targets that were explicitly requested (declared via ProjectReferenceTargets and built by
         /// the static graph), not for targets that merely happen to have results because they ran as a dependency of another target.</param>
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
-        ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss, IReadOnlyCollection<string> allowedTopLevelTargets);
+        ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss, bool cacheConditionFalseTargets, IReadOnlyCollection<string> allowedTopLevelTargets);
 
         /// <summary>
         /// Clears the results for a specific configuration.
