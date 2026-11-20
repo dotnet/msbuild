@@ -31,29 +31,26 @@ A compute-phase property or item is one whose value is produced during compute.
 A property or item becomes compute-phase when compute work writes it:
 
 - a compute task writes it through `<Output />`;
-- an operation inside a target marked `Phase="Compute"` writes it.
+- an operation inside a target marked `MSBuildPhase="Compute"` writes it.
 
 ```xml
 <Target Name="Collect">
-  <GenTask Phase="Compute">
+  <GenTask MSBuildPhase="Compute">
     <Output TaskParameter="Manifest" PropertyName="GenManifest" />
   </GenTask>
   <ItemGroup>
-    <Published Phase="Compute" Include="$(PublishDir)**\*" />
+    <Published MSBuildPhase="Compute" Include="$(PublishDir)**\*" />
   </ItemGroup>
 </Target>
 ```
 
-`Phase` on a property or item element accepts `Precompute`, the default, and `Compute`.
+The phase is set with the `MSBuildPhase` attribute on a property or item element, which accepts `Precompute`, the default, and `Compute`.
 It is only supported on elements inside a target; work that must observe compute results moves into a target.
-The phase is never inferred: an operation that references a compute-phase value must itself be marked `Phase="Compute"`, so each error points at the operation that needs a decision.
+The phase is never inferred: an operation that references a compute-phase value must itself be marked `MSBuildPhase="Compute"`, so each error points at the operation that needs a decision.
 
-`Phase` only has meaning when precompute is enabled:
-
-- On an item element, a `Phase` attribute is parsed as metadata, as it is today.
-  Normal builds keep that metadata; precompute treats the attribute as the phase and does not set the metadata.
-- On a property element, a `Phase` attribute is accepted and ignored by normal builds.
-  Property elements reject unknown attributes today, so this does not change any valid project.
+`MSBuildPhase` is a reserved attribute in all modes, and normal builds ignore it.
+On item elements this is a change wave: disabling the wave makes `MSBuildPhase` ordinary metadata again, as it is today.
+Property elements reject unknown attributes today, so reserving it there does not change any valid project.
 
 A property or item can start as precompute and later become compute-phase.
 Its value at that point, its *original precompute value*, carries into the compute phase:
@@ -61,7 +58,7 @@ Its value at that point, its *original precompute value*, carries into the compu
 ```xml
 <Foo Include="X" />
 ...
-<Foo Phase="Compute" Include="@(SomeComputeItem)" />
+<Foo MSBuildPhase="Compute" Include="@(SomeComputeItem)" />
 ```
 
 Here the compute value of `Foo` is `X` followed by the items of `SomeComputeItem`.
@@ -190,21 +187,21 @@ The node then exports the values it produces.
     <GenDir>$(OutDir)gen\</GenDir>
   </PropertyGroup>
 
-  <GenTask Phase="Compute" Sources="@(Schema)" OutputDirectory="$(GenDir)">
+  <GenTask MSBuildPhase="Compute" Sources="@(Schema)" OutputDirectory="$(GenDir)">
     <Output TaskParameter="Manifest" PropertyName="GenManifest" />
   </GenTask>
 
   <ItemGroup>
-    <Gen Phase="Compute" Include="$(GenDir)*.cs" Exclude="$(GenDir)skip.cs">
+    <Gen MSBuildPhase="Compute" Include="$(GenDir)*.cs" Exclude="$(GenDir)skip.cs">
       <Origin>generated</Origin>
     </Gen>
-    <GenRefs Phase="Compute" Include="@(Gen->'%(Filename).ref')" />
+    <GenRefs MSBuildPhase="Compute" Include="@(Gen->'%(Filename).ref')" />
     <FileWrites Include="$(GenDir)gen.manifest" />
   </ItemGroup>
 </Target>
 
 <Target Name="Build" DependsOnTargets="Generate">
-  <Csc Phase="Compute"
+  <Csc MSBuildPhase="Compute"
        Condition="'$(GenManifest)' != ''"
        Sources="@(Compile);@(Gen)"
        References="@(GenRefs)"
@@ -278,7 +275,7 @@ The following table summarizes what compute work supports when precompute is ena
 | Batching over both precompute and compute-phase items | No | Buckets would mix values from both phases |
 | Target batching over compute-phase items | No | Target batches are graph nodes, so their number must be known during precompute |
 | Compute-phase values in task attributes other than parameters and `Condition` | No | Such as `ContinueOnError` |
-| `Phase` on `PropertyGroup` and `ItemGroup` | No | Phase is set per operation |
+| `MSBuildPhase` on `PropertyGroup` and `ItemGroup` | No | The phase is set per operation |
 
 When precompute is enabled, the unsupported cases are errors.
 Target batching over compute-phase items could later be supported with a container node that expands during compute into one child node per batch.
@@ -291,7 +288,7 @@ Other differences from a normal build:
 
 ### Considerations
 
-- **Non-Precompute Compatibility**: Behavior and performance are unchanged when precompute is not enabled.
+- **Non-Precompute Compatibility**: Behavior and performance are unchanged when precompute is not enabled, except that `MSBuildPhase` is reserved on items, behind a change wave.
   This takes priority over the elegance of precompute syntax.
 - **Precompute Compatibility**: Compute work produces the same results as a normal build except as listed above.
   Restrictions that only apply when precompute is enabled are acceptable when the patterns they reject are rare.
