@@ -149,15 +149,17 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Fill up the dictionary for first use
         /// </summary>
-        // Preserve the PropertyFunctionMembers set on every type in the property-function allowlist
-        // below. Property functions dispatch over the allowlisted receiver type by reflection (see
-        // Expander.Function), and receiver types are restricted to this allowlist unless the
-        // MSBUILDENABLEALLPROPERTYFUNCTIONS feature switch is enabled. Preserving these members is what
+        // Preserve the PropertyFunctionMembers set on the types in the property-function allowlist
+        // below, including FileInfo/DirectoryInfo whose constructors are allowlisted. DirectoryInfo
+        // instances are also reachable through Directory.GetParent. Property functions dispatch
+        // over these types by reflection (see Expander.Function). Preserving these members is what
         // makes the IL2072/IL2074/IL2080/IL2096 suppressions in Expander honest under trimming. Keep in
-        // sync with the entries added below.
+        // sync with the entries added below and other permitted receiver types.
         [DynamicDependency(PropertyFunctionMembers, typeof(Environment))]
         [DynamicDependency(PropertyFunctionMembers, typeof(Directory))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(DirectoryInfo))]
         [DynamicDependency(PropertyFunctionMembers, typeof(File))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(FileInfo))]
         [DynamicDependency(PropertyFunctionMembers, typeof(RuntimeInformation))]
         [DynamicDependency(PropertyFunctionMembers, typeof(OSPlatform))]
         [DynamicDependency(PropertyFunctionMembers, typeof(CultureInfo))]
@@ -256,6 +258,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.IO.Directory::GetLastAccessTime", directoryType);
                         availableStaticMethods.TryAdd("System.IO.Directory::GetLastWriteTime", directoryType);
                         availableStaticMethods.TryAdd("System.IO.Directory::GetParent", directoryType);
+                        availableStaticMethods.TryAdd("System.IO.DirectoryInfo::new", new Tuple<string, Type>(null, typeof(DirectoryInfo)));
 
                         availableStaticMethods.TryAdd("System.IO.File::Exists", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::GetCreationTime", fileType);
@@ -266,6 +269,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.IO.File::GetLastWriteTimeUtc", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::ReadAllText", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::ReadAllBytes", fileType);
+                        availableStaticMethods.TryAdd("System.IO.FileInfo::new", new Tuple<string, Type>(null, typeof(FileInfo)));
 
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::GetCultureInfo", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::new", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
