@@ -1002,6 +1002,26 @@ public class FileUtilities_Tests
         }
     }
 
+    [UnixOnlyFact]
+    public void MaybeAdjustFilePath_WithoutBackslashes_ReturnsInputUnchanged()
+    {
+        string filePath = ObjectModelHelpers.CreateFileInTempProjectDirectory("first/second/file.txt", string.Empty);
+        string baseDirectory = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(filePath)));
+
+        try
+        {
+            string value = "first/second/file.txt";
+            ReadOnlyMemory<char> memory = "'first/second/file.txt'".AsMemory(1, value.Length);
+
+            FileUtilities.MaybeAdjustFilePath(value, baseDirectory).ShouldBeSameAs(value);
+            FileUtilities.MaybeAdjustFilePath(memory, baseDirectory).Equals(memory).ShouldBeTrue();
+        }
+        finally
+        {
+            File.Delete(filePath);
+        }
+    }
+
     private static string SystemSpecificAbsolutePath => typeof(BuildEnvironmentHelper).GetAssemblyPath();
 
     [Fact]
