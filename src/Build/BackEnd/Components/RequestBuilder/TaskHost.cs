@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd
     /// The task host object which allows tasks to interface with the rest of the build system.
     /// Implementation of IBuildEngineX is thread-safe, so, for example, tasks can log concurrently on multiple threads.
     /// </summary>
-    internal class TaskHost :
+    internal partial class TaskHost :
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
@@ -433,6 +433,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
+                CaptureTaskResultCacheEvent(e);
+
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
                 // also log a warning if the event is not serializable and drop the logging message.
@@ -540,6 +542,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
+                CaptureTaskResultCacheEvent(e);
+
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
                 // also log a warning if the event is not serializable and drop the logging message.
@@ -581,6 +585,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
+                CaptureTaskResultCacheEvent(e);
+
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
                 // also log a warning if the event is not serializable and drop the logging message.
@@ -621,6 +627,8 @@ namespace Microsoft.Build.BackEnd
 
                     return;
                 }
+
+                CaptureTaskResultCacheEvent(e);
 
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
@@ -713,6 +721,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
+                MarkTaskResultCacheEventCaptureUnsupported();
                 _taskLoggingContext.LoggingService.LogTelemetry(_taskLoggingContext.BuildEventContext, eventName, properties);
             }
         }

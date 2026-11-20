@@ -2692,6 +2692,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void Reset()
         {
+            _componentFactories.ShutdownComponent(BuildComponentType.TaskResultCacheFileDigestCache);
+
             _nodeManager?.UnregisterPacketHandler(NodePacketType.BuildRequestBlocker);
             _nodeManager?.UnregisterPacketHandler(NodePacketType.BuildRequestConfiguration);
             _nodeManager?.UnregisterPacketHandler(NodePacketType.BuildRequestConfigurationResponse);
