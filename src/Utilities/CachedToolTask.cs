@@ -41,7 +41,7 @@ public abstract class CachedToolTask : ToolTask
             exitCode = ExecuteToolCore(pathToTool, responseFileCommands, commandLineCommands);
         }
 
-        return exitCode == 0 && base.HasLoggedErrors ? -1 : exitCode;
+        return exitCode == 0 && HasLoggedErrors ? -1 : exitCode;
     }
 
     private bool TryExecuteCached(string pathToTool, string responseFileCommands, string commandLineCommands,

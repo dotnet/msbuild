@@ -633,6 +633,32 @@ public sealed class InvocationCache_Tests
         }
     }
 
+    [Fact]
+    public void ToolTaskHonorsDerivedErrorPolicyAfterColdAndWarmReplay()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string root = env.CreateFolder().Path;
+        env.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, "true");
+        env.SetEnvironmentVariable(TestCachedToolTask.PathVariable, Path.Combine(root, "cache"));
+        var invocation = new InvocationDescription(InvocationInputs.FromFiles(), [], InvocationOutputs.FromFiles());
+
+        for (int i = 0; i < 2; i++)
+        {
+            var engine = new MockEngine(_output);
+            var task = new TestCachedToolTask
+            {
+                BuildEngine = engine,
+                Description = invocation,
+                LogAdditionalErrorOnReplay = true
+            };
+
+            task.Execute().ShouldBeFalse();
+            task.Executions.ShouldBe(i == 0 ? 1 : 0);
+            engine.Errors.ShouldBe(1);
+            task.Log.HasLoggedErrors.ShouldBeFalse();
+        }
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -665,6 +691,8 @@ public sealed class InvocationCache_Tests
 
     private sealed class TestCachedToolTask : CachedToolTask
     {
+        private TaskLoggingHelper? _additionalLog;
+
         internal const string EnabledVariable = "MSBUILD_INVOCATION_CACHE_TEST_ENABLED";
         internal const string PathVariable = "MSBUILD_INVOCATION_CACHE_TEST_PATH";
         internal static readonly InvocationCacheConfiguration Configuration = new("Test", EnabledVariable, PathVariable);
@@ -675,11 +703,13 @@ public sealed class InvocationCache_Tests
         internal int Descriptions { get; private set; }
         internal int Executions { get; private set; }
         internal List<string> ReplayedLines { get; } = [];
+        internal bool LogAdditionalErrorOnReplay { get; set; }
 
         internal int Run() => ExecuteTool("tool", "response", "command");
 
         protected override string ToolName => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "cmd.exe" : "sh";
         protected override InvocationCacheConfiguration CacheConfiguration => Configuration;
+        protected override bool HasLoggedErrors => base.HasLoggedErrors || (_additionalLog?.HasLoggedErrors ?? false);
 
         protected override string GenerateFullPathToTool() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), ToolName)
@@ -704,6 +734,11 @@ public sealed class InvocationCache_Tests
         protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
         {
             ReplayedLines.Add(singleLine);
+            if (LogAdditionalErrorOnReplay && singleLine == "first")
+            {
+                (_additionalLog ??= new TaskLoggingHelper(this)).LogError("Additional logger error.");
+            }
+
             base.LogEventsFromTextOutput(singleLine, messageImportance);
         }
     }
