@@ -28,9 +28,10 @@ Two gates are intended to constrain what can be called:
 
 1. **Static calls** are limited to a curated allowlist of types/members
    (plus the MSBuild intrinsics).
-2. **Instance calls** are allowed on *any* public member except `GetType`.
+2. **Instance calls** use the `PropertyFunctionReceiver` allowlist when Change Wave 18.14 or the trimming feature switch is enabled.
+   The legacy configuration permits any public instance member except `GetType`.
 
-The second gate is effectively unbounded. Because each chained call rebinds against
+The legacy second gate is effectively unbounded. Because each chained call rebinds against
 the **runtime type of the previous return value**, any allowlisted static that
 returns a rich object (most importantly `System.IO.Directory.GetParent` →
 `DirectoryInfo`) exposes that object's entire public surface, and transitively the
@@ -58,7 +59,7 @@ down predate the split and are approximate; the table here is current.
 | Execute the call, escape the result, recurse the remainder | `Function<T>.Execute` | [Expander.Function.cs#L367](../../src/Build/Evaluation/Expander.Function.cs#L367) |
 | Resolve a static receiver `Type` | `GetTypeForStaticMethod` | [Expander.Function.cs#L671](../../src/Build/Evaluation/Expander.Function.cs#L671) |
 | **Static** allow gate | `IsStaticMethodAvailable` | [Expander.Function.cs#L1134](../../src/Build/Evaluation/Expander.Function.cs#L1134) |
-| **Instance** allow gate (only blocks `GetType`) | `IsInstanceMethodAvailable` | [Expander.Function.cs#L1154](../../src/Build/Evaluation/Expander.Function.cs#L1154) |
+| **Instance** receiver allowlist gate | `IsInstanceMethodAvailable` | [Expander.Function.cs#L1154](../../src/Build/Evaluation/Expander.Function.cs#L1154) |
 | Argument coercion fallback | `CoerceArguments` | [Expander.Function.cs#L999](../../src/Build/Evaluation/Expander.Function.cs#L999) |
 | Late-bound overload resolution | `LateBindExecute` | [Expander.Function.cs#L1244](../../src/Build/Evaluation/Expander.Function.cs#L1244) |
 | Public-only binding invariant | `AllowedBindingFlags` + ctor assert | [Expander.Function.cs#L87](../../src/Build/Evaluation/Expander.Function.cs#L87) |
@@ -80,7 +81,7 @@ flowchart TD
     F --> G[Execute]
     G --> H{objectInstance == null?}
     H -->|yes static| I[IsStaticMethodAvailable]
-    H -->|no instance| J["IsInstanceMethodAvailable (only blocks GetType)"]
+    H -->|no instance| J["IsInstanceMethodAvailable (receiver allowlist)"]
     I --> K[bind public member, invoke]
     J --> K
     K --> L{remainder empty?}
@@ -121,9 +122,9 @@ A static call `[Type]::Method(...)` is checked twice:
    stage 1 but is not allowlisted (e.g. `System.GC`) fails here →
    `InvalidFunctionMethodUnavailable` (MSB4185).
 
-### 3.2 Instance call gating is effectively unbounded by default
+### 3.2 Legacy instance call gating is effectively unbounded
 
-In the **unrestricted** configuration (the untrimmed default), `IsInstanceMethodAvailable`
+In the **unrestricted** configuration (untrimmed, with Change Wave 18.14 disabled), `IsInstanceMethodAvailable`
 ([Expander.cs#L4853](../../src/Build/Evaluation/Expander.cs#L4853)) reduces to a single denial:
 
 ```csharp
@@ -132,7 +133,7 @@ return !string.Equals("GetType", methodName, StringComparison.OrdinalIgnoreCase)
 
 so every other public instance method/property/field on the runtime receiver type is callable.
 That unbounded surface is exactly what the **now-implemented** receiver restriction bounds: when
-`RestrictPropertyFunctionReceivers` is on - the default under trimming, opt-in otherwise - this gate
+`RestrictPropertyFunctionReceivers` or Change Wave 18.14 is on, this gate
 instead consults the `PropertyFunctionReceiver` allowlist (§10). The reachability analysis in §4-§8
 describes the unrestricted surface; §10 is what closes it.
 
@@ -321,10 +322,10 @@ The **now-implemented** constraining mode (§10) does exactly this: it hooks `Is
 member deny-list - a small, statically known set the trimmer can root, rather than the
 open BCL closure. Because dir-walk idioms such as
 `$([System.IO.Directory]::GetParent($(X)).Parent.FullName)` are common in real
-builds, the restriction is **opt-in under the JIT** (the `RestrictPropertyFunctionReceivers`
-feature switch, default off) and **forced on under trimming** - a `[FeatureSwitchDefinition]` rather
-than a `Trait` (which the trimmer keeps) or a `ChangeWave` (time-boxed opt-*outs*), so it folds to a
-constant and the unbounded branch is removed. The full trim-safe design is in §10.
+builds, the allowlist preserves this read-only navigation. Change Wave 18.14 enables the restriction
+under the JIT, with a temporary compatibility opt-out. The independent `RestrictPropertyFunctionReceivers`
+feature switch is **forced on under trimming**. It folds to a constant and removes the unbounded branch,
+regardless of the change wave. The full trim-safe design is in §10.
 
 ## 9. The existing escape hatch and trim-time substitution
 
@@ -357,18 +358,18 @@ application, the legacy environment variable still behaves as before when no App
 ## 10. Constraining mode (implemented in #14079)
 
 **Status: implemented (PR #14079).** The unbounded instance "dotting-in" surface analyzed above is now
-bounded by an opt-in / trim-forced receiver-type restriction.
+bounded by a wave-enabled / trim-forced receiver-type restriction.
 
 What shipped:
 
 - A receiver allowlist, [`PropertyFunctionReceiver`](../../src/Build/Evaluation/PropertyFunctionReceiver.cs),
-  gated by the `RestrictPropertyFunctionReceivers` feature switch in
+  enabled by Change Wave 18.14 or the `RestrictPropertyFunctionReceivers` feature switch in
   [`FeatureSwitches`](../../src/Framework/FeatureSwitches.cs). The wide property-function gates now read
   `FeatureSwitches.EnableAllPropertyFunctions` (a `[FeatureGuard]` switch) instead of the old `Traits`
   environment read, so the trimmer can substitute a constant and remove the unbounded branch.
 - The allowlist is a small, static `typeof(...)` set of side-effect-free receivers (`string`, the numeric
   primitives, `bool`/`char`, `DateTime`/`DateTimeOffset`/`TimeSpan`, `Guid`, `Version`, `CultureInfo`,
-  `Uri`, `Regex`/`Match`/`Group`/`Capture`, plus any enum). Directory/file navigation is allowed via a
+  `Uri`, `OSPlatform`, `Regex`/`Match`/`Group`/`Capture`, their result collections, plus any enum). Directory/file navigation is allowed via a
   **member** allowlist (`FullName`, `Name`, `Exists`, `Parent`, `Root`, `Extension`, `Length`, `Directory`,
   `DirectoryName`) that excludes every state-mutating member (`Open*`, `Create*`, `CopyTo`, `MoveTo`,
   `Delete`, ...), so the common `$([System.IO.Directory]::GetParent($(X)).Parent.FullName)` idiom keeps
@@ -382,9 +383,19 @@ trimmer keeps, so it could not satisfy "no runtime re-enablement under trimming"
 `[FeatureSwitchDefinition]` is substituted to a constant and its dead branch removed. ChangeWaves are
 time-boxed opt-*outs*; this is a permanent trim boundary that must be non-disableable under trimming.
 
-**Behavior:** the untrimmed default is **wide** (unchanged - opt in via the
-`Microsoft.Build.RestrictPropertyFunctionReceivers` AppContext switch, which has no environment variable);
-a trimmed/AOT MSBuild **enforces the restriction by default**, and no runtime setting (including
+**Behavior:** Change Wave 18.14 enables the receiver allowlist in untrimmed hosts.
+Set `MSBUILDDISABLEFEATURESFROMVERSION=18.14` to temporarily restore the legacy instance surface.
+The `Microsoft.Build.RestrictPropertyFunctionReceivers` AppContext switch remains independent.
+Setting it to `true` enforces the restriction even with the wave disabled.
+Setting it to `false` does not disable the wave.
+A trimmed/AOT MSBuild **enforces the restriction by default**, and no runtime setting (including
 `MSBUILDENABLEALLPROPERTYFUNCTIONS=1`) can re-open the removed branches. The one remaining suppression is
 the `InvokePublicMember` call in [Expander.cs](../../src/Build/Evaluation/Expander.cs), whose
 `DynamicallyAccessedMembers` justification is now honest because only allowlisted receiver types flow to it.
+
+The wave can affect read-only chains too, such as members of unlisted collection or globalization types.
+File and directory enumeration through instance methods is excluded, even when the caller only reads the results.
+The existing `MSBUILDENABLEALLPROPERTYFUNCTIONS=1` escape hatch still bypasses both allowlists in untrimmed hosts
+when the corresponding AppContext switch is unset.
+These allowlists are not a security sandbox: allowed types retain their existing instance surfaces,
+and static functions and MSBuild intrinsics keep their existing permissions.
