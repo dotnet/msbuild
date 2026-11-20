@@ -90,7 +90,8 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
     {
         // The central node updates the 'in-flight' node status on the terminal
         // when a node starts the MSBuild task, so we need to forward these along so that behavior still works.
-        if (e.BuildEventContext is not null && e.TaskName == MSBuildTaskName)
+        if (e.BuildEventContext is not null
+            && string.Equals(e.TaskName, MSBuildTaskName, System.StringComparison.OrdinalIgnoreCase))
         {
             BuildEventRedirector?.ForwardEvent(e);
         }
@@ -100,7 +101,8 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
     {
         // The central node updates the 'in-flight' node status on the terminal
         // when a node finishes the MSBuild task, so we need to forward these along so that behavior still works.
-        if (e.BuildEventContext is not null && e.TaskName == MSBuildTaskName)
+        if (e.BuildEventContext is not null
+            && string.Equals(e.TaskName, MSBuildTaskName, System.StringComparison.OrdinalIgnoreCase))
         {
             BuildEventRedirector?.ForwardEvent(e);
         }
