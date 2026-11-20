@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.Shared;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
@@ -70,6 +70,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly bool[] _enabledDataSources = new bool[(int)BuildCheckDataSource.ValuesCount];
         private readonly BuildEventsProcessor _buildEventsProcessor;
         private readonly IBuildCheckAcquisitionModule _acquisitionModule;
+        private readonly DeferredWarnings _deferredWarnings = new();
 
         internal BuildCheckManager()
         {
@@ -238,12 +239,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         }
                         catch (BuildCheckConfigurationException e)
                         {
-                            checkContext.DispatchAsWarningFromText(
+                            ReportResult(EventsCreatorHelper.CreateWarningEventFromText(
+                                checkContext.BuildEventContext,
                                 DiagnosticSubcategory.None,
                                 warningCode: null,
                                 helpKeyword: null,
                                 ElementLocation.Create(projectPath),
-                                e.Message);
+                                e.Message), checkContext);
                             invalidChecksToRemove.Add(checkFactoryContext);
                         }
                     }
@@ -348,12 +350,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
                 catch (BuildCheckConfigurationException e)
                 {
-                    checkContext.DispatchAsWarningFromText(
+                    ReportResult(EventsCreatorHelper.CreateWarningEventFromText(
+                        checkContext.BuildEventContext,
                         DiagnosticSubcategory.None,
                         warningCode: null,
                         helpKeyword: null,
                         ElementLocation.Create(projectFullPath),
-                        e.Message);
+                        e.Message), checkContext);
                     invalidChecksToRemove.Add(checkFactoryContext);
                 }
             }
@@ -532,21 +535,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             return new BuildCheckTracingData(_ruleTelemetryData.ToList(), _tracingReporter.GetInfrastructureTracingStats());
         }
 
-        public void FinalizeProcessing(LoggingContext loggingContext)
-        {
-            if (IsInProcNode)
-            {
-                // We do not want to send tracing stats from in-proc node
-                return;
-            }
-
-            var checkEventStats = CreateCheckTracingStats();
-
-            BuildCheckTracingEventArgs checkEventArg =
-                new(checkEventStats) { BuildEventContext = loggingContext.BuildEventContext };
-            loggingContext.LogBuildEvent(checkEventArg);
-        }
-
         private readonly ConcurrentDictionary<int, string> _projectsByInstanceId = new();
         private readonly ConcurrentDictionary<int, string> _projectsByEvaluationId = new();
         // We are receiving project imported data only from the logger events - hence always in a single threaded context
@@ -653,19 +641,35 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             // There can be multiple ProjectStarted-ProjectFinished per single configuration project build (each request for different target)
             _projectsByInstanceId[buildEventContext.ProjectInstanceId] = projectFullPath;
 
-            if (_deferredEvalDiagnostics.TryGetValue(buildEventContext.EvaluationId, out var list))
+            DispatchDeferredDiagnostics((buildEventContext.EvaluationId, BuildEventContext.InvalidProjectInstanceId), checkContext);
+            DispatchDeferredDiagnostics((BuildEventContext.InvalidEvaluationId, buildEventContext.ProjectInstanceId), checkContext);
+        }
+
+        private void DispatchDeferredDiagnostics((int EvaluationId, int ProjectInstanceId) key, ICheckContext checkContext)
+        {
+            List<BuildWarningEventArgs>? diagnostics = _deferredWarnings.Take(key);
+            if (diagnostics is null)
             {
-                foreach (BuildEventArgs deferredArgs in list)
-                {
-                    deferredArgs.BuildEventContext = deferredArgs.BuildEventContext!.WithInstanceIdAndContextId(buildEventContext);
-                    checkContext.DispatchBuildEvent(deferredArgs);
-                }
-                list.Clear();
-                _deferredEvalDiagnostics.Remove(buildEventContext.EvaluationId);
+                return;
+            }
+
+            foreach (BuildWarningEventArgs diagnostic in diagnostics)
+            {
+                diagnostic.BuildEventContext = diagnostic.BuildEventContext!.WithInstanceIdAndContextId(checkContext.BuildEventContext);
+                checkContext.DispatchBuildEvent(diagnostic);
             }
         }
 
-        private readonly Dictionary<int, List<BuildEventArgs>> _deferredEvalDiagnostics = new();
+        public void FinalizeProcessing(ICheckContext checkContext)
+        {
+            foreach (List<BuildWarningEventArgs> diagnostics in _deferredWarnings.TakeAll())
+            {
+                foreach (BuildWarningEventArgs diagnostic in diagnostics)
+                {
+                    checkContext.DispatchBuildEvent(diagnostic);
+                }
+            }
+        }
 
         /// <summary>
         /// Registers the logic import by a project file.
@@ -682,33 +686,30 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
-        void IResultReporter.ReportResult(BuildEventArgs eventArgs, ICheckContext checkContext)
+        public void ReportResult(BuildEventArgs eventArgs, ICheckContext checkContext)
         {
             // If we do not need to decide on promotability/demotability of warnings or we are ready to decide on those
             //  - we can just dispatch the event.
             if (
-                // no context - we cannot defer as we'd need eval id to queue it
+                // no context to associate with a project start
                 eventArgs.BuildEventContext == null ||
-                // no eval id - we cannot defer as we'd need eval id to queue it
-                eventArgs.BuildEventContext.EvaluationId == BuildEventContext.InvalidEvaluationId ||
-                // instance id known - no need to defer
-                eventArgs.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId ||
+                // no evaluation or configuration identity to associate with a project start
+                (eventArgs.BuildEventContext.EvaluationId == BuildEventContext.InvalidEvaluationId &&
+                 eventArgs.BuildEventContext.ProjectInstanceId == BuildEventContext.InvalidProjectInstanceId) ||
+                // project context known - warning policy is available
+                eventArgs.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId ||
                 // it's not a warning - no need to defer
-                eventArgs is not BuildWarningEventArgs)
+                eventArgs is not BuildWarningEventArgs warning)
             {
                 checkContext.DispatchBuildEvent(eventArgs);
                 return;
             }
 
-            // This is evaluation - so we need to defer it until we know the instance id and context id
-
-            if (!_deferredEvalDiagnostics.TryGetValue(eventArgs.BuildEventContext.EvaluationId, out var list))
-            {
-                list = [];
-                _deferredEvalDiagnostics[eventArgs.BuildEventContext.EvaluationId] = list;
-            }
-
-            list.Add(eventArgs);
+            // Setup can precede evaluation; otherwise correlate by evaluation until the project starts.
+            var key = eventArgs.BuildEventContext.EvaluationId != BuildEventContext.InvalidEvaluationId
+                ? (eventArgs.BuildEventContext.EvaluationId, BuildEventContext.InvalidProjectInstanceId)
+                : (BuildEventContext.InvalidEvaluationId, eventArgs.BuildEventContext.ProjectInstanceId);
+            _deferredWarnings.Enqueue(key, warning);
         }
 
         public void EndProjectRequest(
@@ -754,6 +755,48 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         public void Shutdown()
         { /* Too late here for any communication to the main node or for logging anything */ }
+
+        // Take operations transfer ownership of batches so logging never runs under the collection lock.
+        private sealed class DeferredWarnings
+        {
+            private readonly Dictionary<(int EvaluationId, int ProjectInstanceId), List<BuildWarningEventArgs>> _warnings = new();
+
+            internal void Enqueue((int EvaluationId, int ProjectInstanceId) key, BuildWarningEventArgs warning)
+            {
+                lock (_warnings)
+                {
+                    if (!_warnings.TryGetValue(key, out var warnings))
+                    {
+                        warnings = [];
+                        _warnings[key] = warnings;
+                    }
+                    warnings.Add(warning);
+                }
+            }
+
+            internal List<BuildWarningEventArgs>? Take((int EvaluationId, int ProjectInstanceId) key)
+            {
+                lock (_warnings)
+                {
+                    if (!_warnings.TryGetValue(key, out var warnings))
+                    {
+                        return null;
+                    }
+                    _warnings.Remove(key);
+                    return warnings;
+                }
+            }
+
+            internal List<BuildWarningEventArgs>[] TakeAll()
+            {
+                lock (_warnings)
+                {
+                    List<BuildWarningEventArgs>[] pending = [.. _warnings.Values];
+                    _warnings.Clear();
+                    return pending;
+                }
+            }
+        }
 
         private class CheckFactoryContext(
             CheckFactory factory,

@@ -1361,6 +1361,16 @@ namespace Microsoft.Build.Execution
 
                     if (loggingService != null)
                     {
+                        Assumed.NotNull(_buildParameters);
+                        if (_buildParameters.IsBuildCheckEnabled)
+                        {
+                            // Some evaluations never execute. Preserve their diagnostics before loggers finish.
+                            WaitForAllLoggingServiceEventsToBeProcessed();
+                            var buildCheckProvider = _componentFactories.GetComponent<IBuildCheckManagerProvider>(BuildComponentType.BuildCheckManagerProvider);
+                            buildCheckProvider.Instance.FinalizeProcessing(new CheckLoggingContext(loggingService, BuildEventContext.Invalid));
+                            WaitForAllLoggingServiceEventsToBeProcessed();
+                        }
+
                         // Override the build success if the user specified /warnaserror and any errors were logged outside of a build submission.
                         if (exceptionsThrownInEndBuild ||
                             (_overallBuildSuccess && loggingService.HasBuildSubmissionLoggedErrors(BuildEventContext.InvalidSubmissionId)))
@@ -3731,6 +3741,8 @@ namespace Microsoft.Build.Execution
                 // Even if an exception is thrown, we want to make sure we null out the logging service so that
                 // we don't try to shut it down again in some other cleanup code.
                 _componentFactories.ReplaceFactory(BuildComponentType.LoggingService, (IBuildComponent?)null);
+                // The connector and in-process engines share this manager until logging has finished.
+                _componentFactories.ShutdownComponent(BuildComponentType.BuildCheckManagerProvider);
             }
         }
 

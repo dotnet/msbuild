@@ -753,7 +753,10 @@ namespace Microsoft.Build.Evaluation
             pathToAssembly = FileUtilities.GetFullPathNoThrow(ResolveAgainstThreadWorkingDirectory(pathToAssembly));
             if (FileSystems.Default.FileExists(pathToAssembly))
             {
-                loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly, projectPath));
+                loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly, projectPath)
+                {
+                    BuildEventContext = loggingContext.BuildEventContext,
+                });
 
                 return true;
             }

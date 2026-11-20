@@ -6,11 +6,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Unittest;
+using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -351,6 +356,87 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyEngineStatus(BuildRequestEngineStatus.Uninitialized);
         }
 
+
+        [Theory]
+        [InlineData(Scheduler.InProcNodeId, true, 0)]
+        [InlineData(2, true, 0)]
+        [InlineData(2, false, 1)]
+        public void DeferredWarningsSurviveWorkerDeactivationFailure(int nodeId, bool isInProcNode, int expectedWarnings)
+        {
+            _host.BuildParameters.IsBuildCheckEnabled = true;
+            var logging = LoggingService.CreateLoggingService(LoggerMode.Synchronous, nodeId);
+            _host.LoggingService = logging;
+            logging.InitializeComponent(_host);
+            var logger = new MockLogger();
+            logging.RegisterLogger(logger);
+            var provider = new BuildCheckManagerProvider();
+            provider.InitializeComponent(_host);
+            _host.BuildCheckManagerProvider = provider;
+            var manager = (BuildCheckManagerProvider.BuildCheckManager)provider.Instance;
+            manager.SetDataSource(BuildCheckDataSource.BuildExecution);
+            if (isInProcNode)
+            {
+                manager.SetDataSource(BuildCheckDataSource.EventArgs);
+            }
+
+            var data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", Array.Empty<string>(), null);
+            _cache.AddConfiguration(new BuildRequestConfiguration(1, data, "2.0"));
+            var builder = (MockRequestBuilder)_host.RequestBuilder;
+            builder.ThrowExceptionOnCancel = true;
+            VerifyEngineStatus(BuildRequestEngineStatus.Uninitialized, true);
+            _engine.InitializeForBuild(new NodeLoggingContext(logging, nodeId, isInProcNode));
+            VerifyEngineStatus(BuildRequestEngineStatus.Idle);
+            var context = new BuildEventContext(0, nodeId, 42,
+                BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId,
+                BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            var warning = new BuildWarningEventArgs(null, null, "TestFile", 0, 0, 0, 0,
+                "deferred configuration warning", null, null) { BuildEventContext = context };
+            logger.Warnings.ShouldBeEmpty();
+            manager.ReportResult(warning, new CheckLoggingContext(logging, context));
+            logger.Warnings.ShouldBeEmpty();
+
+            _engine.SubmitBuildRequest(CreateNewBuildRequest(1, ["target"]));
+            VerifyEngineStatus(BuildRequestEngineStatus.Active);
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFolder debugPath = env.CreateFolder();
+            var transientDebugPath = env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath.Path);
+            try
+            {
+                // Isolate and assert the crash log from the intentional teardown failure.
+                DebugUtils.SetDebugPath();
+                DebugUtils.ResetDebugDumpPathInRunningTests = true;
+                _ = DebugUtils.DebugDumpPath;
+                Should.Throw<InternalErrorException>(() => _engine.CleanupForBuild())
+                    .Message.ShouldContain("ThrowExceptionOnCancel set.");
+                string[] failureLogs = Directory.GetFiles(debugPath.Path, "MSBuild_*.failure.txt", SearchOption.AllDirectories);
+                File.ReadAllText(failureLogs.ShouldHaveSingleItem()).ShouldContain("ThrowExceptionOnCancel set.");
+                logger.AllBuildEvents.ShouldNotContain(e => e is BuildCheckTracingEventArgs);
+                logger.Warnings.Count.ShouldBe(expectedWarnings);
+                if (expectedWarnings != 0)
+                {
+                    BuildWarningEventArgs reported = logger.Warnings.ShouldHaveSingleItem();
+                    reported.Message.ShouldBe(warning.Message);
+                    reported.File.ShouldBe(warning.File);
+                    reported.BuildEventContext.ShouldBe(context);
+                }
+            }
+            finally
+            {
+                try
+                {
+                    builder.WaitForCancelCompletion();
+                    manager.Shutdown();
+                    logging.ShutdownComponent();
+                }
+                finally
+                {
+                    transientDebugPath.Revert();
+                    DebugUtils.SetDebugPath();
+                    DebugUtils.ResetDebugDumpPathInRunningTests = true;
+                    _ = DebugUtils.DebugDumpPath;
+                }
+            }
+        }
 
         /// <summary>
         /// This test verifies that issuing a simple request results in a successful completion.

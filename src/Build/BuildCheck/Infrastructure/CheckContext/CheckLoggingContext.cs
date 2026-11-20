@@ -39,10 +39,6 @@ internal readonly struct CheckLoggingContext(ILoggingService loggingService, Bui
         => loggingService
             .LogErrorFromText(eventContext, subcategory, errorCode, helpKeyword, location, message);
 
-    public void DispatchAsWarningFromText(DiagnosticSubcategory subcategory, string? warningCode, string? helpKeyword, IElementLocation location, string message)
-        => loggingService
-            .LogWarningFromText(eventContext, subcategory, warningCode, helpKeyword, location, message);
-
     public void DispatchFailedAcquisitionTelemetry(string assemblyName, Exception exception)
     {
         var telemetryTransportData = KnownTelemetry.BuildCheckTelemetry.ProcessCustomCheckLoadingFailure(assemblyName, exception);

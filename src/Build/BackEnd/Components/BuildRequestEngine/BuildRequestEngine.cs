@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Utilities;
@@ -311,6 +312,15 @@ namespace Microsoft.Build.BackEnd
                         RaiseRequestComplete(entry.Request, result);
                     }
 
+                    var buildCheckManager = _componentHost.GetComponent<IBuildCheckManagerProvider>(BuildComponentType.BuildCheckManagerProvider).Instance;
+                    // The coordinator owns the shared in-process manager through logging completion.
+                    // Workers must preserve diagnostics even when request deactivation failed.
+                    bool isBuildCheckWorker = _componentHost.BuildParameters.IsBuildCheckEnabled && !_nodeLoggingContext.IsInProcNode;
+                    if (isBuildCheckWorker)
+                    {
+                        buildCheckManager.FinalizeProcessing(new CheckLoggingContext(_nodeLoggingContext.LoggingService, _nodeLoggingContext.BuildEventContext));
+                    }
+
                     // Any exceptions which occurred while we are shutting down request builders should be thrown now so the outer handler
                     // can report them.
                     if (deactivateExceptions.Count > 0)
@@ -319,13 +329,15 @@ namespace Microsoft.Build.BackEnd
                         throw new AggregateException(deactivateExceptions);
                     }
 
-                    IBuildCheckManagerProvider buildCheckProvider = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider);
-                    var buildCheckManager = buildCheckProvider!.Instance;
-                    buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
+                    if (isBuildCheckWorker)
+                    {
+                        _nodeLoggingContext.LogBuildEvent(new BuildCheckTracingEventArgs(buildCheckManager.CreateCheckTracingStats())
+                        {
+                            BuildEventContext = _nodeLoggingContext.BuildEventContext,
+                        });
+                    }
                     // Flush and send the per-BuildRequestEngine telemetry data if any was collected.
                     _nodeLoggingContext.TelemetryCollector?.FinalizeProcessing(_nodeLoggingContext);
-                    // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
-                    buildCheckProvider.ShutdownComponent();
                 },
                 isLastTask: true);
 
