@@ -84,8 +84,9 @@
          from making it into our NuGet packages. -->
     <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
 
-    <!-- Configure analyzer to forbid certain API calls -->
-    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" Condition=" '$(IsUnitTestProject)' != 'true' " />
+    <!-- Configure analyzer to forbid certain API calls, except in test and benchmark projects that may intentionally use banned APIs. -->
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt"
+                     Condition=" '$(IsUnitTestProject)' != 'true' and '$(MSBuildProjectName)' != 'MSBuild.Benchmarks' " />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true'">
