@@ -14,8 +14,6 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal abstract class MultipleComparisonNode : OperatorExpressionNode
     {
-        private bool _conditionedPropertiesUpdated = false;
-
         /// <summary>
         /// Compare numbers
         /// </summary>
@@ -101,41 +99,32 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Reset temporary state
-        /// </summary>
-        internal override void ResetState()
-        {
-            base.ResetState();
-            _conditionedPropertiesUpdated = false;
-        }
-
-        /// <summary>
-        /// Updates the conditioned properties table if it hasn't already been done.
+        /// Updates the conditioned properties table.
         /// </summary>
         private void UpdateConditionedProperties(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (!_conditionedPropertiesUpdated && state.ConditionedPropertiesInProject != null)
+            if (state.ConditionedPropertiesInProject == null)
             {
-                string leftUnexpandedValue = LeftChild.GetUnexpandedValue(state);
-                string rightUnexpandedValue = RightChild.GetUnexpandedValue(state);
+                return;
+            }
 
-                if (leftUnexpandedValue != null)
-                {
-                    ConditionEvaluator.UpdateConditionedPropertiesTable(
-                        state.ConditionedPropertiesInProject,
-                         leftUnexpandedValue,
-                         RightChild.GetExpandedValue(state));
-                }
+            string leftUnexpandedValue = LeftChild.GetUnexpandedValue(state);
+            string rightUnexpandedValue = RightChild.GetUnexpandedValue(state);
 
-                if (rightUnexpandedValue != null)
-                {
-                    ConditionEvaluator.UpdateConditionedPropertiesTable(
-                        state.ConditionedPropertiesInProject,
-                         rightUnexpandedValue,
-                         LeftChild.GetExpandedValue(state));
-                }
+            if (leftUnexpandedValue != null)
+            {
+                ConditionEvaluator.UpdateConditionedPropertiesTable(
+                    state.ConditionedPropertiesInProject,
+                     leftUnexpandedValue,
+                     RightChild.GetExpandedValue(state));
+            }
 
-                _conditionedPropertiesUpdated = true;
+            if (rightUnexpandedValue != null)
+            {
+                ConditionEvaluator.UpdateConditionedPropertiesTable(
+                    state.ConditionedPropertiesInProject,
+                     rightUnexpandedValue,
+                     LeftChild.GetExpandedValue(state));
             }
         }
     }
