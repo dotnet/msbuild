@@ -1,0 +1,17 @@
+{
+  "name": "msbuild-perfstar-action",
+  "private": true,
+  "description": "Local GitHub Action for queueing MSBuild PerfStar evaluations",
+  "scripts": {
+    "build": "ncc build src/main.js -o dist",
+    "test": "node --test",
+    "validate": "node --check src/main.js && node --check src/branch-manager.js && npm test && npm run build && git diff --exit-code -- dist"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.3"
+  }
+}
