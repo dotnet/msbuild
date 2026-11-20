@@ -1921,17 +1921,16 @@ namespace Microsoft.Build.Execution
                         int count = translator.Reader.ReadInt32();
                         if (count > 0)
                         {
-                            // Use a builder to avoid intermediate immutable dictionary allocations
-                            // from feeding a lazy enumerable into SetItems.
-                            var builder = ImmutableDictionaryExtensions.EmptyMetadata.ToBuilder();
+                            var metadata = new Dictionary<string, string>(count, MSBuildNameIgnoreCaseComparer.Default);
                             for (int i = 0; i < count; i++)
                             {
                                 int key = translator.Reader.ReadInt32();
                                 int value = translator.Reader.ReadInt32();
-                                builder[interner.GetString(key)] = interner.GetString(value);
+                                metadata[interner.GetString(key)] = interner.GetString(value);
                             }
 
-                            _directMetadata = builder.ToImmutable();
+                            // Mutation paths convert this read-only state to an immutable dictionary on demand.
+                            _directMetadata = metadata;
                         }
                         else
                         {
