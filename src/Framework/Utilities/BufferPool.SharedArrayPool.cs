@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#pragma warning disable RS0030 // SharedArrayPool caches buffers in front of ArrayPool<T>.Shared.
+
 #if NETFRAMEWORK
 using System;
 using System.Buffers;

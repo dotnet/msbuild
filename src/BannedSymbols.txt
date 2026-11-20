@@ -7,3 +7,6 @@ M:System.Xml.XPath.XPathDocument.#ctor(System.String);Do not pass string paths t
 M:System.Xml.XPath.XPathDocument.#ctor(System.String,System.Xml.XmlSpace);Do not pass string paths to XPathDocument ctor--use the Stream overload
 M:System.Xml.Linq.XDocument.Load(System.String);Do not pass uri to XDocument.Load, use overload with XmlReader instead
 M:System.Xml.Linq.XDocument.Load(System.String, System.Xml.Linq.LoadOptions);Do not pass uri to XDocument.Load, use overload with XmlReader instead
+P:System.Buffers.ArrayPool`1.Shared;Use BufferPool<T>.Shared instead--ArrayPool<T>.Shared is slow on .NET Framework
+M:System.Buffers.ArrayPool`1.Create;Use BufferPool<T>.Create instead
+M:System.Buffers.ArrayPool`1.Create(System.Int32,System.Int32);Use BufferPool<T>.Create instead

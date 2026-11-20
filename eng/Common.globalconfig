@@ -5,6 +5,11 @@ is_global = true
 # from this file with more specific configurations
 global_level = 99
 
+# Disable banned API diagnostics by default because .editorconfig does not apply to source-generated
+# code (https://github.com/dotnet/roslyn/issues/52014). For example, CsWin32 uses the banned
+# ArrayPool<T>.Shared API. The root .editorconfig re-enables RS0030 for C# and VB source files.
+dotnet_diagnostic.RS0030.severity = none
+
 # Microsoft.Analyzers.ManagedCodeAnalysis
 # Description: Microsoft.Analyzers.ManagedCodeAnalysis
 
