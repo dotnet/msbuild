@@ -7,6 +7,7 @@ using System.Runtime.Versioning;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Win32;
 using Shouldly;
@@ -28,6 +29,10 @@ namespace Microsoft.Build.UnitTests.Evaluation;
 /// </remarks>
 public class PropertyFunctionReceiverRestriction_Tests
 {
+    private readonly ITestOutputHelper _output;
+
+    public PropertyFunctionReceiverRestriction_Tests(ITestOutputHelper output) => _output = output;
+
     private const string RestrictSwitch = "Microsoft.Build.RestrictPropertyFunctionReceivers";
     private const string RestrictEnvVar = "MSBUILDRESTRICTPROPERTYFUNCTIONS";
 
@@ -65,6 +70,102 @@ public class PropertyFunctionReceiverRestriction_Tests
         TransientTestFolder folder = env.CreateFolder();
         TransientTestFile file = env.CreateFile(folder, "data.txt", "content");
         return (folder.Path, file.Path);
+    }
+
+    private static void DisableReceiverRestrictionWave(TestEnvironment env)
+    {
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_14.ToString());
+        ChangeWaves.ResetStateForTests();
+    }
+
+    [Theory]
+    [InlineData("$([System.IO.Directory]::GetParent($(File)).Delete(true))", "Delete")]
+    [InlineData("$([System.IO.FileInfo]::new($(File)).Directory.CreateSubdirectory('sub'))", "CreateSubdirectory")]
+    [InlineData("$([System.IO.DirectoryInfo]::new($(Folder)).Delete(true))", "Delete")]
+    [InlineData("$([System.IO.FileInfo]::new($(File)).Delete())", "Delete")]
+    [InlineData("$([System.IO.FileInfo]::new($(File)).OpenWrite())", "OpenWrite")]
+    [InlineData("$([System.IO.FileInfo]::new($(File)).set_IsReadOnly(true))", "set_IsReadOnly")]
+    [InlineData("$([System.IO.Directory]::GetParent($(File)).GetFiles())", "GetFiles")]
+    public void Default_ChainedInstanceMember_IsChecked(string expression, string member)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        (string folder, string file) = CreateFolderWithFile(env);
+
+        InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
+            Evaluate(expression, ("File", file), ("Folder", folder)));
+
+        exception.ErrorCode.ShouldBe("MSB4185");
+        exception.Message.ShouldContain(member);
+        File.ReadAllText(file).ShouldBe("content");
+        File.GetAttributes(file).HasFlag(FileAttributes.ReadOnly).ShouldBeFalse();
+        Directory.GetDirectories(folder).ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("$([System.IO.Directory]::GetParent($(File)).Name.ToUpperInvariant())")]
+    [InlineData("$([System.IO.FileInfo]::new($(File)).Directory.Name.ToUpperInvariant())")]
+    [InlineData("$([System.IO.DirectoryInfo]::new($(Folder)).Name.ToUpperInvariant())")]
+    public void Default_ReadOnlyNavigation_RemainsAvailable(string expression)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        (string folder, string file) = CreateFolderWithFile(env);
+
+        Evaluate(expression, ("File", file), ("Folder", folder))
+            .ShouldBe(Path.GetFileName(folder).ToUpperInvariant());
+        Evaluate("$([System.IO.FileInfo]::new($(File)).Length)", ("File", file)).ShouldBe("7");
+        Evaluate("$(S.ToCharArray().GetValue(0).ToString())", ("S", "Hello")).ShouldBe("H");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void WaveOptOut_PreservesLegacyCalls_UnlessExplicitlyRestricted(bool explicitlyRestricted)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        (string folder, string file) = CreateFolderWithFile(env);
+        DisableReceiverRestrictionWave(env);
+
+        using (SetSwitch(RestrictSwitch, explicitlyRestricted))
+        {
+            const string expression = "$([System.IO.Directory]::GetParent($(File)).Delete(true))";
+            if (explicitlyRestricted)
+            {
+                Should.Throw<InvalidProjectFileException>(() => Evaluate(expression, ("File", file)))
+                    .ErrorCode.ShouldBe("MSB4185");
+                File.Exists(file).ShouldBeTrue();
+            }
+            else
+            {
+                Evaluate(expression, ("File", file)).ShouldBeEmpty();
+                Directory.Exists(folder).ShouldBeFalse();
+            }
+        }
+    }
+
+    [Fact]
+    public void EnableAllPropertyFunctions_BypassesDefaultReceiverRestriction()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        (string folder, string file) = CreateFolderWithFile(env);
+
+        using (SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", true))
+        {
+            Evaluate("$([System.IO.Directory]::GetParent($(File)).Delete(true))", ("File", file))
+                .ShouldBeEmpty();
+            Directory.Exists(folder).ShouldBeFalse();
+        }
+    }
+
+    [Theory]
+    [InlineData("$([System.Text.RegularExpressions.Regex]::Match('abc', '(b)').Groups[1].Value)", "b")]
+    [InlineData("$([System.Text.RegularExpressions.Regex]::Matches('abc', '(b)')[0].Groups[1].Captures[0].Value)", "b")]
+    [InlineData("$([System.Runtime.InteropServices.OSPlatform]::Windows.ToString())", "WINDOWS")]
+    public void Restricted_ExistingRegexAndPlatformChains_RemainAvailable(string expression, string expected)
+    {
+        using (SetSwitch(RestrictSwitch, true))
+        {
+            Evaluate(expression).ShouldBe(expected);
+        }
     }
 
     // ---- Restricted: side-effect-free receivers remain callable ----
@@ -185,13 +286,14 @@ public class PropertyFunctionReceiverRestriction_Tests
         }
     }
 
-    // ---- Default (unrestricted) behavior is preserved ----
+    // ---- Legacy behavior is preserved when the wave is disabled ----
 
     [Fact]
     public void Unrestricted_DirectoryInfoEnumeration_IsAllowed()
     {
         using TestEnvironment env = TestEnvironment.Create();
         (_, string file) = CreateFolderWithFile(env);
+        DisableReceiverRestrictionWave(env);
 
         using (SetSwitch(RestrictSwitch, false))
         {
@@ -212,6 +314,7 @@ public class PropertyFunctionReceiverRestriction_Tests
         // The new switch deliberately has no environment-variable opt-in; setting the (non-wired)
         // variable must not turn the restriction on.
         env.SetEnvironmentVariable(RestrictEnvVar, "1");
+        DisableReceiverRestrictionWave(env);
 
         Evaluate("$([System.IO.Directory]::GetParent($(File)).GetFiles().Length)", ("File", file))
             .ShouldBe("1");
@@ -295,6 +398,7 @@ public class PropertyFunctionReceiverRestriction_Tests
     {
         using TestEnvironment env = TestEnvironment.Create();
         (_, string file) = CreateFolderWithFile(env);
+        DisableReceiverRestrictionWave(env);
 
         using (SetSwitch(RestrictSwitch, false))
         {
