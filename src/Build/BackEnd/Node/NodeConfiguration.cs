@@ -3,6 +3,7 @@
 
 #if FEATURE_APPDOMAIN
 using System;
+using Microsoft.Build.Framework;
 #endif
 using System.Diagnostics;
 
@@ -164,17 +165,17 @@ namespace Microsoft.Build.BackEnd
             byte[] appDomainConfigBytes = null;
 
             // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
+            // NetFrameworkApis returns null bytes, and a null setup, on a runtime without AppDomains.
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+                appDomainConfigBytes = NetFrameworkApis.GetConfigurationBytes(_appDomainSetup);
             }
 
             translator.Translate(ref appDomainConfigBytes);
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
-                _appDomainSetup = new AppDomainSetup();
-                _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
+                _appDomainSetup = NetFrameworkApis.CreateAppDomainSetup(appDomainConfigBytes);
             }
 #endif
             translator.Translate(ref _loggingNodeConfiguration);

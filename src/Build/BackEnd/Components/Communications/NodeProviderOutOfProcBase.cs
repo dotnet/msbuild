@@ -17,6 +17,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Eventing;
 
 #if NETFRAMEWORK
+using System.Runtime.CompilerServices;
 using System.Security.Principal;
 #endif
 
@@ -865,7 +866,10 @@ namespace Microsoft.Build.BackEnd
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         // This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
-        //  on non-Windows operating systems
+        //  on non-Windows operating systems, and on .NET, which has PipeSecurity but not the PipeStream.GetAccessControl()
+        //  instance method this .NET Framework assembly calls (.NET has it as an extension method in PipesAclExtensions).
+        //  See RuntimeCapabilities.SupportsPipeOptionsCurrentUserOnly.
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
             SecurityIdentifier identifier = s_currentWindowsIdentity.Owner;
@@ -895,6 +899,8 @@ namespace Microsoft.Build.BackEnd
                 PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
                 | PipeOptions.CurrentUserOnly
+#else
+                | RuntimeCapabilities.CurrentUserOnlyIfSupported
 #endif
             );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
@@ -942,7 +948,9 @@ namespace Microsoft.Build.BackEnd
             nodeStream.Connect(timeout);
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-            if (NativeMethodsShared.IsWindows)
+            // When the runtime supports PipeOptions.CurrentUserOnly, the pipe was opened with it and
+            // Connect has already made this check (see RuntimeCapabilities.SupportsPipeOptionsCurrentUserOnly).
+            if (NativeMethodsShared.IsWindows && !RuntimeCapabilities.SupportsPipeOptionsCurrentUserOnly)
             {
                 // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
                 // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to

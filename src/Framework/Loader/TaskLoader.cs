@@ -4,6 +4,7 @@
 #if FEATURE_APPDOMAIN
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.Shared.Debugging;
 #endif
 using Microsoft.Build.Framework;
@@ -52,7 +53,9 @@ internal static class TaskLoader
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
     {
 #if FEATURE_APPDOMAIN
-        bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute;
+        // When the runtime cannot create AppDomains (this .NET Framework assembly is loaded into a
+        // .NET process), the task runs in the current AppDomain, as it does in the .NET flavor of MSBuild.
+        bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute && RuntimeCapabilities.SupportsAppDomains;
         s_resolverLoadedType = null;
         taskAppDomain = null;
         ITask? taskInstanceInOtherAppDomain = null;
@@ -76,40 +79,7 @@ internal static class TaskLoader
                 }
                 else
                 {
-                    // Our task depend on this name to be precisely that, so if you change it make sure
-                    // you also change the checks in the tasks run in separate AppDomains. Better yet, just don't change it.
-
-                    // Make sure we copy the appdomain configuration and send it to the appdomain we create so that if the creator of the current appdomain
-                    // has done the binding redirection in code, that we will get those settings as well.
-                    AppDomainSetup appDomainInfo = new AppDomainSetup();
-
-                    // Get the current app domain setup settings
-                    byte[] currentAppdomainBytes = appDomainSetup.GetConfigurationBytes();
-
-                    // Apply the appdomain settings to the new appdomain before creating it
-                    appDomainInfo.SetConfigurationBytes(currentAppdomainBytes);
-
-                    if (BuildEnvironmentHelper.Instance.RunningTests)
-                    {
-                        // Prevent the new app domain from looking in the VS test runner location. If this
-                        // is not done, we will not be able to find Microsoft.Build.* assemblies.
-                        appDomainInfo.ApplicationBase = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
-                        appDomainInfo.ConfigurationFile = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile;
-                    }
-
-                    AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver;
-                    s_resolverLoadedType = loadedType;
-
-                    taskAppDomain = AppDomain.CreateDomain(isOutOfProc ? "taskAppDomain (out-of-proc)" : "taskAppDomain (in-proc)", null, appDomainInfo);
-
-                    if (loadedType.LoadedAssembly != null)
-                    {
-                        taskAppDomain.Load(loadedType.LoadedAssemblyName);
-                    }
-
-                    // Hook up last minute dumping of any exceptions
-                    taskAppDomain.UnhandledException += DebugUtils.UnhandledExceptionHandler;
-                    appDomainCreated?.Invoke(taskAppDomain);
+                    CreateTaskAppDomain(loadedType, appDomainSetup, appDomainCreated, isOutOfProc, out taskAppDomain);
                 }
             }
             else
@@ -170,6 +140,53 @@ internal static class TaskLoader
     }
 
 #if FEATURE_APPDOMAIN
+    /// <summary>
+    /// Creates the AppDomain that a [LoadInSeparateAppDomain] task runs in. AppDomainSetup's
+    /// configuration bytes and this AppDomain.CreateDomain overload do not exist on .NET, so they
+    /// are referenced only from this method, which is not inlined into <see cref="CreateTask"/>.
+    /// See <see cref="RuntimeCapabilities"/>. The AppDomain is assigned to <paramref name="taskAppDomain"/>
+    /// as soon as it is created, so that the caller unloads it when the rest of this method throws.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void CreateTaskAppDomain(LoadedType loadedType, AppDomainSetup appDomainSetup, Action<AppDomain>? appDomainCreated, bool isOutOfProc, out AppDomain taskAppDomain)
+    {
+        // Our task depend on this name to be precisely that, so if you change it make sure
+        // you also change the checks in the tasks run in separate AppDomains. Better yet, just don't change it.
+
+        // Make sure we copy the appdomain configuration and send it to the appdomain we create so that if the creator of the current appdomain
+        // has done the binding redirection in code, that we will get those settings as well.
+        AppDomainSetup appDomainInfo = new AppDomainSetup();
+
+        // Get the current app domain setup settings
+        byte[] currentAppdomainBytes = appDomainSetup.GetConfigurationBytes();
+
+        // Apply the appdomain settings to the new appdomain before creating it
+        appDomainInfo.SetConfigurationBytes(currentAppdomainBytes);
+
+        if (BuildEnvironmentHelper.Instance.RunningTests)
+        {
+            // Prevent the new app domain from looking in the VS test runner location. If this
+            // is not done, we will not be able to find Microsoft.Build.* assemblies.
+            appDomainInfo.ApplicationBase = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
+            appDomainInfo.ConfigurationFile = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile;
+        }
+
+        AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver;
+        s_resolverLoadedType = loadedType;
+
+        AppDomain createdAppDomain = AppDomain.CreateDomain(isOutOfProc ? "taskAppDomain (out-of-proc)" : "taskAppDomain (in-proc)", null, appDomainInfo);
+        taskAppDomain = createdAppDomain;
+
+        if (loadedType.LoadedAssembly != null)
+        {
+            createdAppDomain.Load(loadedType.LoadedAssemblyName);
+        }
+
+        // Hook up last minute dumping of any exceptions
+        createdAppDomain.UnhandledException += DebugUtils.UnhandledExceptionHandler;
+        appDomainCreated?.Invoke(createdAppDomain);
+    }
+
     /// <summary>
     /// This is a resolver to help created AppDomains when they are unable to load an assembly into their domain we will help
     /// them succeed by providing the already loaded one in the currentdomain so that they can derive AssemblyName info from it

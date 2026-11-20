@@ -10,6 +10,7 @@ using System.IO;
 using System.Resources;
 using System.Text;
 #if FEATURE_APPDOMAIN
+using System.Runtime.CompilerServices;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Lifetime;
 #endif
@@ -1421,19 +1422,36 @@ namespace Microsoft.Build.Utilities
         /// </remarks>
         public void MarkAsInactive()
         {
+            // Without remoting this object is never sent across an AppDomain boundary, and there is no sponsor.
+            if (!RuntimeCapabilities.SupportsRemoting)
+            {
+                return;
+            }
+
             lock (_locker)
             {
-                // Clear out the sponsor (who is responsible for keeping the TaskLoggingHelper remoting lease alive until the task is done)
-                // this will be null if the engineproxy was never sent across an appdomain boundary.
-                if (_sponsor != null)
-                {
-                    ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
+                ReleaseSponsor();
+            }
+        }
 
-                    lease?.Unregister(_sponsor);
+        /// <summary>
+        /// Unregisters and closes the lease sponsor. The remoting lifetime types do not exist on .NET,
+        /// so they and <see cref="_sponsor"/> are referenced only from methods that are not inlined.
+        /// See <see cref="RuntimeCapabilities"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void ReleaseSponsor()
+        {
+            // Clear out the sponsor (who is responsible for keeping the TaskLoggingHelper remoting lease alive until the task is done)
+            // this will be null if the engineproxy was never sent across an appdomain boundary.
+            if (_sponsor != null)
+            {
+                ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
 
-                    _sponsor.Close();
-                    _sponsor = null;
-                }
+                lease?.Unregister(_sponsor);
+
+                _sponsor.Close();
+                _sponsor = null;
             }
         }
 #endif

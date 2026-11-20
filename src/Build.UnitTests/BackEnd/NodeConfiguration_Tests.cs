@@ -51,6 +51,29 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 deserializedConfig.AppDomainSetup.GetConfigurationBytes().SequenceEqual(configBytes).ShouldBeTrue();
             }
         }
+
+        /// <summary>
+        /// A configuration without an AppDomainSetup, as BuildManager creates on a runtime without
+        /// AppDomains, is written without configuration bytes, and on .NET Framework the node that
+        /// reads it gets an AppDomainSetup without configuration bytes.
+        /// </summary>
+        [Fact]
+        public void TestTranslationWithoutAppDomainSetup()
+        {
+            NodeConfiguration config = new NodeConfiguration(
+                nodeId: 1,
+                buildParameters: new BuildParameters(),
+                forwardingLoggers: Array.Empty<LoggerDescription>(),
+                appDomainSetup: null,
+                loggingNodeConfiguration: new LoggingNodeConfiguration());
+
+            ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = NodeConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            NodeConfiguration deserializedConfig = packet.ShouldBeOfType<NodeConfiguration>();
+            deserializedConfig.AppDomainSetup.ShouldNotBeNull();
+            deserializedConfig.AppDomainSetup.GetConfigurationBytes().ShouldBeNull();
+        }
 #endif
     }
 }

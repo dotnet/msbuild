@@ -4,7 +4,9 @@
 using System.IO.Pipes;
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
 using System;
+using System.Runtime.CompilerServices;
 using System.Security.Principal;
+using Microsoft.Build.Framework;
 #endif
 
 namespace Microsoft.Build.Internal
@@ -29,6 +31,8 @@ namespace Microsoft.Build.Internal
                 PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
                 | PipeOptions.CurrentUserOnly
+#else
+                | RuntimeCapabilities.CurrentUserOnlyIfSupported
 #endif
             );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
@@ -46,7 +50,12 @@ namespace Microsoft.Build.Internal
             // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
             // remote node could set the owner to something else would also let it change owners on other objects, so
             // this would be a security flaw upstream of us.
-            ValidateRemotePipeOwner();
+            // When the runtime supports PipeOptions.CurrentUserOnly, the pipe was opened with it and
+            // Connect has already made this check (see RuntimeCapabilities.SupportsPipeOptionsCurrentUserOnly).
+            if (!RuntimeCapabilities.SupportsPipeOptionsCurrentUserOnly)
+            {
+                ValidateRemotePipeOwner();
+            }
 #endif
             if (PerformHandshake(s_useHandhakeTimeout ? timeout : 0))
             {
@@ -58,7 +67,9 @@ namespace Microsoft.Build.Internal
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         // This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
-        //  on non-Windows operating systems
+        //  on non-Windows operating systems, and on .NET, which has PipeSecurity but not the PipeStream.GetAccessControl()
+        //  instance method this .NET Framework assembly calls. See RuntimeCapabilities.SupportsPipeOptionsCurrentUserOnly.
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private void ValidateRemotePipeOwner()
         {
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;

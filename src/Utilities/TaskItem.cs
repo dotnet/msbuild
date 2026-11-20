@@ -7,9 +7,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-#if FEATURE_APPDOMAIN
-using System.Runtime.Remoting;
-#endif
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security;
 #endif
@@ -441,7 +438,7 @@ namespace Microsoft.Build.Utilities
                     }
 
 #if FEATURE_APPDOMAIN
-                    if (RemotingServices.IsTransparentProxy(destinationItem))
+                    if (NetFrameworkApis.IsTransparentProxy(destinationItem))
                     {
                         // Linq is not serializable so materialize the collection before making the call.
                         metadataToImport = metadataToImport.ToList();

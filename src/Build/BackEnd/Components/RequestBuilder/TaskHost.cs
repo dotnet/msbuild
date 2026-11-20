@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 #if FEATURE_APPDOMAIN
+using System.Runtime.CompilerServices;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Lifetime;
 #endif
@@ -968,7 +969,7 @@ namespace Microsoft.Build.BackEnd
             public override bool LogsMessagesOfImportance(MessageImportance importance)
             {
 #if FEATURE_APPDOMAIN
-                if (RemotingServices.IsTransparentProxy(_taskHost))
+                if (NetFrameworkApis.IsTransparentProxy(_taskHost))
                 {
                     // If the check would be a cross-domain call, chances are that it wouldn't be worth it.
                     // Simply disable the optimization in such a case.
@@ -1136,20 +1137,37 @@ namespace Microsoft.Build.BackEnd
                 _targetBuilderCallback = null;
 
 #if FEATURE_APPDOMAIN
-                // Clear out the sponsor (who is responsible for keeping the EngineProxy remoting lease alive until the task is done)
-                // this will be null if the engine proxy was never sent across an AppDomain boundary.
-                if (_sponsor != null)
+                // Without remoting the engine proxy is never sent across an AppDomain boundary, and there is no sponsor.
+                if (RuntimeCapabilities.SupportsRemoting)
                 {
-                    ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
-
-                    lease?.Unregister(_sponsor);
-
-                    _sponsor.Close();
-                    _sponsor = null;
+                    ReleaseSponsor();
                 }
 #endif
             }
         }
+
+#if FEATURE_APPDOMAIN
+        /// <summary>
+        /// Unregisters and closes the lease sponsor. The remoting lifetime types do not exist on .NET,
+        /// so they and <see cref="_sponsor"/> are referenced only from methods that are not inlined.
+        /// See <see cref="RuntimeCapabilities"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void ReleaseSponsor()
+        {
+            // Clear out the sponsor (who is responsible for keeping the EngineProxy remoting lease alive until the task is done)
+            // this will be null if the engine proxy was never sent across an AppDomain boundary.
+            if (_sponsor != null)
+            {
+                ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
+
+                lease?.Unregister(_sponsor);
+
+                _sponsor.Close();
+                _sponsor = null;
+            }
+        }
+#endif
 
         /// <summary>
         /// Determine if the event is serializable. If we are running with multiple nodes we need to make sure the logging events are serializable. If not

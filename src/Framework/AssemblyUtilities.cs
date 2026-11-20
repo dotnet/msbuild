@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Reflection;
+#if !RUNTIME_TYPE_NETCORE
+using Microsoft.Build.Framework;
+#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -31,7 +34,11 @@ namespace Microsoft.Build.Shared
             name.HashAlgorithm = assemblyNameToClone.HashAlgorithm;
             name.VersionCompatibility = assemblyNameToClone.VersionCompatibility;
             name.CodeBase = assemblyNameToClone.CodeBase;
-            name.KeyPair = assemblyNameToClone.KeyPair;
+            if (RuntimeCapabilities.SupportsAssemblyNameKeyPair)
+            {
+                name.KeyPair = assemblyNameToClone.KeyPair;
+            }
+
             name.VersionCompatibility = assemblyNameToClone.VersionCompatibility;
 #else
             // Setting the culture name creates a new CultureInfo, leading to many allocations. Only set CultureName when the CultureInfo member is not available.
