@@ -142,14 +142,14 @@ The existing nested `BuildProjectFile` callback already supplies much of the fou
 
 - The callback uses the same scheduler path as an in-process task that builds a project reference. The calling task's node is given back while the nested build runs.
 - While the calling thread waits, another task can run in the same TaskHost. The TaskHost keeps one `TaskExecutionContext` per task, and saves and restores the environment and current directory around the callback (`BlockForCallback`, `ResumeAfterCallback`).
-- A successful callback waits for the scheduler to reacquire the node before the parent sends `TaskHostBuildResponse`.
-- Before the response, `TaskHostTask` calls `TryReactivateTaskHandler`, which moves the handler of the resumed task to the top of the provider's handler stack. Resumption is therefore not strictly last-in, first-out. The resumed task's handler moves to the top even if another task is still blocked.
+- When a scheduled nested build completes normally, the callback waits for the scheduler to reacquire the node before the parent sends `TaskHostBuildResponse`.
+- If the request is still active and not cancelled, `TaskHostTask` attempts to reactivate its handler before sending the response. `TryReactivateTaskHandler` moves that handler to the top of the provider's handler stack, even if another task is still blocked. Resumption is therefore not strictly last-in, first-out.
 
 The callback model does not cover explicit `Yield`:
 
-- `IBuildEngine3.Yield()` and `Reacquire()` are no-ops in the TaskHost. A blocked callback task does no work while the other task runs.
+- `IBuildEngine3.Yield()` and `Reacquire()` are no-ops in the TaskHost. A callback blocks the calling thread, although other threads created by the task can still run.
 - A truly yielded task continues to run while another task is active in the same process. The yielded task can log or complete during that time.
-- The provider sends each packet from the TaskHost to the handler at the top of the stack. A packet from a yielded task can therefore go to the active task's handler.
+- The provider routes task-scoped packets such as logs and completion to the handler at the top of the stack. A packet from a yielded task can therefore go to the active task's handler.
 
 Option B adds these parts to the callback foundation:
 
@@ -158,7 +158,7 @@ Option B adds these parts to the callback foundation:
 - Forwarding of `Yield` and `Reacquire` to the existing scheduler path in `TaskHostTask`.
 - Tracking of yielded task contexts through `Reacquire`, completion, and failure, with a parent-side reacquire if the task ends while yielded.
 
-Option B does not isolate process-wide state while tasks overlap. The callback model has less exposure because the blocked task does not run. A yielded task can run, so the risk in [Risks and limitations](#risks-and-limitations) applies.
+Option B does not isolate process-wide state while tasks overlap. Unlike a callback, an explicit yield does not block the calling thread. The risk in [Risks and limitations](#risks-and-limitations) applies.
 
 ## Comparison
 
