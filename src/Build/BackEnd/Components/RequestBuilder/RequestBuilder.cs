@@ -170,6 +170,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Exposes the shared dedicated scheduler for testing.
+        /// </summary>
+        internal static TaskScheduler DedicatedScheduler => s_dedicatedScheduler;
+
+        /// <summary>
         /// Retrieves the request entry associated with this RequestBuilder.
         /// </summary>
         internal BuildRequestEntry RequestEntry
@@ -1643,7 +1648,12 @@ namespace Microsoft.Build.BackEnd
             {
                 var thread = new Thread(() =>
                 {
-                    foreach (Task t in _tasks.GetConsumingEnumerable())
+                    // Do not use GetConsumingEnumerable here: its yield-return iterator retains
+                    // the last task in Current while waiting for the next one, rooting completed
+                    // build request continuations and their project graphs on idle workers.
+                    // TryTake clears its out parameter before blocking, so explicitly clearing t
+                    // after TryExecuteTask is not necessary.
+                    while (_tasks.TryTake(out Task t, Timeout.Infinite))
                     {
                         TryExecuteTask(t);
                         Interlocked.Increment(ref _availableThreads);
