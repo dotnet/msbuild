@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
@@ -95,9 +96,22 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <remarks>
         /// Lazily created, as there are lots of items
-        /// that have no metadata at all.
+        /// that have no metadata at all. The value is one of:
+        /// - null, when there is no direct metadata;
+        /// - a non-empty <see cref="ProjectMetadata"/> array without null entries (the common case);
+        /// - a <see cref="SparseDirectMetadata"/>, only after a metadatum was removed and others remain.
+        ///
+        /// This is an immutable copy-on-write snapshot that is never mutated after it is published.
+        /// Most items have only one or two direct metadata, so a linear scan of a small array costs
+        /// much less memory than a hash set guarded by a reader/writer lock (one per item), and is
+        /// at least as fast for these sizes.
+        /// Readers read the field once and use that snapshot without a lock.
+        /// Writers publish a new snapshot with <see cref="Interlocked.CompareExchange(ref object, object, object)"/>,
+        /// so concurrent writes are never lost.
+        ///
+        /// The enumeration order is the same as the order of the hash set that was used previously.
         /// </remarks>
-        private PropertyDictionary<ProjectMetadata> _directMetadata;
+        private object _directMetadata;
 
         /// <summary>
         /// Cached values of derivable item-spec modifiers. All time-based metadata are computed on demand.
@@ -124,7 +138,7 @@ namespace Microsoft.Build.Evaluation
                              ProjectItemElement xml,
                              string evaluatedIncludeEscaped,
                              string evaluatedIncludeBeforeWildcardExpansionEscaped,
-                             PropertyDictionary<ProjectMetadata> directMetadataCloned,
+                             ProjectMetadata[] directMetadataCloned,
                              List<ProjectItemDefinition> inheritedItemDefinitionsCloned)
         {
             Assumed.NotNull(project);
@@ -262,7 +276,18 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public IEnumerable<ProjectMetadata> DirectMetadata
         {
-            get { return Link != null ? Link.DirectMetadata : (IEnumerable<ProjectMetadata>)_directMetadata ?? (IEnumerable<ProjectMetadata>)ReadOnlyEmptyCollection<ProjectMetadata>.Instance; }
+            get
+            {
+                if (Link != null)
+                {
+                    return Link.DirectMetadata;
+                }
+
+                ProjectMetadata[] directMetadata = ToDenseArray(_directMetadata);
+                return directMetadata is null
+                    ? ReadOnlyEmptyCollection<ProjectMetadata>.Instance
+                    : new ReadOnlyCollection<ProjectMetadata>(directMetadata);
+            }
         }
 
         /// <summary>
@@ -274,7 +299,7 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return Link != null ? Link.DirectMetadata.Count : _directMetadata != null ? _directMetadata.Count : 0; }
+            { return Link != null ? Link.DirectMetadata.Count : GetCount(_directMetadata); }
         }
 
         /// <summary>
@@ -351,11 +376,15 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // Finally any direct metadata win.
-                if (_directMetadata != null)
+                ProjectMetadata[] directMetadata = GetSlots(_directMetadata);
+                if (directMetadata != null)
                 {
-                    foreach (ProjectMetadata metadatum in _directMetadata)
+                    foreach (ProjectMetadata metadatum in directMetadata)
                     {
-                        allMetadata[metadatum.Name] = metadatum;
+                        if (metadatum != null)
+                        {
+                            allMetadata[metadatum.Name] = metadatum;
+                        }
                     }
                 }
 
@@ -409,19 +438,7 @@ namespace Microsoft.Build.Evaluation
 
             ArgumentException.ThrowIfNullOrEmpty(name);
 
-            ProjectMetadata result = null;
-
-            if (_directMetadata != null)
-            {
-                result = _directMetadata[name];
-            }
-
-            if (result == null)
-            {
-                result = GetItemDefinitionMetadata(name);
-            }
-
-            return result;
+            return FindDirectMetadata(name) ?? GetItemDefinitionMetadata(name);
         }
 
         /// <summary>
@@ -448,7 +465,7 @@ namespace Microsoft.Build.Evaluation
                 return Link.HasMetadata(name);
             }
 
-            if (_directMetadata?.Contains(name) == true)
+            if (FindDirectMetadata(name) != null)
             {
                 return true;
             }
@@ -475,16 +492,7 @@ namespace Microsoft.Build.Evaluation
         {
             ArgumentException.ThrowIfNullOrEmpty(name);
 
-            string value = null;
-
-            if (_directMetadata != null)
-            {
-                ProjectMetadata metadatum = _directMetadata[name];
-                if (metadatum != null)
-                {
-                    value = metadatum.EvaluatedValueEscaped;
-                }
-            }
+            string value = FindDirectMetadata(name)?.EvaluatedValueEscaped;
 
             if (value == null)
             {
@@ -528,13 +536,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         ProjectMetadata IItem<ProjectMetadata>.SetMetadata(ProjectMetadataElement metadataElement, string evaluatedInclude)
         {
-            _directMetadata ??= new PropertyDictionary<ProjectMetadata>();
-
             ProjectMetadata predecessor = GetMetadata(metadataElement.Name);
 
             ProjectMetadata metadatum = new ProjectMetadata(this, metadataElement, evaluatedInclude, predecessor);
 
-            _directMetadata.Set(metadatum);
+            SetDirectMetadatum(metadatum);
 
             return metadatum;
         }
@@ -587,11 +593,10 @@ namespace Microsoft.Build.Evaluation
                 _project.SplitItemElementIfNecessary(_xml);
             }
 
-            ProjectMetadata metadatum;
+            ProjectMetadata metadatum = FindDirectMetadata(name);
 
-            if (_directMetadata?.Contains(name) == true)
+            if (metadatum != null)
             {
-                metadatum = _directMetadata[name];
                 metadatum.UnevaluatedValue = unevaluatedValue;
             }
             else
@@ -605,8 +610,7 @@ namespace Microsoft.Build.Evaluation
 
             if (!propagateMetadataToSiblingItems)
             {
-                _directMetadata ??= new PropertyDictionary<ProjectMetadata>();
-                _directMetadata.Set(metadatum);
+                SetDirectMetadatum(metadatum);
             }
             else
             {
@@ -614,8 +618,7 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (var siblingItem in siblingItems)
                 {
-                    siblingItem._directMetadata ??= new PropertyDictionary<ProjectMetadata>();
-                    siblingItem._directMetadata.Set(metadatum.DeepClone());
+                    siblingItem.SetDirectMetadatum(metadatum.DeepClone());
                 }
             }
 
@@ -640,7 +643,7 @@ namespace Microsoft.Build.Evaluation
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
             ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
-            ProjectMetadata metadatum = _directMetadata?[name];
+            ProjectMetadata metadatum = FindDirectMetadata(name);
 
             if (metadatum == null)
             {
@@ -652,10 +655,10 @@ namespace Microsoft.Build.Evaluation
             _project.SplitItemElementIfNecessary(_xml);
 
             // New metadata objects may have been created
-            metadatum = _directMetadata[name];
+            metadatum = FindDirectMetadata(name);
 
             _xml.RemoveChild(metadatum.Xml);
-            _directMetadata.Remove(name);
+            RemoveDirectMetadatum(name);
 
             return true;
         }
@@ -821,29 +824,229 @@ namespace Microsoft.Build.Evaluation
 
             oldXml.Parent.InsertBeforeChild(_xml, oldXml);
 
-            if (_directMetadata == null)
+            // ProjectMetadata objects may be being shared with other ProjectItem objects,
+            // or originate from item definitions, so it is necessary to replace ours with
+            // new ones. The old snapshot is immutable, so it can be enumerated directly
+            // while the new metadata are added. They are added in enumeration order without
+            // holes, as the dictionary used previously did when it was recreated here.
+            ProjectMetadata[] previous = ToDenseArray(Interlocked.Exchange(ref _directMetadata, null));
+
+            if (previous == null)
             {
                 return;
             }
 
-            // ProjectMetadata objects may be being shared with other ProjectItem objects,
-            // or originate from item definitions, so it is necessary to replace ours with
-            // new ones.
-            List<ProjectMetadata> temporary = new List<ProjectMetadata>(_directMetadata.Count);
-
-            foreach (ProjectMetadata metadatum in _directMetadata)
-            {
-                temporary.Add(metadatum);
-            }
-
-            _directMetadata = new PropertyDictionary<ProjectMetadata>(_directMetadata.Count);
-
-            foreach (ProjectMetadata metadatum in temporary)
+            foreach (ProjectMetadata metadatum in previous)
             {
                 SetMetadataValue(metadatum.Name, metadatum.EvaluatedValueEscaped);
             }
         }
 
+        /// <summary>
+        /// Gets the slots of a direct metadata snapshot. Slots can be null (holes) only in a <see cref="SparseDirectMetadata"/>.
+        /// </summary>
+        private static ProjectMetadata[] GetSlots(object directMetadata)
+            => directMetadata is SparseDirectMetadata sparse ? sparse.Slots : (ProjectMetadata[])directMetadata;
+
+        /// <summary>
+        /// Gets the number of metadata in a direct metadata snapshot.
+        /// </summary>
+        private static int GetCount(object directMetadata)
+            => directMetadata switch
+            {
+                null => 0,
+                SparseDirectMetadata sparse => sparse.Count,
+                _ => ((ProjectMetadata[])directMetadata).Length,
+            };
+
+        /// <summary>
+        /// Gets the metadata of a direct metadata snapshot in enumeration order, without holes.
+        /// Returns null if there are none. Allocates only if the snapshot has holes.
+        /// </summary>
+        private static ProjectMetadata[] ToDenseArray(object directMetadata)
+        {
+            if (directMetadata is not SparseDirectMetadata sparse)
+            {
+                return (ProjectMetadata[])directMetadata;
+            }
+
+            ProjectMetadata[] dense = new ProjectMetadata[sparse.Count];
+            int count = 0;
+            foreach (ProjectMetadata metadatum in sparse.Slots)
+            {
+                if (metadatum != null)
+                {
+                    dense[count++] = metadatum;
+                }
+            }
+
+            return dense;
+        }
+
+        /// <summary>
+        /// Returns the index of the metadatum with the specified name in the slots, or -1.
+        /// Names are compared case-insensitively.
+        /// </summary>
+        private static int IndexOfDirectMetadatum(ProjectMetadata[] slots, string name)
+        {
+            if (slots != null)
+            {
+                for (int i = 0; i < slots.Length; i++)
+                {
+                    ProjectMetadata metadatum = slots[i];
+                    if (metadatum != null && MSBuildNameIgnoreCaseComparer.Default.Equals(metadatum.Name, name))
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Gets the direct metadatum with the specified name, or null if there is none.
+        /// Does not consider item definitions or built-in metadata.
+        /// </summary>
+        private ProjectMetadata FindDirectMetadata(string name)
+        {
+            ProjectMetadata[] slots = GetSlots(_directMetadata);
+            int index = IndexOfDirectMetadatum(slots, name);
+            return index < 0 ? null : slots[index];
+        }
+
+        /// <summary>
+        /// Adds the metadatum to the direct metadata.
+        /// Replaces any direct metadatum with the same name.
+        /// </summary>
+        private void SetDirectMetadatum(ProjectMetadata metadatum)
+        {
+            ArgumentNullException.ThrowIfNull(metadatum);
+
+            object current = _directMetadata;
+
+            while (true)
+            {
+                object updated = WithDirectMetadatum(current, metadatum);
+                if (ReferenceEquals(updated, current))
+                {
+                    return;
+                }
+
+                object observed = Interlocked.CompareExchange(ref _directMetadata, updated, current);
+                if (ReferenceEquals(observed, current))
+                {
+                    return;
+                }
+
+                current = observed;
+            }
+        }
+
+        /// <summary>
+        /// Returns a snapshot that has the metadatum in addition to the metadata in <paramref name="current"/>.
+        /// The slot of each metadatum is the same as in the hash set that was used previously, so that
+        /// the enumeration order does not change: a metadatum with the same name is replaced in its slot,
+        /// a new metadatum goes into the most recently freed slot, and otherwise it is appended.
+        /// </summary>
+        private static object WithDirectMetadatum(object current, ProjectMetadata metadatum)
+        {
+            ProjectMetadata[] slots = GetSlots(current);
+            int index = IndexOfDirectMetadatum(slots, metadatum.Name);
+            ProjectMetadata[] updatedSlots;
+
+            if (index >= 0)
+            {
+                if (ReferenceEquals(slots[index], metadatum))
+                {
+                    return current;
+                }
+
+                updatedSlots = (ProjectMetadata[])slots.Clone();
+                updatedSlots[index] = metadatum;
+
+                return current is SparseDirectMetadata replaced
+                    ? new SparseDirectMetadata(updatedSlots, replaced.FreeSlots)
+                    : updatedSlots;
+            }
+
+            if (current is SparseDirectMetadata sparse)
+            {
+                int[] freeSlots = sparse.FreeSlots;
+                updatedSlots = (ProjectMetadata[])slots.Clone();
+                updatedSlots[freeSlots[freeSlots.Length - 1]] = metadatum;
+
+                if (freeSlots.Length == 1)
+                {
+                    return updatedSlots;
+                }
+
+                int[] updatedFreeSlots = new int[freeSlots.Length - 1];
+                Array.Copy(freeSlots, updatedFreeSlots, updatedFreeSlots.Length);
+
+                return new SparseDirectMetadata(updatedSlots, updatedFreeSlots);
+            }
+
+            if (slots == null)
+            {
+                updatedSlots = [metadatum];
+                return updatedSlots;
+            }
+
+            updatedSlots = new ProjectMetadata[slots.Length + 1];
+            Array.Copy(slots, updatedSlots, slots.Length);
+            updatedSlots[slots.Length] = metadatum;
+
+            return updatedSlots;
+        }
+
+        /// <summary>
+        /// Removes the direct metadatum with the specified name, if any.
+        /// Returns true if it was present.
+        /// </summary>
+        private bool RemoveDirectMetadatum(string name)
+        {
+            object current = _directMetadata;
+
+            while (true)
+            {
+                ProjectMetadata[] slots = GetSlots(current);
+                int index = IndexOfDirectMetadatum(slots, name);
+                if (index < 0)
+                {
+                    return false;
+                }
+
+                object updated = null;
+
+                if (GetCount(current) > 1)
+                {
+                    // Leave a hole, so that the other metadata keep their slots and a metadatum
+                    // added later fills this slot, as in the hash set that was used previously.
+                    ProjectMetadata[] updatedSlots = (ProjectMetadata[])slots.Clone();
+                    updatedSlots[index] = null;
+
+                    int[] freeSlots = (current as SparseDirectMetadata)?.FreeSlots;
+                    int freeSlotCount = freeSlots?.Length ?? 0;
+                    int[] updatedFreeSlots = new int[freeSlotCount + 1];
+                    if (freeSlots != null)
+                    {
+                        Array.Copy(freeSlots, updatedFreeSlots, freeSlotCount);
+                    }
+
+                    updatedFreeSlots[freeSlotCount] = index;
+                    updated = new SparseDirectMetadata(updatedSlots, updatedFreeSlots);
+                }
+
+                object observed = Interlocked.CompareExchange(ref _directMetadata, updated, current);
+                if (ReferenceEquals(observed, current))
+                {
+                    return true;
+                }
+
+                current = observed;
+            }
+        }
         /// <summary>
         /// Helper to get the value of a built-in metadatum with
         /// the specified name, if any.
@@ -886,6 +1089,44 @@ namespace Microsoft.Build.Evaluation
             }
 
             return metadataFromDefinition;
+        }
+
+        /// <summary>
+        /// Direct metadata of an item from which a metadatum was removed while others remain.
+        /// Immutable.
+        /// </summary>
+        /// <remarks>
+        /// This keeps the slot layout of the hash set that was used previously, so that the
+        /// enumeration order does not change: a removed metadatum leaves a hole, and a new metadatum
+        /// fills the most recently freed hole before it is appended. This is rare, so it is not
+        /// necessary to make it compact.
+        /// </remarks>
+        private sealed class SparseDirectMetadata
+        {
+            /// <summary>
+            /// Creates the snapshot. Takes ownership of the arrays.
+            /// </summary>
+            internal SparseDirectMetadata(ProjectMetadata[] slots, int[] freeSlots)
+            {
+                Slots = slots;
+                FreeSlots = freeSlots;
+            }
+
+            /// <summary>
+            /// The metadata in enumeration order. Holes are null.
+            /// </summary>
+            internal ProjectMetadata[] Slots { get; }
+
+            /// <summary>
+            /// The indexes of the holes in <see cref="Slots"/>. Never empty.
+            /// The last index is the most recently freed hole, which is filled first.
+            /// </summary>
+            internal int[] FreeSlots { get; }
+
+            /// <summary>
+            /// The number of metadata. Always more than zero.
+            /// </summary>
+            internal int Count => Slots.Length - FreeSlots.Length;
         }
 
         /// <summary>
@@ -1041,15 +1282,16 @@ namespace Microsoft.Build.Evaluation
                 // (4) any item definition metadata associated with the destination item's item type; none yet.
 
                 // Clone for (1)
-                PropertyDictionary<ProjectMetadata> directMetadataClone = null;
+                ProjectMetadata[] sourceDirectMetadata = ToDenseArray(source._directMetadata);
+                ProjectMetadata[] directMetadataClone = null;
 
-                if (source.DirectMetadataCount > 0)
+                if (sourceDirectMetadata != null)
                 {
-                    directMetadataClone = new PropertyDictionary<ProjectMetadata>(source.DirectMetadataCount);
+                    directMetadataClone = new ProjectMetadata[sourceDirectMetadata.Length];
 
-                    foreach (ProjectMetadata metadatum in source._directMetadata)
+                    for (int i = 0; i < sourceDirectMetadata.Length; i++)
                     {
-                        directMetadataClone.Set(metadatum.DeepClone());
+                        directMetadataClone[i] = sourceDirectMetadata[i].DeepClone();
                     }
                 }
 
