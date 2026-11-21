@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -82,6 +84,42 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // requests, but we call it in odd ways here so restore it manually
             // to keep the overall test invariant happy.
             Directory.SetCurrentDirectory(_originalWorkingDirectory);
+        }
+
+        [Fact]
+        public void IdleDedicatedWorkerDoesNotRetainCompletedTask()
+        {
+            TaskScheduler scheduler = (TaskScheduler)typeof(RequestBuilder)
+                .GetField("s_dedicatedScheduler", BindingFlags.Static | BindingFlags.NonPublic)
+                .GetValue(null);
+
+            (WeakReference task, WeakReference state, Thread worker) = ExecuteTaskWithState(scheduler);
+
+            SpinWait.SpinUntil(() => (worker.ThreadState & ThreadState.WaitSleepJoin) != 0, 10_000)
+                .ShouldBeTrue("the worker must be idle before checking its GC roots");
+
+            for (int attempt = 0; attempt < 10 && (task.IsAlive || state.IsAlive); attempt++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+                Thread.Sleep(10);
+            }
+
+            worker.IsAlive.ShouldBeTrue();
+            task.IsAlive.ShouldBeFalse("an idle worker must release its last completed task without another task being queued");
+            state.IsAlive.ShouldBeFalse("the completed task's state must also be collectible");
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static (WeakReference task, WeakReference state, Thread worker) ExecuteTaskWithState(TaskScheduler scheduler)
+        {
+            object state = new object();
+            // AsyncState remains attached to a completed task, unlike its action delegate.
+            Task<Thread> task = Task.Factory.StartNew(
+                static _ => Thread.CurrentThread, state, CancellationToken.None, TaskCreationOptions.None, scheduler);
+            task.Wait(10_000).ShouldBeTrue();
+            return (new WeakReference(task), new WeakReference(state), task.Result);
         }
 
         [Fact]
