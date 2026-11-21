@@ -516,6 +516,22 @@ namespace Microsoft.Build.Collections
             }
         }
 
+        internal T GetWithMatchingHash(string name)
+        {
+            using (_lock.EnterDisposableReadLock())
+            {
+                return ((RetrievableValuedEntryHashSet<T>)_properties).GetWithMatchingHash(name);
+            }
+        }
+
+        internal T[] GetSnapshot()
+        {
+            using (_lock.EnterDisposableReadLock())
+            {
+                return ((RetrievableValuedEntryHashSet<T>)_properties).ToArray();
+            }
+        }
+
         /// <summary>
         /// Add the specified property to the collection.
         /// Overwrites any property with the same name already in the collection.

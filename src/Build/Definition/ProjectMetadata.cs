@@ -36,6 +36,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly ProjectMetadataElement _xml;
 
+        // The evaluated item's name index is not rebuilt when the backing XML is renamed.
+        internal int InitialNameHashCode { get; }
+
         /// <summary>
         /// Evaluated value
         /// </summary>
@@ -76,6 +79,7 @@ namespace Microsoft.Build.Evaluation
 
             _parent = parent;
             _xml = xml;
+            InitialNameHashCode = MSBuildNameIgnoreCaseComparer.Default.GetHashCode(xml.Name);
             _evaluatedValueEscaped = evaluatedValueEscaped;
             _predecessor = predecessor;
         }
