@@ -1643,9 +1643,11 @@ namespace Microsoft.Build.BackEnd
             {
                 var thread = new Thread(() =>
                 {
-                    foreach (Task t in _tasks.GetConsumingEnumerable())
+                    // A consuming enumerator can retain its last task while waiting for more work.
+                    while (_tasks.TryTake(out Task t, Timeout.Infinite))
                     {
                         TryExecuteTask(t);
+                        t = null;
                         Interlocked.Increment(ref _availableThreads);
                     }
                 });
