@@ -128,7 +128,7 @@ Do **not** hand-roll `DateTime.FromFileTime((long)hi << 32 | lo)` — use the he
 
 ## BufferScope<T>
 
-`BufferScope<T>` (`src/Framework/Utilities/BufferScope.cs`) — stackalloc initial buffer with `ArrayPool<T>` fallback. Lives in Framework, available to all projects via `InternalsVisibleTo`.
+`BufferScope<T>` (`src/Framework/Utilities/BufferScope.cs`) — stackalloc initial buffer with `BufferPool<T>` fallback. Lives in Framework, available to all projects via `InternalsVisibleTo`.
 
 ```csharp
 using BufferScope<char> buffer = new(stackalloc char[(int)PInvoke.MAX_PATH]);
@@ -143,6 +143,7 @@ if (length > 0) path = buffer.Slice(0, length).ToString();
 
 - `ref struct` — always use with `using`. Never stack-allocate more than 1024 bytes.
 - Check CsWin32 convenience overloads (e.g. `GetShortPathName(string, Span<char>)`) before writing `fixed` blocks.
+- For local, fixed-lifetime heap buffers, prefer `BufferPool<T>.Shared.RentSpan(length, out span)` in a `using` statement when the API accepts a span. Its `out` span is limited to the requested range, but `PooledBuffer<T>.Array` still exposes the full rented array. Use `Rent(minimumLength, out array)` only when an API requires an array. Rented arrays are not guaranteed to be zero-initialized; initialize every element before reading it. Disposal clears reference-containing types only; it clears the requested range for `RentSpan` and the entire array for `Rent`. Keep the default clear length until filling succeeds, or ensure it still covers writes if filling can fail. Don't force this pattern where it changes allocation behavior or ownership.
 
 ## Gotchas
 
