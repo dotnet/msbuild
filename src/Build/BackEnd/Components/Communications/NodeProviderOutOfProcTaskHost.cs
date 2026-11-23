@@ -1190,9 +1190,13 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_NET35_TASKHOST
             if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
             {
+#if RUNTIME_TYPE_NETCORE
+                return ResolveVisualStudioTaskHostLaunchConfiguration(hostContext, out visualStudioResolution);
+#else
                 string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(hostContext);
                 string toolsDirectory = Path.GetDirectoryName(msbuildLocation) ?? string.Empty;
                 return new NodeLaunchData(msbuildLocation, string.Empty, new Handshake(hostContext, toolsDirectory));
+#endif
             }
 #endif
 
@@ -1216,6 +1220,16 @@ namespace Microsoft.Build.BackEnd
             }
 
             Version fileVersion = GetFileVersion(found.TaskHostExecutablePath);
+            bool isClr2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+
+            if (isClr2)
+            {
+                CommunicationsUtilities.Trace($"For a host context of {hostContext}, using Visual Studio task host from {found.TaskHostExecutablePath} (version {fileVersion}).");
+                return new NodeLaunchData(
+                    found.TaskHostExecutablePath,
+                    string.Empty,
+                    new Handshake(hostContext, found.HandshakeToolsDirectory, fileVersion));
+            }
 
             CommunicationsUtilities.Trace($"For a host context of {hostContext}, using Visual Studio MSBuild from {found.TaskHostExecutablePath} (version {fileVersion}).");
 
@@ -1357,12 +1371,11 @@ namespace Microsoft.Build.BackEnd
             => s_visualStudioInstances ??= VisualStudioLocationHelper.GetInstances();
 
         /// <summary>
-        /// .NET Framework (CLR4) task hosts are served by Visual Studio; .NET task hosts use the SDK.
+        /// .NET Framework task hosts are served by Visual Studio; .NET task hosts use the SDK.
         /// </summary>
         private static bool IsVisualStudioTaskHostContext(HandshakeOptions hostContext)
             => Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost)
-                && !Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET)
-                && !Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+                && !Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET);
 
         /// <summary>
         /// Reads the Visual Studio installation directory set by a Developer Command Prompt. Only the Visual Studio
@@ -1398,15 +1411,21 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
+            bool isClr2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+            if (isClr2 && Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64))
+            {
+                return null;
+            }
+
             string architectureDirectory = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.X64)
                 ? Path.Combine(root, "amd64")
                 : Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64)
                     ? Path.Combine(root, "arm64")
                     : root;
 
-            string msbuildExePath = Path.Combine(architectureDirectory, "MSBuild.exe");
+            string msbuildExePath = Path.Combine(architectureDirectory, isClr2 ? TaskHostNameForClr2TaskHost : "MSBuild.exe");
             return FileSystems.Default.FileExists(msbuildExePath)
-                ? new VisualStudioTaskHostResolution.Found(msbuildExePath, root)
+                ? new VisualStudioTaskHostResolution.Found(msbuildExePath, isClr2 ? architectureDirectory : root)
                 : null;
         }
 
