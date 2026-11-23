@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void GetKeyWithEndpointIdentity_IncludesTheKeyAndTheCurrentUser()
         {
-            ServerNodeHandshake handshake = new(HandshakeOptions.None);
+            ServerNodeHandshake handshake = new(ServerHandshakeOptions.None);
 
             handshake.GetKeyWithEndpointIdentity().ShouldContain(handshake.GetKey());
             handshake.GetKeyWithEndpointIdentity().ShouldContain(Environment.UserName);
@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Only the derived names carry the user. The handshake exchanged over the wire must not,
             // or it would stop matching other MSBuild versions. The key is purely the numeric
             // handshake components, so no user string can have leaked into it.
-            ServerNodeHandshake handshake = new(HandshakeOptions.None);
+            ServerNodeHandshake handshake = new(ServerHandshakeOptions.None);
 
             handshake.GetKey().ShouldNotBeEmpty();
             handshake.GetKey().ToCharArray().ShouldAllBe(c => char.IsDigit(c) || c == ' ' || c == '-');
@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void ComputeHash_HashesTheUserScopedKey()
         {
-            ServerNodeHandshake handshake = new(HandshakeOptions.None);
+            ServerNodeHandshake handshake = new(ServerHandshakeOptions.None);
 
             // Hashing through the production HashKey pins which input is hashed without restating
             // the algorithm, so this fails if ComputeHash ever drops back to the bare key.
@@ -53,8 +53,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             // Guards against the hash ignoring part of its input, which would silently drop the user
             // scoping that GetKeyWithEndpointIdentity adds.
-            ServerNodeHandshake first = new(HandshakeOptions.None);
-            ServerNodeHandshake second = new(HandshakeOptions.NodeReuse);
+            ServerNodeHandshake first = new(ServerHandshakeOptions.None);
+            ServerNodeHandshake second = new(ServerHandshakeOptions.NodeReuse);
 
             first.GetKeyWithEndpointIdentity().ShouldNotBe(second.GetKeyWithEndpointIdentity());
             first.ComputeHash().ShouldNotBe(second.ComputeHash());
@@ -65,8 +65,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             // A client and the server it launches are separate processes that must agree on the
             // derived names, so the hash has to depend only on the handshake and the user.
-            ServerNodeHandshake first = new(HandshakeOptions.None);
-            ServerNodeHandshake second = new(HandshakeOptions.None);
+            ServerNodeHandshake first = new(ServerHandshakeOptions.None);
+            ServerNodeHandshake second = new(ServerHandshakeOptions.None);
 
             first.ComputeHash().ShouldBe(second.ComputeHash());
         }
@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             // The hash is embedded in '/tmp/...' pipe paths and 'Global\...' mutex names, so path and
             // namespace separators must not survive into it.
-            string hash = new ServerNodeHandshake(HandshakeOptions.None).ComputeHash();
+            string hash = new ServerNodeHandshake(ServerHandshakeOptions.None).ComputeHash();
 
             hash.ShouldNotBeEmpty();
             hash.ShouldNotContain("/");
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void ServerNames_AreAllDerivedFromTheUserScopedHash()
         {
-            ServerNodeHandshake handshake = new(HandshakeOptions.None);
+            ServerNodeHandshake handshake = new(ServerHandshakeOptions.None);
             string hash = handshake.ComputeHash();
 
             // Every machine-wide name the server uses must carry the user-scoped hash.
@@ -101,8 +101,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             // The resident server passes no instance id, so its endpoint must be exactly what it was
             // before transient servers became addressable separately.
-            ServerNodeHandshake withoutArgument = new(HandshakeOptions.None);
-            ServerNodeHandshake withExplicitNull = new(HandshakeOptions.None, instanceId: null);
+            ServerNodeHandshake withoutArgument = new(ServerHandshakeOptions.None);
+            ServerNodeHandshake withExplicitNull = new(ServerHandshakeOptions.None, instanceId: null);
 
             withExplicitNull.ComputeHash().ShouldBe(withoutArgument.ComputeHash());
         }
@@ -113,9 +113,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // A transient server serves one build and is then torn down, so no other client may be
             // able to reach it: otherwise it can be ordered to shut down mid-build, and concurrent
             // transient builds contend for one set of names instead of getting their own servers.
-            ServerNodeHandshake resident = new(HandshakeOptions.None);
-            ServerNodeHandshake first = new(HandshakeOptions.None, instanceId: "instance-one");
-            ServerNodeHandshake second = new(HandshakeOptions.None, instanceId: "instance-two");
+            ServerNodeHandshake resident = new(ServerHandshakeOptions.None);
+            ServerNodeHandshake first = new(ServerHandshakeOptions.None, instanceId: "instance-one");
+            ServerNodeHandshake second = new(ServerHandshakeOptions.None, instanceId: "instance-two");
 
             first.ComputeHash().ShouldNotBe(resident.ComputeHash());
             second.ComputeHash().ShouldNotBe(resident.ComputeHash());
@@ -127,8 +127,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             // The client and the transient server it launches are separate processes that must derive
             // the same names from the id passed on the command line.
-            ServerNodeHandshake client = new(HandshakeOptions.None, instanceId: "shared-id");
-            ServerNodeHandshake server = new(HandshakeOptions.None, instanceId: "shared-id");
+            ServerNodeHandshake client = new(ServerHandshakeOptions.None, instanceId: "shared-id");
+            ServerNodeHandshake server = new(ServerHandshakeOptions.None, instanceId: "shared-id");
 
             client.ComputeHash().ShouldBe(server.ComputeHash());
         }
@@ -138,8 +138,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             // The instance id scopes only the derived names. The handshake exchanged over the wire
             // answers "are we compatible", so putting the id in it would be a wire-format change.
-            ServerNodeHandshake resident = new(HandshakeOptions.None);
-            ServerNodeHandshake transientServer = new(HandshakeOptions.None, instanceId: "instance-one");
+            ServerNodeHandshake resident = new(ServerHandshakeOptions.None);
+            ServerNodeHandshake transientServer = new(ServerHandshakeOptions.None, instanceId: "instance-one");
 
             transientServer.GetKey().ShouldBe(resident.GetKey());
         }
@@ -147,8 +147,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void ServerNames_AllDifferBetweenTransientServers()
         {
-            ServerNodeHandshake first = new(HandshakeOptions.None, instanceId: "instance-one");
-            ServerNodeHandshake second = new(HandshakeOptions.None, instanceId: "instance-two");
+            ServerNodeHandshake first = new(ServerHandshakeOptions.None, instanceId: "instance-one");
+            ServerNodeHandshake second = new(ServerHandshakeOptions.None, instanceId: "instance-two");
 
             // Every name two transient servers could collide on has to be distinct, not just the pipe:
             // sharing either mutex would serialize them or make one refuse to start.

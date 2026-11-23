@@ -271,7 +271,7 @@ internal sealed class NodeEndpointOutOfProcTaskHost : INodeEndpoint
                 // The handshake protocol is a series of int exchanges.  The host sends us a each component, and we
                 // verify it. Afterwards, the host sends an "End of Handshake" signal, to which we respond in kind.
                 // Once the handshake is complete, both sides can be assured the other is ready to accept data.
-                Handshake handshake = new(CommunicationsUtilities.GetHandshakeOptions());
+                Clr2TaskHostHandshake handshake = new();
                 try
                 {
                     HandshakeComponents handshakeComponents = handshake.RetrieveHandshakeComponents();
@@ -308,7 +308,7 @@ internal sealed class NodeEndpointOutOfProcTaskHost : INodeEndpoint
                             // Based on this parent node decides how to communicate with the child.
                             if (_parentPacketVersion >= 2)
                             {
-                                _pipeServer.WriteIntForHandshake(Handshake.PacketVersionFromChildMarker);  // Marker: PacketVersion follows
+                                _pipeServer.WriteIntForHandshake(Clr2TaskHostHandshake.PacketVersionFromChildMarker);  // Marker: PacketVersion follows
                                 _pipeServer.WriteIntForHandshake(NodePacketTypeExtensions.PacketVersion);
                                 CommunicationsUtilities.Trace($"Sent PacketVersion: {NodePacketTypeExtensions.PacketVersion}");
                             }

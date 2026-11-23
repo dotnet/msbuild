@@ -3,7 +3,7 @@
 
 #nullable enable
 
-#if NETFRAMEWORK
+#if !NET
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]

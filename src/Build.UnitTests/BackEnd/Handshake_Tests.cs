@@ -2,6 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
+using System.IO.Pipes;
+using System.Reflection;
+using System.Threading.Tasks;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -48,7 +53,25 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             SetChangeWave(wave, env);
 
-            return new Handshake(options).GetKey();
+            return CreateHandshake(options).GetKey();
+        }
+
+        private static Handshake CreateHandshake(HandshakeOptions options)
+        {
+            var settings = (TaskHostHandshakeOptions)(options & ~(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.CLR2));
+            if (!Handshake.IsHandshakeOptionEnabled(options, HandshakeOptions.TaskHost))
+            {
+                return new WorkerNodeHandshake();
+            }
+
+            if (Handshake.IsHandshakeOptionEnabled(options, HandshakeOptions.NET))
+            {
+                return new NetTaskHostHandshake(settings);
+            }
+
+            return Handshake.IsHandshakeOptionEnabled(options, HandshakeOptions.CLR2)
+                ? new Clr2TaskHostHandshake(settings, BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot)
+                : new FrameworkTaskHostHandshake(settings);
         }
 
         [Fact]
@@ -106,10 +129,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture());
 
             SetChangeWave(ChangeWaves.LowestWave.ToString(), env);
-            string firstHash = new ServerNodeHandshake(options).ComputeHash();
+            string firstHash = new ServerNodeHandshake((ServerHandshakeOptions)options).ComputeHash();
 
             SetChangeWave(ChangeWaves.HighestWave.ToString(), env);
-            string secondHash = new ServerNodeHandshake(options).ComputeHash();
+            string secondHash = new ServerNodeHandshake((ServerHandshakeOptions)options).ComputeHash();
 
             secondHash.ShouldNotBe(firstHash);
         }
@@ -160,6 +183,74 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             waveSetKey.ShouldBe(unsetKey);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task TypedConnectionsPreserveWireIdentityAndPacketNegotiation(bool negotiateVersion)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", "typed-handshake-test");
+            SetChangeWave(ChangeWaves.LowestWave.ToString(), env);
+
+            const string taskHostDirectory = @"C:\external-msbuild";
+            Version taskHostVersion = new(18, 1, 2, 3);
+            Version localVersion = new(typeof(IBuildEngine).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
+            using Process process = Process.GetCurrentProcess();
+            int sessionId = NativeMethods.IsWindows ? process.SessionId : 0;
+            string toolsDirectory = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+            int taskSalt = CommunicationsUtilities.GetHashCode("typed-handshake-test" + taskHostDirectory);
+            int nodeSalt = CommunicationsUtilities.GetHashCode("typed-handshake-test" + toolsDirectory + ChangeWaves.DisabledWave);
+            HandshakeOptions workerOptions = CommunicationsUtilities.GetHandshakeOptions(
+                taskHost: false, TaskHostParameters.Empty,
+                architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: true, lowPriority: true);
+
+            await VerifyConnection(new WorkerNodeHandshake(nodeReuse: true, lowPriority: true), workerOptions, nodeSalt, localVersion, sessionId);
+            await VerifyConnection(new ServerNodeHandshake((ServerHandshakeOptions)workerOptions), workerOptions, nodeSalt, localVersion, 0);
+            TaskHostHandshake netHost = new NetTaskHostHandshake(TaskHostHandshakeOptions.X64, taskHostDirectory);
+            await VerifyConnection(netHost, HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.X64, taskSalt, new Version(99, 99, 99, 99), sessionId);
+            await VerifyConnection(new FrameworkTaskHostHandshake(TaskHostHandshakeOptions.X64, taskHostDirectory, taskHostVersion),
+                HandshakeOptions.TaskHost | HandshakeOptions.X64, taskSalt, taskHostVersion, sessionId);
+            await VerifyConnection(new Clr2TaskHostHandshake(TaskHostHandshakeOptions.X64, taskHostDirectory, taskHostVersion),
+                HandshakeOptions.TaskHost | HandshakeOptions.CLR2 | HandshakeOptions.X64, taskSalt, taskHostVersion, sessionId);
+
+            async Task VerifyConnection<THandshake>(THandshake handshake, HandshakeOptions options, int salt, Version version, int expectedSessionId)
+                where THandshake : INodeHandshake
+            {
+                string pipeName = $"msbuild-typed-handshake-{Guid.NewGuid():N}";
+                using NamedPipeServerStream server = new(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+                using NamedPipeClientStream client = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+                Task peer = Task.Run(async () =>
+                {
+                    using IDisposable peerLifetime = server;
+                    await server.WaitForConnectionAsync();
+                    int[] expected = [
+                        (int)options | (CommunicationsUtilities.handshakeVersion << 24),
+                        salt, version.Major, version.Minor, version.Build, version.Revision, expectedSessionId];
+                    foreach (int component in expected)
+                    {
+                        ReadInt().ShouldBe(CommunicationsUtilities.AvoidEndOfHandshakeSignal(component));
+                    }
+
+                    ReadInt().ShouldBe(-0x2a2a2a2a);
+                    if (negotiateVersion)
+                    {
+                        server.WriteIntForHandshake(Handshake.PacketVersionFromChildMarker);
+                        server.WriteIntForHandshake(2);
+                    }
+
+                    server.WriteEndOfHandshakeSignal();
+
+                    int ReadInt()
+                        => (server.ReadByte() << 24) | (server.ReadByte() << 16) | (server.ReadByte() << 8) | server.ReadByte();
+                });
+
+                bool connected = NodeConnection<THandshake>.TryConnectToPipeStream(client, pipeName, handshake, 10_000, out HandshakeResult result);
+                await peer;
+                connected.ShouldBeTrue();
+                result.NegotiatedPacketVersion.ShouldBe((byte)(negotiateVersion ? 2 : 1));
+            }
+        }
+
 #if !NETFRAMEWORK
         /// <summary>
         /// A .NET Framework (CLR4) task host launched from .NET MSBuild comes from a Visual Studio installation,
@@ -168,10 +259,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void Clr4TaskHostHandshakeUsesExplicitToolsDirectoryAndFileVersion()
         {
-            HandshakeOptions options = HandshakeOptions.TaskHost | HandshakeOptions.X64;
+            TaskHostHandshakeOptions options = TaskHostHandshakeOptions.X64;
             const string toolsDirectory = @"C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin";
 
-            Handshake handshake = new(options, toolsDirectory, new Version(18, 1, 2, 3));
+            FrameworkTaskHostHandshake handshake = new(options, toolsDirectory, new Version(18, 1, 2, 3));
             HandshakeComponents components = handshake.RetrieveHandshakeComponents();
 
             components.FileVersionMajor.ShouldBe(18);
@@ -179,25 +270,25 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             components.FileVersionBuild.ShouldBe(2);
             components.FileVersionPrivate.ShouldBe(3);
 
-            new Handshake(options, toolsDirectory, new Version(18, 1, 2, 3)).GetKey().ShouldBe(handshake.GetKey());
-            new Handshake(options, toolsDirectory + "2", new Version(18, 1, 2, 3)).RetrieveHandshakeComponents().Salt.ShouldNotBe(components.Salt);
-            new Handshake(options).RetrieveHandshakeComponents().Salt.ShouldNotBe(components.Salt);
+            new FrameworkTaskHostHandshake(options, toolsDirectory, new Version(18, 1, 2, 3)).GetKey().ShouldBe(handshake.GetKey());
+            new FrameworkTaskHostHandshake(options, toolsDirectory + "2", new Version(18, 1, 2, 3)).RetrieveHandshakeComponents().Salt.ShouldNotBe(components.Salt);
+            new FrameworkTaskHostHandshake(options).RetrieveHandshakeComponents().Salt.ShouldNotBe(components.Salt);
         }
 
         [Fact]
         public void Clr2TaskHostHandshakeUsesExecutableDirectoryAndFileVersion()
         {
-            HandshakeOptions options = HandshakeOptions.TaskHost | HandshakeOptions.CLR2 | HandshakeOptions.X64;
+            TaskHostHandshakeOptions options = TaskHostHandshakeOptions.X64;
             const string directory = @"C:\Visual Studio\MSBuild\Current\Bin\amd64";
             Version version = new(18, 1, 2, 3);
 
-            HandshakeComponents components = new Handshake(options, directory, version).RetrieveHandshakeComponents();
+            HandshakeComponents components = new Clr2TaskHostHandshake(options, directory, version).RetrieveHandshakeComponents();
             components.FileVersionMajor.ShouldBe(18);
             components.FileVersionMinor.ShouldBe(1);
             components.FileVersionBuild.ShouldBe(2);
             components.FileVersionPrivate.ShouldBe(3);
-            new Handshake(options, directory + "2", version).RetrieveHandshakeComponents().Salt.ShouldNotBe(components.Salt);
-            new Handshake(options, directory, new Version(18, 1, 2, 4)).RetrieveHandshakeComponents().FileVersionPrivate.ShouldNotBe(components.FileVersionPrivate);
+            new Clr2TaskHostHandshake(options, directory + "2", version).RetrieveHandshakeComponents().Salt.ShouldNotBe(components.Salt);
+            new Clr2TaskHostHandshake(options, directory, new Version(18, 1, 2, 4)).RetrieveHandshakeComponents().FileVersionPrivate.ShouldNotBe(components.FileVersionPrivate);
         }
 #endif
     }

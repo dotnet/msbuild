@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests
         [UnixOnlyFact]
         public void Handshake_OnUnix_SessionIdIsZero()
         {
-            var handshake = new Handshake(HandshakeOptions.NodeReuse);
+            var handshake = new WorkerNodeHandshake(nodeReuse: true);
 
             // Use the structured accessor rather than parsing the key string
             handshake.RetrieveHandshakeComponents().SessionId.ShouldBe(0,
@@ -33,8 +33,8 @@ namespace Microsoft.Build.UnitTests
             // because SessionId is always 0 (not terminal-specific).
             // Note: this runs in a single process, so it validates determinism
             // rather than cross-terminal behavior (which requires integration testing).
-            var h1 = new Handshake(HandshakeOptions.NodeReuse);
-            var h2 = new Handshake(HandshakeOptions.NodeReuse);
+            var h1 = new WorkerNodeHandshake(nodeReuse: true);
+            var h2 = new WorkerNodeHandshake(nodeReuse: true);
 
             h1.GetKey().ShouldBe(h2.GetKey());
         }

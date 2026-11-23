@@ -9,7 +9,19 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Internal;
 
-internal sealed class ServerNodeHandshake : Handshake
+[Flags]
+internal enum ServerHandshakeOptions
+{
+    None = 0,
+    X64 = HandshakeOptions.X64,
+    NodeReuse = HandshakeOptions.NodeReuse,
+    LowPriority = HandshakeOptions.LowPriority,
+    Administrator = HandshakeOptions.Administrator,
+    NET = HandshakeOptions.NET,
+    Arm64 = HandshakeOptions.Arm64,
+}
+
+internal sealed class ServerNodeHandshake : NodeHandshake
 {
     /// <summary>
     /// Caching computed hash.
@@ -32,8 +44,8 @@ internal sealed class ServerNodeHandshake : Handshake
 
     public override byte? ExpectedVersionInFirstByte => null;
 
-    internal ServerNodeHandshake(HandshakeOptions nodeType, string? instanceId = null)
-        : base(nodeType, includeSessionId: false, toolsDirectory: null)
+    internal ServerNodeHandshake(ServerHandshakeOptions options, string? instanceId = null)
+        : base((HandshakeOptions)options, includeSessionId: false, toolsDirectory: null)
     {
         _instanceId = instanceId;
     }

@@ -7,6 +7,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
 using Shouldly;
 using Xunit;
+using NodeEndpointOutOfProcBase = Microsoft.Build.BackEnd.NodeEndpointOutOfProcBase<Microsoft.Build.Internal.NetTaskHostHandshake>;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {

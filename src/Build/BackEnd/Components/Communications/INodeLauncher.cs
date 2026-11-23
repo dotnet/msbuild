@@ -13,7 +13,6 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     /// <param name="MSBuildLocation">The path to the executable to launch (e.g., MSBuild.exe or dotnet.exe).</param>
     /// <param name="CommandLineArgs">The command line arguments to pass to the executable.</param>
-    /// <param name="Handshake">The handshake data used to establish communication with the node process.</param>
     /// <param name="EnvironmentOverrides">
     /// Optional environment variable overrides for the process.
     /// A non-null value sets or overrides that variable. A null value removes the variable
@@ -24,8 +23,14 @@ namespace Microsoft.Build.BackEnd
     internal readonly record struct NodeLaunchData(
         string MSBuildLocation,
         string CommandLineArgs,
-        Handshake? Handshake = null,
         IDictionary<string, string?>? EnvironmentOverrides = null);
+
+    internal readonly record struct NodeLaunchData<THandshake>(
+        string MSBuildLocation,
+        string CommandLineArgs,
+        THandshake Handshake,
+        IDictionary<string, string?>? EnvironmentOverrides = null)
+        where THandshake : INodeHandshake;
 
     internal interface INodeLauncher
     {

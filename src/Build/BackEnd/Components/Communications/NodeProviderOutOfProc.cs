@@ -19,7 +19,7 @@ namespace Microsoft.Build.BackEnd
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
     /// which act as child nodes for the build system.
     /// </summary>
-    internal class NodeProviderOutOfProc : NodeProviderOutOfProcBase, INodeProvider
+    internal class NodeProviderOutOfProc : NodeProviderOutOfProcBase<WorkerNodeHandshake>, INodeProvider
     {
         /// <summary>
         /// A mapping of all the nodes managed by this provider.
@@ -67,10 +67,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="enableNodeReuse">Is reuse of build nodes allowed?</param>
         /// <param name="enableLowPriority">Is the build running at low priority?</param>
-        internal static Handshake GetHandshake(bool enableNodeReuse, bool enableLowPriority)
+        internal static WorkerNodeHandshake GetHandshake(bool enableNodeReuse, bool enableLowPriority)
         {
             CommunicationsUtilities.Trace($"""MSBUILDNODEHANDSHAKESALT="{Traits.MSBuildNodeHandshakeSalt}", msbuildDirectory="{BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32}", enableNodeReuse={enableNodeReuse}, enableLowPriority={enableLowPriority}""");
-            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: enableNodeReuse, lowPriority: enableLowPriority));
+            return new WorkerNodeHandshake(enableNodeReuse, enableLowPriority);
         }
 
         /// <summary>
@@ -88,13 +88,13 @@ namespace Microsoft.Build.BackEnd
             }
 
             ConcurrentBag<NodeInfo> nodes = new();
-            Handshake hostHandshake = new(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority));
+            WorkerNodeHandshake hostHandshake = new(ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority);
 
             // Start the new process.  We pass in a node mode with a node number of 1, to indicate that we
             // want to start up just a standard MSBuild out-of-proc node.
             // Note: We need to always pass /nodeReuse to ensure the value for /nodeReuse from msbuild.rsp
             // (next to msbuild.exe) is ignored.
-            NodeLaunchData nodeLaunchData = new(
+            NodeLaunchData<WorkerNodeHandshake> nodeLaunchData = new(
                 MSBuildLocation: null,
                 CommandLineArgs: $"/noautoresponse /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcNode)} /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}",
                 Handshake: hostHandshake,

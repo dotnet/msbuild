@@ -10,7 +10,11 @@ namespace Microsoft.Build.CommandLine
     /// <summary>
     /// This is an implementation of INodeEndpoint for the out-of-proc nodes.  It acts only as a client.
     /// </summary>
-    internal class NodeEndpointOutOfProcTaskHost : NodeEndpointOutOfProcBase
+#if RUNTIME_TYPE_NETCORE
+    internal class NodeEndpointOutOfProcTaskHost : NodeEndpointOutOfProcBase<NetTaskHostHandshake>
+#else
+    internal class NodeEndpointOutOfProcTaskHost : NodeEndpointOutOfProcBase<FrameworkTaskHostHandshake>
+#endif
     {
         internal bool _nodeReuse;
 
@@ -32,7 +36,20 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Returns the host handshake for this node endpoint
         /// </summary>
-        protected override Handshake GetHandshake() =>
-            new(CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: TaskHostParameters.Empty, nodeReuse: _nodeReuse));
+#if RUNTIME_TYPE_NETCORE
+        protected override NetTaskHostHandshake GetHandshake()
+#else
+        protected override FrameworkTaskHostHandshake GetHandshake()
+#endif
+        {
+            var options = (TaskHostHandshakeOptions)(CommunicationsUtilities.GetHandshakeOptions(
+                taskHost: true, taskHostParameters: TaskHostParameters.Empty, nodeReuse: _nodeReuse)
+                & ~(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.CLR2));
+#if RUNTIME_TYPE_NETCORE
+            return new NetTaskHostHandshake(options);
+#else
+            return new FrameworkTaskHostHandshake(options);
+#endif
+        }
     }
 }

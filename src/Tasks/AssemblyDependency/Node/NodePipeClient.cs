@@ -19,7 +19,7 @@ namespace Microsoft.Build.Internal
 
         private readonly NamedPipeClientStream _pipeClient;
 
-        internal NodePipeClient(string pipeName, Handshake handshake)
+        internal NodePipeClient(string pipeName, ServerNodeHandshake handshake)
             : base(pipeName, handshake) =>
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             _pipeClient = new(

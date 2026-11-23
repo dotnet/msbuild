@@ -33,6 +33,37 @@ Endpoints (nodes) communicate via named pipes (Windows or named pipes API implem
 
 The validation of transport is done via [proprietary handshake](https://github.com/dotnet/msbuild/blob/main/src/Build/BackEnd/Components/Communications/NodeProviderOutOfProcBase.cs#L501-L508).
 
+### Handshake types
+
+The internal C# 15 `Handshake` union contains five protocol types:
+
+| Type | Installation identity | Session and compatibility rules |
+| --- | --- | --- |
+| `WorkerNodeHandshake` | Current tools directory and Framework assembly file version | Includes the Windows session and resolved change wave. |
+| `ServerNodeHandshake` | Current tools directory and Framework assembly file version | Uses session zero. Its key omits the session, and its first-byte check remains disabled. RAR uses this same protocol. |
+| `NetTaskHostHandshake` | SDK tools directory and version sentinel `99` | Includes the Windows session but excludes change waves. Preserves the existing architecture and drive-letter tolerance. |
+| `FrameworkTaskHostHandshake` | Current installation, or explicit host tools directory and file version | Includes the Windows session but excludes change waves. Supports CLR4 hosts from another Visual Studio installation. |
+| `Clr2TaskHostHandshake` | Task-host executable directory and file version | Includes the Windows session but excludes change waves. Matches the standalone CLR2 host protocol. |
+
+`TaskHostHandshake` is a separate union that contains only the three task-host types.
+Task-host configuration options cannot name a different runtime or node kind.
+Worker handshakes derive their configuration from the current process.
+
+`NodeEndpointOutOfProcBase<THandshake>` binds each endpoint to its required handshake type.
+The CLI task-host endpoint uses `NetTaskHostHandshake` or `FrameworkTaskHostHandshake`, depending on its runtime.
+The standalone CLR2 endpoint constructs only its own `Clr2TaskHostHandshake`.
+`NodeProviderOutOfProcBase<THandshake>` accepts only `NodeLaunchData<THandshake>`.
+Worker providers require `WorkerNodeHandshake`, and task-host providers require `TaskHostHandshake`.
+`NodeConnection<THandshake>` also requires the selected handshake type when it connects to a pipe.
+A worker handshake cannot be passed to a server endpoint or converted to `TaskHostHandshake`.
+The process launcher receives only process configuration, not an untyped handshake.
+
+This refactoring does not change the wire format.
+All protocols still send seven big-endian integers and the existing end marker.
+Task hosts retain their packet-version negotiation and legacy version-one fallback.
+Node reuse and task-host connection lifetimes retain their existing rules.
+The refactoring changes internal APIs only, so it does not require a ChangeWave.
+
 `NodeEndpointOutOfProcBase` combines queued logging packet frames into pipe writes up to a configurable byte budget. `MSBUILDLOGPACKETBATCHSIZE` sets that budget in bytes: the default is 64 KiB, zero disables batching, and values from zero through 1 MiB are accepted inclusively. Invalid values use the default. Each packet is serialized independently with its existing type, length, payload, and negotiated version; batching does not change the wire format or binary log contents. Pending frames are written when the queue drains, before control packets, and before shutdown, without waiting for more packets. Frames at least as large as a configured positive limit bypass the batch buffer. This setting controls user-space logging writes independently of `MSBUILDNODECONNECTIONBUFFERSIZE`, which controls the kernel pipe buffer size.
 
 

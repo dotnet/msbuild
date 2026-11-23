@@ -34,7 +34,7 @@ namespace Microsoft.Build.Internal
 
         private readonly NamedPipeServerStream _pipeServer;
 
-        internal NodePipeServer(string pipeName, Handshake handshake, int maxNumberOfServerInstances = 1)
+        internal NodePipeServer(string pipeName, ServerNodeHandshake handshake, int maxNumberOfServerInstances = 1)
             : base(pipeName, handshake)
         {
             PipeOptions pipeOptions = PipeOptions.Asynchronous;

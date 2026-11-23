@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
         internal static SharedConfig CreateConfig(int maxNumberOfServerInstances)
         {
-            ServerNodeHandshake handshake = new(HandshakeOptions.None);
+            ServerNodeHandshake handshake = new(ServerHandshakeOptions.None);
             NodePacketFactory packetFactory = new();
             packetFactory.RegisterPacketHandler(NodePacketType.RarNodeExecuteRequest, static t => new RarNodeExecuteRequest(t), null);
 

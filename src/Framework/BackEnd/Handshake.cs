@@ -9,17 +9,151 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Internal;
 
-internal class Handshake
+internal interface INodeHandshake
 {
-    /// <summary>
-    /// Marker indicating that the next integer in the child handshake response is the PacketVersion.
-    /// </summary>
-    public const int PacketVersionFromChildMarker = -1;
+    HandshakeOptions HandshakeOptions { get; }
+    HandshakeComponents RetrieveHandshakeComponents();
+    string GetKey();
+    byte? ExpectedVersionInFirstByte { get; }
+    bool IsNetTaskHostSaltMatch(int receivedSalt);
+}
 
-    // The number is selected as an arbitrary value that is unlikely to conflict with any future sdk version.
+/// <summary>
+/// The closed set of handshake protocols. Node APIs use a concrete case, not this union.
+/// </summary>
+internal union Handshake(
+    WorkerNodeHandshake,
+    ServerNodeHandshake,
+    NetTaskHostHandshake,
+    FrameworkTaskHostHandshake,
+    Clr2TaskHostHandshake) : INodeHandshake
+{
+    public const int PacketVersionFromChildMarker = -1;
     public const int NetTaskHostHandshakeVersion = 99;
 
+    private INodeHandshake Protocol => this switch
+    {
+        WorkerNodeHandshake handshake => handshake,
+        ServerNodeHandshake handshake => handshake,
+        NetTaskHostHandshake handshake => handshake,
+        FrameworkTaskHostHandshake handshake => handshake,
+        Clr2TaskHostHandshake handshake => handshake,
+    };
+
+    public HandshakeOptions HandshakeOptions => Protocol.HandshakeOptions;
+    public HandshakeComponents RetrieveHandshakeComponents() => Protocol.RetrieveHandshakeComponents();
+    public string GetKey() => Protocol.GetKey();
+    public byte? ExpectedVersionInFirstByte => Protocol.ExpectedVersionInFirstByte;
+    public bool IsNetTaskHostSaltMatch(int receivedSalt) => Protocol.IsNetTaskHostSaltMatch(receivedSalt);
+
+    internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option)
+        => (hostContext & option) == option;
+}
+
+/// <summary>
+/// A task-host node can use only one of the three task-host protocols.
+/// </summary>
+internal union TaskHostHandshake(
+    NetTaskHostHandshake,
+    FrameworkTaskHostHandshake,
+    Clr2TaskHostHandshake) : INodeHandshake
+{
+    private INodeHandshake Protocol => this switch
+    {
+        NetTaskHostHandshake handshake => handshake,
+        FrameworkTaskHostHandshake handshake => handshake,
+        Clr2TaskHostHandshake handshake => handshake,
+    };
+
+    public HandshakeOptions HandshakeOptions => Protocol.HandshakeOptions;
+    public HandshakeComponents RetrieveHandshakeComponents() => Protocol.RetrieveHandshakeComponents();
+    public string GetKey() => Protocol.GetKey();
+    public byte? ExpectedVersionInFirstByte => Protocol.ExpectedVersionInFirstByte;
+    public bool IsNetTaskHostSaltMatch(int receivedSalt) => Protocol.IsNetTaskHostSaltMatch(receivedSalt);
+}
+
+/// <summary>
+/// Task-host configuration without runtime or node-kind discriminators.
+/// </summary>
+[Flags]
+internal enum TaskHostHandshakeOptions
+{
+    None = 0,
+    X64 = HandshakeOptions.X64,
+    NodeReuse = HandshakeOptions.NodeReuse,
+    LowPriority = HandshakeOptions.LowPriority,
+    Administrator = HandshakeOptions.Administrator,
+    Arm64 = HandshakeOptions.Arm64,
+    SidecarTaskHost = HandshakeOptions.SidecarTaskHost,
+}
+
+internal sealed class WorkerNodeHandshake : NodeHandshake
+{
+    internal WorkerNodeHandshake(bool nodeReuse = false, bool lowPriority = false)
+        : base(CommunicationsUtilities.GetHandshakeOptions(
+            taskHost: false,
+            taskHostParameters: TaskHostParameters.Empty,
+            architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(),
+            nodeReuse: nodeReuse,
+            lowPriority: lowPriority), includeSessionId: true, toolsDirectory: null)
+    {
+    }
+}
+
+internal sealed class NetTaskHostHandshake : NodeHandshake
+{
+    private protected override bool IncludesChangeWave => false;
+    private protected override bool AcceptsDriveLetterCaseVariant => true;
+
+    internal NetTaskHostHandshake(TaskHostHandshakeOptions options = TaskHostHandshakeOptions.None, string? toolsDirectory = null)
+        : base((HandshakeOptions)options | HandshakeOptions.TaskHost | HandshakeOptions.NET, includeSessionId: true, toolsDirectory)
+    {
+    }
+
+    private protected override HandshakeComponents CreateComponents(int options, int salt, int sessionId, Version? fileVersion) => new(
+        options,
+        salt,
+        Handshake.NetTaskHostHandshakeVersion,
+        Handshake.NetTaskHostHandshakeVersion,
+        Handshake.NetTaskHostHandshakeVersion,
+        Handshake.NetTaskHostHandshakeVersion,
+        sessionId);
+}
+
+internal sealed class FrameworkTaskHostHandshake : NodeHandshake
+{
+    private protected override bool IncludesChangeWave => false;
+
+    internal FrameworkTaskHostHandshake(TaskHostHandshakeOptions options = TaskHostHandshakeOptions.None)
+        : base((HandshakeOptions)options | HandshakeOptions.TaskHost, includeSessionId: true, toolsDirectory: null)
+    {
+    }
+
+    internal FrameworkTaskHostHandshake(TaskHostHandshakeOptions options, string toolsDirectory, Version fileVersion)
+        : base((HandshakeOptions)options | HandshakeOptions.TaskHost, includeSessionId: true, toolsDirectory, fileVersion)
+    {
+    }
+}
+
+internal sealed class Clr2TaskHostHandshake : NodeHandshake
+{
+    private protected override bool IncludesChangeWave => false;
+
+    internal Clr2TaskHostHandshake(TaskHostHandshakeOptions options, string toolsDirectory, Version? fileVersion = null)
+        : base((HandshakeOptions)options | HandshakeOptions.TaskHost | HandshakeOptions.CLR2, includeSessionId: true, toolsDirectory, fileVersion)
+    {
+    }
+}
+
+/// <summary>
+/// Shared wire encoding, deliberately unavailable as a node API parameter.
+/// </summary>
+internal abstract class NodeHandshake : INodeHandshake
+{
     protected readonly HandshakeComponents _handshakeComponents;
+
+    private protected virtual bool IncludesChangeWave => true;
+    private protected virtual bool AcceptsDriveLetterCaseVariant => false;
 
     /// <summary>
     /// For the .NET task host on Windows, the salt computed from the tools directory with the
@@ -33,76 +167,12 @@ internal class Handshake
     /// </summary>
     private readonly int? _netTaskHostSaltDriveCaseVariant;
 
-    /// <summary>
-    ///  Initializes a new instance of the <see cref="Handshake"/> class with the specified node type.
-    /// </summary>
-    /// <param name="nodeType">
-    ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
-    /// </param>
-    public Handshake(HandshakeOptions nodeType)
-        : this(nodeType, includeSessionId: true, toolsDirectory: null)
-    {
-    }
-
-    /// <summary>
-    ///  Initializes a new instance of the <see cref="Handshake"/> class with the specified node type
-    ///  and optional predefined tools directory.
-    /// </summary>
-    /// <param name="nodeType">
-    ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
-    /// </param>
-    /// <param name="toolsDirectory">
-    ///  The directory path to use for handshake salt calculation. For some task hosts, notably the .NET TaskHost (on .NET Framework)
-    ///  and the CLR2 TaskHost, this is needed to ensure the child process connects with the expected tools directory context.
-    /// </param>
-    public Handshake(HandshakeOptions nodeType, string toolsDirectory)
-        : this(nodeType, includeSessionId: true, toolsDirectory)
-    {
-    }
-
-    /// <summary>
-    ///  Initializes a new instance of the <see cref="Handshake"/> class for a task host that is a different
-    ///  MSBuild installation than the current process, for example a .NET Framework (CLR4) task host in a
-    ///  Visual Studio installation launched from .NET MSBuild.
-    /// </summary>
-    /// <param name="nodeType">
-    ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
-    /// </param>
-    /// <param name="toolsDirectory">
-    ///  The tools directory root of the task host's MSBuild installation, used for the handshake salt calculation.
-    /// </param>
-    /// <param name="fileVersion">
-    ///  The file version of the task host's Microsoft.Build.Framework assembly, which the task host uses in its handshake.
-    /// </param>
-    public Handshake(HandshakeOptions nodeType, string toolsDirectory, Version fileVersion)
-        : this(nodeType, includeSessionId: true, toolsDirectory, fileVersion)
-    {
-    }
-
-    // Helper method to validate handshake option presence
-    internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option)
-        => (hostContext & option) == option;
-
     // Source options of the handshake.
-    internal HandshakeOptions HandshakeOptions { get; }
+    public HandshakeOptions HandshakeOptions { get; }
 
-    protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string? toolsDirectory, Version? fileVersion = null)
+    private protected NodeHandshake(HandshakeOptions nodeType, bool includeSessionId, string? toolsDirectory, Version? fileVersion = null)
     {
         HandshakeOptions = nodeType;
-
-#if NETFRAMEWORK
-        Assumed.True(
-            toolsDirectory is null || IsNetTaskHost || IsClr2TaskHost,
-            $"{toolsDirectory} should only be provided for .NET or CLR2 TaskHost nodes.");
-        Assumed.True(fileVersion is null, "A file version should not have been provided.");
-#else
-        // IsNetTaskHost covers the case when NET process spawns NET TaskHost.
-        // A .NET Framework task host comes from a different Visual Studio installation.
-        Assumed.True(
-            toolsDirectory is null || IsTaskHost,
-            $"{toolsDirectory} should not have been provided.");
-        Assumed.True(fileVersion is null || IsFrameworkTaskHost, "A file version should only be provided for .NET Framework TaskHost nodes.");
-#endif
 
         toolsDirectory ??= BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
@@ -128,7 +198,7 @@ internal class Handshake
         // case-sensitive hash, that produces a mismatch and the otherwise-valid handshake fails with
         // MSB4216. Precompute the salt for the alternate drive-letter casing so the child also accepts
         // the parent's spelling (see IsNetTaskHostSaltMatch). Only the child consults this value.
-        if (IsNetTaskHost && TryGetDriveLetterCaseVariant(toolsDirectory, out string? alternateToolsDirectory))
+        if (AcceptsDriveLetterCaseVariant && TryGetDriveLetterCaseVariant(toolsDirectory, out string? alternateToolsDirectory))
         {
             _netTaskHostSaltDriveCaseVariant = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{alternateToolsDirectory}{changeWaveSalt}");
         }
@@ -149,16 +219,8 @@ internal class Handshake
             sessionId = currentProcess.SessionId;
         }
 
-        _handshakeComponents = IsNetTaskHost
-            ? CreateNetTaskHostComponents(options, salt, sessionId)
-            : CreateStandardComponents(options, salt, sessionId, fileVersion);
+        _handshakeComponents = CreateComponents(options, salt, sessionId, fileVersion);
     }
-
-    private bool IsNetTaskHost
-        => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET | HandshakeOptions.TaskHost);
-
-    private bool IsTaskHost
-        => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.TaskHost);
 
     /// <summary>
     /// The part of the handshake salt that represents the change wave this process resolved, so that nodes
@@ -179,7 +241,7 @@ internal class Handshake
     /// </summary>
     private string GetChangeWaveSalt()
     {
-        if (IsTaskHost)
+        if (!IncludesChangeWave)
         {
             return string.Empty;
         }
@@ -230,28 +292,7 @@ internal class Handshake
         return true;
     }
 
-#if NETFRAMEWORK
-    private bool IsClr2TaskHost
-        => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2 | HandshakeOptions.TaskHost);
-#else
-    /// <summary>
-    /// A task host that is not a .NET task host runs on .NET Framework.
-    /// </summary>
-    private bool IsFrameworkTaskHost
-        => IsTaskHost
-            && !IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET);
-#endif
-
-    private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(
-        options,
-        salt,
-        NetTaskHostHandshakeVersion,
-        NetTaskHostHandshakeVersion,
-        NetTaskHostHandshakeVersion,
-        NetTaskHostHandshakeVersion,
-        sessionId);
-
-    private static HandshakeComponents CreateStandardComponents(int options, int salt, int sessionId, Version? fileVersion)
+    private protected virtual HandshakeComponents CreateComponents(int options, int salt, int sessionId, Version? fileVersion)
     {
         // Read the file version from the assembly's AssemblyFileVersionAttribute rather than from the file on
         // disk: Assembly.Location is empty in a single-file/Native AOT host (and the on-disk read carries an

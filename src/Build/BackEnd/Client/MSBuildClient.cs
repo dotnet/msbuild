@@ -668,7 +668,7 @@ namespace Microsoft.Build.Server
         }
 
         private ServerNodeHandshake GetHandshake() => new(
-            CommunicationsUtilities.GetHandshakeOptions(
+            (ServerHandshakeOptions)CommunicationsUtilities.GetHandshakeOptions(
                 taskHost: false,
                 taskHostParameters: TaskHostParameters.Empty,
                 architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()),
@@ -778,7 +778,7 @@ namespace Microsoft.Build.Server
                 bool connected;
                 try
                 {
-                    connected = NodeProviderOutOfProcBase.TryConnectToPipeStream(
+                    connected = NodeConnection<ServerNodeHandshake>.TryConnectToPipeStream(
                         _nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds), out result);
                 }
                 catch (TimeoutException)
@@ -794,7 +794,7 @@ namespace Microsoft.Build.Server
                 }
                 catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
-                    // Mirror the exception-tolerant behavior of NodeProviderOutOfProcBase.TryConnectToProcess
+                    // Mirror the exception-tolerant behavior of the node provider's process connection.
                     // so any non-critical failure (UnauthorizedAccessException, IOException,
                     // InvalidOperationException, etc.) routes through the standard fallback path
                     // rather than escaping out of MSBuildClient.Execute.

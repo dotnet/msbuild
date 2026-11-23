@@ -327,7 +327,7 @@ public sealed class NodeEndpointReadLoop_Tests(ITestOutputHelper output)
         return diagnostic;
 
         void SetField(string name, object value) =>
-            typeof(NodeEndpointOutOfProcBase).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(endpoint, value);
+            typeof(NodeEndpointOutOfProcBase<WorkerNodeHandshake>).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(endpoint, value);
     }
 
     private sealed class RawPacket(int frameSize, NodePacketType type = NodePacketType.LogMessage, Action? beforeTranslate = null) : INodePacket
@@ -371,11 +371,11 @@ public sealed class NodeEndpointReadLoop_Tests(ITestOutputHelper output)
         }
     }
 
-    private sealed class TestEndpoint : NodeEndpointOutOfProcBase
+    private sealed class TestEndpoint : NodeEndpointOutOfProcBase<WorkerNodeHandshake>
     {
         public TestEndpoint() => ChangeLinkStatus(LinkStatus.Active);
 
-        protected override Handshake GetHandshake() => throw new NotSupportedException();
+        protected override WorkerNodeHandshake GetHandshake() => throw new NotSupportedException();
     }
 
     private sealed class FailingReadStream : MemoryStream

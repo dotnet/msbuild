@@ -1,16 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
     /// This is an implementation of INodeEndpoint for the out-of-proc nodes.  It acts only as a client.
     /// </summary>
-    internal sealed class NodeEndpointOutOfProc : NodeEndpointOutOfProcBase
+    internal sealed class NodeEndpointOutOfProc : NodeEndpointOutOfProcBase<WorkerNodeHandshake>
     {
         private readonly bool _enableReuse;
 
@@ -32,15 +30,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the host handshake for this node endpoint.
         /// </summary>
-        protected override Handshake GetHandshake()
+        protected override WorkerNodeHandshake GetHandshake()
         {
-            HandshakeOptions handshakeOptions = CommunicationsUtilities.GetHandshakeOptions(
-                taskHost: false,
-                taskHostParameters: TaskHostParameters.Empty,
-                architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(),
-                nodeReuse: _enableReuse,
-                lowPriority: LowPriority);
-            return new Handshake(handshakeOptions);
+            return new WorkerNodeHandshake(nodeReuse: _enableReuse, lowPriority: LowPriority);
         }
     }
 }

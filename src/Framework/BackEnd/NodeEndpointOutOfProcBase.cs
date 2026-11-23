@@ -32,7 +32,8 @@ namespace Microsoft.Build.BackEnd;
 /// This is an implementation of INodeEndpoint for the out-of-proc nodes.  It acts only as a client.
 /// </summary>
 [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is expected to keep the stream open for the process lifetime")]
-internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
+internal abstract class NodeEndpointOutOfProcBase<THandshake> : INodeEndpoint
+    where THandshake : INodeHandshake
 {
 #if NETCOREAPP2_1_OR_GREATER
     /// <summary>
@@ -278,7 +279,7 @@ internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     /// <summary>
     /// Returns the host handshake for this node endpoint.
     /// </summary>
-    protected abstract Handshake GetHandshake();
+    protected abstract THandshake GetHandshake();
 
     /// <summary>
     /// Updates the current link status if it has changed and notifies any registered delegates.
@@ -399,7 +400,7 @@ internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
                 // The handshake protocol is a series of int exchanges.  The host sends us a each component, and we
                 // verify it. Afterwards, the host sends an "End of Handshake" signal, to which we respond in kind.
                 // Once the handshake is complete, both sides can be assured the other is ready to accept data.
-                Handshake handshake = GetHandshake();
+                THandshake handshake = GetHandshake();
                 try
                 {
                     HandshakeComponents handshakeComponents = handshake.RetrieveHandshakeComponents();
@@ -540,7 +541,7 @@ internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     /// <summary>
     /// Method to verify that the handshake part received from the host matches the expected values.
     /// </summary>
-    private bool IsHandshakePartValid(KeyValuePair<string, int> component, int handshakePart, int index, Handshake handshake)
+    private bool IsHandshakePartValid(KeyValuePair<string, int> component, int handshakePart, int index, THandshake handshake)
     {
         if (handshakePart == component.Value)
         {

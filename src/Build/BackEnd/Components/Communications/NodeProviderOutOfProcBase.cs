@@ -43,12 +43,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The number of times to retry creating an out-of-proc node.
         /// </summary>
-        private const int NodeCreationRetries = 10;
+        private protected const int NodeCreationRetries = 10;
 
         /// <summary>
         /// The amount of time to wait for an out-of-proc node to spool up before we give up.
         /// </summary>
-        private const int TimeoutForNewNodeCreation = 30000;
+        private protected const int TimeoutForNewNodeCreation = 30000;
 
         /// <summary>
         /// The amount of time to wait for an out-of-proc node to exit.
@@ -61,13 +61,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The build component host.
         /// </summary>
-        private IBuildComponentHost _componentHost;
+        private protected IBuildComponentHost _componentHost;
 
         /// <summary>
         /// Keeps track of the processes we've already checked for nodes so we don't check them again.
         /// We decided to use ConcurrentDictionary of(string, byte) as common implementation of ConcurrentHashSet.
         /// </summary>
-        private readonly ConcurrentDictionary<string, byte /*void*/> _processesToIgnore = new();
+        private protected readonly ConcurrentDictionary<string, byte /*void*/> _processesToIgnore = new();
 
         /// <summary>
         /// Stops skipping the processes this provider failed to connect to, so the next build
@@ -182,12 +182,12 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false), out HandshakeResult result);
+                Stream nodeStream = NodeConnection<WorkerNodeHandshake>.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false), out HandshakeResult result);
 
                 if (nodeStream == null)
                 {
                     // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true), out result);
+                    nodeStream = NodeConnection<WorkerNodeHandshake>.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true), out result);
                 }
 
                 if (nodeStream != null)
@@ -220,7 +220,11 @@ namespace Microsoft.Build.BackEnd
                 CommunicationsUtilities.Trace(nodeId, $"Shutdown response: {shutdown.Reason}. {shutdown.Exception}");
             }
         }
+    }
 
+    internal abstract class NodeProviderOutOfProcBase<THandshake> : NodeProviderOutOfProcBase
+        where THandshake : INodeHandshake
+    {
         /// <summary>
         /// Finds or creates child processes which can act as nodes using the provided launch data.
         /// </summary>
@@ -231,7 +235,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="terminateNode">Callback when a node terminates.</param>
         /// <param name="numberOfNodesToCreate">Number of nodes to create.</param>
         protected IList<NodeContext> GetNodes(
-            NodeLaunchData nodeLaunchData,
+            NodeLaunchData<THandshake> nodeLaunchData,
             int nextNodeId,
             INodePacketFactory factory,
             NodeContextCreatedDelegate createNode,
@@ -389,7 +393,7 @@ namespace Microsoft.Build.BackEnd
 
                         // Attempt to connect to each process in turn.
                         MSBuildEventSource.Log.NodePipeConnectStart(nodeId, nodeToReuseId);
-                        nodeStream = TryConnectToProcess(nodeToReuseId, 0 /* poll, don't wait for connections */, nodeLaunchData.Handshake, out result);
+                        nodeStream = NodeConnection<THandshake>.TryConnectToProcess(nodeToReuseId, 0 /* poll, don't wait for connections */, nodeLaunchData.Handshake, out result);
                         MSBuildEventSource.Log.NodePipeConnectStop(nodeId, nodeToReuseId, succeeded: nodeStream != null);
                     }
                     catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
@@ -447,7 +451,7 @@ namespace Microsoft.Build.BackEnd
 #endif
                     // Create the node process
                     INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
-                    NodeLaunchData launchData = new(msbuildLocation, commandLineArgs, nodeLaunchData.Handshake, nodeLaunchData.EnvironmentOverrides);
+                    NodeLaunchData launchData = new(msbuildLocation, commandLineArgs, nodeLaunchData.EnvironmentOverrides);
                     MSBuildEventSource.Log.NodeLaunchStart(nodeId);
                     Process msbuildProcess = nodeLauncher.Start(launchData, nodeId);
                     MSBuildEventSource.Log.NodeLaunchStop(nodeId, msbuildProcess.Id);
@@ -460,7 +464,7 @@ namespace Microsoft.Build.BackEnd
 
                     // Now try to connect to it.
                     MSBuildEventSource.Log.NodePipeConnectStart(nodeId, msbuildProcess.Id);
-                    Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, nodeLaunchData.Handshake, out HandshakeResult result);
+                    Stream nodeStream = NodeConnection<THandshake>.TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, nodeLaunchData.Handshake, out HandshakeResult result);
                     MSBuildEventSource.Log.NodePipeConnectStop(nodeId, msbuildProcess.Id, succeeded: nodeStream != null);
                     if (nodeStream != null)
                     {
@@ -515,7 +519,10 @@ namespace Microsoft.Build.BackEnd
         /// pipe for some other process to claim it.
         /// </summary>
         protected virtual bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions, byte negotiatedVersion) => false;
+    }
 
+    internal abstract partial class NodeProviderOutOfProcBase
+    {
         /// <summary>
         /// Finds processes that could be reusable MSBuild nodes.
         /// </summary>
@@ -525,7 +532,7 @@ namespace Microsoft.Build.BackEnd
         /// Item 1 is a descriptive name of the processes being searched for.
         /// Item 2 is the list of matching processes, sorted by ID.
         /// </returns>
-        private (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(
+        private protected (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(
             string msbuildLocation = null,
             NodeMode? expectedNodeMode = null)
         {
@@ -568,7 +575,7 @@ namespace Microsoft.Build.BackEnd
         /// On the reuse path (<paramref name="msbuildLocation"/> non-null) returns the single name
         /// that location would produce. On the shutdown path (<paramref name="msbuildLocation"/> null)
         /// derives the name from <paramref name="configuredNodeExeLocation"/> or the current MSBuild
-        /// path — mirroring <see cref="GetNodes"/> — and adds the alternate host as a defensive
+        /// path — mirroring <see cref="NodeProviderOutOfProcBase{THandshake}.GetNodes"/> — and adds the alternate host as a defensive
         /// fallback for idle nodes started by an earlier build under a different host kind.
         /// <paramref name="configuredNodeExeLocation"/> is a parameter (rather than instance state)
         /// so the resolver can be unit-tested in isolation.
@@ -616,7 +623,7 @@ namespace Microsoft.Build.BackEnd
         /// When the current process is <c>dotnet</c> and <paramref name="msbuildLocation"/> points
         /// at the MSBuild AppHost, returns the sibling <c>MSBuild.dll</c> (so workers launch via
         /// <c>dotnet MSBuild.dll</c> instead of the AppHost). Otherwise returns the input
-        /// unchanged. Shared by <see cref="GetNodes"/> and <see cref="ResolveProcessNamesToSearch"/>.
+        /// unchanged. Shared by <see cref="NodeProviderOutOfProcBase{THandshake}.GetNodes"/> and <see cref="ResolveProcessNamesToSearch"/>.
         /// </summary>
         /// <remarks>
         /// This is a point-in-time workaround, not a permanent design choice. The AppHost was
@@ -626,7 +633,7 @@ namespace Microsoft.Build.BackEnd
         /// remap (along with its callers) should be removed. Tracked by
         /// https://github.com/dotnet/msbuild/issues/13464.
         /// </remarks>
-        private static string RemapAppHostToManagedDllIfHostedByDotnet(string msbuildLocation)
+        private protected static string RemapAppHostToManagedDllIfHostedByDotnet(string msbuildLocation)
         {
             if (string.IsNullOrEmpty(msbuildLocation)
                 || !Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase)
@@ -699,11 +706,12 @@ namespace Microsoft.Build.BackEnd
         /// Generate a string from task host context and the remote process to be used as key to lookup processes we have already
         /// attempted to connect to or are already connected to
         /// </summary>
-        private string GetProcessesToIgnoreKey(Handshake hostHandshake, int nodeProcessId) =>
+        private protected string GetProcessesToIgnoreKey<THandshake>(THandshake hostHandshake, int nodeProcessId)
+            where THandshake : INodeHandshake =>
 #if NET
-            string.Create(CultureInfo.InvariantCulture, $"{hostHandshake}|{nodeProcessId}");
+            string.Create(CultureInfo.InvariantCulture, $"{hostHandshake.GetKey()}|{nodeProcessId}");
 #else
-            $"{hostHandshake}|{nodeProcessId.ToString(CultureInfo.InvariantCulture)}";
+            $"{hostHandshake.GetKey()}|{nodeProcessId.ToString(CultureInfo.InvariantCulture)}";
 #endif
 
         /// <summary>
@@ -863,7 +871,7 @@ namespace Microsoft.Build.BackEnd
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         // This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
         //  on non-Windows operating systems
-        private static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
+        internal static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
             SecurityIdentifier identifier = s_currentWindowsIdentity.Owner;
             PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
@@ -875,11 +883,15 @@ namespace Microsoft.Build.BackEnd
             }
         }
 #endif
+    }
 
+    internal static class NodeConnection<THandshake>
+        where THandshake : INodeHandshake
+    {
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
-        private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake, out HandshakeResult result)
+        internal static Stream TryConnectToProcess(int nodeProcessId, int timeout, THandshake handshake, out HandshakeResult result)
         {
             // Try and connect to the process.
             string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
@@ -934,7 +946,7 @@ namespace Microsoft.Build.BackEnd
         /// <remarks>
         /// Reused by MSBuild server client <see cref="Microsoft.Build.Server.MSBuildClient"/>.
         /// </remarks>
-        internal static bool TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout, out HandshakeResult result)
+        internal static bool TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, THandshake handshake, int timeout, out HandshakeResult result)
         {
             nodeStream.Connect(timeout);
 
@@ -947,7 +959,7 @@ namespace Microsoft.Build.BackEnd
                 // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
                 // remote node could set the owner to something else would also let it change owners on other objects, so
                 // this would be a security flaw upstream of us.
-                ValidateRemotePipeSecurityOnWindows(nodeStream);
+                NodeProviderOutOfProcBase.ValidateRemotePipeSecurityOnWindows(nodeStream);
             }
 #endif
 
@@ -981,7 +993,10 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
         }
+    }
 
+    internal abstract partial class NodeProviderOutOfProcBase
+    {
         /// <summary>
         /// Class which wraps up the communications infrastructure for a given node.
         /// </summary>

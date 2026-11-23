@@ -180,7 +180,7 @@ internal sealed class HandshakeResult
         => new(status, value: 0, errorMessage);
 }
 
-internal sealed class Handshake
+internal sealed class Clr2TaskHostHandshake
 {
     /// <summary>
     /// Marker indicating that the next integer in the child handshake response is the PacketVersion.
@@ -196,8 +196,9 @@ internal sealed class Handshake
     // Source options of the handshake.
     internal HandshakeOptions HandshakeOptions { get; }
 
-    public Handshake(HandshakeOptions nodeType)
+    public Clr2TaskHostHandshake()
     {
+        HandshakeOptions nodeType = CommunicationsUtilities.GetHandshakeOptions();
         HandshakeOptions = nodeType;
 
         // Build handshake options with version in upper bits
@@ -494,7 +495,7 @@ internal static class CommunicationsUtilities
             {
                 // If the received handshake part is not PacketVersionFromChildMarker it means we communicate with the host that does not support packet version negotiation.
                 // Fallback to the old communication validation pattern.
-                if (innerResult.Value != Handshake.PacketVersionFromChildMarker)
+                if (innerResult.Value != Clr2TaskHostHandshake.PacketVersionFromChildMarker)
                 {
                     result = CreateVersionMismatchResult(isProvider, innerResult.Value);
                     return false;

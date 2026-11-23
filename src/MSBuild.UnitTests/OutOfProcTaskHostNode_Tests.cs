@@ -19,6 +19,11 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
+#if NET
+using NodeEndpointOutOfProcBase = Microsoft.Build.BackEnd.NodeEndpointOutOfProcBase<Microsoft.Build.Internal.NetTaskHostHandshake>;
+#else
+using NodeEndpointOutOfProcBase = Microsoft.Build.BackEnd.NodeEndpointOutOfProcBase<Microsoft.Build.Internal.FrameworkTaskHostHandshake>;
+#endif
 
 #nullable enable
 

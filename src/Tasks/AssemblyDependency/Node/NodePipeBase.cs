@@ -58,7 +58,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         private INodePacketFactory? _packetFactory;
 
-        protected NodePipeBase(string pipeName, Handshake handshake)
+        protected NodePipeBase(string pipeName, ServerNodeHandshake handshake)
         {
             PipeName = pipeName;
             HandshakeComponents = handshake.RetrieveHandshakeComponents();
