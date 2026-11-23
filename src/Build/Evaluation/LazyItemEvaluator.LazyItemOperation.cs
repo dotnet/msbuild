@@ -225,7 +225,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // Metadata expressions are allowed here.
                         // Temporarily gather and expand these in a table so they can reference other metadata elements above.
-                        EvaluatedMetadataTable metadataTable = new(_itemType, metadata.Length);
+                        EvaluatorMetadataTable metadataTable = new(_itemType, metadata.Length);
                         _expander.Metadata = metadataTable;
 
                         foreach (var metadataElement in metadata)

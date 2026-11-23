@@ -25,13 +25,13 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// Stores evaluated metadata in declaration order and creates a lookup table only if prefix metadata is read.
     /// </summary>
-    internal sealed class EvaluatedMetadataTable : IMetadataTable
+    internal sealed class EvaluatorMetadataTable : IMetadataTable
     {
         private readonly string _implicitItemType;
         private readonly EvaluatedMetadataEntry[] _entries;
         private Dictionary<string, string>? _metadata;
 
-        internal EvaluatedMetadataTable(string implicitItemType, int capacity)
+        internal EvaluatorMetadataTable(string implicitItemType, int capacity)
         {
             _implicitItemType = implicitItemType;
             _entries = capacity == 0 ? Array.Empty<EvaluatedMetadataEntry>() : new EvaluatedMetadataEntry[capacity];

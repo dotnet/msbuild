@@ -736,7 +736,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ProjectItemElement item = root.AddItemGroup().AddItem("I", "item");
             ProjectMetadataElement first = item.AddMetadata("First", "one");
             ProjectMetadataElement second = item.AddMetadata("Second", "two");
-            var table = new EvaluatedMetadataTable("I", 2);
+            var table = new EvaluatorMetadataTable("I", 2);
 
             table.GetEscapedValue("First").ShouldBeEmpty();
             table.GetEscapedValueIfPresent("i", "First").ShouldBeNull();

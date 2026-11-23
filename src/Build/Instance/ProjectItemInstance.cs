@@ -2297,7 +2297,7 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// Applies the supplied metadata to the destination item.
                 /// </summary>
-                public void SetMetadata(EvaluatedMetadataTable metadataList, IEnumerable<ProjectItemInstance> destinationItems)
+                public void SetMetadata(EvaluatorMetadataTable metadataList, IEnumerable<ProjectItemInstance> destinationItems)
                 {
                     // Set up a single dictionary that can be applied to all the items
                     ImmutableDictionary<string, string>.Builder metadataBuilder = ImmutableDictionaryExtensions.EmptyMetadata.ToBuilder();
@@ -2472,7 +2472,7 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// Applies the supplied metadata to the destination item.
                 /// </summary>
-                public void SetMetadata(EvaluatedMetadataTable metadata, IEnumerable<TaskItem> destinationItems)
+                public void SetMetadata(EvaluatorMetadataTable metadata, IEnumerable<TaskItem> destinationItems)
                 {
                     // Not difficult to implement, but we do not expect to go here.
                     Assumed.Unreachable();

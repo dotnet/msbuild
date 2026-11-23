@@ -1013,7 +1013,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Applies the supplied metadata to the destination item.
             /// </summary>
-            public void SetMetadata(EvaluatedMetadataTable metadata, IEnumerable<ProjectItem> destinationItems)
+            public void SetMetadata(EvaluatorMetadataTable metadata, IEnumerable<ProjectItem> destinationItems)
             {
                 foreach (IItem<ProjectMetadata> item in destinationItems)
                 {

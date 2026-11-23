@@ -1509,7 +1509,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                _expander.Metadata = new EvaluatedMetadataTable(itemDefinitionElement.ItemType, capacity: 0);
+                _expander.Metadata = new EvaluatorMetadataTable(itemDefinitionElement.ItemType, capacity: 0);
             }
 
             if (EvaluateCondition(itemDefinitionElement, ExpanderOptions.ExpandPropertiesAndMetadata, ParserOptions.AllowPropertiesAndCustomMetadata))
