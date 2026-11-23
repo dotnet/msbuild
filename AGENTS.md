@@ -135,34 +135,11 @@ After building the whole repo, to use the just-built MSBuild to build things use
 
 ### Running Tests
 
-**Windows:**
-```cmd
-# Full test suite (~9 minutes) - NEVER CANCEL
-.\build.cmd -test
-
-# Individual test project (recommended):
-dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
-```
-
-**macOS/Linux:**
-```bash
-# Full test suite (~9 minutes) - NEVER CANCEL
-./build.sh --test
-
-# Individual test project (recommended):
-dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
-```
-
-You can run a single unit test with `-- --filter-method "*{methodname}*"`, for example `dotnet test src/Framework.UnitTests/ -- --filter-method "*ExerciseBuildEventContext*"`.
+Run individual test projects, not the full suite: `dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj` (~10-60 s), or a single test with `-- --filter-method "*{methodname}*"`. The full suite (`.\build.cmd -test` / `./build.sh --test`, ~9 minutes, never cancel) is for final validation. See the [running-unit-tests skill](.github/skills/running-unit-tests/SKILL.md) for filters and speedups, and [What to test](.github/instructions/tests.instructions.md#what-to-test) before writing or requesting tests.
 
 For local Unix runs, exclude `LogUnixWarningUponBuildingProjectWithDriveEnumeration` and
 `LogUnixWarningUponItemCreationWithDriveEnumeration` using `--filter-not-method`.
 These tests can hang while enumerating the filesystem root; do not run them unfiltered.
-
-### Test Verification
-
-* **Individual Test Project**: ~10-60 seconds per project
-* **Full Test Suite**: ~9 minutes
 
 ## Project Layout and Architecture
 

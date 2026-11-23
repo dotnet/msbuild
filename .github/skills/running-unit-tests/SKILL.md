@@ -61,7 +61,7 @@ Aim for sub-30s iterations.
 
 These trade safety for speed — use during iteration, **revert before final validation**:
 
--- **Single TFM**: pass `-f net11.0`. Halves runtime on Windows by skipping `net472`.
+- **Single TFM**: pass `-f net11.0`. Halves runtime on Windows by skipping `net472`. Halves runtime on Windows by skipping `net472`.
 - **Temporarily relax single-threaded execution**: drop a `xunit.runner.json` next to the test project (or override the existing one) with:
   ```json
   {
@@ -118,20 +118,9 @@ Match the source area you changed to its `*.UnitTests` project:
 | `src/Build/BuildCheck/**` | `src/BuildCheck.UnitTests/Microsoft.Build.BuildCheck.UnitTests.csproj` |
 | `src/Shared/**` | Run the consumers above (Build, Tasks, Utilities) — shared code is linked into all of them. |
 
-## Quick reference
-
-| Scenario | Command |
-|----------|---------|
-| Fast scoped dev loop | `dotnet test <proj> -f net11.0 -- --filter-method "*X*"` |
-| Direct test exe | `artifacts\bin\<Proj>\Debug\net11.0\<Proj>.exe --filter-method "*X*" --no-progress` |
-| Single test by name | `dotnet test <proj> -- --filter-method "*MyTestMethod*"` |
-| Final per-project validation | `dotnet test <proj> -c Release` (all TFMs) |
-| Final full validation | `.\build.cmd -test -c Release` / `./build.sh --test -c Release` |
-| TRX report | `--report-trx --report-trx-filename out.trx --results-directory artifacts\TestResults` |
-
 ## See also
 
-- `.github/instructions/tests.instructions.md` — test authoring conventions (xUnit v3, Shouldly, `TestEnvironment`, `MockLogger`).
+- `.github/instructions/tests.instructions.md` — what is worth testing, and authoring conventions (xUnit v3, Shouldly, `TestEnvironment`, `MockLogger`).
 - `src/Shared/UnitTests/xunit.runner.json` — repo-wide xUnit settings.
 - `src/Directory.Build.targets` — `XunitOptions`, auto trait filters, coverage wiring.
 - `documentation/wiki/Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md`
