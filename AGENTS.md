@@ -29,6 +29,8 @@ Instructions for GitHub Copilot and other AI coding agents working with the MSBu
 
 Official builds treat all warnings as errors, so do not introduce new warnings.
 
+Don't request reflection/structure tests (asserting `static`, `readonly`, attributes) or nondeterministic race tests. If no deterministic test would fail without the change, ask for root-cause reasoning and a repro in the PR description instead. See [What to test](.github/instructions/tests.instructions.md#what-to-test).
+
 ### Performance Considerations
 
 When reviewing pull requests:

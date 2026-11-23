@@ -61,7 +61,7 @@ Aim for sub-30s iterations.
 
 These trade safety for speed — use during iteration, **revert before final validation**:
 
-- **Single TFM**: pass `-f net11.0`. Halves runtime on Windows by skipping `net472`. Halves runtime on Windows by skipping `net472`.
+- **Single TFM**: pass `-f net11.0`. Halves runtime on Windows by skipping `net472`.
 - **Temporarily relax single-threaded execution**: drop a `xunit.runner.json` next to the test project (or override the existing one) with:
   ```json
   {
