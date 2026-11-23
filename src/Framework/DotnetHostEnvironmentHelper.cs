@@ -19,7 +19,7 @@ namespace Microsoft.Build.Internal
     /// </summary>
     internal static class DotnetHostEnvironmentHelper
     {
-        private static CachedOverrides? s_cachedOverrides;
+        private static volatile CachedOverrides? s_cachedOverrides;
 
         private sealed record class CachedOverrides(string? DotnetHostPath, IDictionary<string, string?>? Overrides);
 
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Internal
                 return cached.Overrides;
             }
 
-            string? dotnetRoot = ResolveDotnetRoot(dotnetHostPath);
+            string? dotnetRoot = ResolveDotnetRoot(resolvedPath);
 
             if (string.IsNullOrEmpty(dotnetRoot))
             {
@@ -134,8 +134,6 @@ namespace Microsoft.Build.Internal
 
         private static string? ResolveDotnetRoot(string? dotnetHostPath)
         {
-            dotnetHostPath ??= Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
-
             if (!string.IsNullOrEmpty(dotnetHostPath))
             {
                 return Path.GetDirectoryName(dotnetHostPath);
