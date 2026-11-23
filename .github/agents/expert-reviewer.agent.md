@@ -105,13 +105,13 @@ Hot paths: `Evaluator.cs`, `Expander.cs`, file I/O operations.
 Apply [What to test](../instructions/tests.instructions.md#what-to-test); paste that section verbatim into this dimension's sub-agent prompt.
 
 **CHECK — Flag if:**
-- [ ] New behavior or a bug fix has no test, **and** you can name a realistic, deterministic test that would fail without the change
-- [ ] An added test would pass without the change, or its assertions would pass with wrong output
+- [ ] Non-trivial new behavior or bug fix (not a defensive guard or tiny string/localization fix) has no test, **and** you can name a realistic, deterministic test that would fail without the change
+- [ ] A regression or feature test would pass on every target OS/TFM without the change, or its assertions would pass with wrong output
 - [ ] An added test is low-value per that section (reflection/structure, constants, external behavior, nondeterministic race, redundant) — recommend deleting it
 - [ ] Tests depend on timing, file-system ordering, or implicit environment state
 - [ ] The change targets an edge case but only the happy path is tested
 
-Never propose reflection or structure tests. If no deterministic test is feasible, ask for root-cause reasoning and repro evidence in the PR description instead, at most MODERATE.
+Never propose reflection or structure tests. If no deterministic test is feasible and the PR description lacks root-cause reasoning or any repro, ask for them there (at most MODERATE); otherwise don't comment.
 
 ---
 

@@ -8,8 +8,8 @@ applyTo: "src/*Tests/**/*.cs,src/UnitTests.Shared/**/*.cs,src/Shared/UnitTests/*
 
 This section is the canonical test-value guidance for authors and reviewers. A test must raise confidence in the change per second of CI time:
 
-* Drive realistic behavior through a real entry point (a build, the task via `MockEngine`, the API callers use) and assert observable output, including the edge cases the change touches. High-value examples: error paths, serialization round-trips, ChangeWave opt-out, state leaking across node reuse.
-* Fail without the change. If it passes on the old code, or derives its expected value via the same API as the product code, it is not a regression test.
+* Drive realistic behavior through a real entry point (a build, the task via `MockEngine`, the API callers use) and assert observable output, including the edge cases the change touches. High-value examples: error paths, serialization round-trips, ChangeWave opt-out, state leaking across node reuse, cross-OS contracts.
+* Fail without the change on at least one target OS/TFM (unless it locks down existing behavior for a refactoring). If it passes everywhere on the old code, or derives its expected value via the same API as the product code, it is not a regression test.
 * Be deterministic and cheap. Prefer one focused case over a matrix of unrelated modes, languages, or TFMs; each extra process-launching case adds runtime and flake risk. Don't duplicate existing coverage; fold near-duplicates into a `[Theory]`.
 * Match the risk. Defensive guards, scenarios that can't happen in practice, and tiny string or localization fixes don't need a dedicated test.
 

@@ -29,7 +29,7 @@ Instructions for GitHub Copilot and other AI coding agents working with the MSBu
 
 Official builds treat all warnings as errors, so do not introduce new warnings.
 
-Don't request reflection/structure tests (asserting `static`, `readonly`, attributes) or nondeterministic race tests. If no deterministic test would fail without the change, ask for root-cause reasoning and a repro in the PR description instead. See [What to test](.github/instructions/tests.instructions.md#what-to-test).
+Don't write or request reflection/structure tests (asserting `static`, `readonly`, attributes), tests restating constants/defaults, or nondeterministic race tests; if no deterministic test would fail without the change, ask for root-cause reasoning and any repro in the PR description only if missing. See [What to test](.github/instructions/tests.instructions.md#what-to-test).
 
 ### Performance Considerations
 
@@ -137,7 +137,7 @@ After building the whole repo, to use the just-built MSBuild to build things use
 
 ### Running Tests
 
-Run individual test projects, not the full suite: `dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj` (~10-60 s), or a single test with `-- --filter-method "*{methodname}*"`. The full suite (`.\build.cmd -test` / `./build.sh --test`, ~9 minutes, never cancel) is for final validation. See the [running-unit-tests skill](.github/skills/running-unit-tests/SKILL.md) for filters and speedups, and [What to test](.github/instructions/tests.instructions.md#what-to-test) before writing or requesting tests.
+Run individual test projects, not the full suite: `dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj` (~10-60 s), or a single test with `-- --filter-method "*{methodname}*"`. Reserve the full suite (`.\build.cmd -test` / `./build.sh --test`, ~9 minutes, never cancel) for broad engine/framework/shared changes. See the [running-unit-tests skill](.github/skills/running-unit-tests/SKILL.md) for filters and speedups, and [What to test](.github/instructions/tests.instructions.md#what-to-test) before writing or requesting tests.
 
 For local Unix runs, exclude `LogUnixWarningUponBuildingProjectWithDriveEnumeration` and
 `LogUnixWarningUponItemCreationWithDriveEnumeration` using `--filter-not-method`.
