@@ -18,6 +18,6 @@
     "pinned": true
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "11.0.0-beta.26563.2"
+    "Microsoft.DotNet.Arcade.Sdk": "11.0.0-beta.26569.5"
   }
 }
