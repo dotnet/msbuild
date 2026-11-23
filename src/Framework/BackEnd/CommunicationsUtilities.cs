@@ -562,100 +562,93 @@ internal static class CommunicationsUtilities
         return true;
     }
 
-    /// <summary>
-    ///  Given the appropriate information, return the equivalent HandshakeOptions.
-    /// </summary>
-    internal static HandshakeOptions GetHandshakeOptions(
-        bool taskHost,
+    internal readonly struct WorkerNodeHandshakeConfiguration
+    {
+        internal WorkerNodeHandshakeConfiguration(bool nodeReuse, bool lowPriority)
+        {
+            HandshakeOptions = GetProcessHandshakeOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority);
+        }
+
+        internal HandshakeOptions HandshakeOptions { get; }
+
+        internal WorkerNodeHandshake CreateHandshake() => new(this);
+    }
+
+    internal static WorkerNodeHandshake GetWorkerNodeHandshake(bool nodeReuse = false, bool lowPriority = false)
+        => new WorkerNodeHandshakeConfiguration(nodeReuse, lowPriority).CreateHandshake();
+
+    internal static ServerNodeHandshake GetServerNodeHandshake(string? instanceId = null, bool nodeReuse = false, bool lowPriority = false)
+        => new((ServerHandshakeOptions)GetProcessHandshakeOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority), instanceId);
+
+    internal static ServerNodeHandshake GetRarNodeHandshake() => new(ServerHandshakeOptions.None);
+
+    internal static NetTaskHostHandshake GetCurrentNetTaskHostHandshake(bool nodeReuse = false, bool lowPriority = false)
+        => new((TaskHostHandshakeOptions)GetProcessHandshakeOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority));
+
+    internal static FrameworkTaskHostHandshake GetCurrentFrameworkTaskHostHandshake(bool nodeReuse = false, bool lowPriority = false)
+        => new((TaskHostHandshakeOptions)GetProcessHandshakeOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority));
+
+    internal static NetTaskHostHandshakeConfiguration GetNetTaskHostHandshakeConfiguration(bool nodeReuse = false, bool lowPriority = false)
+        => new((TaskHostHandshakeOptions)GetProcessHandshakeOptions(architecture: null, nodeReuse, lowPriority));
+
+    internal static FrameworkTaskHostHandshakeConfiguration GetFrameworkTaskHostHandshakeConfiguration(string architecture, bool nodeReuse = false, bool lowPriority = false)
+        => new((TaskHostHandshakeOptions)GetProcessHandshakeOptions(architecture, nodeReuse, lowPriority));
+
+    internal static Clr2TaskHostHandshakeConfiguration GetClr2TaskHostHandshakeConfiguration(string architecture, bool lowPriority = false)
+        => new((TaskHostHandshakeOptions)GetProcessHandshakeOptions(architecture, nodeReuse: false, lowPriority));
+
+    internal static TaskHostHandshakeConfiguration GetTaskHostHandshakeConfiguration(
         TaskHostParameters taskHostParameters,
-        string? architectureFlagToSet = null,
         bool nodeReuse = false,
         bool lowPriority = false)
     {
-        HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
-
-        int clrVersion = 0;
-
-        // We don't know about the TaskHost.
-        if (taskHost)
+        if (taskHostParameters.IsEmpty)
         {
-            // No parameters given, default to current
-            if (taskHostParameters.IsEmpty)
+            string architecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
+            return typeof(bool).Assembly.GetName().Version!.Major switch
             {
-                clrVersion = typeof(bool).Assembly.GetName().Version!.Major;
-                architectureFlagToSet = XMakeAttributes.GetCurrentMSBuildArchitecture();
-            }
-            else // Figure out flags based on parameters given
-            {
-                Assumed.NotNull(taskHostParameters.Runtime, "Should always have an explicit runtime when we call this method.");
-                Assumed.NotNull(taskHostParameters.Architecture, "Should always have an explicit architecture when we call this method.");
-
-                if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
-                {
-                    clrVersion = 2;
-                }
-                else if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
-                {
-                    clrVersion = 4;
-                }
-                else if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
-                {
-                    clrVersion = 5;
-                }
-                else
-                {
-                    Assumed.Unreachable();
-                }
-
-                architectureFlagToSet = taskHostParameters.Architecture;
-            }
+                2 => GetClr2TaskHostHandshakeConfiguration(architecture, lowPriority),
+                4 => GetFrameworkTaskHostHandshakeConfiguration(architecture, nodeReuse, lowPriority),
+                // A child keeps its architecture bit so already-deployed parents can connect.
+                >= 5 => new NetTaskHostHandshakeConfiguration((TaskHostHandshakeOptions)GetProcessHandshakeOptions(architecture, nodeReuse, lowPriority)),
+                _ => Assumed.Unreachable<TaskHostHandshakeConfiguration>("Unsupported task-host runtime."),
+            };
         }
 
-        // For a NET task host the launched TaskHost node runs whatever architecture the .NET
-        // SDK shipped, which the worker node cannot know. Suppress the worker node's arch bit
-        // so the handshake stays architecture-agnostic: any architecture of worker node may
-        // connect to any architecture of the resolved SDK TaskHost node (the TaskHost node
-        // tolerates a missing arch bit via IsAllowedBitnessMismatch). Only the worker node
-        // suppresses; the TaskHost node itself (TaskHostParameters.Empty) keeps its arch bit so
-        // already-deployed worker nodes that still emit one continue to connect.
-        bool isNetTaskHostWorkerNode =
-            taskHost &&
-            !taskHostParameters.IsEmpty &&
-            XMakeAttributes.MSBuildRuntimeValues.net.Equals(taskHostParameters.Runtime, StringComparison.OrdinalIgnoreCase);
+        Assumed.NotNull(taskHostParameters.Runtime, "Should always have an explicit runtime when we call this method.");
+        Assumed.NotNull(taskHostParameters.Architecture, "Should always have an explicit architecture when we call this method.");
 
-        if (!isNetTaskHostWorkerNode && !string.IsNullOrEmpty(architectureFlagToSet))
+        if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
         {
-            if (architectureFlagToSet!.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
+            return GetClr2TaskHostHandshakeConfiguration(taskHostParameters.Architecture, lowPriority);
+        }
+
+        if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
+        {
+            return GetFrameworkTaskHostHandshakeConfiguration(taskHostParameters.Architecture, nodeReuse, lowPriority);
+        }
+
+        Assumed.True(taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase));
+        // The parent cannot determine the SDK task host's architecture.
+        return GetNetTaskHostHandshakeConfiguration(nodeReuse, lowPriority);
+    }
+
+    private static HandshakeOptions GetProcessHandshakeOptions(string? architecture, bool nodeReuse, bool lowPriority)
+    {
+        HandshakeOptions context = HandshakeOptions.None;
+        if (!string.IsNullOrEmpty(architecture))
+        {
+            if (architecture!.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
             {
                 context |= HandshakeOptions.X64;
             }
-            else if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.arm64, StringComparison.OrdinalIgnoreCase))
+            else if (architecture.Equals(XMakeAttributes.MSBuildArchitectureValues.arm64, StringComparison.OrdinalIgnoreCase))
             {
                 context |= HandshakeOptions.Arm64;
             }
         }
 
-        switch (clrVersion)
-        {
-            case 0:
-            // Not a taskhost, runtime must match
-            case 4:
-                // Default for MSBuild running on .NET Framework 4,
-                // not represented in handshake
-                break;
-            case 2:
-                context |= HandshakeOptions.CLR2;
-                break;
-            case >= 5:
-                context |= HandshakeOptions.NET;
-                break;
-            default:
-                Assumed.Unreachable();
-                break;
-        }
-
-        // Node reuse is not supported in CLR2 because it's a legacy runtime.
-        if (nodeReuse && clrVersion != 2)
+        if (nodeReuse)
         {
             context |= HandshakeOptions.NodeReuse;
         }

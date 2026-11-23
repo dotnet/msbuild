@@ -90,12 +90,12 @@ internal enum TaskHostHandshakeOptions
 internal sealed class WorkerNodeHandshake : NodeHandshake
 {
     internal WorkerNodeHandshake(bool nodeReuse = false, bool lowPriority = false)
-        : base(CommunicationsUtilities.GetHandshakeOptions(
-            taskHost: false,
-            taskHostParameters: TaskHostParameters.Empty,
-            architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(),
-            nodeReuse: nodeReuse,
-            lowPriority: lowPriority), includeSessionId: true, toolsDirectory: null)
+        : this(new CommunicationsUtilities.WorkerNodeHandshakeConfiguration(nodeReuse, lowPriority))
+    {
+    }
+
+    internal WorkerNodeHandshake(CommunicationsUtilities.WorkerNodeHandshakeConfiguration configuration)
+        : base(configuration.HandshakeOptions, includeSessionId: true, toolsDirectory: null)
     {
     }
 }

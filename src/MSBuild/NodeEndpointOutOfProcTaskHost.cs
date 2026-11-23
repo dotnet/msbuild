@@ -42,13 +42,10 @@ namespace Microsoft.Build.CommandLine
         protected override FrameworkTaskHostHandshake GetHandshake()
 #endif
         {
-            var options = (TaskHostHandshakeOptions)(CommunicationsUtilities.GetHandshakeOptions(
-                taskHost: true, taskHostParameters: TaskHostParameters.Empty, nodeReuse: _nodeReuse)
-                & ~(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.CLR2));
 #if RUNTIME_TYPE_NETCORE
-            return new NetTaskHostHandshake(options);
+            return CommunicationsUtilities.GetCurrentNetTaskHostHandshake(nodeReuse: _nodeReuse);
 #else
-            return new FrameworkTaskHostHandshake(options);
+            return CommunicationsUtilities.GetCurrentFrameworkTaskHostHandshake(nodeReuse: _nodeReuse);
 #endif
         }
     }

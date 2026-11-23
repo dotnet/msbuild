@@ -122,9 +122,7 @@ namespace Microsoft.Build.Server
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {
-            ServerNodeHandshake handshake = new(
-                (ServerHandshakeOptions)CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()),
-                _instanceId);
+            ServerNodeHandshake handshake = CommunicationsUtilities.GetServerNodeHandshake(_instanceId);
 
             _serverBusyMutexName = GetBusyServerMutexName(handshake);
 

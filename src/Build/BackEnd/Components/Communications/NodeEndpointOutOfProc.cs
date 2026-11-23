@@ -32,7 +32,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override WorkerNodeHandshake GetHandshake()
         {
-            return new WorkerNodeHandshake(nodeReuse: _enableReuse, lowPriority: LowPriority);
+            return CommunicationsUtilities.GetWorkerNodeHandshake(nodeReuse: _enableReuse, lowPriority: LowPriority);
         }
     }
 }

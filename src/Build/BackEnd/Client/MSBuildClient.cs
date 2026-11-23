@@ -18,7 +18,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Server
 {
@@ -667,12 +666,7 @@ namespace Microsoft.Build.Server
                         _shutdownServerAfterBuild);
         }
 
-        private ServerNodeHandshake GetHandshake() => new(
-            (ServerHandshakeOptions)CommunicationsUtilities.GetHandshakeOptions(
-                taskHost: false,
-                taskHostParameters: TaskHostParameters.Empty,
-                architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()),
-            _serverInstanceId);
+        private ServerNodeHandshake GetHandshake() => CommunicationsUtilities.GetServerNodeHandshake(_serverInstanceId);
 
         /// <summary>
         /// Handle cancellation.

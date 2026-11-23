@@ -22,7 +22,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
         private OutOfProcRarClient()
         {
-            ServerNodeHandshake handshake = new(ServerHandshakeOptions.None);
+            ServerNodeHandshake handshake = CommunicationsUtilities.GetRarNodeHandshake();
             _pipeClient = new NodePipeClient(NamedPipeUtil.GetRarNodeEndpointPipeName(handshake), handshake);
 
             NodePacketFactory packetFactory = new();

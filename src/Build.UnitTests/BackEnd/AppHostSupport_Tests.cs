@@ -181,25 +181,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void Handshake_ExternalPathCanMismatch_DefaultAlwaysMatches()
         {
-            // Use explicit NET runtime and current architecture to ensure the NET
-            // HandshakeOptions flag is set, which is required for passing toolsDirectory
-            // to the Handshake constructor.
-            var netTaskHostParams = new TaskHostParameters(
-                runtime: XMakeAttributes.MSBuildRuntimeValues.net,
-                architecture: XMakeAttributes.GetCurrentMSBuildArchitecture(),
-                dotnetHostPath: null,
-                msBuildAssemblyPath: null);
-
-            TaskHostHandshakeOptions options = (TaskHostHandshakeOptions)(CommunicationsUtilities.GetHandshakeOptions(
-                taskHost: true,
-                taskHostParameters: netTaskHostParams,
-                nodeReuse: false) & ~(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.CLR2));
+            NetTaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetNetTaskHostHandshakeConfiguration();
 
             // Simulate child: no explicit toolsDirectory → defaults to BuildEnvironmentHelper.
-            var childHandshake = new NetTaskHostHandshake(options);
+            NetTaskHostHandshake childHandshake = configuration.CreateHandshake();
 
             // After the fix: parent also omits toolsDirectory → same default → must match.
-            var parentFixedHandshake = new NetTaskHostHandshake(options);
+            NetTaskHostHandshake parentFixedHandshake = configuration.CreateHandshake();
             parentFixedHandshake.GetKey().ShouldBe(childHandshake.GetKey(),
                 "When both parent and child omit toolsDirectory, they must produce " +
                 "identical handshake keys (both default to BuildEnvironmentHelper).");
@@ -208,7 +196,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             // If that path differs from BuildEnvironmentHelper (e.g. symlinks),
             // the handshake would mismatch.
             string externalPath = Path.Combine(Path.GetTempPath(), $"different_path_{Guid.NewGuid():N}");
-            var parentBrokenHandshake = new NetTaskHostHandshake(options, externalPath);
+            NetTaskHostHandshake parentBrokenHandshake = configuration.CreateHandshake(externalPath);
             parentBrokenHandshake.GetKey().ShouldNotBe(childHandshake.GetKey(),
                 "An arbitrary external toolsDirectory should produce a different handshake " +
                 "than the BuildEnvironmentHelper default, proving the mismatch scenario.");
@@ -226,12 +214,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [WindowsOnlyFact]
         public void Handshake_NetTaskHost_AcceptsDriveLetterCasingDifference()
         {
-            TaskHostHandshakeOptions options = GetNetTaskHostHandshakeOptions();
+            NetTaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetNetTaskHostHandshakeConfiguration();
 
             // The child resolved its own location with one drive-letter casing; the parent supplied
             // the same directory with the opposite casing.
-            var child = new NetTaskHostHandshake(options, @"d:\agent\_work\sdk\11.0.100");
-            var parent = new NetTaskHostHandshake(options, @"D:\agent\_work\sdk\11.0.100");
+            NetTaskHostHandshake child = configuration.CreateHandshake(@"d:\agent\_work\sdk\11.0.100");
+            NetTaskHostHandshake parent = configuration.CreateHandshake(@"D:\agent\_work\sdk\11.0.100");
 
             int childSalt = child.RetrieveHandshakeComponents().Salt;
             int parentSalt = parent.RetrieveHandshakeComponents().Salt;
@@ -254,10 +242,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [WindowsOnlyFact]
         public void Handshake_NetTaskHost_RejectsUnrelatedToolsDirectory()
         {
-            TaskHostHandshakeOptions options = GetNetTaskHostHandshakeOptions();
+            NetTaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetNetTaskHostHandshakeConfiguration();
 
-            var child = new NetTaskHostHandshake(options, @"d:\agent\_work\sdk\11.0.100");
-            var unrelated = new NetTaskHostHandshake(options, @"d:\agent\_work\sdk\10.0.200");
+            NetTaskHostHandshake child = configuration.CreateHandshake(@"d:\agent\_work\sdk\11.0.100");
+            NetTaskHostHandshake unrelated = configuration.CreateHandshake(@"d:\agent\_work\sdk\10.0.200");
 
             child.IsNetTaskHostSaltMatch(unrelated.RetrieveHandshakeComponents().Salt).ShouldBeFalse(
                 "A different SDK directory is not a drive-letter casing variant and must not be accepted.");
@@ -277,22 +265,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             handshake.IsNetTaskHostSaltMatch(handshake.RetrieveHandshakeComponents().Salt).ShouldBeFalse(
                 "Only the .NET task host computes an alternate-casing salt; other node types must " +
                 "not widen salt acceptance.");
-        }
-
-        private static TaskHostHandshakeOptions GetNetTaskHostHandshakeOptions()
-        {
-            // Use explicit NET runtime and current architecture to ensure the NET HandshakeOptions
-            // flag is set, which is required for passing toolsDirectory to the Handshake constructor.
-            var netTaskHostParams = new TaskHostParameters(
-                runtime: XMakeAttributes.MSBuildRuntimeValues.net,
-                architecture: XMakeAttributes.GetCurrentMSBuildArchitecture(),
-                dotnetHostPath: null,
-                msBuildAssemblyPath: null);
-
-            return (TaskHostHandshakeOptions)(CommunicationsUtilities.GetHandshakeOptions(
-                taskHost: true,
-                taskHostParameters: netTaskHostParams,
-                nodeReuse: false) & ~(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.CLR2));
         }
 #endif
 
@@ -317,16 +289,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 Directory.CreateDirectory(realDir);
                 Directory.CreateSymbolicLink(symlinkDir, realDir);
 
-                TaskHostHandshakeOptions options = (TaskHostHandshakeOptions)(CommunicationsUtilities.GetHandshakeOptions(
-                    taskHost: true,
-                    taskHostParameters: TaskHostParameters.Empty,
-                    nodeReuse: false) & ~(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.CLR2));
+                NetTaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetNetTaskHostHandshakeConfiguration();
 
                 // Parent using the symlink path (like $(MSBuildThisFileDirectory) would on macOS /tmp)
-                var symlinkHandshake = new NetTaskHostHandshake(options, symlinkDir);
+                NetTaskHostHandshake symlinkHandshake = configuration.CreateHandshake(symlinkDir);
 
                 // Child using the resolved real path (like AppContext.BaseDirectory resolves /private/tmp)
-                var realHandshake = new NetTaskHostHandshake(options, realDir);
+                NetTaskHostHandshake realHandshake = configuration.CreateHandshake(realDir);
 
                 // These produce DIFFERENT keys — this is the bug.
                 // If these were used as parent vs child toolsDirectory, the pipe names would
@@ -340,8 +309,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 // Using the SAME source (MSBuildToolsDirectoryRoot) on both sides always matches,
                 // regardless of symlinks, because both compute it from AppContext.BaseDirectory.
                 string consistentDir = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-                var parentFixed = new NetTaskHostHandshake(options, consistentDir);
-                var childDefault = new NetTaskHostHandshake(options);
+                NetTaskHostHandshake parentFixed = configuration.CreateHandshake(consistentDir);
+                NetTaskHostHandshake childDefault = configuration.CreateHandshake();
 
                 parentFixed.GetKey().ShouldBe(childDefault.GetKey(),
                     "Using MSBuildToolsDirectoryRoot on both sides must produce matching keys.");

@@ -198,7 +198,17 @@ internal sealed class Clr2TaskHostHandshake
 
     public Clr2TaskHostHandshake()
     {
-        HandshakeOptions nodeType = CommunicationsUtilities.GetHandshakeOptions();
+        HandshakeOptions nodeType = HandshakeOptions.TaskHost | HandshakeOptions.CLR2;
+        if (NativeMethods.Is64Bit)
+        {
+            nodeType |= HandshakeOptions.X64;
+        }
+
+        // A child and its parent must have the same elevation level.
+        if (new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+        {
+            nodeType |= HandshakeOptions.Administrator;
+        }
         HandshakeOptions = nodeType;
 
         // Build handshake options with version in upper bits
@@ -591,33 +601,6 @@ internal static class CommunicationsUtilities
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// Given the appropriate information, return the equivalent HandshakeOptions.
-    /// </summary>
-    internal static HandshakeOptions GetHandshakeOptions()
-    {
-        // For MSBuildTaskHost, the HandshakeOptions are easy to compute.
-        HandshakeOptions options = HandshakeOptions.TaskHost;
-
-        options |= HandshakeOptions.CLR2;
-
-        if (NativeMethods.Is64Bit)
-        {
-            options |= HandshakeOptions.X64;
-        }
-
-        // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
-        // Both the client and the host will calculate this separately, and the idea is that if they come out the same
-        // then we can be sufficiently confident that the other side has the same elevation level as us.  This is complementary
-        // to the username check which is also done on connection.
-        if (new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
-        {
-            options |= HandshakeOptions.Administrator;
-        }
-
-        return options;
     }
 
     /// <summary>

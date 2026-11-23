@@ -13,12 +13,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// </summary>
     public class TaskHostNodeKey_Tests
     {
+        private static readonly NetTaskHostHandshakeConfiguration s_netConfiguration = new(TaskHostHandshakeOptions.None);
+        private static readonly FrameworkTaskHostHandshakeConfiguration s_frameworkConfiguration = new(TaskHostHandshakeOptions.X64);
+
         [Fact]
         public void TaskHostNodeKey_Equality_SameValues_AreEqual()
         {
             TaskHostLaunchIdentity launchIdentity = new("msbuild", "arguments", "dotnet");
-            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, LaunchIdentity: launchIdentity);
-            var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, LaunchIdentity: launchIdentity);
+            var key1 = new TaskHostNodeKey(s_netConfiguration, 1, LaunchIdentity: launchIdentity);
+            var key2 = new TaskHostNodeKey(s_netConfiguration, 1, LaunchIdentity: launchIdentity);
 
             key1.ShouldBe(key2);
             (key1 == key2).ShouldBeTrue();
@@ -28,8 +31,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void TaskHostNodeKey_Equality_DifferentNodeId_AreNotEqual()
         {
-            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1);
-            var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 2);
+            var key1 = new TaskHostNodeKey(s_netConfiguration, 1);
+            var key2 = new TaskHostNodeKey(s_netConfiguration, 2);
 
             key1.ShouldNotBe(key2);
             (key1 != key2).ShouldBeTrue();
@@ -38,8 +41,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void TaskHostNodeKey_Equality_DifferentHandshakeOptions_AreNotEqual()
         {
-            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1);
-            var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.X64, 1);
+            var key1 = new TaskHostNodeKey(s_netConfiguration, 1);
+            var key2 = new TaskHostNodeKey(s_frameworkConfiguration, 1);
 
             key1.ShouldNotBe(key2);
             (key1 != key2).ShouldBeTrue();
@@ -48,8 +51,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void TaskHostNodeKey_Equality_DifferentConsoleForwarding_AreNotEqual()
         {
-            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, ForwardConsoleOutput: false);
-            var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, ForwardConsoleOutput: true);
+            var key1 = new TaskHostNodeKey(s_netConfiguration, 1, ForwardConsoleOutput: false);
+            var key2 = new TaskHostNodeKey(s_netConfiguration, 1, ForwardConsoleOutput: true);
 
             key1.ShouldNotBe(key2);
             (key1 != key2).ShouldBeTrue();
@@ -65,11 +68,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             string dotnetHostPath)
         {
             var key1 = new TaskHostNodeKey(
-                HandshakeOptions.TaskHost | HandshakeOptions.NET,
+                s_netConfiguration,
                 1,
                 LaunchIdentity: new TaskHostLaunchIdentity("msbuild", "arguments", "dotnet"));
             var key2 = new TaskHostNodeKey(
-                HandshakeOptions.TaskHost | HandshakeOptions.NET,
+                s_netConfiguration,
                 1,
                 LaunchIdentity: new TaskHostLaunchIdentity(executablePath, commandLineArgs, dotnetHostPath));
 
@@ -80,9 +83,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void TaskHostNodeKey_Equality_NullAndPopulatedLaunchIdentity_AreNotEqual()
         {
-            var keyWithoutIdentity = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1);
+            var keyWithoutIdentity = new TaskHostNodeKey(s_netConfiguration, 1);
             var keyWithIdentity = new TaskHostNodeKey(
-                HandshakeOptions.TaskHost | HandshakeOptions.NET,
+                s_netConfiguration,
                 1,
                 LaunchIdentity: new TaskHostLaunchIdentity(string.Empty, string.Empty, string.Empty));
 
@@ -103,8 +106,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             var dict = new System.Collections.Generic.Dictionary<TaskHostNodeKey, string>();
             TaskHostLaunchIdentity launchIdentity = new("msbuild", "arguments", "dotnet");
-            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, LaunchIdentity: launchIdentity);
-            var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.X64, 2);
+            var key1 = new TaskHostNodeKey(s_netConfiguration, 1, LaunchIdentity: launchIdentity);
+            var key2 = new TaskHostNodeKey(s_frameworkConfiguration, 2);
 
             dict[key1] = "value1";
             dict[key2] = "value2";
@@ -113,7 +116,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             dict[key2].ShouldBe("value2");
 
             // Create a new key with same values as key1
-            var key1Copy = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, LaunchIdentity: launchIdentity);
+            var key1Copy = new TaskHostNodeKey(s_netConfiguration, 1, LaunchIdentity: launchIdentity);
             dict[key1Copy].ShouldBe("value1");
         }
 
@@ -121,9 +124,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public void TaskHostNodeKey_LargeNodeId_Works()
         {
             // Test that we can use node IDs greater than 255 (the previous limit)
-            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 256);
-            var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1000);
-            var key3 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, int.MaxValue);
+            var key1 = new TaskHostNodeKey(s_netConfiguration, 256);
+            var key2 = new TaskHostNodeKey(s_netConfiguration, 1000);
+            var key3 = new TaskHostNodeKey(s_netConfiguration, int.MaxValue);
 
             key1.NodeId.ShouldBe(256);
             key2.NodeId.ShouldBe(1000);
@@ -139,32 +142,30 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public void TaskHostNodeKey_NegativeNodeId_Works()
         {
             // Traditional multi-proc builds use -1 for node ID
-            var key = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, -1);
+            var key = new TaskHostNodeKey(s_netConfiguration, -1);
 
             key.NodeId.ShouldBe(-1);
             key.HandshakeOptions.ShouldBe(HandshakeOptions.TaskHost | HandshakeOptions.NET);
         }
 
         [Fact]
-        public void TaskHostNodeKey_AllHandshakeOptions_Work()
+        public void TaskHostNodeKey_PreservesConfigurationWireOptions()
         {
-            // Test various HandshakeOptions combinations
-            HandshakeOptions[] optionsList =
+            TaskHostHandshakeConfiguration[] configurations =
             [
-                HandshakeOptions.None,
-                HandshakeOptions.TaskHost,
-                HandshakeOptions.TaskHost | HandshakeOptions.NET,
-                HandshakeOptions.TaskHost | HandshakeOptions.X64,
-                HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.NodeReuse,
-                HandshakeOptions.TaskHost | HandshakeOptions.CLR2,
-                HandshakeOptions.TaskHost | HandshakeOptions.Arm64
+                new FrameworkTaskHostHandshakeConfiguration(TaskHostHandshakeOptions.None),
+                s_netConfiguration,
+                s_frameworkConfiguration,
+                new NetTaskHostHandshakeConfiguration(TaskHostHandshakeOptions.NodeReuse),
+                new Clr2TaskHostHandshakeConfiguration(TaskHostHandshakeOptions.None),
+                new FrameworkTaskHostHandshakeConfiguration(TaskHostHandshakeOptions.Arm64)
             ];
 
-            foreach (var options in optionsList)
+            foreach (TaskHostHandshakeConfiguration configuration in configurations)
             {
-                var key = new TaskHostNodeKey(options, 42);
+                var key = new TaskHostNodeKey(configuration, 42);
 
-                key.HandshakeOptions.ShouldBe(options);
+                key.HandshakeOptions.ShouldBe(configuration.HandshakeOptions);
                 key.NodeId.ShouldBe(42);
             }
         }

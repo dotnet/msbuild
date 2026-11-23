@@ -70,7 +70,7 @@ namespace Microsoft.Build.BackEnd
         internal static WorkerNodeHandshake GetHandshake(bool enableNodeReuse, bool enableLowPriority)
         {
             CommunicationsUtilities.Trace($"""MSBUILDNODEHANDSHAKESALT="{Traits.MSBuildNodeHandshakeSalt}", msbuildDirectory="{BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32}", enableNodeReuse={enableNodeReuse}, enableLowPriority={enableLowPriority}""");
-            return new WorkerNodeHandshake(enableNodeReuse, enableLowPriority);
+            return CommunicationsUtilities.GetWorkerNodeHandshake(enableNodeReuse, enableLowPriority);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             ConcurrentBag<NodeInfo> nodes = new();
-            WorkerNodeHandshake hostHandshake = new(ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority);
+            WorkerNodeHandshake hostHandshake = CommunicationsUtilities.GetWorkerNodeHandshake(ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority);
 
             // Start the new process.  We pass in a node mode with a node number of 1, to indicate that we
             // want to start up just a standard MSBuild out-of-proc node.

@@ -25,10 +25,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         private const string DisableFeaturesFromVersion = "MSBUILDDISABLEFEATURESFROMVERSION";
 
-        private static readonly HandshakeOptions s_workerNodeOptions = CommunicationsUtilities.GetHandshakeOptions(
-            taskHost: false,
-            taskHostParameters: TaskHostParameters.Empty);
-
         private readonly ITestOutputHelper _output;
 
         public Handshake_Tests(ITestOutputHelper output) => _output = output;
@@ -49,29 +45,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             env.SetEnvironmentVariable(DisableFeaturesFromVersion, wave);
         }
 
-        private static string GetKeyForChangeWave(string? wave, TestEnvironment env, HandshakeOptions options)
+        private static string GetKeyForChangeWave(string? wave, TestEnvironment env, Func<Handshake>? createHandshake = null)
         {
             SetChangeWave(wave, env);
 
-            return CreateHandshake(options).GetKey();
-        }
-
-        private static Handshake CreateHandshake(HandshakeOptions options)
-        {
-            var settings = (TaskHostHandshakeOptions)(options & ~(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.CLR2));
-            if (!Handshake.IsHandshakeOptionEnabled(options, HandshakeOptions.TaskHost))
-            {
-                return new WorkerNodeHandshake();
-            }
-
-            if (Handshake.IsHandshakeOptionEnabled(options, HandshakeOptions.NET))
-            {
-                return new NetTaskHostHandshake(settings);
-            }
-
-            return Handshake.IsHandshakeOptionEnabled(options, HandshakeOptions.CLR2)
-                ? new Clr2TaskHostHandshake(settings, BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot)
-                : new FrameworkTaskHostHandshake(settings);
+            Handshake handshake = createHandshake is null ? CommunicationsUtilities.GetWorkerNodeHandshake() : createHandshake();
+            return handshake.GetKey();
         }
 
         [Fact]
@@ -79,8 +58,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            string firstKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, s_workerNodeOptions);
-            string secondKey = GetKeyForChangeWave(ChangeWaves.HighestWave.ToString(), env, s_workerNodeOptions);
+            string firstKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env);
+            string secondKey = GetKeyForChangeWave(ChangeWaves.HighestWave.ToString(), env);
 
             secondKey.ShouldNotBe(firstKey);
         }
@@ -90,8 +69,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            string firstKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, s_workerNodeOptions);
-            string secondKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, s_workerNodeOptions);
+            string firstKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env);
+            string secondKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env);
 
             secondKey.ShouldBe(firstKey);
         }
@@ -108,8 +87,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            string unsetKey = GetKeyForChangeWave(null, env, s_workerNodeOptions);
-            string equivalentKey = GetKeyForChangeWave(wave, env, s_workerNodeOptions);
+            string unsetKey = GetKeyForChangeWave(null, env);
+            string equivalentKey = GetKeyForChangeWave(wave, env);
 
             equivalentKey.ShouldBe(unsetKey);
         }
@@ -123,16 +102,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(
-                taskHost: false,
-                taskHostParameters: TaskHostParameters.Empty,
-                architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture());
-
             SetChangeWave(ChangeWaves.LowestWave.ToString(), env);
-            string firstHash = new ServerNodeHandshake((ServerHandshakeOptions)options).ComputeHash();
+            string firstHash = CommunicationsUtilities.GetServerNodeHandshake().ComputeHash();
 
             SetChangeWave(ChangeWaves.HighestWave.ToString(), env);
-            string secondHash = new ServerNodeHandshake((ServerHandshakeOptions)options).ComputeHash();
+            string secondHash = CommunicationsUtilities.GetServerNodeHandshake().ComputeHash();
 
             secondHash.ShouldNotBe(firstHash);
         }
@@ -146,19 +120,26 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// host may take the change wave into account.
         /// </summary>
         [Theory]
-        [InlineData((int)(HandshakeOptions.TaskHost | HandshakeOptions.CLR2))]
-        [InlineData((int)(HandshakeOptions.TaskHost | HandshakeOptions.NET))]
-        [InlineData((int)(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.X64))]
-        [InlineData((int)(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.SidecarTaskHost))]
-        [InlineData((int)HandshakeOptions.TaskHost)]
-        public void TaskHostHandshakeIgnoresChangeWave(int taskHostOptions)
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr2, (int)TaskHostHandshakeOptions.None)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.net, (int)TaskHostHandshakeOptions.None)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.net, (int)TaskHostHandshakeOptions.X64)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.net, (int)TaskHostHandshakeOptions.SidecarTaskHost)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr4, (int)TaskHostHandshakeOptions.None)]
+        public void TaskHostHandshakeIgnoresChangeWave(string runtime, int taskHostOptions)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            var options = (HandshakeOptions)taskHostOptions;
+            var options = (TaskHostHandshakeOptions)taskHostOptions;
+            Func<Handshake> createHandshake = runtime switch
+            {
+                XMakeAttributes.MSBuildRuntimeValues.clr2 => () => new Clr2TaskHostHandshake(options, BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot),
+                XMakeAttributes.MSBuildRuntimeValues.net => () => new NetTaskHostHandshake(options),
+                XMakeAttributes.MSBuildRuntimeValues.clr4 => () => new FrameworkTaskHostHandshake(options),
+                _ => throw new ArgumentOutOfRangeException(nameof(runtime)),
+            };
 
-            string firstKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, options);
-            string secondKey = GetKeyForChangeWave(ChangeWaves.HighestWave.ToString(), env, options);
+            string firstKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, createHandshake);
+            string secondKey = GetKeyForChangeWave(ChangeWaves.HighestWave.ToString(), env, createHandshake);
 
             secondKey.ShouldBe(firstKey);
         }
@@ -175,10 +156,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            HandshakeOptions options = HandshakeOptions.TaskHost | HandshakeOptions.NET;
-
-            string unsetKey = GetKeyForChangeWave(null, env, options);
-            string waveSetKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, options);
+            string unsetKey = GetKeyForChangeWave(null, env, () => CommunicationsUtilities.GetCurrentNetTaskHostHandshake());
+            string waveSetKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, () => CommunicationsUtilities.GetCurrentNetTaskHostHandshake());
 
             waveSetKey.ShouldBe(unsetKey);
         }
@@ -200,12 +179,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             string toolsDirectory = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
             int taskSalt = CommunicationsUtilities.GetHashCode("typed-handshake-test" + taskHostDirectory);
             int nodeSalt = CommunicationsUtilities.GetHashCode("typed-handshake-test" + toolsDirectory + ChangeWaves.DisabledWave);
-            HandshakeOptions workerOptions = CommunicationsUtilities.GetHandshakeOptions(
-                taskHost: false, TaskHostParameters.Empty,
-                architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: true, lowPriority: true);
+            WorkerNodeHandshake workerHandshake = CommunicationsUtilities.GetWorkerNodeHandshake(nodeReuse: true, lowPriority: true);
+            HandshakeOptions workerOptions = workerHandshake.HandshakeOptions;
 
-            await VerifyConnection(new WorkerNodeHandshake(nodeReuse: true, lowPriority: true), workerOptions, nodeSalt, localVersion, sessionId);
-            await VerifyConnection(new ServerNodeHandshake((ServerHandshakeOptions)workerOptions), workerOptions, nodeSalt, localVersion, 0);
+            await VerifyConnection(workerHandshake, workerOptions, nodeSalt, localVersion, sessionId);
+            await VerifyConnection(CommunicationsUtilities.GetServerNodeHandshake(nodeReuse: true, lowPriority: true), workerOptions, nodeSalt, localVersion, 0);
             TaskHostHandshake netHost = new NetTaskHostHandshake(TaskHostHandshakeOptions.X64, taskHostDirectory);
             await VerifyConnection(netHost, HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.X64, taskSalt, new Version(99, 99, 99, 99), sessionId);
             await VerifyConnection(new FrameworkTaskHostHandshake(TaskHostHandshakeOptions.X64, taskHostDirectory, taskHostVersion),

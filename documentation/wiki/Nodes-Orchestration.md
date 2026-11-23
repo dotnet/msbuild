@@ -49,6 +49,21 @@ The internal C# 15 `Handshake` union contains five protocol types:
 Task-host configuration options cannot name a different runtime or node kind.
 Worker handshakes derive their configuration from the current process.
 
+`CommunicationsUtilities` provides purpose-specific factories instead of a general `GetHandshakeOptions` API.
+Worker, server, RAR, and child task-host factories return the required handshake type directly.
+Parent task-host factories return runtime-specific configuration structs.
+Each struct's `CreateHandshake` method returns its concrete handshake type.
+
+CLR4 and CLR2 configurations accept the resolved host tools directory and file version when they create the handshake.
+`GetTaskHostHandshakeConfiguration` selects a configuration through a closed union when the requested runtime is determined at run time.
+`TaskHostNodeKey` carries that configuration through acquisition, so its runtime flags cannot disagree with the launch configuration.
+The provider matches that union before it selects a launch path.
+Configuration flags remain available for connection keys and existence checks, without calculating installation identity.
+
+Explicit .NET requests omit architecture bits because the parent cannot determine the SDK host's architecture.
+Child factories preserve the current architecture bits for compatibility with deployed parents.
+CLR2 configuration factories do not enable node reuse.
+
 `NodeEndpointOutOfProcBase<THandshake>` binds each endpoint to its required handshake type.
 The CLI task-host endpoint uses `NetTaskHostHandshake` or `FrameworkTaskHostHandshake`, depending on its runtime.
 The standalone CLR2 endpoint constructs only its own `Clr2TaskHostHandshake`.

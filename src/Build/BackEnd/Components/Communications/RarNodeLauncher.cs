@@ -21,7 +21,7 @@ namespace Microsoft.Build.BackEnd
         internal RarNodeLauncher(INodeLauncher nodeLauncher)
         {
             _nodeLauncher = nodeLauncher;
-            _pipeName = NamedPipeUtil.GetRarNodePipeName(new(ServerHandshakeOptions.None));
+            _pipeName = NamedPipeUtil.GetRarNodePipeName(CommunicationsUtilities.GetRarNodeHandshake());
         }
 
         /// <summary>
