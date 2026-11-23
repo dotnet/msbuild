@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.IO;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -159,5 +161,194 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             provider.ConnectionPersists(options, version).ShouldBeFalse();
         }
+
+#if RUNTIME_TYPE_NETCORE
+        [WindowsOnlyTheory]
+        [InlineData((int)HandshakeOptions.None, "")]
+        [InlineData((int)HandshakeOptions.X64, "amd64")]
+        [InlineData((int)HandshakeOptions.Arm64, "arm64")]
+        public void Clr4TaskHostIsLocatedInVisualStudioFromDeveloperCommandPrompt(int architecture, string architectureDirectory)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string visualStudioRoot = env.CreateFolder().Path;
+            string toolsDirectoryRoot = Path.Combine(visualStudioRoot, "MSBuild", "Current", "Bin");
+            string msbuildExePath = Path.Combine(toolsDirectoryRoot, architectureDirectory, "MSBuild.exe");
+            Directory.CreateDirectory(Path.GetDirectoryName(msbuildExePath)!);
+            File.WriteAllText(msbuildExePath, string.Empty);
+
+            // A Developer Command Prompt sets VSINSTALLDIR with a trailing separator.
+            env.SetEnvironmentVariable("VSINSTALLDIR", visualStudioRoot + Path.DirectorySeparatorChar);
+            env.SetEnvironmentVariable("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
+
+            HandshakeOptions clr4Context = HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse | (HandshakeOptions)architecture;
+
+            NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(clr4Context, () => throw new InvalidOperationException())
+                .ShouldBe(new NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found(msbuildExePath, toolsDirectoryRoot));
+
+            NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(clr4Context).ShouldBe(msbuildExePath);
+
+            // .NET task hosts do not come from Visual Studio.
+            (NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(clr4Context | HandshakeOptions.NET, () => throw new InvalidOperationException())
+                is NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotApplicable).ShouldBeTrue();
+
+            // Only the Visual Studio version matching this MSBuild is used.
+            env.SetEnvironmentVariable("VisualStudioVersion", "17.0");
+            (NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(clr4Context, () => [])
+                is NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Clr4TaskHostIsNotLocatedInVisualStudioOutsideDeveloperCommandPrompt()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("VSINSTALLDIR", null);
+            env.SetEnvironmentVariable("VisualStudioVersion", null);
+
+            (NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(HandshakeOptions.TaskHost | HandshakeOptions.X64, () => [])
+                is NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Clr4TaskHostIsNotLocatedInVisualStudioWithoutMSBuildExe()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("VSINSTALLDIR", env.CreateFolder().Path);
+            env.SetEnvironmentVariable("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
+
+            (NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(HandshakeOptions.TaskHost | HandshakeOptions.X64, () => [])
+                is NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Clr4TaskHostUsesTheOnlyVisualStudioInstallationOutsideDeveloperCommandPrompt()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            ClearDeveloperCommandPrompt(env);
+
+            VisualStudioInstance installation = CreateVisualStudioInstallation(env, "Visual Studio Enterprise 2026", "18.0.11111.0", out string msbuildExePath, out string toolsDirectoryRoot);
+            VisualStudioInstance olderInstallation = CreateVisualStudioInstallation(env, "Visual Studio Enterprise 2022", "17.14.0.0", out _, out _);
+            VisualStudioInstance installationWithoutMSBuild = new("Visual Studio Build Tools 2026", env.CreateFolder().Path, new Version(18, 0));
+
+            NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(
+                HandshakeOptions.TaskHost | HandshakeOptions.X64,
+                () => [olderInstallation, installationWithoutMSBuild, installation])
+                .ShouldBe(new NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found(msbuildExePath, toolsDirectoryRoot));
+        }
+
+        [Fact]
+        public void Clr4TaskHostReportsMissingVisualStudio()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            ClearDeveloperCommandPrompt(env);
+
+            VisualStudioInstance olderInstallation = CreateVisualStudioInstallation(env, "Visual Studio Enterprise 2022", "17.14.0.0", out _, out _);
+
+            (NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(HandshakeOptions.TaskHost | HandshakeOptions.X64, () => [])
+                is NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound).ShouldBeTrue();
+
+            (NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(HandshakeOptions.TaskHost | HandshakeOptions.X64, () => [olderInstallation])
+                is NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound).ShouldBeTrue();
+
+            // A Developer Command Prompt for an installation without MSBuild.exe falls back to the installations that have it.
+            env.SetEnvironmentVariable("VSINSTALLDIR", env.CreateFolder().Path);
+            env.SetEnvironmentVariable("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
+            (NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(HandshakeOptions.TaskHost | HandshakeOptions.X64, () => [])
+                is NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound).ShouldBeTrue();
+
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                out string? code,
+                out _,
+                "TaskHostVisualStudioNotFound",
+                "LegacyTask",
+                "CLR4",
+                "x64",
+                MSBuildConstants.CurrentVisualStudioVersion);
+            code.ShouldBe("MSB4291");
+            message.ShouldContain("LegacyTask");
+            message.ShouldContain(MSBuildConstants.CurrentVisualStudioVersion);
+        }
+
+        [Fact]
+        public void Clr4TaskHostReportsMultipleVisualStudioInstallations()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            ClearDeveloperCommandPrompt(env);
+
+            VisualStudioInstance enterprise = CreateVisualStudioInstallation(env, "Visual Studio Enterprise 2026", "18.0.11111.0", out _, out _);
+            VisualStudioInstance buildTools = CreateVisualStudioInstallation(env, "Visual Studio Build Tools 2026", "18.1.22222.0", out _, out _);
+
+            var multipleFound = NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(HandshakeOptions.TaskHost | HandshakeOptions.X64, () => [enterprise, buildTools]) switch
+            {
+                NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.MultipleFound found => found,
+                _ => throw new InvalidOperationException("Expected multiple Visual Studio installations."),
+            };
+            multipleFound.Installations.ShouldBe([enterprise, buildTools]);
+
+            string list = NodeProviderOutOfProcTaskHost.FormatVisualStudioInstallations(multipleFound.Installations);
+            list.ShouldContain($"Visual Studio Enterprise 2026 (18.0.11111.0): {enterprise.Path}");
+            list.ShouldContain($"Visual Studio Build Tools 2026 (18.1.22222.0): {buildTools.Path}");
+
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                out string? code,
+                out _,
+                "TaskHostMultipleVisualStudioFound",
+                "LegacyTask",
+                "CLR4",
+                "x64",
+                MSBuildConstants.CurrentVisualStudioVersion,
+                list);
+            code.ShouldBe("MSB4292");
+            message.ShouldContain(enterprise.Path);
+            message.ShouldContain(buildTools.Path);
+            message.ShouldContain("VSINSTALLDIR");
+        }
+
+        [Fact]
+        public void Clr4TaskHostPrefersDeveloperCommandPromptOverDiscoveredInstallations()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            VisualStudioInstance enterprise = CreateVisualStudioInstallation(env, "Visual Studio Enterprise 2026", "18.0.11111.0", out string msbuildExePath, out string toolsDirectoryRoot);
+            VisualStudioInstance buildTools = CreateVisualStudioInstallation(env, "Visual Studio Build Tools 2026", "18.1.22222.0", out _, out _);
+            env.SetEnvironmentVariable("VSINSTALLDIR", enterprise.Path + Path.DirectorySeparatorChar);
+            env.SetEnvironmentVariable("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
+
+            NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(
+                HandshakeOptions.TaskHost | HandshakeOptions.X64,
+                () => throw new InvalidOperationException("Visual Studio installations should not be queried."))
+                .ShouldBe(new NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found(msbuildExePath, toolsDirectoryRoot));
+        }
+
+        [Theory]
+        [InlineData((int)(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.X64))]
+        [InlineData((int)(HandshakeOptions.NodeReuse | HandshakeOptions.X64))]
+        public void VisualStudioIsNotUsedForOtherHosts(int hostContext)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            ClearDeveloperCommandPrompt(env);
+
+            (NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(
+                (HandshakeOptions)hostContext,
+                () => throw new InvalidOperationException("Visual Studio installations should not be queried."))
+                is NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotApplicable).ShouldBeTrue();
+        }
+
+        private static void ClearDeveloperCommandPrompt(TestEnvironment env)
+        {
+            env.SetEnvironmentVariable("VSINSTALLDIR", null);
+            env.SetEnvironmentVariable("VisualStudioVersion", null);
+        }
+
+        private static VisualStudioInstance CreateVisualStudioInstallation(TestEnvironment env, string name, string version, out string msbuildExePath, out string toolsDirectoryRoot)
+        {
+            string installationPath = env.CreateFolder().Path;
+            toolsDirectoryRoot = Path.Combine(installationPath, "MSBuild", "Current", "Bin");
+            msbuildExePath = Path.Combine(toolsDirectoryRoot, "amd64", "MSBuild.exe");
+            Directory.CreateDirectory(Path.GetDirectoryName(msbuildExePath)!);
+            File.WriteAllText(msbuildExePath, string.Empty);
+
+            return new VisualStudioInstance(name, installationPath, Version.Parse(version));
+        }
+#endif
     }
 }
