@@ -23,14 +23,14 @@ internal union TaskHostHandshakeConfiguration(
 
 internal readonly record struct NetTaskHostHandshakeConfiguration(TaskHostHandshakeOptions Options)
 {
-    internal HandshakeOptions HandshakeOptions => (HandshakeOptions)Options | HandshakeOptions.TaskHost | HandshakeOptions.NET;
+    internal HandshakeOptions HandshakeOptions => Options.ToWireOptions() | HandshakeOptions.TaskHost | HandshakeOptions.NET;
 
     internal NetTaskHostHandshake CreateHandshake(string? toolsDirectory = null) => new(Options, toolsDirectory);
 }
 
 internal readonly record struct FrameworkTaskHostHandshakeConfiguration(TaskHostHandshakeOptions Options)
 {
-    internal HandshakeOptions HandshakeOptions => (HandshakeOptions)Options | HandshakeOptions.TaskHost;
+    internal HandshakeOptions HandshakeOptions => Options.ToWireOptions() | HandshakeOptions.TaskHost;
 
     internal FrameworkTaskHostHandshake CreateHandshake() => new(Options);
 
@@ -39,7 +39,7 @@ internal readonly record struct FrameworkTaskHostHandshakeConfiguration(TaskHost
 
 internal readonly record struct Clr2TaskHostHandshakeConfiguration(TaskHostHandshakeOptions Options)
 {
-    internal HandshakeOptions HandshakeOptions => (HandshakeOptions)Options | HandshakeOptions.TaskHost | HandshakeOptions.CLR2;
+    internal HandshakeOptions HandshakeOptions => Options.ToWireOptions() | HandshakeOptions.TaskHost | HandshakeOptions.CLR2;
 
     internal Clr2TaskHostHandshake CreateHandshake(string toolsDirectory, Version? fileVersion = null) => new(Options, toolsDirectory, fileVersion);
 }

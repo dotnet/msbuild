@@ -160,7 +160,7 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         NodeProviderOutOfProcBase.NodeContext context = new(
             1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
             NodePacketTypeExtensions.PacketVersion, connectionPersistsAcrossBuilds: true);
-        TaskHostNodeKey key = new(new FrameworkTaskHostHandshakeConfiguration(TaskHostHandshakeOptions.NodeReuse), 1);
+        TaskHostNodeKey key = new(new FrameworkTaskHostHandshakeConfiguration(new(NodeReuse: true)), 1);
         RecordingHandler outer = new();
         RecordingHandler nested = new();
         provider.NodeContextCreated(context, key);
@@ -253,7 +253,7 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         NodeProviderOutOfProcBase.NodeContext context = new(
             1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
             NodePacketTypeExtensions.PacketVersion, connectionPersistsAcrossBuilds: true);
-        TaskHostNodeKey key = new(new FrameworkTaskHostHandshakeConfiguration(TaskHostHandshakeOptions.NodeReuse), 1);
+        TaskHostNodeKey key = new(new FrameworkTaskHostHandshakeConfiguration(new(NodeReuse: true)), 1);
         provider.NodeContextCreated(context, key);
         Task shutdown = Task.Run(() => provider.ShutdownConnectedNodes(enableReuse: true));
 

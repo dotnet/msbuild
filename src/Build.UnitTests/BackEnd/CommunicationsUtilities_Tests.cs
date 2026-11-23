@@ -66,6 +66,34 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Theory]
+        [InlineData("x86", (int)TaskHostArchitecture.X86, 0)]
+        [InlineData("x64", (int)TaskHostArchitecture.X64, (int)HandshakeOptions.X64)]
+        [InlineData("ARM64", (int)TaskHostArchitecture.Arm64, (int)HandshakeOptions.Arm64)]
+        [InlineData("unknown", (int)TaskHostArchitecture.Unspecified, 0)]
+        public void FrameworkTaskHostConfiguration_EncodesOneArchitecture(string architecture, int expectedArchitecture, int expectedWireBits)
+        {
+            FrameworkTaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetFrameworkTaskHostHandshakeConfiguration(architecture);
+
+            configuration.Options.Architecture.ShouldBe((TaskHostArchitecture)expectedArchitecture);
+            (configuration.HandshakeOptions & (HandshakeOptions.X64 | HandshakeOptions.Arm64)).ShouldBe((HandshakeOptions)expectedWireBits);
+        }
+
+        [Fact]
+        public void TaskHostOptions_EncodeIndependentWireFlags()
+        {
+            TaskHostHandshakeOptions options = new(
+                TaskHostArchitecture.Arm64,
+                NodeReuse: true,
+                LowPriority: true,
+                Administrator: true,
+                SidecarTaskHost: true);
+
+            options.ToWireOptions().ShouldBe(
+                HandshakeOptions.Arm64 | HandshakeOptions.NodeReuse | HandshakeOptions.LowPriority
+                | HandshakeOptions.Administrator | HandshakeOptions.SidecarTaskHost);
+        }
+
+        [Theory]
         [InlineData(false)]
         [InlineData(true)]
         public void TaskHostHandshake_KeepsChildArchBit(bool net)

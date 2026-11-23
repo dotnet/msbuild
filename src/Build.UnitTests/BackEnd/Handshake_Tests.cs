@@ -120,16 +120,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// host may take the change wave into account.
         /// </summary>
         [Theory]
-        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr2, (int)TaskHostHandshakeOptions.None)]
-        [InlineData(XMakeAttributes.MSBuildRuntimeValues.net, (int)TaskHostHandshakeOptions.None)]
-        [InlineData(XMakeAttributes.MSBuildRuntimeValues.net, (int)TaskHostHandshakeOptions.X64)]
-        [InlineData(XMakeAttributes.MSBuildRuntimeValues.net, (int)TaskHostHandshakeOptions.SidecarTaskHost)]
-        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr4, (int)TaskHostHandshakeOptions.None)]
-        public void TaskHostHandshakeIgnoresChangeWave(string runtime, int taskHostOptions)
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr2, (int)TaskHostArchitecture.Unspecified, false)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.net, (int)TaskHostArchitecture.Unspecified, false)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.net, (int)TaskHostArchitecture.X64, false)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.net, (int)TaskHostArchitecture.Unspecified, true)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr4, (int)TaskHostArchitecture.Unspecified, false)]
+        public void TaskHostHandshakeIgnoresChangeWave(string runtime, int architecture, bool sidecar)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            var options = (TaskHostHandshakeOptions)taskHostOptions;
+            TaskHostHandshakeOptions options = new((TaskHostArchitecture)architecture, SidecarTaskHost: sidecar);
             Func<Handshake> createHandshake = runtime switch
             {
                 XMakeAttributes.MSBuildRuntimeValues.clr2 => () => new Clr2TaskHostHandshake(options, BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot),
@@ -184,11 +184,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             await VerifyConnection(workerHandshake, workerOptions, nodeSalt, localVersion, sessionId);
             await VerifyConnection(CommunicationsUtilities.GetServerNodeHandshake(nodeReuse: true, lowPriority: true), workerOptions, nodeSalt, localVersion, 0);
-            TaskHostHandshake netHost = new NetTaskHostHandshake(TaskHostHandshakeOptions.X64, taskHostDirectory);
+            TaskHostHandshakeOptions x64Options = new(TaskHostArchitecture.X64);
+            TaskHostHandshake netHost = new NetTaskHostHandshake(x64Options, taskHostDirectory);
             await VerifyConnection(netHost, HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.X64, taskSalt, new Version(99, 99, 99, 99), sessionId);
-            await VerifyConnection(new FrameworkTaskHostHandshake(TaskHostHandshakeOptions.X64, taskHostDirectory, taskHostVersion),
+            await VerifyConnection(new FrameworkTaskHostHandshake(x64Options, taskHostDirectory, taskHostVersion),
                 HandshakeOptions.TaskHost | HandshakeOptions.X64, taskSalt, taskHostVersion, sessionId);
-            await VerifyConnection(new Clr2TaskHostHandshake(TaskHostHandshakeOptions.X64, taskHostDirectory, taskHostVersion),
+            await VerifyConnection(new Clr2TaskHostHandshake(x64Options, taskHostDirectory, taskHostVersion),
                 HandshakeOptions.TaskHost | HandshakeOptions.CLR2 | HandshakeOptions.X64, taskSalt, taskHostVersion, sessionId);
 
             async Task VerifyConnection<THandshake>(THandshake handshake, HandshakeOptions options, int salt, Version version, int expectedSessionId)
@@ -237,7 +238,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void Clr4TaskHostHandshakeUsesExplicitToolsDirectoryAndFileVersion()
         {
-            TaskHostHandshakeOptions options = TaskHostHandshakeOptions.X64;
+            TaskHostHandshakeOptions options = new(TaskHostArchitecture.X64);
             const string toolsDirectory = @"C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin";
 
             FrameworkTaskHostHandshake handshake = new(options, toolsDirectory, new Version(18, 1, 2, 3));
@@ -256,7 +257,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void Clr2TaskHostHandshakeUsesExecutableDirectoryAndFileVersion()
         {
-            TaskHostHandshakeOptions options = TaskHostHandshakeOptions.X64;
+            TaskHostHandshakeOptions options = new(TaskHostArchitecture.X64);
             const string directory = @"C:\Visual Studio\MSBuild\Current\Bin\amd64";
             Version version = new(18, 1, 2, 3);
 

@@ -63,6 +63,8 @@ Configuration flags remain available for connection keys and existence checks, w
 Explicit .NET requests omit architecture bits because the parent cannot determine the SDK host's architecture.
 Child factories preserve the current architecture bits for compatibility with deployed parents.
 CLR2 configuration factories do not enable node reuse.
+Task-host options use one architecture value before they produce wire flags.
+Unspecified and x86 remain distinct in memory but share the same wire identity and reusable hosts.
 
 `NodeEndpointOutOfProcBase<THandshake>` binds each endpoint to its required handshake type.
 The CLI task-host endpoint uses `NetTaskHostHandshake` or `FrameworkTaskHostHandshake`, depending on its runtime.

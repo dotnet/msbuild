@@ -583,19 +583,19 @@ internal static class CommunicationsUtilities
     internal static ServerNodeHandshake GetRarNodeHandshake() => new(ServerHandshakeOptions.None);
 
     internal static NetTaskHostHandshake GetCurrentNetTaskHostHandshake(bool nodeReuse = false, bool lowPriority = false)
-        => new((TaskHostHandshakeOptions)GetProcessHandshakeOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority));
+        => new(GetTaskHostOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority));
 
     internal static FrameworkTaskHostHandshake GetCurrentFrameworkTaskHostHandshake(bool nodeReuse = false, bool lowPriority = false)
-        => new((TaskHostHandshakeOptions)GetProcessHandshakeOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority));
+        => new(GetTaskHostOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority));
 
     internal static NetTaskHostHandshakeConfiguration GetNetTaskHostHandshakeConfiguration(bool nodeReuse = false, bool lowPriority = false)
-        => new((TaskHostHandshakeOptions)GetProcessHandshakeOptions(architecture: null, nodeReuse, lowPriority));
+        => new(GetTaskHostOptions(architecture: null, nodeReuse, lowPriority));
 
     internal static FrameworkTaskHostHandshakeConfiguration GetFrameworkTaskHostHandshakeConfiguration(string architecture, bool nodeReuse = false, bool lowPriority = false)
-        => new((TaskHostHandshakeOptions)GetProcessHandshakeOptions(architecture, nodeReuse, lowPriority));
+        => new(GetTaskHostOptions(architecture, nodeReuse, lowPriority));
 
     internal static Clr2TaskHostHandshakeConfiguration GetClr2TaskHostHandshakeConfiguration(string architecture, bool lowPriority = false)
-        => new((TaskHostHandshakeOptions)GetProcessHandshakeOptions(architecture, nodeReuse: false, lowPriority));
+        => new(GetTaskHostOptions(architecture, nodeReuse: false, lowPriority));
 
     internal static TaskHostHandshakeConfiguration GetTaskHostHandshakeConfiguration(
         TaskHostParameters taskHostParameters,
@@ -610,7 +610,7 @@ internal static class CommunicationsUtilities
                 2 => GetClr2TaskHostHandshakeConfiguration(architecture, lowPriority),
                 4 => GetFrameworkTaskHostHandshakeConfiguration(architecture, nodeReuse, lowPriority),
                 // A child keeps its architecture bit so already-deployed parents can connect.
-                >= 5 => new NetTaskHostHandshakeConfiguration((TaskHostHandshakeOptions)GetProcessHandshakeOptions(architecture, nodeReuse, lowPriority)),
+                >= 5 => new NetTaskHostHandshakeConfiguration(GetTaskHostOptions(architecture, nodeReuse, lowPriority)),
                 _ => Assumed.Unreachable<TaskHostHandshakeConfiguration>("Unsupported task-host runtime."),
             };
         }
@@ -631,6 +631,22 @@ internal static class CommunicationsUtilities
         Assumed.True(taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase));
         // The parent cannot determine the SDK task host's architecture.
         return GetNetTaskHostHandshakeConfiguration(nodeReuse, lowPriority);
+    }
+
+    private static TaskHostHandshakeOptions GetTaskHostOptions(string? architecture, bool nodeReuse, bool lowPriority)
+    {
+        TaskHostArchitecture taskHostArchitecture =
+            string.Equals(architecture, XMakeAttributes.MSBuildArchitectureValues.x86, StringComparison.OrdinalIgnoreCase) ? TaskHostArchitecture.X86 :
+            string.Equals(architecture, XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase) ? TaskHostArchitecture.X64 :
+            string.Equals(architecture, XMakeAttributes.MSBuildArchitectureValues.arm64, StringComparison.OrdinalIgnoreCase) ? TaskHostArchitecture.Arm64 :
+            TaskHostArchitecture.Unspecified;
+
+        HandshakeOptions processOptions = GetProcessHandshakeOptions(architecture: null, nodeReuse, lowPriority);
+        return new TaskHostHandshakeOptions(
+            taskHostArchitecture,
+            NodeReuse: nodeReuse,
+            LowPriority: lowPriority,
+            Administrator: (processOptions & HandshakeOptions.Administrator) != 0);
     }
 
     private static HandshakeOptions GetProcessHandshakeOptions(string? architecture, bool nodeReuse, bool lowPriority)

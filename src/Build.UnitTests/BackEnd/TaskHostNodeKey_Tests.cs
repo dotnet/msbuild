@@ -14,7 +14,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     public class TaskHostNodeKey_Tests
     {
         private static readonly NetTaskHostHandshakeConfiguration s_netConfiguration = new(TaskHostHandshakeOptions.None);
-        private static readonly FrameworkTaskHostHandshakeConfiguration s_frameworkConfiguration = new(TaskHostHandshakeOptions.X64);
+        private static readonly FrameworkTaskHostHandshakeConfiguration s_frameworkConfiguration = new(new(TaskHostArchitecture.X64));
 
         [Fact]
         public void TaskHostNodeKey_Equality_SameValues_AreEqual()
@@ -92,6 +92,19 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             keyWithoutIdentity.ShouldNotBe(keyWithIdentity);
         }
 
+        [Fact]
+        public void TaskHostNodeKey_Equality_UnspecifiedAndX86ShareWireIdentity()
+        {
+            FrameworkTaskHostHandshakeConfiguration unspecified = new(new(TaskHostArchitecture.Unspecified));
+            FrameworkTaskHostHandshakeConfiguration x86 = new(new(TaskHostArchitecture.X86));
+            TaskHostNodeKey unspecifiedKey = new(unspecified, 1);
+            TaskHostNodeKey x86Key = new(x86, 1);
+
+            unspecified.Options.Architecture.ShouldNotBe(x86.Options.Architecture);
+            unspecifiedKey.ShouldBe(x86Key);
+            unspecifiedKey.GetHashCode().ShouldBe(x86Key.GetHashCode());
+        }
+
         [Theory]
         [InlineData(0, false)]
         [InlineData(7, false)]
@@ -156,9 +169,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 new FrameworkTaskHostHandshakeConfiguration(TaskHostHandshakeOptions.None),
                 s_netConfiguration,
                 s_frameworkConfiguration,
-                new NetTaskHostHandshakeConfiguration(TaskHostHandshakeOptions.NodeReuse),
+                new NetTaskHostHandshakeConfiguration(new(NodeReuse: true)),
                 new Clr2TaskHostHandshakeConfiguration(TaskHostHandshakeOptions.None),
-                new FrameworkTaskHostHandshakeConfiguration(TaskHostHandshakeOptions.Arm64)
+                new FrameworkTaskHostHandshakeConfiguration(new(TaskHostArchitecture.Arm64))
             ];
 
             foreach (TaskHostHandshakeConfiguration configuration in configurations)

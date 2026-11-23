@@ -72,19 +72,63 @@ internal union TaskHostHandshake(
     public bool IsNetTaskHostSaltMatch(int receivedSalt) => Protocol.IsNetTaskHostSaltMatch(receivedSalt);
 }
 
-/// <summary>
-/// Task-host configuration without runtime or node-kind discriminators.
-/// </summary>
-[Flags]
-internal enum TaskHostHandshakeOptions
+internal enum TaskHostArchitecture
 {
-    None = 0,
-    X64 = HandshakeOptions.X64,
-    NodeReuse = HandshakeOptions.NodeReuse,
-    LowPriority = HandshakeOptions.LowPriority,
-    Administrator = HandshakeOptions.Administrator,
-    Arm64 = HandshakeOptions.Arm64,
-    SidecarTaskHost = HandshakeOptions.SidecarTaskHost,
+    Unspecified,
+    X86,
+    X64,
+    Arm64,
+}
+
+/// <summary>
+/// Task-host options before they are encoded as handshake flags.
+/// </summary>
+internal readonly record struct TaskHostHandshakeOptions(
+    TaskHostArchitecture Architecture = TaskHostArchitecture.Unspecified,
+    bool NodeReuse = false,
+    bool LowPriority = false,
+    bool Administrator = false,
+    bool SidecarTaskHost = false)
+{
+    internal static TaskHostHandshakeOptions None => default;
+
+    internal HandshakeOptions ToWireOptions()
+    {
+        HandshakeOptions options = Architecture switch
+        {
+            TaskHostArchitecture.Unspecified or TaskHostArchitecture.X86 => HandshakeOptions.None,
+            TaskHostArchitecture.X64 => HandshakeOptions.X64,
+            TaskHostArchitecture.Arm64 => HandshakeOptions.Arm64,
+            _ => Assumed.Unreachable<HandshakeOptions>("Unsupported task-host architecture."),
+        };
+
+        if (NodeReuse)
+        {
+            options |= HandshakeOptions.NodeReuse;
+        }
+
+        if (LowPriority)
+        {
+            options |= HandshakeOptions.LowPriority;
+        }
+
+        if (Administrator)
+        {
+            options |= HandshakeOptions.Administrator;
+        }
+
+        if (SidecarTaskHost)
+        {
+            options |= HandshakeOptions.SidecarTaskHost;
+        }
+
+        return options;
+    }
+
+    // Unspecified and x86 have the same wire identity and must share reusable hosts.
+    public bool Equals(TaskHostHandshakeOptions other) => ToWireOptions() == other.ToWireOptions();
+
+    public override int GetHashCode() => (int)ToWireOptions();
 }
 
 internal sealed class WorkerNodeHandshake : NodeHandshake
@@ -105,8 +149,8 @@ internal sealed class NetTaskHostHandshake : NodeHandshake
     private protected override bool IncludesChangeWave => false;
     private protected override bool AcceptsDriveLetterCaseVariant => true;
 
-    internal NetTaskHostHandshake(TaskHostHandshakeOptions options = TaskHostHandshakeOptions.None, string? toolsDirectory = null)
-        : base((HandshakeOptions)options | HandshakeOptions.TaskHost | HandshakeOptions.NET, includeSessionId: true, toolsDirectory)
+    internal NetTaskHostHandshake(TaskHostHandshakeOptions options = default, string? toolsDirectory = null)
+        : base(options.ToWireOptions() | HandshakeOptions.TaskHost | HandshakeOptions.NET, includeSessionId: true, toolsDirectory)
     {
     }
 
@@ -124,13 +168,13 @@ internal sealed class FrameworkTaskHostHandshake : NodeHandshake
 {
     private protected override bool IncludesChangeWave => false;
 
-    internal FrameworkTaskHostHandshake(TaskHostHandshakeOptions options = TaskHostHandshakeOptions.None)
-        : base((HandshakeOptions)options | HandshakeOptions.TaskHost, includeSessionId: true, toolsDirectory: null)
+    internal FrameworkTaskHostHandshake(TaskHostHandshakeOptions options = default)
+        : base(options.ToWireOptions() | HandshakeOptions.TaskHost, includeSessionId: true, toolsDirectory: null)
     {
     }
 
     internal FrameworkTaskHostHandshake(TaskHostHandshakeOptions options, string toolsDirectory, Version fileVersion)
-        : base((HandshakeOptions)options | HandshakeOptions.TaskHost, includeSessionId: true, toolsDirectory, fileVersion)
+        : base(options.ToWireOptions() | HandshakeOptions.TaskHost, includeSessionId: true, toolsDirectory, fileVersion)
     {
     }
 }
@@ -140,7 +184,7 @@ internal sealed class Clr2TaskHostHandshake : NodeHandshake
     private protected override bool IncludesChangeWave => false;
 
     internal Clr2TaskHostHandshake(TaskHostHandshakeOptions options, string toolsDirectory, Version? fileVersion = null)
-        : base((HandshakeOptions)options | HandshakeOptions.TaskHost | HandshakeOptions.CLR2, includeSessionId: true, toolsDirectory, fileVersion)
+        : base(options.ToWireOptions() | HandshakeOptions.TaskHost | HandshakeOptions.CLR2, includeSessionId: true, toolsDirectory, fileVersion)
     {
     }
 }
