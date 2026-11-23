@@ -178,6 +178,12 @@ namespace Microsoft.Build.BackEnd.Logging
             private set;
         }
 
+        // Loggers can share a sink, so distinguish requests made by each logger during initialization.
+        internal int EvaluationPropertiesAndItemsRequestCount { get; private set; }
+
+        // Untracked sinks retain the original inference from IncludeEvaluationPropertiesAndItems.
+        internal bool? RequiresLegacyEvaluationData { get; set; }
+
         #endregion
 
         #region Methods
@@ -206,6 +212,7 @@ namespace Microsoft.Build.BackEnd.Logging
         void IEventSource4.IncludeEvaluationPropertiesAndItems()
         {
             IncludeEvaluationPropertiesAndItems = true;
+            EvaluationPropertiesAndItemsRequestCount++;
         }
 
         #endregion

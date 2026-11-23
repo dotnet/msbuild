@@ -643,10 +643,15 @@ namespace Microsoft.Build.BackEnd.Logging
                 // If any logger requested the data - we need to emit them
                 IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
                     sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
-                // If any logger didn't request the data - hence it's likely legacy logger
-                //  - we need to populate the data in legacy way
+
+                // Removing telemetry's legacy vote must not mask real consumers sharing an opting-in sink.
+                // Otherwise preserve the existing sink-level negotiation, including late opt-ins.
+                bool hasTelemetryLogger = _distributedCentralLoggers.Any(logger => logger is TelemetryInfra.InternalTelemetryConsumingLogger);
                 IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
-                    sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
+                    hasTelemetryLogger
+                        ? sinks.Any(sink => sink.RequiresLegacyEvaluationData ?? !sink.IncludeEvaluationPropertiesAndItems) ||
+                          _filterEventSource?.RequiresLegacyEvaluationData is true
+                        : sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
             }
         }
 
@@ -1098,7 +1103,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     EventSourceSink eventSource = (EventSourceSink)_eventSinkDictionary[_centralForwardingLoggerSinkId];
 
                     // Initialize and register the logger
+                    int evaluationDataRequests = eventSource.EvaluationPropertiesAndItemsRequestCount;
                     InitializeLogger(logger, eventSource);
+                    eventSource.RequiresLegacyEvaluationData =
+                        eventSource.RequiresLegacyEvaluationData is true ||
+                        (logger is not CentralForwardingLogger &&
+                         eventSource.EvaluationPropertiesAndItemsRequestCount == evaluationDataRequests);
                 }
 
                 // Logger has been registered successfully
@@ -1221,6 +1231,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 existingReusableCentralLogger.RerouteActiveEventSource(eventSourceSink);
             }
 
+            // Telemetry and the ProjectCollection's pass-through forwarder are not evaluation-data consumers.
+            eventSourceSink.RequiresLegacyEvaluationData =
+                centralLogger is not (TelemetryInfra.InternalTelemetryConsumingLogger or CentralForwardingLogger) &&
+                !eventSourceSink.IncludeEvaluationPropertiesAndItems;
+
             _distributedCentralLoggers.Add(centralLogger);
 
             EventRedirectorToSink newRedirector = new EventRedirectorToSink(sinkId, eventSourceSink);
@@ -1238,6 +1253,17 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Initialize and register the forwarding logger
             InitializeLogger(localForwardingLogger, _filterEventSource);
+
+            // Known pass-through forwarders defer to their central consumers. Other forwarders can consume data
+            // themselves, and their worker-node preferences need not match this node's instance.
+            Type forwardingLoggerType = localForwardingLogger.GetType();
+            _filterEventSource.RequiresLegacyEvaluationData =
+                _filterEventSource.RequiresLegacyEvaluationData is true ||
+                (forwardingLoggerType != typeof(CentralForwardingLogger) &&
+                 forwardingLoggerType != typeof(ConfigurableForwardingLogger) &&
+                 forwardingLoggerType != typeof(Framework.Telemetry.InternalTelemetryForwardingLogger) &&
+                 forwardingLoggerType != typeof(ForwardingTerminalLogger) &&
+                 forwardingLoggerType != typeof(BuildCheckForwardingLogger));
 
             _loggerDescriptions.Add(forwardingLogger);
 
