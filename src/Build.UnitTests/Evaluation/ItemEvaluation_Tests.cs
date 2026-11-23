@@ -730,7 +730,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
-        public void EvaluatedMetadataTableSnapshotsNamesAndUpdatesAnExistingIndex()
+        public void EvaluatorMetadataTableSnapshotsNamesAndUpdatesAnExistingIndex()
         {
             ProjectRootElement root = ProjectRootElement.Create();
             ProjectItemElement item = root.AddItemGroup().AddItem("I", "item");
