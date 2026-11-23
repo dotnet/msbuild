@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -102,7 +103,7 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace($"Starting to acquire {numberOfNodesToCreate} new or existing node(s) to establish nodes from ID {nextNodeId} to {nextNodeId + numberOfNodesToCreate - 1}...");
      
-            IList<NodeContext> nodeContexts = GetNodes(nodeLaunchData, nextNodeId, factory, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate);
+            IList<NodeContext> nodeContexts = GetNodes(nodeLaunchData, nextNodeId, factory, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate, out string lastConnectionFailure);
 
             if (nodeContexts.Count > 0)
             {
@@ -111,7 +112,17 @@ namespace Microsoft.Build.BackEnd
                     .ToList();
             }
 
-            throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotConnectToMSBuildExe", ComponentHost.BuildParameters.NodeExeLocation));
+            // Log the error here: the BuildAbortedException is not logged by its callers.
+            string nodeExeLocation = ComponentHost.BuildParameters.NodeExeLocation;
+            lastConnectionFailure ??= string.Empty;
+            ComponentHost.LoggingService.LogError(
+                new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId),
+                ElementLocation.Empty,
+                "CouldNotConnectToMSBuildExe",
+                nodeExeLocation,
+                lastConnectionFailure);
+
+            throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotConnectToMSBuildExe", nodeExeLocation, lastConnectionFailure));
 
             void NodeContextCreated(NodeContext context)
             {

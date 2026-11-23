@@ -46,12 +46,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The number of times to retry creating an out-of-proc node.
         /// </summary>
-        private const int NodeCreationRetries = 10;
+        protected int NodeCreationRetries { get; init; } = 10;
 
         /// <summary>
         /// The amount of time to wait for an out-of-proc node to spool up before we give up.
         /// </summary>
-        private const int TimeoutForNewNodeCreation = 30000;
+        protected int TimeoutForNewNodeCreation { get; init; } = 30000;
 
         /// <summary>
         /// The amount of time to wait for an out-of-proc node to exit.
@@ -233,13 +233,15 @@ namespace Microsoft.Build.BackEnd
         /// <param name="createNode">Callback when a node is created.</param>
         /// <param name="terminateNode">Callback when a node terminates.</param>
         /// <param name="numberOfNodesToCreate">Number of nodes to create.</param>
+        /// <param name="lastConnectionFailure">A description of the last failed attempt to connect to a new node, or null if no attempt failed.</param>
         protected IList<NodeContext> GetNodes(
             NodeLaunchData nodeLaunchData,
             int nextNodeId,
             INodePacketFactory factory,
             NodeContextCreatedDelegate createNode,
             NodeContextTerminateDelegate terminateNode,
-            int numberOfNodesToCreate)
+            int numberOfNodesToCreate,
+            out string lastConnectionFailure)
         {
             string commandLineArgs = nodeLaunchData.CommandLineArgs;
 #if DEBUG
@@ -318,6 +320,7 @@ namespace Microsoft.Build.BackEnd
 
             ConcurrentQueue<NodeContext> nodeContexts = new();
             ConcurrentQueue<Exception> exceptions = new();
+            string lastFailure = null;
             int currentProcessId = EnvironmentUtilities.CurrentProcessId;
             Parallel.For(nextNodeId, nextNodeId + numberOfNodesToCreate, (nodeId) =>
             {
@@ -349,6 +352,7 @@ namespace Microsoft.Build.BackEnd
                     new AggregateException(exceptions.ToArray()));
             }
 
+            lastConnectionFailure = lastFailure;
             return nodeContexts.ToList();
 
             bool TryReuseAnyFromPossibleRunningNodes(int currentProcessId, int nodeId)
@@ -475,25 +479,30 @@ namespace Microsoft.Build.BackEnd
                         return true;
                     }
 
+                    string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(msbuildProcess.Id);
+                    string errorMessage = result.ErrorMessage?.TrimEnd();
                     if (msbuildProcess.HasExited)
                     {
-                        if (Traits.Instance.DebugNodeCommunication)
+                        int? exitCode = null;
+                        try
                         {
-                            try
-                            {
-                                CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it has exited with exit code {msbuildProcess.ExitCode}. This can indicate a crash at startup");
-                            }
-                            catch (InvalidOperationException)
-                            {
-                                // This case is common on Windows where we called CreateProcess and the Process object
-                                // can't get the exit code.
-                                CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it has exited with unknown exit code. This can indicate a crash at startup");
-                            }
+                            exitCode = msbuildProcess.ExitCode;
                         }
+                        catch (InvalidOperationException)
+                        {
+                            // This case is common on Windows where we called CreateProcess and the Process object
+                            // can't get the exit code.
+                        }
+
+                        CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it has exited with exit code {exitCode?.ToString(CultureInfo.InvariantCulture) ?? "unknown"}. This can indicate a crash at startup");
+                        lastFailure = exitCode is null
+                            ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NodeConnectionFailed", msbuildProcess.Id, pipeName, errorMessage)
+                            : ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NodeConnectionFailedProcessExited", msbuildProcess.Id, pipeName, errorMessage, exitCode.Value);
                     }
                     else
                     {
                         CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node");
+                        lastFailure = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NodeConnectionFailed", msbuildProcess.Id, pipeName, errorMessage);
                     }
                 }
 
@@ -924,9 +933,9 @@ namespace Microsoft.Build.BackEnd
 
                 // If we don't close any stream, we might hang up the child
                 nodeStream?.Dispose();
-            }
 
-            result = HandshakeResult.Failure(HandshakeStatus.Undefined, "Check the COMM traces to diagnose the issue with communication.");
+                result = HandshakeResult.Failure(HandshakeStatus.Undefined, e.Message);
+            }
 
             return null;
         }

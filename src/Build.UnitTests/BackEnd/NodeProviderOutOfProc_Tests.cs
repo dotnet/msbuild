@@ -2,7 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -12,10 +17,114 @@ using Xunit;
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
-    /// Tests for NodeProviderOutOfProc, specifically the node over-provisioning detection feature.
+    /// Tests for NodeProviderOutOfProc.
     /// </summary>
     public class NodeProviderOutOfProc_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public NodeProviderOutOfProc_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
+        /// <summary>
+        /// Simulates a worker node that cannot be reached, for example because a sandbox blocks the pipe.
+        /// The build must fail with an error that tells why, instead of failing without any error.
+        /// </summary>
+        [Fact]
+        public void CreateNodes_WhenConnectionFails_LogsErrorWithReason()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string projectFile = env.CreateFile("empty.proj", """
+                <Project>
+                    <Target Name="Build" />
+                </Project>
+                """).Path;
+
+            ExitingNodeLauncher launcher = new();
+            using BuildManager buildManager = new();
+            IBuildComponentHost host = buildManager;
+            host.RegisterFactory(BuildComponentType.NodeLauncher, _ => launcher);
+            host.RegisterFactory(BuildComponentType.OutOfProcNodeProvider, _ => new QuickNodeProviderOutOfProc());
+            MockLogger logger = new(_output);
+
+            BuildResult result = buildManager.Build(
+                new BuildParameters
+                {
+                    DisableInProcNode = true,
+                    MaxNodeCount = 1,
+                    EnableNodeReuse = false,
+                    Loggers = [logger],
+                },
+                new BuildRequestData(projectFile, new Dictionary<string, string>(), null, ["Build"], null));
+
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+            result.Exception.ShouldBeOfType<BuildAbortedException>();
+            launcher.LaunchCount.ShouldBe(QuickNodeProviderOutOfProc.Retries);
+
+            BuildErrorEventArgs error = logger.Errors.ShouldHaveSingleItem();
+            error.Code.ShouldBe("MSB4218");
+            error.Message.ShouldContain("-maxCpuCount:1");
+
+            // The connection error text comes from the OS, so check the text around it.
+            string reason = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                "NodeConnectionFailedProcessExited",
+                launcher.LastProcessId,
+                NamedPipeUtil.GetPlatformSpecificPipeName(launcher.LastProcessId),
+                "\0",
+                ExitingNodeLauncher.ExitCode);
+            foreach (string part in reason.Split('\0'))
+            {
+                error.Message.ShouldContain(part);
+            }
+        }
+
+        private sealed class QuickNodeProviderOutOfProc : NodeProviderOutOfProc
+        {
+            public const int Retries = 2;
+
+            public QuickNodeProviderOutOfProc()
+            {
+                NodeCreationRetries = Retries;
+                TimeoutForNewNodeCreation = 100;
+            }
+        }
+
+        /// <summary>
+        /// Starts a process that exits at once, so no node pipe is ever created.
+        /// </summary>
+        private sealed class ExitingNodeLauncher : INodeLauncher, IBuildComponent
+        {
+            public const int ExitCode = 42;
+
+            public int LaunchCount { get; private set; }
+
+            public int LastProcessId { get; private set; }
+
+            public void InitializeComponent(IBuildComponentHost host)
+            {
+            }
+
+            public void ShutdownComponent()
+            {
+            }
+
+            public Process Start(NodeLaunchData launchData, int nodeId)
+            {
+                ProcessStartInfo startInfo = NativeMethodsShared.IsWindows
+                    ? new ProcessStartInfo("cmd.exe", $"/c exit {ExitCode}")
+                    : new ProcessStartInfo("/bin/sh", $"-c \"exit {ExitCode}\"");
+                startInfo.UseShellExecute = false;
+                startInfo.CreateNoWindow = true;
+
+                Process process = Process.Start(startInfo);
+                process.WaitForExit();
+                LaunchCount++;
+                LastProcessId = process.Id;
+                return process;
+            }
+        }
         /// <summary>
         /// Test helper class to expose protected methods for testing.
         /// Uses configurable overrides for testing.

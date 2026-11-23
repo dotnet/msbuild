@@ -736,6 +736,16 @@
         <target state="translated">MSB4270: plug-ins de cache de projet introuvables dans l'assembly "{0}". Un plug-in est attendu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NodeConnectionFailed">
+        <source>The last attempt to connect to process {0} through "{1}" failed: {2}</source>
+        <target state="new">The last attempt to connect to process {0} through "{1}" failed: {2}</target>
+        <note>{0} is a process ID. {1} is the name of a named pipe or the path of a Unix domain socket. {2} is the error message, which ends with a period.</note>
+      </trans-unit>
+      <trans-unit id="NodeConnectionFailedProcessExited">
+        <source>The last attempt to connect to process {0} through "{1}" failed: {2} The process exited with code {3}.</source>
+        <target state="new">The last attempt to connect to process {0} through "{1}" failed: {2} The process exited with code {3}.</target>
+        <note>{0} is a process ID. {1} is the name of a named pipe or the path of a Unix domain socket. {2} is the error message, which ends with a period. {3} is the exit code of the process.</note>
+      </trans-unit>
       <trans-unit id="NodeReused">
         <source>Reusing node {0} (PID: {1}).</source>
         <target state="translated">Réutilisation du {0} de nœud (PID : {1}).</target>
@@ -1392,9 +1402,9 @@ Erreurs : {3}</target>
         <note>{StrBegin="MSB4193: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotConnectToMSBuildExe">
-        <source>MSB4218: Failed to successfully launch or connect to a child MSBuild.exe process. Verify that the MSBuild.exe "{0}" launches successfully, and that it is loading the same microsoft.build.dll that the launching process loaded. If the location seems incorrect, try specifying the correct location in the BuildParameters object, or with the MSBUILD_EXE_PATH environment variable.</source>
-        <target state="translated">MSB4218: Échec du lancement ou de la connexion à un processus MSBuild.exe enfant. Vérifiez que le processus MSBuild.exe "{0}" se lance correctement et qu'il charge le même fichier microsoft.build.dll que celui chargé par le processus de lancement. Si l'emplacement semble incorrect, essayez de spécifier l'emplacement correct dans l'objet BuildParameters ou à l'aide de la variable d'environnement MSBUILD_EXE_PATH.</target>
-        <note>{StrBegin="MSB4218: "}</note>
+        <source>MSB4218: Failed to successfully launch or connect to a child MSBuild.exe process. {1} Verify that the MSBuild.exe "{0}" launches successfully, and that it is loading the same microsoft.build.dll that the launching process loaded. If the location seems incorrect, try specifying the correct location in the BuildParameters object, or with the MSBUILD_EXE_PATH environment variable. If the build runs in a sandbox or in another environment that restricts communication between processes, use the -maxCpuCount:1 switch to build in a single process. To log the communication with child processes, set the MSBUILDDEBUGCOMM environment variable to 1.</source>
+        <target state="new">MSB4218: Failed to successfully launch or connect to a child MSBuild.exe process. {1} Verify that the MSBuild.exe "{0}" launches successfully, and that it is loading the same microsoft.build.dll that the launching process loaded. If the location seems incorrect, try specifying the correct location in the BuildParameters object, or with the MSBUILD_EXE_PATH environment variable. If the build runs in a sandbox or in another environment that restricts communication between processes, use the -maxCpuCount:1 switch to build in a single process. To log the communication with child processes, set the MSBUILDDEBUGCOMM environment variable to 1.</target>
+        <note>{StrBegin="MSB4218: "} {0} is the path to MSBuild. {1} is the reason for the last failed connection attempt (see NodeConnectionFailed), or empty. Do not translate "-maxCpuCount:1", "MSBUILDDEBUGCOMM", "MSBUILD_EXE_PATH" or "BuildParameters".</note>
       </trans-unit>
       <trans-unit id="CannotModifyReservedItem">
         <source>MSB4117: The "{0}" item name is reserved, and cannot be used.</source>

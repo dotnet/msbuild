@@ -1148,7 +1148,8 @@ namespace Microsoft.Build.BackEnd
                 this,
                 OnNodeContextCreated,
                 NodeContextTerminated,
-                1);
+                1,
+                out _);
 
             return nodeContexts.Count == 1;
         }
