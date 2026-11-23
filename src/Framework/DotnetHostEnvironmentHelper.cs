@@ -19,8 +19,9 @@ namespace Microsoft.Build.Internal
     /// </summary>
     internal static class DotnetHostEnvironmentHelper
     {
-        private static string? _cachedDotnetHostPath;
-        private static IDictionary<string, string?>? _cachedOverrides;
+        private static CachedOverrides? s_cachedOverrides;
+
+        private sealed record class CachedOverrides(string? DotnetHostPath, IDictionary<string, string?>? Overrides);
 
         // Environment variable name for .NET runtime root directory.
         private const string DotnetRootEnvVarName = "DOTNET_ROOT";
@@ -74,20 +75,18 @@ namespace Microsoft.Build.Internal
             string? resolvedPath = dotnetHostPath ?? Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
 
             // Return cached result if the input hasn't changed.
-            // Race conditions are benign here: the computation is idempotent, so the worst case is a redundant allocation.
-            string? cachedPath = _cachedDotnetHostPath;
-            IDictionary<string, string?>? cachedResult = _cachedOverrides;
-            if (string.Equals(cachedPath, resolvedPath, StringComparison.Ordinal) && (cachedPath is not null || cachedResult is not null))
+            // Path and result are published as one reference so they stay consistent; a race only costs a redundant computation.
+            CachedOverrides? cached = s_cachedOverrides;
+            if (cached is not null && string.Equals(cached.DotnetHostPath, resolvedPath, StringComparison.Ordinal))
             {
-                return cachedResult;
+                return cached.Overrides;
             }
 
             string? dotnetRoot = ResolveDotnetRoot(dotnetHostPath);
 
             if (string.IsNullOrEmpty(dotnetRoot))
             {
-                _cachedOverrides = null;
-                _cachedDotnetHostPath = resolvedPath;
+                s_cachedOverrides = new CachedOverrides(resolvedPath, null);
                 return null;
             }
 
@@ -102,8 +101,7 @@ namespace Microsoft.Build.Internal
                 overrides[varName] = null;
             }
 
-            _cachedOverrides = overrides;
-            _cachedDotnetHostPath = resolvedPath;
+            s_cachedOverrides = new CachedOverrides(resolvedPath, overrides);
 
             return overrides;
         }

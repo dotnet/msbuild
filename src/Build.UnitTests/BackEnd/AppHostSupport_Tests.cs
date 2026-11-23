@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -80,6 +81,47 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var overrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(hostPath);
 
             overrides["DOTNET_ROOT"].ShouldBe(expectedRoot);
+        }
+
+        [Fact]
+        public void CreateDotnetRootEnvironmentOverrides_ConcurrentCallsWithDifferentPaths_ReturnMatchingRoot()
+        {
+            string[] hostPaths = NativeMethodsShared.IsWindows
+                ? [@"C:\sdk-a\dotnet.exe", @"D:\sdk-b\dotnet.exe"]
+                : ["/opt/sdk-a/dotnet", "/opt/sdk-b/dotnet"];
+            string[] expectedRoots = [Path.GetDirectoryName(hostPaths[0]), Path.GetDirectoryName(hostPaths[1])];
+
+            const int threadCount = 8;
+            const int iterations = 20_000;
+            int mismatches = 0;
+            using Barrier barrier = new(threadCount);
+
+            Thread[] threads = new Thread[threadCount];
+            for (int t = 0; t < threadCount; t++)
+            {
+                int offset = t;
+                threads[t] = new Thread(() =>
+                {
+                    barrier.SignalAndWait();
+                    for (int i = 0; i < iterations; i++)
+                    {
+                        int index = (i + offset) % 2;
+                        var overrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(hostPaths[index]);
+                        if (overrides["DOTNET_ROOT"] != expectedRoots[index])
+                        {
+                            Interlocked.Increment(ref mismatches);
+                        }
+                    }
+                });
+                threads[t].Start();
+            }
+
+            foreach (Thread thread in threads)
+            {
+                thread.Join();
+            }
+
+            mismatches.ShouldBe(0);
         }
 
         [Fact]
