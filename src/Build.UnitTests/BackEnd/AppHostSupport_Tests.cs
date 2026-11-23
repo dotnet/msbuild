@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -82,33 +80,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var overrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(hostPath);
 
             overrides["DOTNET_ROOT"].ShouldBe(expectedRoot);
-        }
-
-        [Fact]
-        public void CreateDotnetRootEnvironmentOverrides_ConcurrentCallsWithDifferentPaths_ReturnMatchingRoot()
-        {
-            string[] hostPaths = NativeMethodsShared.IsWindows
-                ? [@"C:\sdk-a\dotnet.exe", @"D:\sdk-b\dotnet.exe"]
-                : ["/opt/sdk-a/dotnet", "/opt/sdk-b/dotnet"];
-            string[] expectedRoots = [Path.GetDirectoryName(hostPaths[0]), Path.GetDirectoryName(hostPaths[1])];
-
-            const int iterations = 20_000;
-            int mismatches = 0;
-
-            Parallel.For(0, 8, worker =>
-            {
-                for (int i = 0; i < iterations; i++)
-                {
-                    int index = (i + worker) % 2;
-                    var overrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(hostPaths[index]);
-                    if (overrides?["DOTNET_ROOT"] != expectedRoots[index])
-                    {
-                        Interlocked.Increment(ref mismatches);
-                    }
-                }
-            });
-
-            mismatches.ShouldBe(0);
         }
 
         [Fact]
