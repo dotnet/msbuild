@@ -10,19 +10,87 @@ Related documents:
 
 ## Problem
 
-`IBuildEngine3.Yield()` lets a task give its node back to the scheduler while it does work that does not need the node, typically while a long external tool runs. `IBuildEngine3.Reacquire()` waits until the scheduler gives the node back. `ToolTask` does this when `YieldDuringToolExecution` is set. The C++ tasks `CL` and `MIDL` (CPPTasks) set it by default, so other projects can run on the node while the compiler runs.
+Moving C++ tasks into a TaskHost removes an existing scheduling benefit: other projects cannot use the task's node while its compiler runs.
 
-MSBuild runs a task in an out-of-process TaskHost (`OutOfProcTaskHostNode`) when:
+The components have different roles:
 
-- the task needs a different runtime or architecture (for example, CLR4 tasks such as CPPTasks under `dotnet build`);
-- multithreaded mode (`-mt`) moves a non-thread-safe task out of the worker node; or
-- `MSBUILDFORCEALLTASKSOUTOFPROC` is set.
+- The **scheduler** assigns projects to worker nodes.
+- A **worker node** executes projects. A task runs either inside that node or in a separate **TaskHost** process.
+- An **external tool**, such as the compiler, runs in another process. It does not run inside the worker node or TaskHost.
 
-In a TaskHost, `Yield` and `Reacquire` are no-ops. The scheduler cannot use the node while the compiler runs. This can increase native C++ build times in `-mt` mode and under `dotnet build`.
+`IBuildEngine3.Yield()` returns the task's node capacity to the scheduler. `Reacquire()` waits until that capacity is available again.
+The C++ `CL` and `MIDL` tasks (CPPTasks) enable this behavior by default through `YieldDuringToolExecution`.
+The task starts its external tool, yields, and waits for the tool. The compiler continues running while the scheduler uses the node for another project.
+
+### Current in-process behavior
+
+This example shows one worker node and two ready projects. Project A's compiler runs while that node builds project B.
+
+```mermaid
+sequenceDiagram
+    participant S as Scheduler
+    participant W as Worker node
+    participant C as External compiler
+
+    S->>W: Run project A's CL task
+    W->>C: Start compiler
+    activate C
+    W->>S: Yield node
+    Note over W,C: CL waits while the compiler runs
+    S->>W: Build ready project B
+    W->>W: Execute project B's tasks
+    W-->>S: Project B completes
+    C-->>W: Compiler exits
+    deactivate C
+    W->>S: Reacquire (wait)
+    S-->>W: Node granted
+    W->>W: Complete CL task
+```
+
+### Current TaskHost behavior
+
+In `OutOfProcTaskHostNode`, `Yield` and `Reacquire` are no-ops. No yield request reaches the scheduler.
+The node's scheduling capacity stays reserved while the compiler runs. Other nodes can still work, but another project cannot use this capacity.
+
+```mermaid
+sequenceDiagram
+    participant S as Scheduler
+    participant W as Worker node
+    participant H as TaskHost (CL task)
+    participant C as External compiler
+
+    S->>W: Run project A's CL task
+    W->>H: Execute CL
+    H->>C: Start compiler
+    activate C
+    H->>H: Yield (no-op)
+    Note over S,W: Project B waits for this node's capacity
+    Note over H,C: CL waits while the compiler runs
+    C-->>H: Compiler exits
+    deactivate C
+    H->>H: Reacquire (no-op)
+    H-->>W: CL task completes
+    W-->>S: Project A completes
+    S->>W: Build ready project B
+```
+
+This affects tasks hosted for compatibility or isolation:
+
+- CLR4 tasks under `dotnet build`, or tasks that need a different architecture
+- non-thread-safe tasks moved into sidecar TaskHosts by multithreaded mode (`-mt`)
+- tasks explicitly assigned to `TaskHostFactory`, or forced out of process with `MSBUILDFORCEALLTASKSOUTOFPROC`
+
+The goal is to restore scheduling overlap across the TaskHost boundary, not to move compilers into TaskHosts or change the compiler's work.
+Both options forward `Yield` and `Reacquire`. They differ in whether another task can use the same TaskHost while the first task remains yielded.
 
 ### Measurements
 
-A native C++ workload of 104 projects, built with `-m:8`. Values are medians.
+On a 104-project native C++ workload at `-m:8`, the in-process clean build took about 39 s.
+`MSBuild.exe -mt` took about 99 s. The later, contemporaneous yield-disabled comparison took about 103–104 s.
+These are not one controlled comparison: the earlier baselines were captured on a different day.
+See [Performance](#performance) for both prototypes, sample counts, and provenance.
+
+Earlier baseline measurements, as medians:
 
 | Configuration | Clean | No-op |
 |---|---:|---:|
@@ -33,62 +101,62 @@ A native C++ workload of 104 projects, built with `-m:8`. Values are medians.
 
 The `YieldDuringToolExecution` comparison supports the importance of yielding for clean builds. With it disabled, in-process clean builds took 66.1–95.8 s, compared with 35.5–37.7 s when it was enabled.
 
-## Requirements common to both options
+## Design decisions
 
-Both prototypes forward `Yield` and `Reacquire` across the TaskHost boundary with these rules:
+Returning a node does not finish the task. Its thread, compiler, and callbacks can remain alive while another project uses that node.
+This creates the decisions below. Both options use the existing scheduler rather than introduce a second scheduling policy.
 
-- **Negotiation.** The feature is available only when both peers negotiate packet version 9 (`NodePacketTypeExtensions.TaskHostYieldMinVersion`). Older peers and the CLR2 `MSBuildTaskHost` keep the no-op behavior.
-- **Opt-out.** The feature is behind [change wave 18.14](../../wiki/ChangeWaves.md#1814). Opting out restores no-op `Yield` and `Reacquire` and the current routing. The parent tells the TaskHost its policy, so a reused TaskHost follows the current parent's wave.
-- **Reacquire ordering.** The parent sends the response to `TaskHostYieldRequest(reacquire: true)` only after the real `IBuildEngine3.Reacquire()` returns. The task cannot continue before the scheduler gives its node back.
-- **Scheduler accounting.** The parent calls the real `IBuildEngine3.Yield()` and `Reacquire()`. Node and core accounting, including the release of requested cores on `Reacquire` (see [resource management](../resource-management.md)), use the existing scheduler paths.
-- **Contract enforcement.** As in the in-process engine, these calls throw: `Yield` twice, `Reacquire` without `Yield`, and `Reacquire` on a thread other than the one that called `Yield`.
-- **Unbalanced exit.** If a task completes or throws while yielded, the parent must reacquire for the task before it processes the result. See [Reacquire before completion](#reacquire-before-completion).
-- **No hangs.** Cancellation, or loss of the connection, while a task waits in `Reacquire` must unblock the task and release its registrations.
+| Decision | Why it matters | What the options must resolve |
+|---|---|---|
+| **Yielded-task lifetime** | A yielded task can log, finish, fail, or be cancelled before it reacquires. Releasing node capacity must not discard its context. | A keeps its host occupied. B keeps a separate context for each task in a shared host. Both track yield state through cleanup. |
+| **Process-wide state** | Environment variables, the current directory, `Console`, and static fields belong to the process, not to a task context. | A uses separate processes. B saves and restores selected state, but requires an unenforceable rule against process-wide access while yielded. |
+| **Routing and cancellation** | Task A can send a packet while task B is active. Cancelling A must not accidentally cancel B. | A separates overlapping tasks by host. B identifies task-scoped packets and cancellation by task ID. |
+| **Nodes and cores** | Yielding changes scheduler ownership, not the compiler's OS execution. External compilers can overlap even with a fixed node budget. | Both use existing node and core accounting. A task resumes non-yielded work only after scheduler reacquisition. See [shared requirements](#requirements-common-to-both-options). |
+| **Build time and memory** | Separate hosts consume memory, while shared hosts require more complex routing and accept interference risk. | Compare elapsed build time, host count, and peak RSS. CPU utilization was not measured, so the data does not establish CPU efficiency. |
 
-### Reacquire before completion
-
-The engine requires a request to be reacquired after a real `Yield` and before the request reports its result. However, the engine does not check this when a task ends:
-
-- A successful local completion requires the request entry to be `Active` (`BuildRequestEntry.Complete`). The scheduler requires the request to be `Executing` when it records any result, including a failure (`Scheduler.ReportResult`).
-- When a task ends, `TaskBuilder` calls `TaskHost.MarkAsInactive`, which does not check the yield state.
-- In a test with the .NET 11 RC1 SDK at `-m:1`, an in-process task that returned while yielded made the build hang after later tasks ran. A failing task in the same state caused internal error MSB0001, because the request was `Yielding` instead of `Executing`.
-
-Out-of-process `Yield` is a no-op today, so a hosted task that never reacquires still succeeds. When `Yield` is forwarded, the TaskHost implementation must preserve that invariant itself:
-
-- The parent tracks whether each task is yielded. Option B tracks this per task ID, because one host can contain several yielded tasks.
-- The parent reacquires for the task on every exit path: completion, exception, host crash or disconnect, and cancellation. It does this before it applies outputs or environment changes from the task. In the prototypes, `TaskHostTask.ReacquireIfYielded` does this.
-- This reacquire waits for the scheduler to give the node back. Cancellation during the wait must not hang. A failed reacquire, for example `BuildAbortedException`, is recorded and reported after host cleanup.
-
-Two related decisions are separate from this design:
-
-- **Report unbalanced tasks?** Both prototypes keep a task that returns while yielded successful, which matches today's TaskHost behavior. A new error or warning would break builds that succeed today, including `-warnaserror` builds. If a diagnostic is added, it should be a message or be opt-in. The parent must reacquire even when the task fails, because the scheduler also requires `Executing` for failed results.
-- **Engine-level handling.** A clear engine check, or an automatic reacquire in `TaskBuilder`, would fix the in-process hang and could centralize some cleanup. It would not remove the TaskHost protocol, task-ID routing, or cancellation handling. The hook must run before task results are applied, which is earlier than `MarkAsInactive`. It must also call `Reacquire` on the thread that called `Yield`, and it must handle cancellation. This is a separate change that affects in-process tasks.
-
-The main difference between the options is how they isolate the process state of tasks that run at the same time, and how they protect that isolation.
+The central choice is therefore **process isolation (A)** versus **shared-host reuse (B)**.
+The [recommendation](#recommendation) weighs the measured benefit against the isolation risk.
 
 ## Option A: process-level isolation
 
 Prototype: [branch `baronfel-taskhost-yielding`](https://github.com/dotnet/msbuild/tree/baronfel-taskhost-yielding), current [commit `9f3b3ae8b9`](https://github.com/dotnet/msbuild/commit/9f3b3ae8b9dcda9c8f4fb990f06780241772ad20).
 
-A TaskHost that contains a yielded, still-running task stays occupied. If other work needs a TaskHost of the same kind, the provider assigns another host slot (`TaskHostNodeKey.HostSlot`), which starts another process. Idle slots are reused.
+Each overlapping task uses a separate TaskHost process. A yielded task keeps its host slot (`TaskHostNodeKey.HostSlot`) occupied until it finishes.
+
+### How Option A restores overlap
+
+The scheduler reuses the node, but not task A's occupied TaskHost. Task B uses another new or idle host of the same kind.
+The external compiler and task B overlap without sharing TaskHost process state.
 
 ```mermaid
 sequenceDiagram
-    participant T1 as Task 1 (TaskHost slot 0)
-    participant WN as Worker node
-    participant SC as Scheduler
-    participant T2 as Task 2 (TaskHost slot 1)
+    participant S as Scheduler
+    participant W as Worker node
+    box TaskHost process 1
+        participant A as Task A
+    end
+    box TaskHost process 2
+        participant B as Task B
+    end
+    participant C as External compiler
 
-    T1->>WN: TaskHostYieldRequest(Yield)
-    WN->>SC: IBuildEngine3.Yield()
-    WN-->>T1: TaskHostYieldResponse
-    Note over T1: Compiler runs in a separate process. Slot 0 stays occupied.
-    SC->>WN: Run another task
-    WN->>T2: TaskHostConfiguration (new or idle slot)
-    T1->>WN: TaskHostYieldRequest(Reacquire)
-    WN->>SC: IBuildEngine3.Reacquire() (blocks)
-    SC-->>WN: Node granted
-    WN-->>T1: TaskHostYieldResponse
+    A->>C: Start compiler
+    activate C
+    A->>W: Yield request
+    W->>S: Yield node
+    W-->>A: Yield response
+    Note over A: Host stays occupied<br/>by task A
+    S->>W: Build ready project B
+    W->>B: Run task B in another host
+    B-->>W: Task B completes
+    W-->>S: Project B completes
+    C-->>A: Compiler exits
+    deactivate C
+    A->>W: Reacquire request
+    W->>S: Reacquire (wait)
+    S-->>W: Node granted
+    W-->>A: Reacquire response
+    A-->>W: Task A completes
 ```
 
 ### Protocol
@@ -107,30 +175,42 @@ sequenceDiagram
 Prototype: [branch `baronfel-taskhost-yielding-option-b`](https://github.com/dotnet/msbuild/tree/baronfel-taskhost-yielding-option-b), current [tip `b841c2dbe9`](https://github.com/dotnet/msbuild/commit/b841c2dbe9fb2f5ab7a4a4d610e74696bb4e23d2).
 Tested implementation: [commit `09842896bd`](https://github.com/dotnet/msbuild/commit/09842896bd1e4255ef57b02b6bd6fc52565e1436).
 
-There is one TaskHost per (worker node, runtime) key, as today. Each host runs at most one non-yielded task, plus any number of yielded tasks. Yielded tasks can continue to run in the same TaskHost process as the new task. An external compiler runs in its own process, not in the TaskHost.
+There is one TaskHost per (worker node, runtime) key, as today. Each host runs at most one non-yielded task, plus any number of yielded tasks.
+
+### How Option B restores overlap
+
+The scheduler reuses the node and the same TaskHost. Task A remains yielded while task B uses that process.
+Task IDs keep their messages separate. They do not isolate process-wide state.
 
 ```mermaid
 sequenceDiagram
-    participant T1 as Task 1 (shared TaskHost)
-    participant C as Compiler (external process)
-    participant WN as Worker node
-    participant SC as Scheduler
-    participant T2 as Task 2 (same TaskHost)
+    participant S as Scheduler
+    participant W as Worker node
+    box Shared TaskHost process
+        participant A as Task A
+        participant B as Task B
+    end
+    participant C as External compiler
 
-    T1->>C: Start compiler
-    T1->>T1: Save environment and current directory
-    T1->>WN: Envelope(1, TaskHostYieldRequest(Yield))
-    WN->>SC: IBuildEngine3.Yield()
-    WN-->>T1: TaskHostYieldResponse (by RequestId)
-    Note over T1,C: Task 1 waits. The compiler runs in a separate process.
-    SC->>WN: Run another task
-    WN->>T2: TaskHostTaskIdentity(2) + TaskHostConfiguration
-    T2-->>WN: Envelope(2, log / callback / complete)
-    T1->>WN: Envelope(1, TaskHostYieldRequest(Reacquire))
-    WN->>SC: IBuildEngine3.Reacquire() (blocks)
-    SC-->>WN: Node granted
-    WN-->>T1: TaskHostYieldResponse
-    T1->>T1: Restore environment and current directory
+    A->>C: Start compiler
+    activate C
+    A->>A: Save environment<br/>and current directory
+    A->>W: Yield request tagged A
+    W->>S: Yield node
+    W-->>A: Yield response<br/>matched by RequestId
+    S->>W: Build ready project B
+    W->>B: Run task B in the same host
+    A-->>W: Log tagged A<br/>while B is active
+    B-->>W: Completion tagged B
+    W-->>S: Project B completes
+    C-->>A: Compiler exits
+    deactivate C
+    A->>W: Reacquire request tagged A
+    W->>S: Reacquire (wait)
+    S-->>W: Node granted
+    W-->>A: Reacquire response<br/>matched by RequestId
+    A->>A: Restore environment<br/>and current directory
+    A-->>W: Completion tagged A
 ```
 
 ### Protocol
@@ -178,7 +258,7 @@ Option B adds these parts to the callback foundation:
 - Forwarding of `Yield` and `Reacquire` to the existing scheduler path in `TaskHostTask`.
 - Tracking of yielded task contexts through `Reacquire`, completion, and failure, with a parent-side reacquire if the task ends while yielded.
 
-Option B does not isolate process-wide state while tasks overlap. Unlike a callback, an explicit yield does not block the calling thread. The risk in [Risks and limitations](#risks-and-limitations) applies.
+This reuses the callback foundation, but does not remove the [shared-state risk](#risks-and-limitations).
 
 ## Comparison
 
@@ -218,7 +298,7 @@ Notes:
 |---|---|---|
 | **Safety** | Stronger process-state isolation. Each running task has its own TaskHost process, although external resources can still be shared. | Weaker. Yielded tasks share process state, and the rule cannot be enforced. A task that breaks the rule or a host crash can affect other tasks in the host. |
 | **Implementation** | Small protocol change (yield request, response, and policy). Adds host-slot management, and nested callbacks no longer reuse the process. | Larger protocol change: identity, envelopes, per-task cancel, and routing by task ID. Needs environment save and restore, and more complex cancel and drain logic. |
-| **CPU / build time** | The clean build took 41.80 s in normal mode and about 40.8 s in `-mt`. The `-mt` no-op runs took 13.61–14.93 s. | The clean build took 40.17 s in normal mode and 35.56–35.95 s in `-mt`. The `-mt` no-op runs took 7.95–8.12 s. |
+| **Elapsed build time** | The clean build took 41.80 s in normal mode and about 40.8 s in `-mt`. The `-mt` no-op runs took 13.61–14.93 s. | The clean build took 40.17 s in normal mode and 35.56–35.95 s in `-mt`. The `-mt` no-op runs took 7.95–8.12 s. |
 | **Memory** | Highest. 26–30 TaskHosts, 3.31 GB in normal mode and 2304 MiB in `-mt`. Grows with the number of overlapping yielded tasks. | 8 TaskHosts, as without yield. 2.37 GB in normal mode and 1345 MiB in `-mt`. |
 
 ## Recommendation
@@ -232,9 +312,45 @@ Use **Option B** if its shared-state risk is acceptable, and require these mitig
 
 Neither the tests nor the diagnostics enforce isolation. They cannot guarantee safety for arbitrary tasks. If that residual risk is unacceptable, choose Option A.
 
-In these measurements, Option B had lower clean-build elapsed times and peak RSS in both modes. The samples are small. Option A needs more TaskHost processes when yielded tasks overlap. Option B's main risk is shared process state. In-process yielded tasks must follow the same rule. `ToolTask` starts its external tool in a separate process before calling `Yield`. While yielded, it waits, logs output, and handles cancellation or timeout.
+The measurements favor B, but sample counts are small.
+`ToolTask` starts its external tool before yielding, then waits, logs, and handles cancellation or timeout.
+Derived tasks still need to follow the shared-state rule, as in-process yielded tasks do.
 
-If tests or field observations expose unacceptable interference, use Option A or assess a per-task isolation setting.
+## Requirements common to both options
+
+These requirements apply whichever isolation model is selected. Here, the **parent** is the worker node that owns the hosted task.
+
+- **Negotiation.** Both peers must negotiate packet version 9 (`NodePacketTypeExtensions.TaskHostYieldMinVersion`). Older peers and the CLR2 `MSBuildTaskHost` keep no-op behavior.
+- **Opt-out.** Change wave [18.14](../../wiki/ChangeWaves.md#1814) gates the feature. Opting out restores no-op calls and current routing. The parent sends its policy before each task, including in a reused host.
+- **Reacquire ordering.** The parent responds to `TaskHostYieldRequest(reacquire: true)` only after the real `IBuildEngine3.Reacquire()` returns. The task cannot resume non-yielded work before the scheduler gives its node back.
+- **Scheduler accounting.** The parent calls the real `IBuildEngine3.Yield()` and `Reacquire()`. These preserve existing node and core accounting, including release of requested cores on `Reacquire`. See [resource management](../resource-management.md).
+- **Contract enforcement.** As in the in-process engine, these calls throw: `Yield` twice, `Reacquire` without `Yield`, and `Reacquire` on a thread other than the one that yielded.
+- **Unbalanced exit.** Before processing a result, the parent must reacquire if the task ended while yielded. This also applies when the task throws. See [Reacquire before completion](#reacquire-before-completion).
+- **No hangs.** Cancellation or connection loss during `Reacquire` must unblock the task and release its registrations.
+
+### Reacquire before completion
+
+Reacquisition protects scheduler state, not just successful task results. A failed request also needs the correct state before it reports its result.
+The current engine checks this late:
+
+- `BuildRequestEntry.Complete` requires `Active` for successful local completion. `Scheduler.ReportResult` requires `Executing` for any result, including failure.
+- `TaskHost.MarkAsInactive` does not check yield state. `TaskBuilder` calls it after the task's batches, not immediately after each `Execute` returns.
+- A test with the .NET 11 RC1 SDK at `-m:1` reproduced a hang after an in-process task returned while yielded. Later tasks ran first. A failing task in the same state produced MSB0001: the request was `Yielding`, not `Executing`.
+
+Today's no-op TaskHost yield does not cause this state transition. A hosted task that omits `Reacquire` can therefore still succeed.
+Both prototypes preserve that behavior by reacquiring in the parent rather than rejecting the task.
+
+`TaskHostTask.ReacquireIfYielded` handles completion, exceptions, host loss, and cancellation. It runs before the parent applies outputs or environment changes.
+The parent tracks yield state per task, including each task ID in Option B. It reports a failed reacquire after host cleanup.
+Reacquisition can wait for node capacity, so cancellation must also work during this cleanup wait.
+
+An engine change could centralize some cleanup, but detecting an unbalanced task is not enough. The request still needs a safe scheduler transition.
+An automatic reacquire must run before results are applied, on the thread that called `Yield`, and must handle cancellation.
+`MarkAsInactive` is too late to assume it is the correct hook.
+Neither approach removes task-ID routing, TaskHost communication, or the shared-state risk.
+
+Rejecting unbalanced tasks is a separate compatibility decision. Both prototypes allow an otherwise successful hosted task to remain successful after parent-side reacquisition.
+A new error or warning can break existing builds, including `-warnaserror` builds. Diagnostics should be messages or opt-in.
 
 ## Validation
 
@@ -259,6 +375,7 @@ Option B must also add the shared-state guard test from the [recommendation](#re
 
 ## Open questions
 
-- Should Option B allow a task to request a separate TaskHost when it cannot follow the shared-state rule?
-- What causes the observed no-op time differences, and does enabling yield affect them?
-- Should the engine check, or automatically fix, a task that returns while yielded? This applies to in-process tasks and TaskHosts. See [Reacquire before completion](#reacquire-before-completion).
+- **Is shared-state risk acceptable?** B saves memory and had lower elapsed times, but cannot isolate arbitrary yielded task code. Choose A if that risk is unacceptable.
+- **Does B need per-task process isolation?** Some tasks cannot follow the shared-state rule. A separate-host setting could preserve isolation without selecting A for every task.
+- **What explains the no-op differences?** The measurements show a gap, not its cause or whether yield affects it. More evidence is needed before choosing a fix.
+- **Should the engine enforce balanced completion?** Earlier checking or automatic cleanup could also help in-process tasks. The ordering and compatibility constraints in [Reacquire before completion](#reacquire-before-completion) still apply.
