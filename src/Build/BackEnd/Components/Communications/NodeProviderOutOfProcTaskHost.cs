@@ -311,6 +311,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>
         public void ShutdownConnectedNodes(bool enableReuse)
         {
+#if RUNTIME_TYPE_NETCORE
+            // Query Visual Studio installations again for the next build, so that installing or removing one takes effect
+            // in a process that serves several builds.
+            s_visualStudioInstances = null;
+#endif
+
             if (_nodeContexts is null)
             {
                 return;
@@ -1279,7 +1285,7 @@ namespace Microsoft.Build.BackEnd
         private static readonly int s_currentVisualStudioMajorVersion = Version.Parse(MSBuildConstants.CurrentVisualStudioVersion).Major;
 
         /// <summary>
-        /// Visual Studio installations reported by the Visual Studio setup API, queried at most once.
+        /// Visual Studio installations reported by the Visual Studio setup API, queried at most once per build.
         /// </summary>
         private static IList<VisualStudioInstance> s_visualStudioInstances;
 
