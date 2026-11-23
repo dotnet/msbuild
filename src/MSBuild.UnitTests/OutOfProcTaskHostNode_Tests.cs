@@ -209,8 +209,8 @@ namespace Microsoft.Build.UnitTests
             RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
             RedirectedNodeState nodeState = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
             nodeState.SetField("_nodeEndpoint", endpoint.Node);
-            using TaskExecutionContext context = CreateTaskContext(1, taskCompleted ? TaskExecutionState.Completed : TaskExecutionState.Executing);
-            using TaskExecutionContext otherContext = CreateTaskContext(2, TaskExecutionState.Executing);
+            using TaskExecutionContext context = CreateTaskContext(1, taskCompleted ? TaskExecutionState.Completed : TaskExecutionState.Executing, nodeState.Node);
+            using TaskExecutionContext otherContext = CreateTaskContext(2, TaskExecutionState.Executing, nodeState.Node);
             if (otherTaskActive)
             {
                 ((ConcurrentDictionary<int, TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
@@ -218,23 +218,247 @@ namespace Microsoft.Build.UnitTests
                     .GetValue(nodeState.Node)!).TryAdd(otherContext.TaskId, otherContext).ShouldBeTrue();
             }
 
-            // Log from a separate thread with the task's context flowed to it, as a background
-            // thread started by the task would.
+            // Log from a separate thread holding the first task's IBuildEngine proxy, as a background
+            // thread started by the task would. Even when another task is active on the reused TaskHost,
+            // events from the completed task must be dropped rather than attributed to the active task.
             Thread logger = new(() =>
             {
                 ((AsyncLocal<TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
                     .GetField("_currentTaskContext", BindingFlags.Instance | BindingFlags.NonPublic)!
                     .GetValue(nodeState.Node)!).Value = context;
-                nodeState.Node.LogMessageEvent(new BuildMessageEventArgs("late message", null, "LateLogger", MessageImportance.Low));
+                context.LogMessageEvent(new BuildMessageEventArgs("late message", null, "LateLogger", MessageImportance.Low));
+                nodeState.Node.LogErrorEvent(new BuildErrorEventArgs(null, "LATE0001", "project.proj", 1, 1, 0, 0, "late error", null, "LateLogger"));
             });
             logger.Start();
             logger.Join();
 
-            // While another task is running, a thread captured by an earlier task may be logging on its behalf.
-            endpoint.Packets.Count.ShouldBe(taskCompleted && !otherTaskActive ? 0 : 1);
+            endpoint.Packets.Count.ShouldBe(taskCompleted ? 0 : 2);
         }
 
-        private static TaskExecutionContext CreateTaskContext(int taskId, TaskExecutionState state) =>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TaskLoggingHelperAfterTaskCompletesDoesNotThrowOrLeak(bool suppressExecutionContextFlow)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
+            RedirectedNodeState nodeState = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            nodeState.SetField("_nodeEndpoint", endpoint.Node);
+
+            using TaskExecutionContext completedContext = CreateTaskContext(
+                1,
+                TaskExecutionState.Executing,
+                nodeState.Node,
+                projectFileOfTask: "task1.proj",
+                lineNumberOfTask: 17,
+                warningsAsErrors: new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase) { "WARN0001" });
+            using TaskExecutionContext activeContext = CreateTaskContext(
+                2,
+                TaskExecutionState.Executing,
+                nodeState.Node,
+                projectFileOfTask: "task2.proj",
+                lineNumberOfTask: 99);
+
+            ((ConcurrentDictionary<int, TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
+                .GetField("_taskContexts", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(nodeState.Node)!).TryAdd(activeContext.TaskId, activeContext).ShouldBeTrue();
+
+            Microsoft.Build.Utilities.TaskLoggingHelper log = new(completedContext, "LateTask");
+            completedContext.MarkAsInactive();
+            completedContext.ReleaseTaskReferences();
+
+            Exception? caught = null;
+            using ManualResetEvent finished = new(false);
+
+            AsyncFlowControl? flowControl = suppressExecutionContextFlow ? ExecutionContext.SuppressFlow() : null;
+            try
+            {
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    try
+                    {
+                        log.LogMessage(MessageImportance.High, "late message");
+                        log.LogWarning(subcategory: null, warningCode: "WARN0001", helpKeyword: null, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: "late warning");
+                        log.LogError("late error");
+                        _ = ((IBuildEngine10)completedContext).EngineServices.IsTaskInputLoggingEnabled;
+                    }
+                    catch (Exception ex)
+                    {
+                        caught = ex;
+                    }
+                    finally
+                    {
+                        finished.Set();
+                    }
+                });
+            }
+            finally
+            {
+                flowControl?.Undo();
+            }
+
+            finished.WaitOne(10_000).ShouldBeTrue();
+            caught.ShouldBeNull();
+            endpoint.Packets.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void SharedWorkerThreadCreatedByCompletedTaskLogsWithCurrentTaskProxy()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
+            RedirectedNodeState nodeState = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            nodeState.SetField("_nodeEndpoint", endpoint.Node);
+
+            using TaskExecutionContext context1 = CreateTaskContext(
+                1,
+                TaskExecutionState.Executing,
+                nodeState.Node,
+                projectFileOfTask: "task1.proj",
+                lineNumberOfTask: 10);
+            using TaskExecutionContext context2 = CreateTaskContext(
+                2,
+                TaskExecutionState.Executing,
+                nodeState.Node,
+                projectFileOfTask: "task2.proj",
+                lineNumberOfTask: 42,
+                warningsAsErrors: new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB9999" });
+
+            Microsoft.Build.Utilities.TaskLoggingHelper task1Log = new(context1, "Task1");
+            Microsoft.Build.Utilities.TaskLoggingHelper task2Log = new(context2, "Task2");
+
+            using AutoResetEvent workerReady = new(false);
+            using AutoResetEvent runWork = new(false);
+            Exception? workerException = null;
+
+            // Start a reusable worker thread while Task 1's AsyncLocal context is current, then complete Task 1.
+            ((AsyncLocal<TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
+                .GetField("_currentTaskContext", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(nodeState.Node)!).Value = context1;
+
+            Thread sharedWorker = new(() =>
+            {
+                workerReady.Set();
+                runWork.WaitOne();
+                try
+                {
+                    // Stale logging on Task 1's proxy must be dropped.
+                    task1Log.LogError("stale error from task 1");
+
+                    // Current logging via Task 2's proxy must succeed and use Task 2's location and warning promotion.
+                    task2Log.LogWarning(subcategory: null, warningCode: "MSB9999", helpKeyword: null, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: "promoted warning from task 2");
+                }
+                catch (Exception ex)
+                {
+                    workerException = ex;
+                }
+            });
+            sharedWorker.Start();
+            workerReady.WaitOne(10_000).ShouldBeTrue();
+
+            ((AsyncLocal<TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
+                .GetField("_currentTaskContext", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(nodeState.Node)!).Value = null!;
+            context1.MarkAsInactive();
+            context1.ReleaseTaskReferences();
+
+            runWork.Set();
+            sharedWorker.Join(10_000).ShouldBeTrue();
+            workerException.ShouldBeNull();
+
+            INodePacket singlePacket = endpoint.Packets.ShouldHaveSingleItem();
+            LogMessagePacketBase logPacket = singlePacket.ShouldBeAssignableTo<LogMessagePacketBase>()!;
+            BuildErrorEventArgs promotedError = logPacket.NodeBuildEvent!.Value.Value.ShouldBeOfType<BuildErrorEventArgs>();
+            promotedError.Code.ShouldBe("MSB9999");
+            promotedError.File.ShouldBe("task2.proj");
+            promotedError.LineNumber.ShouldBe(42);
+        }
+
+        [Fact]
+        public void CallbacksOnCompletedTaskContextThrowWithoutCorruptingNodeCounts()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
+            RedirectedNodeState nodeState = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            nodeState.SetField("_nodeEndpoint", endpoint.Node);
+
+            using TaskExecutionContext context = CreateTaskContext(1, TaskExecutionState.Executing, nodeState.Node);
+            context.MarkAsInactive();
+            context.ReleaseTaskReferences();
+
+            IBuildEngine9 engine = context;
+            Should.Throw<InternalErrorException>(() => _ = engine.ContinueOnError);
+            Should.Throw<InternalErrorException>(() => _ = engine.IsRunningMultipleNodes);
+            Should.Throw<InternalErrorException>(() => engine.BuildProjectFile("project.proj", ["Build"], null, null));
+            Should.Throw<InternalErrorException>(() => engine.RequestCores(1));
+            Should.Throw<InternalErrorException>(() => engine.ReleaseCores(1));
+            Should.Throw<InternalErrorException>(() => ((IBuildEngine4)context).RegisterTaskObject("key", new object(), RegisteredTaskObjectLifetime.Build, allowEarlyCollection: false));
+
+            typeof(OutOfProcTaskHostNode).GetField("_activeTaskCount", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(nodeState.Node).ShouldBe(0);
+            typeof(OutOfProcTaskHostNode).GetField("_blockedTaskCount", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(nodeState.Node).ShouldBe(0);
+            endpoint.Packets.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void AbandonedInFlightBuildCallbackOnTaskCompletion_PreservesNodeCountsAndDropsLateResponse()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
+            RedirectedNodeState nodeState = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            nodeState.SetField("_nodeEndpoint", endpoint.Node);
+            nodeState.SetField("_parentPacketVersion", NodePacketTypeExtensions.PacketVersion);
+            nodeState.SetField("_activeTaskCount", 1);
+
+            using TaskExecutionContext context = CreateTaskContext(1, TaskExecutionState.Executing, nodeState.Node);
+            Exception? callbackException = null;
+
+            Thread callbackThread = new(() =>
+            {
+                try
+                {
+                    ((IBuildEngine)context).BuildProjectFile("nested.proj", ["Build"], null, null);
+                }
+                catch (Exception ex)
+                {
+                    callbackException = ex;
+                }
+            });
+            callbackThread.Start();
+
+            // Wait until the callback request packet is enqueued and the task has transitioned to BlockedOnCallback.
+            Stopwatch sw = Stopwatch.StartNew();
+            while (endpoint.Packets.IsEmpty && sw.ElapsedMilliseconds < 10_000)
+            {
+                Thread.Sleep(5);
+            }
+
+            INodePacket sentPacket = endpoint.Packets.ShouldHaveSingleItem();
+            TaskHostBuildRequest buildRequest = sentPacket.ShouldBeOfType<TaskHostBuildRequest>();
+
+            // Simulate Execute() returning while the background thread is still blocked in BuildProjectFile.
+            context.MarkAsInactive(reclaimNodeCounts: true);
+            callbackThread.Join(10_000).ShouldBeTrue();
+
+            callbackException.ShouldBeOfType<InvalidOperationException>();
+            typeof(OutOfProcTaskHostNode).GetField("_activeTaskCount", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(nodeState.Node).ShouldBe(0);
+            typeof(OutOfProcTaskHostNode).GetField("_blockedTaskCount", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(nodeState.Node).ShouldBe(0);
+
+            // A late response arriving from the parent for that abandoned requestId must be ignored without throwing.
+            typeof(OutOfProcTaskHostNode).GetMethod("HandleCallbackResponse", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .Invoke(nodeState.Node, [new TaskHostBuildResponse(buildRequest.RequestId, true, null)]);
+        }
+
+        private static TaskExecutionContext CreateTaskContext(
+            int taskId,
+            TaskExecutionState state,
+            OutOfProcTaskHostNode? owner = null,
+            string projectFileOfTask = "project.proj",
+            int lineNumberOfTask = 1,
+            System.Collections.Generic.ICollection<string>? warningsAsErrors = null) =>
             new(
                 taskId,
                 new TaskHostConfiguration(
@@ -247,20 +471,21 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_APPDOMAIN
                     appDomainSetup: null,
 #endif
-                    lineNumberOfTask: 1,
+                    lineNumberOfTask: lineNumberOfTask,
                     columnNumberOfTask: 1,
-                    projectFileOfTask: "project.proj",
+                    projectFileOfTask: projectFileOfTask,
                     continueOnError: false,
                     taskName: "LateLogger",
                     taskLocation: "LateLogger.dll",
                     targetName: "Build",
-                    projectFile: "project.proj",
+                    projectFile: projectFileOfTask,
                     isTaskInputLoggingEnabled: false,
                     taskParameters: null,
                     globalParameters: null,
-                    warningsAsErrors: null,
+                    warningsAsErrors: warningsAsErrors,
                     warningsNotAsErrors: null,
-                    warningsAsMessages: null))
+                    warningsAsMessages: null),
+                owner)
             {
                 State = state,
             };
@@ -509,5 +734,392 @@ namespace Microsoft.Build.UnitTests
         public sealed class IsolatedFailureFlagTask : FailureFlagTask
         {
         }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void LateBackgroundLoggingInTaskHost_DoesNotCrashOrFailSubsequentTask(bool runSecondTask)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+            TransientTestFolder syncFolder = env.CreateFolder(createFolder: true);
+
+            string secondTaskXml = runSecondTask
+                ? $"""<LateBackgroundLoggingTask Mode="TriggerAndVerify" SyncDirectory="{syncFolder.Path}" />"""
+                : string.Empty;
+            string firstTaskMode = runSecondTask ? "SpawnAndReturn" : "SingleTaskIdle";
+
+            TransientTestFile project = env.CreateFile("lateBackgroundLogging.proj", $"""
+                <Project>
+                  <UsingTask TaskName="{nameof(LateBackgroundLoggingTask)}" AssemblyFile="{typeof(LateBackgroundLoggingTask).Assembly.Location}" TaskFactory="TaskHostFactory" />
+                  <Target Name="Build">
+                    <{nameof(LateBackgroundLoggingTask)} Mode="{firstTaskMode}" SyncDirectory="{syncFolder.Path}" />
+                    {secondTaskXml}
+                  </Target>
+                </Project>
+                """);
+
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{project.Path}\" -m:1 -nr:false", out bool success, outputHelper: _output);
+            MatchCollection taskPids = Regex.Matches(output, @"LateLoggingTaskPid=(\d+)");
+            foreach (Match match in taskPids)
+            {
+                env.WithTransientProcess(int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture));
+            }
+
+            success.ShouldBeTrue(output);
+            output.ShouldNotContain("MSB0001");
+            output.ShouldNotContain("LateErrorFromTask1");
+            output.ShouldNotContain("LateWarningFromTask1");
+            File.Exists(Path.Combine(syncFolder.Path, "unexpected.error")).ShouldBeFalse(
+                File.Exists(Path.Combine(syncFolder.Path, "unexpected.error"))
+                    ? File.ReadAllText(Path.Combine(syncFolder.Path, "unexpected.error"))
+                    : string.Empty);
+
+            taskPids.Count.ShouldBe(runSecondTask ? 2 : 1);
+            if (runSecondTask)
+            {
+                output.ShouldNotContain("LateMessageFromTask1");
+                taskPids[1].Groups[1].Value.ShouldBe(taskPids[0].Groups[1].Value, "both tasks must share the same TaskHost process");
+                output.ShouldContain("SecondTaskCompletedCleanly");
+            }
+        }
+
+#if NETFRAMEWORK
+        [Fact]
+        public void IsolatedTask_LateBackgroundLoggingDuringAppDomainUnload_DoesNotDeadlockOrFailBuild()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+            TransientTestFolder syncFolder = env.CreateFolder(createFolder: true);
+
+            TransientTestFile project = env.CreateFile("isolatedLateLogging.proj", $"""
+                <Project>
+                  <UsingTask TaskName="{nameof(IsolatedLateBackgroundLoggingTask)}" AssemblyFile="{typeof(IsolatedLateBackgroundLoggingTask).Assembly.Location}" TaskFactory="TaskHostFactory" />
+                  <Target Name="Build">
+                    <{nameof(IsolatedLateBackgroundLoggingTask)} SpawnUnloadLogger="true" SyncDirectory="{syncFolder.Path}" />
+                    <{nameof(IsolatedLateBackgroundLoggingTask)} SpawnUnloadLogger="false" SyncDirectory="{syncFolder.Path}" />
+                  </Target>
+                </Project>
+                """);
+
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{project.Path}\" -m:1 -nr:false", out bool success, outputHelper: _output);
+            MatchCollection taskPids = Regex.Matches(output, @"IsolatedLateLoggingTaskPid=(\d+)");
+            foreach (Match match in taskPids)
+            {
+                env.WithTransientProcess(int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture));
+            }
+
+            success.ShouldBeTrue(output);
+            output.ShouldNotContain("MSB0001");
+            output.ShouldNotContain("IsolatedUnloadError");
+            File.Exists(Path.Combine(syncFolder.Path, "isolated.error")).ShouldBeFalse(
+                File.Exists(Path.Combine(syncFolder.Path, "isolated.error"))
+                    ? File.ReadAllText(Path.Combine(syncFolder.Path, "isolated.error"))
+                    : string.Empty);
+
+            taskPids.Count.ShouldBe(2);
+            taskPids[1].Groups[1].Value.ShouldBe(taskPids[0].Groups[1].Value, "both isolated tasks must share the same TaskHost process");
+            output.ShouldContain("IsolatedSecondTaskSucceeded");
+        }
+#endif
+
+        public sealed class LateBackgroundLoggingTask : ITask
+        {
+            public IBuildEngine BuildEngine { get; set; } = null!;
+            public ITaskHost HostObject { get; set; } = null!;
+            public string Mode { get; set; } = string.Empty;
+            public string SyncDirectory { get; set; } = string.Empty;
+
+            public bool Execute()
+            {
+                Microsoft.Build.Utilities.TaskLoggingHelper log = new(this);
+                using Process process = Process.GetCurrentProcess();
+                log.LogMessage(MessageImportance.High, "LateLoggingTaskPid={0}", process.Id);
+
+                if (string.Equals(Mode, "SingleTaskIdle", StringComparison.Ordinal))
+                {
+                    object gate = new();
+                    bool executeReturning = false;
+                    int startedCount = 0;
+
+                    void Worker()
+                    {
+                        lock (gate)
+                        {
+                            if (++startedCount == 2)
+                            {
+                                Monitor.PulseAll(gate);
+                            }
+
+                            while (!executeReturning)
+                            {
+                                Monitor.Wait(gate, 10_000);
+                            }
+                        }
+
+                        try
+                        {
+                            // Straddle the exact Execute() return + TaskHost shutdown window (#15612);
+                            // messages logged before MarkAsInactive() are valid, while messages logged
+                            // after MarkAsInactive() must be dropped without crashing with MSB0001.
+                            for (int i = 0; i < 25; i++)
+                            {
+                                log.LogMessage(MessageImportance.High, "BoundaryMessageFromTask");
+                                Thread.Yield();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            WriteAtomicFile(Path.Combine(SyncDirectory, "unexpected.error"), ex.ToString());
+                        }
+                    }
+
+                    Thread flowedThread = new(Worker) { IsBackground = true };
+                    flowedThread.Start();
+
+                    AsyncFlowControl suppressedFlow = ExecutionContext.SuppressFlow();
+                    try
+                    {
+                        Thread suppressedThread = new(Worker) { IsBackground = true };
+                        suppressedThread.Start();
+                    }
+                    finally
+                    {
+                        suppressedFlow.Undo();
+                    }
+
+                    lock (gate)
+                    {
+                        while (startedCount < 2)
+                        {
+                            Monitor.Wait(gate, 10_000);
+                        }
+
+                        executeReturning = true;
+                        Monitor.PulseAll(gate);
+                    }
+
+                    return true;
+                }
+
+                if (string.Equals(Mode, "SpawnAndReturn", StringComparison.Ordinal))
+                {
+                    object gate = new();
+                    int startedCount = 0;
+                    string releaseGate = Path.Combine(SyncDirectory, "release.gate");
+
+                    void SpawnedWorker(string resultFileName)
+                    {
+                        lock (gate)
+                        {
+                            if (++startedCount == 2)
+                            {
+                                Monitor.PulseAll(gate);
+                            }
+                        }
+
+                        if (!WaitForFile(releaseGate, timeoutMs: 15_000))
+                        {
+                            WriteAtomicFile(Path.Combine(SyncDirectory, resultFileName), "Timed out waiting for release.gate");
+                            return;
+                        }
+
+                        try
+                        {
+                            log.LogMessage(MessageImportance.High, "LateMessageFromTask1");
+                            log.LogWarning("LateWarningFromTask1");
+                            log.LogError("LateErrorFromTask1");
+                            WriteAtomicFile(Path.Combine(SyncDirectory, resultFileName), "OK");
+                        }
+                        catch (Exception ex)
+                        {
+                            WriteAtomicFile(Path.Combine(SyncDirectory, "unexpected.error"), ex.ToString());
+                            WriteAtomicFile(Path.Combine(SyncDirectory, resultFileName), ex.ToString());
+                        }
+                    }
+
+                    Thread flowedThread = new(() => SpawnedWorker("done1.result")) { IsBackground = true };
+                    flowedThread.Start();
+
+                    AsyncFlowControl suppressedFlow = ExecutionContext.SuppressFlow();
+                    try
+                    {
+                        Thread suppressedThread = new(() => SpawnedWorker("done2.result")) { IsBackground = true };
+                        suppressedThread.Start();
+                    }
+                    finally
+                    {
+                        suppressedFlow.Undo();
+                    }
+
+                    lock (gate)
+                    {
+                        DateTime deadline = DateTime.UtcNow.AddSeconds(10);
+                        while (startedCount < 2 && DateTime.UtcNow < deadline)
+                        {
+                            Monitor.Wait(gate, 1_000);
+                        }
+
+                        if (startedCount < 2)
+                        {
+                            log.LogError("Timed out waiting for background threads to start.");
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+                if (string.Equals(Mode, "TriggerAndVerify", StringComparison.Ordinal))
+                {
+                    WriteAtomicFile(Path.Combine(SyncDirectory, "release.gate"), "GO");
+
+                    string done1 = Path.Combine(SyncDirectory, "done1.result");
+                    string done2 = Path.Combine(SyncDirectory, "done2.result");
+                    if (!WaitForFile(done1, timeoutMs: 15_000) || !WaitForFile(done2, timeoutMs: 15_000))
+                    {
+                        log.LogError("Timed out waiting for Task 1 background threads to finish logging.");
+                        return false;
+                    }
+
+                    string result1 = File.ReadAllText(done1);
+                    string result2 = File.ReadAllText(done2);
+                    if (!string.Equals(result1, "OK", StringComparison.Ordinal) || !string.Equals(result2, "OK", StringComparison.Ordinal))
+                    {
+                        log.LogError("Background threads failed: {0} / {1}", result1, result2);
+                        return false;
+                    }
+
+                    log.LogMessage(MessageImportance.High, "SecondTaskCompletedCleanly");
+                    return true;
+                }
+
+                log.LogError("Unexpected Mode '{0}'.", Mode);
+                return false;
+            }
+
+            private static bool WaitForFile(string path, int timeoutMs)
+            {
+                Stopwatch sw = Stopwatch.StartNew();
+                while (sw.ElapsedMilliseconds < timeoutMs)
+                {
+                    if (File.Exists(path))
+                    {
+                        return true;
+                    }
+
+                    Thread.Sleep(5);
+                }
+
+                return File.Exists(path);
+            }
+
+            private static void WriteAtomicFile(string path, string content)
+            {
+                string tempPath = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+                File.WriteAllText(tempPath, content);
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+
+                File.Move(tempPath, path);
+            }
+        }
+
+#if NETFRAMEWORK
+        [LoadInSeparateAppDomain]
+        public sealed class IsolatedLateBackgroundLoggingTask : MarshalByRefObject, ITask
+        {
+            public IBuildEngine BuildEngine { get; set; } = null!;
+            public ITaskHost HostObject { get; set; } = null!;
+            public bool SpawnUnloadLogger { get; set; }
+            public string SyncDirectory { get; set; } = string.Empty;
+
+            public bool Execute()
+            {
+                Microsoft.Build.Utilities.TaskLoggingHelper log = new(this);
+                using Process process = Process.GetCurrentProcess();
+                log.LogMessage(MessageImportance.High, "IsolatedLateLoggingTaskPid={0}", process.Id);
+
+                if (!SpawnUnloadLogger)
+                {
+                    log.LogMessage(MessageImportance.High, "IsolatedSecondTaskSucceeded");
+                    return true;
+                }
+
+                object gate = new();
+                bool started = false;
+                bool executeReturning = false;
+                Thread backgroundThread = new(() =>
+                {
+                    try
+                    {
+                        lock (gate)
+                        {
+                            started = true;
+                            Monitor.PulseAll(gate);
+                            while (!executeReturning)
+                            {
+                                Monitor.Wait(gate, 10_000);
+                            }
+                        }
+
+                        // Exercise cross-AppDomain logging across Execute() return and into AppDomain.Unload.
+                        while (true)
+                        {
+                            log.LogMessage(MessageImportance.High, "IsolatedBoundaryMessage");
+                            Thread.Yield();
+                        }
+                    }
+                    catch (Exception ex) when (ex is ThreadAbortException or AppDomainUnloadedException)
+                    {
+                        try
+                        {
+                            log.LogError("IsolatedUnloadError");
+                        }
+                        catch (Exception inner) when (inner is ThreadAbortException or AppDomainUnloadedException)
+                        {
+                            // Expected once the CLR blocks cross-AppDomain calls during AppDomain.Unload.
+                        }
+                        catch (Exception inner)
+                        {
+                            File.WriteAllText(Path.Combine(SyncDirectory, "isolated.error"), inner.ToString());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        File.WriteAllText(Path.Combine(SyncDirectory, "isolated.error"), ex.ToString());
+                    }
+                })
+                {
+                    IsBackground = true,
+                };
+
+                backgroundThread.Start();
+                lock (gate)
+                {
+                    DateTime deadline = DateTime.UtcNow.AddSeconds(10);
+                    while (!started && DateTime.UtcNow < deadline)
+                    {
+                        Monitor.Wait(gate, 1_000);
+                    }
+
+                    if (!started)
+                    {
+                        log.LogError("Timed out waiting for isolated background thread to start.");
+                        return false;
+                    }
+
+                    executeReturning = true;
+                    Monitor.PulseAll(gate);
+                }
+
+                return true;
+            }
+        }
+#endif
     }
 }

@@ -433,17 +433,7 @@ namespace Microsoft.Build.BackEnd
                             while (!taskFinished)
                             {
                                 _packetReceivedEvent.WaitOne();
-
-                                INodePacket packet = null;
-
-                                // Handle the packet that's coming in
-                                while (_receivedPackets.TryDequeue(out packet))
-                                {
-                                    if (packet != null)
-                                    {
-                                        HandlePacket(packet, out taskFinished);
-                                    }
-                                }
+                                taskFinished = DrainReceivedPackets();
                             }
                         }
                         finally
@@ -611,6 +601,26 @@ namespace Microsoft.Build.BackEnd
         {
             _receivedPackets.Enqueue(packet);
             _packetReceivedEvent.Set();
+        }
+
+        /// <summary>
+        /// Drains received packets until the queue is empty or a terminal packet finishes the task.
+        /// </summary>
+        internal bool DrainReceivedPackets()
+        {
+            bool taskFinished = false;
+
+            // Stop draining as soon as TaskHostTaskComplete or NodeShutdown finishes the task;
+            // any trailing packet must not reset taskFinished back to false.
+            while (!taskFinished && _receivedPackets.TryDequeue(out INodePacket packet))
+            {
+                if (packet != null)
+                {
+                    HandlePacket(packet, out taskFinished);
+                }
+            }
+
+            return taskFinished;
         }
 
         /// <summary>
