@@ -6,7 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -724,6 +727,85 @@ namespace Microsoft.Build.UnitTests.Evaluation
             };
 
             ObjectModelHelpers.AssertItems(new[] { $"{prefix}foo" }, items, expectedMetadata);
+        }
+
+        [Fact]
+        public void EvaluatorMetadataTableSnapshotsNamesAndUpdatesAnExistingIndex()
+        {
+            ProjectRootElement root = ProjectRootElement.Create();
+            ProjectItemElement item = root.AddItemGroup().AddItem("I", "item");
+            ProjectMetadataElement first = item.AddMetadata("First", "one");
+            ProjectMetadataElement second = item.AddMetadata("Second", "two");
+            var table = new EvaluatorMetadataTable("I", 2);
+
+            table.GetEscapedValue("First").ShouldBeEmpty();
+            table.GetEscapedValueIfPresent("i", "First").ShouldBeNull();
+
+            table.SetValue(first, "one");
+            first.Name = "Renamed";
+
+            table.GetEscapedValue("First").ShouldBe("one");
+            table.GetEscapedValue("i", "FIRST").ShouldBe("one");
+            table.GetEscapedValueIfPresent("", "First").ShouldBeNull();
+            table.GetEscapedValueIfPresent("Other", "First").ShouldBeNull();
+            table.GetEscapedValueIfPresent(null, "Missing").ShouldBeNull();
+
+            second.Name = "fIrSt";
+            table.SetValue(second, string.Empty);
+
+            table.GetEscapedValueIfPresent(null, "FIRST").ShouldBe(string.Empty);
+            table.Count.ShouldBe(2);
+            table[0].Element.ShouldBeSameAs(first);
+            table[0].Name.ShouldBe("First");
+            table[1].Name.ShouldBe("fIrSt");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ItemDefinitionConditionReadsEmptyMetadataBeforeFirstDefinition(bool projectInstance)
+        {
+            ProjectRootElement root = ProjectRootElement.Create();
+            ProjectItemDefinitionGroupElement group = root.AddItemDefinitionGroup();
+            ProjectItemDefinitionElement matching = group.AddItemDefinition("Matching");
+            matching.Condition = "'%(Missing)' == '' and '%(Matching.Missing)' == ''";
+            matching.AddMetadata("Color", "green");
+            ProjectItemDefinitionElement skipped = group.AddItemDefinition("Skipped");
+            skipped.Condition = "'%(Missing)' != ''";
+            skipped.AddMetadata("Color", "red");
+            ProjectItemGroupElement items = root.AddItemGroup();
+            items.AddItem("Matching", "item");
+            items.AddItem("Skipped", "item");
+
+            if (projectInstance)
+            {
+                ProjectInstance project = ProjectInstance.FromProjectRootElement(root, new ProjectOptions());
+                project.GetItems("Matching").ShouldHaveSingleItem().GetMetadataValue("Color").ShouldBe("green");
+                project.GetItems("Skipped").ShouldHaveSingleItem().GetMetadataValue("Color").ShouldBeEmpty();
+            }
+            else
+            {
+                var project = new Project(root, null, null, ProjectCollection.GlobalProjectCollection);
+                project.GetItems("Matching").ShouldHaveSingleItem().GetMetadataValue("Color").ShouldBe("green");
+                project.GetItems("Skipped").ShouldHaveSingleItem().GetMetadataValue("Color").ShouldBeEmpty();
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void InvariantMetadataPreservesDuplicateCasingAcrossObjectModels(bool projectInstance)
+        {
+            ProjectRootElement root = ProjectRootElement.Create();
+            ProjectItemElement item = root.AddItemGroup().AddItem("I", "item");
+            item.AddMetadata("Alpha", "one").ExpressedAsAttribute = true;
+            item.AddMetadata("aLPHA", "two");
+
+            string value = projectInstance
+                ? ProjectInstance.FromProjectRootElement(root, new ProjectOptions()).GetItems("I").ShouldHaveSingleItem().GetMetadataValue("alpha")
+                : new Project(root, null, null, ProjectCollection.GlobalProjectCollection).GetItems("I").ShouldHaveSingleItem().GetMetadataValue("alpha");
+
+            value.ShouldBe("two");
         }
     }
 }
