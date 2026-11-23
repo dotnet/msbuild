@@ -68,7 +68,7 @@ The main difference between the options is how they isolate the process state of
 
 ## Option A: process-level isolation
 
-Prototype: [branch `baronfel-taskhost-yielding`](https://github.com/dotnet/msbuild/tree/baronfel-taskhost-yielding), [commit `1499e7d2e3`](https://github.com/dotnet/msbuild/commit/1499e7d2e3415428ee70239a87d0fbbc3e0436f1).
+Prototype: [branch `baronfel-taskhost-yielding`](https://github.com/dotnet/msbuild/tree/baronfel-taskhost-yielding), current [commit `9f3b3ae8b9`](https://github.com/dotnet/msbuild/commit/9f3b3ae8b9dcda9c8f4fb990f06780241772ad20).
 
 A TaskHost that contains a yielded, still-running task stays occupied. If other work needs a TaskHost of the same kind, the provider assigns another host slot (`TaskHostNodeKey.HostSlot`), which starts another process. Idle slots are reused.
 
@@ -104,7 +104,8 @@ sequenceDiagram
 
 ## Option B: shared TaskHosts with task-ID routing
 
-Prototype: [branch `baronfel-taskhost-yielding-option-b`](https://github.com/dotnet/msbuild/tree/baronfel-taskhost-yielding-option-b), [commit `1bd382fdcc`](https://github.com/dotnet/msbuild/commit/1bd382fdcc707651a8b091e4cf52415c595bcd4f).
+Prototype: [branch `baronfel-taskhost-yielding-option-b`](https://github.com/dotnet/msbuild/tree/baronfel-taskhost-yielding-option-b), current [tip `b841c2dbe9`](https://github.com/dotnet/msbuild/commit/b841c2dbe9fb2f5ab7a4a4d610e74696bb4e23d2).
+Tested implementation: [commit `09842896bd`](https://github.com/dotnet/msbuild/commit/09842896bd1e4255ef57b02b6bd6fc52565e1436).
 
 There is one TaskHost per (worker node, runtime) key, as today. Each host runs at most one non-yielded task, plus any number of yielded tasks. Yielded tasks can continue to run in the same TaskHost process as the new task. An external compiler runs in its own process, not in the TaskHost.
 
@@ -184,6 +185,11 @@ Option B does not isolate process-wide state while tasks overlap. Unlike a callb
 ### Performance
 
 Measured with `dotnet build -m:8` on the same workload. Times are elapsed wall-clock times. CPU utilization was not measured. Process counts and peak process-tree RSS are for clean builds.
+
+Both published prototype branches are rebased on the CLR4 TaskHost support [commit `102f08a36b`](https://github.com/dotnet/msbuild/commit/102f08a36b153123ffa697a250a68b6f7e26b572).
+The measurements used Option A [commit `1499e7d2e3`](https://github.com/dotnet/msbuild/commit/1499e7d2e3415428ee70239a87d0fbbc3e0436f1) and Option B [commit `1bd382fdcc`](https://github.com/dotnet/msbuild/commit/1bd382fdcc707651a8b091e4cf52415c595bcd4f).
+The rebased implementation commits (`9f3b3ae8b9` and `09842896bd`, respectively) have identical Git trees to their measured counterparts.
+Option B's current tip adds only documentation after its tested implementation commit.
 
 Normal mode, 4 rounds of each option. Runs were sequential, with variant order varied across rounds:
 
