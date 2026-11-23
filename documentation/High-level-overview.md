@@ -145,6 +145,13 @@ MSBuild generally runs tasks in its own process, but has an ability to run tasks
 
 A specific task host is automatically selected when a task explicitly declares the need for a specific runtime or architecture that is different from the one used by the executing MSBuild engine. The runtime and architecture can be requested via `Runtime` and `Architecture` attributes in [`UsingTask`](https://learn.microsoft.com/visualstudio/msbuild/usingtask-element-msbuild) element defining the task or in the [`Task`](https://learn.microsoft.com/visualstudio/msbuild/task-element-msbuild) element used for task invocation.
 
+MSBuild running on .NET (for example `dotnet build`) can run tasks that require the .NET Framework on Windows. It uses a task host from a Visual Studio installation matching that MSBuild version. `Runtime="CLR4"` uses `MSBuild.exe`. `Runtime="CLR2"` uses `MSBuildTaskHost.exe` and requires .NET Framework 3.5 to be enabled. CLR2 task hosts support x86 and x64, but not ARM64. The installation is chosen as follows:
+- In a Visual Studio Developer Command Prompt (set up by `VsDevCmd.bat` or a `vcvars*.bat` file), the `VSINSTALLDIR` and `VisualStudioVersion` environment variables identify the installation.
+- Otherwise, MSBuild queries the Visual Studio setup API and uses the installation if exactly one has a suitable task host for the requested runtime and architecture.
+- If no installation is found, the task fails with error MSB4291. If several are found, the task fails with error MSB4292, which lists them; choose one by building from its Developer Command Prompt.
+
+For a CLR2 task in the legacy GAC, specify a fully qualified `AssemblyName` or use `AssemblyFile`. Metadata inspection does not apply .NET Framework assembly binding policy.
+
 TaskHost can be opted-in via `TaskFactory="TaskHostFactory"` in the [`UsingTask`](https://learn.microsoft.com/visualstudio/msbuild/usingtask-element-msbuild) element defining the task. This opt-in behavior can be used for various cases:
 - If a task's source code is in the same repository that is being built, and the repository's build needs to use that task during the build process. Using a Task Host makes sure the DLLs are not locked at the end of the build (as MSBuild uses long living worker nodes that survives single build execution)
 - As an isolation mechanism - separating the execution from the engine execution process.
