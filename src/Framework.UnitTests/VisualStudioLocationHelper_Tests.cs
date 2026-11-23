@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests
     ///  Baseline behavioural contract for <see cref="VisualStudioLocationHelper"/> — the helper
     ///  that queries the Visual Studio Setup Configuration COM API
     ///  (<c>Microsoft.VisualStudio.Setup.Configuration.Native.dll</c>) for installed VS
-    ///  instances on Windows .NET Framework.
+    ///  instances on Windows.
     /// </summary>
     /// <remarks>
     ///  These tests intentionally make no assumption about whether VS is installed on the
@@ -32,9 +32,8 @@ namespace Microsoft.Build.UnitTests
     ///   <item>Repeated calls return an equivalent set of instances (the helper is a pure
     ///         read of installer state; there is no per-call side effect).</item>
     ///  </list>
-    ///  Tests run only on .NET Framework with VS Setup Configuration enabled — the
-    ///  <c>FEATURE_VISUALSTUDIOSETUP</c> gate inside the helper means the non-net472 build
-    ///  returns an empty list unconditionally and there is no native interop to exercise.
+    ///  Tests run on Windows for both .NET Framework and .NET, where <c>FEATURE_VISUALSTUDIOSETUP</c>
+    ///  is enabled; the helper returns an empty list on other platforms.
     /// </remarks>
     public sealed class VisualStudioLocationHelper_Tests
     {
