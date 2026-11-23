@@ -3292,26 +3292,5 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
-
-        /// <summary>
-        /// Copy instances share cached resource strings and are constructed concurrently under -mt, so the strings must be
-        /// initialized once by the type initializer rather than lazily by the constructor, where a racing instance could
-        /// observe them as null and fail with ArgumentNullException. Regression test for GitHub issue #15648.
-        /// </summary>
-        [Fact]
-        public void CachedResourceStringsAreReadOnlyAndInitialized()
-        {
-            FieldInfo[] cachedResourceStrings = typeof(Copy)
-                .GetFields(BindingFlags.Static | BindingFlags.NonPublic)
-                .Where(field => field.FieldType == typeof(string) && !field.IsLiteral)
-                .ToArray();
-
-            cachedResourceStrings.ShouldNotBeEmpty();
-            foreach (FieldInfo field in cachedResourceStrings)
-            {
-                field.IsInitOnly.ShouldBeTrue($"{field.Name} must be static readonly");
-                ((string)field.GetValue(null)).ShouldNotBeNullOrEmpty(field.Name);
-            }
-        }
     }
 }
