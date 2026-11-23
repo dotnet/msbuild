@@ -588,30 +588,32 @@ internal static class CommunicationsUtilities
     internal static FrameworkTaskHostHandshake GetCurrentFrameworkTaskHostHandshake(bool nodeReuse = false, bool lowPriority = false)
         => new(GetTaskHostOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority));
 
-    internal static NetTaskHostHandshakeConfiguration GetNetTaskHostHandshakeConfiguration(bool nodeReuse = false, bool lowPriority = false)
-        => new(GetTaskHostOptions(architecture: null, nodeReuse, lowPriority));
+    internal static NetTaskHostRequest GetNetTaskHostRequest(bool nodeReuse = false, bool lowPriority = false, TaskHostLaunchPaths launchPaths = default)
+        => new(GetTaskHostOptions(architecture: null, nodeReuse, lowPriority), launchPaths);
 
-    internal static FrameworkTaskHostHandshakeConfiguration GetFrameworkTaskHostHandshakeConfiguration(string architecture, bool nodeReuse = false, bool lowPriority = false)
-        => new(GetTaskHostOptions(architecture, nodeReuse, lowPriority));
+    internal static FrameworkTaskHostRequest GetFrameworkTaskHostRequest(string architecture, bool nodeReuse = false, bool lowPriority = false, TaskHostLaunchPaths launchPaths = default)
+        => new(GetTaskHostOptions(architecture, nodeReuse, lowPriority), launchPaths);
 
-    internal static Clr2TaskHostHandshakeConfiguration GetClr2TaskHostHandshakeConfiguration(string architecture, bool lowPriority = false)
-        => new(GetTaskHostOptions(architecture, nodeReuse: false, lowPriority));
+    internal static Clr2TaskHostRequest GetClr2TaskHostRequest(string architecture, bool lowPriority = false, TaskHostLaunchPaths launchPaths = default)
+        => new(GetTaskHostOptions(architecture, nodeReuse: false, lowPriority), launchPaths);
 
-    internal static TaskHostHandshakeConfiguration GetTaskHostHandshakeConfiguration(
+    internal static TaskHostRequest GetTaskHostRequest(
         TaskHostParameters taskHostParameters,
         bool nodeReuse = false,
         bool lowPriority = false)
     {
+        TaskHostLaunchPaths launchPaths = new(taskHostParameters.MSBuildAssemblyPath, taskHostParameters.DotnetHostPath);
+
         if (taskHostParameters.IsEmpty)
         {
             string architecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
             return typeof(bool).Assembly.GetName().Version!.Major switch
             {
-                2 => GetClr2TaskHostHandshakeConfiguration(architecture, lowPriority),
-                4 => GetFrameworkTaskHostHandshakeConfiguration(architecture, nodeReuse, lowPriority),
+                2 => GetClr2TaskHostRequest(architecture, lowPriority, launchPaths),
+                4 => GetFrameworkTaskHostRequest(architecture, nodeReuse, lowPriority, launchPaths),
                 // A child keeps its architecture bit so already-deployed parents can connect.
-                >= 5 => new NetTaskHostHandshakeConfiguration(GetTaskHostOptions(architecture, nodeReuse, lowPriority)),
-                _ => Assumed.Unreachable<TaskHostHandshakeConfiguration>("Unsupported task-host runtime."),
+                >= 5 => new NetTaskHostRequest(GetTaskHostOptions(architecture, nodeReuse, lowPriority), launchPaths),
+                _ => Assumed.Unreachable<TaskHostRequest>("Unsupported task-host runtime."),
             };
         }
 
@@ -620,17 +622,17 @@ internal static class CommunicationsUtilities
 
         if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
         {
-            return GetClr2TaskHostHandshakeConfiguration(taskHostParameters.Architecture, lowPriority);
+            return GetClr2TaskHostRequest(taskHostParameters.Architecture, lowPriority, launchPaths);
         }
 
         if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
         {
-            return GetFrameworkTaskHostHandshakeConfiguration(taskHostParameters.Architecture, nodeReuse, lowPriority);
+            return GetFrameworkTaskHostRequest(taskHostParameters.Architecture, nodeReuse, lowPriority, launchPaths);
         }
 
         Assumed.True(taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase));
         // The parent cannot determine the SDK task host's architecture.
-        return GetNetTaskHostHandshakeConfiguration(nodeReuse, lowPriority);
+        return GetNetTaskHostRequest(nodeReuse, lowPriority, launchPaths);
     }
 
     private static TaskHostHandshakeOptions GetTaskHostOptions(string? architecture, bool nodeReuse, bool lowPriority)

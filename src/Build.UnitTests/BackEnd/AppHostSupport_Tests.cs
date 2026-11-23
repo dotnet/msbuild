@@ -181,13 +181,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void Handshake_ExternalPathCanMismatch_DefaultAlwaysMatches()
         {
-            NetTaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetNetTaskHostHandshakeConfiguration();
+            NetTaskHostRequest request = CommunicationsUtilities.GetNetTaskHostRequest();
 
             // Simulate child: no explicit toolsDirectory → defaults to BuildEnvironmentHelper.
-            NetTaskHostHandshake childHandshake = configuration.CreateHandshake();
+            NetTaskHostHandshake childHandshake = request.CreateHandshake();
 
             // After the fix: parent also omits toolsDirectory → same default → must match.
-            NetTaskHostHandshake parentFixedHandshake = configuration.CreateHandshake();
+            NetTaskHostHandshake parentFixedHandshake = request.CreateHandshake();
             parentFixedHandshake.GetKey().ShouldBe(childHandshake.GetKey(),
                 "When both parent and child omit toolsDirectory, they must produce " +
                 "identical handshake keys (both default to BuildEnvironmentHelper).");
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             // If that path differs from BuildEnvironmentHelper (e.g. symlinks),
             // the handshake would mismatch.
             string externalPath = Path.Combine(Path.GetTempPath(), $"different_path_{Guid.NewGuid():N}");
-            NetTaskHostHandshake parentBrokenHandshake = configuration.CreateHandshake(externalPath);
+            NetTaskHostHandshake parentBrokenHandshake = request.CreateHandshake(externalPath);
             parentBrokenHandshake.GetKey().ShouldNotBe(childHandshake.GetKey(),
                 "An arbitrary external toolsDirectory should produce a different handshake " +
                 "than the BuildEnvironmentHelper default, proving the mismatch scenario.");
@@ -214,12 +214,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [WindowsOnlyFact]
         public void Handshake_NetTaskHost_AcceptsDriveLetterCasingDifference()
         {
-            NetTaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetNetTaskHostHandshakeConfiguration();
+            NetTaskHostRequest request = CommunicationsUtilities.GetNetTaskHostRequest();
 
             // The child resolved its own location with one drive-letter casing; the parent supplied
             // the same directory with the opposite casing.
-            NetTaskHostHandshake child = configuration.CreateHandshake(@"d:\agent\_work\sdk\11.0.100");
-            NetTaskHostHandshake parent = configuration.CreateHandshake(@"D:\agent\_work\sdk\11.0.100");
+            NetTaskHostHandshake child = request.CreateHandshake(@"d:\agent\_work\sdk\11.0.100");
+            NetTaskHostHandshake parent = request.CreateHandshake(@"D:\agent\_work\sdk\11.0.100");
 
             int childSalt = child.RetrieveHandshakeComponents().Salt;
             int parentSalt = parent.RetrieveHandshakeComponents().Salt;
@@ -242,10 +242,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [WindowsOnlyFact]
         public void Handshake_NetTaskHost_RejectsUnrelatedToolsDirectory()
         {
-            NetTaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetNetTaskHostHandshakeConfiguration();
+            NetTaskHostRequest request = CommunicationsUtilities.GetNetTaskHostRequest();
 
-            NetTaskHostHandshake child = configuration.CreateHandshake(@"d:\agent\_work\sdk\11.0.100");
-            NetTaskHostHandshake unrelated = configuration.CreateHandshake(@"d:\agent\_work\sdk\10.0.200");
+            NetTaskHostHandshake child = request.CreateHandshake(@"d:\agent\_work\sdk\11.0.100");
+            NetTaskHostHandshake unrelated = request.CreateHandshake(@"d:\agent\_work\sdk\10.0.200");
 
             child.IsNetTaskHostSaltMatch(unrelated.RetrieveHandshakeComponents().Salt).ShouldBeFalse(
                 "A different SDK directory is not a drive-letter casing variant and must not be accepted.");
@@ -289,13 +289,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 Directory.CreateDirectory(realDir);
                 Directory.CreateSymbolicLink(symlinkDir, realDir);
 
-                NetTaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetNetTaskHostHandshakeConfiguration();
+                NetTaskHostRequest request = CommunicationsUtilities.GetNetTaskHostRequest();
 
                 // Parent using the symlink path (like $(MSBuildThisFileDirectory) would on macOS /tmp)
-                NetTaskHostHandshake symlinkHandshake = configuration.CreateHandshake(symlinkDir);
+                NetTaskHostHandshake symlinkHandshake = request.CreateHandshake(symlinkDir);
 
                 // Child using the resolved real path (like AppContext.BaseDirectory resolves /private/tmp)
-                NetTaskHostHandshake realHandshake = configuration.CreateHandshake(realDir);
+                NetTaskHostHandshake realHandshake = request.CreateHandshake(realDir);
 
                 // These produce DIFFERENT keys — this is the bug.
                 // If these were used as parent vs child toolsDirectory, the pipe names would
@@ -309,8 +309,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 // Using the SAME source (MSBuildToolsDirectoryRoot) on both sides always matches,
                 // regardless of symlinks, because both compute it from AppContext.BaseDirectory.
                 string consistentDir = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-                NetTaskHostHandshake parentFixed = configuration.CreateHandshake(consistentDir);
-                NetTaskHostHandshake childDefault = configuration.CreateHandshake();
+                NetTaskHostHandshake parentFixed = request.CreateHandshake(consistentDir);
+                NetTaskHostHandshake childDefault = request.CreateHandshake();
 
                 parentFixed.GetKey().ShouldBe(childDefault.GetKey(),
                     "Using MSBuildToolsDirectoryRoot on both sides must produce matching keys.");

@@ -12,7 +12,7 @@ using Xunit;
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     /// <summary>
-    /// Tests for <see cref="CommunicationsUtilities.GetTaskHostHandshakeConfiguration"/> covering the worker
+    /// Tests for <see cref="CommunicationsUtilities.GetTaskHostRequest"/> covering the worker
     /// node side of NET task host launches: the worker node must suppress its own architecture
     /// bit on the wire so already-shipped SDK TaskHost nodes (whose <c>IsAllowedBitnessMismatch</c>
     /// tolerates "worker node sent no arch bit") accept the connection regardless of either
@@ -24,15 +24,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [InlineData(XMakeAttributes.MSBuildArchitectureValues.x64)]
         [InlineData(XMakeAttributes.MSBuildArchitectureValues.arm64)]
         [InlineData(XMakeAttributes.MSBuildArchitectureValues.x86)]
-        public void NetTaskHostConfiguration_SuppressesParentArchBit(string workerArchitecture)
+        public void NetTaskHostRequest_SuppressesParentArchBit(string workerArchitecture)
         {
             var parameters = new TaskHostParameters(
                 runtime: XMakeAttributes.MSBuildRuntimeValues.net,
                 architecture: workerArchitecture);
 
-            TaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetTaskHostHandshakeConfiguration(parameters);
-            (configuration is NetTaskHostHandshakeConfiguration).ShouldBeTrue();
-            HandshakeOptions options = configuration.HandshakeOptions;
+            TaskHostRequest request = CommunicationsUtilities.GetTaskHostRequest(parameters);
+            (request is NetTaskHostRequest).ShouldBeTrue();
+            HandshakeOptions options = request.HandshakeOptions;
 
             options.HasFlag(HandshakeOptions.NET).ShouldBeTrue();
             options.HasFlag(HandshakeOptions.X64).ShouldBeFalse();
@@ -40,27 +40,27 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void FrameworkTaskHostConfiguration_KeepsX64ArchBit()
+        public void FrameworkTaskHostRequest_KeepsX64ArchBit()
         {
             var parameters = new TaskHostParameters(
                 runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
                 architecture: XMakeAttributes.MSBuildArchitectureValues.x64);
 
-            TaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetTaskHostHandshakeConfiguration(parameters);
-            (configuration is FrameworkTaskHostHandshakeConfiguration).ShouldBeTrue();
-            HandshakeOptions options = configuration.HandshakeOptions;
+            TaskHostRequest request = CommunicationsUtilities.GetTaskHostRequest(parameters);
+            (request is FrameworkTaskHostRequest).ShouldBeTrue();
+            HandshakeOptions options = request.HandshakeOptions;
 
             options.HasFlag(HandshakeOptions.X64).ShouldBeTrue();
         }
 
         [Fact]
-        public void FrameworkTaskHostConfiguration_KeepsArm64ArchBit()
+        public void FrameworkTaskHostRequest_KeepsArm64ArchBit()
         {
             var parameters = new TaskHostParameters(
                 runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
                 architecture: XMakeAttributes.MSBuildArchitectureValues.arm64);
 
-            HandshakeOptions options = CommunicationsUtilities.GetTaskHostHandshakeConfiguration(parameters).HandshakeOptions;
+            HandshakeOptions options = CommunicationsUtilities.GetTaskHostRequest(parameters).HandshakeOptions;
 
             options.HasFlag(HandshakeOptions.Arm64).ShouldBeTrue();
         }
@@ -70,12 +70,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [InlineData("x64", (int)TaskHostArchitecture.X64, (int)HandshakeOptions.X64)]
         [InlineData("ARM64", (int)TaskHostArchitecture.Arm64, (int)HandshakeOptions.Arm64)]
         [InlineData("unknown", (int)TaskHostArchitecture.Unspecified, 0)]
-        public void FrameworkTaskHostConfiguration_EncodesOneArchitecture(string architecture, int expectedArchitecture, int expectedWireBits)
+        public void FrameworkTaskHostRequest_EncodesOneArchitecture(string architecture, int expectedArchitecture, int expectedWireBits)
         {
-            FrameworkTaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetFrameworkTaskHostHandshakeConfiguration(architecture);
+            FrameworkTaskHostRequest request = CommunicationsUtilities.GetFrameworkTaskHostRequest(architecture);
 
-            configuration.Options.Architecture.ShouldBe((TaskHostArchitecture)expectedArchitecture);
-            (configuration.HandshakeOptions & (HandshakeOptions.X64 | HandshakeOptions.Arm64)).ShouldBe((HandshakeOptions)expectedWireBits);
+            request.Options.Architecture.ShouldBe((TaskHostArchitecture)expectedArchitecture);
+            (request.HandshakeOptions & (HandshakeOptions.X64 | HandshakeOptions.Arm64)).ShouldBe((HandshakeOptions)expectedWireBits);
         }
 
         [Fact]
@@ -126,38 +126,57 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [InlineData(XMakeAttributes.MSBuildRuntimeValues.net, true)]
         [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr4, true)]
         [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr2, false)]
-        public void TaskHostConfiguration_PreservesPriorityAndRuntimeReusePolicy(string runtime, bool reuseExpected)
+        public void TaskHostRequest_PreservesPriorityAndRuntimeReusePolicy(string runtime, bool reuseExpected)
         {
             TaskHostParameters parameters = new(runtime: runtime, architecture: XMakeAttributes.MSBuildArchitectureValues.arm64);
-            TaskHostHandshakeConfiguration configuration = CommunicationsUtilities.GetTaskHostHandshakeConfiguration(
+            TaskHostRequest request = CommunicationsUtilities.GetTaskHostRequest(
                 parameters, nodeReuse: true, lowPriority: true);
 
-            configuration.HandshakeOptions.HasFlag(HandshakeOptions.TaskHost).ShouldBeTrue();
-            configuration.HandshakeOptions.HasFlag(HandshakeOptions.NodeReuse).ShouldBe(reuseExpected);
-            configuration.HandshakeOptions.HasFlag(HandshakeOptions.LowPriority).ShouldBeTrue();
-            configuration.HandshakeOptions.HasFlag(HandshakeOptions.NET).ShouldBe(runtime == XMakeAttributes.MSBuildRuntimeValues.net);
-            configuration.HandshakeOptions.HasFlag(HandshakeOptions.CLR2).ShouldBe(runtime == XMakeAttributes.MSBuildRuntimeValues.clr2);
-            configuration.HandshakeOptions.HasFlag(HandshakeOptions.Arm64).ShouldBe(runtime != XMakeAttributes.MSBuildRuntimeValues.net);
+            request.HandshakeOptions.HasFlag(HandshakeOptions.TaskHost).ShouldBeTrue();
+            request.HandshakeOptions.HasFlag(HandshakeOptions.NodeReuse).ShouldBe(reuseExpected);
+            request.HandshakeOptions.HasFlag(HandshakeOptions.LowPriority).ShouldBeTrue();
+            request.HandshakeOptions.HasFlag(HandshakeOptions.NET).ShouldBe(runtime == XMakeAttributes.MSBuildRuntimeValues.net);
+            request.HandshakeOptions.HasFlag(HandshakeOptions.CLR2).ShouldBe(runtime == XMakeAttributes.MSBuildRuntimeValues.clr2);
+            request.HandshakeOptions.HasFlag(HandshakeOptions.Arm64).ShouldBe(runtime != XMakeAttributes.MSBuildRuntimeValues.net);
+        }
+
+        [Theory]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.net)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr4)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr2)]
+        [InlineData(null)]
+        public void TaskHostRequest_PreservesExplicitLaunchPaths(string? runtime)
+        {
+            TaskHostParameters parameters = new(
+                runtime: runtime,
+                architecture: runtime is null ? null : XMakeAttributes.MSBuildArchitectureValues.x64,
+                dotnetHostPath: "dotnet-host",
+                msBuildAssemblyPath: "msbuild-directory");
+
+            TaskHostRequest request = CommunicationsUtilities.GetTaskHostRequest(parameters);
+
+            request.LaunchPaths.MSBuildAssemblyPath.ShouldBe("msbuild-directory");
+            request.LaunchPaths.DotnetHostPath.ShouldBe("dotnet-host");
         }
 
         [Fact]
-        public void TaskHostConfigurations_CreateTypedHandshakesWithResolvedInstallationIdentity()
+        public void TaskHostRequests_CreateTypedHandshakesWithResolvedInstallationIdentity()
         {
             string toolsDirectory = Path.Combine(Path.GetTempPath(), "resolved-task-host");
             Version fileVersion = new(18, 1, 2, 3);
-            NetTaskHostHandshakeConfiguration netConfiguration = CommunicationsUtilities.GetNetTaskHostHandshakeConfiguration(nodeReuse: true);
-            FrameworkTaskHostHandshakeConfiguration frameworkConfiguration = CommunicationsUtilities.GetFrameworkTaskHostHandshakeConfiguration(
+            NetTaskHostRequest netRequest = CommunicationsUtilities.GetNetTaskHostRequest(nodeReuse: true);
+            FrameworkTaskHostRequest frameworkRequest = CommunicationsUtilities.GetFrameworkTaskHostRequest(
                 XMakeAttributes.MSBuildArchitectureValues.x64, nodeReuse: true);
-            Clr2TaskHostHandshakeConfiguration clr2Configuration = CommunicationsUtilities.GetClr2TaskHostHandshakeConfiguration(
+            Clr2TaskHostRequest clr2Request = CommunicationsUtilities.GetClr2TaskHostRequest(
                 XMakeAttributes.MSBuildArchitectureValues.x64);
 
-            NetTaskHostHandshake net = netConfiguration.CreateHandshake(toolsDirectory);
-            FrameworkTaskHostHandshake framework = frameworkConfiguration.CreateHandshake(toolsDirectory, fileVersion);
-            Clr2TaskHostHandshake clr2 = clr2Configuration.CreateHandshake(toolsDirectory, fileVersion);
+            NetTaskHostHandshake net = netRequest.CreateHandshake(toolsDirectory);
+            FrameworkTaskHostHandshake framework = frameworkRequest.CreateHandshake(toolsDirectory, fileVersion);
+            Clr2TaskHostHandshake clr2 = clr2Request.CreateHandshake(toolsDirectory, fileVersion);
 
-            net.HandshakeOptions.ShouldBe(netConfiguration.HandshakeOptions);
-            framework.HandshakeOptions.ShouldBe(frameworkConfiguration.HandshakeOptions);
-            clr2.HandshakeOptions.ShouldBe(clr2Configuration.HandshakeOptions);
+            net.HandshakeOptions.ShouldBe(netRequest.HandshakeOptions);
+            framework.HandshakeOptions.ShouldBe(frameworkRequest.HandshakeOptions);
+            clr2.HandshakeOptions.ShouldBe(clr2Request.HandshakeOptions);
             net.HandshakeOptions.HasFlag(HandshakeOptions.X64).ShouldBeFalse();
             clr2.HandshakeOptions.HasFlag(HandshakeOptions.NodeReuse).ShouldBeFalse();
             int expectedSalt = CommunicationsUtilities.GetHashCode(

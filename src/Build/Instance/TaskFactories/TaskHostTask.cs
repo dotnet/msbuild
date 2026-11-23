@@ -390,18 +390,19 @@ namespace Microsoft.Build.BackEnd
                     lock (_taskHostLock)
                     {
                         effectiveNodeReuse = _buildComponentHost.BuildParameters.EnableNodeReuse && _allowNodeReuse;
-                        TaskHostHandshakeConfiguration handshakeConfiguration = CommunicationsUtilities.GetTaskHostHandshakeConfiguration(
+                        TaskHostRequest request = CommunicationsUtilities.GetTaskHostRequest(
                             // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
                             nodeReuse: effectiveNodeReuse,
                             taskHostParameters: _taskHostParameters);
-                        _requiredContext = handshakeConfiguration.HandshakeOptions;
+                        _requiredContext = request.HandshakeOptions;
 
                         _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(
-                            new TaskHostNodeKey(handshakeConfiguration, _scheduledNodeId, _forwardConsoleOutput),
+                            request,
+                            _scheduledNodeId,
+                            _forwardConsoleOutput,
                             this,
                             this,
                             hostConfiguration,
-                            _taskHostParameters,
                             RequiresParameterConversion,
                             out parameterConversionUnsupported,
                             out hostProcessId,

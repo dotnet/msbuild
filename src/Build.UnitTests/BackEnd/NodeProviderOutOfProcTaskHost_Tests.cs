@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ChangeWaves.ResetStateForTests();
 
             NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
-            HandshakeOptions options = CommunicationsUtilities.GetTaskHostHandshakeConfiguration(TaskHostParameters.Empty, nodeReuse: true).HandshakeOptions;
+            HandshakeOptions options = CommunicationsUtilities.GetTaskHostRequest(TaskHostParameters.Empty, nodeReuse: true).HandshakeOptions;
 
             ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11).ShouldBeTrue();
             provider.ConnectionPersists(options).ShouldBe(expectedPersistence);
@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
             ChangeWaves.ResetStateForTests();
             NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
-            HandshakeOptions options = CommunicationsUtilities.GetTaskHostHandshakeConfiguration(TaskHostParameters.Empty, nodeReuse: true).HandshakeOptions;
+            HandshakeOptions options = CommunicationsUtilities.GetTaskHostRequest(TaskHostParameters.Empty, nodeReuse: true).HandshakeOptions;
 
             provider.ConnectionPersists(options, version).ShouldBeFalse();
         }

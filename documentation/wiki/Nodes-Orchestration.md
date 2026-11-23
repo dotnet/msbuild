@@ -46,23 +46,23 @@ The internal C# 15 `Handshake` union contains five protocol types:
 | `Clr2TaskHostHandshake` | Task-host executable directory and file version | Includes the Windows session but excludes change waves. Matches the standalone CLR2 host protocol. |
 
 `TaskHostHandshake` is a separate union that contains only the three task-host types.
-Task-host configuration options cannot name a different runtime or node kind.
+Task-host request options cannot name a different runtime or node kind.
 Worker handshakes derive their configuration from the current process.
 
 `CommunicationsUtilities` provides purpose-specific factories instead of a general `GetHandshakeOptions` API.
 Worker, server, RAR, and child task-host factories return the required handshake type directly.
-Parent task-host factories return runtime-specific configuration structs.
-Each struct's `CreateHandshake` method returns its concrete handshake type.
+Parent task-host factories return runtime-specific request structs.
+Each request carries the launch paths and returns its concrete handshake type.
 
-CLR4 and CLR2 configurations accept the resolved host tools directory and file version when they create the handshake.
-`GetTaskHostHandshakeConfiguration` selects a configuration through a closed union when the requested runtime is determined at run time.
-`TaskHostNodeKey` carries that configuration through acquisition, so its runtime flags cannot disagree with the launch configuration.
-The provider matches that union before it selects a launch path.
-Configuration flags remain available for connection keys and existence checks, without calculating installation identity.
+CLR4 and CLR2 requests accept the resolved host tools directory and file version when they create the handshake.
+`GetTaskHostRequest` selects a request through a closed union when the requested runtime is determined at run time.
+The provider derives `TaskHostNodeKey` from the request and matches the request before it selects a launch path.
+The key uses the handshake flags and resolved launch identity to preserve pooling behavior.
+Request flags remain available for connection keys and existence checks, without calculating installation identity.
 
 Explicit .NET requests omit architecture bits because the parent cannot determine the SDK host's architecture.
 Child factories preserve the current architecture bits for compatibility with deployed parents.
-CLR2 configuration factories do not enable node reuse.
+CLR2 request factories do not enable node reuse.
 Task-host options use one architecture value before they produce wire flags.
 Unspecified and x86 remain distinct in memory but share the same wire identity and reusable hosts.
 

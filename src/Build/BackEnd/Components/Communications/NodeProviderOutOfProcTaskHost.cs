@@ -29,27 +29,25 @@ namespace Microsoft.Build.BackEnd
 
     /// <summary>
     /// Represents a unique key for identifying task host nodes.
-    /// Combines typed handshake configuration (which specifies runtime/architecture configuration) with
-    /// the scheduled node ID to uniquely identify task hosts in multi-threaded mode.
+    /// Combines the handshake identity, scheduled node ID, console forwarding, and resolved launch identity.
+    /// The scheduled node ID is -1 in traditional multi-process builds.
     /// </summary>
-    /// <param name="HandshakeConfiguration">The typed configuration specifying the task host runtime and architecture.</param>
-    /// <param name="NodeId">
-    /// The scheduled node ID. In traditional multi-proc builds, this is -1 (meaning the task host
-    /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
-    /// its own task host, so the node ID is used to distinguish them.
-    /// </param>
-    /// <param name="ForwardConsoleOutput">
-    /// Whether the task host forwards console output. Hosts with different forwarding behavior must not share a connection.
-    /// </param>
-    /// <param name="LaunchIdentity">The effective executable, arguments, and runtime host used to launch the task host.</param>
-    internal readonly record struct TaskHostNodeKey(
-        TaskHostHandshakeConfiguration HandshakeConfiguration,
-        int NodeId,
-        bool ForwardConsoleOutput = false,
-        TaskHostLaunchIdentity? LaunchIdentity = null)
+    internal readonly record struct TaskHostNodeKey
     {
-        internal HandshakeOptions HandshakeOptions => HandshakeConfiguration.HandshakeOptions;
+        internal TaskHostNodeKey(TaskHostRequest request, int nodeId, bool forwardConsoleOutput = false, TaskHostLaunchIdentity? launchIdentity = null)
+        {
+            HandshakeOptions = request.HandshakeOptions;
+            NodeId = nodeId;
+            ForwardConsoleOutput = forwardConsoleOutput;
+            LaunchIdentity = launchIdentity;
+        }
+
+        internal HandshakeOptions HandshakeOptions { get; }
+        internal int NodeId { get; }
+        internal bool ForwardConsoleOutput { get; }
+        internal TaskHostLaunchIdentity? LaunchIdentity { get; init; }
     }
+
     /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
     /// which act as child nodes for the build system.
@@ -811,16 +809,16 @@ namespace Microsoft.Build.BackEnd
         {
             Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
-            return (taskHostParameters.DotnetHostPath, GetMSBuildPath(taskHostParameters));
+            return (taskHostParameters.DotnetHostPath, GetMSBuildPath(taskHostParameters.MSBuildAssemblyPath));
         }
 
-        private static string GetMSBuildPath(in TaskHostParameters taskHostParameters)
+        private static string GetMSBuildPath(string msBuildAssemblyPath)
         {
-            if (taskHostParameters.MSBuildAssemblyPath != null)
+            if (msBuildAssemblyPath != null)
             {
-                ValidateNetHostSdkVersion(taskHostParameters.MSBuildAssemblyPath);
+                ValidateNetHostSdkVersion(msBuildAssemblyPath);
 
-                return taskHostParameters.MSBuildAssemblyPath;
+                return msBuildAssemblyPath;
             }
 
 #if NET
@@ -923,11 +921,12 @@ namespace Microsoft.Build.BackEnd
         /// and configure it for the task.
         /// </summary>
         internal bool AcquireAndSetUpHost(
-            TaskHostNodeKey requestedNodeKey,
+            TaskHostRequest request,
+            int scheduledNodeId,
+            bool forwardConsoleOutput,
             INodePacketFactory factory,
             INodePacketHandler handler,
             TaskHostConfiguration configuration,
-            in TaskHostParameters taskHostParameters,
             bool requiresParameterConversion,
             out bool parameterConversionUnsupported,
             out int hostProcessId,
@@ -940,9 +939,11 @@ namespace Microsoft.Build.BackEnd
             wasNewlyCreated = false;
             connection = null;
             visualStudioResolution = VisualStudioTaskHostResolution.NotApplicable.Instance;
+            TaskHostNodeKey requestedNodeKey = new(request, scheduledNodeId, forwardConsoleOutput);
             TaskHostNodeKey nodeKey = default;
+            TaskHostLaunchPaths launchPaths = request.LaunchPaths;
 
-            if (taskHostParameters.MSBuildAssemblyPath is null && taskHostParameters.DotnetHostPath is null)
+            if (launchPaths.MSBuildAssemblyPath is null && launchPaths.DotnetHostPath is null)
             {
                 KeyValuePair<TaskHostNodeKey, NodeContext>? reusableConnection = null;
                 foreach (KeyValuePair<TaskHostNodeKey, NodeContext> existing in _nodeContexts)
@@ -983,7 +984,7 @@ namespace Microsoft.Build.BackEnd
             NodeLaunchData<TaskHostHandshake> nodeLaunchData = default;
             if (nodeKey == default)
             {
-                nodeLaunchData = ResolveNodeLaunchConfiguration(requestedNodeKey.HandshakeConfiguration, taskHostParameters, out visualStudioResolution);
+                nodeLaunchData = ResolveNodeLaunchConfiguration(request, out visualStudioResolution);
                 if (nodeLaunchData.MSBuildLocation is null)
                 {
                     return false;
@@ -991,7 +992,7 @@ namespace Microsoft.Build.BackEnd
 
                 nodeKey = requestedNodeKey with
                 {
-                    LaunchIdentity = CreateLaunchIdentity(nodeLaunchData, taskHostParameters.DotnetHostPath),
+                    LaunchIdentity = CreateLaunchIdentity(nodeLaunchData, launchPaths.DotnetHostPath),
                 };
             }
 
@@ -1152,7 +1153,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates a new MSBuild or MSBuildTaskHost process acting as a child node.
         /// </summary>
-        internal bool CreateNode(TaskHostNodeKey nodeKey, INodePacketFactory factory, NodeLaunchData<TaskHostHandshake> nodeLaunchData)
+        private bool CreateNode(TaskHostNodeKey nodeKey, INodePacketFactory factory, NodeLaunchData<TaskHostHandshake> nodeLaunchData)
         {
             ArgumentNullException.ThrowIfNull(factory);
             Assumed.False(_nodeContexts.ContainsKey(nodeKey), "We should not already have a node for this context!  Did we forget to call DisconnectFromHost somewhere?");
@@ -1179,51 +1180,50 @@ namespace Microsoft.Build.BackEnd
         }
 
         private NodeLaunchData<TaskHostHandshake> ResolveNodeLaunchConfiguration(
-            TaskHostHandshakeConfiguration handshakeConfiguration,
-            in TaskHostParameters taskHostParameters,
+            TaskHostRequest request,
             out VisualStudioTaskHostResolution visualStudioResolution)
         {
             visualStudioResolution = VisualStudioTaskHostResolution.NotApplicable.Instance;
 
-            if (handshakeConfiguration is NetTaskHostHandshakeConfiguration netConfiguration)
+            if (request is NetTaskHostRequest netRequest)
             {
-                return ResolveAppHostOrFallback(GetMSBuildPath(taskHostParameters), taskHostParameters.DotnetHostPath, netConfiguration);
+                return ResolveAppHostOrFallback(netRequest);
             }
 
 #if FEATURE_NET35_TASKHOST
-            if (handshakeConfiguration is Clr2TaskHostHandshakeConfiguration clr2Configuration)
+            if (request is Clr2TaskHostRequest clr2Request)
             {
 #if RUNTIME_TYPE_NETCORE
-                return ResolveVisualStudioTaskHostLaunchConfiguration(clr2Configuration, out visualStudioResolution);
+                return ResolveVisualStudioTaskHostLaunchConfiguration(clr2Request, out visualStudioResolution);
 #else
-                string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(clr2Configuration.HandshakeOptions);
+                string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(clr2Request.HandshakeOptions);
                 string toolsDirectory = Path.GetDirectoryName(msbuildLocation) ?? string.Empty;
-                return new NodeLaunchData<TaskHostHandshake>(msbuildLocation, string.Empty, clr2Configuration.CreateHandshake(toolsDirectory));
+                return new NodeLaunchData<TaskHostHandshake>(msbuildLocation, string.Empty, clr2Request.CreateHandshake(toolsDirectory));
 #endif
             }
 #endif
 
-            if (handshakeConfiguration is not FrameworkTaskHostHandshakeConfiguration frameworkConfiguration)
+            if (request is not FrameworkTaskHostRequest frameworkRequest)
             {
-                return Assumed.Unreachable<NodeLaunchData<TaskHostHandshake>>("Unsupported task-host handshake configuration.");
+                return Assumed.Unreachable<NodeLaunchData<TaskHostHandshake>>("Unsupported task-host request.");
             }
 
 #if RUNTIME_TYPE_NETCORE
-            return ResolveVisualStudioTaskHostLaunchConfiguration(frameworkConfiguration, out visualStudioResolution);
+            return ResolveVisualStudioTaskHostLaunchConfiguration(frameworkRequest, out visualStudioResolution);
 #else
             return new NodeLaunchData<TaskHostHandshake>(
-                GetMSBuildExecutablePathForNonNETRuntimes(frameworkConfiguration.HandshakeOptions),
-                BuildCommandLineArgs(IsNodeReuseEnabled(frameworkConfiguration.HandshakeOptions)),
-                frameworkConfiguration.CreateHandshake());
+                GetMSBuildExecutablePathForNonNETRuntimes(frameworkRequest.HandshakeOptions),
+                BuildCommandLineArgs(IsNodeReuseEnabled(frameworkRequest.HandshakeOptions)),
+                frameworkRequest.CreateHandshake());
 #endif
         }
 
 #if RUNTIME_TYPE_NETCORE
         private NodeLaunchData<TaskHostHandshake> ResolveVisualStudioTaskHostLaunchConfiguration(
-            Clr2TaskHostHandshakeConfiguration configuration,
+            Clr2TaskHostRequest request,
             out VisualStudioTaskHostResolution visualStudioResolution)
         {
-            HandshakeOptions hostContext = configuration.HandshakeOptions;
+            HandshakeOptions hostContext = request.HandshakeOptions;
             visualStudioResolution = ResolveVisualStudioTaskHost(hostContext);
             if (visualStudioResolution is not VisualStudioTaskHostResolution.Found found)
             {
@@ -1236,14 +1236,14 @@ namespace Microsoft.Build.BackEnd
             return new NodeLaunchData<TaskHostHandshake>(
                 found.TaskHostExecutablePath,
                 string.Empty,
-                configuration.CreateHandshake(found.HandshakeToolsDirectory, fileVersion));
+                request.CreateHandshake(found.HandshakeToolsDirectory, fileVersion));
         }
 
         private NodeLaunchData<TaskHostHandshake> ResolveVisualStudioTaskHostLaunchConfiguration(
-            FrameworkTaskHostHandshakeConfiguration configuration,
+            FrameworkTaskHostRequest request,
             out VisualStudioTaskHostResolution visualStudioResolution)
         {
-            HandshakeOptions hostContext = configuration.HandshakeOptions;
+            HandshakeOptions hostContext = request.HandshakeOptions;
             visualStudioResolution = ResolveVisualStudioTaskHost(hostContext);
             if (visualStudioResolution is not VisualStudioTaskHostResolution.Found found)
             {
@@ -1259,7 +1259,7 @@ namespace Microsoft.Build.BackEnd
             return new NodeLaunchData<TaskHostHandshake>(
                 found.TaskHostExecutablePath,
                 BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)),
-                configuration.CreateHandshake(found.HandshakeToolsDirectory, fileVersion),
+                request.CreateHandshake(found.HandshakeToolsDirectory, fileVersion),
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
                     ["MSBUILD_EXE_PATH"] = found.TaskHostExecutablePath,
@@ -1484,16 +1484,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Resolves whether to use the MSBuild app host or fall back to dotnet.exe.
         /// </summary>
-        /// <param name="msbuildAssemblyPath">Path to the MSBuild assembly/app host directory.</param>
-        /// <param name="dotnetHostPath">Path to the dotnet executable.</param>
-        /// <param name="configuration">The typed configuration for the .NET task host.</param>
+        /// <param name="request">The typed request for the .NET task host.</param>
         /// <returns>The resolved node launch configuration.</returns>
-        private NodeLaunchData<TaskHostHandshake> ResolveAppHostOrFallback(
-            string msbuildAssemblyPath,
-            string dotnetHostPath,
-            NetTaskHostHandshakeConfiguration configuration)
+        private NodeLaunchData<TaskHostHandshake> ResolveAppHostOrFallback(NetTaskHostRequest request)
         {
-            HandshakeOptions hostContext = configuration.HandshakeOptions;
+            string msbuildAssemblyPath = GetMSBuildPath(request.LaunchPaths.MSBuildAssemblyPath);
+            string dotnetHostPath = request.LaunchPaths.DotnetHostPath;
+            HandshakeOptions hostContext = request.HandshakeOptions;
             string commandLineArgs = BuildCommandLineArgs(IsNodeReuseEnabled(hostContext));
             (string launchPath, bool useAppHost) = ResolveNetTaskHostLaunchPath(msbuildAssemblyPath);
 
@@ -1511,9 +1508,9 @@ namespace Microsoft.Build.BackEnd
             // AppContext.BaseDirectory. By omitting toolsDirectory, both sides default to
             // BuildEnvironmentHelper which resolves symlinks consistently.
 #if RUNTIME_TYPE_NETCORE
-            NetTaskHostHandshake handshake = configuration.CreateHandshake();
+            NetTaskHostHandshake handshake = request.CreateHandshake();
 #else
-            NetTaskHostHandshake handshake = configuration.CreateHandshake(toolsDirectory: msbuildAssemblyPath);
+            NetTaskHostHandshake handshake = request.CreateHandshake(toolsDirectory: msbuildAssemblyPath);
 #endif
 
             if (useAppHost)
