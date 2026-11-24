@@ -1052,7 +1052,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (idleNodes.Contains(InProcNodeId))
             {
-                using var _ = _requestBufferPool.RentSpan(
+                using var rental = _requestBufferPool.RentSpan(
                     _schedulingData.UnscheduledRequestsCount, out Span<SchedulableRequest> unscheduledRequests);
 
                 int numRead = 0;
@@ -1062,6 +1062,8 @@ namespace Microsoft.Build.BackEnd
                     unscheduledRequests[numRead] = unscheduledRequestsRead.Current;
                     numRead++;
                 }
+
+                rental.SetClearLength(numRead);
 
                 foreach (SchedulableRequest request in unscheduledRequests[..numRead])
                 {
