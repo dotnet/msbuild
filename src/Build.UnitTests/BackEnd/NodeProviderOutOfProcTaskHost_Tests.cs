@@ -34,6 +34,70 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _output = output;
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TaskHostLaunchRecipes_KeepHandshakeAndArgumentsTogether(bool nodeReuse)
+        {
+            TaskHostHandshakeOptions options = new(NodeReuse: nodeReuse);
+            string dotnetRoot = Path.Combine(Path.GetTempPath(), "task-host-dotnet");
+            string dotnetPath = Path.Combine(dotnetRoot, "dotnet");
+            NetTaskHostRequest netRequest = new(options, new(DotnetHostPath: dotnetPath));
+            FrameworkTaskHostRequest frameworkRequest = new(options);
+            Clr2TaskHostRequest clr2Request = new(TaskHostHandshakeOptions.None);
+            string dllPath = Path.Combine("sdk path", "MSBuild.dll");
+
+            NodeLaunchData<TaskHostHandshake> appHost = NodeLaunchData.ForNetTaskHostAppHost(
+                netRequest, "apphost", toolsDirectory: null, lowPriority: true);
+            NodeLaunchData<TaskHostHandshake> dll = NodeLaunchData.ForNetTaskHostDll(
+                netRequest, dllPath, toolsDirectory: null, lowPriority: true);
+            NodeLaunchData<TaskHostHandshake> framework = NodeLaunchData.ForFrameworkTaskHost(
+                frameworkRequest, "msbuild", lowPriority: true);
+            NodeLaunchData<TaskHostHandshake> clr2 = NodeLaunchData.ForClr2TaskHost(
+                clr2Request, "legacy-task-host", "legacy-directory");
+
+            (appHost.Handshake is NetTaskHostHandshake).ShouldBeTrue();
+            (dll.Handshake is NetTaskHostHandshake).ShouldBeTrue();
+            (framework.Handshake is FrameworkTaskHostHandshake).ShouldBeTrue();
+            (clr2.Handshake is Clr2TaskHostHandshake).ShouldBeTrue();
+
+            NodeLaunchData<TaskHostHandshake>[] modernLaunches = [appHost, dll, framework];
+            foreach (NodeLaunchData<TaskHostHandshake> launch in modernLaunches)
+            {
+                launch.ExpectedNodeMode.ShouldBe(NodeMode.OutOfProcTaskHostNode);
+                NodeModeHelper.ExtractFromCommandLine(launch.CommandLineArgs).ShouldBe(launch.ExpectedNodeMode);
+                launch.Handshake.HandshakeOptions.HasFlag(HandshakeOptions.NodeReuse).ShouldBe(nodeReuse);
+                launch.CommandLineArgs.ShouldContain($"/nodereuse:{nodeReuse} /low:True");
+            }
+
+            string taskHostArguments = $"/nologo /nodemode:2 /nodereuse:{nodeReuse} /low:True /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
+            appHost.CommandLineArgs.ShouldBe(taskHostArguments);
+            framework.CommandLineArgs.ShouldBe(taskHostArguments);
+            appHost.EnvironmentOverrides!["DOTNET_ROOT"].ShouldBe(dotnetRoot);
+            dll.MSBuildLocation.ShouldBe(dotnetPath);
+            dll.CommandLineArgs.ShouldBe($"\"{dllPath}\" {taskHostArguments}");
+            clr2.ExpectedNodeMode.ShouldBeNull();
+            clr2.CommandLineArgs.ShouldBeEmpty();
+            clr2.Handshake.HandshakeOptions.HasFlag(HandshakeOptions.NodeReuse).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void ExternalFrameworkLaunch_UsesResolvedInstallationForHandshakeAndEnvironment()
+        {
+            FrameworkTaskHostRequest request = new(TaskHostHandshakeOptions.None);
+            Version fileVersion = new(18, 1, 2, 3);
+            NodeLaunchData<TaskHostHandshake> launch = NodeLaunchData.ForExternalFrameworkTaskHost(
+                request, "external-msbuild", "external-tools", fileVersion, lowPriority: false);
+
+            launch.EnvironmentOverrides!["MSBUILD_EXE_PATH"].ShouldBe("external-msbuild");
+            int expectedSalt = CommunicationsUtilities.GetHashCode(
+                (Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? string.Empty) + "external-tools");
+            launch.Handshake.RetrieveHandshakeComponents().Salt.ShouldBe(CommunicationsUtilities.AvoidEndOfHandshakeSignal(expectedSalt));
+            launch.Handshake.RetrieveHandshakeComponents().FileVersionMajor.ShouldBe(18);
+            launch.Handshake.RetrieveHandshakeComponents().FileVersionPrivate.ShouldBe(3);
+            launch.ExpectedNodeMode.ShouldBe(NodeMode.OutOfProcTaskHostNode);
+        }
+
         [Fact]
         public void CreateProcessWideComponent_ReturnsTheSameInstanceEveryTime()
         {

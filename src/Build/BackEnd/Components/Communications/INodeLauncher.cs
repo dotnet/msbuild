@@ -1,10 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -23,14 +26,116 @@ namespace Microsoft.Build.BackEnd
     internal readonly record struct NodeLaunchData(
         string MSBuildLocation,
         string CommandLineArgs,
-        IDictionary<string, string?>? EnvironmentOverrides = null);
-
-    internal readonly record struct NodeLaunchData<THandshake>(
-        string MSBuildLocation,
-        string CommandLineArgs,
-        THandshake Handshake,
         IDictionary<string, string?>? EnvironmentOverrides = null)
-        where THandshake : INodeHandshake;
+    {
+        internal static NodeLaunchData<WorkerNodeHandshake> ForWorker(
+            bool nodeReuse,
+            bool lowPriority)
+            => new(
+                msBuildLocation: null,
+                commandLineArgs: $"/noautoresponse /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcNode)} /nodeReuse:{nodeReuse.ToString().ToLower()} /low:{lowPriority.ToString().ToLower()}",
+                handshake: CommunicationsUtilities.GetWorkerNodeHandshake(nodeReuse, lowPriority),
+                expectedNodeMode: NodeMode.OutOfProcNode,
+                DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides());
+
+        internal static NodeLaunchData<TaskHostHandshake> ForNetTaskHostAppHost(
+            NetTaskHostRequest request,
+            string msBuildLocation,
+            string? toolsDirectory,
+            bool lowPriority)
+            => new(
+                msBuildLocation,
+                GetTaskHostCommandLineArgs(request.Options.NodeReuse, lowPriority),
+                request.CreateHandshake(toolsDirectory),
+                NodeMode.OutOfProcTaskHostNode,
+                DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(request.LaunchPaths.DotnetHostPath)
+                    ?? throw new NodeFailedToLaunchException(errorCode: null, ResourceUtilities.GetResourceString("DotnetHostPathNotSet")));
+
+        internal static NodeLaunchData<TaskHostHandshake> ForNetTaskHostDll(
+            NetTaskHostRequest request,
+            string msBuildDllPath,
+            string? toolsDirectory,
+            bool lowPriority)
+        {
+            string? dotnetHostPath = request.LaunchPaths.DotnetHostPath;
+#if RUNTIME_TYPE_NETCORE
+            if (string.IsNullOrEmpty(dotnetHostPath))
+            {
+                dotnetHostPath = CurrentHost.GetCurrentHost();
+            }
+#endif
+
+            return new(
+                dotnetHostPath,
+                $"\"{msBuildDllPath}\" {GetTaskHostCommandLineArgs(request.Options.NodeReuse, lowPriority)}",
+                request.CreateHandshake(toolsDirectory),
+                NodeMode.OutOfProcTaskHostNode);
+        }
+
+        internal static NodeLaunchData<TaskHostHandshake> ForFrameworkTaskHost(
+            FrameworkTaskHostRequest request,
+            string msBuildLocation,
+            bool lowPriority)
+            => new(
+                msBuildLocation,
+                GetTaskHostCommandLineArgs(request.Options.NodeReuse, lowPriority),
+                request.CreateHandshake(),
+                NodeMode.OutOfProcTaskHostNode);
+
+        internal static NodeLaunchData<TaskHostHandshake> ForExternalFrameworkTaskHost(
+            FrameworkTaskHostRequest request,
+            string msBuildLocation,
+            string toolsDirectory,
+            Version fileVersion,
+            bool lowPriority)
+            => new(
+                msBuildLocation,
+                GetTaskHostCommandLineArgs(request.Options.NodeReuse, lowPriority),
+                request.CreateHandshake(toolsDirectory, fileVersion),
+                NodeMode.OutOfProcTaskHostNode,
+                new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["MSBUILD_EXE_PATH"] = msBuildLocation,
+                });
+
+        internal static NodeLaunchData<TaskHostHandshake> ForClr2TaskHost(
+            Clr2TaskHostRequest request,
+            string msBuildLocation,
+            string toolsDirectory,
+            Version? fileVersion = null)
+            => new(
+                msBuildLocation,
+                string.Empty,
+                request.CreateHandshake(toolsDirectory, fileVersion),
+                expectedNodeMode: null);
+
+        private static string GetTaskHostCommandLineArgs(bool nodeReuse, bool lowPriority)
+            => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuse} /low:{lowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
+    }
+
+    internal readonly record struct NodeLaunchData<THandshake>
+        where THandshake : INodeHandshake
+    {
+        internal NodeLaunchData(
+            string? msBuildLocation,
+            string commandLineArgs,
+            THandshake handshake,
+            NodeMode? expectedNodeMode,
+            IDictionary<string, string?>? environmentOverrides = null)
+        {
+            MSBuildLocation = msBuildLocation;
+            CommandLineArgs = commandLineArgs;
+            Handshake = handshake;
+            ExpectedNodeMode = expectedNodeMode;
+            EnvironmentOverrides = environmentOverrides;
+        }
+
+        internal string? MSBuildLocation { get; }
+        internal string CommandLineArgs { get; }
+        internal THandshake Handshake { get; }
+        internal NodeMode? ExpectedNodeMode { get; }
+        internal IDictionary<string, string?>? EnvironmentOverrides { get; }
+    }
 
     internal interface INodeLauncher
     {

@@ -256,8 +256,7 @@ namespace Microsoft.Build.BackEnd
                 msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
             }
 
-            // Extract the expected NodeMode from the command line arguments
-            NodeMode? expectedNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLineArgs);
+            NodeMode? expectedNodeMode = nodeLaunchData.ExpectedNodeMode;
 
 #if RUNTIME_TYPE_NETCORE
             // When MSBuild is hosted by dotnet.exe (e.g. `dotnet build`), NodeExeLocation may resolve

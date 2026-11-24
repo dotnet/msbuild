@@ -3,6 +3,8 @@
 
 using System;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -16,6 +18,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class NodeProviderOutOfProc_Tests
     {
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void WorkerLaunch_UsesTheSameOptionsForHandshakeAndArguments(bool nodeReuse, bool lowPriority)
+        {
+            NodeLaunchData<WorkerNodeHandshake> launch = NodeLaunchData.ForWorker(nodeReuse, lowPriority);
+
+            launch.ExpectedNodeMode.ShouldBe(NodeMode.OutOfProcNode);
+            NodeModeHelper.ExtractFromCommandLine(launch.CommandLineArgs).ShouldBe(launch.ExpectedNodeMode);
+            launch.Handshake.HandshakeOptions.HasFlag(HandshakeOptions.NodeReuse).ShouldBe(nodeReuse);
+            launch.Handshake.HandshakeOptions.HasFlag(HandshakeOptions.LowPriority).ShouldBe(lowPriority);
+            launch.CommandLineArgs.ShouldBe(
+                $"/noautoresponse /nologo /nodemode:1 /nodeReuse:{nodeReuse.ToString().ToLower()} /low:{lowPriority.ToString().ToLower()}");
+        }
+
         /// <summary>
         /// Test helper class to expose protected methods for testing.
         /// Uses configurable overrides for testing.

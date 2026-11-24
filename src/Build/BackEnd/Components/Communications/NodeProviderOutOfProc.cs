@@ -88,17 +88,14 @@ namespace Microsoft.Build.BackEnd
             }
 
             ConcurrentBag<NodeInfo> nodes = new();
-            WorkerNodeHandshake hostHandshake = CommunicationsUtilities.GetWorkerNodeHandshake(ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority);
 
             // Start the new process.  We pass in a node mode with a node number of 1, to indicate that we
             // want to start up just a standard MSBuild out-of-proc node.
             // Note: We need to always pass /nodeReuse to ensure the value for /nodeReuse from msbuild.rsp
             // (next to msbuild.exe) is ignored.
-            NodeLaunchData<WorkerNodeHandshake> nodeLaunchData = new(
-                MSBuildLocation: null,
-                CommandLineArgs: $"/noautoresponse /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcNode)} /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}",
-                Handshake: hostHandshake,
-                EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides());
+            NodeLaunchData<WorkerNodeHandshake> nodeLaunchData = NodeLaunchData.ForWorker(
+                ComponentHost.BuildParameters.EnableNodeReuse,
+                ComponentHost.BuildParameters.LowPriority);
 
             CommunicationsUtilities.Trace($"Starting to acquire {numberOfNodesToCreate} new or existing node(s) to establish nodes from ID {nextNodeId} to {nextNodeId + numberOfNodesToCreate - 1}...");
      

@@ -71,6 +71,8 @@ The CLI task-host endpoint uses `NetTaskHostHandshake` or `FrameworkTaskHostHand
 The standalone CLR2 endpoint constructs only its own `Clr2TaskHostHandshake`.
 `NodeProviderOutOfProcBase<THandshake>` accepts only `NodeLaunchData<THandshake>`.
 Worker providers require `WorkerNodeHandshake`, and task-host providers require `TaskHostHandshake`.
+Launch recipes create the matching handshake, node mode, and command-line arguments from the same request.
+The CLR2 recipe keeps its legacy empty command line and does not specify a node mode.
 `NodeConnection<THandshake>` also requires the selected handshake type when it connects to a pipe.
 A worker handshake cannot be passed to a server endpoint or converted to `TaskHostHandshake`.
 The process launcher receives only process configuration, not an untyped handshake.
