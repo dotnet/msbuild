@@ -593,7 +593,6 @@ internal class OutOfProcTaskHostNode : INodePacketFactory, INodePacketHandler, I
         _isTaskExecuting = true;
         OutOfProcTaskHostTaskResult? taskResult = null;
         TaskHostConfiguration taskConfiguration = (TaskHostConfiguration)state;
-        TaskExecutionEngineProxy? taskEngineProxy = null;
 
         // We only really know the values of these variables for sure once we see what we received from our parent
         // environment -- otherwise if this was a completely new build, we could lose out on expected environment
@@ -622,10 +621,9 @@ internal class OutOfProcTaskHostNode : INodePacketFactory, INodePacketHandler, I
             // We will not create an appdomain now because of a bug
             // As a fix, we will create the class directly without wrapping it in a domain
             _taskWrapper = new OutOfProcTaskAppDomainWrapper();
-            taskEngineProxy = new TaskExecutionEngineProxy(this, taskConfiguration);
 
             taskResult = _taskWrapper.ExecuteTask(
-                buildEngine: taskEngineProxy,
+                buildEngine: this,
                 taskConfiguration.TaskName,
                 taskConfiguration.TaskLocation,
                 taskConfiguration.ProjectFileOfTask,
@@ -645,8 +643,6 @@ internal class OutOfProcTaskHostNode : INodePacketFactory, INodePacketHandler, I
         }
         finally
         {
-            taskEngineProxy?.MarkAsInactive();
-
             try
             {
                 _isTaskExecuting = false;
@@ -684,7 +680,6 @@ internal class OutOfProcTaskHostNode : INodePacketFactory, INodePacketHandler, I
             {
                 // Call Dispose to unload any AppDomains and other necessary cleanup in the taskWrapper
                 _taskWrapper?.Dispose();
-                taskEngineProxy?.Dispose();
 
                 // The task has now fully completed executing
                 _taskCompleteEvent.Set();
@@ -850,192 +845,22 @@ internal class OutOfProcTaskHostNode : INodePacketFactory, INodePacketHandler, I
     /// </summary>
     private void SendBuildEvent(BuildEventArgs e)
     {
-        if (e == null)
-        {
-            throw new ArgumentNullException(nameof(e));
-        }
-
-        TaskHostConfiguration? configuration = _currentConfiguration;
-        if (!_isTaskExecuting || configuration == null)
-        {
-            return;
-        }
-
-        SendBuildEventCore(
-            configuration.NodeId,
-            configuration.TaskName,
-            configuration.ProjectFileOfTask,
-            configuration.LineNumberOfTask,
-            configuration.ColumnNumberOfTask,
-            e);
-    }
-
-    private void SendBuildEventCore(
-        int nodeId,
-        string? taskName,
-        string? projectFileOfTask,
-        int lineNumberOfTask,
-        int columnNumberOfTask,
-        BuildEventArgs e)
-    {
         if (_nodeEndpoint?.LinkStatus == LinkStatus.Active)
         {
+            ErrorUtilities.VerifyThrow(_currentConfiguration != null, $"{nameof(_currentConfiguration)} is null.");
+
             // Types which are not serializable and are not IExtendedBuildEventArgs as
             // those always implement custom serialization by WriteToStream and CreateFromStream.
             if (!e.GetType().IsSerializable)
             {
-                e = new BuildWarningEventArgs(
-                    subcategory: null,
-                    code: null,
-                    file: projectFileOfTask,
-                    lineNumber: lineNumberOfTask,
-                    columnNumber: columnNumberOfTask,
-                    endLineNumber: 0,
-                    endColumnNumber: 0,
-                    message: string.Format(SR.ExpectedEventToBeSerializable, e.GetType().Name),
-                    helpKeyword: null,
-                    senderName: taskName);
+                // log a warning and bail.  This will end up re-calling SendBuildEvent, but we know for a fact
+                // that the warning that we constructed is serializable, so everything should be good.
+                LogWarningFromResource(string.Format(SR.ExpectedEventToBeSerializable, e.GetType().Name));
+                return;
             }
 
-            LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(nodeId, e));
+            LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
             _nodeEndpoint.SendData(logMessage);
-        }
-    }
-
-    private sealed class TaskExecutionEngineProxy : MarshalByRefObject, IBuildEngine2, IDisposable
-    {
-        private readonly object _lock = new();
-        private readonly int _nodeId;
-        private readonly string _taskName;
-        private readonly string _projectFileOfTask;
-        private readonly bool _continueOnError;
-        private OutOfProcTaskHostNode? _owner;
-        private bool _isActive = true;
-
-        public TaskExecutionEngineProxy(OutOfProcTaskHostNode owner, TaskHostConfiguration configuration)
-        {
-            _owner = owner;
-            _nodeId = configuration.NodeId;
-            _taskName = configuration.TaskName ?? string.Empty;
-            _projectFileOfTask = configuration.ProjectFileOfTask ?? string.Empty;
-            LineNumberOfTaskNode = configuration.LineNumberOfTask;
-            ColumnNumberOfTaskNode = configuration.ColumnNumberOfTask;
-            _continueOnError = configuration.ContinueOnError;
-        }
-
-        public override object? InitializeLifetimeService() => null;
-
-        public int LineNumberOfTaskNode { get; private set; }
-
-        public int ColumnNumberOfTaskNode { get; private set; }
-
-        public string ProjectFileOfTaskNode => _projectFileOfTask;
-
-        bool IBuildEngine.ContinueOnError
-        {
-            get
-            {
-                VerifyActiveProxy();
-                return _continueOnError;
-            }
-        }
-
-        bool IBuildEngine2.IsRunningMultipleNodes
-        {
-            get
-            {
-                VerifyActiveProxy();
-                LogUnsupportedCallbackError();
-                return false;
-            }
-        }
-
-        public void LogErrorEvent(BuildErrorEventArgs e) => LogBuildEvent(e);
-
-        public void LogWarningEvent(BuildWarningEventArgs e) => LogBuildEvent(e);
-
-        public void LogMessageEvent(BuildMessageEventArgs e) => LogBuildEvent(e);
-
-        public void LogCustomEvent(CustomBuildEventArgs e) => LogBuildEvent(e);
-
-        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs)
-        {
-            VerifyActiveProxy();
-            LogUnsupportedCallbackError();
-            return false;
-        }
-
-        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs, string toolsVersion)
-        {
-            VerifyActiveProxy();
-            LogUnsupportedCallbackError();
-            return false;
-        }
-
-        public bool BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IDictionary[] targetOutputsPerProject, string[] toolsVersion, bool useResultsCache, bool unloadProjectsOnCompletion)
-        {
-            VerifyActiveProxy();
-            LogUnsupportedCallbackError();
-            return false;
-        }
-
-        internal void MarkAsInactive()
-        {
-            lock (_lock)
-            {
-                _isActive = false;
-                _owner = null;
-            }
-        }
-
-        public void Dispose()
-        {
-            MarkAsInactive();
-            RemotingServices.Disconnect(this);
-        }
-
-        private void VerifyActiveProxy()
-        {
-            ErrorUtilities.VerifyThrow(_isActive, "Attempted to use an inactive task host.");
-        }
-
-        private void LogBuildEvent(BuildEventArgs e)
-        {
-            if (e == null)
-            {
-                throw new ArgumentNullException(nameof(e));
-            }
-
-            lock (_lock)
-            {
-                if (!_isActive)
-                {
-                    if (Environment.GetEnvironmentVariable("MSBUILDBREAKONLOGAFTERTASKRETURNS") == "1")
-                    {
-                        System.Diagnostics.Trace.Fail($"Task {_taskName}, after already returning, attempted to log '{e.Message}'.");
-                    }
-
-                    CommunicationsUtilities.Trace($"Task {_taskName} logged '{e.Message}' after completion; dropping event.");
-                    return;
-                }
-
-                _owner?.SendBuildEventCore(_nodeId, _taskName, _projectFileOfTask, LineNumberOfTaskNode, ColumnNumberOfTaskNode, e);
-            }
-        }
-
-        private void LogUnsupportedCallbackError()
-        {
-            LogBuildEvent(new BuildErrorEventArgs(
-                subcategory: null,
-                code: null,
-                file: _projectFileOfTask,
-                lineNumber: LineNumberOfTaskNode,
-                columnNumber: ColumnNumberOfTaskNode,
-                endLineNumber: 0,
-                endColumnNumber: 0,
-                message: SR.BuildEngineCallbacksInTaskHostUnsupported,
-                helpKeyword: null,
-                senderName: _taskName));
         }
     }
 
@@ -1053,6 +878,28 @@ internal class OutOfProcTaskHostNode : INodePacketFactory, INodePacketHandler, I
             importance);
 
         LogMessageEvent(messageArgs);
+    }
+
+    /// <summary>
+    /// Generates the error event corresponding to a particular resource string and set of args.
+    /// </summary>
+    private void LogWarningFromResource(string message)
+    {
+        ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log warnings!");
+
+        BuildWarningEventArgs warningArgs = new(
+            subcategory: null,
+            code: null,
+            file: ProjectFileOfTaskNode,
+            lineNumber: LineNumberOfTaskNode,
+            columnNumber: ColumnNumberOfTaskNode,
+            endLineNumber: 0,
+            endColumnNumber: 0,
+            message: message,
+            helpKeyword: null,
+            senderName: _currentConfiguration.TaskName);
+
+        LogWarningEvent(warningArgs);
     }
 
     /// <summary>

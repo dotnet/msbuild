@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void DrainReceivedPackets_StopsAtTaskCompleteWithoutResettingCompletion()
+        public void DrainReceivedPackets_StopsAtTaskComplete()
         {
             var buildEngine = new MockEngine();
             var task = new TaskHostTask(
@@ -70,7 +70,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var postCompletionError = new BuildErrorEventArgs(null, "TEST0001", "project.proj", 1, 1, 0, 0, "after completion", null, nameof(DummyTask));
 
             task.PacketReceived(0, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, preCompletionMessage)));
-            task.PacketReceived(0, new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success), buildProcessEnvironment: null));
+            task.PacketReceived(0, new TaskHostTaskComplete(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success),
+#if FEATURE_REPORTFILEACCESSES
+                fileAccessData: null,
+#endif
+                buildProcessEnvironment: null));
             task.PacketReceived(0, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, postCompletionError)));
 
             task.DrainReceivedPackets().ShouldBeTrue();
