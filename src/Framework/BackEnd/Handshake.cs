@@ -47,6 +47,7 @@ internal union Handshake(
     public string GetKey() => Protocol.GetKey();
     public byte? ExpectedVersionInFirstByte => Protocol.ExpectedVersionInFirstByte;
     public bool IsNetTaskHostSaltMatch(int receivedSalt) => Protocol.IsNetTaskHostSaltMatch(receivedSalt);
+    internal bool IsTaskHost => this is NetTaskHostHandshake or FrameworkTaskHostHandshake or Clr2TaskHostHandshake;
     internal bool IsClr2 => this is Clr2TaskHostHandshake;
     internal bool IsNet => this is NetTaskHostHandshake;
 

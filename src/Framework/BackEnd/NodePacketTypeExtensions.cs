@@ -81,15 +81,15 @@ internal static class NodePacketTypeExtensions
     /// <summary>
     /// Create a packet type byte with an extended header for versioned task-host packets.
     /// </summary>
-    /// <param name="handshakeOptions">Handshake options to check.</param>
+    /// <param name="handshake">Handshake that determines the packet format, or <see langword="null"/> when none applies.</param>
     /// <param name="type">Base packet type.</param>
     /// <param name="extendedheader">Output byte with flag set if applicable.</param>
     /// <param name="negotiatedVersion">Version negotiated with the child TaskHost.</param>
     /// <returns>True if extended header flag was set, false otherwise.</returns>
-    public static bool TryCreateExtendedHeaderType(HandshakeOptions handshakeOptions, NodePacketType type, out byte extendedheader, byte negotiatedVersion = 0)
+    public static bool TryCreateExtendedHeaderType(Handshake? handshake, NodePacketType type, out byte extendedheader, byte negotiatedVersion = 0)
     {
-        if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.TaskHost)
-            && (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NET)
+        if (handshake is { IsTaskHost: true } taskHostHandshake
+            && (taskHostHandshake.IsNet
                 || (type == NodePacketType.NodeBuildComplete && negotiatedVersion >= TaskHostOwnershipMinVersion)
                 || (type == NodePacketType.TaskHostConsoleConfiguration && negotiatedVersion >= ConsoleOutputForwardingMinVersion)))
         {

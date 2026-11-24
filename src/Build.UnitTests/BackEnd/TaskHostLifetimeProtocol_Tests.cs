@@ -61,12 +61,31 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
     [InlineData(7, true)]
     public void Clr4CompletionUsesVersionedLifetimeActions(byte version, bool extended)
     {
+        Handshake handshake = Handshake.From(new FrameworkTaskHostHandshake());
         NodePacketTypeExtensions.TryCreateExtendedHeaderType(
-            HandshakeOptions.TaskHost, NodePacketType.NodeBuildComplete, out byte rawType, version).ShouldBe(extended);
+            handshake, NodePacketType.NodeBuildComplete, out byte rawType, version).ShouldBe(extended);
         NodePacketTypeExtensions.HasExtendedHeader(rawType).ShouldBe(extended);
         NodePacketTypeExtensions.TryCreateExtendedHeaderType(
-            HandshakeOptions.TaskHost, NodePacketType.TaskHostConfiguration, out _, version).ShouldBeFalse(
+            handshake, NodePacketType.TaskHostConfiguration, out _, version).ShouldBeFalse(
                 "CLR4 task configuration keeps its AppDomain-compatible format");
+    }
+
+    [Fact]
+    public void NetTaskHostAlwaysUsesExtendedPacketHeaders()
+    {
+        Handshake handshake = Handshake.From(new NetTaskHostHandshake());
+        NodePacketTypeExtensions.TryCreateExtendedHeaderType(
+            handshake, NodePacketType.TaskHostConfiguration, out byte rawType).ShouldBeTrue();
+        NodePacketTypeExtensions.HasExtendedHeader(rawType).ShouldBeTrue();
+        NodePacketTypeExtensions.GetNodePacketType(rawType).ShouldBe(NodePacketType.TaskHostConfiguration);
+    }
+
+    [Fact]
+    public void ConnectionWithoutHandshakeDoesNotUseExtendedPacketHeaders()
+    {
+        NodePacketTypeExtensions.TryCreateExtendedHeaderType(
+            null, NodePacketType.NodeBuildComplete, out byte rawType, NodePacketTypeExtensions.PacketVersion).ShouldBeFalse();
+        NodePacketTypeExtensions.HasExtendedHeader(rawType).ShouldBeFalse();
     }
 
     [Fact]
@@ -87,12 +106,13 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
     [InlineData(7, true)]
     public void Clr4ConsoleConfigurationCarriesItsNegotiatedVersion(byte version, bool extended)
     {
+        Handshake handshake = Handshake.From(new FrameworkTaskHostHandshake());
         NodePacketTypeExtensions.TryCreateExtendedHeaderType(
-            HandshakeOptions.TaskHost, NodePacketType.TaskHostConsoleConfiguration, out byte rawType, version).ShouldBe(extended);
+            handshake, NodePacketType.TaskHostConsoleConfiguration, out byte rawType, version).ShouldBe(extended);
         NodePacketTypeExtensions.HasExtendedHeader(rawType).ShouldBe(extended);
         NodePacketTypeExtensions.GetNodePacketType(rawType).ShouldBe(NodePacketType.TaskHostConsoleConfiguration);
         NodePacketTypeExtensions.TryCreateExtendedHeaderType(
-            HandshakeOptions.TaskHost, NodePacketType.TaskHostConfiguration, out _, version).ShouldBeFalse();
+            handshake, NodePacketType.TaskHostConfiguration, out _, version).ShouldBeFalse();
     }
 
     [Fact]
