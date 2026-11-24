@@ -1257,35 +1257,44 @@ namespace Microsoft.Build.BackEnd
         {
             visualStudioResolution = VisualStudioTaskHostResolution.NotApplicable.Instance;
 
-            if (request is NetTaskHostRequest netRequest)
+            return request switch
             {
-                return ResolveAppHostOrFallback(netRequest);
-            }
+                NetTaskHostRequest netRequest => ResolveAppHostOrFallback(netRequest),
+                FrameworkTaskHostRequest frameworkRequest => ResolveFrameworkTaskHostLaunchConfiguration(frameworkRequest, out visualStudioResolution),
+                Clr2TaskHostRequest clr2Request => ResolveClr2TaskHostLaunchConfiguration(clr2Request, out visualStudioResolution),
+            };
+        }
 
-#if FEATURE_NET35_TASKHOST
-            if (request is Clr2TaskHostRequest clr2Request)
-            {
+        private NodeLaunchData<TaskHostHandshake> ResolveFrameworkTaskHostLaunchConfiguration(
+            FrameworkTaskHostRequest request,
+            out VisualStudioTaskHostResolution visualStudioResolution)
+        {
 #if RUNTIME_TYPE_NETCORE
-                return ResolveVisualStudioTaskHostLaunchConfiguration(clr2Request, out visualStudioResolution);
+            return ResolveVisualStudioTaskHostLaunchConfiguration(request, out visualStudioResolution);
 #else
-                string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(clr2Request);
-                string toolsDirectory = Path.GetDirectoryName(msbuildLocation) ?? string.Empty;
-                return NodeLaunchData.ForClr2TaskHost(clr2Request, msbuildLocation, toolsDirectory);
-#endif
-            }
-#endif
-
-            if (request is not FrameworkTaskHostRequest frameworkRequest)
-            {
-                return Assumed.Unreachable<NodeLaunchData<TaskHostHandshake>>("Unsupported task-host request.");
-            }
-
-#if RUNTIME_TYPE_NETCORE
-            return ResolveVisualStudioTaskHostLaunchConfiguration(frameworkRequest, out visualStudioResolution);
-#else
+            visualStudioResolution = VisualStudioTaskHostResolution.NotApplicable.Instance;
             return NodeLaunchData.ForFrameworkTaskHost(
-                frameworkRequest,
-                GetMSBuildExecutablePathForNonNETRuntimes(frameworkRequest));
+                request,
+                GetMSBuildExecutablePathForNonNETRuntimes(request));
+#endif
+        }
+
+        private NodeLaunchData<TaskHostHandshake> ResolveClr2TaskHostLaunchConfiguration(
+            Clr2TaskHostRequest request,
+            out VisualStudioTaskHostResolution visualStudioResolution)
+        {
+#if FEATURE_NET35_TASKHOST
+#if RUNTIME_TYPE_NETCORE
+            return ResolveVisualStudioTaskHostLaunchConfiguration(request, out visualStudioResolution);
+#else
+            visualStudioResolution = VisualStudioTaskHostResolution.NotApplicable.Instance;
+            string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(request);
+            string toolsDirectory = Path.GetDirectoryName(msbuildLocation) ?? string.Empty;
+            return NodeLaunchData.ForClr2TaskHost(request, msbuildLocation, toolsDirectory);
+#endif
+#else
+            visualStudioResolution = VisualStudioTaskHostResolution.NotApplicable.Instance;
+            return Assumed.Unreachable<NodeLaunchData<TaskHostHandshake>>("CLR2 task hosts are not supported in this build.");
 #endif
         }
 
