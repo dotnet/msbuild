@@ -106,9 +106,7 @@ internal static class TaskLoader
                     {
                         AssemblyName assemblyName = loadedType.LoadedAssemblyName;
 
-                        // Inline task assemblies are loaded from bytes, so their CodeBase points to the code that
-                        // called Assembly.Load rather than to the task assembly. Point it at the file on disk so
-                        // the new AppDomain can find the assembly.
+                        // Inline task assemblies are loaded from bytes, so point CodeBase to the file on disk.
                         if (string.IsNullOrEmpty(loadedType.LoadedAssembly.Location) && !string.IsNullOrEmpty(loadedType.Path))
                         {
                             assemblyName = (AssemblyName)assemblyName.Clone();
