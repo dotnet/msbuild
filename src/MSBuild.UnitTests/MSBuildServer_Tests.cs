@@ -84,6 +84,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             _output = output;
             _env = TestEnvironment.Create(_output);
+            UseNativeTempDirectoryForChildProcesses();
         }
 
         public void Dispose() => _env.Dispose();
@@ -353,5 +354,33 @@ namespace Microsoft.Build.Engine.UnitTests
             Match match = regex.Match(searchString);
             return int.Parse(match.Groups[1].Value);
         }
+
+        /// <summary>
+        /// Starting with .NET 10.0.13, named mutexes are user-scoped by default, and on macOS the runtime keeps them under the
+        /// TMPDIR it reads from the native process environment. The test assembly fixture changes TMPDIR only in the managed
+        /// environment, which child processes inherit, so the server would create its mutexes where this process never looks
+        /// and <see cref="MSBuildClient.ShutdownServer"/> would report "not running" without shutting it down.
+        /// Give child processes this process's native TMPDIR so both sides use the same mutex directory in every test.
+        /// </summary>
+        private void UseNativeTempDirectoryForChildProcesses()
+        {
+#if !NETFRAMEWORK
+            if (!OperatingSystem.IsMacOS())
+            {
+                return;
+            }
+
+            string? nativeTempDirectory = System.Runtime.InteropServices.Marshal.PtrToStringUTF8(NativeGetEnvironmentVariable("TMPDIR"));
+            if (!string.IsNullOrEmpty(nativeTempDirectory))
+            {
+                _env.SetEnvironmentVariable("TMPDIR", nativeTempDirectory);
+            }
+#endif
+        }
+
+#if !NETFRAMEWORK
+        [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "getenv")]
+        private static extern IntPtr NativeGetEnvironmentVariable([System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPUTF8Str)] string name);
+#endif
     }
 }
