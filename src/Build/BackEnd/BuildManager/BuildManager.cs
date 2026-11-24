@@ -699,6 +699,7 @@ namespace Microsoft.Build.Execution
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
                 var loggingService = InitializeLoggingService();
+                _buildParameters.LogTaskInputs |= loggingService.IncludeTaskInputs;
 
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);

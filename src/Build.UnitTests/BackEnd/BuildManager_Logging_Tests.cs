@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using FakeItEasy;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -79,6 +80,28 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         [WindowsFullFrameworkOnlyFact]
         public void Build_WithCustomBuildArgs_ShouldEmitWarningOnFramework() => Build_WithCustomBuildArgs_ShouldEmitEvent<BuildWarningEventArgs>();
+
+        [Fact]
+        public void Build_ShouldLogTaskInputsWhenRequestedByLogger()
+        {
+            var logger = A.Fake<ILogger>();
+            A.CallTo(() => logger.Initialize(A<IEventSource>._))
+                .Invokes((IEventSource eventSource) => ((IEventSource3)eventSource).IncludeTaskInputs());
+
+            var projectFile = _env.CreateFolder().CreateFile("main.proj", """
+                <Project>
+                  <Target Name="Build">
+                    <WriteLinesToFile File="$(MSBuildThisFileDirectory)result.txt" Lines="hello" />
+                  </Target>
+                </Project>
+                """);
+            var parameters = new BuildParameters(_projectCollection) { Loggers = [_logger, logger] };
+            var request = new BuildRequestData(projectFile.Path, new Dictionary<string, string>(), null, ["Build"], null);
+
+            _buildManager.Build(parameters, request).ShouldHaveSucceeded();
+
+            _logger.TaskParameterEvents.ShouldContain(e => e.Kind == TaskParameterMessageKind.TaskInput && e.ItemType == "Lines");
+        }
 
         private void Build_WithCustomBuildArgs_ShouldEmitEvent<T>() where T : LazyFormattedBuildEventArgs
         {
