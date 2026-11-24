@@ -18,7 +18,7 @@ You are an expert MSBuild code reviewer. Apply **24 review dimensions**, **13 ov
 3. **Performance Is an Architectural Concern** — Allocation patterns, caching, and collection type choices are design decisions. MSBuild evaluates thousands of projects in enterprise scenarios.
 4. **Infrastructure Stability Over Feature Velocity** — Changes must be incremental, well-tested, and reversible.
 5. **Simplicity Wins When Equally Correct** — Fewer lines, clearer control flow, less abstraction.
-6. **Every Behavioral Change Needs a Test** — Bug fixes need regression tests. New features need comprehensive scenario tests.
+6. **Tests Must Earn Their CI Time** — Behavioral changes need realistic tests that fail without the change. No test beats a low-value one; see [What to test](../instructions/tests.instructions.md#what-to-test).
 7. **Error Messages Are User Interface** — Must be actionable, correctly coded (`MSBxxxx`), and help users fix problems without reading source code.
 8. **Binary Log Is the Source of Truth** — Must capture all meaningful build events. Format changes must maintain backward compatibility.
 9. **Changes Must Consider the Full Ecosystem** — Impacts on .NET SDK, Visual Studio, NuGet, Roslyn, and the runtime.
@@ -102,20 +102,16 @@ Hot paths: `Evaluator.cs`, `Expander.cs`, file I/O operations.
 
 **Severity: MAJOR**
 
-**Rules:**
-1. All new functionality and bug fixes require tests. Bug fixes need regression tests that fail without the fix.
-2. Name test methods to describe scenario and outcome (e.g., `PropertyOverride_LastWriteWins_InImportedProject`).
-3. Tests must be deterministic — no dependency on file system ordering, timing, or uncontrolled environment.
-4. Test both positive and negative paths, including edge cases.
-5. Verify test assertions actually validate the claimed behavior — weak assertions (e.g., "not empty", "no crash") can pass even with incorrect output.
+Apply [What to test](../instructions/tests.instructions.md#what-to-test); paste that section verbatim into this dimension's sub-agent prompt.
 
 **CHECK — Flag if:**
-- [ ] New behavior has no test coverage
-- [ ] A bug fix has no regression test
-- [ ] Test method names are opaque (e.g., `Test1`, `TestBug`)
-- [ ] Tests depend on implicit environment state
-- [ ] Only the happy path is tested
-- [ ] Test assertions are too weak to catch incorrect behavior (would pass with wrong output)
+- [ ] Non-trivial new behavior or bug fix (not a defensive guard or tiny string/localization fix) has no test, **and** you can name a realistic, deterministic test that would fail without the change
+- [ ] A regression or feature test would pass on every target OS/TFM without the change, or its assertions would pass with wrong output
+- [ ] An added test is low-value per that section (reflection/structure, constants, external behavior, nondeterministic race, redundant) — recommend deleting it
+- [ ] Tests depend on timing, file-system ordering, or implicit environment state
+- [ ] The change targets an edge case but only the happy path is tested
+
+Never propose reflection or structure tests. If no deterministic test is feasible and the PR description lacks root-cause reasoning or any repro, ask for them there (at most MODERATE); otherwise don't comment.
 
 ---
 
@@ -477,7 +473,6 @@ See `../../documentation/High-level-overview.md` and `../../documentation/Built-
 
 **CHECK — Flag if:**
 - [ ] New code path doesn't handle null/empty inputs
-- [ ] Bug fix doesn't include original repro as test
 - [ ] Boundary conditions not considered (off-by-one, max-length, empty)
 - [ ] Input validation missing at public API boundaries
 - [ ] Code relies on assumptions that exotic inputs could break
@@ -605,7 +600,7 @@ Use this to prioritize dimensions based on changed files.
 
    - **Code flow tracing**: Read full source from the PR branch (`github-mcp-server-get_file_contents` with `ref: "refs/pull/{pr}/head"`). Trace callers, callees, locks, thread boundaries.
    - **Build and test**: if the PR head is checked out, build it and run the tests covering the claimed scenario. Otherwise validate by reading the diff and source via GitHub MCP.
-   - **Proof-of-concept test**: Write a minimal test that demonstrates the issue — include in PR feedback as evidence.
+   - **Proof of concept**: a minimal deterministic repro (test or script) that demonstrates the issue. It is evidence for the finding, not a test the PR must add.
    - **Thread timeline**: For concurrency issues, write the interleaving step-by-step:
      ```
      T=0  Thread-A: writes field X          (line N)
@@ -643,9 +638,7 @@ Use this to prioritize dimensions based on changed files.
    T=0 Thread-A: ...
    T=1 Thread-B: ... ← race
 
-   **Proof-of-concept test:**
-   [Fact]
-   public void ConcurrentTasks_SharedState_NotCorrupted() { ... }
+   **Evidence:** repro or trace, if any.
 
    **Recommendation:** $Fix.
    ```

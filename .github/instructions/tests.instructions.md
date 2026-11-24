@@ -1,8 +1,28 @@
 ---
-applyTo: "src/*.Tests/**/*.cs"
+applyTo: "src/*Tests/**/*.cs,src/UnitTests.Shared/**/*.cs,src/Shared/UnitTests/**/*.cs"
 ---
 
 # Testing Instructions
+
+## What to test
+
+This section is the canonical test-value guidance for authors and reviewers. A test must raise confidence in the change per second of CI time:
+
+* Drive realistic behavior through a real entry point (a build, the task via `MockEngine`, the API callers use) and assert observable output, including the edge cases the change touches. High-value examples: error paths, serialization round-trips, ChangeWave opt-out, state leaking across node reuse, cross-OS contracts.
+* Fail without the change on at least one target OS/TFM (unless it locks down existing behavior for a refactoring). If it passes everywhere on the old code, or derives its expected value via the same API as the product code, it is not a regression test.
+* Be deterministic and cheap. Prefer one focused case over a matrix of unrelated modes, languages, or TFMs; each extra process-launching case adds runtime and flake risk. Don't duplicate existing coverage; fold near-duplicates into a `[Theory]`.
+* Match the risk. Defensive guards, scenarios that can't happen in practice, and tiny string or localization fixes don't need a dedicated test.
+
+Don't write, and reviewers must not request:
+
+* Reflection or structure tests: asserting a member is `static`, `readonly`, has an attribute, a visibility, or a shape. The code already states that; the test only mirrors the implementation.
+* Tests that restate constants, defaults, resource strings, or trivial accessors.
+* Tests of behavior owned by the runtime, xUnit, or other external code.
+* Nondeterministic tests for rare races (sleeps, timing, loop-until-it-breaks). A stress test is acceptable only if it is cheap and reliably fails without the fix.
+
+When no meaningful deterministic test exists, ship without one and put the evidence in the PR description: root-cause reasoning plus any manual or stress repro, before and after. Reviewers ask for that evidence, not for a test.
+
+## Conventions
 
 Use xUnit with Shouldly assertions. Use Shouldly assertions for all assertions in modified code, even if the file is predominantly using xUnit assertions.
 
@@ -47,23 +67,7 @@ Test assemblies use assembly fixtures (for example, `Microsoft.Build.UnitTests.M
 
 ## Data-Driven and Async Tests
 
-Prefer a focused regression that directly proves the requested behavior over a Boolean matrix covering unrelated modes or languages. Do not retest behavior owned by external frameworks, and keep process-test matrices to the minimum needed because each case adds runtime and resource-exhaustion flake risk. For task-routing tests, compare the task's PID with a known in-process assembly task. Avoid duplicating existing end-to-end routing coverage.
-
-Use `[Theory]` with `[InlineData]` for simple inputs. Use `[MemberData]` or `TheoryData<T>` for complex objects (returning `IEnumerable<object[]>`). If the data type is custom, implement `IXunitSerializable`.
-
-```csharp
-[Theory]
-[InlineData("input1", "expected1")]
-public void TestLogic(string input, string expected) { ... }
-```
-
-For async tests, always return `async Task` (never `async void`) and `await` asynchronous operations.
-```csharp
-[Fact]
-public async Task AsyncOperation_Works() {
-    await service.DoWorkAsync();
-}
-```
+Use `[Theory]` with `[InlineData]` for simple inputs and `[MemberData]` or `TheoryData<T>` for complex objects; custom data types must implement `IXunitSerializable`. Async tests return `async Task` (never `async void`). For task-routing tests, compare the task's PID with a known in-process assembly task.
 
 ## Test Resources
 
