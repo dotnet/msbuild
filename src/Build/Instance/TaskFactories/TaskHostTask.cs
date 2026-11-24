@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -945,33 +945,28 @@ namespace Microsoft.Build.BackEnd
 
             string taskHostLocation = null;
 
-            if (requiredRequest is NetTaskHostRequest netRequest)
+            switch (requiredRequest)
             {
-                (_, string msbuildPath) = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(netRequest);
-                if (msbuildPath != null)
-                {
-                    (taskHostLocation, _) = NodeProviderOutOfProcTaskHost.ResolveNetTaskHostLaunchPath(msbuildPath);
-                }
-            }
-            else
-            {
-#if RUNTIME_TYPE_NETCORE
-                taskHostLocation = visualStudioResolution switch
-                {
-                    NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found found => found.TaskHostExecutablePath,
-                    NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound
-                        or NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.MultipleFound => null,
-                    _ => NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredRequest),
-                };
-#else
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredRequest);
-#endif
+                case NetTaskHostRequest netRequest:
+                    (_, string msbuildPath) = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(netRequest);
+                    if (msbuildPath != null)
+                    {
+                        (taskHostLocation, _) = NodeProviderOutOfProcTaskHost.ResolveNetTaskHostLaunchPath(msbuildPath);
+                    }
+
+                    break;
+                case FrameworkTaskHostRequest frameworkRequest:
+                    taskHostLocation = GetClrTaskHostLocation(frameworkRequest, visualStudioResolution);
+                    break;
+                case Clr2TaskHostRequest clr2Request:
+                    taskHostLocation = GetClrTaskHostLocation(clr2Request, visualStudioResolution);
+                    break;
             }
 
             string msbuildLocation = taskHostLocation ??
                 // We don't know the path -- probably we're trying to get a 64-bit assembly on a
                 // 32-bit machine.  At least give them the exe name to look for, though ...
-                (requiredRequest.IsClr2
+                (requiredRequest is Clr2TaskHostRequest
                 ? "MSBuildTaskHost.exe"
                 : NodeProviderOutOfProcTaskHost.GetTaskHostNameFromHostContext(requiredRequest));
 
@@ -992,5 +987,24 @@ namespace Microsoft.Build.BackEnd
                     e.Message);
             }
         }
+
+        /// <summary>
+        /// Gets the location of a .NET Framework task host for an error message, reusing the Visual Studio
+        /// resolution made when the task host was requested.
+        /// </summary>
+        private static string GetClrTaskHostLocation(
+            ClrTaskHostRequest request,
+            NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution visualStudioResolution)
+#if RUNTIME_TYPE_NETCORE
+            => visualStudioResolution switch
+            {
+                NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found found => found.TaskHostExecutablePath,
+                NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound
+                    or NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.MultipleFound => null,
+                _ => NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(request),
+            };
+#else
+            => NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(request);
+#endif
     }
 }

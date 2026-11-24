@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.BackEnd;
@@ -191,8 +191,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
                 var key = new TaskHostNodeKey(request, 42);
 
-                key.Request.IsNet.ShouldBe(request.IsNet);
-                key.Request.IsClr2.ShouldBe(request.IsClr2);
+                key.Request.Value.GetType().ShouldBe(request.Value.GetType());
                 key.Request.Options.ShouldBe(request.Options);
                 key.Request.LaunchPaths.ShouldBe(default);
                 key.NodeId.ShouldBe(42);

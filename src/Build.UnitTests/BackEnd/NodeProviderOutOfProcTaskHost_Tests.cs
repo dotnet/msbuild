@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -259,10 +259,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(clr4Request).ShouldBe(msbuildExePath);
 
-            // .NET task hosts do not come from Visual Studio.
-            (NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(CreateNetRequest(), () => throw new InvalidOperationException())
-                is NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotApplicable).ShouldBeTrue();
-
             // Only the Visual Studio version matching this MSBuild is used.
             env.SetEnvironmentVariable("VisualStudioVersion", "17.0");
             (NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(clr4Request, () => [])
@@ -447,26 +443,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 .ShouldBe(new NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found(msbuildExePath, toolsDirectoryRoot));
         }
 
-        [Fact]
-        public void VisualStudioIsNotUsedForNetTaskHosts()
-        {
-            using TestEnvironment env = TestEnvironment.Create(_output);
-            ClearDeveloperCommandPrompt(env);
-
-            (NodeProviderOutOfProcTaskHost.ResolveVisualStudioTaskHost(
-                CreateNetRequest(),
-                () => throw new InvalidOperationException("Visual Studio installations should not be queried."))
-                is NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotApplicable).ShouldBeTrue();
-        }
-
         private static FrameworkTaskHostRequest CreateFrameworkRequest(TaskHostArchitecture architecture = TaskHostArchitecture.X86, bool nodeReuse = false)
             => new(new(architecture, NodeReuse: nodeReuse));
 
         private static Clr2TaskHostRequest CreateClr2Request(TaskHostArchitecture architecture = TaskHostArchitecture.X86)
             => new(new(architecture));
-
-        private static NetTaskHostRequest CreateNetRequest()
-            => new(TaskHostHandshakeOptions.None);
 
         private static void ClearDeveloperCommandPrompt(TestEnvironment env)
         {

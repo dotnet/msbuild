@@ -494,13 +494,16 @@ namespace Microsoft.Build.Evaluation
 
             TaskHostRequest desiredRequest = CommunicationsUtilities.GetTaskHostRequest(parameters);
 
-            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(desiredRequest);
-#if NETFRAMEWORK
-            if (desiredRequest is NetTaskHostRequest netRequest)
+            string taskHostLocation = desiredRequest switch
             {
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(netRequest).MSBuildPath;
-            }
+                FrameworkTaskHostRequest frameworkRequest => NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(frameworkRequest),
+                Clr2TaskHostRequest clr2Request => NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(clr2Request),
+#if NETFRAMEWORK
+                NetTaskHostRequest netRequest => NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(netRequest).MSBuildPath,
+#else
+                NetTaskHostRequest => NodeProviderOutOfProcTaskHost.GetCurrentInstallationMSBuildExecutablePath(),
 #endif
+            };
 
             return taskHostLocation != null && FileUtilities.FileExistsNoThrow(taskHostLocation);
         }

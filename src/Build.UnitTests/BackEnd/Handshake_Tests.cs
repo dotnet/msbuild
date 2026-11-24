@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -174,8 +174,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 request.Options.ShouldBe(options);
                 request.Architecture.ShouldBe(TaskHostArchitecture.Arm64);
                 request.NodeReuse.ShouldBeTrue();
-                request.IsNet.ShouldBe(isNet);
-                request.IsClr2.ShouldBe(isClr2);
+                (request is NetTaskHostRequest).ShouldBe(isNet);
+                (request is Clr2TaskHostRequest).ShouldBe(isClr2);
             }
 
             void AssertHandshakeOptions(TaskHostHandshake handshake, bool isNet, bool isClr2)
@@ -183,8 +183,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 handshake.Options.ShouldBe(options);
                 handshake.Architecture.ShouldBe(TaskHostArchitecture.Arm64);
                 handshake.NodeReuse.ShouldBeTrue();
-                handshake.IsNet.ShouldBe(isNet);
-                handshake.IsClr2.ShouldBe(isClr2);
+                (handshake is NetTaskHostHandshake).ShouldBe(isNet);
+                (handshake is Clr2TaskHostHandshake).ShouldBe(isClr2);
             }
         }
 
@@ -194,16 +194,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             WorkerNodeHandshake workerHandshake = new(nodeReuse: true);
             Handshake worker = Handshake.From(workerHandshake);
             worker.NodeReuse.ShouldBeTrue();
-            worker.IsClr2.ShouldBeFalse();
-            worker.IsNet.ShouldBeFalse();
+            (worker is WorkerNodeHandshake).ShouldBeTrue();
 
             TaskHostHandshake clr2Handshake = new Clr2TaskHostHandshake(
                 new(TaskHostArchitecture.X64, NodeReuse: true),
                 BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot);
             Handshake clr2 = Handshake.From(clr2Handshake);
             clr2.NodeReuse.ShouldBeTrue();
-            clr2.IsClr2.ShouldBeTrue();
-            clr2.IsNet.ShouldBeFalse();
+            (clr2 is Clr2TaskHostHandshake).ShouldBeTrue();
         }
 
         /// <summary>

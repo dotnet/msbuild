@@ -22,8 +22,6 @@ internal union TaskHostRequest(
 
     internal TaskHostArchitecture Architecture => Options.Architecture;
     internal bool NodeReuse => Options.NodeReuse;
-    internal bool IsClr2 => this is Clr2TaskHostRequest;
-    internal bool IsNet => this is NetTaskHostRequest;
 
     internal HandshakeOptions HandshakeOptions => this switch
     {
@@ -37,6 +35,27 @@ internal union TaskHostRequest(
         NetTaskHostRequest request => request.LaunchPaths,
         FrameworkTaskHostRequest request => request.LaunchPaths,
         Clr2TaskHostRequest request => request.LaunchPaths,
+    };
+}
+
+/// <summary>
+/// A request for a .NET Framework task host (the <c>clr4</c> or <c>clr2</c> runtime), which is
+/// located in an MSBuild or Visual Studio installation rather than in a .NET SDK.
+/// </summary>
+internal union ClrTaskHostRequest(
+    FrameworkTaskHostRequest,
+    Clr2TaskHostRequest)
+{
+    internal TaskHostArchitecture Architecture => this switch
+    {
+        FrameworkTaskHostRequest request => request.Options.Architecture,
+        Clr2TaskHostRequest request => request.Options.Architecture,
+    };
+
+    internal HandshakeOptions HandshakeOptions => this switch
+    {
+        FrameworkTaskHostRequest request => request.HandshakeOptions,
+        Clr2TaskHostRequest request => request.HandshakeOptions,
     };
 }
 

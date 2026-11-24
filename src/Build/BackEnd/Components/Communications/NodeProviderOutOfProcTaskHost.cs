@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -296,48 +296,51 @@ namespace Microsoft.Build.BackEnd
         /// so pooling and launch decisions remain consistent.
         /// </remarks>
         private static bool ExistsOnlyForCompatibility(TaskHostHandshake handshake)
-            => ExistsOnlyForCompatibility(handshake.IsClr2, handshake.IsNet, handshake.Architecture);
+            => handshake switch
+            {
+                NetTaskHostHandshake => NetTaskHostExistsOnlyForCompatibility,
+                FrameworkTaskHostHandshake frameworkHandshake => ArchitectureDiffersFromCurrentProcess(frameworkHandshake.Options.Architecture),
+                Clr2TaskHostHandshake => true,
+            };
 
         /// <summary>
         /// Determines whether the requested task host is needed only for runtime or architecture
         /// compatibility with this process.
         /// </summary>
         /// <remarks>
-        /// The request and handshake are separate typed unions. This overload extracts their
-        /// common compatibility attributes and delegates to one policy implementation.
+        /// The request and handshake are separate typed unions. Both overloads apply the same
+        /// per-runtime rules, so pooling and launch decisions remain consistent.
         /// </remarks>
         private static bool ExistsOnlyForCompatibility(TaskHostRequest request)
-            => ExistsOnlyForCompatibility(request.IsClr2, request.IsNet, request.Architecture);
+            => request switch
+            {
+                NetTaskHostRequest => NetTaskHostExistsOnlyForCompatibility,
+                FrameworkTaskHostRequest frameworkRequest => ArchitectureDiffersFromCurrentProcess(frameworkRequest.Options.Architecture),
+                Clr2TaskHostRequest => true,
+            };
 
         /// <summary>
-        /// Applies the compatibility policy shared by task-host requests and handshakes.
+        /// A .NET task host runs a different runtime only when this process is not itself .NET.
         /// </summary>
         /// <remarks>
-        /// Keeping the runtime- and architecture-specific rules here prevents the request and
-        /// handshake overloads from diverging across platforms.
+        /// In a .NET process the runtime is the same. A .NET task host runs whatever architecture
+        /// the SDK shipped and suppresses its architecture bits for that reason, so they carry no
+        /// information here and there is nothing further to compare.
         /// </remarks>
-        private static bool ExistsOnlyForCompatibility(bool isClr2, bool isNet, TaskHostArchitecture architecture)
-        {
-            // A different runtime. CLR2 always is. .NET only when this process is not itself .NET.
-            if (isClr2)
-            {
-                return true;
-            }
-
-            if (isNet)
-            {
+        private const bool NetTaskHostExistsOnlyForCompatibility =
 #if NETFRAMEWORK
-                return true;
+            true;
 #else
-                // Same runtime as this process. A .NET task host runs whatever architecture the SDK
-                // shipped and suppresses its architecture bits for that reason, so they carry no
-                // information here and there is nothing further to compare.
-                return false;
+            false;
 #endif
-            }
 
-            // A different architecture. The handshake encodes only x64 and arm64, so no bit means
-            // x86 -- which differs from this process unless this process is itself x86.
+        /// <summary>
+        /// Determines whether a .NET Framework task host runs a different architecture than this process.
+        /// </summary>
+        private static bool ArchitectureDiffersFromCurrentProcess(TaskHostArchitecture architecture)
+        {
+            // The handshake encodes only x64 and arm64, so no bit means x86 -- which differs from
+            // this process unless this process is itself x86.
             string requestedArchitecture = architecture switch
             {
                 TaskHostArchitecture.X64 => XMakeAttributes.MSBuildArchitectureValues.x64,
@@ -741,12 +744,24 @@ namespace Microsoft.Build.BackEnd
         /// Given a task-host request, returns the name of the executable we should be searching for.
         /// </summary>
         internal static string GetTaskHostNameFromHostContext(TaskHostRequest request)
-        {
-            if (request.IsClr2)
+            => request switch
             {
-                return TaskHostNameForClr2TaskHost;
-            }
+                Clr2TaskHostRequest => TaskHostNameForClr2TaskHost,
+                NetTaskHostRequest or FrameworkTaskHostRequest => GetMSBuildExecutableName(),
+            };
 
+        /// <summary>
+        /// Given a .NET Framework task-host request, returns the name of the executable we should be searching for.
+        /// </summary>
+        private static string GetTaskHostNameFromHostContext(ClrTaskHostRequest request)
+            => request switch
+            {
+                Clr2TaskHostRequest => TaskHostNameForClr2TaskHost,
+                FrameworkTaskHostRequest => GetMSBuildExecutableName(),
+            };
+
+        private static string GetMSBuildExecutableName()
+        {
             string name = s_msbuildName;
             if (string.IsNullOrEmpty(name))
             {
@@ -764,13 +779,13 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Given a task-host request, returns the appropriate MSBuild executable path for non-.NET runtimes.
+        /// Given a .NET Framework task-host request, returns the appropriate MSBuild executable path.
         /// </summary>
         /// <param name="request">The desired task-host runtime and architecture.</param>
         /// <returns>
-        /// The full path to MSBuild.exe.
+        /// The full path to the task-host executable, or <see langword="null"/> when no single Visual Studio installation provides it.
         /// </returns>
-        internal static string GetMSBuildExecutablePathForNonNETRuntimes(TaskHostRequest request)
+        internal static string GetMSBuildExecutablePathForNonNETRuntimes(ClrTaskHostRequest request)
         {
 #if RUNTIME_TYPE_NETCORE
             // Not cached: the Developer Command Prompt selection depends on environment variables.
@@ -783,11 +798,44 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            var toolName = GetTaskHostNameFromHostContext(request);
+            string toolName = GetTaskHostNameFromHostContext(request);
+            switch (request)
+            {
+                case Clr2TaskHostRequest clr2Request:
+                    Assumed.False(clr2Request.Options.Architecture == TaskHostArchitecture.Arm64, "ARM64 CLR2 task hosts are not supported.");
 
-            // Snapshot to locals so concurrent callers never read a null static
-            // that another thread hasn't written yet. Redundant computation is
-            // harmless — BuildEnvironmentHelper properties are deterministic.
+                    return clr2Request.Options.Architecture == TaskHostArchitecture.X64
+                        ? Path.Combine(GetOrInitializeX64Clr2Path(toolName, GetBaseTaskHostPath64()), toolName)
+                        : Path.Combine(GetOrInitializeX32Clr2Path(toolName, GetBaseTaskHostPath()), toolName);
+
+                case FrameworkTaskHostRequest frameworkRequest:
+                    return frameworkRequest.Options.Architecture switch
+                    {
+                        TaskHostArchitecture.X64 => Path.Combine(s_pathToX64Clr4 ??= GetBaseTaskHostPath64(), toolName),
+                        TaskHostArchitecture.Arm64 => Path.Combine(s_pathToArm64Clr4 ??= GetBaseTaskHostPathArm64(), toolName),
+                        _ => Path.Combine(s_pathToX32Clr4 ??= GetBaseTaskHostPath(), toolName),
+                    };
+
+                default:
+                    return Assumed.Unreachable<string>("Unsupported .NET Framework task-host request.");
+            }
+        }
+
+        /// <summary>
+        /// Returns the path of this installation's MSBuild executable in its 32-bit tools directory.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="Evaluation.IntrinsicFunctions.DoesTaskHostExist"/> reports whether a .NET task host exists from this path in a .NET
+        /// process, where a .NET task host request does not select a .NET Framework installation.
+        /// </remarks>
+        internal static string GetCurrentInstallationMSBuildExecutablePath()
+            => Path.Combine(s_pathToX32Clr4 ??= GetBaseTaskHostPath(), GetMSBuildExecutableName());
+
+        // Snapshot to locals so concurrent callers never read a null static
+        // that another thread hasn't written yet. Redundant computation is
+        // harmless — BuildEnvironmentHelper properties are deterministic.
+        private static string GetBaseTaskHostPath()
+        {
             string basePath = s_baseTaskHostPath;
             if (basePath is null)
             {
@@ -795,6 +843,11 @@ namespace Microsoft.Build.BackEnd
                 s_baseTaskHostPath = basePath;
             }
 
+            return basePath;
+        }
+
+        private static string GetBaseTaskHostPath64()
+        {
             string basePath64 = s_baseTaskHostPath64;
             if (basePath64 is null)
             {
@@ -802,6 +855,11 @@ namespace Microsoft.Build.BackEnd
                 s_baseTaskHostPath64 = basePath64;
             }
 
+            return basePath64;
+        }
+
+        private static string GetBaseTaskHostPathArm64()
+        {
             string basePathArm64 = s_baseTaskHostPathArm64;
             if (basePathArm64 is null)
             {
@@ -809,30 +867,7 @@ namespace Microsoft.Build.BackEnd
                 s_baseTaskHostPathArm64 = basePathArm64;
             }
 
-            bool isX64 = request.Architecture == TaskHostArchitecture.X64;
-            bool isArm64 = request.Architecture == TaskHostArchitecture.Arm64;
-            bool isCLR2 = request.IsClr2;
-
-            if (isCLR2)
-            {
-                Assumed.False(isArm64, "ARM64 CLR2 task hosts are not supported.");
-
-                return isX64
-                    ? Path.Combine(GetOrInitializeX64Clr2Path(toolName, basePath64), toolName)
-                    : Path.Combine(GetOrInitializeX32Clr2Path(toolName, basePath), toolName);
-            }
-
-            if (isX64)
-            {
-                return Path.Combine(s_pathToX64Clr4 ??= basePath64, toolName);
-            }
-
-            if (isArm64)
-            {
-                return Path.Combine(s_pathToArm64Clr4 ??= basePathArm64, toolName);
-            }
-
-            return Path.Combine(s_pathToX32Clr4 ??= basePath, toolName);
+            return basePathArm64;
         }
 
         /// <summary>
@@ -1315,7 +1350,7 @@ namespace Microsoft.Build.BackEnd
             VisualStudioTaskHostResolution.MultipleFound)
         {
             /// <summary>
-            /// The requested task host is not a .NET Framework task host on Windows, so Visual Studio is not used.
+            /// Visual Studio was not queried: the requested task host is not a .NET Framework task host, or this is not Windows.
             /// </summary>
             internal sealed record NotApplicable
             {
@@ -1366,22 +1401,17 @@ namespace Microsoft.Build.BackEnd
         /// Visual Studio setup API is queried, and an installation is used only when it is the only one available.
         /// </summary>
         /// <param name="request">The typed task-host request.</param>
-        internal static VisualStudioTaskHostResolution ResolveVisualStudioTaskHost(TaskHostRequest request)
+        internal static VisualStudioTaskHostResolution ResolveVisualStudioTaskHost(ClrTaskHostRequest request)
             => NativeMethodsShared.IsWindows
                 ? ResolveVisualStudioTaskHost(request, GetVisualStudioInstances)
                 : VisualStudioTaskHostResolution.NotApplicable.Instance;
 
         /// <summary>
-        /// Platform-independent implementation of <see cref="ResolveVisualStudioTaskHost(TaskHostRequest)"/>
+        /// Platform-independent implementation of <see cref="ResolveVisualStudioTaskHost(ClrTaskHostRequest)"/>
         /// with an explicit source of Visual Studio installations.
         /// </summary>
-        internal static VisualStudioTaskHostResolution ResolveVisualStudioTaskHost(TaskHostRequest request, Func<IList<VisualStudioInstance>> getVisualStudioInstances)
+        internal static VisualStudioTaskHostResolution ResolveVisualStudioTaskHost(ClrTaskHostRequest request, Func<IList<VisualStudioInstance>> getVisualStudioInstances)
         {
-            if (request.IsNet)
-            {
-                return VisualStudioTaskHostResolution.NotApplicable.Instance;
-            }
-
             // A Developer Command Prompt selects the installation explicitly.
             if (TryGetDeveloperCommandPromptInstallation(out string developerCommandPromptInstallDirectory)
                 && FindTaskHostInInstallation(developerCommandPromptInstallDirectory, request) is { } developerCommandPromptTaskHost)
@@ -1442,7 +1472,7 @@ namespace Microsoft.Build.BackEnd
         /// Gets the task host for the requested runtime and architecture within a Visual Studio installation.
         /// </summary>
         /// <returns>The task host in the installation, or <see langword="null"/> when it does not exist.</returns>
-        private static VisualStudioTaskHostResolution.Found FindTaskHostInInstallation(string visualStudioInstallDirectory, TaskHostRequest request)
+        private static VisualStudioTaskHostResolution.Found FindTaskHostInInstallation(string visualStudioInstallDirectory, ClrTaskHostRequest request)
         {
             if (string.IsNullOrEmpty(visualStudioInstallDirectory))
             {
@@ -1461,22 +1491,29 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            bool isClr2 = request.IsClr2;
-            if (isClr2 && request.Architecture == TaskHostArchitecture.Arm64)
+            TaskHostArchitecture architecture = request.Architecture;
+            if (request is Clr2TaskHostRequest && architecture == TaskHostArchitecture.Arm64)
             {
                 return null;
             }
 
-            string architectureDirectory = request.Architecture switch
+            string architectureDirectory = architecture switch
             {
                 TaskHostArchitecture.X64 => Path.Combine(root, "amd64"),
                 TaskHostArchitecture.Arm64 => Path.Combine(root, "arm64"),
                 _ => root,
             };
 
-            string msbuildExePath = Path.Combine(architectureDirectory, isClr2 ? TaskHostNameForClr2TaskHost : "MSBuild.exe");
+            // A CLR2 task host computes its handshake from its own directory; MSBuild.exe from the tools directory root.
+            (string executableName, string handshakeToolsDirectory) = request switch
+            {
+                Clr2TaskHostRequest => (TaskHostNameForClr2TaskHost, architectureDirectory),
+                FrameworkTaskHostRequest => ("MSBuild.exe", root),
+            };
+
+            string msbuildExePath = Path.Combine(architectureDirectory, executableName);
             return FileSystems.Default.FileExists(msbuildExePath)
-                ? new VisualStudioTaskHostResolution.Found(msbuildExePath, isClr2 ? architectureDirectory : root)
+                ? new VisualStudioTaskHostResolution.Found(msbuildExePath, handshakeToolsDirectory)
                 : null;
         }
 
