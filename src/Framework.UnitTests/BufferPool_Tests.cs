@@ -3,6 +3,7 @@
 
 using System;
 using System.Buffers;
+using System.Threading;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -80,6 +81,139 @@ public class BufferPool_Tests
         next.ShouldNotBeSameAs(rented);
         pool.Return(rented);
         pool.Return(next);
+    }
+
+    [Fact]
+    public void Shared_CacheIsIsolatedPerThread()
+    {
+        ArrayPool<TestBufferElement> pool = BufferPool<TestBufferElement>.Shared;
+        TestBufferElement[] cachedBuffer = pool.Rent(16);
+        pool.Return(cachedBuffer);
+
+        TestBufferElement[]? otherThreadBuffer = null;
+        Exception? threadException = null;
+        Thread thread = new(() =>
+        {
+            try
+            {
+                TestBufferElement[] buffer = pool.Rent(16);
+                otherThreadBuffer = buffer;
+                pool.Return(buffer);
+            }
+            catch (Exception exception)
+            {
+                threadException = exception;
+            }
+        });
+
+        thread.Start();
+        thread.Join(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+
+        threadException.ShouldBeNull();
+        otherThreadBuffer.ShouldNotBeSameAs(cachedBuffer);
+
+        TestBufferElement[] rentedBuffer = pool.Rent(16);
+        rentedBuffer.ShouldBeSameAs(cachedBuffer);
+        pool.Return(rentedBuffer);
+    }
+
+    [Fact]
+    public void Shared_SimultaneousRentalsOnDifferentThreadsAreDistinct()
+    {
+        ArrayPool<TestBufferElement> pool = BufferPool<TestBufferElement>.Shared;
+        using Barrier barrier = new(2);
+        TestBufferElement[]?[] buffers = new TestBufferElement[]?[2];
+        bool[] reachedBarrier = new bool[2];
+        Exception?[] threadExceptions = new Exception?[2];
+
+        void RentAndWait(int index)
+        {
+            TestBufferElement[]? buffer = null;
+            try
+            {
+                buffer = pool.Rent(16);
+                buffers[index] = buffer;
+                reachedBarrier[index] = barrier.SignalAndWait(TimeSpan.FromSeconds(10));
+            }
+            catch (Exception exception)
+            {
+                threadExceptions[index] = exception;
+            }
+            finally
+            {
+                if (buffer is not null)
+                {
+                    pool.Return(buffer);
+                }
+            }
+        }
+
+        Thread firstThread = new(() => RentAndWait(0));
+        Thread secondThread = new(() => RentAndWait(1));
+        firstThread.Start();
+        secondThread.Start();
+
+        firstThread.Join(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+        secondThread.Join(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+
+        threadExceptions[0].ShouldBeNull();
+        threadExceptions[1].ShouldBeNull();
+        reachedBarrier[0].ShouldBeTrue();
+        reachedBarrier[1].ShouldBeTrue();
+        buffers[0].ShouldNotBeSameAs(buffers[1]);
+    }
+
+    [Fact]
+    public void Shared_CrossThreadReturnCachesOnReturningThread()
+    {
+        ArrayPool<TestBufferElement> pool = BufferPool<TestBufferElement>.Shared;
+        using ManualResetEventSlim bufferRented = new();
+        using ManualResetEventSlim allowOwnerToRentAgain = new();
+        TestBufferElement[]? originalBuffer = null;
+        TestBufferElement[]? ownerRentedBuffer = null;
+        Exception? threadException = null;
+
+        Thread ownerThread = new(() =>
+        {
+            try
+            {
+                originalBuffer = pool.Rent(16);
+                bufferRented.Set();
+                allowOwnerToRentAgain.Wait();
+                TestBufferElement[] buffer = pool.Rent(16);
+                ownerRentedBuffer = buffer;
+                pool.Return(buffer);
+            }
+            catch (Exception exception)
+            {
+                threadException = exception;
+                bufferRented.Set();
+            }
+        });
+
+        ownerThread.Start();
+        bool ownerRented = bufferRented.Wait(TimeSpan.FromSeconds(10));
+        TestBufferElement[]? returnedThreadBuffer = null;
+        try
+        {
+            if (ownerRented)
+            {
+                pool.Return(originalBuffer!);
+                returnedThreadBuffer = pool.Rent(16);
+            }
+        }
+        finally
+        {
+            allowOwnerToRentAgain.Set();
+        }
+
+        ownerThread.Join(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+
+        threadException.ShouldBeNull();
+        ownerRented.ShouldBeTrue();
+        returnedThreadBuffer.ShouldBeSameAs(originalBuffer);
+        ownerRentedBuffer.ShouldNotBeSameAs(originalBuffer);
+        pool.Return(returnedThreadBuffer!);
     }
 #endif
 
