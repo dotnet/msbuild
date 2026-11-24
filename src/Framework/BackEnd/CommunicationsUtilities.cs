@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -566,7 +566,7 @@ internal static class CommunicationsUtilities
     {
         internal WorkerNodeHandshakeConfiguration(bool nodeReuse, bool lowPriority)
         {
-            HandshakeOptions = GetProcessHandshakeOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority);
+            HandshakeOptions = ProcessHandshakeSettings.ForCurrentArchitecture(nodeReuse, lowPriority).ToHandshakeOptions();
         }
 
         internal HandshakeOptions HandshakeOptions { get; }
@@ -578,15 +578,15 @@ internal static class CommunicationsUtilities
         => new WorkerNodeHandshakeConfiguration(nodeReuse, lowPriority).CreateHandshake();
 
     internal static ServerNodeHandshake GetServerNodeHandshake(string? instanceId = null, bool nodeReuse = false, bool lowPriority = false)
-        => new((ServerHandshakeOptions)GetProcessHandshakeOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority), instanceId);
+        => new(ProcessHandshakeSettings.ForCurrentArchitecture(nodeReuse, lowPriority).ToServerHandshakeOptions(), instanceId);
 
     internal static ServerNodeHandshake GetRarNodeHandshake() => new(ServerHandshakeOptions.None);
 
     internal static NetTaskHostHandshake GetCurrentNetTaskHostHandshake(bool nodeReuse = false, bool lowPriority = false)
-        => new(GetTaskHostOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority));
+        => new(ProcessHandshakeSettings.ForCurrentArchitecture(nodeReuse, lowPriority).ToTaskHostOptions());
 
     internal static FrameworkTaskHostHandshake GetCurrentFrameworkTaskHostHandshake(bool nodeReuse = false, bool lowPriority = false)
-        => new(GetTaskHostOptions(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority));
+        => new(ProcessHandshakeSettings.ForCurrentArchitecture(nodeReuse, lowPriority).ToTaskHostOptions());
 
     internal static NetTaskHostRequest GetNetTaskHostRequest(bool nodeReuse = false, bool lowPriority = false, TaskHostLaunchPaths launchPaths = default)
         => new(GetTaskHostOptions(architecture: null, nodeReuse, lowPriority), launchPaths);
@@ -636,61 +636,114 @@ internal static class CommunicationsUtilities
     }
 
     private static TaskHostHandshakeOptions GetTaskHostOptions(string? architecture, bool nodeReuse, bool lowPriority)
+        => ProcessHandshakeSettings.Create(architecture, nodeReuse, lowPriority).ToTaskHostOptions();
+
+    /// <summary>
+    /// The settings of a process that participate in every handshake: its architecture, whether it can be
+    /// reused, whether it runs at low priority, and whether it is elevated.
+    /// </summary>
+    /// <remarks>
+    /// Each handshake kind projects these settings to its own options type, so the wire bits for each
+    /// setting are computed in one place.
+    /// </remarks>
+    private readonly record struct ProcessHandshakeSettings(
+        TaskHostArchitecture Architecture,
+        bool NodeReuse,
+        bool LowPriority,
+        bool Administrator)
     {
-        TaskHostArchitecture taskHostArchitecture =
-            string.Equals(architecture, XMakeAttributes.MSBuildArchitectureValues.x86, StringComparison.OrdinalIgnoreCase) ? TaskHostArchitecture.X86 :
-            string.Equals(architecture, XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase) ? TaskHostArchitecture.X64 :
-            string.Equals(architecture, XMakeAttributes.MSBuildArchitectureValues.arm64, StringComparison.OrdinalIgnoreCase) ? TaskHostArchitecture.Arm64 :
-            TaskHostArchitecture.Unspecified;
+        internal static ProcessHandshakeSettings ForCurrentArchitecture(bool nodeReuse, bool lowPriority)
+            => Create(XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse, lowPriority);
 
-        HandshakeOptions processOptions = GetProcessHandshakeOptions(architecture: null, nodeReuse, lowPriority);
-        return new TaskHostHandshakeOptions(
-            taskHostArchitecture,
-            NodeReuse: nodeReuse,
-            LowPriority: lowPriority,
-            Administrator: (processOptions & HandshakeOptions.Administrator) != 0);
-    }
+        /// <param name="architecture">An MSBuild architecture value, or <see langword="null"/> when the architecture is not specified.</param>
+        /// <param name="nodeReuse">Whether the node can be reused.</param>
+        /// <param name="lowPriority">Whether the node runs at low priority.</param>
+        internal static ProcessHandshakeSettings Create(string? architecture, bool nodeReuse, bool lowPriority)
+            => new(ParseArchitecture(architecture), nodeReuse, lowPriority, IsAdministrator());
 
-    private static HandshakeOptions GetProcessHandshakeOptions(string? architecture, bool nodeReuse, bool lowPriority)
-    {
-        HandshakeOptions context = HandshakeOptions.None;
-        if (!string.IsNullOrEmpty(architecture))
+        internal TaskHostHandshakeOptions ToTaskHostOptions()
+            => new(Architecture, NodeReuse, LowPriority, Administrator);
+
+        internal HandshakeOptions ToHandshakeOptions()
         {
-            if (architecture!.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
+            // x86 has no architecture bit.
+            HandshakeOptions options = Architecture switch
             {
-                context |= HandshakeOptions.X64;
-            }
-            else if (architecture.Equals(XMakeAttributes.MSBuildArchitectureValues.arm64, StringComparison.OrdinalIgnoreCase))
+                TaskHostArchitecture.X64 => HandshakeOptions.X64,
+                TaskHostArchitecture.Arm64 => HandshakeOptions.Arm64,
+                _ => HandshakeOptions.None,
+            };
+
+            if (NodeReuse)
             {
-                context |= HandshakeOptions.Arm64;
+                options |= HandshakeOptions.NodeReuse;
             }
+
+            if (LowPriority)
+            {
+                options |= HandshakeOptions.LowPriority;
+            }
+
+            if (Administrator)
+            {
+                options |= HandshakeOptions.Administrator;
+            }
+
+            return options;
         }
 
-        if (nodeReuse)
+        internal ServerHandshakeOptions ToServerHandshakeOptions()
         {
-            context |= HandshakeOptions.NodeReuse;
+            // x86 has no architecture bit.
+            ServerHandshakeOptions options = Architecture switch
+            {
+                TaskHostArchitecture.X64 => ServerHandshakeOptions.X64,
+                TaskHostArchitecture.Arm64 => ServerHandshakeOptions.Arm64,
+                _ => ServerHandshakeOptions.None,
+            };
+
+            if (NodeReuse)
+            {
+                options |= ServerHandshakeOptions.NodeReuse;
+            }
+
+            if (LowPriority)
+            {
+                options |= ServerHandshakeOptions.LowPriority;
+            }
+
+            if (Administrator)
+            {
+                options |= ServerHandshakeOptions.Administrator;
+            }
+
+            return options;
         }
 
-        if (lowPriority)
+        private static TaskHostArchitecture ParseArchitecture(string? architecture)
+            => string.Equals(architecture, XMakeAttributes.MSBuildArchitectureValues.x86, StringComparison.OrdinalIgnoreCase) ? TaskHostArchitecture.X86 :
+               string.Equals(architecture, XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase) ? TaskHostArchitecture.X64 :
+               string.Equals(architecture, XMakeAttributes.MSBuildArchitectureValues.arm64, StringComparison.OrdinalIgnoreCase) ? TaskHostArchitecture.Arm64 :
+               TaskHostArchitecture.Unspecified;
+
+        /// <summary>
+        /// If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
+        /// Both the client and the host will calculate this separately, and the idea is that if they come out the same
+        /// then we can be sufficiently confident that the other side has the same elevation level as us.  This is complementary
+        /// to the username check which is also done on connection.
+        /// </summary>
+        private static bool IsAdministrator()
         {
-            context |= HandshakeOptions.LowPriority;
-        }
-
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS || NET
-        // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
-        // Both the client and the host will calculate this separately, and the idea is that if they come out the same
-        // then we can be sufficiently confident that the other side has the same elevation level as us.  This is complementary
-        // to the username check which is also done on connection.
-        if (
+            return
 #if NET
-            NativeMethods.IsWindows &&
+                NativeMethods.IsWindows &&
 #endif
-            new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
-        {
-            context |= HandshakeOptions.Administrator;
+                new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+#else
+            return false;
+#endif
         }
-#endif
-        return context;
     }
 
     /// <summary>
