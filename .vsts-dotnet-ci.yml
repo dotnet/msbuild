@@ -223,7 +223,9 @@ jobs:
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
       name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+      # The bootstrap copies the SDK resolver and Microsoft.NET.Build.Extensions from the machine's VS.
+      # Newer VS 18 builds (Insiders/scout) ship components that MSBuild 18.0 can't load, so use VS 2022.
+      demands: ImageOverride -equals windows.vs2022.amd64.open
     ${{ if ne(variables['System.TeamProject'], 'public') }}:
       name: VSEngSS-MicroBuild2022-1ES
       demands: agent.os -equals Windows_NT
