@@ -437,7 +437,7 @@ namespace Microsoft.Build.BackEnd
                     // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
                     // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
                     // nodes because we should never be able to connect in this case.
-                    if (nodeLaunchData.Handshake is TaskHostHandshake { IsClr2: true })
+                    if (nodeLaunchData.Handshake is TaskHostHandshake { Value: Clr2TaskHostHandshake })
                     {
                         bool frameworkMissing = !FrameworkLocationHelper.IsDotNetFrameworkV35AvailableForTaskHost();
                         if (frameworkMissing)
@@ -1458,11 +1458,9 @@ namespace Microsoft.Build.BackEnd
                                 NodePacketTypeExtensions.WriteVersion(writeStream, context._negotiatedPacketVersion);
                                 writeTranslator.NegotiatedPacketVersion = context._negotiatedPacketVersion;
                             }
-                            else if (_handshake?.IsClr2 != true)
+                            else if (NodePacketTypeExtensions.GetPacketVersionWithoutExtendedHeader(_handshake) is byte packetVersion)
                             {
-                                // CLR4 task hosts: set version to 0 to enable version-dependent fields.
-                                // CLR2 task hosts: leave as null (default) to skip version-dependent fields.
-                                writeTranslator.NegotiatedPacketVersion = 0;
+                                writeTranslator.NegotiatedPacketVersion = packetVersion;
                             }
 
                             // When the negotiated wire format supports it, send the (invariant) build process

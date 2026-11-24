@@ -88,10 +88,22 @@ internal static class NodePacketTypeExtensions
     /// <returns>True if extended header flag was set, false otherwise.</returns>
     public static bool TryCreateExtendedHeaderType(Handshake? handshake, NodePacketType type, out byte extendedheader, byte negotiatedVersion = 0)
     {
-        if (handshake is { IsTaskHost: true } taskHostHandshake
-            && (taskHostHandshake.IsNet
-                || (type == NodePacketType.NodeBuildComplete && negotiatedVersion >= TaskHostOwnershipMinVersion)
-                || (type == NodePacketType.TaskHostConsoleConfiguration && negotiatedVersion >= ConsoleOutputForwardingMinVersion)))
+        bool hasExtendedHeader = handshake switch
+        {
+            // .NET task hosts version every packet.
+            NetTaskHostHandshake => true,
+
+            // .NET Framework task hosts version only packets added after they first shipped,
+            // and only once the child has reported support for them.
+            FrameworkTaskHostHandshake or Clr2TaskHostHandshake =>
+                (type == NodePacketType.NodeBuildComplete && negotiatedVersion >= TaskHostOwnershipMinVersion)
+                || (type == NodePacketType.TaskHostConsoleConfiguration && negotiatedVersion >= ConsoleOutputForwardingMinVersion),
+
+            // Worker and server nodes, and connections without a handshake, do not use extended headers.
+            _ => false,
+        };
+
+        if (hasExtendedHeader)
         {
             extendedheader = (byte)((byte)type | ExtendedHeaderFlag);
             return true;
@@ -100,6 +112,21 @@ internal static class NodePacketTypeExtensions
         extendedheader = (byte)type;
         return false;
     }
+
+    /// <summary>
+    /// Gets the packet version to use when a packet is written without an extended header.
+    /// </summary>
+    /// <param name="handshake">Handshake that determines the packet format, or <see langword="null"/> when none applies.</param>
+    /// <returns>
+    /// <see langword="null"/> for CLR2 task hosts, which do not contain version-dependent fields, so no
+    /// version is set; otherwise 0, so that the version-dependent fields that every other peer supports are written.
+    /// </returns>
+    public static byte? GetPacketVersionWithoutExtendedHeader(Handshake? handshake)
+        => handshake switch
+        {
+            Clr2TaskHostHandshake => null,
+            _ => 0,
+        };
 
     /// <summary>
     /// Reads the protocol version from an extended header in the stream.

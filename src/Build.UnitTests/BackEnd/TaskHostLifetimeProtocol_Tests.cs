@@ -89,6 +89,15 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void Clr2TaskHostKeepsItsNegotiatedVersionForPacketsWithoutExtendedHeaders()
+    {
+        NodePacketTypeExtensions.GetPacketVersionWithoutExtendedHeader(
+            Handshake.From(new Clr2TaskHostHandshake(new(), BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot))).ShouldBeNull();
+        NodePacketTypeExtensions.GetPacketVersionWithoutExtendedHeader(Handshake.From(new FrameworkTaskHostHandshake())).ShouldBe((byte)0);
+        NodePacketTypeExtensions.GetPacketVersionWithoutExtendedHeader(null).ShouldBe((byte)0);
+    }
+
+    [Fact]
     public void ConsoleForwardingRequiresANewerProtocolThanOwnership()
     {
         NodePacketTypeExtensions.TaskHostOwnershipMinVersion.ShouldBe((byte)6);
