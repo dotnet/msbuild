@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
@@ -103,6 +105,20 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             unspecified.Options.Architecture.ShouldNotBe(x86.Options.Architecture);
             unspecifiedKey.ShouldBe(x86Key);
             unspecifiedKey.GetHashCode().ShouldBe(x86Key.GetHashCode());
+        }
+
+        [Theory]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.net)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr4)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr2)]
+        public void TaskHostNodeKey_IgnoresLaunchPriorityBeforeResolution(string runtime)
+        {
+            TaskHostParameters parameters = new(runtime, XMakeAttributes.MSBuildArchitectureValues.x64);
+            TaskHostNodeKey normal = new(CommunicationsUtilities.GetTaskHostRequest(parameters, lowPriority: false), 1);
+            TaskHostNodeKey low = new(CommunicationsUtilities.GetTaskHostRequest(parameters, lowPriority: true), 1);
+
+            low.ShouldBe(normal);
+            low.GetHashCode().ShouldBe(normal.GetHashCode());
         }
 
         [Fact]

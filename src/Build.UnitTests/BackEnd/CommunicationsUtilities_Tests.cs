@@ -79,7 +79,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void TaskHostOptions_EncodeIndependentWireFlags()
+        public void TaskHostOptions_ExcludeLaunchPriorityFromWireFlags()
         {
             TaskHostHandshakeOptions options = new(
                 TaskHostArchitecture.Arm64,
@@ -89,8 +89,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 SidecarTaskHost: true);
 
             options.ToWireOptions().ShouldBe(
-                HandshakeOptions.Arm64 | HandshakeOptions.NodeReuse | HandshakeOptions.LowPriority
+                HandshakeOptions.Arm64 | HandshakeOptions.NodeReuse
                 | HandshakeOptions.Administrator | HandshakeOptions.SidecarTaskHost);
+            options.LowPriority.ShouldBeTrue();
         }
 
         [Theory]
@@ -134,7 +135,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             request.HandshakeOptions.HasFlag(HandshakeOptions.TaskHost).ShouldBeTrue();
             request.HandshakeOptions.HasFlag(HandshakeOptions.NodeReuse).ShouldBe(reuseExpected);
-            request.HandshakeOptions.HasFlag(HandshakeOptions.LowPriority).ShouldBeTrue();
+            request.Options.LowPriority.ShouldBeTrue();
+            request.HandshakeOptions.HasFlag(HandshakeOptions.LowPriority).ShouldBeFalse();
             request.HandshakeOptions.HasFlag(HandshakeOptions.NET).ShouldBe(runtime == XMakeAttributes.MSBuildRuntimeValues.net);
             request.HandshakeOptions.HasFlag(HandshakeOptions.CLR2).ShouldBe(runtime == XMakeAttributes.MSBuildRuntimeValues.clr2);
             request.HandshakeOptions.HasFlag(HandshakeOptions.Arm64).ShouldBe(runtime != XMakeAttributes.MSBuildRuntimeValues.net);

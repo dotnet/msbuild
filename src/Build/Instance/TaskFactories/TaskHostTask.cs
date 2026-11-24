@@ -393,7 +393,8 @@ namespace Microsoft.Build.BackEnd
                         TaskHostRequest request = CommunicationsUtilities.GetTaskHostRequest(
                             // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
                             nodeReuse: effectiveNodeReuse,
-                            taskHostParameters: _taskHostParameters);
+                            taskHostParameters: _taskHostParameters,
+                            lowPriority: _buildComponentHost.BuildParameters.LowPriority);
                         _requiredRequest = request;
 
                         _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(

@@ -1285,8 +1285,7 @@ namespace Microsoft.Build.BackEnd
 #else
             return NodeLaunchData.ForFrameworkTaskHost(
                 frameworkRequest,
-                GetMSBuildExecutablePathForNonNETRuntimes(frameworkRequest),
-                ComponentHost.BuildParameters.LowPriority);
+                GetMSBuildExecutablePathForNonNETRuntimes(frameworkRequest));
 #endif
         }
 
@@ -1333,8 +1332,7 @@ namespace Microsoft.Build.BackEnd
                 request,
                 found.TaskHostExecutablePath,
                 found.HandshakeToolsDirectory,
-                fileVersion,
-                ComponentHost.BuildParameters.LowPriority);
+                fileVersion);
         }
 #endif
 
@@ -1578,15 +1576,13 @@ namespace Microsoft.Build.BackEnd
                 return NodeLaunchData.ForNetTaskHostAppHost(
                     request,
                     launchPath,
-                    toolsDirectory,
-                    ComponentHost.BuildParameters.LowPriority);
+                    toolsDirectory);
             }
 
             NodeLaunchData<TaskHostHandshake> launch = NodeLaunchData.ForNetTaskHostDll(
                 request,
                 launchPath,
-                toolsDirectory,
-                ComponentHost.BuildParameters.LowPriority);
+                toolsDirectory);
             CommunicationsUtilities.Trace($"For a host context of {hostContext}, app host not found, falling back to dotnet.exe ({launch.MSBuildLocation}) hosting {launchPath}.");
             return launch;
         }

@@ -28,6 +28,11 @@ internal interface ILaunchableNodeHandshake : INodeHandshake
     /// The node mode the launched process reports, or <see langword="null"/> when the process does not report one.
     /// </summary>
     NodeMode? ExpectedNodeMode { get; }
+
+    /// <summary>
+    /// Whether the launched process runs at low priority.
+    /// </summary>
+    bool LowPriority { get; }
 }
 
 /// <summary>
@@ -143,6 +148,7 @@ internal union TaskHostHandshake(
         NetTaskHostHandshake or FrameworkTaskHostHandshake => NodeMode.OutOfProcTaskHostNode,
         Clr2TaskHostHandshake => null,
     };
+    public bool LowPriority => Options.LowPriority;
 
     internal Handshake ToHandshake() => this switch
     {
@@ -163,6 +169,10 @@ internal enum TaskHostArchitecture
 /// <summary>
 /// Task-host options before they are encoded as handshake flags.
 /// </summary>
+/// <remarks>
+/// Existing task hosts do not report launch priority in the handshake. Low priority controls
+/// process launch only and is not part of the handshake identity.
+/// </remarks>
 internal readonly record struct TaskHostHandshakeOptions(
     TaskHostArchitecture Architecture = TaskHostArchitecture.Unspecified,
     bool NodeReuse = false,
@@ -185,11 +195,6 @@ internal readonly record struct TaskHostHandshakeOptions(
         if (NodeReuse)
         {
             options |= HandshakeOptions.NodeReuse;
-        }
-
-        if (LowPriority)
-        {
-            options |= HandshakeOptions.LowPriority;
         }
 
         if (Administrator)
@@ -224,6 +229,7 @@ internal sealed class WorkerNodeHandshake : NodeHandshake, ILaunchableNodeHandsh
     }
 
     public NodeMode? ExpectedNodeMode => NodeMode.OutOfProcNode;
+    public bool LowPriority => (HandshakeOptions & global::Microsoft.Build.Internal.HandshakeOptions.LowPriority) != 0;
 }
 
 internal sealed class NetTaskHostHandshake : NodeHandshake

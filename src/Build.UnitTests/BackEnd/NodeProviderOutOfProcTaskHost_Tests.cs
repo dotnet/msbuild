@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [InlineData(true)]
         public void TaskHostLaunchRecipes_KeepHandshakeAndArgumentsTogether(bool nodeReuse)
         {
-            TaskHostHandshakeOptions options = new(NodeReuse: nodeReuse);
+            TaskHostHandshakeOptions options = new(NodeReuse: nodeReuse, LowPriority: true);
             string dotnetRoot = Path.Combine(Path.GetTempPath(), "task-host-dotnet");
             string dotnetPath = Path.Combine(dotnetRoot, "dotnet");
             NetTaskHostRequest netRequest = new(options, new(DotnetHostPath: dotnetPath));
@@ -48,11 +48,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string dllPath = Path.Combine("sdk path", "MSBuild.dll");
 
             NodeLaunchData<TaskHostHandshake> appHost = NodeLaunchData.ForNetTaskHostAppHost(
-                netRequest, "apphost", toolsDirectory: null, lowPriority: true);
+                netRequest, "apphost", toolsDirectory: null);
             NodeLaunchData<TaskHostHandshake> dll = NodeLaunchData.ForNetTaskHostDll(
-                netRequest, dllPath, toolsDirectory: null, lowPriority: true);
+                netRequest, dllPath, toolsDirectory: null);
             NodeLaunchData<TaskHostHandshake> framework = NodeLaunchData.ForFrameworkTaskHost(
-                frameworkRequest, "msbuild", lowPriority: true);
+                frameworkRequest, "msbuild");
             NodeLaunchData<TaskHostHandshake> clr2 = NodeLaunchData.ForClr2TaskHost(
                 clr2Request, "legacy-task-host", "legacy-directory");
 
@@ -67,6 +67,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 launch.ExpectedNodeMode.ShouldBe(NodeMode.OutOfProcTaskHostNode);
                 NodeModeHelper.ExtractFromCommandLine(launch.CommandLineArgs).ShouldBe(launch.ExpectedNodeMode);
                 launch.Handshake.HandshakeOptions.HasFlag(HandshakeOptions.NodeReuse).ShouldBe(nodeReuse);
+                launch.Handshake.LowPriority.ShouldBeTrue();
                 launch.CommandLineArgs.ShouldContain($"/nodereuse:{nodeReuse} /low:True");
             }
 
@@ -87,7 +88,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             FrameworkTaskHostRequest request = new(TaskHostHandshakeOptions.None);
             Version fileVersion = new(18, 1, 2, 3);
             NodeLaunchData<TaskHostHandshake> launch = NodeLaunchData.ForExternalFrameworkTaskHost(
-                request, "external-msbuild", "external-tools", fileVersion, lowPriority: false);
+                request, "external-msbuild", "external-tools", fileVersion);
 
             launch.EnvironmentOverrides!["MSBUILD_EXE_PATH"].ShouldBe("external-msbuild");
             int expectedSalt = CommunicationsUtilities.GetHashCode(

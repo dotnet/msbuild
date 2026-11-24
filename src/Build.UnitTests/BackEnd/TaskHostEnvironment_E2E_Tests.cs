@@ -85,6 +85,43 @@ public class TaskHostEnvironment_E2E_Tests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void LowPriorityTaskHostExecutes()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        TransientTestFile project = env.CreateFile("low-priority.proj", $"""
+            <Project>
+              <UsingTask TaskName="ReadEnvironmentVariableTask" AssemblyFile="{typeof(ReadEnvironmentVariableTask).Assembly.Location}" />
+              <Target Name="Build">
+                <ReadEnvironmentVariableTask VariableName="PATH">
+                  <Output TaskParameter="Pid" PropertyName="TaskPid" />
+                </ReadEnvironmentVariableTask>
+              </Target>
+            </Project>
+            """);
+
+        MockLogger logger = new(_output);
+        BuildParameters parameters = new()
+        {
+            MultiThreaded = true,
+            EnableNodeReuse = false,
+            LowPriority = true,
+            Loggers = [logger],
+        };
+        using BuildManager manager = new();
+        BuildResult result = manager.Build(parameters, new BuildRequestData(
+            project.Path, new Dictionary<string, string?>(), null, ["Build"], null,
+            BuildRequestDataFlags.ProvideProjectStateAfterBuild));
+
+        result.ShouldHaveSucceeded();
+        ProjectInstance? state = result.ProjectStateAfterBuild;
+        state.ShouldNotBeNull();
+        int taskPid = int.Parse(state.GetPropertyValue("TaskPid"), CultureInfo.InvariantCulture);
+        using Process currentProcess = Process.GetCurrentProcess();
+        taskPid.ShouldNotBe(currentProcess.Id);
+        env.WithTransientProcess(taskPid);
+    }
+
+    [Fact]
     public void ReusedTaskHostObservesTheNextBuildEnvironment()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);

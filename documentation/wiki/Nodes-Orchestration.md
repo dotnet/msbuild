@@ -65,6 +65,9 @@ Child factories preserve the current architecture bits for compatibility with de
 CLR2 request factories do not enable node reuse.
 Task-host options use one architecture value before they produce wire flags.
 Unspecified and x86 remain distinct in memory but share the same wire identity and reusable hosts.
+Existing task hosts do not report launch priority, so it is not part of the handshake identity.
+The typed request retains the priority for the `/low` argument of modern task hosts.
+The resolved launch identity still includes the command-line arguments used for node reuse.
 
 `NodeEndpointOutOfProcBase<THandshake>` binds each endpoint to its required handshake type.
 The CLI task-host endpoint uses `NetTaskHostHandshake` or `FrameworkTaskHostHandshake`, depending on its runtime.
