@@ -36,7 +36,7 @@ namespace Microsoft.Build.BackEnd
 
             return new(
                 msBuildLocation: null,
-                commandLineArgs: $"/noautoresponse /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcNode)} /nodeReuse:{nodeReuse.ToString().ToLower()} /low:{handshake.LowPriority.ToString().ToLower()}",
+                commandLineArgs: GetWorkerCommandLineArgs(handshake),
                 handshake,
                 DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides());
         }
@@ -50,7 +50,7 @@ namespace Microsoft.Build.BackEnd
 
             return new(
                 msBuildLocation,
-                GetTaskHostCommandLineArgs(handshake.NodeReuse, handshake.LowPriority),
+                GetTaskHostCommandLineArgs(handshake),
                 handshake,
                 DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(request.LaunchPaths.DotnetHostPath)
                     ?? throw new NodeFailedToLaunchException(errorCode: null, ResourceUtilities.GetResourceString("DotnetHostPathNotSet")));
@@ -73,7 +73,7 @@ namespace Microsoft.Build.BackEnd
 
             return new(
                 dotnetHostPath,
-                $"\"{msBuildDllPath}\" {GetTaskHostCommandLineArgs(handshake.NodeReuse, handshake.LowPriority)}",
+                $"\"{msBuildDllPath}\" {GetTaskHostCommandLineArgs(handshake)}",
                 handshake);
         }
 
@@ -85,7 +85,7 @@ namespace Microsoft.Build.BackEnd
 
             return new(
                 msBuildLocation,
-                GetTaskHostCommandLineArgs(handshake.NodeReuse, handshake.LowPriority),
+                GetTaskHostCommandLineArgs(handshake),
                 handshake);
         }
 
@@ -99,7 +99,7 @@ namespace Microsoft.Build.BackEnd
 
             return new(
                 msBuildLocation,
-                GetTaskHostCommandLineArgs(handshake.NodeReuse, handshake.LowPriority),
+                GetTaskHostCommandLineArgs(handshake),
                 handshake,
                 new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
                 {
@@ -117,8 +117,21 @@ namespace Microsoft.Build.BackEnd
                 string.Empty,
                 request.CreateHandshake(toolsDirectory, fileVersion));
 
-        private static string GetTaskHostCommandLineArgs(bool nodeReuse, bool lowPriority)
-            => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuse} /low:{lowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
+        private static string GetWorkerCommandLineArgs(WorkerNodeHandshake handshake)
+            => $"/noautoresponse /nologo {GetNodeModeCommandLineArgument(handshake)} /nodeReuse:{handshake.NodeReuse.ToString().ToLowerInvariant()} /low:{handshake.LowPriority.ToString().ToLowerInvariant()}";
+
+        private static string GetTaskHostCommandLineArgs(TaskHostHandshake handshake)
+            => handshake switch
+            {
+                NetTaskHostHandshake or FrameworkTaskHostHandshake =>
+                    $"/nologo {GetNodeModeCommandLineArgument(handshake)} /nodereuse:{handshake.NodeReuse} /low:{handshake.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ",
+                Clr2TaskHostHandshake => string.Empty,
+            };
+
+        private static string GetNodeModeCommandLineArgument(ILaunchableNodeHandshake handshake)
+            => handshake.ExpectedNodeMode is NodeMode nodeMode
+                ? NodeModeHelper.ToCommandLineArgument(nodeMode)
+                : string.Empty;
     }
 
     internal readonly record struct NodeLaunchData<THandshake>
