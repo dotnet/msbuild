@@ -234,7 +234,7 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
         ["Build"],
         null);
 
-    private sealed class RetainingWorkerProvider : NodeProviderOutOfProc
+    private sealed class RetainingWorkerProvider : WorkerNodeProviderOutOfProc
     {
         protected override int GetNodeReuseThreshold() => int.MaxValue;
     }

@@ -16,10 +16,10 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
-    /// which act as child nodes for the build system.
+    /// The provider for out-of-proc worker nodes. This manages the lifetime of external MSBuild.exe
+    /// processes which act as child nodes for the build system.
     /// </summary>
-    internal class NodeProviderOutOfProc : NodeProviderOutOfProcBase<WorkerNodeHandshake>, INodeProvider
+    internal class WorkerNodeProviderOutOfProc : NodeProviderOutOfProcBase<WorkerNodeHandshake>, INodeProvider
     {
         /// <summary>
         /// A mapping of all the nodes managed by this provider.
@@ -29,7 +29,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor.
         /// </summary>
-        protected NodeProviderOutOfProc()
+        protected WorkerNodeProviderOutOfProc()
         {
         }
 
@@ -195,7 +195,7 @@ namespace Microsoft.Build.BackEnd
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
             Assumed.Equal(componentType, BuildComponentType.OutOfProcNodeProvider, $"Factory cannot create components of type {componentType}");
-            return new NodeProviderOutOfProc();
+            return new WorkerNodeProviderOutOfProc();
         }
 
         /// <summary>

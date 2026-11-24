@@ -30,8 +30,10 @@ using Constants = Microsoft.Build.Framework.Constants;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// Contains the shared pieces of code from NodeProviderOutOfProc
-    /// and NodeProviderOutOfProcTaskHost.
+    /// Provides the common node and process lifecycle used by the worker-node and task-host providers,
+    /// including shared node context, shutdown, and process-management helpers. The generic derived base
+    /// adds the typed handshake used to create and connect each kind of node, keeping that protocol-specific
+    /// behavior paired with the corresponding provider.
     /// </summary>
     internal abstract partial class NodeProviderOutOfProcBase
     {
@@ -182,12 +184,12 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                NodeConnectionResult connection = NodeConnection.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false));
+                NodeConnectionResult connection = NodeConnection.TryConnectToProcess(nodeProcess.Id, timeout, WorkerNodeProviderOutOfProc.GetHandshake(nodeReuse, false));
 
                 if (connection is NodeConnectionResult.Failed)
                 {
                     // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    connection = NodeConnection.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true));
+                    connection = NodeConnection.TryConnectToProcess(nodeProcess.Id, timeout, WorkerNodeProviderOutOfProc.GetHandshake(nodeReuse, true));
                 }
 
                 if (connection is NodeConnectionResult.Connected connected)

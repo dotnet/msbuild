@@ -67,7 +67,7 @@ namespace Microsoft.Build.BackEnd
 
             _componentEntriesByType[BuildComponentType.NodeLauncher] = new BuildComponentEntry(BuildComponentType.NodeLauncher, NodeLauncher.CreateComponent, CreationPattern.Singleton);
             _componentEntriesByType[BuildComponentType.InProcNodeProvider] = new BuildComponentEntry(BuildComponentType.InProcNodeProvider, NodeProviderInProc.CreateComponent, CreationPattern.Singleton);
-            _componentEntriesByType[BuildComponentType.OutOfProcNodeProvider] = new BuildComponentEntry(BuildComponentType.OutOfProcNodeProvider, NodeProviderOutOfProc.CreateComponent, CreationPattern.Singleton);
+            _componentEntriesByType[BuildComponentType.OutOfProcNodeProvider] = new BuildComponentEntry(BuildComponentType.OutOfProcNodeProvider, WorkerNodeProviderOutOfProc.CreateComponent, CreationPattern.Singleton);
             _componentEntriesByType[BuildComponentType.OutOfProcTaskHostNodeProvider] = new BuildComponentEntry(BuildComponentType.OutOfProcTaskHostNodeProvider, NodeProviderOutOfProcTaskHost.CreateComponent, CreationPattern.Singleton);
 
             // PropertyCache,

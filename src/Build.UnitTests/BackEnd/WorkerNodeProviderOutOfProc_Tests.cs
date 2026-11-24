@@ -14,9 +14,9 @@ using Xunit;
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
-    /// Tests for NodeProviderOutOfProc, specifically the node over-provisioning detection feature.
+    /// Tests for WorkerNodeProviderOutOfProc and out-of-proc node over-provisioning detection.
     /// </summary>
-    public class NodeProviderOutOfProc_Tests
+    public class WorkerNodeProviderOutOfProc_Tests
     {
         [Theory]
         [InlineData(false, false)]
