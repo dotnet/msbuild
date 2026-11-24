@@ -11,6 +11,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -189,7 +190,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
         string projectFile = CreateProject(env, explicitTaskHost: false);
         int? firstProcessId = null;
         HashSet<int> processIds = [];
-        NodeProviderOutOfProcBase.NodeContext? firstConnection = null;
+        NodeProviderOutOfProcBase.NodeContext<TaskHostHandshake>? firstConnection = null;
 
         (string Text, bool UseCachedWriter, bool Expected)[] builds =
         [
@@ -243,7 +244,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
                 .GetComponent<NodeProviderOutOfProcTaskHost>(BuildComponentType.OutOfProcTaskHostNodeProvider);
             if (retainConnection)
             {
-                NodeProviderOutOfProcBase.NodeContext connection = provider.ConnectedNodes.Values.ShouldHaveSingleItem();
+                NodeProviderOutOfProcBase.NodeContext<TaskHostHandshake> connection = provider.ConnectedNodes.Values.ShouldHaveSingleItem();
                 connection.ConnectionPersistsAcrossBuilds.ShouldBeTrue();
                 firstConnection ??= connection;
                 connection.ShouldBeSameAs(firstConnection);

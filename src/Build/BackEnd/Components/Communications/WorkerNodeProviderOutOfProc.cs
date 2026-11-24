@@ -24,7 +24,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A mapping of all the nodes managed by this provider.
         /// </summary>
-        private ConcurrentDictionary<int, NodeContext> _nodeContexts;
+        private ConcurrentDictionary<int, NodeContext<WorkerNodeHandshake>> _nodeContexts;
 
         /// <summary>
         /// Constructor.
@@ -99,7 +99,7 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace($"Starting to acquire {numberOfNodesToCreate} new or existing node(s) to establish nodes from ID {nextNodeId} to {nextNodeId + numberOfNodesToCreate - 1}...");
      
-            IList<NodeContext> nodeContexts = GetNodes(nodeLaunchData, nextNodeId, factory, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate);
+            IList<NodeContext<WorkerNodeHandshake>> nodeContexts = GetNodes(nodeLaunchData, nextNodeId, factory, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate);
 
             if (nodeContexts.Count > 0)
             {
@@ -110,7 +110,7 @@ namespace Microsoft.Build.BackEnd
 
             throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotConnectToMSBuildExe", ComponentHost.BuildParameters.NodeExeLocation));
 
-            void NodeContextCreated(NodeContext context)
+            void NodeContextCreated(NodeContext<WorkerNodeHandshake> context)
             {
                 NodeInfo nodeInfo = new NodeInfo(context.NodeId, ProviderType);
 
@@ -143,7 +143,7 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownConnectedNodes(bool enableReuse)
         {
             // Send the build completion message to the nodes, causing them to shutdown or reset.
-            var contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
+            var contextsToShutDown = new List<NodeContext<WorkerNodeHandshake>>(_nodeContexts.Values);
 
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
         }
@@ -177,7 +177,7 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             this.ComponentHost = host;
-            _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
+            _nodeContexts = new ConcurrentDictionary<int, NodeContext<WorkerNodeHandshake>>();
         }
 
         /// <summary>

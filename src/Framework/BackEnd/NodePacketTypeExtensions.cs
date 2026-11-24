@@ -81,25 +81,26 @@ internal static class NodePacketTypeExtensions
     /// <summary>
     /// Create a packet type byte with an extended header for versioned task-host packets.
     /// </summary>
-    /// <param name="handshake">Handshake that determines the packet format, or <see langword="null"/> when none applies.</param>
+    /// <param name="handshake">The handshake that determines the packet format.</param>
     /// <param name="type">Base packet type.</param>
     /// <param name="extendedheader">Output byte with flag set if applicable.</param>
     /// <param name="negotiatedVersion">Version negotiated with the child TaskHost.</param>
     /// <returns>True if extended header flag was set, false otherwise.</returns>
-    public static bool TryCreateExtendedHeaderType(Handshake? handshake, NodePacketType type, out byte extendedheader, byte negotiatedVersion = 0)
+    public static bool TryCreateExtendedHeaderType(ILaunchableNodeHandshake handshake, NodePacketType type, out byte extendedheader, byte negotiatedVersion = 0)
     {
         bool hasExtendedHeader = handshake switch
         {
             // .NET task hosts version every packet.
-            NetTaskHostHandshake => true,
+            NetTaskHostHandshake or TaskHostHandshake { Value: NetTaskHostHandshake } => true,
 
             // .NET Framework task hosts version only packets added after they first shipped,
             // and only once the child has reported support for them.
-            FrameworkTaskHostHandshake or Clr2TaskHostHandshake =>
+            FrameworkTaskHostHandshake or Clr2TaskHostHandshake
+                or TaskHostHandshake { Value: FrameworkTaskHostHandshake or Clr2TaskHostHandshake } =>
                 (type == NodePacketType.NodeBuildComplete && negotiatedVersion >= TaskHostOwnershipMinVersion)
                 || (type == NodePacketType.TaskHostConsoleConfiguration && negotiatedVersion >= ConsoleOutputForwardingMinVersion),
 
-            // Worker and server nodes, and connections without a handshake, do not use extended headers.
+            // Worker nodes do not use extended headers.
             _ => false,
         };
 
@@ -116,15 +117,15 @@ internal static class NodePacketTypeExtensions
     /// <summary>
     /// Gets the packet version to use when a packet is written without an extended header.
     /// </summary>
-    /// <param name="handshake">Handshake that determines the packet format, or <see langword="null"/> when none applies.</param>
+    /// <param name="handshake">The handshake that determines the packet format.</param>
     /// <returns>
     /// <see langword="null"/> for CLR2 task hosts, which do not contain version-dependent fields, so no
     /// version is set; otherwise 0, so that the version-dependent fields that every other peer supports are written.
     /// </returns>
-    public static byte? GetPacketVersionWithoutExtendedHeader(Handshake? handshake)
+    public static byte? GetPacketVersionWithoutExtendedHeader(ILaunchableNodeHandshake handshake)
         => handshake switch
         {
-            Clr2TaskHostHandshake => null,
+            Clr2TaskHostHandshake or TaskHostHandshake { Value: Clr2TaskHostHandshake } => null,
             _ => 0,
         };
 

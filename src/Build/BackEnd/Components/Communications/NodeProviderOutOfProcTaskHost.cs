@@ -135,7 +135,7 @@ namespace Microsoft.Build.BackEnd
         /// A mapping of all the task host nodes managed by this provider.
         /// The key is a TaskHostNodeKey combining the typed task-host request and scheduled node ID.
         /// </summary>
-        private ConcurrentDictionary<TaskHostNodeKey, NodeContext> _nodeContexts;
+        private ConcurrentDictionary<TaskHostNodeKey, NodeContext<TaskHostHandshake>> _nodeContexts;
 
         /// <summary>
         /// Reverse mapping from communication node ID to TaskHostNodeKey.
@@ -368,7 +368,7 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            List<NodeContext> contextsToShutDown = [.. _nodeContexts.Values];
+            List<NodeContext<TaskHostHandshake>> contextsToShutDown = [.. _nodeContexts.Values];
 
             // Processes that could not be connected to are skipped for the rest of a build; clear
             // that for the next one, or a pooled task host this process failed to claim once is
@@ -381,7 +381,7 @@ namespace Microsoft.Build.BackEnd
             // Retire terminal sidecars before sending shutdown, so a new build cannot acquire them.
             lock (_activeNodes)
             {
-                foreach (NodeContext context in contextsToShutDown)
+                foreach (NodeContext<TaskHostHandshake> context in contextsToShutDown)
                 {
                     if (!_nodeIdToNodeKey.TryGetValue(context.NodeId, out TaskHostNodeKey nodeKey))
                     {
@@ -409,7 +409,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            foreach (NodeContext context in contextsToShutDown)
+            foreach (NodeContext<TaskHostHandshake> context in contextsToShutDown)
             {
                 NodeBuildCompleteAction action = !enableReuse
                     ? NodeBuildCompleteAction.Shutdown
@@ -445,7 +445,7 @@ namespace Microsoft.Build.BackEnd
         /// FOR UNIT TESTING ONLY: a worker node process must keep the same set across every build it
         /// serves, or task hosts that are still connected are lost.
         /// </summary>
-        internal ConcurrentDictionary<TaskHostNodeKey, NodeContext> ConnectedNodes => _nodeContexts;
+        internal ConcurrentDictionary<TaskHostNodeKey, NodeContext<TaskHostHandshake>> ConnectedNodes => _nodeContexts;
 
         /// <summary>
         /// The host of the build currently being served. FOR UNIT TESTING ONLY.
@@ -479,7 +479,7 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
+            _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext<TaskHostHandshake>>();
             _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
             _nodeIdToPacketHandlerStack = new ConcurrentDictionary<int, Stack<INodePacketHandler>>();
             _consoleForwardingNodeIds = [];
@@ -1002,7 +1002,7 @@ namespace Microsoft.Build.BackEnd
             out bool parameterConversionUnsupported,
             out int hostProcessId,
             out bool wasNewlyCreated,
-            out NodeContext connection,
+            out NodeContext<TaskHostHandshake> connection,
             out VisualStudioTaskHostResolution visualStudioResolution)
         {
             parameterConversionUnsupported = false;
@@ -1016,8 +1016,8 @@ namespace Microsoft.Build.BackEnd
 
             if (launchPaths.MSBuildAssemblyPath is null && launchPaths.DotnetHostPath is null)
             {
-                KeyValuePair<TaskHostNodeKey, NodeContext>? reusableConnection = null;
-                foreach (KeyValuePair<TaskHostNodeKey, NodeContext> existing in _nodeContexts)
+                KeyValuePair<TaskHostNodeKey, NodeContext<TaskHostHandshake>>? reusableConnection = null;
+                foreach (KeyValuePair<TaskHostNodeKey, NodeContext<TaskHostHandshake>> existing in _nodeContexts)
                 {
                     // A nested request without explicit launch paths may reuse only its unique active outer host.
                     if ((existing.Key with { LaunchIdentity = requestedNodeKey.LaunchIdentity }) == requestedNodeKey
@@ -1081,7 +1081,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
+            if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext<TaskHostHandshake> context))
             {
                 return false;
             }
@@ -1136,7 +1136,7 @@ namespace Microsoft.Build.BackEnd
         /// Selects the existing handler whose build callback has reacquired the owning node.
         /// A late callback cannot reactivate a retired or replacement connection.
         /// </summary>
-        internal bool TryReactivateTaskHandler(NodeContext context, INodePacketHandler handler)
+        internal bool TryReactivateTaskHandler(NodeContext<TaskHostHandshake> context, INodePacketHandler handler)
         {
             lock (_activeNodes)
             {
@@ -1167,7 +1167,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Expected to be called when TaskHostTask is done with host of the given context.
         /// </summary>
-        internal void DisconnectFromHost(NodeContext context, INodePacketHandler handler)
+        internal void DisconnectFromHost(NodeContext<TaskHostHandshake> context, INodePacketHandler handler)
         {
             lock (_activeNodes)
             {
@@ -1236,11 +1236,11 @@ namespace Microsoft.Build.BackEnd
             int communicationNodeId = Interlocked.Increment(ref _nextNodeId);
 
             // Create callbacks that capture the TaskHostNodeKey
-            void OnNodeContextCreated(NodeContext context) => NodeContextCreated(context, nodeKey);
+            void OnNodeContextCreated(NodeContext<TaskHostHandshake> context) => NodeContextCreated(context, nodeKey);
 
             CommunicationsUtilities.Trace($"For a host context of {hostContext}, spawning executable from {nodeLaunchData.MSBuildLocation}.");
 
-            IList<NodeContext> nodeContexts = GetNodes(
+            IList<NodeContext<TaskHostHandshake>> nodeContexts = GetNodes(
                 nodeLaunchData,
                 communicationNodeId,
                 this,
@@ -1605,7 +1605,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Method called when a context created.
         /// </summary>
-        internal void NodeContextCreated(NodeContext context, TaskHostNodeKey nodeKey)
+        internal void NodeContextCreated(NodeContext<TaskHostHandshake> context, TaskHostNodeKey nodeKey)
         {
             lock (_activeNodes)
             {
@@ -1625,7 +1625,7 @@ namespace Microsoft.Build.BackEnd
         /// <see langword="false"/> if the node is no longer tracked, meaning its process went away
         /// between being looked up and being used, in which case the caller must not use it.
         /// </returns>
-        private bool TryActivateNode(NodeContext context)
+        private bool TryActivateNode(NodeContext<TaskHostHandshake> context)
         {
             lock (_activeNodes)
             {
@@ -1643,7 +1643,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        internal bool TryAttachTaskHandler(NodeContext context, INodePacketHandler handler)
+        internal bool TryAttachTaskHandler(NodeContext<TaskHostHandshake> context, INodePacketHandler handler)
         {
             lock (_activeNodes)
             {

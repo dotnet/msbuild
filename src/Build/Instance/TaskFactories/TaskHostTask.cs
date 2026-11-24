@@ -104,7 +104,7 @@ namespace Microsoft.Build.BackEnd
         /// True if currently connected to the task host; false otherwise.
         /// </summary>
         private bool _connectedToTaskHost = false;
-        private NodeProviderOutOfProcBase.NodeContext _taskHostConnection;
+        private NodeProviderOutOfProcBase.NodeContext<TaskHostHandshake> _taskHostConnection;
 
         /// <summary>
         /// The provider for task host nodes.

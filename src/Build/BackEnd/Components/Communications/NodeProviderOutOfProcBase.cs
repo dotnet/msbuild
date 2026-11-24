@@ -81,7 +81,8 @@ namespace Microsoft.Build.BackEnd
         /// Delegate used to tell the node provider that a context has been created.
         /// </summary>
         /// <param name="context">The created node context.</param>
-        internal delegate void NodeContextCreatedDelegate(NodeContext context);
+        internal delegate void NodeContextCreatedDelegate<THandshake>(NodeContext<THandshake> context)
+            where THandshake : ILaunchableNodeHandshake;
 
         /// <summary>
         /// Delegate used to tell the node provider that a context has terminated.
@@ -103,7 +104,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="context">The node to which data shall be sent.</param>
         /// <param name="packet">The packet to send.</param>
-        protected void SendData(NodeContext context, INodePacket packet)
+        protected void SendData<THandshake>(NodeContext<THandshake> context, INodePacket packet)
+            where THandshake : ILaunchableNodeHandshake
         {
             ArgumentNullException.ThrowIfNull(packet);
             context.SendData(packet);
@@ -114,7 +116,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="contextsToShutDown">List of the contexts to be shut down</param>
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>
-        protected void ShutdownConnectedNodes(List<NodeContext> contextsToShutDown, bool enableReuse)
+        protected void ShutdownConnectedNodes<THandshake>(List<NodeContext<THandshake>> contextsToShutDown, bool enableReuse)
+            where THandshake : ILaunchableNodeHandshake
         {
             // Send the build completion message to the nodes, causing them to shutdown or reset.
             _processesToIgnore.Clear();
@@ -132,7 +135,7 @@ namespace Microsoft.Build.BackEnd
             int i = 0;
             int contextIndex = 0;
             var loggingService = _componentHost.LoggingService;
-            foreach (NodeContext nodeContext in contextsToShutDown)
+            foreach (NodeContext<THandshake> nodeContext in contextsToShutDown)
             {
                 if (nodeContext is null)
                 {
@@ -184,19 +187,21 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                NodeConnectionResult connection = NodeConnection.TryConnectToProcess(nodeProcess.Id, timeout, WorkerNodeProviderOutOfProc.GetHandshake(nodeReuse, false));
+                WorkerNodeHandshake handshake = WorkerNodeProviderOutOfProc.GetHandshake(nodeReuse, false);
+                NodeConnectionResult connection = NodeConnection.TryConnectToProcess(nodeProcess.Id, timeout, handshake);
 
                 if (connection is NodeConnectionResult.Failed)
                 {
                     // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    connection = NodeConnection.TryConnectToProcess(nodeProcess.Id, timeout, WorkerNodeProviderOutOfProc.GetHandshake(nodeReuse, true));
+                    handshake = WorkerNodeProviderOutOfProc.GetHandshake(nodeReuse, true);
+                    connection = NodeConnection.TryConnectToProcess(nodeProcess.Id, timeout, handshake);
                 }
 
                 if (connection is NodeConnectionResult.Connected connected)
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace($"Shutting down node with pid = {nodeProcess.Id}");
-                    RequestNodeShutdown(nodeProcess, connected, terminateNode);
+                    RequestNodeShutdown(nodeProcess, connected, terminateNode, handshake);
                 }
             }
         }
@@ -204,11 +209,15 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Transfers the pipe to a context that keeps it open until the node acknowledges shutdown or disconnects.
         /// </summary>
-        internal static NodeContext RequestNodeShutdown(Process nodeProcess, NodeConnectionResult.Connected connection, NodeContextTerminateDelegate terminateNode)
+        internal static NodeContext<WorkerNodeHandshake> RequestNodeShutdown(
+            Process nodeProcess,
+            NodeConnectionResult.Connected connection,
+            NodeContextTerminateDelegate terminateNode,
+            WorkerNodeHandshake handshake)
         {
             NodePacketFactory factory = new();
             factory.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, new ShutdownPacketHandler());
-            NodeContext context = new(0, nodeProcess, connection, factory, terminateNode);
+            NodeContext<WorkerNodeHandshake> context = new(0, nodeProcess, connection, factory, terminateNode, handshake);
             context.BeginAsyncPacketRead();
             context.SendData(new NodeBuildComplete(false /* no node reuse */));
             return context;
@@ -236,11 +245,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="createNode">Callback when a node is created.</param>
         /// <param name="terminateNode">Callback when a node terminates.</param>
         /// <param name="numberOfNodesToCreate">Number of nodes to create.</param>
-        protected IList<NodeContext> GetNodes(
+        protected IList<NodeContext<THandshake>> GetNodes(
             NodeLaunchData<THandshake> nodeLaunchData,
             int nextNodeId,
             INodePacketFactory factory,
-            NodeContextCreatedDelegate createNode,
+            NodeContextCreatedDelegate<THandshake> createNode,
             NodeContextTerminateDelegate terminateNode,
             int numberOfNodesToCreate)
         {
@@ -318,7 +327,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            ConcurrentQueue<NodeContext> nodeContexts = new();
+            ConcurrentQueue<NodeContext<THandshake>> nodeContexts = new();
             ConcurrentQueue<Exception> exceptions = new();
             int currentProcessId = EnvironmentUtilities.CurrentProcessId;
             Parallel.For(nextNodeId, nextNodeId + numberOfNodesToCreate, (nodeId) =>
@@ -503,8 +512,14 @@ namespace Microsoft.Build.BackEnd
 
             void CreateNodeContext(int nodeId, Process nodeToReuse, NodeConnectionResult.Connected connection)
             {
-                Handshake handshake = Handshake.From(nodeLaunchData.Handshake);
-                NodeContext nodeContext = new(nodeId, nodeToReuse, connection, factory, terminateNode, handshake, DoesConnectionPersistAcrossBuilds(nodeLaunchData.Handshake, connection.NegotiatedPacketVersion));
+                NodeContext<THandshake> nodeContext = new(
+                    nodeId,
+                    nodeToReuse,
+                    connection,
+                    factory,
+                    terminateNode,
+                    nodeLaunchData.Handshake,
+                    DoesConnectionPersistAcrossBuilds(nodeLaunchData.Handshake, connection.NegotiatedPacketVersion));
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
@@ -1025,7 +1040,8 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Class which wraps up the communications infrastructure for a given node.
         /// </summary>
-        internal sealed class NodeContext
+        internal sealed class NodeContext<THandshake>
+            where THandshake : ILaunchableNodeHandshake
         {
             private enum ExitPacketState
             {
@@ -1069,7 +1085,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Handshake used to connect to the node.
             /// </summary>
-            private readonly Handshake? _handshake;
+            private readonly THandshake _handshake;
 
             /// <summary>
             /// A buffer typically big enough to handle a packet body.
@@ -1164,7 +1180,7 @@ namespace Microsoft.Build.BackEnd
                 NodeConnectionResult.Connected connection,
                 INodePacketFactory factory,
                 NodeContextTerminateDelegate terminateDelegate,
-                Handshake? handshake = null,
+                THandshake handshake,
                 bool connectionPersistsAcrossBuilds = false)
             {
                 Stream nodePipe = connection.Stream;
@@ -1422,7 +1438,7 @@ namespace Microsoft.Build.BackEnd
 
             private void DrainPacketQueueCore(object state)
             {
-                NodeContext context = (NodeContext)state;
+                NodeContext<THandshake> context = (NodeContext<THandshake>)state;
                 MemoryStream writeStream = context._writeBufferMemoryStream;
                 Stream serverToClientStream = context._pipeStream;
 

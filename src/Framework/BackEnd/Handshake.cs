@@ -232,7 +232,7 @@ internal sealed class WorkerNodeHandshake : NodeHandshake, ILaunchableNodeHandsh
     public bool LowPriority => (HandshakeOptions & global::Microsoft.Build.Internal.HandshakeOptions.LowPriority) != 0;
 }
 
-internal sealed class NetTaskHostHandshake : NodeHandshake
+internal sealed class NetTaskHostHandshake : NodeHandshake, ILaunchableNodeHandshake
 {
     private protected override bool IncludesChangeWave => false;
     private protected override bool AcceptsDriveLetterCaseVariant => true;
@@ -245,6 +245,9 @@ internal sealed class NetTaskHostHandshake : NodeHandshake
         Options = options;
     }
 
+    public NodeMode? ExpectedNodeMode => NodeMode.OutOfProcTaskHostNode;
+    public bool LowPriority => Options.LowPriority;
+
     private protected override HandshakeComponents CreateComponents(int options, int salt, int sessionId, Version? fileVersion) => new(
         options,
         salt,
@@ -255,7 +258,7 @@ internal sealed class NetTaskHostHandshake : NodeHandshake
         sessionId);
 }
 
-internal sealed class FrameworkTaskHostHandshake : NodeHandshake
+internal sealed class FrameworkTaskHostHandshake : NodeHandshake, ILaunchableNodeHandshake
 {
     private protected override bool IncludesChangeWave => false;
 
@@ -272,9 +275,12 @@ internal sealed class FrameworkTaskHostHandshake : NodeHandshake
     {
         Options = options;
     }
+
+    public NodeMode? ExpectedNodeMode => NodeMode.OutOfProcTaskHostNode;
+    public bool LowPriority => Options.LowPriority;
 }
 
-internal sealed class Clr2TaskHostHandshake : NodeHandshake
+internal sealed class Clr2TaskHostHandshake : NodeHandshake, ILaunchableNodeHandshake
 {
     private protected override bool IncludesChangeWave => false;
 
@@ -285,6 +291,9 @@ internal sealed class Clr2TaskHostHandshake : NodeHandshake
     {
         Options = options;
     }
+
+    public NodeMode? ExpectedNodeMode => null;
+    public bool LowPriority => Options.LowPriority;
 }
 
 /// <summary>
