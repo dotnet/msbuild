@@ -556,7 +556,7 @@ internal abstract class NodeEndpointOutOfProcBase<THandshake> : INodeEndpoint
         {
             // NET task host tolerates a worker node connecting with an architecture mismatch.
             // The lower 24 bits carry the HandshakeOptions flags; the upper byte is the handshake version.
-            isAllowedMismatch = IsAllowedBitnessMismatch(component.Value, handshakePart);
+            isAllowedMismatch = Handshake.IsAllowedBitnessMismatch(component.Value, handshakePart);
         }
         else if (component.Key == nameof(HandshakeComponents.Salt))
         {
@@ -582,52 +582,6 @@ internal abstract class NodeEndpointOutOfProcBase<THandshake> : INodeEndpoint
 
         return false;
     }
-
-#if NET
-    /// <summary>
-    /// The .NET task host (TaskHost node) tolerates a worker node that did not emit an
-    /// architecture bit on the wire (indistinguishable from x86) when the TaskHost node
-    /// itself is x64 or arm64. This is the .NET Framework worker node → .NET SDK TaskHost
-    /// node scenario: the worker node typically cannot describe the TaskHost node's
-    /// architecture, but the launched process is whatever the SDK ships (x64 on
-    /// Windows-x64, arm64 on Windows-arm64).
-    ///
-    /// True cross-arch mismatches (e.g. worker node sent X64 but TaskHost node expects
-    /// Arm64, or vice versa) remain rejected.
-    ///
-    /// The tolerance is scoped to architecture: every non-architecture flag must still
-    /// match. Those flags carry the node's identity, most importantly <see cref="HandshakeOptions.NodeReuse"/>,
-    /// which is what separates a long-lived sidecar TaskHost from a TaskHost that exits
-    /// with the build. Tolerating a difference there would let a process that is not the
-    /// sidecar's owner connect to it, take it over for its own build, and afterwards
-    /// return it to the global reconnectable pool, defeating the sidecar's lifetime
-    /// guarantees.
-    ///
-    /// The lower 24 bits (mask 0x00FFFFFF) carry the HandshakeOptions flags; the upper
-    /// byte carries the handshake version and is ignored here.
-    /// </summary>
-    internal static bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
-    {
-        var expectedNodeType = (HandshakeOptions)(expectedOptions & 0x00FFFFFF);
-        var receivedNodeType = (HandshakeOptions)(receivedOptions & 0x00FFFFFF);
-        const HandshakeOptions ArchitectureFlags = HandshakeOptions.X64 | HandshakeOptions.Arm64;
-
-        // Only the architecture may differ; everything else identifies the node and must match.
-        if ((expectedNodeType & ~ArchitectureFlags) != (receivedNodeType & ~ArchitectureFlags))
-        {
-            return false;
-        }
-
-        // not X64 or Arm64 means the wire-form architecture is x86 (or no arch bit).
-        bool receivedIsX86 = !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.X64) &&
-                             !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.Arm64);
-
-        bool expectedIsX64 = Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.X64);
-        bool expectedIsArm64 = Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.Arm64);
-
-        return receivedIsX86 && (expectedIsX64 || expectedIsArm64);
-    }
-#endif
 
     internal void RunReadLoop(
         Stream localPipe,

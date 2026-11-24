@@ -48,6 +48,34 @@ internal union Handshake(
 
     internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option)
         => (hostContext & option) == option;
+
+#if NET
+    /// <summary>
+    /// The .NET task host tolerates a worker that does not emit an architecture bit when the
+    /// host is x64 or arm64. All other flags, including node reuse, must match to preserve
+    /// task-host ownership. The upper byte is the handshake version and is ignored.
+    /// </summary>
+    internal static bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
+    {
+        var expectedNodeType = (HandshakeOptions)(expectedOptions & 0x00FFFFFF);
+        var receivedNodeType = (HandshakeOptions)(receivedOptions & 0x00FFFFFF);
+        const HandshakeOptions ArchitectureFlags = HandshakeOptions.X64 | HandshakeOptions.Arm64;
+
+        if ((expectedNodeType & ~ArchitectureFlags) != (receivedNodeType & ~ArchitectureFlags))
+        {
+            return false;
+        }
+
+        // An absent architecture bit is also the wire encoding for x86.
+        bool receivedIsX86 = !IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.X64) &&
+                             !IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.Arm64);
+
+        bool expectedIsX64 = IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.X64);
+        bool expectedIsArm64 = IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.Arm64);
+
+        return receivedIsX86 && (expectedIsX64 || expectedIsArm64);
+    }
+#endif
 }
 
 /// <summary>
