@@ -175,6 +175,7 @@ internal static class TaskLoader
             {
                 AppDomain.Unload(taskAppDomain);
                 RemoveAssemblyResolver();
+                taskAppDomain = null;
             }
 #endif
         }
