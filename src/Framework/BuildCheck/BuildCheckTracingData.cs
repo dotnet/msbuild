@@ -17,8 +17,10 @@ internal sealed class BuildCheckTracingData(
     Dictionary<string, TimeSpan> infrastructureTracingData)
 {
     public BuildCheckTracingData(IReadOnlyList<BuildCheckRuleTelemetryData> telemetryData, Dictionary<string, TimeSpan> infrastructureTracingData)
-        : this(telemetryData.ToDictionary(data => data.RuleId), infrastructureTracingData)
-    { }
+        : this(new Dictionary<string, BuildCheckRuleTelemetryData>(), infrastructureTracingData)
+    {
+        TelemetryData.Merge(telemetryData, data => data.RuleId, BuildCheckRuleTelemetryData.Merge);
+    }
 
     public BuildCheckTracingData()
         : this(new Dictionary<string, BuildCheckRuleTelemetryData>(), [])

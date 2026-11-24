@@ -1076,17 +1076,13 @@ internal partial class Expander<P, I>
                     {
                         parameters += "null";
                     }
+                    else if (arg is string argString)
+                    {
+                        parameters += argString.Length == 0 ? "''" : argString;
+                    }
                     else
                     {
-                        string argString = arg.ToString();
-                        if (arg is string && argString.Length == 0)
-                        {
-                            parameters += "''";
-                        }
-                        else
-                        {
-                            parameters += arg.ToString();
-                        }
+                        parameters += Convert.ToString(arg, CultureInfo.InvariantCulture);
                     }
 
                     parameters += ", ";

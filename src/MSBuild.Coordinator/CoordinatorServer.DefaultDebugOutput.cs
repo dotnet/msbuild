@@ -4,6 +4,7 @@
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
+using Microsoft.Build.Shared.Debugging;
 
 namespace Microsoft.Build.Coordinator;
 
@@ -27,7 +28,7 @@ internal sealed partial class CoordinatorServer
 
         private DefaultDebugOutput()
         {
-            _debugDumpDirectory = FrameworkDebugUtils.DebugPath;
+            _debugDumpDirectory = DebugUtils.DebugPath;
 
             if (string.IsNullOrEmpty(_debugDumpDirectory))
             {

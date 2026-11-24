@@ -188,6 +188,7 @@ internal static partial class FileUtilities
                 fileName = $"tmp{Guid.NewGuid():N}";
             }
 
+            // CodeQL [SM00414] False positive: GetTemporaryFile creates temporary directories under trusted build paths.
             Directory.CreateDirectory(directory);
 
             string file = Path.Combine(directory, $"{fileName}{extension}");

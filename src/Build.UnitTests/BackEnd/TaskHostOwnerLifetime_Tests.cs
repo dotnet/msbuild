@@ -70,6 +70,7 @@ public sealed class TaskHostOwnerLifetime_Tests(ITestOutputHelper output)
         output.WriteLine($"OriginalTaskHost={original}; ReplacementTaskHost={replacement}; FinalTaskHost={last}");
     }
 
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/15436")]
     [Theory]
     [InlineData("dispose")]
     [InlineData("reuse-off")]

@@ -119,6 +119,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             GetResultOutputFile,
             FeatureAvailability,
             MultiThreaded,
+            Precompute,
             ParentPacketVersion,
             NoLogo,
             ServerInstanceId,
@@ -297,6 +298,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             new ParameterizedSwitchInfo(  ["getResultOutputFile"],              ParameterizedSwitch.GetResultOutputFile,        null,                           true,           "MissingGetResultFileError",           true,   false,   "HelpMessage_51_GetResultOutputFileSwitch"),
             new ParameterizedSwitchInfo(  ["featureAvailability", "fa"],        ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false,   "HelpMessage_46_FeatureAvailabilitySwitch"),
             new ParameterizedSwitchInfo(  ["multithreaded", "mt"],              ParameterizedSwitch.MultiThreaded,              null,                           false,          null,                                  true,   false,   "HelpMessage_49_MultiThreadedSwitch"),
+            new ParameterizedSwitchInfo(  ["precompute"],                       ParameterizedSwitch.Precompute,                  null,                           false,          null,                                  true,   false,   "HelpMessage_PrecomputeSwitch"),
             new ParameterizedSwitchInfo(  ["parentpacketversion"],              ParameterizedSwitch.ParentPacketVersion,        null,                           false,          null,                                  false,  false,   null),
             new ParameterizedSwitchInfo(  ["nologo"],                           ParameterizedSwitch.NoLogo,                     null,                           false,          null,                                  true,   false,   "HelpMessage_5_NoLogoSwitch"),
             new ParameterizedSwitchInfo(  ["serverinstanceid"],                 ParameterizedSwitch.ServerInstanceId,           null,                           false,          null,                                  false,  false,   null)

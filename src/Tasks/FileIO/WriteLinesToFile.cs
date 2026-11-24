@@ -120,6 +120,7 @@ namespace Microsoft.Build.Tasks
             }
 
             string directoryPath = Path.GetDirectoryName(filePath);
+            // CodeQL [SM00414] False positive: filePath is a trusted task input path in the project file.
             Directory.CreateDirectory(directoryPath);
 
             // Handle WriteOnlyWhenDifferent check for Overwrite mode before executing
@@ -179,6 +180,7 @@ namespace Microsoft.Build.Tasks
                 temporaryFilePath = Path.Combine(directoryPath, Path.GetRandomFileName() + "~");
 
                 // Write content to temporary file
+                // CodeQL [SM00414] False positive: temporaryFilePath is constructed under the trusted target file directory.
                 System.IO.File.WriteAllText(temporaryFilePath, contentsAsString, encoding);
 
                 // Atomically move temp file to target, overwriting if it already exists.
@@ -249,6 +251,7 @@ namespace Microsoft.Build.Tasks
                 // For append mode, directly append new content to the file.
                 // This avoids the race condition of reading-modify-write entire file.
                 // Multiple processes can safely append without losing data.
+                // CodeQL [SM00414] False positive: filePath is a trusted task input path in the project file.
                 System.IO.File.AppendAllText(filePath, contentsAsString, encoding);
                 return !Log.HasLoggedErrors;
             }

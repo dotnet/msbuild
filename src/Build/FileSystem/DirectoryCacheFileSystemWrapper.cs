@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Shared.Globbing;
 
 #if FEATURE_MSIOREDIST
 using Path = Microsoft.IO.Path;
@@ -83,7 +84,7 @@ namespace Microsoft.Build.FileSystem
         {
             FindPredicate predicate = (ref ReadOnlySpan<char> fileName) =>
             {
-                return FileMatcher.IsAllFilesWildcard(searchPattern) || FileMatcher.IsMatch(fileName, searchPattern);
+                return FileMatcher.IsAllFilesWildcard(searchPattern) || GlobPattern.MatchesName(fileName, searchPattern);
             };
 
 #if !FEATURE_MSIOREDIST && NETFRAMEWORK

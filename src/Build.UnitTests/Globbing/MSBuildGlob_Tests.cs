@@ -155,14 +155,14 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         }
 
         [Fact]
-        public void GlobParsingShouldDeduplicateRegexes()
+        public void GlobParsingShouldDeduplicateMatchers()
         {
             var globRoot = NativeMethodsShared.IsWindows ? @"c:\a" : "/a";
             var fileSpec = $"b/**/*.cs";
             var glob1 = MSBuildGlob.Parse(globRoot, fileSpec);
             var glob2 = MSBuildGlob.Parse(globRoot, fileSpec);
 
-            Assert.Same(glob1.TestOnlyRegex, glob2.TestOnlyRegex);
+            glob1.TestOnlyMatcher.ShouldBeSameAs(glob2.TestOnlyMatcher);
         }
 
         [Theory]
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void GlobRegexCachePartitionsInvariantAndLegacyCultures(bool reverseOrder)
+        public void GlobCachePartitionsInvariantAndLegacyCultures(bool reverseOrder)
         {
             using TestEnvironment environment = TestEnvironment.Create();
             CultureInfo originalCulture = CultureInfo.CurrentCulture;

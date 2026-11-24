@@ -15,8 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Shared.Globbing;
@@ -46,7 +44,7 @@ internal sealed class MSBuildPathMatcher
 
     private readonly string[] _directoryPatterns;
     private readonly bool[] _ignoreCaseDirectoryPatterns;
-    private readonly Regex?[]? _cultureSensitiveDirectoryPatterns;
+    private readonly GlobPattern?[]? _cultureSensitiveDirectoryPatterns;
     private readonly string?[]? _win32DirectoryPatterns;
     private readonly bool[]? _enforceStrictWin32DirectoryMatch;
     private readonly string _filePattern;
@@ -55,7 +53,7 @@ internal sealed class MSBuildPathMatcher
     private readonly bool _enforceStrictWin32Match;
     private readonly string? _win32FilePattern;
     private readonly bool _matchesAllFiles;
-    private readonly Regex? _filePatternRegex;
+    private readonly GlobPattern? _filePatternMatcher;
     private readonly int _globstarCount;
     private readonly int _singleGlobstarIndex;
     private readonly bool _endsInGlobstar;
@@ -69,10 +67,10 @@ internal sealed class MSBuildPathMatcher
         bool filesystemCaseSensitive = false,
         bool matchFileNameInternally = true,
         bool treatStarDotStarAsAllFiles = true,
-        bool useTrailingDotRegex = true,
+        bool useTrailingDotCompatibility = true,
         bool useWin32FileNameMatch = false,
         bool useWin32DirectoryMatch = false,
-        bool preserveLegacyRegexSemantics = false,
+        bool preserveLegacySemantics = false,
         bool useInvariantCulture = false)
     {
         ArgumentNullException.ThrowIfNull(wildcardDirectoryPart);
@@ -80,8 +78,8 @@ internal sealed class MSBuildPathMatcher
 
         _directoryPatterns = SplitDirectoryPatterns(wildcardDirectoryPart);
         _ignoreCaseDirectoryPatterns = new bool[_directoryPatterns.Length];
-        _cultureSensitiveDirectoryPatterns = preserveLegacyRegexSemantics
-            ? new Regex?[_directoryPatterns.Length]
+        _cultureSensitiveDirectoryPatterns = preserveLegacySemantics
+            ? new GlobPattern?[_directoryPatterns.Length]
             : null;
         _win32DirectoryPatterns = useWin32DirectoryMatch
             ? new string?[_directoryPatterns.Length]
@@ -96,12 +94,13 @@ internal sealed class MSBuildPathMatcher
         for (int index = 0; index < _directoryPatterns.Length; index++)
         {
             _ignoreCaseDirectoryPatterns[index] = !filesystemCaseSensitive || globstarSeen;
-            if (preserveLegacyRegexSemantics && _directoryPatterns[index] != RecursiveDirectoryMatch)
+            if (preserveLegacySemantics && _directoryPatterns[index] != RecursiveDirectoryMatch)
             {
-                _cultureSensitiveDirectoryPatterns![index] = CreateCultureSensitiveDirectoryRegex(
+                _cultureSensitiveDirectoryPatterns![index] = GlobPattern.ForName(
                     _directoryPatterns[index],
                     _ignoreCaseDirectoryPatterns[index],
-                    useInvariantCulture);
+                    useInvariantCulture,
+                    isFilePattern: false);
             }
 
             if (useWin32DirectoryMatch
@@ -136,16 +135,18 @@ internal sealed class MSBuildPathMatcher
         _matchesAllFiles = filePattern.Length == 0
             || filePattern == "*"
             || (treatStarDotStarAsAllFiles && filePattern == "*.*");
-        if (preserveLegacyRegexSemantics)
+        if (preserveLegacySemantics)
         {
-            _filePatternRegex = CreateCultureSensitiveFileRegex(filePattern, useInvariantCulture);
+            _filePatternMatcher = GlobPattern.ForName(
+                filePattern,
+                ignoreCase: true,
+                useInvariantCulture,
+                isFilePattern: true);
         }
         else
         {
-            _filePatternRegex = useTrailingDotRegex && filePattern.EndsWith(".", StringComparison.Ordinal)
-                ? new Regex(
-                    FileMatcher.RegularExpressionFromFileSpec(string.Empty, string.Empty, filePattern),
-                    GetRegexOptions(_ignoreCaseFilePattern, useInvariantCulture))
+            _filePatternMatcher = useTrailingDotCompatibility && filePattern.EndsWith(".", StringComparison.Ordinal)
+                ? GlobPattern.ForName(filePattern, _ignoreCaseFilePattern, useInvariantCulture, isFilePattern: true)
                 : null;
         }
     }
@@ -509,80 +510,33 @@ internal sealed class MSBuildPathMatcher
         ReadOnlySpan<char> name,
         string pattern,
         bool ignoreCase,
-        Regex? regex)
+        GlobPattern? matcher)
     {
-        if (regex is not null)
+        if (matcher is not null)
         {
-#if NET
-            return regex.IsMatch(name);
-#else
-            return regex.IsMatch(name.ToString());
-#endif
+            return matcher.IsMatch(name);
         }
 
-        if (ignoreCase)
-        {
-            return FileMatcher.IsMatch(name, pattern);
-        }
-
-        int nameIndex = 0;
-        int patternIndex = 0;
-        int patternAfterStar = -1;
-        int nameAfterStar = -1;
-
-        while (nameIndex < name.Length)
-        {
-            if (patternIndex < pattern.Length
-                && (pattern[patternIndex] == '?' || pattern[patternIndex] == name[nameIndex]))
-            {
-                patternIndex++;
-                nameIndex++;
-            }
-            else if (patternIndex < pattern.Length && pattern[patternIndex] == '*')
-            {
-                patternAfterStar = ++patternIndex;
-                nameAfterStar = nameIndex;
-            }
-            else if (patternAfterStar >= 0)
-            {
-                patternIndex = patternAfterStar;
-                nameIndex = ++nameAfterStar;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        while (patternIndex < pattern.Length && pattern[patternIndex] == '*')
-        {
-            patternIndex++;
-        }
-
-        return patternIndex == pattern.Length;
+        return GlobPattern.MatchesName(name, pattern, ignoreCase);
     }
 
     private bool MatchesFileNameCore(ReadOnlySpan<char> fileName)
     {
         if (!_useWin32FileNameMatch)
         {
-            return MatchesName(fileName, _filePattern, _ignoreCaseFilePattern, _filePatternRegex);
+            return MatchesName(fileName, _filePattern, _ignoreCaseFilePattern, _filePatternMatcher);
         }
 
         return FileMatcher.IsWin32FileNameMatch(fileName, _win32FilePattern!)
-            && (!_enforceStrictWin32Match || FileMatcher.IsMatch(fileName, _filePattern));
+            && (!_enforceStrictWin32Match || GlobPattern.MatchesName(fileName, _filePattern));
     }
 
     private bool MatchesDirectoryName(ReadOnlySpan<char> directoryName, int patternIndex)
     {
-        Regex? cultureSensitivePattern = _cultureSensitiveDirectoryPatterns?[patternIndex];
+        GlobPattern? cultureSensitivePattern = _cultureSensitiveDirectoryPatterns?[patternIndex];
         if (cultureSensitivePattern is not null)
         {
-            return MatchesName(
-                directoryName,
-                _directoryPatterns[patternIndex],
-                ignoreCase: true,
-                cultureSensitivePattern);
+            return cultureSensitivePattern.IsMatch(directoryName);
         }
 
         string? win32Pattern = _win32DirectoryPatterns?[patternIndex];
@@ -592,93 +546,12 @@ internal sealed class MSBuildPathMatcher
                 directoryName,
                 _directoryPatterns[patternIndex],
                 _ignoreCaseDirectoryPatterns[patternIndex],
-                regex: null);
+                matcher: null);
         }
 
         return FileMatcher.IsWin32FileNameMatch(directoryName, win32Pattern)
             && (!_enforceStrictWin32DirectoryMatch![patternIndex]
-                || FileMatcher.IsMatch(directoryName, _directoryPatterns[patternIndex]));
-    }
-
-    private static Regex CreateCultureSensitiveDirectoryRegex(
-        string pattern,
-        bool ignoreCase,
-        bool useInvariantCulture)
-    {
-        StringBuilder expression = new(pattern.Length + 8);
-        expression.Append('^');
-
-        foreach (char value in pattern)
-        {
-            if (value == '*')
-            {
-                expression.Append("[\\s\\S]*");
-            }
-            else if (value == '?')
-            {
-                expression.Append('.');
-            }
-            else
-            {
-                AppendRegexLiteral(expression, value);
-            }
-        }
-
-        expression.Append('$');
-        return new Regex(expression.ToString(), GetRegexOptions(ignoreCase, useInvariantCulture));
-    }
-
-    private static Regex CreateCultureSensitiveFileRegex(string pattern, bool useInvariantCulture)
-    {
-        StringBuilder expression = new(pattern.Length + 8);
-        expression.Append('^');
-        bool hasTrailingDot = pattern.EndsWith(".", StringComparison.Ordinal);
-        int patternLength = hasTrailingDot ? pattern.Length - 1 : pattern.Length;
-
-        for (int index = 0; index < patternLength; index++)
-        {
-            char value = pattern[index];
-            if (value == '*')
-            {
-                expression.Append(hasTrailingDot ? "[^.]*" : "[\\s\\S]*");
-            }
-            else if (value == '?')
-            {
-                expression.Append(hasTrailingDot ? "[^.]." : ".");
-            }
-            else
-            {
-                AppendRegexLiteral(expression, value);
-            }
-
-            if (!hasTrailingDot
-                && index < patternLength - 2
-                && value == '*'
-                && pattern[index + 1] == '.'
-                && pattern[index + 2] == '*')
-            {
-                index += 2;
-            }
-        }
-
-        expression.Append('$');
-        return new Regex(expression.ToString(), GetRegexOptions(ignoreCase: true, useInvariantCulture));
-    }
-
-    private static RegexOptions GetRegexOptions(bool ignoreCase, bool useInvariantCulture)
-    {
-        RegexOptions options = ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
-        return useInvariantCulture ? options | RegexOptions.CultureInvariant : options;
-    }
-
-    private static void AppendRegexLiteral(StringBuilder expression, char value)
-    {
-        if (value is '\\' or '.' or '$' or '^' or '{' or '[' or '(' or '|' or ')' or '+' or ']')
-        {
-            expression.Append('\\');
-        }
-
-        expression.Append(value);
+                || GlobPattern.MatchesName(directoryName, _directoryPatterns[patternIndex]));
     }
 
     private static string[] SplitDirectoryPatterns(string wildcardDirectoryPart)

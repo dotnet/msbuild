@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -95,6 +95,8 @@ namespace Microsoft.Build.Tasks
                     isRootFolderSameAsCurrentDirectory = String.Compare(fullRootPathString, currentDirectory, StringComparison.OrdinalIgnoreCase) == 0;
                 }
 
+                bool isWave18_14Enabled = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14);
+
                 for (int i = 0; i < Files.Length; ++i)
                 {
                     AssignedFiles[i] = new TaskItem(Files[i]);
@@ -111,10 +113,14 @@ namespace Microsoft.Build.Tasks
 
                     if (string.IsNullOrEmpty(targetPath))
                     {
+                        bool hasRelativeSpecifiers = isWave18_14Enabled
+                            ? FileUtilities.ContainsRelativePathSegments(Files[i].ItemSpec)
+                            : Files[i].ItemSpec.Contains("." + Path.DirectorySeparatorChar);
+
                         if (// if the file path is relative
                             !Path.IsPathRooted(Files[i].ItemSpec) &&
                             // if the file path doesn't contain any relative specifiers
-                            !Files[i].ItemSpec.Contains("." + Path.DirectorySeparatorChar) &&
+                            !hasRelativeSpecifiers &&
                             // if the file path is already relative to the root folder
                             isRootFolderSameAsCurrentDirectory)
                         {

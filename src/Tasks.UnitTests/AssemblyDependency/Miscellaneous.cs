@@ -2765,6 +2765,37 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
         }
+        [Fact]
+        public void LongHintPathIsNormalizedBeforeProbing()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string projectDirectory = env.CreateFolder().Path;
+            TaskEnvironment taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory);
+            string hintPath = Path.Combine(new string('a', 240), "..", "Library.dll");
+            string expectedPath = Path.Combine(projectDirectory, "Library.dll");
+            taskEnvironment.GetAbsolutePath(hintPath).Value.Length.ShouldBeGreaterThan(260);
+            expectedPath.Length.ShouldBeLessThan(260);
+
+            File.Copy(typeof(TaskItem).Assembly.Location, expectedPath);
+            var assemblyName = new AssemblyNameExtension(typeof(TaskItem).Assembly.GetName());
+            var resolver = new HintPathResolver(
+                "{HintPathFromItem}",
+                AssemblyNameExtension.GetAssemblyNameEx,
+                // Emulate legacy Windows MAX_PATH (260 including the null terminator),
+                // regardless of the machine's long-path settings.
+                path => path.Length < 260 && File.Exists(path),
+                AssemblyInformation.GetRuntimeVersion,
+                new Version(4, 0),
+                taskEnvironment);
+
+            bool resolved = resolver.Resolve(
+                assemblyName, null, null, true, false, true, [".dll"], hintPath, null, [],
+                out string foundPath, out _);
+
+            resolved.ShouldBeTrue();
+            foundPath.ShouldBe(expectedPath);
+        }
+
         /// <summary>
         /// Make sure we do not crash if a raw file name is passed in and the specific version metadata is set
         /// </summary>

@@ -10,6 +10,7 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Shared.Globbing;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -92,6 +93,7 @@ namespace Microsoft.Build.Tasks
             try
             {
                 AbsolutePath destinationPath = TaskEnvironment.GetAbsolutePath(DestinationFolder.ItemSpec);
+                // CodeQL [SM00414] False positive: DestinationFolder is a trusted task input path in the project file.
                 destinationDirectory = Directory.CreateDirectory(destinationPath);
             }
             catch (Exception e)
@@ -306,12 +308,12 @@ namespace Microsoft.Build.Tasks
 
             if (_includePatterns.Length > 0)
             {
-                result = _includePatterns.All(pattern => !FileMatcher.IsMatch(FileMatcher.Normalize(zipArchiveEntry.FullName), pattern));
+                result = _includePatterns.All(pattern => !GlobPattern.MatchesName(FileMatcher.Normalize(zipArchiveEntry.FullName).AsSpan(), pattern));
             }
 
             if (_excludePatterns.Length > 0)
             {
-                result |= _excludePatterns.Any(pattern => FileMatcher.IsMatch(FileMatcher.Normalize(zipArchiveEntry.FullName), pattern));
+                result |= _excludePatterns.Any(pattern => GlobPattern.MatchesName(FileMatcher.Normalize(zipArchiveEntry.FullName).AsSpan(), pattern));
             }
 
             return result;

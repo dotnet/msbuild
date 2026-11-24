@@ -7,21 +7,21 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Eventing;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.Utilities;
-using Microsoft.Build.Experimental.FileAccess;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Messaging;
 #endif
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Components.Caching;
+using Microsoft.Build.Eventing;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.FileAccess;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -668,8 +668,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="key">The key used to retrieve the object.</param>
         /// <param name="obj">The object to be held for later disposal.</param>
         /// <param name="lifetime">The lifetime of the object.</param>
-        /// <param name="allowEarlyCollection">The object may be disposed earlier that the requested time if
-        /// MSBuild needs to reclaim memory.</param>
+        /// <param name="allowEarlyCollection">This parameter is ignored. It is kept for compatibility.</param>
         public void RegisterTaskObject(object key, object obj, RegisteredTaskObjectLifetime lifetime, bool allowEarlyCollection)
         {
             _registeredTaskObjectCache.RegisterTaskObject(key, obj, lifetime, allowEarlyCollection);
@@ -681,8 +680,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="key">The key used to retrieve the object.</param>
         /// <param name="lifetime">The lifetime of the object.</param>
         /// <returns>
-        /// The registered object, or null is there is no object registered under that key or the object
-        /// has been discarded through early collection.
+        /// The registered object, or null if there is no object registered under that key.
         /// </returns>
         public object GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime)
         {
@@ -695,8 +693,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="key">The key used to retrieve the object.</param>
         /// <param name="lifetime">The lifetime of the object.</param>
         /// <returns>
-        /// The registered object, or null is there is no object registered under that key or the object
-        /// has been discarded through early collection.
+        /// The registered object, or null if there is no object registered under that key.
         /// </returns>
         public object UnregisterTaskObject(object key, RegisteredTaskObjectLifetime lifetime)
         {

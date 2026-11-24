@@ -50,10 +50,6 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="..\Shared\IsExternalInit.cs" />
-  </ItemGroup>
-
   <Target Name="AddGeneratedFile" BeforeTargets="BeforeCompile;CoreCompile" Inputs="$(MSBuildAllProjects)" Outputs="$(IntermediateOutputPath)BuildCheckUnitTestsConstants.cs">
     <PropertyGroup>
       <GeneratedText>

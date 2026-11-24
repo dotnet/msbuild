@@ -351,6 +351,7 @@ namespace Microsoft.Build.Tasks
         {
             XDocument document;
             var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
+            // CodeQL [SM00414] False positive: appConfigFile is a trusted project configuration file path.
             using (XmlReader xr = XmlReader.Create(File.OpenRead(appConfigFile), xrs))
             {
                 document = XDocument.Load(xr);

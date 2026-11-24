@@ -56,6 +56,7 @@ namespace Microsoft.Build.Shared
     /// between the two is done lazily on demand.
     /// </summary>
     [Serializable]
+    // CodeQL [SM02227] False positive: static call-graph over-approximation via virtual ToString/Flush in VMR build; deserialization only reads AssemblyName fields.
     internal sealed class AssemblyNameExtension : ISerializable, IEquatable<AssemblyNameExtension>, ITranslatable
     {
         private AssemblyName asAssemblyName = null;

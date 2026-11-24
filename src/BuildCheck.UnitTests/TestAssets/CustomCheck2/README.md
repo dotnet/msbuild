@@ -12,7 +12,7 @@ MSBuild Custom Check Template is a .NET template designed to streamline the crea
 To use the MSBuild Custom Check Template, follow these steps:
 1. Install the template using the following command:
    ```bash
-   dotnet new install msbuildcheck
+   dotnet new install Microsoft.Build.Templates
 2. Instantiate a custom template:
    ```bash
    dotnet new msbuildcheck -n <ProjectName>

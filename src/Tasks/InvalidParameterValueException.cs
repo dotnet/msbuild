@@ -15,6 +15,7 @@ namespace Microsoft.Build.Tasks
     /// ArgumentOutOfRangeException does, but it appends its own message to yours.
     /// </summary>
     [Serializable]
+    // CodeQL [SM02227] False positive: static call-graph over-approximation via virtual ToString/Flush in VMR build; deserialization only reads primitive fields.
     internal sealed class InvalidParameterValueException : Exception
     {
         /// <summary>

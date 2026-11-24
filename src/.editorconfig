@@ -5,3 +5,5 @@ dotnet_diagnostic.CA3075.severity = warning
 dotnet_diagnostic.CA3076.severity = warning
 dotnet_diagnostic.CA3077.severity = warning
 
+# Allow use of experimental MSBUILD_PRECOMPUTE anywhere in our code since we're implementing it
+dotnet_diagnostic.MSBUILD_PRECOMPUTE.severity = none

@@ -637,6 +637,13 @@
                      (Short form: -mt)
     </value>
   </data>
+  <data name="HelpMessage_PrecomputeSwitch" xml:space="preserve">
+    <value>  -precompute[:true|false]
+                     Enables EXPERIMENTAL precompute mode, which
+                     separates creation of the build graph from execution
+                     of that graph.
+    </value>
+  </data>
   <data name="HelpMessage_24_NodeReuse" xml:space="preserve">
     <value>  -nodeReuse:&lt;parameters&gt;
                      Enables or Disables the reuse of MSBuild nodes.
@@ -1534,6 +1541,15 @@
       {StrBegin="MSBUILD : error MSB1072: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the -multithreaded parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
+  <data name="InvalidPrecomputeValue" xml:space="preserve">
+    <value>MSBUILD : error MSB1074: Precompute mode value is not valid. {0}</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1074: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -precompute parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>

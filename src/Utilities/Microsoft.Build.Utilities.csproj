@@ -1,7 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\DebuggingSources.proj" />
-
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -12,7 +10,8 @@
     <AssemblyName>Microsoft.Build.Utilities.Core</AssemblyName>
     <EnableDocumentationFile>true</EnableDocumentationFile>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
-    <!-- <CreateTlb>true</CreateTlb> --><!-- This was created in VS but not published, so I don't think it's needed -->
+    <!-- <CreateTlb>true</CreateTlb> -->
+    <!-- This was created in VS but not published, so I don't think it's needed -->
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is used to implement custom MSBuild tasks.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
@@ -36,23 +35,11 @@
 
   <ItemGroup Label="Shared Code">
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
-    <Compile Include="..\Shared\CanonicalError.cs">
-      <Link>Shared\CanonicalError.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Shared\ErrorUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
-      <Link>Shared\InprocTrackingNativeMethods.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>Shared\ResourceUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TaskLoggingHelper.cs">
-      <Link>Shared\TaskLoggingHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Tracing.cs">
-      <Link>Shared\Tracing.cs</Link>
     </Compile>
   </ItemGroup>
 

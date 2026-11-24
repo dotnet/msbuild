@@ -3,6 +3,9 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+#if !NET
+using Microsoft.Build.Framework;
+#endif
 
 namespace Microsoft.Build;
 
@@ -61,7 +64,7 @@ internal static class StringExtensions
         return length != originalLength;
     }
 
-    extension(string)
+    extension(string value)
     {
         /// <summary>
         ///  Determines whether regions of two strings are equal using the specified comparison.
@@ -147,6 +150,43 @@ internal static class StringExtensions
             }
 
             return result;
+        }
+
+        /// <summary>
+        ///  Replaces all occurrences of a string using the specified comparison.
+        /// </summary>
+        public string Replace(string oldValue, string? newValue, StringComparison stringComparison)
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            ArgumentException.ThrowIfNullOrEmpty(oldValue);
+
+            newValue ??= string.Empty;
+
+            int currentOccurrence = value.IndexOf(oldValue, stringComparison);
+            if (currentOccurrence == -1)
+            {
+                return value;
+            }
+
+            int endOfPreviousOccurrence = 0;
+
+            // Assumes one match. Optimizes for replacing fallback property values (e.g. MSBuildExtensionsPath), where an import usually references the fallback property once.
+            // Reduces memory usage by half.
+            var builder = StringBuilderCache.Acquire(capacity: value.Length - oldValue.Length + newValue.Length);
+
+            while (currentOccurrence != -1)
+            {
+                int nonMatchLength = currentOccurrence - endOfPreviousOccurrence;
+                builder.Append(value, endOfPreviousOccurrence, nonMatchLength);
+                builder.Append(newValue);
+
+                endOfPreviousOccurrence = currentOccurrence + oldValue.Length;
+                currentOccurrence = value.IndexOf(oldValue, endOfPreviousOccurrence, stringComparison);
+            }
+
+            builder.Append(value, endOfPreviousOccurrence, value.Length - endOfPreviousOccurrence);
+
+            return StringBuilderCache.GetStringAndRelease(builder);
         }
 #endif
     }

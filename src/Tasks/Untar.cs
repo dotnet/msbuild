@@ -12,6 +12,7 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Shared.Globbing;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -220,6 +221,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
+                // CodeQL [SM00414] False positive: DestinationFolder is a trusted task input path in the project file.
                 destinationDirectory = Directory.CreateDirectory(destinationFolderPath);
 
                 return true;
@@ -389,12 +391,12 @@ namespace Microsoft.Build.Tasks
 
             if (_includePatterns.Length > 0)
             {
-                result = _includePatterns.All(pattern => !FileMatcher.IsMatch(FileMatcher.Normalize(entryName), pattern));
+                result = _includePatterns.All(pattern => !GlobPattern.MatchesName(FileMatcher.Normalize(entryName).AsSpan(), pattern));
             }
 
             if (_excludePatterns.Length > 0)
             {
-                result |= _excludePatterns.Any(pattern => FileMatcher.IsMatch(FileMatcher.Normalize(entryName), pattern));
+                result |= _excludePatterns.Any(pattern => GlobPattern.MatchesName(FileMatcher.Normalize(entryName).AsSpan(), pattern));
             }
 
             return result;

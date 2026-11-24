@@ -17,6 +17,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.NET.StringTools;
 #if FEATURE_WINDOWSINTEROP
 using Windows.Win32;
@@ -120,10 +121,10 @@ internal static class CommunicationsUtilities
     [System.Runtime.Versioning.SupportedOSPlatform("windows6.1")]
     private static FrozenDictionary<string, string> GetEnvironmentVariablesWindows()
     {
-        // The FrameworkDebugUtils static constructor can set the MSBUILDDEBUGPATH environment variable to propagate the debug path to out of proc nodes.
+        // The DebugUtils static constructor can set the MSBUILDDEBUGPATH environment variable to propagate the debug path to out of proc nodes.
         // Need to ensure that constructor is called before this method returns in order to capture its env var write.
         // Otherwise the env var is not captured and thus gets deleted when RequestBuilder resets the environment based on the cached results of this method.
-        Assumed.NotNull(FrameworkDebugUtils.ProcessInfoString);
+        Assumed.NotNull(DebugUtils.ProcessInfoString);
 
         unsafe
         {
@@ -787,7 +788,7 @@ internal static class CommunicationsUtilities
     {
         lock (s_traceLock)
         {
-            s_debugDumpPath ??= FrameworkDebugUtils.DebugPath;
+            s_debugDumpPath ??= DebugUtils.DebugPath;
 
             if (!string.IsNullOrEmpty(s_debugDumpPath))
             {

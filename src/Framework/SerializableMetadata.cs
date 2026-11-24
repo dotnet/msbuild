@@ -14,6 +14,7 @@ namespace Microsoft.Build.Framework
     /// Safe to use across AppDomains.
     /// </summary>
     [Serializable]
+    // CodeQL [SM02227] False positive: static call-graph over-approximation via virtual ToString/Flush in VMR build; deserialization only reads metadata strings.
     internal readonly struct SerializableMetadata : ISerializable
     {
         /// <summary>

@@ -12,9 +12,10 @@ Artifacts produced over the course of the release. Record each URL here as the c
 |---|---|
 | Phase 1.2d — maestro-configuration PR (channels for `{{THIS_RELEASE_VERSION}}` / `{{NEXT_VERSION}}`) | {{URL_OF_PHASE1_DARC_PR}} |
 | Phase 2.3j — maestro-configuration PR (`main`-targeting subs + VMR backflow retargeted, retired-branch cleanup) | {{URL_OF_PHASE2_DARC_PR}} |
-| Phase 3.5 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
+| Phase 3.6 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
 | Phase 4.4 — VS insertion PR | {{URL_OF_VS_INSERTION}} |
 | Phase 5.1b — official build that produced `{{THIS_RELEASE_EXACT_VERSION}}` | {{URL_OF_SHIPPED_OFFICIAL_BUILD}} |
+| Phase 5.1d — `msbuild-nuget-release` publish run | {{URL_OF_NUGET_PUBLISH_RUN}} |
 | Phase 4.7 — Change Waves Learn page sync PR (visualstudio-docs-pr) | {{URL_OF_CHANGE_WAVES_DOCS_PR}} |
 | Phase 5.3 — GitHub release tag | https://github.com/dotnet/msbuild/releases/tag/v{{THIS_RELEASE_EXACT_VERSION}} |
 
@@ -68,7 +69,7 @@ Review the PR diff before merging. Before dependent release steps, confirm [inge
 
 Steps are **sequential** — complete in order.
 
-- [ ] **1.0** **Pre-snap team check.** Before snapping the branch, ping the MSBuild team to confirm there is nothing they still need to merge into `main` that should ship in `{{THIS_RELEASE_VERSION}}`. Anything that lands in `main` after Phase 1.1 will go into `{{NEXT_VERSION}}` instead.
+- [ ] **1.0** **Pre-snap team and release-input check.** Before snapping the branch, ping the MSBuild team to confirm there is nothing they still need to merge into `main` that should ship in `{{THIS_RELEASE_VERSION}}`. Anything that lands in `main` after Phase 1.1 will go into `{{NEXT_VERSION}}` instead. Also validate and record the exact `OptProfBaselineDrop` in `.vsts-dotnet.yml`, its compatibility with the release branch, and retention evidence covering the branch's support lifetime and rebuild needs. A pin does not extend the drop's expiry. If compatibility or retention cannot be verified, pause before Phase 1.1 and obtain a recorded release-owner decision.
 - [ ] **1.1** Create branch `vs{{THIS_RELEASE_VERSION}}` from HEAD of `main` (**requires repo admin rights** — `git push` to `refs/heads/vs*` is restricted; if you don't have permission, ask a repo admin with `vs*` push rights to do it): \
 `git push upstream HEAD:refs/heads/vs{{THIS_RELEASE_VERSION}}`
   - _If branched too early_ (main has commits that shouldn't be in the release): fast-forward the branch to the correct commit (the one currently inserted into VS main): \
@@ -99,7 +100,7 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
     - **SDK lifecycle.** The band ↔ VS version ↔ EOL mapping is the [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions). It states which VS version each SDK band pairs with and when that band's support ends. \
     Use the published lifecycle for support decisions and Maestro channels for dependency routing.
     - **VS lifecycle — a separate source; the SDK table does not answer it.** Use [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs). \
-    **VS 2026 and later: one month of support after Stable release.** Non-LTSC releases are serviced through Insiders and Stable; promoting a new release to Stable ends VS support for the previous release. LTSC baselines are supported for one year after release; identify them from the published LTSC table.
+    **VS 2026 and later: one month of support after Stable release.** Non-LTSC releases are serviced through Insiders and Stable; promoting a new release to Stable ends VS support for the previous release. LTSC baselines are supported for two years from their LTSC release; identify them from the published LTSC table.
 
     **At branch snap, before Stable promotion:** the current release plus two preceding releases is a useful audit window, so `vs{{THIS_RELEASE_VERSION}} - 3` is worth checking. Use actual Stable promotions and SDK/VS deadlines for retirement decisions.
 
@@ -185,15 +186,15 @@ Verifications (**parallel** — read-only, no ordering dependency):
 Create **one PR in `main`** containing all of the following changes:
 
 - [ ] **3.1** `eng/Versions.props`: Update `VersionPrefix` to `{{NEXT_VERSION}}.0`
-- [ ] **3.2** `eng/Versions.props`: Update `PackageValidationBaselineVersion` to `{{PACKAGE_VALIDATION_BASELINE_VERSION}}`. \
+- [ ] **3.2** Create a new change wave matching `{{NEXT_VERSION}}`: add its static readonly `Version` field and include it in `AllWaves` in `src/Framework/ChangeWaves.cs`, and add an empty version section under **Current Rotation of Change Waves** in `documentation/wiki/ChangeWaves.md`
+- [ ] **3.3** `eng/Versions.props`: Update `PackageValidationBaselineVersion` to `{{PACKAGE_VALIDATION_BASELINE_VERSION}}`. \
 Resolve it deterministically with `pwsh ./scripts/Get-PackageValidationBaseline.ps1 -ThisReleaseVersion {{THIS_RELEASE_VERSION}}` (requires `az login` with devdiv access). See [How to determine `PACKAGE_VALIDATION_BASELINE_VERSION`](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version) in the release skill for the manual fallback.
-- [ ] **3.3** `.vsts-dotnet.yml`: Refresh the hardcoded OptProf baseline so the **next** `vs*` branch cut from `main` inherits valid OptProf data (this is what lets that branch's first official build succeed without the manual Phase 4.4 rerun). \
-Resolve the current value with `pwsh ./scripts/Get-LatestOptProfDrop.ps1` (requires `az login` with devdiv access), then set it as `OptProfBaselineDrop`: \
-`<name: OptProfBaselineDrop` → `value: 'OptimizationData/DotNet-msbuild-Trusted/main/<NNNNNNNN.N>/<buildId>/1'`.
-- [ ] **3.4** If the build pipeline fails on API-compat (only then — this step is a fix-up, not a routine action), update `CompatibilitySuppressions.xml` files. Run: \
+- [ ] **3.4** `.vsts-dotnet.yml`: Verify the exact `OptProfBaselineDrop` intended for the **next future** `vs*` branch cut and record its compatibility and retention evidence. Any reviewed update on `main` changes only what a future branch inherits; never update existing servicing-branch pins automatically. Do not introduce an automatic fallback to the latest legacy output or the VS `main` central profiles. \
+`scripts/Get-LatestOptProfDrop.ps1` reports a historical input consumed by an MSBuild-OptProf run and may be stale; use it only as a discovery aid, not as authoritative evidence or a fresh-production dependency.
+- [ ] **3.5** If the build pipeline fails on API-compat (only then — this step is a fix-up, not a routine action), update `CompatibilitySuppressions.xml` files. Run: \
 `.\build.cmd -pack /p:ApiCompatGenerateSuppressionFile=true` \
 Before running, inspect `artifacts\packages` and move aside stale packages from the pre-bump version; mixed old/new packages can cause `Multiple packages of name 'Microsoft.Build' specified`. Review the generated suppressions rather than accepting compatibility breaks just to make the build pass. See [API compat documentation](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/overview) for details.
-- [ ] **3.5** After Phase 2 ingestion and live-map verification succeed, merge the main-bump PR: {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}}
+- [ ] **3.6** After Phase 2 ingestion and live-map verification succeed, merge the main-bump PR: {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}}
 
 ---
 
@@ -214,10 +215,10 @@ Steps are **sequential**.
 This is a human release check, not an official-build, artifact-publishing, or automated-promotion dependency.
 
 - [ ] **4.0** Before final branding and Insiders promotion, use the telemetry evidence procedure to confirm recent ordinary telemetry from relevant canary builds for each path shipping in this release: {{CANARY_TELEMETRY_EVIDENCE_AND_DECISION}}
-- [ ] **4.1** Review package API compatibility on `vs{{THIS_RELEASE_VERSION}}`. Resolve any API-compat failures using step 3.4 and review changes to `CompatibilitySuppressions.xml`. The repository no longer tracks `PublicAPI.Unshipped.txt` / `PublicAPI.Shipped.txt`, so there is no public-API file promotion step. See [release.md](./release.md#public-api) for details.
-- [ ] **4.2** Bootstrap OptProf for `vs{{THIS_RELEASE_VERSION}}`. **If the Phase 3.3 hardcoded `OptProfBaselineDrop` was kept current, the auto-triggered build should already pick it up (`.vsts-dotnet.yml` seeds `OptProfDrop` from it on `vs*` branches) and this step is a no-op.** Only if the official build still fails for lack of OptProf data (e.g. the baseline was stale/empty at branch-cut):
-  - [ ] **4.2a** **Cancel** the auto-triggered official build for `vs{{THIS_RELEASE_VERSION}}`.
-  - [ ] **4.2b** **Re-run the official build manually** for `vs{{THIS_RELEASE_VERSION}}` with the OptProf override from `main` — set `Optional OptProfDrop Override` to `main`'s latest OptProf drop path (`pwsh ./scripts/Get-LatestOptProfDrop.ps1`).
+- [ ] **4.1** Review package API compatibility on `vs{{THIS_RELEASE_VERSION}}`. Resolve any API-compat failures using step 3.5 and review changes to `CompatibilitySuppressions.xml`. The repository no longer tracks `PublicAPI.Unshipped.txt` / `PublicAPI.Shipped.txt`, so there is no public-API file promotion step. See [release.md](./release.md#public-api) for details.
+- [ ] **4.2** Verify the frozen OptProf input on `vs{{THIS_RELEASE_VERSION}}`: the branch's literal `OptProfBaselineDrop` must match the exact pin recorded before branch creation, remain compatible, and have availability evidence covering the remaining support lifetime and rebuild needs. Do not refresh the branch pin from `main`.
+  - [ ] **4.2a** If the pinned drop is missing, expired, or lacks sufficient evidence, pause and obtain an explicit, reviewed release-owner exception. Restore availability of the **same data** where possible; do not silently fall back to the latest legacy output or VS `main`, and do not make a fresh collector run a production dependency.
+  - [ ] **4.2b** If the approved exception requires a queue-time `Optional OptProfDrop Override`, record the exact drop, rationale, owner approval, and affected build. The override is an explicit queue exception, not an unrecorded replacement servicing default.
 - [ ] **4.3** Get M2 or QB approval as necessary per the VS schedule. \
 _**Only required if we are behind the VS schedule** — i.e. the insertion didn't land in VS `main` before `{{INSIDERS_SNAP_DATE}}` (4.4 was missed) and a milestone-gate approval is now needed. If the insertion made the schedule, **skip this step**._
 - [ ] **4.4** Babysit the VS insertion PR from `vs{{THIS_RELEASE_VERSION}}` into VS `main` (auto-generated at https://devdiv.visualstudio.com/DevDiv/_git/VS/pullrequests). The inserted bits must be in VS `main` **before** `{{INSIDERS_SNAP_DATE}}` so they are included when VS snaps to `rel/insiders`: {{URL_OF_VS_INSERTION}} \
@@ -256,7 +257,7 @@ Steps are **mostly parallel** unless noted.
 
 - [ ] **5.1** Push packages to nuget.org.
 
-  > **How publishing works:** We don't push packages ourselves. We hand a link to the **Release** artifacts of the official build to the _.NET Release Team_, and they push to nuget.org. Search past mail for the subject _"Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org"_ for the template.
+  > **How publishing works:** Run the [`msbuild-nuget-release`](https://dev.azure.com/dnceng/internal/_build?definitionId=1700) pipeline (dnceng/internal) with the official build id. It reads the build's `ReleasePackages` pipeline artifact and pushes it to nuget.org through the isolated NuGet publishing pipeline. Do not email the .NET Release Team. Example: [build 3132822](https://dev.azure.com/dnceng/internal/_build/results?buildId=3132822) published `18.12.2`.
 
   - [ ] **5.1a** Determine the exact MSBuild version that actually shipped to customers. \
   ⚠️ **VS and the SDK might ship _different_ patch versions off the same `vs{{THIS_RELEASE_VERSION}}` branch during servicing — so this must be looked up, never inferred from `eng/Versions.props` at branch HEAD or from the Phase 4.4 insertion PR.**
@@ -265,8 +266,8 @@ Steps are **mostly parallel** unless noted.
     If that returns a source-enabled subscription from a `.NET <X.Y.Zxx> SDK` channel, the release **is** SDK-coupled.
     - **If SDK-coupled: the SDK is the source of truth** — look up the MSBuild version baked into the shipped SDK build of that band. It wins over VS `rel/stable`.
     - **Otherwise**, read the **authoritative GA'd value from VS `rel/stable`**: the `Microsoft.Build` component version in [`.corext/Configs/msbuild-components.json`](https://devdiv.visualstudio.com/DevDiv/_git/VS?path=/.corext/Configs/msbuild-components.json&version=GBrel/stable) (e.g. `18.7.1-servicing-NNNNN-NN+<sha>`). Extract just the **numeric `VersionPrefix`** from that string — drop the `-servicing-NNNNN-NN+<sha>` suffix — and use it as `{{THIS_RELEASE_EXACT_VERSION}}` (e.g. `18.7.1`). **Do not** rely solely on the VS insertion PR — that PR targets VS `main` and can be superseded by a later servicing insertion before GA, whereas `rel/stable` reflects what actually shipped.
-  - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`). Take the latest build that produced the matching versioned artifacts.
-  - [ ] **5.1c** From that build, open the **Publish Artifacts** step and grab the link to the **`PackageArtifacts/Release`** drop. Verify the **Release** folder contains all of:
+  - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`). Take the latest build that produced the matching versioned artifacts **and** has a `ReleasePackages` pipeline artifact. Builds before [#15407](https://github.com/dotnet/msbuild/pull/15407) or its branch backport (e.g. [#15302](https://github.com/dotnet/msbuild/pull/15302) for `vs18.12`) lack it. If the SDK/VS-shipped commit predates the backport, use a later build with the same `VersionPrefix` whose diff from the shipped commit is infra-only (Arcade, `global.json`, pipeline YAML). Record that build's source SHA for 5.3b.
+  - [ ] **5.1c** Open `https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=<BUILD_ID>&view=artifacts&type=publishedArtifacts` and verify `ReleasePackages` contains all of:
     - `Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.Framework.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
@@ -274,7 +275,9 @@ Steps are **mostly parallel** unless noted.
     - `Microsoft.Build.Tasks.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.NET.StringTools.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.Templates.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
-  - [ ] **5.1d** Email the _.NET Release Team_ with the `Release` link from 5.1c and ask them to publish to nuget.org.
+    Every filename must end in exactly `{{THIS_RELEASE_EXACT_VERSION}}.nupkg`. A suffix such as `-1.NNNNN.N` or `-1.final` marks a prerelease; nuget.org packages cannot be deleted.
+  - [ ] **5.1d** Queue [`msbuild-nuget-release`](https://dev.azure.com/dnceng/internal/_build?definitionId=1700) with `msbuildBuildId` = the build id from 5.1b. Set `validateOnly` to `true` for a dry run, then `false` to publish. Retrying a failed run is rejected; queue a new run instead.
+  - [ ] **5.1e** Verify all seven packages list `{{THIS_RELEASE_EXACT_VERSION}}` on nuget.org, e.g. `https://api.nuget.org/v3-flatcontainer/microsoft.build/index.json`. Record the publish run in **Release Output**.
 
 - [ ] **5.2** Publish docs
 

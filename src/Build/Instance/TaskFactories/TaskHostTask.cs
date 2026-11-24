@@ -376,31 +376,7 @@ namespace Microsoft.Build.BackEnd
                     taskLocation = _taskType?.Assembly?.AssemblyLocation ?? string.Empty;
                 }
 
-                TaskHostConfiguration hostConfiguration =
-                    new TaskHostConfiguration(
-                            _buildComponentHost.BuildParameters.NodeId,
-                            _taskEnvironment.ProjectDirectory,
-                            (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
-                            _buildComponentHost.BuildParameters.Culture,
-                            _buildComponentHost.BuildParameters.UICulture,
-                            _hostServices,
-#if FEATURE_APPDOMAIN
-                            _appDomainSetup,
-#endif
-                            BuildEngine.LineNumberOfTaskNode,
-                            BuildEngine.ColumnNumberOfTaskNode,
-                            BuildEngine.ProjectFileOfTaskNode,
-                            BuildEngine.ContinueOnError,
-                            _taskType.Type.FullName,
-                            taskLocation,
-                            _taskLoggingContext?.TargetLoggingContext?.Target?.Name,
-                            _projectFile,
-                            _buildComponentHost.BuildParameters.LogTaskInputs,
-                            _setParameters,
-                            GetGlobalPropertiesForTaskHost(),
-                            _taskLoggingContext.GetWarningsAsErrors(),
-                            _taskLoggingContext.GetWarningsNotAsErrors(),
-                            _taskLoggingContext.GetWarningsAsMessages());
+                TaskHostConfiguration hostConfiguration = CreateConfiguration(taskLocation);
 
                 try
                 {
@@ -501,6 +477,54 @@ namespace Microsoft.Build.BackEnd
 
             return _taskExecutionSucceeded;
         }
+
+        private TaskHostConfiguration CreateConfiguration(string taskLocation)
+#if FEATURE_APPDOMAIN
+            => new(
+                _buildComponentHost.BuildParameters.NodeId,
+                _taskEnvironment.ProjectDirectory,
+                (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
+                _buildComponentHost.BuildParameters.Culture,
+                _buildComponentHost.BuildParameters.UICulture,
+                _hostServices?.ToHostServicesData(),
+                _appDomainSetup,
+                BuildEngine.LineNumberOfTaskNode,
+                BuildEngine.ColumnNumberOfTaskNode,
+                BuildEngine.ProjectFileOfTaskNode,
+                BuildEngine.ContinueOnError,
+                _taskType.Type.FullName,
+                taskLocation,
+                _taskLoggingContext?.TargetLoggingContext?.Target?.Name,
+                _projectFile,
+                _buildComponentHost.BuildParameters.LogTaskInputs,
+                _setParameters,
+                GetGlobalPropertiesForTaskHost(),
+                _taskLoggingContext.GetWarningsAsErrors(),
+                _taskLoggingContext.GetWarningsNotAsErrors(),
+                _taskLoggingContext.GetWarningsAsMessages());
+#else
+            => new(
+                _buildComponentHost.BuildParameters.NodeId,
+                _taskEnvironment.ProjectDirectory,
+                (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
+                _buildComponentHost.BuildParameters.Culture,
+                _buildComponentHost.BuildParameters.UICulture,
+                _hostServices?.ToHostServicesData(),
+                BuildEngine.LineNumberOfTaskNode,
+                BuildEngine.ColumnNumberOfTaskNode,
+                BuildEngine.ProjectFileOfTaskNode,
+                BuildEngine.ContinueOnError,
+                _taskType.Type.FullName,
+                taskLocation,
+                _taskLoggingContext?.TargetLoggingContext?.Target?.Name,
+                _projectFile,
+                _buildComponentHost.BuildParameters.LogTaskInputs,
+                _setParameters,
+                GetGlobalPropertiesForTaskHost(),
+                _taskLoggingContext.GetWarningsAsErrors(),
+                _taskLoggingContext.GetWarningsNotAsErrors(),
+                _taskLoggingContext.GetWarningsAsMessages());
+#endif
 
         /// <summary>
         /// Gets the global properties to send to the out-of-proc TaskHost.
@@ -906,8 +930,8 @@ namespace Microsoft.Build.BackEnd
             string msbuildLocation = taskHostLocation ??
                 // We don't know the path -- probably we're trying to get a 64-bit assembly on a
                 // 32-bit machine.  At least give them the exe name to look for, though ...
-                ((requiredContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2 
-                ? "MSBuildTaskHost.exe" 
+                ((requiredContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2
+                ? "MSBuildTaskHost.exe"
                 : NodeProviderOutOfProcTaskHost.GetTaskHostNameFromHostContext(requiredContext));
 
             if (e == null)

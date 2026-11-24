@@ -183,11 +183,26 @@ namespace Microsoft.Build.Tasks
             string originalPath = Path.Combine(OutputDirectory, manifestName);
             AbsolutePath outputPath = TaskEnvironment.GetAbsolutePath(originalPath);
             ManifestPath = originalPath;
-            using (var xmlWriter = new XmlTextWriter(outputPath, Encoding.UTF8))
+
+            using var buffer = new MemoryStream();
+            using (var xmlWriter = new XmlTextWriter(buffer, Encoding.UTF8))
             {
                 xmlWriter.Formatting = Formatting.Indented;
                 xmlWriter.Indentation = 4;
                 document.Save(xmlWriter);
+            }
+
+            buffer.TryGetBuffer(out ArraySegment<byte> contents);
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14) ||
+                !File.Exists(outputPath) ||
+                !contents.AsSpan().SequenceEqual(File.ReadAllBytes(outputPath).AsSpan()))
+            {
+                using FileStream output = new(outputPath, FileMode.Create, FileAccess.Write, FileShare.Read, bufferSize: 1);
+                output.Write(contents.Array!, contents.Offset, contents.Count);
+            }
+            else
+            {
+                Log.LogMessageFromResources(MessageImportance.Low, "AddToWin32Manifest.SkippingUnchangedFile", originalPath);
             }
         }
 
