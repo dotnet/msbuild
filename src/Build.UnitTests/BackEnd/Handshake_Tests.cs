@@ -188,6 +188,24 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
+        [Fact]
+        public void HandshakeUnionPreservesWorkerAndTaskHostVariants()
+        {
+            WorkerNodeHandshake workerHandshake = new(nodeReuse: true);
+            Handshake worker = Handshake.From(workerHandshake);
+            worker.NodeReuse.ShouldBeTrue();
+            worker.IsClr2.ShouldBeFalse();
+            worker.IsNet.ShouldBeFalse();
+
+            TaskHostHandshake clr2Handshake = new Clr2TaskHostHandshake(
+                new(TaskHostArchitecture.X64, NodeReuse: true),
+                BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot);
+            Handshake clr2 = Handshake.From(clr2Handshake);
+            clr2.NodeReuse.ShouldBeTrue();
+            clr2.IsClr2.ShouldBeTrue();
+            clr2.IsNet.ShouldBeFalse();
+        }
+
         /// <summary>
         /// The .NET task host is the connection at risk: a .NET Framework parent (e.g. Visual Studio) talks to
         /// a child taken from the installed .NET SDK, which resolves the same environment variable against a

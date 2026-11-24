@@ -147,17 +147,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
 
-            HandshakeOptions sameArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture() switch
-            {
-                XMakeAttributes.MSBuildArchitectureValues.arm64 => HandshakeOptions.Arm64,
-                XMakeAttributes.MSBuildArchitectureValues.x64 => HandshakeOptions.X64,
-                _ => HandshakeOptions.None,
-            };
+            TaskHostArchitecture sameArchitecture = CommunicationsUtilities
+                .GetFrameworkTaskHostRequest(XMakeAttributes.GetCurrentMSBuildArchitecture())
+                .Options.Architecture;
 
-            provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse | sameArchitecture).ShouldBeTrue(
+            provider.ConnectionPersists(new FrameworkTaskHostHandshake(new(sameArchitecture, NodeReuse: true))).ShouldBeTrue(
                 "a task host that only exists to keep a task out of this process is owned by it");
 
-            provider.ConnectionPersists(HandshakeOptions.TaskHost | sameArchitecture).ShouldBeFalse(
+            provider.ConnectionPersists(new FrameworkTaskHostHandshake(new(sameArchitecture))).ShouldBeFalse(
                 "a task host not launched with node reuse exits at the end of the build");
         }
 
@@ -169,7 +166,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // node for a task that only ever runs in one of them at a time.
             NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
 
-            provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse | HandshakeOptions.CLR2).ShouldBeFalse();
+            provider.ConnectionPersists(new Clr2TaskHostHandshake(
+                new(NodeReuse: true),
+                BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot)).ShouldBeFalse();
         }
 
         [WindowsFullFrameworkOnlyFact]
@@ -179,20 +178,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // launches for one is shared, not owned.
             NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
 
-            provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse | HandshakeOptions.NET).ShouldBeFalse();
+            provider.ConnectionPersists(new NetTaskHostHandshake(new(NodeReuse: true))).ShouldBeFalse();
         }
 
         [Fact]
         public void CrossArchitectureTaskHostsStayPooled()
         {
             NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+            TaskHostArchitecture currentArchitecture = CommunicationsUtilities
+                .GetFrameworkTaskHostRequest(XMakeAttributes.GetCurrentMSBuildArchitecture())
+                .Options.Architecture;
+            TaskHostArchitecture differentArchitecture = currentArchitecture == TaskHostArchitecture.X64
+                ? TaskHostArchitecture.X86
+                : TaskHostArchitecture.X64;
 
-            // No architecture bit means x86, which differs from this process unless it is itself x86.
-            HandshakeOptions differentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture() == XMakeAttributes.MSBuildArchitectureValues.x64
-                ? HandshakeOptions.None
-                : HandshakeOptions.X64;
-
-            provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse | differentArchitecture).ShouldBeFalse(
+            provider.ConnectionPersists(new FrameworkTaskHostHandshake(new(differentArchitecture, NodeReuse: true))).ShouldBeFalse(
                 "a task host of another architecture is useful to every process that needs that architecture");
         }
 
@@ -206,10 +206,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ChangeWaves.ResetStateForTests();
 
             NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
-            HandshakeOptions options = CommunicationsUtilities.GetTaskHostRequest(TaskHostParameters.Empty, nodeReuse: true).HandshakeOptions;
+            TaskHostHandshake handshake = CreateHandshake(CommunicationsUtilities.GetTaskHostRequest(TaskHostParameters.Empty, nodeReuse: true));
 
             ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11).ShouldBeTrue();
-            provider.ConnectionPersists(options).ShouldBe(expectedPersistence);
+            provider.ConnectionPersists(handshake).ShouldBe(expectedPersistence);
         }
 
         [Theory]
@@ -221,10 +221,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
             ChangeWaves.ResetStateForTests();
             NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
-            HandshakeOptions options = CommunicationsUtilities.GetTaskHostRequest(TaskHostParameters.Empty, nodeReuse: true).HandshakeOptions;
+            TaskHostHandshake handshake = CreateHandshake(CommunicationsUtilities.GetTaskHostRequest(TaskHostParameters.Empty, nodeReuse: true));
 
-            provider.ConnectionPersists(options, version).ShouldBeFalse();
+            provider.ConnectionPersists(handshake, version).ShouldBeFalse();
         }
+
+        private static TaskHostHandshake CreateHandshake(TaskHostRequest request) => request switch
+        {
+            NetTaskHostRequest net => net.CreateHandshake(),
+            FrameworkTaskHostRequest framework => framework.CreateHandshake(),
+            Clr2TaskHostRequest clr2 => clr2.CreateHandshake(BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot),
+        };
 
 #if RUNTIME_TYPE_NETCORE
         [WindowsOnlyTheory]

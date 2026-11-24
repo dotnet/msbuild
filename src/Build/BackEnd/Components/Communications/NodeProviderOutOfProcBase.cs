@@ -285,7 +285,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            bool nodeReuseRequested = Handshake.IsHandshakeOptionEnabled(nodeLaunchData.Handshake.HandshakeOptions, HandshakeOptions.NodeReuse);
+            bool nodeReuseRequested = nodeLaunchData.Handshake.NodeReuse;
 
             // Get all process of possible running node processes for reuse and put them into ConcurrentQueue.
             // Processes from this queue will be concurrently consumed by TryReusePossibleRunningNodes while
@@ -437,7 +437,7 @@ namespace Microsoft.Build.BackEnd
                     // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
                     // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
                     // nodes because we should never be able to connect in this case.
-                    if (Handshake.IsHandshakeOptionEnabled(nodeLaunchData.Handshake.HandshakeOptions, HandshakeOptions.CLR2))
+                    if (nodeLaunchData.Handshake is TaskHostHandshake { IsClr2: true })
                     {
                         bool frameworkMissing = !FrameworkLocationHelper.IsDotNetFrameworkV35AvailableForTaskHost();
                         if (frameworkMissing)
@@ -503,22 +503,22 @@ namespace Microsoft.Build.BackEnd
 
             void CreateNodeContext(int nodeId, Process nodeToReuse, NodeConnectionResult.Connected connection)
             {
-                HandshakeOptions handshakeOptions = nodeLaunchData.Handshake.HandshakeOptions;
-                NodeContext nodeContext = new(nodeId, nodeToReuse, connection, factory, terminateNode, handshakeOptions, DoesConnectionPersistAcrossBuilds(handshakeOptions, connection.NegotiatedPacketVersion));
+                Handshake handshake = Handshake.From(nodeLaunchData.Handshake);
+                NodeContext nodeContext = new(nodeId, nodeToReuse, connection, factory, terminateNode, handshake, DoesConnectionPersistAcrossBuilds(nodeLaunchData.Handshake, connection.NegotiatedPacketVersion));
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
         }
 
         /// <summary>
-        /// Whether a node launched with these handshake options stays connected to this process after
+        /// Whether a node launched with this handshake stays connected to this process after
         /// one of its builds completes, so that this process can use it again for the next one. Such
         /// a node resets in place rather than disconnecting, and more packets follow on its
         /// connection afterwards.
         /// False by default: a node disconnects at the end of a build and, if reusable, waits on its
         /// pipe for some other process to claim it.
         /// </summary>
-        protected virtual bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions, byte negotiatedVersion) => false;
+        protected virtual bool DoesConnectionPersistAcrossBuilds(THandshake handshake, byte negotiatedVersion) => false;
     }
 
     internal abstract partial class NodeProviderOutOfProcBase
@@ -1067,9 +1067,9 @@ namespace Microsoft.Build.BackEnd
             private readonly byte[] _headerByte;
 
             /// <summary>
-            /// Handshake options used to connect to the node.
+            /// Handshake used to connect to the node.
             /// </summary>
-            private HandshakeOptions _handshakeOptions;
+            private readonly Handshake? _handshake;
 
             /// <summary>
             /// A buffer typically big enough to handle a packet body.
@@ -1164,7 +1164,7 @@ namespace Microsoft.Build.BackEnd
                 NodeConnectionResult.Connected connection,
                 INodePacketFactory factory,
                 NodeContextTerminateDelegate terminateDelegate,
-                HandshakeOptions handshakeOptions = HandshakeOptions.None,
+                Handshake? handshake = null,
                 bool connectionPersistsAcrossBuilds = false)
             {
                 Stream nodePipe = connection.Stream;
@@ -1184,7 +1184,7 @@ namespace Microsoft.Build.BackEnd
                 _readTranslator = BinaryTranslator.GetReadTranslator(_readBufferMemoryStream, InterningBinaryReader.CreateSharedBuffer());
                 _writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBufferMemoryStream);
                 _terminateDelegate = terminateDelegate;
-                _handshakeOptions = handshakeOptions;
+                _handshake = handshake;
                 _negotiatedPacketVersion = connection.NegotiatedPacketVersion;
 #if FEATURE_APM
                 _headerReadCompleteCallback = HeaderReadComplete;
@@ -1446,7 +1446,8 @@ namespace Microsoft.Build.BackEnd
 
                             // Write packet type with extended header.
                             // On the receiving side we will check if the extended header is present before making an attempt to read the packet version.
-                            bool extendedHeaderCreated = NodePacketTypeExtensions.TryCreateExtendedHeaderType(_handshakeOptions, packetType, out byte rawPacketType, _negotiatedPacketVersion);
+                            HandshakeOptions handshakeOptions = _handshake?.HandshakeOptions ?? HandshakeOptions.None;
+                            bool extendedHeaderCreated = NodePacketTypeExtensions.TryCreateExtendedHeaderType(handshakeOptions, packetType, out byte rawPacketType, _negotiatedPacketVersion);
                             writeStream.WriteByte(rawPacketType);
 
                             // Pad for the packet length
@@ -1458,7 +1459,7 @@ namespace Microsoft.Build.BackEnd
                                 NodePacketTypeExtensions.WriteVersion(writeStream, context._negotiatedPacketVersion);
                                 writeTranslator.NegotiatedPacketVersion = context._negotiatedPacketVersion;
                             }
-                            else if (!Handshake.IsHandshakeOptionEnabled(_handshakeOptions, HandshakeOptions.CLR2))
+                            else if (_handshake?.IsClr2 != true)
                             {
                                 // CLR4 task hosts: set version to 0 to enable version-dependent fields.
                                 // CLR2 task hosts: leave as null (default) to skip version-dependent fields.

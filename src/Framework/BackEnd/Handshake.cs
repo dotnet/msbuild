@@ -12,6 +12,7 @@ namespace Microsoft.Build.Internal;
 internal interface INodeHandshake
 {
     HandshakeOptions HandshakeOptions { get; }
+    bool NodeReuse { get; }
     HandshakeComponents RetrieveHandshakeComponents();
     string GetKey();
     byte? ExpectedVersionInFirstByte { get; }
@@ -41,10 +42,25 @@ internal union Handshake(
     };
 
     public HandshakeOptions HandshakeOptions => Protocol.HandshakeOptions;
+    public bool NodeReuse => Protocol.NodeReuse;
     public HandshakeComponents RetrieveHandshakeComponents() => Protocol.RetrieveHandshakeComponents();
     public string GetKey() => Protocol.GetKey();
     public byte? ExpectedVersionInFirstByte => Protocol.ExpectedVersionInFirstByte;
     public bool IsNetTaskHostSaltMatch(int receivedSalt) => Protocol.IsNetTaskHostSaltMatch(receivedSalt);
+    internal bool IsClr2 => this is Clr2TaskHostHandshake;
+    internal bool IsNet => this is NetTaskHostHandshake;
+
+    internal static Handshake From(INodeHandshake handshake) => handshake switch
+    {
+        Handshake nodeHandshake => nodeHandshake,
+        TaskHostHandshake taskHostHandshake => taskHostHandshake.ToHandshake(),
+        WorkerNodeHandshake workerHandshake => workerHandshake,
+        ServerNodeHandshake serverHandshake => serverHandshake,
+        NetTaskHostHandshake netTaskHostHandshake => netTaskHostHandshake,
+        FrameworkTaskHostHandshake frameworkTaskHostHandshake => frameworkTaskHostHandshake,
+        Clr2TaskHostHandshake clr2TaskHostHandshake => clr2TaskHostHandshake,
+        _ => Assumed.Unreachable<Handshake>("The handshake must be a known node-handshake variant."),
+    };
 
     internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option)
         => (hostContext & option) == option;
@@ -94,7 +110,6 @@ internal union TaskHostHandshake(
     };
 
     internal TaskHostArchitecture Architecture => Options.Architecture;
-    internal bool NodeReuse => Options.NodeReuse;
     internal bool IsClr2 => this is Clr2TaskHostHandshake;
     internal bool IsNet => this is NetTaskHostHandshake;
 
@@ -106,10 +121,17 @@ internal union TaskHostHandshake(
     };
 
     public HandshakeOptions HandshakeOptions => Protocol.HandshakeOptions;
+    public bool NodeReuse => Options.NodeReuse;
     public HandshakeComponents RetrieveHandshakeComponents() => Protocol.RetrieveHandshakeComponents();
     public string GetKey() => Protocol.GetKey();
     public byte? ExpectedVersionInFirstByte => Protocol.ExpectedVersionInFirstByte;
     public bool IsNetTaskHostSaltMatch(int receivedSalt) => Protocol.IsNetTaskHostSaltMatch(receivedSalt);
+    internal Handshake ToHandshake() => this switch
+    {
+        NetTaskHostHandshake handshake => handshake,
+        FrameworkTaskHostHandshake handshake => handshake,
+        Clr2TaskHostHandshake handshake => handshake,
+    };
 }
 
 internal enum TaskHostArchitecture
@@ -263,6 +285,7 @@ internal abstract class NodeHandshake : INodeHandshake
 
     // Source options of the handshake.
     public HandshakeOptions HandshakeOptions { get; }
+    public bool NodeReuse => (HandshakeOptions & global::Microsoft.Build.Internal.HandshakeOptions.NodeReuse) != 0;
 
     private protected NodeHandshake(HandshakeOptions nodeType, bool includeSessionId, string? toolsDirectory, Version? fileVersion = null)
     {

@@ -246,7 +246,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Whether a task host launched with these options is owned by this process, staying
+        /// Whether a task host launched with this handshake is owned by this process, staying
         /// connected to it between builds instead of disconnecting into the pool of task hosts any
         /// process may claim.
         /// </summary>
@@ -259,9 +259,9 @@ namespace Microsoft.Build.BackEnd
         /// Both endpoints must support cleanup acknowledgments. A legacy reuse flag alone does
         /// not establish ownership.
         /// </remarks>
-        protected override bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions, byte negotiatedVersion)
-            => SupportsSidecarLifetime(handshakeOptions, negotiatedVersion)
-                && Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NodeReuse);
+        protected override bool DoesConnectionPersistAcrossBuilds(TaskHostHandshake handshake, byte negotiatedVersion)
+            => SupportsSidecarLifetime(handshake.HandshakeOptions, negotiatedVersion)
+                && handshake.NodeReuse;
 
         private static bool SupportsSidecarLifetime(HandshakeOptions handshakeOptions, byte negotiatedVersion)
             => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
@@ -408,11 +408,11 @@ namespace Microsoft.Build.BackEnd
         internal IBuildComponentHost CurrentComponentHost => ComponentHost;
 
         /// <summary>
-        /// Whether a node launched with these options keeps its connection between builds.
+        /// Whether a node launched with this handshake keeps its connection between builds.
         /// FOR UNIT TESTING ONLY.
         /// </summary>
-        internal bool ConnectionPersists(HandshakeOptions handshakeOptions, byte negotiatedVersion = NodePacketTypeExtensions.PacketVersion)
-            => DoesConnectionPersistAcrossBuilds(handshakeOptions, negotiatedVersion);
+        internal bool ConnectionPersists(TaskHostHandshake handshake, byte negotiatedVersion = NodePacketTypeExtensions.PacketVersion)
+            => DoesConnectionPersistAcrossBuilds(handshake, negotiatedVersion);
 
         /// <summary>
         /// Initializes the component.
