@@ -35,7 +35,6 @@ namespace Microsoft.Build.BackEnd
                 msBuildLocation: null,
                 commandLineArgs: $"/noautoresponse /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcNode)} /nodeReuse:{nodeReuse.ToString().ToLower()} /low:{lowPriority.ToString().ToLower()}",
                 handshake: CommunicationsUtilities.GetWorkerNodeHandshake(nodeReuse, lowPriority),
-                expectedNodeMode: NodeMode.OutOfProcNode,
                 DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides());
 
         internal static NodeLaunchData<TaskHostHandshake> ForNetTaskHostAppHost(
@@ -47,7 +46,6 @@ namespace Microsoft.Build.BackEnd
                 msBuildLocation,
                 GetTaskHostCommandLineArgs(request.Options.NodeReuse, lowPriority),
                 request.CreateHandshake(toolsDirectory),
-                NodeMode.OutOfProcTaskHostNode,
                 DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(request.LaunchPaths.DotnetHostPath)
                     ?? throw new NodeFailedToLaunchException(errorCode: null, ResourceUtilities.GetResourceString("DotnetHostPathNotSet")));
 
@@ -68,8 +66,7 @@ namespace Microsoft.Build.BackEnd
             return new(
                 dotnetHostPath,
                 $"\"{msBuildDllPath}\" {GetTaskHostCommandLineArgs(request.Options.NodeReuse, lowPriority)}",
-                request.CreateHandshake(toolsDirectory),
-                NodeMode.OutOfProcTaskHostNode);
+                request.CreateHandshake(toolsDirectory));
         }
 
         internal static NodeLaunchData<TaskHostHandshake> ForFrameworkTaskHost(
@@ -79,8 +76,7 @@ namespace Microsoft.Build.BackEnd
             => new(
                 msBuildLocation,
                 GetTaskHostCommandLineArgs(request.Options.NodeReuse, lowPriority),
-                request.CreateHandshake(),
-                NodeMode.OutOfProcTaskHostNode);
+                request.CreateHandshake());
 
         internal static NodeLaunchData<TaskHostHandshake> ForExternalFrameworkTaskHost(
             FrameworkTaskHostRequest request,
@@ -92,7 +88,6 @@ namespace Microsoft.Build.BackEnd
                 msBuildLocation,
                 GetTaskHostCommandLineArgs(request.Options.NodeReuse, lowPriority),
                 request.CreateHandshake(toolsDirectory, fileVersion),
-                NodeMode.OutOfProcTaskHostNode,
                 new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
                 {
                     ["MSBUILD_EXE_PATH"] = msBuildLocation,
@@ -106,34 +101,31 @@ namespace Microsoft.Build.BackEnd
             => new(
                 msBuildLocation,
                 string.Empty,
-                request.CreateHandshake(toolsDirectory, fileVersion),
-                expectedNodeMode: null);
+                request.CreateHandshake(toolsDirectory, fileVersion));
 
         private static string GetTaskHostCommandLineArgs(bool nodeReuse, bool lowPriority)
             => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuse} /low:{lowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
     }
 
     internal readonly record struct NodeLaunchData<THandshake>
-        where THandshake : INodeHandshake
+        where THandshake : ILaunchableNodeHandshake
     {
         internal NodeLaunchData(
             string? msBuildLocation,
             string commandLineArgs,
             THandshake handshake,
-            NodeMode? expectedNodeMode,
             IDictionary<string, string?>? environmentOverrides = null)
         {
             MSBuildLocation = msBuildLocation;
             CommandLineArgs = commandLineArgs;
             Handshake = handshake;
-            ExpectedNodeMode = expectedNodeMode;
             EnvironmentOverrides = environmentOverrides;
         }
 
         internal string? MSBuildLocation { get; }
         internal string CommandLineArgs { get; }
         internal THandshake Handshake { get; }
-        internal NodeMode? ExpectedNodeMode { get; }
+        internal NodeMode? ExpectedNodeMode => Handshake.ExpectedNodeMode;
         internal IDictionary<string, string?>? EnvironmentOverrides { get; }
     }
 

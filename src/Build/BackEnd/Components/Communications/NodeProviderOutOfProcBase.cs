@@ -225,7 +225,7 @@ namespace Microsoft.Build.BackEnd
     }
 
     internal abstract class NodeProviderOutOfProcBase<THandshake> : NodeProviderOutOfProcBase
-        where THandshake : INodeHandshake
+        where THandshake : ILaunchableNodeHandshake
     {
         /// <summary>
         /// Finds or creates child processes which can act as nodes using the provided launch data.

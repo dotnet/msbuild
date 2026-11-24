@@ -20,6 +20,17 @@ internal interface INodeHandshake
 }
 
 /// <summary>
+/// A handshake for a node that MSBuild launches itself, which determines the node mode the launched process runs in.
+/// </summary>
+internal interface ILaunchableNodeHandshake : INodeHandshake
+{
+    /// <summary>
+    /// The node mode the launched process reports, or <see langword="null"/> when the process does not report one.
+    /// </summary>
+    NodeMode? ExpectedNodeMode { get; }
+}
+
+/// <summary>
 /// The closed set of handshake protocols. Node APIs use a concrete case, not this union.
 /// </summary>
 internal union Handshake(
@@ -101,7 +112,7 @@ internal union Handshake(
 internal union TaskHostHandshake(
     NetTaskHostHandshake,
     FrameworkTaskHostHandshake,
-    Clr2TaskHostHandshake) : INodeHandshake
+    Clr2TaskHostHandshake) : ILaunchableNodeHandshake
 {
     internal TaskHostHandshakeOptions Options => this switch
     {
@@ -127,6 +138,17 @@ internal union TaskHostHandshake(
     public string GetKey() => Protocol.GetKey();
     public byte? ExpectedVersionInFirstByte => Protocol.ExpectedVersionInFirstByte;
     public bool IsNetTaskHostSaltMatch(int receivedSalt) => Protocol.IsNetTaskHostSaltMatch(receivedSalt);
+
+    /// <summary>
+    /// .NET and .NET Framework task hosts run as <see cref="NodeMode.OutOfProcTaskHostNode"/>.
+    /// The CLR2 task host is a separate executable that has no node modes.
+    /// </summary>
+    public NodeMode? ExpectedNodeMode => this switch
+    {
+        NetTaskHostHandshake or FrameworkTaskHostHandshake => NodeMode.OutOfProcTaskHostNode,
+        Clr2TaskHostHandshake => null,
+    };
+
     internal Handshake ToHandshake() => this switch
     {
         NetTaskHostHandshake handshake => handshake,
@@ -194,7 +216,7 @@ internal readonly record struct TaskHostHandshakeOptions(
     public override int GetHashCode() => (int)ToWireOptions();
 }
 
-internal sealed class WorkerNodeHandshake : NodeHandshake
+internal sealed class WorkerNodeHandshake : NodeHandshake, ILaunchableNodeHandshake
 {
     internal WorkerNodeHandshake(bool nodeReuse = false, bool lowPriority = false)
         : this(new CommunicationsUtilities.WorkerNodeHandshakeConfiguration(nodeReuse, lowPriority))
@@ -205,6 +227,8 @@ internal sealed class WorkerNodeHandshake : NodeHandshake
         : base(configuration.HandshakeOptions, includeSessionId: true, toolsDirectory: null)
     {
     }
+
+    public NodeMode? ExpectedNodeMode => NodeMode.OutOfProcNode;
 }
 
 internal sealed class NetTaskHostHandshake : NodeHandshake
