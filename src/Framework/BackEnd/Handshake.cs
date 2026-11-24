@@ -86,6 +86,18 @@ internal union TaskHostHandshake(
     FrameworkTaskHostHandshake,
     Clr2TaskHostHandshake) : INodeHandshake
 {
+    internal TaskHostHandshakeOptions Options => this switch
+    {
+        NetTaskHostHandshake handshake => handshake.Options,
+        FrameworkTaskHostHandshake handshake => handshake.Options,
+        Clr2TaskHostHandshake handshake => handshake.Options,
+    };
+
+    internal TaskHostArchitecture Architecture => Options.Architecture;
+    internal bool NodeReuse => Options.NodeReuse;
+    internal bool IsClr2 => this is Clr2TaskHostHandshake;
+    internal bool IsNet => this is NetTaskHostHandshake;
+
     private INodeHandshake Protocol => this switch
     {
         NetTaskHostHandshake handshake => handshake,
@@ -177,9 +189,12 @@ internal sealed class NetTaskHostHandshake : NodeHandshake
     private protected override bool IncludesChangeWave => false;
     private protected override bool AcceptsDriveLetterCaseVariant => true;
 
+    internal TaskHostHandshakeOptions Options { get; }
+
     internal NetTaskHostHandshake(TaskHostHandshakeOptions options = default, string? toolsDirectory = null)
         : base(options.ToWireOptions() | HandshakeOptions.TaskHost | HandshakeOptions.NET, includeSessionId: true, toolsDirectory)
     {
+        Options = options;
     }
 
     private protected override HandshakeComponents CreateComponents(int options, int salt, int sessionId, Version? fileVersion) => new(
@@ -196,14 +211,18 @@ internal sealed class FrameworkTaskHostHandshake : NodeHandshake
 {
     private protected override bool IncludesChangeWave => false;
 
+    internal TaskHostHandshakeOptions Options { get; }
+
     internal FrameworkTaskHostHandshake(TaskHostHandshakeOptions options = default)
         : base(options.ToWireOptions() | HandshakeOptions.TaskHost, includeSessionId: true, toolsDirectory: null)
     {
+        Options = options;
     }
 
     internal FrameworkTaskHostHandshake(TaskHostHandshakeOptions options, string toolsDirectory, Version fileVersion)
         : base(options.ToWireOptions() | HandshakeOptions.TaskHost, includeSessionId: true, toolsDirectory, fileVersion)
     {
+        Options = options;
     }
 }
 
@@ -211,9 +230,12 @@ internal sealed class Clr2TaskHostHandshake : NodeHandshake
 {
     private protected override bool IncludesChangeWave => false;
 
+    internal TaskHostHandshakeOptions Options { get; }
+
     internal Clr2TaskHostHandshake(TaskHostHandshakeOptions options, string toolsDirectory, Version? fileVersion = null)
         : base(options.ToWireOptions() | HandshakeOptions.TaskHost | HandshakeOptions.CLR2, includeSessionId: true, toolsDirectory, fileVersion)
     {
+        Options = options;
     }
 }
 

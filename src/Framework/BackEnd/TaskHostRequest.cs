@@ -13,6 +13,18 @@ internal union TaskHostRequest(
     FrameworkTaskHostRequest,
     Clr2TaskHostRequest)
 {
+    internal TaskHostHandshakeOptions Options => this switch
+    {
+        NetTaskHostRequest request => request.Options,
+        FrameworkTaskHostRequest request => request.Options,
+        Clr2TaskHostRequest request => request.Options,
+    };
+
+    internal TaskHostArchitecture Architecture => Options.Architecture;
+    internal bool NodeReuse => Options.NodeReuse;
+    internal bool IsClr2 => this is Clr2TaskHostRequest;
+    internal bool IsNet => this is NetTaskHostRequest;
+
     internal HandshakeOptions HandshakeOptions => this switch
     {
         NetTaskHostRequest request => request.HandshakeOptions,

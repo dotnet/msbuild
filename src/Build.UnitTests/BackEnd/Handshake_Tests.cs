@@ -148,6 +148,46 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             secondKey.ShouldBe(firstKey);
         }
 
+        [Fact]
+        public void TaskHostRequestAndHandshakeExposeTypedOptions()
+        {
+            TaskHostHandshakeOptions options = new(TaskHostArchitecture.Arm64, NodeReuse: true);
+            string toolsDirectory = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+
+            TaskHostRequest netRequest = new NetTaskHostRequest(options);
+            TaskHostRequest frameworkRequest = new FrameworkTaskHostRequest(options);
+            TaskHostRequest clr2Request = new Clr2TaskHostRequest(options);
+
+            TaskHostHandshake netHandshake = new NetTaskHostHandshake(options);
+            TaskHostHandshake frameworkHandshake = new FrameworkTaskHostHandshake(options);
+            TaskHostHandshake clr2Handshake = new Clr2TaskHostHandshake(options, toolsDirectory);
+
+            AssertRequestOptions(netRequest, isNet: true, isClr2: false);
+            AssertRequestOptions(frameworkRequest, isNet: false, isClr2: false);
+            AssertRequestOptions(clr2Request, isNet: false, isClr2: true);
+            AssertHandshakeOptions(netHandshake, isNet: true, isClr2: false);
+            AssertHandshakeOptions(frameworkHandshake, isNet: false, isClr2: false);
+            AssertHandshakeOptions(clr2Handshake, isNet: false, isClr2: true);
+
+            void AssertRequestOptions(TaskHostRequest request, bool isNet, bool isClr2)
+            {
+                request.Options.ShouldBe(options);
+                request.Architecture.ShouldBe(TaskHostArchitecture.Arm64);
+                request.NodeReuse.ShouldBeTrue();
+                request.IsNet.ShouldBe(isNet);
+                request.IsClr2.ShouldBe(isClr2);
+            }
+
+            void AssertHandshakeOptions(TaskHostHandshake handshake, bool isNet, bool isClr2)
+            {
+                handshake.Options.ShouldBe(options);
+                handshake.Architecture.ShouldBe(TaskHostArchitecture.Arm64);
+                handshake.NodeReuse.ShouldBeTrue();
+                handshake.IsNet.ShouldBe(isNet);
+                handshake.IsClr2.ShouldBe(isClr2);
+            }
+        }
+
         /// <summary>
         /// The .NET task host is the connection at risk: a .NET Framework parent (e.g. Visual Studio) talks to
         /// a child taken from the installed .NET SDK, which resolves the same environment variable against a
