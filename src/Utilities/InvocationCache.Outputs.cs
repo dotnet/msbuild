@@ -26,26 +26,34 @@ public sealed partial class InvocationCache
                 throw new ArgumentException("The cache and output directories must not contain each other.", nameof(outputs));
             }
         }
-        else
+        else if (outputs.Files.Length > 0)
         {
-            var paths = new HashSet<string>(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
-            foreach (string file in outputs.Files)
+            StringComparer comparer = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+            string[] prefixes = new string[outputs.Files.Length];
+            for (int i = 0; i < outputs.Files.Length; i++)
             {
+                string file = outputs.Files[i];
                 string filePrefix = file.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
-                foreach (string existing in paths)
-                {
-                    string existingPrefix = existing.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
-                    if (existing.StartsWith(filePrefix, comparison) || file.StartsWith(existingPrefix, comparison))
-                    {
-                        throw new ArgumentException("Declared output files must not contain each other.", nameof(outputs));
-                    }
-                }
-
-                if (!paths.Add(file) || file.StartsWith(cachePrefix, comparison) ||
-                    cachePrefix.StartsWith(filePrefix, comparison))
+                if (filePrefix.StartsWith(cachePrefix, comparison) || cachePrefix.StartsWith(filePrefix, comparison))
                 {
                     throw new ArgumentException("Cache outputs must be distinct files outside the cache.", nameof(outputs));
+                }
+
+                prefixes[i] = filePrefix;
+            }
+
+            Array.Sort(prefixes, comparer);
+            for (int i = 1; i < prefixes.Length; i++)
+            {
+                if (prefixes[i].Equals(prefixes[i - 1], comparison))
+                {
+                    throw new ArgumentException("Cache outputs must be distinct files outside the cache.", nameof(outputs));
+                }
+
+                if (prefixes[i].StartsWith(prefixes[i - 1], comparison))
+                {
+                    throw new ArgumentException("Declared output files must not contain each other.", nameof(outputs));
                 }
             }
         }

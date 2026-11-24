@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Shouldly;
@@ -193,6 +194,8 @@ public sealed class InvocationCache_Tests
     [InlineData("file-contains-cache")]
     [InlineData("duplicate-file")]
     [InlineData("nested-files")]
+    [InlineData("nested-files-reversed")]
+    [InlineData("nested-files-with-sibling-prefix")]
     public void OverlappingPathsAreRejectedBeforeIO(string overlap)
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
@@ -208,12 +211,30 @@ public sealed class InvocationCache_Tests
             "file-in-cache" => InvocationOutputs.FromFiles(Path.Combine(cache.CacheDirectory, "nested")),
             "file-contains-cache" => InvocationOutputs.FromFiles(root),
             "duplicate-file" => InvocationOutputs.FromFiles(file, file),
+            "nested-files-reversed" => InvocationOutputs.FromFiles(Path.Combine(file, "nested"), file),
+            "nested-files-with-sibling-prefix" => InvocationOutputs.FromFiles(file, file + "-sibling", Path.Combine(file, "nested")),
             _ => InvocationOutputs.FromFiles(file, Path.Combine(file, "nested"))
         };
 
         Should.Throw<ArgumentException>(() => cache.Store(Key, outputs));
         Should.Throw<ArgumentException>(() => cache.TryRestore(Key, outputs, DateTime.UtcNow, out _));
         Directory.GetFileSystemEntries(root).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void NonOverlappingSiblingPrefixOutputsPreserveOrder()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string root = env.CreateFolder().Path;
+        var cache = new InvocationCache(Path.Combine(root, "cache"), new TestTask { BuildEngine = new MockEngine() }.Log, "Test");
+        string sibling = Path.Combine(root, "result-sibling");
+        string file = Path.Combine(root, "result");
+        File.WriteAllText(sibling, "sibling");
+        File.WriteAllText(file, "file");
+        InvocationOutputs outputs = InvocationOutputs.FromFiles(sibling, file);
+
+        cache.Store(Key, outputs);
+        outputs.Files.ShouldBe([sibling, file]);
     }
 
     [Theory]
@@ -687,9 +708,87 @@ public sealed class InvocationCache_Tests
 
             task.Execute().ShouldBeFalse();
             task.Executions.ShouldBe(i == 0 ? 1 : 0);
+            task.ExitCode.ShouldBe(-1);
+            task.ExitCodeOverriddenInErrorHandler.ShouldBe(true);
             engine.Errors.ShouldBe(1);
             task.Log.HasLoggedErrors.ShouldBeFalse();
         }
+    }
+
+    [Fact]
+    public void ToolTaskSetsExitCodeOverriddenFlagOnColdAndWarmReplayErrors()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string root = env.CreateFolder().Path;
+        env.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, "true");
+        env.SetEnvironmentVariable(TestCachedToolTask.PathVariable, Path.Combine(root, "cache"));
+        var invocation = new InvocationDescription(InvocationInputs.FromFiles(), [], InvocationOutputs.FromFiles());
+
+        for (int i = 0; i < 2; i++)
+        {
+            var engine = new MockEngine(_output);
+            var task = new TestCachedToolTask
+            {
+                BuildEngine = engine,
+                Description = invocation,
+                LogStandardErrorAsError = true
+            };
+
+            task.Execute().ShouldBeFalse();
+            task.Executions.ShouldBe(i == 0 ? 1 : 0);
+            task.ExitCode.ShouldBe(-1);
+            task.ExitCodeOverriddenInErrorHandler.ShouldBe(true);
+            engine.Errors.ShouldBe(1);
+        }
+
+        var failedEngine = new MockEngine(_output);
+        var failedTask = new TestCachedToolTask
+        {
+            BuildEngine = failedEngine,
+            Description = new InvocationDescription(InvocationInputs.FromFiles(), ["nonzero"], InvocationOutputs.FromFiles()),
+            ToolExitCode = 42,
+            LogStandardErrorAsError = true
+        };
+
+        failedTask.Execute().ShouldBeFalse();
+        failedTask.ExitCode.ShouldBe(42);
+        failedTask.ExitCodeOverriddenInErrorHandler.ShouldBe(false);
+    }
+
+    [Fact]
+    public async Task OutputCaptureIgnoresLateWritesAfterCompletion()
+    {
+        var capture = new CachedToolTask.OutputCapture();
+        capture.AddStandardOutput("before-out");
+        capture.AddStandardError("before-err");
+
+        using var stop = new CancellationTokenSource();
+        Task writer = Task.Run(() =>
+        {
+            while (!stop.IsCancellationRequested)
+            {
+                capture.AddStandardOutput("late-out");
+                capture.AddStandardError("late-err");
+            }
+        });
+
+        capture.Complete(out IReadOnlyList<string> standardOutput, out IReadOnlyList<string> standardError);
+        int expectedOutCount = standardOutput.Count;
+        int expectedErrCount = standardError.Count;
+
+        for (int i = 0; i < 200; i++)
+        {
+            standardOutput.ToArray().Length.ShouldBe(expectedOutCount);
+            standardError.ToArray().Length.ShouldBe(expectedErrCount);
+        }
+
+        capture.AddStandardOutput("after-out");
+        capture.AddStandardError("after-err");
+        standardOutput.Count.ShouldBe(expectedOutCount);
+        standardError.Count.ShouldBe(expectedErrCount);
+
+        stop.Cancel();
+        await writer;
     }
 
     [Theory]
@@ -835,6 +934,7 @@ public sealed class InvocationCache_Tests
         internal bool LogAdditionalErrorOnReplay { get; set; }
         internal string? WorkingDirectoryOverride { get; set; }
         internal string? WorkingDirectoryUsed { get; private set; }
+        internal bool? ExitCodeOverriddenInErrorHandler { get; private set; }
 
         internal int Run() => ExecuteTool("tool", "response", "command");
 
@@ -842,6 +942,12 @@ public sealed class InvocationCache_Tests
         protected override InvocationCacheConfiguration CacheConfiguration => Configuration;
         protected override bool HasLoggedErrors => base.HasLoggedErrors || (_additionalLog?.HasLoggedErrors ?? false);
         protected override string GetWorkingDirectory() => WorkingDirectoryOverride ?? string.Empty;
+
+        protected override bool HandleTaskExecutionErrors()
+        {
+            ExitCodeOverriddenInErrorHandler = ExitCodeOverriddenToIndicateErrors;
+            return base.HandleTaskExecutionErrors();
+        }
 
         protected override string GenerateFullPathToTool() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), ToolName)

@@ -125,6 +125,20 @@ namespace Microsoft.Build.Utilities
         protected bool ExitCodeOverriddenToIndicateErrors { get; private set; }
 
         /// <summary>
+        /// Converts a zero exit code to -1 and records the override when the task has logged errors.
+        /// </summary>
+        internal int NormalizeExitCodeForLoggedErrors(int exitCode)
+        {
+            if (exitCode == 0 && HasLoggedErrors)
+            {
+                ExitCodeOverriddenToIndicateErrors = true;
+                return -1;
+            }
+
+            return exitCode;
+        }
+
+        /// <summary>
         /// When set to true, this task will yield the node when its task is executing.
         /// </summary>
         public bool YieldDuringToolExecution { get; set; }
@@ -846,11 +860,7 @@ namespace Microsoft.Build.Utilities
                 }
 
                 // If the tool exited cleanly, but logged errors then assign a failing exit code (-1)
-                if (ExitCode == 0 && HasLoggedErrors)
-                {
-                    ExitCode = -1;
-                    ExitCodeOverriddenToIndicateErrors = true;
-                }
+                ExitCode = NormalizeExitCodeForLoggedErrors(ExitCode);
 
                 // release all the OS resources
                 // setting a bool to make sure tardy notification threads

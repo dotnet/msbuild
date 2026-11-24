@@ -15,8 +15,7 @@ namespace Microsoft.Build.Utilities;
 [Experimental("MSBUILD001")]
 public abstract class CachedToolTask : ToolTask
 {
-    private List<string>? _capturedStandardOutput;
-    private List<string>? _capturedStandardError;
+    private OutputCapture? _outputCapture;
 
     /// <summary>
     /// Gets the tool name and cache environment variable names.
@@ -41,7 +40,7 @@ public abstract class CachedToolTask : ToolTask
             exitCode = ExecuteToolCore(pathToTool, responseFileCommands, commandLineCommands);
         }
 
-        return exitCode == 0 && HasLoggedErrors ? -1 : exitCode;
+        return NormalizeExitCodeForLoggedErrors(exitCode);
     }
 
     private bool TryExecuteCached(string pathToTool, string responseFileCommands, string commandLineCommands,
@@ -61,6 +60,7 @@ public abstract class CachedToolTask : ToolTask
         }
 
         var result = new InvocationResult(-1);
+        OutputCapture? capture = null;
         try
         {
             string workingDirectory = GetWorkingDirectory();
@@ -77,20 +77,31 @@ public abstract class CachedToolTask : ToolTask
         }
         finally
         {
-            // Execution may throw before returning its captured output.
-            IReadOnlyList<string> standardOutput = _capturedStandardOutput ?? result.StandardOutput;
-            IReadOnlyList<string> standardError = _capturedStandardError ?? result.StandardError;
-            _capturedStandardOutput = null;
-            _capturedStandardError = null;
+            // Close capture before replay so late callbacks cannot mutate the lists,
+            // including when ExecuteToolCore throws before returning.
+            _outputCapture = null;
+            IReadOnlyList<string> standardOutput;
+            IReadOnlyList<string> standardError;
+            if (capture is not null)
+            {
+                capture.Complete(out standardOutput, out standardError);
+            }
+            else
+            {
+                standardOutput = result.StandardOutput;
+                standardError = result.StandardError;
+            }
+
             ReplayOutput(standardOutput, standardError);
         }
 
         InvocationResult ExecuteAndCapture()
         {
-            _capturedStandardOutput = new List<string>();
-            _capturedStandardError = new List<string>();
+            capture = new OutputCapture();
+            _outputCapture = capture;
             int toolExitCode = ExecuteToolCore(pathToTool, responseFileCommands, commandLineCommands);
-            return new InvocationResult(toolExitCode, _capturedStandardOutput, _capturedStandardError);
+            capture.Complete(out IReadOnlyList<string> standardOutput, out IReadOnlyList<string> standardError);
+            return new InvocationResult(toolExitCode, standardOutput, standardError);
         }
     }
 
@@ -107,7 +118,7 @@ public abstract class CachedToolTask : ToolTask
     /// <inheritdoc />
     protected override Process StartToolProcess(Process process)
     {
-        if (_capturedStandardOutput is { } standardOutput && _capturedStandardError is { } standardError)
+        if (_outputCapture is { } capture)
         {
             // Replace live logging, but preserve ToolTask's EOF notifications.
             process.OutputDataReceived -= ReceiveStandardOutputData;
@@ -115,7 +126,7 @@ public abstract class CachedToolTask : ToolTask
             {
                 if (args.Data is not null)
                 {
-                    standardOutput.Add(args.Data);
+                    capture.AddStandardOutput(args.Data);
                 }
                 else
                 {
@@ -127,7 +138,7 @@ public abstract class CachedToolTask : ToolTask
             {
                 if (args.Data is not null)
                 {
-                    standardError.Add(args.Data);
+                    capture.AddStandardError(args.Data);
                 }
                 else
                 {
@@ -155,6 +166,46 @@ public abstract class CachedToolTask : ToolTask
             else
             {
                 LogEventsFromTextOutput(line, StandardErrorImportanceToUse);
+            }
+        }
+    }
+
+    internal sealed class OutputCapture
+    {
+        private readonly object _lock = new();
+        private readonly List<string> _standardOutput = [];
+        private readonly List<string> _standardError = [];
+        private bool _closed;
+
+        public void AddStandardOutput(string line)
+        {
+            lock (_lock)
+            {
+                if (!_closed)
+                {
+                    _standardOutput.Add(line);
+                }
+            }
+        }
+
+        public void AddStandardError(string line)
+        {
+            lock (_lock)
+            {
+                if (!_closed)
+                {
+                    _standardError.Add(line);
+                }
+            }
+        }
+
+        public void Complete(out IReadOnlyList<string> standardOutput, out IReadOnlyList<string> standardError)
+        {
+            lock (_lock)
+            {
+                _closed = true;
+                standardOutput = _standardOutput;
+                standardError = _standardError;
             }
         }
     }
