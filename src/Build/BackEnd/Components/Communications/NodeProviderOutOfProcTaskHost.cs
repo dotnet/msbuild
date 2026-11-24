@@ -29,20 +29,36 @@ namespace Microsoft.Build.BackEnd
 
     /// <summary>
     /// Represents a unique key for identifying task host nodes.
-    /// Combines the handshake identity, scheduled node ID, console forwarding, and resolved launch identity.
+    /// Combines the typed task-host request, scheduled node ID, console forwarding, and resolved launch identity.
     /// The scheduled node ID is -1 in traditional multi-process builds.
     /// </summary>
     internal readonly record struct TaskHostNodeKey
     {
         internal TaskHostNodeKey(TaskHostRequest request, int nodeId, bool forwardConsoleOutput = false, TaskHostLaunchIdentity? launchIdentity = null)
         {
-            HandshakeOptions = request.HandshakeOptions;
+            Request = WithoutLaunchPaths(request);
             NodeId = nodeId;
             ForwardConsoleOutput = forwardConsoleOutput;
             LaunchIdentity = launchIdentity;
         }
 
-        internal HandshakeOptions HandshakeOptions { get; }
+        /// <summary>
+        /// Returns a copy of <paramref name="request"/> that keeps only its kind and wire options.
+        /// </summary>
+        /// <remarks>
+        /// Requested launch paths are inputs to path resolution, not part of node identity.
+        /// The resolved executable is tracked by <see cref="LaunchIdentity"/>, so retaining the
+        /// requested paths would make otherwise-equal keys differ and prevent task-host reuse.
+        /// </remarks>
+        private static TaskHostRequest WithoutLaunchPaths(TaskHostRequest request)
+            => request switch
+            {
+                NetTaskHostRequest netRequest => new NetTaskHostRequest(netRequest.Options),
+                FrameworkTaskHostRequest frameworkRequest => new FrameworkTaskHostRequest(frameworkRequest.Options),
+                Clr2TaskHostRequest clr2Request => new Clr2TaskHostRequest(clr2Request.Options),
+            };
+
+        internal TaskHostRequest Request { get; }
         internal int NodeId { get; }
         internal bool ForwardConsoleOutput { get; }
         internal TaskHostLaunchIdentity? LaunchIdentity { get; init; }
@@ -117,7 +133,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// A mapping of all the task host nodes managed by this provider.
-        /// The key is a TaskHostNodeKey combining HandshakeOptions and scheduled node ID.
+        /// The key is a TaskHostNodeKey combining the typed task-host request and scheduled node ID.
         /// </summary>
         private ConcurrentDictionary<TaskHostNodeKey, NodeContext> _nodeContexts;
 
@@ -260,27 +276,55 @@ namespace Microsoft.Build.BackEnd
         /// not establish ownership.
         /// </remarks>
         protected override bool DoesConnectionPersistAcrossBuilds(TaskHostHandshake handshake, byte negotiatedVersion)
-            => SupportsSidecarLifetime(handshake.HandshakeOptions, negotiatedVersion)
+            => SupportsSidecarLifetime(ExistsOnlyForCompatibility(handshake), negotiatedVersion)
                 && handshake.NodeReuse;
 
-        private static bool SupportsSidecarLifetime(HandshakeOptions handshakeOptions, byte negotiatedVersion)
+        private static bool SupportsSidecarLifetime(TaskHostRequest request, byte negotiatedVersion)
+            => SupportsSidecarLifetime(ExistsOnlyForCompatibility(request), negotiatedVersion);
+
+        private static bool SupportsSidecarLifetime(bool existsOnlyForCompatibility, byte negotiatedVersion)
             => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
                 && negotiatedVersion >= NodePacketTypeExtensions.TaskHostOwnershipMinVersion
-                && !ExistsOnlyForCompatibility(handshakeOptions);
+                && !existsOnlyForCompatibility;
 
         /// <summary>
-        /// Whether a task host with these options exists only because this process cannot run the
-        /// task itself, rather than to keep a task out of this process.
+        /// Determines whether the connected task host exists only because this process cannot run
+        /// the task itself, rather than to keep a task out of this process.
         /// </summary>
-        internal static bool ExistsOnlyForCompatibility(HandshakeOptions handshakeOptions)
+        /// <remarks>
+        /// Uses the shared compatibility policy also applied to requests before launching a host,
+        /// so pooling and launch decisions remain consistent.
+        /// </remarks>
+        private static bool ExistsOnlyForCompatibility(TaskHostHandshake handshake)
+            => ExistsOnlyForCompatibility(handshake.IsClr2, handshake.IsNet, handshake.Architecture);
+
+        /// <summary>
+        /// Determines whether the requested task host is needed only for runtime or architecture
+        /// compatibility with this process.
+        /// </summary>
+        /// <remarks>
+        /// The request and handshake are separate typed unions. This overload extracts their
+        /// common compatibility attributes and delegates to one policy implementation.
+        /// </remarks>
+        private static bool ExistsOnlyForCompatibility(TaskHostRequest request)
+            => ExistsOnlyForCompatibility(request.IsClr2, request.IsNet, request.Architecture);
+
+        /// <summary>
+        /// Applies the compatibility policy shared by task-host requests and handshakes.
+        /// </summary>
+        /// <remarks>
+        /// Keeping the runtime- and architecture-specific rules here prevents the request and
+        /// handshake overloads from diverging across platforms.
+        /// </remarks>
+        private static bool ExistsOnlyForCompatibility(bool isClr2, bool isNet, TaskHostArchitecture architecture)
         {
             // A different runtime. CLR2 always is. .NET only when this process is not itself .NET.
-            if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.CLR2))
+            if (isClr2)
             {
                 return true;
             }
 
-            if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NET))
+            if (isNet)
             {
 #if NETFRAMEWORK
                 return true;
@@ -294,14 +338,12 @@ namespace Microsoft.Build.BackEnd
 
             // A different architecture. The handshake encodes only x64 and arm64, so no bit means
             // x86 -- which differs from this process unless this process is itself x86.
-            bool wantsX64 = Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.X64);
-            bool wantsArm64 = Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.Arm64);
-
-            string requestedArchitecture = wantsX64
-                ? XMakeAttributes.MSBuildArchitectureValues.x64
-                : wantsArm64
-                    ? XMakeAttributes.MSBuildArchitectureValues.arm64
-                    : XMakeAttributes.MSBuildArchitectureValues.x86;
+            string requestedArchitecture = architecture switch
+            {
+                TaskHostArchitecture.X64 => XMakeAttributes.MSBuildArchitectureValues.x64,
+                TaskHostArchitecture.Arm64 => XMakeAttributes.MSBuildArchitectureValues.arm64,
+                _ => XMakeAttributes.MSBuildArchitectureValues.x86,
+            };
 
             return !string.Equals(requestedArchitecture, XMakeAttributes.GetCurrentMSBuildArchitecture(), StringComparison.OrdinalIgnoreCase);
         }
@@ -343,7 +385,7 @@ namespace Microsoft.Build.BackEnd
                         continue;
                     }
 
-                    if (!enableReuse && SupportsSidecarLifetime(nodeKey.HandshakeOptions, context.NegotiatedPacketVersion))
+                    if (!enableReuse && SupportsSidecarLifetime(nodeKey.Request, context.NegotiatedPacketVersion))
                     {
                         RetireNode(context.NodeId);
                     }
@@ -696,12 +738,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Given a TaskHostContext, returns the name of the executable we should be searching for.
+        /// Given a task-host request, returns the name of the executable we should be searching for.
         /// </summary>
-        internal static string GetTaskHostNameFromHostContext(HandshakeOptions hostContext)
+        internal static string GetTaskHostNameFromHostContext(TaskHostRequest request)
         {
-            Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
-            if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
+            if (request.IsClr2)
             {
                 return TaskHostNameForClr2TaskHost;
             }
@@ -723,20 +764,17 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Given a TaskHostContext, returns the appropriate runtime host and MSBuild assembly locations
-        /// based on the handshake options.
+        /// Given a task-host request, returns the appropriate MSBuild executable path for non-.NET runtimes.
         /// </summary>
-        /// <param name="hostContext">The handshake options specifying the desired task host configuration (architecture, CLR version, runtime).</param>
+        /// <param name="request">The desired task-host runtime and architecture.</param>
         /// <returns>
         /// The full path to MSBuild.exe.
         /// </returns>
-        internal static string GetMSBuildExecutablePathForNonNETRuntimes(HandshakeOptions hostContext)
+        internal static string GetMSBuildExecutablePathForNonNETRuntimes(TaskHostRequest request)
         {
-            Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
-
 #if RUNTIME_TYPE_NETCORE
             // Not cached: the Developer Command Prompt selection depends on environment variables.
-            switch (ResolveVisualStudioTaskHost(hostContext))
+            switch (ResolveVisualStudioTaskHost(request))
             {
                 case VisualStudioTaskHostResolution.Found found:
                     return found.TaskHostExecutablePath;
@@ -745,7 +783,7 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            var toolName = GetTaskHostNameFromHostContext(hostContext);
+            var toolName = GetTaskHostNameFromHostContext(request);
 
             // Snapshot to locals so concurrent callers never read a null static
             // that another thread hasn't written yet. Redundant computation is
@@ -771,9 +809,9 @@ namespace Microsoft.Build.BackEnd
                 s_baseTaskHostPathArm64 = basePathArm64;
             }
 
-            bool isX64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.X64);
-            bool isArm64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64);
-            bool isCLR2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+            bool isX64 = request.Architecture == TaskHostArchitecture.X64;
+            bool isArm64 = request.Architecture == TaskHostArchitecture.Arm64;
+            bool isCLR2 = request.IsClr2;
 
             if (isCLR2)
             {
@@ -805,11 +843,9 @@ namespace Microsoft.Build.BackEnd
         /// - RuntimeHostPath: The path to the dotnet executable that will host the .NET runtime
         /// - MSBuildPath: The path to MSBuild.dll/MSBuild app host.
         /// </returns>
-        internal static (string RuntimeHostPath, string MSBuildPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, TaskHostParameters taskHostParameters)
+        internal static (string RuntimeHostPath, string MSBuildPath) GetMSBuildLocationForNETRuntime(NetTaskHostRequest request)
         {
-            Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
-
-            return (taskHostParameters.DotnetHostPath, GetMSBuildPath(taskHostParameters.MSBuildAssemblyPath));
+            return (request.LaunchPaths.DotnetHostPath, GetMSBuildPath(request.LaunchPaths.MSBuildAssemblyPath));
         }
 
         private static string GetMSBuildPath(string msBuildAssemblyPath)
@@ -1158,7 +1194,8 @@ namespace Microsoft.Build.BackEnd
             ArgumentNullException.ThrowIfNull(factory);
             Assumed.False(_nodeContexts.ContainsKey(nodeKey), "We should not already have a node for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
-            HandshakeOptions hostContext = nodeKey.HandshakeOptions;
+            TaskHostRequest request = nodeKey.Request;
+            HandshakeOptions hostContext = request.HandshakeOptions;
 
             // Generate a unique node ID for communication purposes using atomic increment.
             int communicationNodeId = Interlocked.Increment(ref _nextNodeId);
@@ -1196,7 +1233,7 @@ namespace Microsoft.Build.BackEnd
 #if RUNTIME_TYPE_NETCORE
                 return ResolveVisualStudioTaskHostLaunchConfiguration(clr2Request, out visualStudioResolution);
 #else
-                string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(clr2Request.HandshakeOptions);
+                string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(clr2Request);
                 string toolsDirectory = Path.GetDirectoryName(msbuildLocation) ?? string.Empty;
                 return NodeLaunchData.ForClr2TaskHost(clr2Request, msbuildLocation, toolsDirectory);
 #endif
@@ -1213,7 +1250,7 @@ namespace Microsoft.Build.BackEnd
 #else
             return NodeLaunchData.ForFrameworkTaskHost(
                 frameworkRequest,
-                GetMSBuildExecutablePathForNonNETRuntimes(frameworkRequest.HandshakeOptions),
+                GetMSBuildExecutablePathForNonNETRuntimes(frameworkRequest),
                 ComponentHost.BuildParameters.LowPriority);
 #endif
         }
@@ -1224,7 +1261,7 @@ namespace Microsoft.Build.BackEnd
             out VisualStudioTaskHostResolution visualStudioResolution)
         {
             HandshakeOptions hostContext = request.HandshakeOptions;
-            visualStudioResolution = ResolveVisualStudioTaskHost(hostContext);
+            visualStudioResolution = ResolveVisualStudioTaskHost(request);
             if (visualStudioResolution is not VisualStudioTaskHostResolution.Found found)
             {
                 CommunicationsUtilities.Trace($"For a host context of {hostContext}, no single Visual Studio installation was found.");
@@ -1245,7 +1282,7 @@ namespace Microsoft.Build.BackEnd
             out VisualStudioTaskHostResolution visualStudioResolution)
         {
             HandshakeOptions hostContext = request.HandshakeOptions;
-            visualStudioResolution = ResolveVisualStudioTaskHost(hostContext);
+            visualStudioResolution = ResolveVisualStudioTaskHost(request);
             if (visualStudioResolution is not VisualStudioTaskHostResolution.Found found)
             {
                 CommunicationsUtilities.Trace($"For a host context of {hostContext}, no single Visual Studio installation was found.");
@@ -1328,26 +1365,26 @@ namespace Microsoft.Build.BackEnd
         /// The installation of a Visual Studio Developer Command Prompt is preferred; otherwise the
         /// Visual Studio setup API is queried, and an installation is used only when it is the only one available.
         /// </summary>
-        /// <param name="hostContext">The handshake options of the requested task host.</param>
-        internal static VisualStudioTaskHostResolution ResolveVisualStudioTaskHost(HandshakeOptions hostContext)
+        /// <param name="request">The typed task-host request.</param>
+        internal static VisualStudioTaskHostResolution ResolveVisualStudioTaskHost(TaskHostRequest request)
             => NativeMethodsShared.IsWindows
-                ? ResolveVisualStudioTaskHost(hostContext, GetVisualStudioInstances)
+                ? ResolveVisualStudioTaskHost(request, GetVisualStudioInstances)
                 : VisualStudioTaskHostResolution.NotApplicable.Instance;
 
         /// <summary>
-        /// Platform-independent implementation of <see cref="ResolveVisualStudioTaskHost(HandshakeOptions)"/>
+        /// Platform-independent implementation of <see cref="ResolveVisualStudioTaskHost(TaskHostRequest)"/>
         /// with an explicit source of Visual Studio installations.
         /// </summary>
-        internal static VisualStudioTaskHostResolution ResolveVisualStudioTaskHost(HandshakeOptions hostContext, Func<IList<VisualStudioInstance>> getVisualStudioInstances)
+        internal static VisualStudioTaskHostResolution ResolveVisualStudioTaskHost(TaskHostRequest request, Func<IList<VisualStudioInstance>> getVisualStudioInstances)
         {
-            if (!IsVisualStudioTaskHostContext(hostContext))
+            if (request.IsNet)
             {
                 return VisualStudioTaskHostResolution.NotApplicable.Instance;
             }
 
             // A Developer Command Prompt selects the installation explicitly.
             if (TryGetDeveloperCommandPromptInstallation(out string developerCommandPromptInstallDirectory)
-                && FindTaskHostInInstallation(developerCommandPromptInstallDirectory, hostContext) is { } developerCommandPromptTaskHost)
+                && FindTaskHostInInstallation(developerCommandPromptInstallDirectory, request) is { } developerCommandPromptTaskHost)
             {
                 return developerCommandPromptTaskHost;
             }
@@ -1357,7 +1394,7 @@ namespace Microsoft.Build.BackEnd
             foreach (VisualStudioInstance instance in getVisualStudioInstances() ?? [])
             {
                 if (instance.Version?.Major == s_currentVisualStudioMajorVersion
-                    && FindTaskHostInInstallation(instance.Path, hostContext) is { } taskHost)
+                    && FindTaskHostInInstallation(instance.Path, request) is { } taskHost)
                 {
                     matchingInstallations.Add(instance);
                     matchingTaskHost = taskHost;
@@ -1391,13 +1428,6 @@ namespace Microsoft.Build.BackEnd
             => s_visualStudioInstances ??= VisualStudioLocationHelper.GetInstances();
 
         /// <summary>
-        /// .NET Framework task hosts are served by Visual Studio; .NET task hosts use the SDK.
-        /// </summary>
-        private static bool IsVisualStudioTaskHostContext(HandshakeOptions hostContext)
-            => Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost)
-                && !Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET);
-
-        /// <summary>
         /// Reads the Visual Studio installation directory set by a Developer Command Prompt. Only the Visual Studio
         /// version matching this MSBuild is supported, as BuildEnvironmentHelper does for a Developer Command Prompt.
         /// </summary>
@@ -1412,7 +1442,7 @@ namespace Microsoft.Build.BackEnd
         /// Gets the task host for the requested runtime and architecture within a Visual Studio installation.
         /// </summary>
         /// <returns>The task host in the installation, or <see langword="null"/> when it does not exist.</returns>
-        private static VisualStudioTaskHostResolution.Found FindTaskHostInInstallation(string visualStudioInstallDirectory, HandshakeOptions hostContext)
+        private static VisualStudioTaskHostResolution.Found FindTaskHostInInstallation(string visualStudioInstallDirectory, TaskHostRequest request)
         {
             if (string.IsNullOrEmpty(visualStudioInstallDirectory))
             {
@@ -1431,17 +1461,18 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            bool isClr2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
-            if (isClr2 && Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64))
+            bool isClr2 = request.IsClr2;
+            if (isClr2 && request.Architecture == TaskHostArchitecture.Arm64)
             {
                 return null;
             }
 
-            string architectureDirectory = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.X64)
-                ? Path.Combine(root, "amd64")
-                : Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64)
-                    ? Path.Combine(root, "arm64")
-                    : root;
+            string architectureDirectory = request.Architecture switch
+            {
+                TaskHostArchitecture.X64 => Path.Combine(root, "amd64"),
+                TaskHostArchitecture.Arm64 => Path.Combine(root, "arm64"),
+                _ => root,
+            };
 
             string msbuildExePath = Path.Combine(architectureDirectory, isClr2 ? TaskHostNameForClr2TaskHost : "MSBuild.exe");
             return FileSystems.Default.FileExists(msbuildExePath)

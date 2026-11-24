@@ -93,7 +93,7 @@ namespace Microsoft.Build.BackEnd
         /// The task host context of the task host we're launching -- used to
         /// communicate with the task host.
         /// </summary>
-        private HandshakeOptions _requiredContext = HandshakeOptions.None;
+        private TaskHostRequest _requiredRequest;
 
         /// <summary>
         /// The ID of the node on which this task is scheduled to run.
@@ -394,7 +394,7 @@ namespace Microsoft.Build.BackEnd
                             // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
                             nodeReuse: effectiveNodeReuse,
                             taskHostParameters: _taskHostParameters);
-                        _requiredContext = request.HandshakeOptions;
+                        _requiredRequest = request;
 
                         _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(
                             request,
@@ -461,16 +461,16 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null, visualStudioResolution);
+                        LogErrorUnableToCreateTaskHost(_requiredRequest, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null, visualStudioResolution);
                     }
                 }
                 catch (BuildAbortedException ex)
                 {
-                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, ex, visualStudioResolution);
+                    LogErrorUnableToCreateTaskHost(_requiredRequest, _taskHostParameters.Runtime, _taskHostParameters.Architecture, ex, visualStudioResolution);
                 }
                 catch (NodeFailedToLaunchException e)
                 {
-                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, e, visualStudioResolution);
+                    LogErrorUnableToCreateTaskHost(_requiredRequest, _taskHostParameters.Runtime, _taskHostParameters.Architecture, e, visualStudioResolution);
                 }
             }
             finally
@@ -914,7 +914,7 @@ namespace Microsoft.Build.BackEnd
         /// extract it out into a separate method.
         /// </summary>
         private void LogErrorUnableToCreateTaskHost(
-            HandshakeOptions requiredContext,
+            TaskHostRequest requiredRequest,
             string runtime,
             string architecture,
             Exception e,
@@ -945,9 +945,9 @@ namespace Microsoft.Build.BackEnd
 
             string taskHostLocation = null;
 
-            if (Handshake.IsHandshakeOptionEnabled(requiredContext, HandshakeOptions.NET))
+            if (requiredRequest is NetTaskHostRequest netRequest)
             {
-                (_, string msbuildPath) = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext, _taskHostParameters);
+                (_, string msbuildPath) = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(netRequest);
                 if (msbuildPath != null)
                 {
                     (taskHostLocation, _) = NodeProviderOutOfProcTaskHost.ResolveNetTaskHostLaunchPath(msbuildPath);
@@ -961,19 +961,19 @@ namespace Microsoft.Build.BackEnd
                     NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.Found found => found.TaskHostExecutablePath,
                     NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.NotFound
                         or NodeProviderOutOfProcTaskHost.VisualStudioTaskHostResolution.MultipleFound => null,
-                    _ => NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext),
+                    _ => NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredRequest),
                 };
 #else
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredRequest);
 #endif
             }
 
             string msbuildLocation = taskHostLocation ??
                 // We don't know the path -- probably we're trying to get a 64-bit assembly on a
                 // 32-bit machine.  At least give them the exe name to look for, though ...
-                ((requiredContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2
+                (requiredRequest.IsClr2
                 ? "MSBuildTaskHost.exe"
-                : NodeProviderOutOfProcTaskHost.GetTaskHostNameFromHostContext(requiredContext));
+                : NodeProviderOutOfProcTaskHost.GetTaskHostNameFromHostContext(requiredRequest));
 
             if (e == null)
             {

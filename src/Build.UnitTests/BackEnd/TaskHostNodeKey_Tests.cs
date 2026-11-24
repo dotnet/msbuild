@@ -39,7 +39,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void TaskHostNodeKey_Equality_DifferentHandshakeOptions_AreNotEqual()
+        public void TaskHostNodeKey_Equality_DifferentRequestKinds_AreNotEqual()
         {
             var key1 = new TaskHostNodeKey(s_netRequest, 1);
             var key2 = new TaskHostNodeKey(s_frameworkRequest, 1);
@@ -171,7 +171,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var key = new TaskHostNodeKey(s_netRequest, -1);
 
             key.NodeId.ShouldBe(-1);
-            key.HandshakeOptions.ShouldBe(HandshakeOptions.TaskHost | HandshakeOptions.NET);
+            key.Request.ShouldBe(s_netRequest);
         }
 
         [Fact]
@@ -191,7 +191,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
                 var key = new TaskHostNodeKey(request, 42);
 
-                key.HandshakeOptions.ShouldBe(request.HandshakeOptions);
+                key.Request.IsNet.ShouldBe(request.IsNet);
+                key.Request.IsClr2.ShouldBe(request.IsClr2);
+                key.Request.Options.ShouldBe(request.Options);
+                key.Request.LaunchPaths.ShouldBe(default);
                 key.NodeId.ShouldBe(42);
             }
         }

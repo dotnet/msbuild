@@ -492,13 +492,13 @@ namespace Microsoft.Build.Evaluation
 
             TaskHostParameters parameters = new(runtime, architecture);
 
-            HandshakeOptions desiredContext = CommunicationsUtilities.GetTaskHostRequest(parameters).HandshakeOptions;
+            TaskHostRequest desiredRequest = CommunicationsUtilities.GetTaskHostRequest(parameters);
 
-            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(desiredContext);
+            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(desiredRequest);
 #if NETFRAMEWORK
-            if (Handshake.IsHandshakeOptionEnabled(desiredContext, HandshakeOptions.NET))
+            if (desiredRequest is NetTaskHostRequest netRequest)
             {
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(desiredContext, parameters).MSBuildPath;
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(netRequest).MSBuildPath;
             }
 #endif
 
