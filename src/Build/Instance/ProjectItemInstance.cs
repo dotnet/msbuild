@@ -9,9 +9,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-#if FEATURE_APPDOMAIN
-using System.Runtime.Remoting;
-#endif
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -1611,7 +1608,7 @@ namespace Microsoft.Build.Execution
                 else
                 {
 #if FEATURE_APPDOMAIN
-                    if (RemotingServices.IsTransparentProxy(destinationItem))
+                    if (NetFrameworkApis.IsTransparentProxy(destinationItem))
                     {
                         // Linq is not serializable so materialize the collection before making the call.
                         metadataToImport = metadataToImport.ToList();

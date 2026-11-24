@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -124,6 +126,7 @@ namespace Microsoft.Build.Evaluation
         /// See https://github.com/dotnet/msbuild/blob/main/documentation/NETFramework-NGEN.md#nugetframeworks for the motivation
         /// to use a separate AppDomain.
         /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static AppDomainSetup CreateAppDomainSetup(AssemblyName assemblyName, string assemblyPath)
         {
             byte[] publicKeyToken = assemblyName.GetPublicKeyToken();
@@ -158,6 +161,22 @@ namespace Microsoft.Build.Evaluation
             return appDomainSetup;
         }
 
+        /// <summary>
+        /// Creates the wrapper in a separate AppDomain. AppDomainSetup's configuration bytes and this
+        /// AppDomain.CreateDomain overload do not exist on .NET, so they are referenced only from this
+        /// method and <see cref="CreateAppDomainSetup"/>, which are not inlined into
+        /// <see cref="CreateInstance"/>. See <see cref="RuntimeCapabilities"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static NuGetFrameworkWrapper CreateInstanceInAppDomain(AssemblyName assemblyName, string assemblyPath)
+        {
+            AppDomainSetup appDomainSetup = CreateAppDomainSetup(assemblyName, assemblyPath);
+            Debug.Assert(appDomainSetup != null, "CreateAppDomainSetup returns a setup or throws.");
+
+            AppDomain appDomain = AppDomain.CreateDomain(nameof(NuGetFrameworkWrapper), null, appDomainSetup);
+            return (NuGetFrameworkWrapper)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(NuGetFrameworkWrapper).FullName);
+        }
+
         public static NuGetFrameworkWrapper CreateInstance()
         {
             // Resolve the location of the NuGet.Frameworks assembly
@@ -178,14 +197,9 @@ namespace Microsoft.Build.Evaluation
                 try
                 {
                     assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
-                    if (assemblyName != null && BuildEnvironmentHelper.Instance.RunningInMSBuildExe)
+                    if (assemblyName != null && BuildEnvironmentHelper.Instance.RunningInMSBuildExe && RuntimeCapabilities.SupportsAppDomains)
                     {
-                        AppDomainSetup appDomainSetup = CreateAppDomainSetup(assemblyName, assemblyPath);
-                        if (appDomainSetup != null)
-                        {
-                            AppDomain appDomain = AppDomain.CreateDomain(nameof(NuGetFrameworkWrapper), null, appDomainSetup);
-                            instance = (NuGetFrameworkWrapper)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(NuGetFrameworkWrapper).FullName);
-                        }
+                        instance = CreateInstanceInAppDomain(assemblyName, assemblyPath);
                     }
                 }
                 catch

@@ -258,7 +258,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 // RunningInMSBuildExe is true when the actual process is MSBuild.exe (app host),
                 // false when running via dotnet CLI (dotnet MSBuild.dll), external API callers, or test runners.
                 // VS and MSBuild.exe app host can use Assembly.Load reliably and benefit from NGEN.
-                bool needsFallback = buildEnvironment.Mode == BuildEnvironmentMode.Standalone && !buildEnvironment.RunningInMSBuildExe;
+                bool needsFallback = ShouldLoadResolverFromPath(buildEnvironment.Mode, buildEnvironment.RunningInMSBuildExe, RuntimeCapabilities.AssemblyLoadUsesCodeBase);
 
                 if (needsFallback)
                 {
@@ -282,6 +282,24 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
+        /// <summary>
+        /// Whether the default SDK resolver is loaded with Assembly.LoadFrom instead of Assembly.Load
+        /// with a CodeBase. Assembly.Load is used only where it finds the file and the process can use
+        /// its native image: in MSBuild.exe and Visual Studio on .NET Framework. When this .NET
+        /// Framework assembly is loaded into a .NET process, the runtime ignores the CodeBase, and
+        /// Assembly.Load would not find the file.
+        /// </summary>
+        internal static bool ShouldLoadResolverFromPath(BuildEnvironmentMode mode, bool runningInMSBuildExe, bool assemblyLoadUsesCodeBase)
+        {
+            if (!assemblyLoadUsesCodeBase)
+            {
+                CommunicationsUtilities.Trace("The runtime ignores AssemblyName.CodeBase; the SDK resolver is loaded with Assembly.LoadFrom.");
+                return true;
+            }
+
+            return mode == BuildEnvironmentMode.Standalone && !runningInMSBuildExe;
+        }
+
         private AssemblyName CreateAssemblyNameWithCodeBase(string assemblyName, string codeBase)
         {
             return new AssemblyName(assemblyName)
