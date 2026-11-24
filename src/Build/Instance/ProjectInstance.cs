@@ -3342,7 +3342,7 @@ namespace Microsoft.Build.Execution
 
             evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
-            Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
+            Evaluator.Evaluate(
                 data: this,
                 project: null,
                 xml,

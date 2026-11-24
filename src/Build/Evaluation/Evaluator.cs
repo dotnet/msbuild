@@ -39,6 +39,101 @@ using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Evaluation
 {
+    internal static class Evaluator
+    {
+        internal static void Evaluate<P, I, M, D>(
+            IEvaluatorData<P, I, M, D> data,
+            Project project,
+            ProjectRootElement root,
+            ProjectLoadSettings loadSettings,
+            int maxNodeCount,
+            PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            ICollection<string> propertiesFromCommandLine,
+            ILoggingService loggingService,
+            IItemFactory<I, I> itemFactory,
+            IToolsetProvider toolsetProvider,
+            IDirectoryCacheFactory directoryCacheFactory,
+            ProjectRootElementCacheBase projectRootElementCache,
+            BuildEventContext buildEventContext,
+            ISdkResolverService sdkResolverService,
+            int submissionId,
+            EvaluationContext evaluationContext,
+            bool interactive = false,
+            ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
+            where P : class, IProperty, IEquatable<P>, IValued
+            where I : class, IItem<M>, IMetadataTable
+            where M : class, IMetadatum
+            where D : class, IItemDefinition<M>
+            => Evaluator<P, I, M, D>.Evaluate(
+                data, project, root, loadSettings, maxNodeCount, environmentProperties,
+                propertiesFromCommandLine, loggingService, itemFactory, toolsetProvider,
+                directoryCacheFactory, projectRootElementCache, buildEventContext,
+                sdkResolverService, submissionId, evaluationContext, interactive, evaluationStage);
+
+        /// <summary>
+        /// Helper that creates a list of ProjectItem's given an unevaluated Include and a ProjectRootElement.
+        /// Used by both Evaluator.EvaluateItemElement and by Project.AddItem.
+        /// </summary>
+        internal static List<I> CreateItemsFromInclude<P, I>(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string projectFilePath, BuildEventContext buildEventContext)
+            where P : class, IProperty
+            where I : class, IItem
+        {
+            ArgumentException.ThrowIfNullOrEmpty(unevaluatedIncludeEscaped);
+
+            List<I> items = new List<I>();
+            itemFactory.ItemElement = itemElement;
+
+            // STEP 1: Expand properties in Include
+            string evaluatedIncludeEscaped = expander.ExpandIntoStringLeaveEscaped(unevaluatedIncludeEscaped, ExpanderOptions.ExpandProperties, itemElement.IncludeLocation);
+
+            // STEP 2: Split Include on any semicolons, and take each split in turn
+            if (evaluatedIncludeEscaped.Length > 0)
+            {
+                var includeSplitsEscaped = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedIncludeEscaped);
+
+                foreach (string includeSplitEscaped in includeSplitsEscaped)
+                {
+                    // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
+                    bool throwaway;
+                    IList<I> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(includeSplitEscaped, itemFactory, ExpanderOptions.ExpandItems, false /* do not include null expansion results */, out throwaway, itemElement.IncludeLocation);
+
+                    if (itemsFromSplit != null)
+                    {
+                        // Expression is in form "@(X)"
+                        foreach (I item in itemsFromSplit)
+                        {
+                            items.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        // The expression is not of the form "@(X)". Treat as string
+                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
+                            rootDirectory,
+                            includeSplitEscaped,
+                            excludeSpecsEscaped: null,
+                            forceEvaluate: false,
+                            fileMatcher: expander.EvaluationContext?.FileMatcher,
+                            loggingMechanism: loggingService,
+                            includeLocation: itemElement.IncludeLocation,
+                            projectFilePath: projectFilePath,
+                            buildEventContext: buildEventContext);
+
+                        if (includeSplitFilesEscaped.Length > 0)
+                        {
+                            foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
+                            {
+                                items.Add(itemFactory.CreateItem(includeSplitFileEscaped, includeSplitEscaped, itemElement.ContainingProject.FullPath));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return items;
+        }
+    }
+
     /// <summary>
     /// Evaluates a ProjectRootElement, updating the fresh Project.Data passed in.
     /// Handles evaluating conditions, expanding expressions, and building up the
@@ -327,9 +422,7 @@ namespace Microsoft.Build.Evaluation
         /// Evaluates the project data passed in.
         /// </summary>
         /// <remarks>
-        /// This is the only non-private member of this class.
-        /// This is a helper static method so that the caller can just do "Evaluator.Evaluate(..)" without
-        /// newing one up, yet the whole class need not be static.
+        /// Called by the nongeneric evaluator entry point.
         /// </remarks>
         internal static void Evaluate(
             IEvaluatorData<P, I, M, D> data,
@@ -447,67 +540,6 @@ namespace Microsoft.Build.Evaluation
             }
 
             MSBuildEventSource.Log.EvaluateStop(projectFile);
-        }
-
-        /// <summary>
-        /// Helper that creates a list of ProjectItem's given an unevaluated Include and a ProjectRootElement.
-        /// Used by both Evaluator.EvaluateItemElement and by Project.AddItem.
-        /// </summary>
-        internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string projectFilePath, BuildEventContext buildEventContext)
-        {
-            ArgumentException.ThrowIfNullOrEmpty(unevaluatedIncludeEscaped);
-
-            List<I> items = new List<I>();
-            itemFactory.ItemElement = itemElement;
-
-            // STEP 1: Expand properties in Include
-            string evaluatedIncludeEscaped = expander.ExpandIntoStringLeaveEscaped(unevaluatedIncludeEscaped, ExpanderOptions.ExpandProperties, itemElement.IncludeLocation);
-
-            // STEP 2: Split Include on any semicolons, and take each split in turn
-            if (evaluatedIncludeEscaped.Length > 0)
-            {
-                var includeSplitsEscaped = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedIncludeEscaped);
-
-                foreach (string includeSplitEscaped in includeSplitsEscaped)
-                {
-                    // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
-                    bool throwaway;
-                    IList<I> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(includeSplitEscaped, itemFactory, ExpanderOptions.ExpandItems, false /* do not include null expansion results */, out throwaway, itemElement.IncludeLocation);
-
-                    if (itemsFromSplit != null)
-                    {
-                        // Expression is in form "@(X)"
-                        foreach (I item in itemsFromSplit)
-                        {
-                            items.Add(item);
-                        }
-                    }
-                    else
-                    {
-                        // The expression is not of the form "@(X)". Treat as string
-                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
-                            rootDirectory,
-                            includeSplitEscaped,
-                            excludeSpecsEscaped: null,
-                            forceEvaluate: false,
-                            fileMatcher: expander.EvaluationContext?.FileMatcher,
-                            loggingMechanism: loggingService,
-                            includeLocation: itemElement.IncludeLocation,
-                            projectFilePath: projectFilePath,
-                            buildEventContext: buildEventContext);
-
-                        if (includeSplitFilesEscaped.Length > 0)
-                        {
-                            foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
-                            {
-                                items.Add(itemFactory.CreateItem(includeSplitFileEscaped, includeSplitEscaped, itemElement.ContainingProject.FullPath));
-                            }
-                        }
-                    }
-                }
-            }
-
-            return items;
         }
 
         /// <summary>

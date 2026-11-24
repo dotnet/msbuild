@@ -3410,7 +3410,7 @@ namespace Microsoft.Build.Evaluation
 
                 var itemFactory = new ProjectItemFactory(Owner, renamedItemElement);
 
-                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(
+                List<ProjectItem> items = Evaluator.CreateItemsFromInclude(
                     DirectoryPath,
                     renamedItemElement,
                     itemFactory,
@@ -3477,7 +3477,7 @@ namespace Microsoft.Build.Evaluation
             {
                 var itemFactory = new ProjectItemFactory(Owner, itemElement);
 
-                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(
+                List<ProjectItem> items = Evaluator.CreateItemsFromInclude(
                     DirectoryPath,
                     itemElement,
                     itemFactory,
@@ -3599,7 +3599,7 @@ namespace Microsoft.Build.Evaluation
             {
                 evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
-                Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
+                Evaluator.Evaluate(
                     _data,
                     Owner,
                     Xml,
