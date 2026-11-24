@@ -1,0 +1,38 @@
+name: Agent Workflow Compatibility
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/*.agent.lock.yml'
+      - '.github/workflows/agent-workflow-compatibility.yml'
+      - 'scripts/check_agent_workflow_compatibility.py'
+      - 'scripts/test_agent_workflow_compatibility.py'
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility:
+    name: Check gh-aw runtime updates
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Test compatibility checker
+        run: python3 -m unittest discover -s scripts -p test_agent_workflow_compatibility.py
+
+      - name: Detect gh-aw setup reference updates
+        id: updates
+        run: python3 scripts/check_agent_workflow_compatibility.py --base "$BASE_SHA" --head "$HEAD_SHA" --detect-only
+
+      - name: Check updated runtime compatibility
+        if: steps.updates.outputs.updated == 'true'
+        run: python3 scripts/check_agent_workflow_compatibility.py --base "$BASE_SHA" --head "$HEAD_SHA"
