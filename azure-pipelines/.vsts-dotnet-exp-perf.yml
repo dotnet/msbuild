@@ -21,6 +21,8 @@ parameters:
   default: false
 
 variables:
+  - name: SkipApplyOptimizationDataArg
+    value: ''
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
     value: ''
