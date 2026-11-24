@@ -233,6 +233,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
+        [SkipOnPlatform(TestPlatforms.OSX, "Fails on .NET 10.0.13+: the test process can't see the server's named mutex because the test fixture changes TMPDIR only in the managed environment. https://github.com/dotnet/msbuild/pull/15392")]
         public void CanShutdownServerProcess(bool byBuildManager)
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
