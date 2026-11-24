@@ -18,6 +18,11 @@ public class EditorConfig_Tests
 {
 
     #region AssertEqualityComparer<T>
+    private static class AssertEqualityComparer
+    {
+        public static bool Equals<T>(T left, T right) => AssertEqualityComparer<T>.Instance.Equals(left, right);
+    }
+
     private sealed class AssertEqualityComparer<T> : IEqualityComparer<T>
     {
         public static readonly IEqualityComparer<T> Instance = new AssertEqualityComparer<T>();
@@ -27,21 +32,6 @@ public class EditorConfig_Tests
             var type = typeof(T);
             return !type.IsValueType ||
                 (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
-        }
-
-        public static bool IsNull(T @object)
-        {
-            if (!CanBeNull())
-            {
-                return false;
-            }
-
-            return object.Equals(@object, default(T));
-        }
-
-        public static bool Equals(T left, T right)
-        {
-            return Instance.Equals(left, right);
         }
 
         bool IEqualityComparer<T>.Equals(T x, T y)
@@ -747,7 +737,7 @@ public class EditorConfig_Tests
             var value1 = enumerator1.Current;
             var value2 = enumerator2.Current;
 
-            if (!(comparer != null ? comparer.Equals(value1, value2) : AssertEqualityComparer<T>.Equals(value1, value2)))
+            if (!(comparer != null ? comparer.Equals(value1, value2) : AssertEqualityComparer.Equals(value1, value2)))
             {
                 return false;
             }
