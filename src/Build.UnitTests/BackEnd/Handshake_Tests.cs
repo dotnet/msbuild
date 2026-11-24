@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Pipes;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -223,10 +224,107 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                         => (server.ReadByte() << 24) | (server.ReadByte() << 16) | (server.ReadByte() << 8) | server.ReadByte();
                 });
 
-                bool connected = NodeConnection<THandshake>.TryConnectToPipeStream(client, pipeName, handshake, 10_000, out HandshakeResult result);
+                NodeConnectionResult result = NodeConnection.TryConnectToPipeStream(client, pipeName, handshake, 10_000);
                 await peer;
-                connected.ShouldBeTrue();
-                result.NegotiatedPacketVersion.ShouldBe((byte)(negotiateVersion ? 2 : 1));
+                NodeConnectionResult.Connected connected = result.Value.ShouldBeOfType<NodeConnectionResult.Connected>();
+                connected.Stream.ShouldBeSameAs(client);
+                connected.NegotiatedPacketVersion.ShouldBe((byte)(negotiateVersion ? 2 : 1));
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task ProcessConnection_TransfersOnlySuccessfulStreams(bool accept)
+        {
+            using Process process = Process.GetCurrentProcess();
+            string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(process.Id);
+            using NamedPipeServerStream server = new(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+            Task<int> peer = Task.Run(async () =>
+            {
+                await server.WaitForConnectionAsync();
+                ReadHandshake(server);
+                if (accept)
+                {
+                    server.WriteIntForHandshake(Handshake.PacketVersionFromChildMarker);
+                    server.WriteIntForHandshake(2);
+                    server.WriteEndOfHandshakeSignal();
+                }
+                else
+                {
+                    server.WriteIntForHandshake(42);
+                }
+
+                return server.ReadByte();
+            });
+
+            NodeConnectionResult result = NodeConnection.TryConnectToProcess(
+                process.Id, 10_000, CommunicationsUtilities.GetWorkerNodeHandshake());
+            if (accept)
+            {
+                NodeConnectionResult.Connected connected = result.Value.ShouldBeOfType<NodeConnectionResult.Connected>();
+                using Stream connectedStream = connected.Stream;
+                connected.NegotiatedPacketVersion.ShouldBe((byte)2);
+                connectedStream.ShouldBeOfType<NamedPipeClientStream>().IsConnected.ShouldBeTrue();
+            }
+            else
+            {
+                NodeConnectionResult.Failed failed = result.Value.ShouldBeOfType<NodeConnectionResult.Failed>();
+                failed.Status.ShouldBe(HandshakeStatus.VersionMismatch);
+                failed.ErrorMessage.ShouldContain("42");
+            }
+
+            Task completed = await Task.WhenAny(peer, Task.Delay(10_000));
+            completed.ShouldBeSameAs(peer);
+            (await peer).ShouldBe(-1);
+        }
+
+        [Fact]
+        public async Task PipeConnection_FailureLeavesTheCallerOwnedStreamOpen()
+        {
+            string pipeName = $"msbuild-failed-handshake-{Guid.NewGuid():N}";
+            using NamedPipeServerStream server = new(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+            using NamedPipeClientStream client = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            Task peer = Task.Run(async () =>
+            {
+                await server.WaitForConnectionAsync();
+                ReadHandshake(server);
+                server.WriteIntForHandshake(42);
+            });
+
+            NodeConnectionResult result = NodeConnection.TryConnectToPipeStream(
+                client, pipeName, CommunicationsUtilities.GetWorkerNodeHandshake(), 10_000);
+            await peer;
+
+            NodeConnectionResult.Failed failed = result.Value.ShouldBeOfType<NodeConnectionResult.Failed>();
+            failed.Status.ShouldBe(HandshakeStatus.VersionMismatch);
+            failed.ErrorMessage.ShouldContain("42");
+            client.SafePipeHandle.IsClosed.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void ProcessConnection_TransportFailureKeepsTheExistingDiagnostic()
+        {
+            NodeConnectionResult result = NodeConnection.TryConnectToProcess(
+                -EnvironmentUtilities.CurrentProcessId, 0, CommunicationsUtilities.GetWorkerNodeHandshake());
+
+            NodeConnectionResult.Failed failed = result.Value.ShouldBeOfType<NodeConnectionResult.Failed>();
+            failed.Status.ShouldBe(HandshakeStatus.Undefined);
+            failed.ErrorMessage.ShouldBe("Check the COMM traces to diagnose the issue with communication.");
+        }
+
+        [Fact]
+        public void ConnectionResult_RejectsInvalidCases()
+        {
+            Should.Throw<ArgumentNullException>(() => new NodeConnectionResult.Connected(null!, 1));
+            Should.Throw<InternalErrorException>(() => new NodeConnectionResult.Failed(HandshakeStatus.Success, "unexpected"));
+        }
+
+        private static void ReadHandshake(NamedPipeServerStream server)
+        {
+            for (int i = 0; i < 8 * sizeof(int); i++)
+            {
+                server.ReadByte().ShouldNotBe(-1);
             }
         }
 

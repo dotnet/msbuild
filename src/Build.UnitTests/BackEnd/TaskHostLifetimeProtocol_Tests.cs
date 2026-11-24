@@ -104,7 +104,7 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         NodePacketFactory factory = new();
         factory.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, new ShutdownHandler());
         NodeProviderOutOfProcBase.NodeContext context = new(
-            1, process, pipe, factory, _ => terminated.Set(), NodePacketTypeExtensions.PacketVersion,
+            1, process, new(pipe, NodePacketTypeExtensions.PacketVersion), factory, _ => terminated.Set(),
             HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.NodeReuse, connectionPersistsAcrossBuilds: true);
 
         context.BeginAsyncPacketRead();
@@ -128,7 +128,7 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         writer.Write(checked((int)response.Length - 5));
 
         NodeProviderOutOfProcBase.NodeContext context = NodeProviderOutOfProcBase.RequestNodeShutdown(
-            process, pipe, _ => terminated.Set(), NodePacketTypeExtensions.PacketVersion);
+            process, new(pipe, NodePacketTypeExtensions.PacketVersion), _ => terminated.Set());
 
         try
         {
@@ -158,8 +158,8 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
         provider.InitializeComponent(new MockHost());
         NodeProviderOutOfProcBase.NodeContext context = new(
-            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
-            NodePacketTypeExtensions.PacketVersion, connectionPersistsAcrossBuilds: true);
+            1, process, new(pipe, NodePacketTypeExtensions.PacketVersion), provider,
+            id => { provider.NodeContextTerminated(id); terminated.Set(); }, connectionPersistsAcrossBuilds: true);
         TaskHostNodeKey key = new(new FrameworkTaskHostRequest(new(NodeReuse: true)), 1);
         RecordingHandler outer = new();
         RecordingHandler nested = new();
@@ -206,8 +206,8 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
             1,
             launchIdentity: new TaskHostLaunchIdentity("host", string.Empty, string.Empty));
         NodeProviderOutOfProcBase.NodeContext context = new(
-            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
-            negotiatedPacketVersion, connectionPersistsAcrossBuilds: true);
+            1, process, new(pipe, negotiatedPacketVersion), provider,
+            id => { provider.NodeContextTerminated(id); terminated.Set(); }, connectionPersistsAcrossBuilds: true);
         provider.NodeContextCreated(context, key);
         provider.TryAttachTaskHandler(context, new RecordingHandler()).ShouldBeTrue();
 
@@ -252,8 +252,8 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
         provider.InitializeComponent(new MockHost());
         NodeProviderOutOfProcBase.NodeContext context = new(
-            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
-            NodePacketTypeExtensions.PacketVersion, connectionPersistsAcrossBuilds: true);
+            1, process, new(pipe, NodePacketTypeExtensions.PacketVersion), provider,
+            id => { provider.NodeContextTerminated(id); terminated.Set(); }, connectionPersistsAcrossBuilds: true);
         TaskHostNodeKey key = new(new FrameworkTaskHostRequest(new(NodeReuse: true)), 1);
         provider.NodeContextCreated(context, key);
         Task shutdown = Task.Run(() => provider.ShutdownConnectedNodes(enableReuse: true));
@@ -303,11 +303,11 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         HandshakeOptions options = request.HandshakeOptions;
         TaskHostNodeKey key = new(request, 1);
         NodeProviderOutOfProcBase.NodeContext context = new(
-            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
-            NodePacketTypeExtensions.PacketVersion, options, previouslyReused);
+            1, process, new(pipe, NodePacketTypeExtensions.PacketVersion), provider,
+            id => { provider.NodeContextTerminated(id); terminated.Set(); }, options, previouslyReused);
         NodeProviderOutOfProcBase.NodeContext replacement = new(
-            2, process, replacementPipe, provider, id => { provider.NodeContextTerminated(id); replacementTerminated.Set(); },
-            NodePacketTypeExtensions.PacketVersion, options, previouslyReused);
+            2, process, new(replacementPipe, NodePacketTypeExtensions.PacketVersion), provider,
+            id => { provider.NodeContextTerminated(id); replacementTerminated.Set(); }, options, previouslyReused);
         provider.NodeContextCreated(context, key);
         RecordingHandler retiringHandler = new();
         RecordingHandler replacementHandler = new();
@@ -364,8 +364,8 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
             BuildComponentType.OutOfProcTaskHostNodeProvider);
         provider.InitializeComponent(new MockHost());
         NodeProviderOutOfProcBase.NodeContext context = new(
-            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
-            NodePacketTypeExtensions.PacketVersion);
+            1, process, new(pipe, NodePacketTypeExtensions.PacketVersion), provider,
+            id => { provider.NodeContextTerminated(id); terminated.Set(); });
         provider.NodeContextCreated(context, new TaskHostNodeKey(new FrameworkTaskHostRequest(TaskHostHandshakeOptions.None), 1));
         PacketRecordingHandler first = new();
         PacketRecordingHandler middle = new();
@@ -423,7 +423,7 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         TaskHostRequest request = CommunicationsUtilities.GetTaskHostRequest(TaskHostParameters.Empty, nodeReuse: false);
         HandshakeOptions options = request.HandshakeOptions;
         NodeProviderOutOfProcBase.NodeContext context = new(
-            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); }, 5, options);
+            1, process, new(pipe, 5), provider, id => { provider.NodeContextTerminated(id); terminated.Set(); }, options);
         provider.NodeContextCreated(context, new TaskHostNodeKey(request, 1));
         Task shutdown = Task.Run(() => provider.ShutdownConnectedNodes(enableReuse: false));
 

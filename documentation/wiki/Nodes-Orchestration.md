@@ -74,6 +74,9 @@ Worker providers require `WorkerNodeHandshake`, and task-host providers require 
 Launch recipes create the matching handshake, node mode, and command-line arguments from the same request.
 The CLR2 recipe keeps its legacy empty command line and does not specify a node mode.
 `NodeConnection<THandshake>` also requires the selected handshake type when it connects to a pipe.
+A successful connection carries its stream and negotiated packet version together.
+A failed connection carries its status and diagnostic instead of a stream.
+Node contexts accept the successful connection without separating the stream from its packet version.
 A worker handshake cannot be passed to a server endpoint or converted to `TaskHostHandshake`.
 The process launcher receives only process configuration, not an untyped handshake.
 

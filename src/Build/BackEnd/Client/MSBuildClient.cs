@@ -768,12 +768,11 @@ namespace Microsoft.Build.Server
             {
                 tryAgain = false;
 
-                HandshakeResult result;
-                bool connected;
+                NodeConnectionResult result;
                 try
                 {
-                    connected = NodeConnection<ServerNodeHandshake>.TryConnectToPipeStream(
-                        _nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds), out result);
+                    result = NodeConnection.TryConnectToPipeStream(
+                        _nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds));
                 }
                 catch (TimeoutException)
                 {
@@ -797,13 +796,9 @@ namespace Microsoft.Build.Server
                     return false;
                 }
 
-                if (connected)
+                if (result is NodeConnectionResult.Failed failed)
                 {
-                    return true;
-                }
-                else
-                {
-                    if (result.Status is not HandshakeStatus.Timeout && sw.ElapsedMilliseconds < timeoutMilliseconds)
+                    if (failed.Status is not HandshakeStatus.Timeout && sw.ElapsedMilliseconds < timeoutMilliseconds)
                     {
                         CommunicationsUtilities.Trace($"Retrying to connect to server after {sw.ElapsedMilliseconds} ms");
                         // This solves race condition for time in which server started but have not yet listen on pipe or
@@ -813,10 +808,18 @@ namespace Microsoft.Build.Server
                     }
                     else
                     {
-                        LogConnectFailureDiagnostics(timeoutMilliseconds, isTimeout: result.Status is HandshakeStatus.Timeout, errorMessage: result.ErrorMessage);
+                        LogConnectFailureDiagnostics(timeoutMilliseconds, isTimeout: failed.Status is HandshakeStatus.Timeout, errorMessage: failed.ErrorMessage);
                         _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
                         return false;
                     }
+                }
+                else if (result is NodeConnectionResult.Connected)
+                {
+                    return true;
+                }
+                else
+                {
+                    return Assumed.Unreachable<bool>("Unexpected node connection result.");
                 }
             }
 

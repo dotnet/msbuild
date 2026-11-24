@@ -182,19 +182,19 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = NodeConnection<WorkerNodeHandshake>.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false), out HandshakeResult result);
+                NodeConnectionResult connection = NodeConnection.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false));
 
-                if (nodeStream == null)
+                if (connection is NodeConnectionResult.Failed)
                 {
                     // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    nodeStream = NodeConnection<WorkerNodeHandshake>.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true), out result);
+                    connection = NodeConnection.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true));
                 }
 
-                if (nodeStream != null)
+                if (connection is NodeConnectionResult.Connected connected)
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace($"Shutting down node with pid = {nodeProcess.Id}");
-                    RequestNodeShutdown(nodeProcess, nodeStream, terminateNode, result.NegotiatedPacketVersion);
+                    RequestNodeShutdown(nodeProcess, connected, terminateNode);
                 }
             }
         }
@@ -202,11 +202,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Transfers the pipe to a context that keeps it open until the node acknowledges shutdown or disconnects.
         /// </summary>
-        internal static NodeContext RequestNodeShutdown(Process nodeProcess, Stream nodeStream, NodeContextTerminateDelegate terminateNode, byte negotiatedVersion)
+        internal static NodeContext RequestNodeShutdown(Process nodeProcess, NodeConnectionResult.Connected connection, NodeContextTerminateDelegate terminateNode)
         {
             NodePacketFactory factory = new();
             factory.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, new ShutdownPacketHandler());
-            NodeContext context = new(0, nodeProcess, nodeStream, factory, terminateNode, negotiatedVersion);
+            NodeContext context = new(0, nodeProcess, connection, factory, terminateNode);
             context.BeginAsyncPacketRead();
             context.SendData(new NodeBuildComplete(false /* no node reuse */));
             return context;
@@ -358,8 +358,7 @@ namespace Microsoft.Build.BackEnd
                     // Cached up front so that the failure path never has to touch the foreign process again:
                     // reading Process.Id can itself throw once that process is gone.
                     int nodeToReuseId = -1;
-                    Stream nodeStream;
-                    HandshakeResult result;
+                    NodeConnectionResult connection;
 
                     // Only inspecting and connecting to the candidate is guarded here. A candidate belongs to
                     // another build and may exit, be killed, hit its idle timeout, or refuse a handshake at any
@@ -392,8 +391,8 @@ namespace Microsoft.Build.BackEnd
 
                         // Attempt to connect to each process in turn.
                         MSBuildEventSource.Log.NodePipeConnectStart(nodeId, nodeToReuseId);
-                        nodeStream = NodeConnection<THandshake>.TryConnectToProcess(nodeToReuseId, 0 /* poll, don't wait for connections */, nodeLaunchData.Handshake, out result);
-                        MSBuildEventSource.Log.NodePipeConnectStop(nodeId, nodeToReuseId, succeeded: nodeStream != null);
+                        connection = NodeConnection.TryConnectToProcess(nodeToReuseId, 0 /* poll, don't wait for connections */, nodeLaunchData.Handshake);
+                        MSBuildEventSource.Log.NodePipeConnectStop(nodeId, nodeToReuseId, succeeded: connection is NodeConnectionResult.Connected);
                     }
                     catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                     {
@@ -401,7 +400,7 @@ namespace Microsoft.Build.BackEnd
                         continue;
                     }
 
-                    if (nodeStream != null)
+                    if (connection is NodeConnectionResult.Connected connected)
                     {
                         // Connection successful, use this node.
                         CommunicationsUtilities.Trace($"Successfully connected to existing node {nodeId} which is PID {nodeToReuseId}");
@@ -411,7 +410,7 @@ namespace Microsoft.Build.BackEnd
                             BuildEventContext = new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId)
                         });
 
-                        CreateNodeContext(nodeId, nodeToReuse, nodeStream, result.NegotiatedPacketVersion);
+                        CreateNodeContext(nodeId, nodeToReuse, connected);
                         MSBuildEventSource.Log.NodeConnectStop(nodeId, nodeToReuseId, isReused: true);
                         return true;
                     }
@@ -463,14 +462,14 @@ namespace Microsoft.Build.BackEnd
 
                     // Now try to connect to it.
                     MSBuildEventSource.Log.NodePipeConnectStart(nodeId, msbuildProcess.Id);
-                    Stream nodeStream = NodeConnection<THandshake>.TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, nodeLaunchData.Handshake, out HandshakeResult result);
-                    MSBuildEventSource.Log.NodePipeConnectStop(nodeId, msbuildProcess.Id, succeeded: nodeStream != null);
-                    if (nodeStream != null)
+                    NodeConnectionResult connection = NodeConnection.TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, nodeLaunchData.Handshake);
+                    MSBuildEventSource.Log.NodePipeConnectStop(nodeId, msbuildProcess.Id, succeeded: connection is NodeConnectionResult.Connected);
+                    if (connection is NodeConnectionResult.Connected connected)
                     {
                         // Connection successful, use this node.
                         CommunicationsUtilities.Trace($"Successfully connected to created node {nodeId} which is PID {msbuildProcess.Id}");
 
-                        CreateNodeContext(nodeId, msbuildProcess, nodeStream, result.NegotiatedPacketVersion);
+                        CreateNodeContext(nodeId, msbuildProcess, connected);
                         MSBuildEventSource.Log.NodeConnectStop(nodeId, msbuildProcess.Id, isReused: false);
                         return true;
                     }
@@ -500,10 +499,10 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream, byte negotiatedVersion)
+            void CreateNodeContext(int nodeId, Process nodeToReuse, NodeConnectionResult.Connected connection)
             {
                 HandshakeOptions handshakeOptions = nodeLaunchData.Handshake.HandshakeOptions;
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, handshakeOptions, DoesConnectionPersistAcrossBuilds(handshakeOptions, negotiatedVersion));
+                NodeContext nodeContext = new(nodeId, nodeToReuse, connection, factory, terminateNode, handshakeOptions, DoesConnectionPersistAcrossBuilds(handshakeOptions, connection.NegotiatedPacketVersion));
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
@@ -884,13 +883,43 @@ namespace Microsoft.Build.BackEnd
 #endif
     }
 
-    internal static class NodeConnection<THandshake>
-        where THandshake : INodeHandshake
+    internal union NodeConnectionResult(NodeConnectionResult.Connected, NodeConnectionResult.Failed)
+    {
+        internal sealed class Connected
+        {
+            internal Connected(Stream stream, byte negotiatedPacketVersion)
+            {
+                ArgumentNullException.ThrowIfNull(stream);
+                Stream = stream;
+                NegotiatedPacketVersion = negotiatedPacketVersion;
+            }
+
+            internal Stream Stream { get; }
+            internal byte NegotiatedPacketVersion { get; }
+        }
+
+        internal sealed class Failed
+        {
+            internal Failed(HandshakeStatus status, string errorMessage)
+            {
+                Assumed.True(status is not HandshakeStatus.Success, "A failed connection cannot have a successful handshake status.");
+                ArgumentNullException.ThrowIfNull(errorMessage);
+                Status = status;
+                ErrorMessage = errorMessage;
+            }
+
+            internal HandshakeStatus Status { get; }
+            internal string ErrorMessage { get; }
+        }
+    }
+
+    internal static class NodeConnection
     {
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
-        internal static Stream TryConnectToProcess(int nodeProcessId, int timeout, THandshake handshake, out HandshakeResult result)
+        internal static NodeConnectionResult TryConnectToProcess<THandshake>(int nodeProcessId, int timeout, THandshake handshake)
+            where THandshake : INodeHandshake
         {
             // Try and connect to the process.
             string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
@@ -910,16 +939,14 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                if (TryConnectToPipeStream(nodeStream, pipeName, handshake, timeout, out result))
+                NodeConnectionResult result = TryConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
+                if (result is NodeConnectionResult.Failed failed)
                 {
-                    return nodeStream;
+                    CommunicationsUtilities.Trace($"Failed to connect to pipe {pipeName}. {failed.ErrorMessage.TrimEnd()}");
+                    nodeStream.Dispose();
                 }
-                else
-                {
-                    CommunicationsUtilities.Trace($"Failed to connect to pipe {pipeName}. {result.ErrorMessage.TrimEnd()}");
-                    nodeStream?.Dispose();
-                    return null;
-                }
+
+                return result;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -931,12 +958,10 @@ namespace Microsoft.Build.BackEnd
                 CommunicationsUtilities.Trace($"Failed to connect to pipe {pipeName}. {e.Message.TrimEnd()}");
 
                 // If we don't close any stream, we might hang up the child
-                nodeStream?.Dispose();
+                nodeStream.Dispose();
             }
 
-            result = HandshakeResult.Failure(HandshakeStatus.Undefined, "Check the COMM traces to diagnose the issue with communication.");
-
-            return null;
+            return new NodeConnectionResult.Failed(HandshakeStatus.Undefined, "Check the COMM traces to diagnose the issue with communication.");
         }
 
         /// <summary>
@@ -945,7 +970,8 @@ namespace Microsoft.Build.BackEnd
         /// <remarks>
         /// Reused by MSBuild server client <see cref="Microsoft.Build.Server.MSBuildClient"/>.
         /// </remarks>
-        internal static bool TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, THandshake handshake, int timeout, out HandshakeResult result)
+        internal static NodeConnectionResult TryConnectToPipeStream<THandshake>(NamedPipeClientStream nodeStream, string pipeName, THandshake handshake, int timeout)
+            where THandshake : INodeHandshake
         {
             nodeStream.Connect(timeout);
 
@@ -983,13 +1009,11 @@ namespace Microsoft.Build.BackEnd
             {
                 // We got a connection.
                 CommunicationsUtilities.Trace($"Successfully connected to pipe {pipeName}...!");
-                result = HandshakeResult.Success(0, innerResult.NegotiatedPacketVersion);
-                return true;
+                return new NodeConnectionResult.Connected(nodeStream, innerResult.NegotiatedPacketVersion);
             }
             else
             {
-                result = innerResult;
-                return false;
+                return new NodeConnectionResult.Failed(innerResult.Status, innerResult.ErrorMessage);
             }
         }
     }
@@ -1135,13 +1159,13 @@ namespace Microsoft.Build.BackEnd
             public NodeContext(
                 int nodeId,
                 Process process,
-                Stream nodePipe,
+                NodeConnectionResult.Connected connection,
                 INodePacketFactory factory,
                 NodeContextTerminateDelegate terminateDelegate,
-                byte negotiatedVersion,
                 HandshakeOptions handshakeOptions = HandshakeOptions.None,
                 bool connectionPersistsAcrossBuilds = false)
             {
+                Stream nodePipe = connection.Stream;
                 _nodeId = nodeId;
                 _connectionPersistsAcrossBuilds = connectionPersistsAcrossBuilds;
                 _process = process;
@@ -1159,7 +1183,7 @@ namespace Microsoft.Build.BackEnd
                 _writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBufferMemoryStream);
                 _terminateDelegate = terminateDelegate;
                 _handshakeOptions = handshakeOptions;
-                _negotiatedPacketVersion = negotiatedVersion;
+                _negotiatedPacketVersion = connection.NegotiatedPacketVersion;
 #if FEATURE_APM
                 _headerReadCompleteCallback = HeaderReadComplete;
                 _bodyReadCompleteCallback = BodyReadComplete;
