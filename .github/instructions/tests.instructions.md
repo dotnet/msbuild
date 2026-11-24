@@ -1,5 +1,5 @@
 ---
-applyTo: "src/*.Tests/**/*.cs"
+applyTo: "src/*.Tests/**/*.cs,src/*.UnitTests/**/*.cs"
 ---
 
 # Testing Instructions
@@ -15,6 +15,14 @@ Inject xUnit's `ITestOutputHelper` via the test class constructor and store it a
 Use `TestEnvironment` (`Microsoft.Build.UnitTests.TestEnvironment`) to manage test state. Create with `using TestEnvironment env = TestEnvironment.Create(output);` — prefer a `using` declaration (no braces/indentation). `TestEnvironment` automatically reverts all registered state on dispose. Don't write manual `try`/`finally` blocks to restore state.
 
 `TestEnvironment` can manage environment variables, temporary files and folders, the working directory, the system temp path, `ProjectCollection` lifetimes, test project scaffolding (`TransientTestProjectWithFiles`), process lifetimes, and test invariants.
+
+Create test files and folders through `TestEnvironment`, not raw `System.IO` calls. Use `env.CreateFolder(createFolder: true)` for folders and `folder.CreateFile("name.txt", "contents")` or `env.CreateFile(folder, "name.txt", "contents")` for files; use the returned `.Path`. Don't write `File.WriteAllText(Path.Combine(folder.Path, ...))`, `Directory.CreateDirectory`, or `Path.GetTempPath()` for new test files. Many existing tests still use those patterns; don't copy them into new tests.
+
+```csharp
+using TestEnvironment env = TestEnvironment.Create(_output);
+TransientTestFolder folder = env.CreateFolder(createFolder: true);
+TransientTestFile file = folder.CreateFile("data.txt", "content");
+```
 
 ## Writing Project XML in Tests
 
