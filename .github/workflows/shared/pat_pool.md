@@ -48,6 +48,29 @@ jobs:
             exit 0
           fi
 
+          # Drop PATs that GitHub rejects as bad credentials (expired or revoked)
+          # so they are never selected. Any other response (including network
+          # errors) keeps the PAT, and if every PAT is rejected the full pool is
+          # kept so the failure surfaces in the agent job as before.
+          VALID_PAT_NUMBERS=()
+          for i in "${PAT_NUMBERS[@]}"; do
+            var="COPILOT_PAT_${i}"
+            status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 \
+              -H "Authorization: Bearer ${!var}" \
+              -H "Accept: application/vnd.github+json" \
+              https://api.github.com/user || true)
+            if [ "$status" = "401" ]; then
+              echo "::warning::COPILOT_PAT_${i} was rejected (HTTP 401) and is excluded from selection"
+              POOL_INDICATORS[${i}]="❌"
+            else
+              VALID_PAT_NUMBERS+=(${i})
+            fi
+          done
+
+          if [ ${#VALID_PAT_NUMBERS[@]} -gt 0 ]; then
+            PAT_NUMBERS=("${VALID_PAT_NUMBERS[@]}")
+          fi
+
           # Select a random index using the seed if specified
           if [ -n "$RANDOM_SEED" ]; then
             RANDOM=$RANDOM_SEED

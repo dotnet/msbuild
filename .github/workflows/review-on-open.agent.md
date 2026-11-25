@@ -33,6 +33,12 @@ checkout:
   repository: ${{ github.repository }}
   ref: ${{ github.event.pull_request.base.sha }}
 
+# Reviewing fork PRs is the point of this workflow, so explicitly keep
+# `forks: ["*"]` under gh-aw strict mode. The mitigations above (roles gate,
+# base-only checkout, diff read via MCP, no PR code execution) still apply.
+features:
+  dangerously-allow-pull-request-target-forks-all: true
+
 timeout-minutes: 60
 max-ai-credits: 2000
 

@@ -154,6 +154,9 @@ There are several details of this implementation that keep our workflows and rep
    steps--no untrusted context or input is within scope. The
    `select-pat-number` action only references the secret values to determine
    which are non-empty, filtering the secret numbers to those with values.
+   Each non-empty PAT is then checked with `GET https://api.github.com/user`;
+   PATs rejected with HTTP 401 (expired or revoked) are excluded so they are
+   never selected. If every PAT is rejected, the full non-empty pool is kept.
 1. **The `pat_pool` job emits only a number, never a secret.** Its sole output,
    `pat_number`, is the 0-9 index of the selected PAT (or empty when the pool
    is empty). The actual secret materializes only later, in the activation
@@ -162,8 +165,9 @@ There are several details of this implementation that keep our workflows and rep
    [passing secrets][passing-secrets] between jobs or workflows, with the
    `case` statement acting as a very simple secret store.
 1. **The `select-pat-number` action does not require any permissions.** It
-   reads only the `COPILOT_PAT_#` environment variables passed to it and writes
-   only to `GITHUB_OUTPUT`. The job that hosts it sets `permissions:` to the
+   reads only the `COPILOT_PAT_#` environment variables passed to it, uses
+   them only to authenticate the `GET /user` validity check (which needs no
+   token permissions), and writes only to `GITHUB_OUTPUT`. The job that hosts it sets `permissions:` to the
    workflow defaults (no elevated scopes).
 1. **The implementation uses supported Agentic Workflow extensibility hooks.**
    Defining a custom job inside an [imported workflow file][imports] is
