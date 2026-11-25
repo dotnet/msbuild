@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -64,8 +65,9 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             var cache = new SimpleProjectRootElementCache();
             cache.AddEntry(rootElementToCache);
 
+            // The paths name the same file only if the root directory is case-insensitive.
             ProjectRootElement actualRootElement = cache.Get(projectFile, null, false, null);
-            actualRootElement.ShouldBe(rootElementToCache);
+            actualRootElement.ShouldBe(RootIsCaseSensitive(projectFile) ? null : rootElementToCache);
         }
 
         [Fact]
@@ -100,9 +102,20 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             var cache = new SimpleProjectRootElementCache();
             cache.AddEntry(rootElementToCache);
 
+            // If the root directory is case-sensitive, the cached entry is a different file, so the open function
+            // runs and returns a project with a path other than the one requested.
+            if (RootIsCaseSensitive(projectFile))
+            {
+                Should.Throw<InternalErrorException>(() => cache.Get(projectFile, OpenFunc, false, null));
+                return;
+            }
+
             ProjectRootElement actualRootElement = cache.Get(projectFile, OpenFunc, false, null);
             actualRootElement.ShouldBe(rootElementToCache);
         }
+
+        private static bool RootIsCaseSensitive(string path)
+            => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14) && DirectoryCaseSensitivity.IsCaseSensitive(Path.GetPathRoot(path));
 
         [Fact]
         public void Get_GivenOpenFuncWhichReturnsNull_ThrowsInternalErrorException()
