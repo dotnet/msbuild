@@ -1646,9 +1646,13 @@ namespace Microsoft.Build.Tasks
         private void LogInputs()
         {
             MessageImportance importance = MessageImportance.Low;
-            if (Silent || Log.IsTaskInputLoggingEnabled || !Log.LogsMessagesOfImportance(importance))
+            // Keep this dump even when task input logging is enabled: automatic task input
+            // events cover only the parameters set in the project, while this also shows
+            // defaults and computed values.
+            if (Silent
+                || (Log.IsTaskInputLoggingEnabled && !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14))
+                || !Log.LogsMessagesOfImportance(importance))
             {
-                // the inputs will be logged automatically anyway, avoid duplication in the logs
                 return;
             }
 
