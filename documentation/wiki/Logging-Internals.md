@@ -29,6 +29,8 @@ In this document we'll be describing mainly the internal design and implementati
 
 There is a single instance in the Scheduler node, single instance within each out-of-proc node and one in ProjectCollection (for standalone API driven evaluation). So, we can technically treat `LoggingService` as a singleton.
 
+When negotiating evaluation properties and items on `ProjectStarted` and `ProjectEvaluationFinished` events, the dedicated internal telemetry sink is ignored because it consumes neither event. Other sinks retain their normal negotiation behavior.
+
 ### Methods overview
 
 <a name="RegisterLogger"></a>**`RegisterLogger(ILogger logger)`**
