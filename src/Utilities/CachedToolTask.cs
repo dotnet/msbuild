@@ -1,9 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Resources;
+using Microsoft.Build.Framework;
 
 #pragma warning disable MSBUILD001
 
@@ -16,6 +18,33 @@ namespace Microsoft.Build.Utilities;
 public abstract class CachedToolTask : ToolTask
 {
     private OutputCapture? _outputCapture;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CachedToolTask"/> class.
+    /// </summary>
+    protected CachedToolTask()
+        : base()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CachedToolTask"/> class with the specified task resources.
+    /// </summary>
+    /// <param name="taskResources">The resource manager for localized task messages.</param>
+    protected CachedToolTask(ResourceManager taskResources)
+        : base(taskResources)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CachedToolTask"/> class with the specified task resources and help keyword prefix.
+    /// </summary>
+    /// <param name="taskResources">The resource manager for localized task messages.</param>
+    /// <param name="helpKeywordPrefix">The help keyword prefix for task messages.</param>
+    protected CachedToolTask(ResourceManager taskResources, string helpKeywordPrefix)
+        : base(taskResources, helpKeywordPrefix)
+    {
+    }
 
     /// <summary>
     /// Gets the tool name and cache environment variable names.
@@ -33,7 +62,7 @@ public abstract class CachedToolTask : ToolTask
         string pathToTool, string responseFileCommands, string commandLineCommands);
 
     /// <inheritdoc />
-    protected override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)
+    protected sealed override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)
     {
         if (!TryExecuteCached(pathToTool, responseFileCommands, commandLineCommands, out int exitCode))
         {
@@ -59,20 +88,31 @@ public abstract class CachedToolTask : ToolTask
             return false;
         }
 
+        try
+        {
+            cache.ValidateOutputs(invocation.Outputs);
+        }
+        catch (ArgumentException ex)
+        {
+            Log.LogMessage(MessageImportance.Low, $"{CacheConfiguration.ToolName} cache bypassed: {ex.Message}");
+            return false;
+        }
+
         var result = new InvocationResult(-1);
         OutputCapture? capture = null;
+        int? actualToolExitCode = null;
         try
         {
             string workingDirectory = GetWorkingDirectory();
             workingDirectory = string.IsNullOrEmpty(workingDirectory)
                 ? TaskEnvironment.ProjectDirectory.Value
                 : TaskEnvironment.GetAbsolutePath(workingDirectory).Value;
-            if (!cache.TryExecuteCached(invocation, ExecuteAndCapture, workingDirectory, out result))
+            if (!cache.TryExecuteCachedCore(invocation, ExecuteAndCapture, workingDirectory, validateOutputs: false, out result))
             {
                 return false;
             }
 
-            exitCode = result.ExitCode;
+            exitCode = actualToolExitCode ?? result.ExitCode;
             return true;
         }
         finally
@@ -100,8 +140,18 @@ public abstract class CachedToolTask : ToolTask
             capture = new OutputCapture();
             _outputCapture = capture;
             int toolExitCode = ExecuteToolCore(pathToTool, responseFileCommands, commandLineCommands);
+            actualToolExitCode = toolExitCode;
             capture.Complete(out IReadOnlyList<string> standardOutput, out IReadOnlyList<string> standardError);
-            return new InvocationResult(toolExitCode, standardOutput, standardError);
+            bool uncacheable = TerminatedTool || EofWaitTimedOut || ToolCanceled.WaitOne(0);
+            if (EofWaitTimedOut && toolExitCode == 0)
+            {
+                Log.LogMessage(MessageImportance.Low, $"{CacheConfiguration.ToolName} cache store skipped: output capture did not reach EOF.");
+            }
+
+            int cacheExitCode = uncacheable && toolExitCode == 0
+                ? -1
+                : toolExitCode;
+            return new InvocationResult(cacheExitCode, standardOutput, standardError);
         }
     }
 
@@ -115,40 +165,11 @@ public abstract class CachedToolTask : ToolTask
     protected virtual int ExecuteToolCore(string pathToTool, string responseFileCommands, string commandLineCommands)
         => base.ExecuteTool(pathToTool, responseFileCommands, commandLineCommands);
 
-    /// <inheritdoc />
-    protected override Process StartToolProcess(Process process)
-    {
-        if (_outputCapture is { } capture)
-        {
-            // Replace live logging, but preserve ToolTask's EOF notifications.
-            process.OutputDataReceived -= ReceiveStandardOutputData;
-            process.OutputDataReceived += (_, args) =>
-            {
-                if (args.Data is not null)
-                {
-                    capture.AddStandardOutput(args.Data);
-                }
-                else
-                {
-                    ReceiveStandardOutputData(process, args);
-                }
-            };
-            process.ErrorDataReceived -= ReceiveStandardErrorData;
-            process.ErrorDataReceived += (_, args) =>
-            {
-                if (args.Data is not null)
-                {
-                    capture.AddStandardError(args.Data);
-                }
-                else
-                {
-                    ReceiveStandardErrorData(process, args);
-                }
-            };
-        }
+    internal override bool TryCaptureStandardOutputData(string data)
+        => _outputCapture is { } capture && capture.TryAddStandardOutput(data);
 
-        return base.StartToolProcess(process);
-    }
+    internal override bool TryCaptureStandardErrorData(string data)
+        => _outputCapture is { } capture && capture.TryAddStandardError(data);
 
     private void ReplayOutput(IReadOnlyList<string> standardOutput, IReadOnlyList<string> standardError)
     {
@@ -177,25 +198,31 @@ public abstract class CachedToolTask : ToolTask
         private readonly List<string> _standardError = [];
         private bool _closed;
 
-        public void AddStandardOutput(string line)
+        public bool TryAddStandardOutput(string line)
         {
             lock (_lock)
             {
-                if (!_closed)
+                if (_closed)
                 {
-                    _standardOutput.Add(line);
+                    return false;
                 }
+
+                _standardOutput.Add(line);
+                return true;
             }
         }
 
-        public void AddStandardError(string line)
+        public bool TryAddStandardError(string line)
         {
             lock (_lock)
             {
-                if (!_closed)
+                if (_closed)
                 {
-                    _standardError.Add(line);
+                    return false;
                 }
+
+                _standardError.Add(line);
+                return true;
             }
         }
 

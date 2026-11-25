@@ -78,6 +78,7 @@ public sealed partial class InvocationCache
 {
     private readonly TaskLoggingHelper _log;
     private readonly string _toolName;
+    private readonly TaskEnvironment _environment;
     private readonly MessageImportance _importance;
 
     /// <summary>
@@ -86,18 +87,47 @@ public sealed partial class InvocationCache
     public string CacheDirectory { get; }
 
     /// <summary>
-    /// Creates a cache without creating storage or resolving the supplied directory.
+    /// Creates a cache without creating storage.
     /// </summary>
-    /// <param name="cacheDirectory">The resolved cache directory.</param>
+    /// <param name="cacheDirectory">The cache directory, canonicalized against the current directory if relative.</param>
     /// <param name="log">The task logger for cache diagnostics.</param>
     /// <param name="toolName">The tool name used in messages and writer locks.</param>
     /// <param name="importance">The importance of cache diagnostics.</param>
     public InvocationCache(string cacheDirectory, TaskLoggingHelper log, string toolName,
         MessageImportance importance = MessageImportance.Low)
+        : this(cacheDirectory, log, toolName, TaskEnvironment.Fallback, importance)
     {
-        CacheDirectory = cacheDirectory;
+    }
+
+    internal InvocationCache(string cacheDirectory, TaskLoggingHelper log, string toolName,
+        TaskEnvironment environment, MessageImportance importance = MessageImportance.Low)
+    {
+        if (cacheDirectory is null)
+        {
+            throw new ArgumentNullException(nameof(cacheDirectory));
+        }
+
+        if (string.IsNullOrWhiteSpace(cacheDirectory))
+        {
+            throw new ArgumentException("The cache directory must not be empty or whitespace.", nameof(cacheDirectory));
+        }
+
+        if (log is null)
+        {
+            throw new ArgumentNullException(nameof(log));
+        }
+
+        if (environment is null)
+        {
+            throw new ArgumentNullException(nameof(environment));
+        }
+
+        InvocationCacheConfiguration.ValidateToolName(toolName, nameof(toolName));
+
+        CacheDirectory = environment.GetAbsolutePath(cacheDirectory).GetCanonicalForm().Value;
         _log = log;
         _toolName = toolName;
+        _environment = environment;
         _importance = importance;
     }
 
@@ -115,11 +145,11 @@ public sealed partial class InvocationCache
     /// Only exit code zero is stored, independently of logged errors. Output declarations
     /// are validated before execution. Execution and logging exceptions propagate without retry.
     /// The caller owns diagnostic replay.
-    /// The process current directory contributes to invocation identity.
+    /// The task environment's project directory (or process current directory) contributes to invocation identity.
     /// </remarks>
     public bool TryExecuteCached(InvocationDescription invocation, Func<InvocationResult> execute,
         out InvocationResult result)
-        => TryExecuteCached(invocation, execute, Environment.CurrentDirectory, out result);
+        => TryExecuteCached(invocation, execute, _environment.ProjectDirectory.GetCanonicalForm().Value, out result);
 
     /// <summary>
     /// Restores or executes an invocation using its effective working directory for cache identity.
@@ -127,7 +157,7 @@ public sealed partial class InvocationCache
     /// <param name="invocation">The complete input, context, and output description.</param>
     /// <param name="execute">Executes the tool, preparing outputs and capturing raw diagnostics.</param>
     /// <param name="workingDirectory">
-    /// The directory used by the tool, resolved relative to the process current directory if relative.
+    /// The directory used by the tool, resolved relative to the task environment's project directory if relative.
     /// </param>
     /// <param name="result">The restored or executed result, or an exit code of -1 on bypass.</param>
     /// <returns>
@@ -141,24 +171,54 @@ public sealed partial class InvocationCache
     /// </remarks>
     public bool TryExecuteCached(InvocationDescription invocation, Func<InvocationResult> execute,
         string workingDirectory, out InvocationResult result)
+        => TryExecuteCachedCore(invocation, execute, workingDirectory, validateOutputs: true, out result);
+
+    internal bool TryExecuteCachedCore(InvocationDescription invocation, Func<InvocationResult> execute,
+        string workingDirectory, bool validateOutputs, out InvocationResult result)
     {
+        if (invocation is null)
+        {
+            throw new ArgumentNullException(nameof(invocation));
+        }
+
+        if (execute is null)
+        {
+            throw new ArgumentNullException(nameof(execute));
+        }
+
+        if (workingDirectory is null)
+        {
+            throw new ArgumentNullException(nameof(workingDirectory));
+        }
+
         result = new InvocationResult(-1);
-        ValidateOutputs(invocation.Outputs);
+        if (validateOutputs)
+        {
+            ValidateOutputs(invocation.Outputs);
+        }
 
         DateTime outputTimestampUtc = DateTime.UtcNow;
-        if (!TryComputeKey(_log, _toolName, invocation, workingDirectory, out string key))
+        string resolvedWorkingDirectory = string.IsNullOrEmpty(workingDirectory)
+            ? workingDirectory
+            : _environment.GetAbsolutePath(workingDirectory).GetCanonicalForm().Value;
+        if (!TryComputeKey(_log, _toolName, invocation, resolvedWorkingDirectory, out string key))
         {
             return false;
         }
 
-        result = ExecuteCached(outputTimestampUtc, new InvocationCacheRequest(key, invocation.Outputs), execute);
+        result = ExecuteCached(outputTimestampUtc, new InvocationCacheRequest(key, invocation.Outputs), execute, validateOutputs: false);
         return true;
     }
 
     internal InvocationResult ExecuteCached(DateTime outputTimestampUtc, InvocationCacheRequest request,
-        Func<InvocationResult> execute)
+        Func<InvocationResult> execute, bool validateOutputs = true)
     {
-        if (TryRestore(request.Key, request.Outputs, outputTimestampUtc, out InvocationResult result))
+        if (validateOutputs)
+        {
+            ValidateOutputs(request.Outputs);
+        }
+
+        if (TryRestoreCore(request.Key, request.Outputs, outputTimestampUtc, out InvocationResult result))
         {
             return result;
         }
@@ -166,7 +226,7 @@ public sealed partial class InvocationCache
         result = execute();
         if (result.ExitCode == 0)
         {
-            Store(request.Key, request.Outputs, result.StandardOutput, result.StandardError);
+            StoreCore(request.Key, request.Outputs, result.StandardOutput, result.StandardError);
         }
 
         return result;
@@ -175,9 +235,15 @@ public sealed partial class InvocationCache
     internal bool TryRestore(string inputHash, InvocationOutputs outputs, DateTime outputTimestampUtc,
         out InvocationResult result)
     {
+        ValidateOutputs(outputs);
+        return TryRestoreCore(inputHash, outputs, outputTimestampUtc, out result);
+    }
+
+    private bool TryRestoreCore(string inputHash, InvocationOutputs outputs, DateTime outputTimestampUtc,
+        out InvocationResult result)
+    {
         result = new InvocationResult(-1);
         string entryDirectory = GetEntryDirectory(inputHash);
-        ValidateOutputs(outputs);
         if (outputTimestampUtc.Kind != DateTimeKind.Utc)
         {
             throw new ArgumentException("The output timestamp must be UTC.", nameof(outputTimestampUtc));
@@ -200,7 +266,7 @@ public sealed partial class InvocationCache
             {
                 if (Directory.Exists(outputs.DirectoryPath))
                 {
-                    Directory.Delete(outputs.DirectoryPath, recursive: true);
+                    DeleteOutputDirectory(outputs.DirectoryPath);
                 }
 
                 Directory.CreateDirectory(outputs.DirectoryPath);
@@ -212,7 +278,9 @@ public sealed partial class InvocationCache
                 if (files[i].Present)
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                    ClearReadOnlyAttribute(destination);
                     File.Copy(Path.Combine(entryDirectory, "outputs", files[i].Name), destination, overwrite: true);
+                    ClearReadOnlyAttribute(destination);
                     File.SetLastWriteTimeUtc(destination, outputTimestampUtc);
                 }
                 else
@@ -222,7 +290,6 @@ public sealed partial class InvocationCache
             }
 
             UpdateLastUsed(entryDirectory);
-            _log.LogMessage(_importance, $"{_toolName} cache hit: {inputHash}");
         }
         catch (Exception ex) when (IsCacheFailure(ex))
         {
@@ -230,6 +297,7 @@ public sealed partial class InvocationCache
             return false;
         }
 
+        _log.LogMessage(_importance, $"{_toolName} cache hit: {inputHash}");
         result = new InvocationResult(0, standardOutput, standardError);
         return true;
     }
@@ -237,97 +305,76 @@ public sealed partial class InvocationCache
     internal void Store(string inputHash, InvocationOutputs outputs,
         IReadOnlyCollection<string>? standardOutput = null, IReadOnlyCollection<string>? standardError = null)
     {
-        string entryDirectory = GetEntryDirectory(inputHash);
         ValidateOutputs(outputs);
+        StoreCore(inputHash, outputs, standardOutput, standardError);
+    }
+
+    private void StoreCore(string inputHash, InvocationOutputs outputs,
+        IReadOnlyCollection<string>? standardOutput = null, IReadOnlyCollection<string>? standardError = null)
+    {
+        string entryDirectory = GetEntryDirectory(inputHash);
         string? stagingDirectory = null;
+        bool stored = false;
 
         try
         {
-            using var mutex = new Mutex(initiallyOwned: false, GetWriterMutexName(inputHash));
-            bool acquired;
-            try
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                acquired = mutex.WaitOne(0);
-            }
-            catch (AbandonedMutexException)
-            {
-                acquired = true;
-                _log.LogMessage(_importance, $"{_toolName} cache writer lock was abandoned: {inputHash}");
-            }
-
-            if (!acquired)
-            {
-                _log.LogMessage(_importance, $"{_toolName} cache store skipped; another writer owns '{inputHash}'.");
-                return;
-            }
-
-            try
-            {
-                if (Directory.Exists(entryDirectory))
-                {
-                    _log.LogMessage(_importance, $"{_toolName} cache store skipped; entry '{inputHash}' already exists.");
-                    return;
-                }
-
-                List<string> files = GetFileNames(outputs);
-                bool fileSet = outputs.DirectoryPath is null;
-
                 string parentDirectory = Path.GetDirectoryName(entryDirectory)!;
                 Directory.CreateDirectory(parentDirectory);
-                // Avoid repeating the key so staging does not exceed legacy Windows path limits before the final entry does.
-                stagingDirectory = Path.Combine(parentDirectory, Guid.NewGuid().ToString("N") + ".tmp");
-                Directory.CreateDirectory(stagingDirectory);
-
-                string diagnosticsPath = Path.Combine(stagingDirectory, "diagnostics");
-                using (var diagnostics = new BinaryWriter(File.Create(diagnosticsPath)))
+                string lockPath = Path.Combine(parentDirectory, inputHash + ".lock");
+                bool lockAcquired = false;
+                try
                 {
-                    WriteLines(diagnostics, standardOutput);
-                    WriteLines(diagnostics, standardError);
+                    // Cache-directory-scoped lock file inherits directory ACLs and auto-deletes on close/crash.
+                    using var lockFile = new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None,
+                        bufferSize: 1, FileOptions.DeleteOnClose);
+                    lockAcquired = true;
+                    stored = StoreUnderLock(inputHash, entryDirectory, outputs, standardOutput, standardError, ref stagingDirectory);
                 }
-
-                using (var manifest = new BinaryWriter(File.Create(Path.Combine(stagingDirectory, "manifest"))))
+                catch (IOException) when (!lockAcquired)
                 {
-                    manifest.Write(InvocationCacheEntry.FormatVersion);
-                    manifest.Write(fileSet);
-                    manifest.Write(files.Count);
-                    for (int i = 0; i < files.Count; i++)
+                    _log.LogMessage(_importance, $"{_toolName} cache store skipped; another writer owns '{inputHash}'.");
+                    return;
+                }
+            }
+            else
+            {
+                using var mutex = new Mutex(initiallyOwned: false, GetWriterMutexName(inputHash));
+                bool acquired = false;
+                try
+                {
+                    bool abandoned = false;
+                    try
                     {
-                        string relativePath = files[i];
-                        string cachedFile = Path.Combine(stagingDirectory, "outputs", relativePath);
-                        Directory.CreateDirectory(Path.GetDirectoryName(cachedFile)!);
-                        bool present = true;
-                        try
-                        {
-                            File.Copy(GetOutputPath(outputs, relativePath, i), cachedFile);
-                        }
-                        catch (Exception ex) when (fileSet && ex is FileNotFoundException or DirectoryNotFoundException)
-                        {
-                            present = false;
-                        }
-
-                        manifest.Write(relativePath);
-                        manifest.Write(present);
-                        if (present)
-                        {
-                            manifest.Write(new FileInfo(cachedFile).Length);
-                            manifest.Write(HashFile(cachedFile));
-                        }
+                        acquired = mutex.WaitOne(0);
+                    }
+                    catch (AbandonedMutexException)
+                    {
+                        acquired = true;
+                        abandoned = true;
                     }
 
-                    manifest.Write(new FileInfo(diagnosticsPath).Length);
-                    manifest.Write(HashFile(diagnosticsPath));
+                    if (!acquired)
+                    {
+                        _log.LogMessage(_importance, $"{_toolName} cache store skipped; another writer owns '{inputHash}'.");
+                        return;
+                    }
+
+                    if (abandoned)
+                    {
+                        _log.LogMessage(_importance, $"{_toolName} cache writer lock was abandoned: {inputHash}");
+                    }
+
+                    stored = StoreUnderLock(inputHash, entryDirectory, outputs, standardOutput, standardError, ref stagingDirectory);
                 }
-
-                File.WriteAllBytes(Path.Combine(stagingDirectory, "manifest.sha256"), HashFile(Path.Combine(stagingDirectory, "manifest")));
-
-                InvocationCacheEntry.WriteLastUsed(Path.Combine(stagingDirectory, InvocationCacheEntry.LastUsedFileName));
-                Directory.Move(stagingDirectory, entryDirectory);
-                stagingDirectory = null;
-                _log.LogMessage(_importance, $"{_toolName} cache stored: {inputHash}");
-            }
-            finally
-            {
-                mutex.ReleaseMutex();
+                finally
+                {
+                    if (acquired)
+                    {
+                        mutex.ReleaseMutex();
+                    }
+                }
             }
         }
         catch (Exception ex) when (IsCacheFailure(ex))
@@ -351,6 +398,81 @@ public sealed partial class InvocationCache
                 }
             }
         }
+
+        if (stored)
+        {
+            _log.LogMessage(_importance, $"{_toolName} cache stored: {inputHash}");
+        }
+    }
+
+    private bool StoreUnderLock(string inputHash, string entryDirectory, InvocationOutputs outputs,
+        IReadOnlyCollection<string>? standardOutput, IReadOnlyCollection<string>? standardError, ref string? stagingDirectory)
+    {
+        if (Directory.Exists(entryDirectory))
+        {
+            _log.LogMessage(_importance, $"{_toolName} cache store skipped; entry '{inputHash}' already exists.");
+            return false;
+        }
+
+        List<string> files = GetFileNames(outputs);
+        bool fileSet = outputs.DirectoryPath is null;
+
+        string parentDirectory = Path.GetDirectoryName(entryDirectory)!;
+        Directory.CreateDirectory(parentDirectory);
+        // Avoid repeating the key so staging does not exceed legacy Windows path limits before the final entry does.
+        stagingDirectory = Path.Combine(parentDirectory, Guid.NewGuid().ToString("N") + ".tmp");
+        Directory.CreateDirectory(stagingDirectory);
+
+        string diagnosticsPath = Path.Combine(stagingDirectory, "diagnostics");
+        using (var diagnostics = new BinaryWriter(File.Create(diagnosticsPath)))
+        {
+            WriteLines(diagnostics, standardOutput);
+            WriteLines(diagnostics, standardError);
+        }
+
+        using var sha256 = SHA256.Create();
+        byte[] copyBuffer = new byte[81920];
+        using (var manifest = new BinaryWriter(File.Create(Path.Combine(stagingDirectory, "manifest"))))
+        {
+            manifest.Write(InvocationCacheEntry.FormatVersion);
+            manifest.Write(fileSet);
+            manifest.Write(files.Count);
+            for (int i = 0; i < files.Count; i++)
+            {
+                string relativePath = files[i];
+                string cachedFile = Path.Combine(stagingDirectory, "outputs", relativePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(cachedFile)!);
+                bool present = true;
+                long length = 0;
+                byte[]? hash = null;
+                try
+                {
+                    (length, hash) = CopyAndHashFile(GetOutputPath(outputs, relativePath, i), cachedFile, sha256, copyBuffer);
+                }
+                catch (Exception ex) when (fileSet && ex is FileNotFoundException or DirectoryNotFoundException)
+                {
+                    present = false;
+                }
+
+                manifest.Write(relativePath);
+                manifest.Write(present);
+                if (present)
+                {
+                    manifest.Write(length);
+                    manifest.Write(hash!);
+                }
+            }
+
+            manifest.Write(new FileInfo(diagnosticsPath).Length);
+            manifest.Write(HashFile(diagnosticsPath, sha256));
+        }
+
+        File.WriteAllBytes(Path.Combine(stagingDirectory, "manifest.sha256"), HashFile(Path.Combine(stagingDirectory, "manifest"), sha256));
+
+        InvocationCacheEntry.WriteLastUsed(Path.Combine(stagingDirectory, InvocationCacheEntry.LastUsedFileName));
+        Directory.Move(stagingDirectory, entryDirectory);
+        stagingDirectory = null;
+        return true;
 
         static void WriteLines(BinaryWriter writer, IReadOnlyCollection<string>? lines)
         {
@@ -390,26 +512,28 @@ public sealed partial class InvocationCache
     private string GetWriterMutexName(string inputHash)
     {
         string directory = CacheDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (!FileUtilities.IsFileSystemCaseSensitive)
         {
             directory = directory.ToUpperInvariant();
         }
 
+        byte[] payload = Encoding.UTF8.GetBytes(directory + "\n" + _toolName + "\n" + inputHash);
 #if NET
-        byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(directory + "\n" + inputHash));
-        return @"Global\" + _toolName + "Cache-" + Convert.ToHexString(hash);
+        byte[] hash = SHA256.HashData(payload);
+        return "MSBuildInvocationCache-" + Convert.ToHexString(hash);
 #else
         using var sha256 = SHA256.Create();
-        byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(directory + "\n" + inputHash));
-        return @"Global\" + _toolName + "Cache-" + BitConverter.ToString(hash).Replace("-", "");
+        byte[] hash = sha256.ComputeHash(payload);
+        return "MSBuildInvocationCache-" + BitConverter.ToString(hash).Replace("-", "");
 #endif
     }
 
     private List<(string Name, bool Present)> ReadManifest(string entryDirectory, InvocationOutputs outputs,
         out List<string> standardOutput, out List<string> standardError)
     {
+        using var sha256 = SHA256.Create();
         bool fileSet = outputs.DirectoryPath is null;
-        if (!File.ReadAllBytes(Path.Combine(entryDirectory, "manifest.sha256")).SequenceEqual(HashFile(Path.Combine(entryDirectory, "manifest"))))
+        if (!File.ReadAllBytes(Path.Combine(entryDirectory, "manifest.sha256")).SequenceEqual(HashFile(Path.Combine(entryDirectory, "manifest"), sha256)))
         {
             throw new InvalidDataException("Cached manifest checksum mismatch.");
         }
@@ -437,13 +561,16 @@ public sealed partial class InvocationCache
         }
 
         var files = new List<(string Name, bool Present)>();
-        var paths = new HashSet<string>(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+        var paths = new HashSet<string>(FileUtilities.PathComparer);
         string outputsDirectory = Path.Combine(entryDirectory, "outputs");
         for (int i = 0; i < fileCount; i++)
         {
             string relativePath = manifest.ReadString();
             ValidateRelativePath(relativePath);
-            if (!paths.Add(relativePath) || (fileSet && relativePath != i.ToString(CultureInfo.InvariantCulture)))
+            string normalizedPath = Path.AltDirectorySeparatorChar != Path.DirectorySeparatorChar
+                ? relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
+                : relativePath;
+            if (!paths.Add(normalizedPath) || (fileSet && relativePath != i.ToString(CultureInfo.InvariantCulture)))
             {
                 throw new InvalidDataException($"Invalid {_toolName} cache output inventory.");
             }
@@ -460,7 +587,7 @@ public sealed partial class InvocationCache
                 byte[] expectedHash = manifest.ReadBytes(32);
                 string cachedFile = Path.Combine(outputsDirectory, relativePath);
                 if (expectedHash.Length != 32 || new FileInfo(cachedFile).Length != length ||
-                    !expectedHash.SequenceEqual(HashFile(cachedFile)))
+                    !expectedHash.SequenceEqual(HashFile(cachedFile, sha256)))
                 {
                     throw new InvalidDataException($"Invalid {_toolName} cache output: '{relativePath}'.");
                 }
@@ -473,7 +600,7 @@ public sealed partial class InvocationCache
         byte[] diagnosticsHash = manifest.ReadBytes(32);
         string diagnosticsPath = Path.Combine(entryDirectory, "diagnostics");
         if (diagnosticsHash.Length != 32 || new FileInfo(diagnosticsPath).Length != diagnosticsLength ||
-            !diagnosticsHash.SequenceEqual(HashFile(diagnosticsPath)))
+            !diagnosticsHash.SequenceEqual(HashFile(diagnosticsPath, sha256)))
         {
             throw new InvalidDataException($"Invalid {_toolName} cache diagnostics.");
         }
@@ -528,11 +655,28 @@ public sealed partial class InvocationCache
         }
     }
 
-    private static byte[] HashFile(string path)
+    private static byte[] HashFile(string path, SHA256 sha256)
     {
-        using var sha256 = SHA256.Create();
         using var stream = File.OpenRead(path);
         return sha256.ComputeHash(stream);
+    }
+
+    private static (long Length, byte[] Hash) CopyAndHashFile(string sourcePath, string destinationPath, SHA256 sha256, byte[] buffer)
+    {
+        using var source = File.OpenRead(sourcePath);
+        using var destination = File.Create(destinationPath);
+        sha256.Initialize();
+        long totalBytes = 0;
+        int bytesRead;
+        while ((bytesRead = source.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            destination.Write(buffer, 0, bytesRead);
+            sha256.TransformBlock(buffer, 0, bytesRead, null, 0);
+            totalBytes += bytesRead;
+        }
+
+        sha256.TransformFinalBlock([], 0, 0);
+        return (totalBytes, sha256.Hash!);
     }
 
     private static bool IsCacheFailure(Exception ex) => ex is IOException or UnauthorizedAccessException or InvalidDataException or FormatException;

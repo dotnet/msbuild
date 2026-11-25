@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Build.Framework;
@@ -24,7 +25,7 @@ public sealed partial class InvocationCache
             key = ComputeKey(invocation, workingDirectory);
             return true;
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or (ArgumentException and not ArgumentNullException) or NotSupportedException or SecurityException)
         {
             log.LogMessage(MessageImportance.Low, $"{toolName} cache bypassed: input identity could not be computed: {ex.Message}");
             return false;

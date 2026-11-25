@@ -38,17 +38,60 @@ public sealed class InvocationCacheConfiguration
     /// <param name="pathEnvironmentVariable">The cache path override variable.</param>
     public InvocationCacheConfiguration(string toolName, string enabledEnvironmentVariable, string pathEnvironmentVariable)
     {
+        ValidateToolName(toolName, nameof(toolName));
+        if (enabledEnvironmentVariable is null)
+        {
+            throw new ArgumentNullException(nameof(enabledEnvironmentVariable));
+        }
+
+        if (string.IsNullOrWhiteSpace(enabledEnvironmentVariable))
+        {
+            throw new ArgumentException("The enabled environment variable name must not be empty or whitespace.", nameof(enabledEnvironmentVariable));
+        }
+
+        if (pathEnvironmentVariable is null)
+        {
+            throw new ArgumentNullException(nameof(pathEnvironmentVariable));
+        }
+
+        if (string.IsNullOrWhiteSpace(pathEnvironmentVariable))
+        {
+            throw new ArgumentException("The path environment variable name must not be empty or whitespace.", nameof(pathEnvironmentVariable));
+        }
+
         ToolName = toolName;
         EnabledEnvironmentVariable = enabledEnvironmentVariable;
         PathEnvironmentVariable = pathEnvironmentVariable;
     }
 
+    internal static void ValidateToolName(string toolName, string paramName)
+    {
+        if (toolName is null)
+        {
+            throw new ArgumentNullException(paramName);
+        }
+
+        if (string.IsNullOrWhiteSpace(toolName) ||
+            toolName is "." or ".." ||
+            toolName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
+            toolName.IndexOfAny(['/', '\\']) >= 0)
+        {
+            throw new ArgumentException($"The tool name '{toolName}' must be a valid single path segment.", paramName);
+        }
+    }
+
     internal static string? GetDefaultCacheDirectory(string toolName, TaskEnvironment environment)
     {
+        ValidateToolName(toolName, nameof(toolName));
         string cacheDirectoryName = toolName.ToLowerInvariant();
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.DoNotVerify);
+            string? localAppData = environment.GetEnvironmentVariable("LOCALAPPDATA");
+            if (string.IsNullOrEmpty(localAppData) || !Path.IsPathRooted(localAppData))
+            {
+                localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.DoNotVerify);
+            }
+
             return string.IsNullOrEmpty(localAppData) || !Path.IsPathRooted(localAppData)
                 ? null
                 : Path.Combine(localAppData, cacheDirectoryName);
@@ -64,7 +107,12 @@ public sealed class InvocationCacheConfiguration
             }
         }
 
-        string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.DoNotVerify);
+        string? home = environment.GetEnvironmentVariable("HOME");
+        if (string.IsNullOrEmpty(home) || !Path.IsPathRooted(home))
+        {
+            home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.DoNotVerify);
+        }
+
         if (string.IsNullOrEmpty(home) || !Path.IsPathRooted(home))
         {
             return null;

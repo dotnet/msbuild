@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
+using Microsoft.Build.Framework;
 
 #pragma warning disable MSBUILD001
 
@@ -15,8 +15,7 @@ public sealed partial class InvocationCache
 {
     internal void ValidateOutputs(InvocationOutputs outputs)
     {
-        StringComparison comparison = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        StringComparison comparison = FileUtilities.PathComparison;
         string cachePrefix = CacheDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
         if (outputs.DirectoryPath is not null)
         {
@@ -28,8 +27,7 @@ public sealed partial class InvocationCache
         }
         else if (outputs.Files.Length > 0)
         {
-            StringComparer comparer = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+            StringComparer comparer = FileUtilities.PathComparer;
             string[] prefixes = new string[outputs.Files.Length];
             for (int i = 0; i < outputs.Files.Length; i++)
             {
@@ -97,10 +95,37 @@ public sealed partial class InvocationCache
     private static string GetOutputPath(InvocationOutputs outputs, string name, int index) =>
         outputs.DirectoryPath is not null ? Path.Combine(outputs.DirectoryPath, name) : outputs.Files[index];
 
+    private static void DeleteOutputDirectory(string directory)
+    {
+        foreach (string file in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories))
+        {
+            ClearReadOnlyAttribute(file);
+        }
+
+        Directory.Delete(directory, recursive: true);
+    }
+
+    private static void ClearReadOnlyAttribute(string path)
+    {
+        try
+        {
+            FileAttributes attributes = File.GetAttributes(path);
+            if ((attributes & FileAttributes.ReadOnly) != 0)
+            {
+                File.SetAttributes(path, attributes & ~FileAttributes.ReadOnly);
+            }
+        }
+        catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
+        {
+            // Nothing to clear when the target path does not exist yet.
+        }
+    }
+
     private static void DeleteOutputFile(string path)
     {
         try
         {
+            ClearReadOnlyAttribute(path);
             File.Delete(path);
         }
         catch (DirectoryNotFoundException)

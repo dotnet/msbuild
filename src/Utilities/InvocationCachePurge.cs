@@ -27,6 +27,46 @@ public static class InvocationCachePurge
     public static int Run(string cacheDirectory, string versionDirectory, string toolName,
         DateTimeOffset cutoff, TextWriter output, TextWriter error)
     {
+        if (cacheDirectory is null)
+        {
+            throw new ArgumentNullException(nameof(cacheDirectory));
+        }
+
+        if (string.IsNullOrWhiteSpace(cacheDirectory))
+        {
+            throw new ArgumentException("The cache directory must not be empty or whitespace.", nameof(cacheDirectory));
+        }
+
+        if (versionDirectory is null)
+        {
+            throw new ArgumentNullException(nameof(versionDirectory));
+        }
+
+        if (string.IsNullOrWhiteSpace(versionDirectory))
+        {
+            throw new ArgumentException("The version directory must not be empty or whitespace.", nameof(versionDirectory));
+        }
+
+        if (toolName is null)
+        {
+            throw new ArgumentNullException(nameof(toolName));
+        }
+
+        if (string.IsNullOrWhiteSpace(toolName))
+        {
+            throw new ArgumentException("The tool name must not be empty or whitespace.", nameof(toolName));
+        }
+
+        if (output is null)
+        {
+            throw new ArgumentNullException(nameof(output));
+        }
+
+        if (error is null)
+        {
+            throw new ArgumentNullException(nameof(error));
+        }
+
         int deleted = 0;
         int kept = 0;
         int errors = 0;

@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 #pragma warning disable MSBUILD001
@@ -36,6 +37,29 @@ public sealed class InvocationDescription
     /// <param name="outputs">The owned directory or ordered file set.</param>
     public InvocationDescription(InvocationInputs inputs, string[] context, InvocationOutputs outputs)
     {
+        if (inputs is null)
+        {
+            throw new ArgumentNullException(nameof(inputs));
+        }
+
+        if (context is null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
+
+        if (outputs is null)
+        {
+            throw new ArgumentNullException(nameof(outputs));
+        }
+
+        foreach (string value in context)
+        {
+            if (value is null)
+            {
+                throw new ArgumentException("Context values must not contain null.", nameof(context));
+            }
+        }
+
         Inputs = inputs;
         Context = context;
         Outputs = outputs;

@@ -759,16 +759,16 @@ public sealed class InvocationCache_Tests
     public async Task OutputCaptureIgnoresLateWritesAfterCompletion()
     {
         var capture = new CachedToolTask.OutputCapture();
-        capture.AddStandardOutput("before-out");
-        capture.AddStandardError("before-err");
+        capture.TryAddStandardOutput("before-out").ShouldBeTrue();
+        capture.TryAddStandardError("before-err").ShouldBeTrue();
 
         using var stop = new CancellationTokenSource();
         Task writer = Task.Run(() =>
         {
             while (!stop.IsCancellationRequested)
             {
-                capture.AddStandardOutput("late-out");
-                capture.AddStandardError("late-err");
+                capture.TryAddStandardOutput("late-out");
+                capture.TryAddStandardError("late-err");
             }
         });
 
@@ -782,8 +782,8 @@ public sealed class InvocationCache_Tests
             standardError.ToArray().Length.ShouldBe(expectedErrCount);
         }
 
-        capture.AddStandardOutput("after-out");
-        capture.AddStandardError("after-err");
+        capture.TryAddStandardOutput("after-out").ShouldBeFalse();
+        capture.TryAddStandardError("after-err").ShouldBeFalse();
         standardOutput.Count.ShouldBe(expectedOutCount);
         standardError.Count.ShouldBe(expectedErrCount);
 
@@ -896,6 +896,591 @@ public sealed class InvocationCache_Tests
         output.ToString().ShouldContain(expired ? "Deleted: 1, Kept: 0" : "Deleted: 0, Kept: 1");
     }
 
+    [Fact]
+    public void TaskEnvironmentOverloadsResolveRelativePathsAndDefaultHome()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        string projectDir = env.CreateFolder().Path;
+        string inputPath = Path.Combine(projectDir, "input.txt");
+        File.WriteAllText(inputPath, "hello");
+        string outputDir = Path.Combine(projectDir, "out");
+        string cacheDir = Path.Combine(projectDir, "cache");
+        TaskEnvironment taskEnv = env.WithTransientTestState(new TransientTaskEnvironment(projectDir)).Environment;
+
+        InvocationInputs relativeInputs = InvocationInputs.FromFiles(["input.txt"], taskEnv);
+        InvocationOutputs relativeOutputs = InvocationOutputs.FromDirectory("out", taskEnv);
+        InvocationOutputs relativeFileOutputs = InvocationOutputs.FromFiles(["out/a.txt"], taskEnv);
+        var description = new InvocationDescription(relativeInputs, ["arg"], relativeOutputs);
+
+        InvocationCache? cache = InvocationCache.TryCreate("cache", new TestTask { BuildEngine = new MockEngine() }.Log, "Test", taskEnv);
+        cache.ShouldNotBeNull();
+        cache.CacheDirectory.ShouldBe(Path.GetFullPath(cacheDir));
+        relativeFileOutputs.Files.ShouldBe([Path.GetFullPath(Path.Combine(outputDir, "a.txt"))]);
+
+        int executions = 0;
+        cache.TryExecuteCached(description, () =>
+        {
+            executions++;
+            Directory.CreateDirectory(outputDir);
+            File.WriteAllText(Path.Combine(outputDir, "a.txt"), "output");
+            return new InvocationResult(0);
+        }, out InvocationResult first).ShouldBeTrue();
+        first.ExitCode.ShouldBe(0);
+        executions.ShouldBe(1);
+
+        // Second call with explicit canonicalized paths and explicit projectDir must hit the same entry.
+        var absoluteDescription = new InvocationDescription(
+            InvocationInputs.FromFiles(inputPath),
+            ["arg"],
+            InvocationOutputs.FromDirectory(outputDir));
+        cache.TryExecuteCached(absoluteDescription, () =>
+        {
+            executions++;
+            return new InvocationResult(0);
+        }, projectDir, out InvocationResult second).ShouldBeTrue();
+        second.ExitCode.ShouldBe(0);
+        executions.ShouldBe(1);
+
+        // GetDefaultCacheDirectory honors task-local LOCALAPPDATA (Windows) or HOME (Unix).
+        string fakeHome = env.CreateFolder().Path;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            taskEnv.SetEnvironmentVariable("LOCALAPPDATA", fakeHome);
+            InvocationCacheConfiguration.GetDefaultCacheDirectory("Test", taskEnv).ShouldBe(Path.Combine(fakeHome, "test"));
+        }
+        else
+        {
+            taskEnv.SetEnvironmentVariable("XDG_CACHE_HOME", null);
+            taskEnv.SetEnvironmentVariable("HOME", fakeHome);
+            string expected = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                ? Path.Combine(fakeHome, "Library", "Caches", "test")
+                : Path.Combine(fakeHome, ".cache", "test");
+            InvocationCacheConfiguration.GetDefaultCacheDirectory("Test", taskEnv).ShouldBe(expected);
+        }
+    }
+
+    [Fact]
+    public void CacheCanonicalizesPathsAndRejectsInvalidToolNamesAndWhitespaceCacheDirectory()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        TaskLoggingHelper log = new TestTask { BuildEngine = new MockEngine() }.Log;
+
+        string nonCanonicalCache = Path.Combine(root, "sub", "..", "cache");
+        var cache = new InvocationCache(nonCanonicalCache, log, "Test");
+        cache.CacheDirectory.ShouldBe(Path.GetFullPath(Path.Combine(root, "cache")));
+
+        // Overlap validation must catch output inside the canonical cache path.
+        Should.Throw<ArgumentException>(() => cache.ValidateOutputs(InvocationOutputs.FromDirectory(Path.Combine(root, "cache", "out"))));
+
+        TaskEnvironment taskEnv = env.WithTransientTestState(new TransientTaskEnvironment(root)).Environment;
+        InvocationCache? fromTryCreate = InvocationCache.TryCreate(Path.Combine("sub", "..", "cache"), log, "Test", taskEnv);
+        fromTryCreate.ShouldNotBeNull();
+        fromTryCreate.CacheDirectory.ShouldBe(Path.GetFullPath(Path.Combine(root, "cache")));
+
+        // Whitespace cacheDirectory falls back to platform default instead of creating a literal space-named directory.
+        string fakeHome = env.CreateFolder().Path;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            taskEnv.SetEnvironmentVariable("LOCALAPPDATA", fakeHome);
+        }
+        else
+        {
+            taskEnv.SetEnvironmentVariable("XDG_CACHE_HOME", fakeHome);
+        }
+
+        InvocationCache? whitespaceCache = InvocationCache.TryCreate("   ", log, "Test", taskEnv);
+        whitespaceCache.ShouldNotBeNull();
+        whitespaceCache.CacheDirectory.ShouldBe(Path.Combine(fakeHome, "test"));
+
+        foreach (string badToolName in new[] { "", "   ", ".", "..", "a/b", "a\\b" })
+        {
+            Should.Throw<ArgumentException>(() => new InvocationCacheConfiguration(badToolName, "E", "P"));
+            Should.Throw<ArgumentException>(() => new InvocationCache(Path.Combine(root, "cache"), log, badToolName));
+            Should.Throw<ArgumentException>(() => InvocationCache.TryCreate(Path.Combine(root, "cache"), log, badToolName, taskEnv));
+        }
+    }
+
+    [Fact]
+    public void CacheHitLoggingFailureDoesNotReExecuteTool()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        string cacheDir = Path.Combine(root, "cache");
+        string inputFile = Path.Combine(root, "in.txt");
+        string outputDir = Path.Combine(root, "out");
+        File.WriteAllText(inputFile, "data");
+
+        var description = new InvocationDescription(
+            InvocationInputs.FromFiles(inputFile),
+            ["arg"],
+            InvocationOutputs.FromDirectory(outputDir));
+
+        var seedCache = new InvocationCache(cacheDir, new TestTask { BuildEngine = new MockEngine() }.Log, "Test");
+        seedCache.TryExecuteCached(description, () =>
+        {
+            Directory.CreateDirectory(outputDir);
+            File.WriteAllText(Path.Combine(outputDir, "a.txt"), "ok");
+            return new InvocationResult(0);
+        }, out _).ShouldBeTrue();
+
+        var throwingEngine = new ThrowingOnHitMockEngine();
+        var hitCache = new InvocationCache(cacheDir, new TestTask { BuildEngine = throwingEngine }.Log, "Test");
+        int executions = 0;
+
+        Should.Throw<IOException>(() => hitCache.TryExecuteCached(description, () =>
+        {
+            executions++;
+            return new InvocationResult(0);
+        }, out _));
+
+        executions.ShouldBe(0);
+    }
+
+    [Fact]
+    public void CachedToolTaskReplaysPartialOutputAndReleasesCaptureWhenExecuteToolCoreThrows()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        string cacheDir = Path.Combine(root, "cache");
+        string outputDir = Path.Combine(root, "out");
+        TaskEnvironment taskEnv = env.WithTransientTestState(new TransientTaskEnvironment(root)).Environment;
+        taskEnv.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, "true");
+        taskEnv.SetEnvironmentVariable(TestCachedToolTask.PathVariable, cacheDir);
+
+        var engine = new MockEngine();
+        var task = new TestCachedToolTask
+        {
+            BuildEngine = engine,
+            TaskEnvironment = taskEnv,
+            Description = new InvocationDescription(
+                InvocationInputs.FromFiles(),
+                ["throw-case"],
+                InvocationOutputs.FromDirectory(outputDir)),
+        };
+        task.Execution = () =>
+        {
+            task.TryCaptureStandardOutputData("partial-stdout").ShouldBeTrue();
+            task.TryCaptureStandardErrorData("partial-stderr").ShouldBeTrue();
+            throw new InvalidOperationException("boom");
+        };
+
+        Should.Throw<InvalidOperationException>(() => task.Run());
+        task.ReplayedLines.ShouldContain("partial-stdout");
+        task.ReplayedLines.ShouldContain("partial-stderr");
+        Directory.Exists(Path.Combine(cacheDir, "v1")).ShouldBeFalse();
+
+        // Capture must be cleared so subsequent non-cached calls are not captured.
+        task.TryCaptureStandardOutputData("after-throw").ShouldBeFalse();
+    }
+
+    [Fact]
+    public void CachedToolTaskSupportsResourceManagerConstructorsAndCustomStartToolProcess()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        string cacheDir = Path.Combine(root, "cache");
+        string outputDir = Path.Combine(root, "out");
+        TaskEnvironment taskEnv = env.WithTransientTestState(new TransientTaskEnvironment(root)).Environment;
+        taskEnv.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, "true");
+        taskEnv.SetEnvironmentVariable(TestCachedToolTask.PathVariable, cacheDir);
+
+        var resources = new System.Resources.ResourceManager("TestResources", typeof(InvocationCache_Tests).Assembly);
+        var description = new InvocationDescription(
+            InvocationInputs.FromFiles(),
+            ["custom-start-process"],
+            InvocationOutputs.FromDirectory(outputDir));
+
+        var first = new CustomStartProcessCachedToolTask(resources, "Prefix.")
+        {
+            BuildEngine = new MockEngine(),
+            TaskEnvironment = taskEnv,
+            Description = description,
+            OutputDir = outputDir,
+        };
+        first.Execute().ShouldBeTrue();
+        first.Executions.ShouldBe(1);
+        first.ReplayedLines.ShouldContain("first");
+
+        var second = new CustomStartProcessCachedToolTask(resources)
+        {
+            BuildEngine = new MockEngine(),
+            TaskEnvironment = taskEnv,
+            Description = description,
+            OutputDir = outputDir,
+        };
+        second.Execute().ShouldBeTrue();
+        second.Executions.ShouldBe(0);
+        second.ReplayedLines.ShouldContain("first");
+    }
+
+    [Fact]
+    public void PurgeFallsBackToDirectoryCreationTimeWhenLastUsedMissingOrInvalid()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        var cache = new InvocationCache(Path.Combine(root, "cache"), new TestTask { BuildEngine = new MockEngine() }.Log, "Test");
+        cache.Store(Key, InvocationOutputs.FromFiles());
+        string entry = Path.Combine(cache.CacheDirectory, "v1", Key);
+        File.WriteAllText(Path.Combine(entry, "last-used"), "not-a-timestamp");
+        DateTimeOffset cutoff = DateTimeOffset.UtcNow.AddDays(1);
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        InvocationCachePurge.Run(cache.CacheDirectory, "v1", "Test", cutoff, output, error).ShouldBe(0);
+
+        Directory.Exists(entry).ShouldBeFalse();
+        error.ToString().ShouldContain("using directory creation time");
+        output.ToString().ShouldContain("Deleted: 1, Kept: 0, Errors: 0");
+    }
+
+    [Fact]
+    public void PurgeReportsErrorWhenVersionDirectoryIsMissing()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        using var output = new StringWriter();
+        using var error = new StringWriter();
+
+        InvocationCachePurge.Run(Path.Combine(root, "missing-cache"), "v1", "Test", DateTimeOffset.UtcNow, output, error).ShouldBe(1);
+
+        error.ToString().ShouldContain("Could not enumerate Test cache");
+        output.ToString().ShouldContain("Deleted: 0, Kept: 0, Errors: 1");
+    }
+
+    private sealed class ThrowingOnHitMockEngine : IBuildEngine
+    {
+        public bool ContinueOnError => false;
+        public int LineNumberOfTaskNode => 0;
+        public int ColumnNumberOfTaskNode => 0;
+        public string ProjectFileOfTaskNode => string.Empty;
+
+        public bool BuildProjectFile(string projectFileName, string[] targetNames, System.Collections.IDictionary globalProperties, System.Collections.IDictionary targetOutputs)
+            => false;
+
+        public void LogCustomEvent(CustomBuildEventArgs e) { }
+        public void LogErrorEvent(BuildErrorEventArgs e) { }
+        public void LogWarningEvent(BuildWarningEventArgs e) { }
+
+        public void LogMessageEvent(BuildMessageEventArgs e)
+        {
+            if (e.Message is not null && e.Message.Contains("cache hit:"))
+            {
+                throw new IOException("simulated logger failure");
+            }
+        }
+    }
+
+    [Fact]
+    public void PublicApisValidateArgumentsUpfrontAndDoNotSwallowNullArguments()
+    {
+        using var env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        TaskLoggingHelper log = new TestTask { BuildEngine = new MockEngine() }.Log;
+        var cache = new InvocationCache(Path.Combine(root, "cache"), log, "Test");
+        var validInputs = InvocationInputs.FromFiles([Path.Combine(root, "a.txt")]);
+        var validOutputs = InvocationOutputs.FromDirectory(Path.Combine(root, "out"));
+        var validDescription = new InvocationDescription(validInputs, ["args"], validOutputs);
+
+        Should.Throw<ArgumentNullException>(() => new InvocationCache(Path.Combine(root, "cache"), null!, "Test"));
+        Should.Throw<ArgumentNullException>(() => InvocationCache.TryCreateFromEnvironment(null!, TestCachedToolTask.Configuration));
+        Should.Throw<ArgumentNullException>(() => InvocationCache.TryCreateFromEnvironment(log, null!));
+        Should.Throw<ArgumentNullException>(() => cache.TryExecuteCached(null!, () => new InvocationResult(0), root, out _));
+        Should.Throw<ArgumentNullException>(() => cache.TryExecuteCached(validDescription, null!, root, out _));
+        Should.Throw<ArgumentNullException>(() => cache.TryExecuteCached(validDescription, () => new InvocationResult(0), null!, out _));
+        Should.Throw<ArgumentNullException>(() => new InvocationCacheConfiguration("Test", null!, "PATH_VAR"));
+        Should.Throw<ArgumentNullException>(() => new InvocationCacheConfiguration("Test", "ENABLED_VAR", null!));
+        Should.Throw<ArgumentException>(() => new InvocationCacheConfiguration("Test", "   ", "PATH_VAR"));
+        Should.Throw<ArgumentNullException>(() => new InvocationDescription(null!, ["args"], validOutputs));
+        Should.Throw<ArgumentNullException>(() => new InvocationDescription(validInputs, null!, validOutputs));
+        Should.Throw<ArgumentNullException>(() => new InvocationDescription(validInputs, ["args"], null!));
+        Should.Throw<ArgumentNullException>(() => InvocationInputs.FromFiles(null!));
+        Should.Throw<ArgumentNullException>(() => InvocationInputs.FromFiles([Path.Combine(root, "a.txt")], null!));
+        Should.Throw<ArgumentNullException>(() => InvocationOutputs.FromDirectory(null!));
+        Should.Throw<ArgumentException>(() => InvocationOutputs.FromDirectory("   "));
+        Should.Throw<ArgumentNullException>(() => InvocationOutputs.FromDirectory("out", null!));
+        Should.Throw<ArgumentNullException>(() => InvocationOutputs.FromFiles(null!));
+        Should.Throw<ArgumentNullException>(() => InvocationOutputs.FromFiles([Path.Combine(root, "a.txt")], null!));
+        Should.Throw<ArgumentException>(() => InvocationCachePurge.Run(null!, "v1", "Test", DateTimeOffset.UtcNow, new StringWriter(), new StringWriter()));
+        Should.Throw<ArgumentException>(() => InvocationCachePurge.Run(root, null!, "Test", DateTimeOffset.UtcNow, new StringWriter(), new StringWriter()));
+        Should.Throw<ArgumentException>(() => InvocationCachePurge.Run(root, "v1", null!, DateTimeOffset.UtcNow, new StringWriter(), new StringWriter()));
+        Should.Throw<ArgumentNullException>(() => InvocationCachePurge.Run(root, "v1", "Test", DateTimeOffset.UtcNow, null!, new StringWriter()));
+        Should.Throw<ArgumentNullException>(() => InvocationCachePurge.Run(root, "v1", "Test", DateTimeOffset.UtcNow, new StringWriter(), null!));
+    }
+
+    [Fact]
+    public void CachedToolTaskBypassesCacheWithoutMsb6001WhenOutputOverlapsCacheDirectory()
+    {
+        using var env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        string cacheDir = Path.Combine(root, "cache");
+        string input = Path.Combine(root, "in.txt");
+        File.WriteAllText(input, "input");
+        string overlappingOutputDir = Path.Combine(cacheDir, "out");
+
+        env.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, "true");
+        env.SetEnvironmentVariable(TestCachedToolTask.PathVariable, cacheDir);
+
+        var engine = new MockEngine();
+        var task = new TestCachedToolTask
+        {
+            BuildEngine = engine,
+            Description = new InvocationDescription(
+                InvocationInputs.FromFiles([input]),
+                ["args"],
+                InvocationOutputs.FromDirectory(overlappingOutputDir)),
+        };
+
+        task.Execute().ShouldBeTrue();
+        task.Executions.ShouldBe(1);
+        engine.Errors.ShouldBe(0);
+        engine.Log.ShouldNotContain("MSB6001");
+        engine.Log.ShouldContain("Test cache bypassed:");
+    }
+
+    [Fact]
+    public void CachedToolTaskDoesNotCacheCanceledExecutionAndResetsTerminatedStateOnReuse()
+    {
+        using var env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        string cacheDir = Path.Combine(root, "cache");
+        string input = Path.Combine(root, "in.txt");
+        string output = Path.Combine(root, "out.txt");
+        File.WriteAllText(input, "input");
+
+        env.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, "true");
+        env.SetEnvironmentVariable(TestCachedToolTask.PathVariable, cacheDir);
+
+        var description = new InvocationDescription(
+            InvocationInputs.FromFiles([input]),
+            ["cancel-test"],
+            InvocationOutputs.FromFiles([output]));
+
+        var canceledTask = new TestCachedToolTask
+        {
+            BuildEngine = new MockEngine(),
+            Description = description,
+            Execution = () =>
+            {
+                File.WriteAllText(output, "partial");
+                return 0;
+            },
+        };
+        canceledTask.Cancel();
+
+        canceledTask.Execute().ShouldBeTrue();
+        canceledTask.Executions.ShouldBe(1);
+
+        // Because the first run was canceled, it must not have been stored in the cache.
+        var secondTask = new TestCachedToolTask
+        {
+            BuildEngine = new MockEngine(),
+            Description = description,
+            Execution = () =>
+            {
+                File.WriteAllText(output, "complete");
+                return 0;
+            },
+        };
+        secondTask.Execute().ShouldBeTrue();
+        secondTask.Executions.ShouldBe(1);
+        File.ReadAllText(output).ShouldBe("complete");
+
+        // Now verify a reused task instance resets _terminatedTool before a subsequent cache hit.
+        var reusedTask = new TestCachedToolTask
+        {
+            BuildEngine = new MockEngine(),
+            Timeout = 1,
+            Description = new InvocationDescription(
+                InvocationInputs.FromFiles([input]),
+                ["timeout-then-hit"],
+                InvocationOutputs.FromFiles([Path.Combine(root, "timeout-out.txt")])),
+            Execution = () =>
+            {
+                // Run a real short-lived sleep via base.ExecuteTool so ToolTask sets _terminatedTool = true.
+                return -1;
+            },
+        };
+        reusedTask.Execution = null;
+        reusedTask.CommandOverride = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? "/d /c \"ping -n 5 127.0.0.1 >nul\""
+            : "-c \"sleep 5\"";
+        reusedTask.Execute().ShouldBeFalse();
+
+        // Reuse the same instance on the already-cached description: must succeed as a cache hit.
+        reusedTask.Timeout = System.Threading.Timeout.Infinite;
+        reusedTask.CommandOverride = null;
+        reusedTask.Description = description;
+        reusedTask.Execute().ShouldBeTrue();
+        reusedTask.Executions.ShouldBe(1);
+    }
+
+    [Fact]
+    public void CachedToolTaskDoesNotCacheWhenOutputCaptureEndsBeforeEof()
+    {
+        using var env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        string cacheDir = Path.Combine(root, "cache");
+        string input = Path.Combine(root, "in.txt");
+        string output = Path.Combine(root, "out.txt");
+        File.WriteAllText(input, "input");
+
+        env.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, "true");
+        env.SetEnvironmentVariable(TestCachedToolTask.PathVariable, cacheDir);
+
+        var description = new InvocationDescription(
+            InvocationInputs.FromFiles([input]),
+            ["eof-timeout"],
+            InvocationOutputs.FromFiles([output]));
+
+        var firstEngine = new MockEngine();
+        var firstTask = new TestCachedToolTask
+        {
+            BuildEngine = firstEngine,
+            Description = description,
+            SimulateEofTimeout = true,
+            Execution = () =>
+            {
+                File.WriteAllText(output, "v1");
+                return 0;
+            },
+        };
+
+        firstTask.Execute().ShouldBeTrue();
+        firstTask.Executions.ShouldBe(1);
+        firstEngine.Log.ShouldContain("output capture did not reach EOF");
+
+        var secondTask = new TestCachedToolTask
+        {
+            BuildEngine = new MockEngine(),
+            Description = description,
+            Execution = () =>
+            {
+                File.WriteAllText(output, "v2");
+                return 0;
+            },
+        };
+
+        secondTask.Execute().ShouldBeTrue();
+        secondTask.Executions.ShouldBe(1);
+        File.ReadAllText(output).ShouldBe("v2");
+    }
+
+    [Fact]
+    public void TryRestoreOverwritesAndDeletesReadOnlyOutputs()
+    {
+        using var env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        var cache = new InvocationCache(Path.Combine(root, "cache"), new TestTask { BuildEngine = new MockEngine() }.Log, "Test");
+        DateTime timestamp = DateTime.UtcNow;
+
+        string dirKey = new string('a', 64);
+        string fileKey = new string('b', 64);
+
+        // Directory mode with read-only existing file.
+        string outDir = Path.Combine(root, "dir-out");
+        Directory.CreateDirectory(outDir);
+        string dirFile = Path.Combine(outDir, "a.txt");
+        File.WriteAllText(dirFile, "v1");
+        InvocationOutputs dirOutputs = InvocationOutputs.FromDirectory(outDir);
+        cache.Store(dirKey, dirOutputs);
+
+        File.WriteAllText(dirFile, "stale");
+        File.SetAttributes(dirFile, File.GetAttributes(dirFile) | FileAttributes.ReadOnly);
+        try
+        {
+            cache.TryRestore(dirKey, dirOutputs, timestamp, out _).ShouldBeTrue();
+            File.ReadAllText(dirFile).ShouldBe("v1");
+        }
+        finally
+        {
+            if (File.Exists(dirFile))
+            {
+                File.SetAttributes(dirFile, File.GetAttributes(dirFile) & ~FileAttributes.ReadOnly);
+            }
+        }
+
+        // File-set mode with read-only existing present file and read-only existing absent file.
+        string presentFile = Path.Combine(root, "present.txt");
+        string absentFile = Path.Combine(root, "absent.txt");
+        File.WriteAllText(presentFile, "cached");
+        InvocationOutputs fileOutputs = InvocationOutputs.FromFiles([presentFile, absentFile]);
+        cache.Store(fileKey, fileOutputs);
+
+        File.WriteAllText(presentFile, "stale");
+        File.WriteAllText(absentFile, "should-be-deleted");
+        File.SetAttributes(presentFile, File.GetAttributes(presentFile) | FileAttributes.ReadOnly);
+        File.SetAttributes(absentFile, File.GetAttributes(absentFile) | FileAttributes.ReadOnly);
+        try
+        {
+            cache.TryRestore(fileKey, fileOutputs, timestamp, out _).ShouldBeTrue();
+            File.ReadAllText(presentFile).ShouldBe("cached");
+            File.Exists(absentFile).ShouldBeFalse();
+        }
+        finally
+        {
+            foreach (string path in new[] { presentFile, absentFile })
+            {
+                if (File.Exists(path))
+                {
+                    File.SetAttributes(path, File.GetAttributes(path) & ~FileAttributes.ReadOnly);
+                }
+            }
+        }
+    }
+
+    private sealed class CustomStartProcessCachedToolTask : CachedToolTask
+    {
+        internal InvocationDescription? Description { get; set; }
+        internal string OutputDir { get; set; } = string.Empty;
+        internal int Executions { get; private set; }
+        internal List<string> ReplayedLines { get; } = [];
+
+        public CustomStartProcessCachedToolTask(System.Resources.ResourceManager taskResources)
+            : base(taskResources)
+        {
+        }
+
+        public CustomStartProcessCachedToolTask(System.Resources.ResourceManager taskResources, string helpKeywordPrefix)
+            : base(taskResources, helpKeywordPrefix)
+        {
+        }
+
+        protected override string ToolName => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "cmd.exe" : "sh";
+        protected override InvocationCacheConfiguration CacheConfiguration => TestCachedToolTask.Configuration;
+
+        protected override string GenerateFullPathToTool() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), ToolName)
+            : "/bin/sh";
+
+        protected override string GenerateCommandLineCommands() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? "/d /c \"echo first\""
+            : "-c \"echo first\"";
+
+        protected override InvocationDescription? DescribeInvocation(string pathToTool, string responseFileCommands, string commandLineCommands)
+            => Description;
+
+        protected override int ExecuteToolCore(string pathToTool, string responseFileCommands, string commandLineCommands)
+        {
+            Executions++;
+            Directory.CreateDirectory(OutputDir);
+            return base.ExecuteToolCore(pathToTool, responseFileCommands, commandLineCommands);
+        }
+
+        // Deliberately starts the process directly without calling base.StartToolProcess.
+        protected override Process StartToolProcess(Process proc)
+        {
+            proc.Start();
+            return proc;
+        }
+
+        protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
+        {
+            ReplayedLines.Add(singleLine);
+            base.LogEventsFromTextOutput(singleLine, messageImportance);
+        }
+    }
+
     private sealed class TestTask : Microsoft.Build.Utilities.Task
     {
         public override bool Execute() => true;
@@ -934,7 +1519,11 @@ public sealed class InvocationCache_Tests
         internal bool LogAdditionalErrorOnReplay { get; set; }
         internal string? WorkingDirectoryOverride { get; set; }
         internal string? WorkingDirectoryUsed { get; private set; }
+        internal string? CommandOverride { get; set; }
+        internal bool SimulateEofTimeout { get; set; }
         internal bool? ExitCodeOverriddenInErrorHandler { get; private set; }
+
+        internal override bool EofWaitTimedOut => SimulateEofTimeout || base.EofWaitTimedOut;
 
         internal int Run() => ExecuteTool("tool", "response", "command");
 
@@ -953,9 +1542,9 @@ public sealed class InvocationCache_Tests
             ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), ToolName)
             : "/bin/sh";
 
-        protected override string GenerateCommandLineCommands() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+        protected override string GenerateCommandLineCommands() => CommandOverride ?? (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? $"/d /c \"echo first&echo warning CACHE0001: warning&echo.&echo last&1>&2 echo stderr&exit /b {ToolExitCode}\""
-            : $"-c \"echo first; echo 'warning CACHE0001: warning'; echo; echo last; echo stderr >&2; exit {ToolExitCode}\"";
+            : $"-c \"echo first; echo 'warning CACHE0001: warning'; echo; echo last; echo stderr >&2; exit {ToolExitCode}\"");
 
         protected override InvocationDescription? DescribeInvocation(string pathToTool, string responseFileCommands, string commandLineCommands)
         {

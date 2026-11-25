@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Security;
 using Microsoft.Build.Framework;
 
 #pragma warning disable MSBUILD001
@@ -30,6 +31,16 @@ public sealed partial class InvocationCache
     public static InvocationCache? TryCreateFromEnvironment(TaskLoggingHelper log,
         InvocationCacheConfiguration configuration, TaskEnvironment environment)
     {
+        if (log is null)
+        {
+            throw new ArgumentNullException(nameof(log));
+        }
+
+        if (configuration is null)
+        {
+            throw new ArgumentNullException(nameof(configuration));
+        }
+
         if (environment is null)
         {
             throw new ArgumentNullException(nameof(environment));
@@ -73,12 +84,19 @@ public sealed partial class InvocationCache
     public static InvocationCache? TryCreate(string? cacheDirectory, TaskLoggingHelper log,
         string toolName, TaskEnvironment environment)
     {
+        if (log is null)
+        {
+            throw new ArgumentNullException(nameof(log));
+        }
+
         if (environment is null)
         {
             throw new ArgumentNullException(nameof(environment));
         }
 
-        if (string.IsNullOrEmpty(cacheDirectory))
+        InvocationCacheConfiguration.ValidateToolName(toolName, nameof(toolName));
+
+        if (string.IsNullOrWhiteSpace(cacheDirectory))
         {
             cacheDirectory = InvocationCacheConfiguration.GetDefaultCacheDirectory(toolName, environment);
         }
@@ -91,15 +109,15 @@ public sealed partial class InvocationCache
 
         try
         {
-            string fullPath = environment.GetAbsolutePath(cacheDirectory).Value;
+            string fullPath = environment.GetAbsolutePath(cacheDirectory).GetCanonicalForm().Value;
             if (File.Exists(fullPath))
             {
                 throw new IOException($"Cache location is a file: '{fullPath}'.");
             }
 
-            return new InvocationCache(fullPath, log, toolName);
+            return new InvocationCache(fullPath, log, toolName, environment);
         }
-        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or IOException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is (ArgumentException and not ArgumentNullException) or NotSupportedException or IOException or UnauthorizedAccessException or SecurityException)
         {
             log.LogMessage(MessageImportance.Low, $"{toolName} caching is disabled because the cache directory '{cacheDirectory}' could not be resolved: {ex.Message}");
             return null;
