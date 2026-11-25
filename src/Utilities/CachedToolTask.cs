@@ -55,11 +55,8 @@ public abstract class CachedToolTask : ToolTask
     /// Describes all relevant inputs, execution context, and owned outputs.
     /// </summary>
     /// <param name="pathToTool">The path to the tool executable.</param>
-    /// <param name="responseFileCommands">The commands to write to the response file.</param>
-    /// <param name="commandLineCommands">The commands to pass on the command line.</param>
     /// <returns>The description, or null to bypass caching. Called only when caching is enabled.</returns>
-    protected abstract InvocationDescription? DescribeInvocation(
-        string pathToTool, string responseFileCommands, string commandLineCommands);
+    protected abstract InvocationDescription? DescribeInvocation(string pathToTool);
 
     /// <inheritdoc />
     protected sealed override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)
@@ -82,7 +79,7 @@ public abstract class CachedToolTask : ToolTask
             return false;
         }
 
-        InvocationDescription? invocation = DescribeInvocation(pathToTool, responseFileCommands, commandLineCommands);
+        InvocationDescription? invocation = DescribeInvocation(pathToTool);
         if (invocation is null)
         {
             return false;

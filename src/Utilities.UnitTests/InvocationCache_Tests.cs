@@ -1527,7 +1527,7 @@ public sealed class InvocationCache_Tests
             ? "/d /c \"echo first\""
             : "-c \"echo first\"";
 
-        protected override InvocationDescription? DescribeInvocation(string pathToTool, string responseFileCommands, string commandLineCommands)
+        protected override InvocationDescription? DescribeInvocation(string pathToTool)
             => Description;
 
         protected override int ExecuteToolCore(string pathToTool, string responseFileCommands, string commandLineCommands)
@@ -1616,7 +1616,7 @@ public sealed class InvocationCache_Tests
             ? $"/d /c \"echo first&echo warning CACHE0001: warning&echo.&echo last&1>&2 echo stderr&exit /b {ToolExitCode}\""
             : $"-c \"echo first; echo 'warning CACHE0001: warning'; echo; echo last; echo stderr >&2; exit {ToolExitCode}\"");
 
-        protected override InvocationDescription? DescribeInvocation(string pathToTool, string responseFileCommands, string commandLineCommands)
+        protected override InvocationDescription? DescribeInvocation(string pathToTool)
         {
             Descriptions++;
             return Description;
