@@ -303,8 +303,8 @@ cleanup and logging callbacks, before output caches are serialized. A normal or 
 allows cache serialization; a late warning promoted to an error fails `EndBuild` and prevents serialization.
 The host directory captured before logger initialization is restored when the build ends.
 `BuildManager` resolves relative output-cache paths for CLI and API builds before entering the sentinel;
-the CLI resolves its entry-project path before constructing requests inside that scope.
-Loggers must not change the process current directory. Failures to enable strict mode, recover its directory,
+the CLI resolves its entry-project path before constructing requests inside that scope. Loggers must
+not change the process current directory. Failures to enable strict mode, recover its directory,
 or restore the host directory fail the build; they do not silently disable checks.
 After successful restoration, MSBuild attempts to remove the scope's own temporary directory.
 Locked leftovers are not reused by later builds. Cleanup is best-effort and does not replace
@@ -344,9 +344,8 @@ directory. For solution wrappers and static graphs they resolve against the dire
 started in. This applies with or without strict mode. MSBuild uses an async-local directory for this,
 not the process CWD, and restores it before targets and tasks run, which still use the project directory.
 
-Two cases still differ from non-MT, as before this change. When `SaveOperatingEnvironment` is false,
-or the startup directory no longer exists, project-file evaluation under `-mt` stays project-relative,
-while non-MT uses the process current directory. This includes evaluation done by a project cache.
+When `SaveOperatingEnvironment` is false, project-file evaluation under `-mt` (including evaluation
+done by a project cache) stays project-relative rather than using the process current directory.
 
 ## Interaction with `DisableInProcNode`
 

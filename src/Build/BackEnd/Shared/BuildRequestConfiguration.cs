@@ -573,11 +573,14 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Match non-MT evaluation without changing process CWD or the request's execution directory.
+                // When SaveOperatingEnvironment is false, establish the project directory explicitly so callers
+                // without a TaskEnvironment (such as ProjectCacheService) do not fall through to the sentinel.
                 using EvaluationDirectoryScope evaluationDirectory = new(
                     componentHost.BuildParameters.MultiThreaded
-                        && componentHost.BuildParameters.SaveOperatingEnvironment
-                            ? GetMultiThreadedEvaluationDirectory()
-                            : null);
+                        ? componentHost.BuildParameters.SaveOperatingEnvironment
+                            ? BuildParameters.StartupDirectory
+                            : Path.GetDirectoryName(ProjectFullPath)
+                        : null);
 
                 return new ProjectInstance(
                     ProjectFullPath,
@@ -597,46 +600,6 @@ namespace Microsoft.Build.BackEnd
                     submissionId,
                     projectLoadSettings);
             });
-        }
-
-        private static string GetMultiThreadedEvaluationDirectory()
-        {
-            string startupDirectory = BuildParameters.StartupDirectory;
-            try
-            {
-                FileAttributes attributes = File.GetAttributes(startupDirectory);
-                if ((attributes & FileAttributes.Directory) != 0)
-                {
-                    if ((attributes & FileAttributes.ReparsePoint) != 0)
-                    {
-#if FEATURE_MSIOREDIST
-                        var target = Microsoft.IO.Directory.ResolveLinkTarget(startupDirectory, returnFinalTarget: true);
-#else
-                        var target = Directory.ResolveLinkTarget(startupDirectory, returnFinalTarget: true);
-#endif
-                        if (target is not null)
-                        {
-                            attributes = File.GetAttributes(target.FullName);
-                        }
-                    }
-
-                    if ((attributes & FileAttributes.Directory) != 0)
-                    {
-                        return startupDirectory;
-                    }
-                }
-            }
-            catch (Exception e) when (e is FileNotFoundException or DirectoryNotFoundException or DriveNotFoundException)
-            {
-                // The launch directory can disappear, for example when a removable drive is disconnected.
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                // The directory could not be inspected, which does not show that it is gone.
-                return startupDirectory;
-            }
-
-            return null;
         }
 
         private void InitializeProject(BuildParameters buildParameters, Func<ProjectInstance> loadProjectFromFile)

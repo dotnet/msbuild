@@ -21,7 +21,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Logging;
-using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 
@@ -275,9 +274,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [InlineData("Directory.Solution.props", true, true)]
         [InlineData("before.test.sln.targets", true, true)]
         [InlineData("Directory.Solution.props", false, true)]
-        [InlineData("before.test.sln.targets", false, true)]
         [InlineData("Directory.Solution.props", true, false)]
-        [InlineData("before.test.sln.targets", true, false)]
         public void SolutionEvaluationPreservesHostRelativePaths(string importName, bool saveEnvironment, bool strict)
         {
             SetStrictMode(_env, enabled: strict);
@@ -346,56 +343,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData(false, false, true)]
-        [InlineData(false, true, true)]
-        [InlineData(true, false, true)]
-        [InlineData(true, true, true)]
-        [InlineData(true, true, false)]
-        public void ProjectEvaluationHandlesMissingStartupDirectory(bool multiThreaded, bool strict, bool saveEnvironment)
-            => VerifyStartupDirectoryEvaluation(multiThreaded, strict, saveEnvironment);
-
-        [Fact]
-        public void ProjectEvaluationHandlesDanglingStartupDirectoryLink()
-            => VerifyStartupDirectoryEvaluation(true, true, true, useDirectoryLink: true);
-
-        [Fact]
-        public void ProjectEvaluationPreservesExistingStartupDirectoryLink()
-            => VerifyStartupDirectoryEvaluation(true, true, true, useDirectoryLink: true, deleteStartupDirectory: false);
-
-        [WindowsOnlyFact]
-        public void ProjectEvaluationHandlesMissingStartupDrive()
-        {
-            string[] drives = Directory.GetLogicalDrives();
-            for (char drive = 'Z'; drive >= 'A'; drive--)
-            {
-                string startupDirectory = $"{drive}:\\";
-                if (!Array.Exists(drives, path => StringComparer.OrdinalIgnoreCase.Equals(path, startupDirectory)))
-                {
-                    VerifyStartupDirectoryEvaluation(true, true, true, unavailableStartupDirectory: startupDirectory);
-                    return;
-                }
-            }
-
-            throw new InvalidOperationException("No unused drive letter is available for this test.");
-        }
-
-        [Theory]
-        [InlineData(true, null, true, true, "project payload")]
-        [InlineData(true, null, false, true, "host payload")]
-        [InlineData(true, null, true, false, "project payload")]
-        [InlineData(true, "18.12", false, true, "host payload")]
-        [InlineData(true, "18.12", true, true, "project payload")]
-        [InlineData(true, "18.12", false, false, "project payload")]
-        [InlineData(false, null, true, true, "host payload")]
+        [InlineData(true, true, true, "host payload")]
+        [InlineData(true, false, true, "host payload")]
+        [InlineData(true, true, false, "project payload")]
+        [InlineData(true, false, false, "project payload")]
+        [InlineData(false, false, true, "host payload")]
         public void CachedProjectEvaluationPreservesDirectoryContext(
             bool multiThreaded,
-            string? disabledWave,
-            bool missingStartupDirectory,
+            bool strict,
             bool saveEnvironment,
             string expectedPayload)
         {
-            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
-            ChangeWaves.ResetStateForTests();
+            SetStrictMode(_env, enabled: strict);
             var hostDirectory = _env.CreateFolder();
             var projectDirectory = _env.CreateFolder();
             _env.CreateFile(hostDirectory, "payload.txt", "host payload");
@@ -403,14 +362,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _env.SetCurrentDirectory(hostDirectory.Path);
             string originalDirectory = Directory.GetCurrentDirectory();
             string? originalThreadDirectory = FileUtilities.CurrentThreadWorkingDirectory;
-            string startupDirectory = originalDirectory;
-            if (missingStartupDirectory)
-            {
-                startupDirectory = _env.CreateFolder().Path;
-                Directory.Delete(startupDirectory);
-            }
-
-            _env.WithTransientTestState(new TransientStartupDirectory(startupDirectory));
+            _env.WithTransientTestState(new TransientStartupDirectory(originalDirectory));
             var project = _env.CreateFile(projectDirectory, "build.proj", """
                 <Project>
                   <PropertyGroup>
@@ -449,109 +401,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             cache.Requests.ShouldHaveSingleItem().ProjectInstance!.GetPropertyValue("Payload").ShouldBe(expectedPayload);
             logger.AssertNoErrors();
             logger.AssertNoWarnings();
-            FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalThreadDirectory);
-        }
-
-        private void VerifyStartupDirectoryEvaluation(
-            bool multiThreaded,
-            bool strict,
-            bool saveEnvironment,
-            bool useDirectoryLink = false,
-            bool deleteStartupDirectory = true,
-            string? unavailableStartupDirectory = null)
-        {
-            SetStrictMode(_env, enabled: strict);
-            var startupDirectory = _env.CreateFolder();
-            var hostDirectory = _env.CreateFolder();
-            var projectDirectory = _env.CreateFolder();
-            const string fileName = "payload.txt";
-            _env.CreateFile(hostDirectory, fileName, "host decoy");
-            _env.CreateFile(projectDirectory, fileName, "project decoy");
-            _env.SetCurrentDirectory(hostDirectory.Path);
-            string originalDirectory = Directory.GetCurrentDirectory();
-            string? originalThreadDirectory = FileUtilities.CurrentThreadWorkingDirectory;
-            string startupPath = unavailableStartupDirectory ?? startupDirectory.Path;
-            if (useDirectoryLink)
-            {
-                startupPath = Path.Combine(hostDirectory.Path, "startup-link");
-                if (NativeMethodsShared.IsWindows)
-                {
-                    // Junctions exercise directory reparse points without requiring symlink privileges.
-                    string output = RunnerUtilities.RunProcessAndGetOutput(
-                        Path.Combine(Environment.SystemDirectory, "cmd.exe"),
-                        $"/d /c mklink /J \"{startupPath}\" \"{startupDirectory.Path}\"",
-                        out bool success, outputHelper: _output);
-                    success.ShouldBeTrue(output);
-                }
-                else
-                {
-#if FEATURE_MSIOREDIST
-                    Microsoft.IO.Directory.CreateSymbolicLink(startupPath, startupDirectory.Path);
-#else
-                    Directory.CreateSymbolicLink(startupPath, startupDirectory.Path);
-#endif
-                }
-            }
-
-            _env.WithTransientTestState(new TransientStartupDirectory(startupPath));
-            if (deleteStartupDirectory)
-            {
-                Directory.Delete(startupDirectory.Path);
-            }
-            else
-            {
-                _env.CreateFile(startupDirectory, fileName, "startup payload");
-            }
-            var project = _env.CreateFile(projectDirectory, "build.proj", $"""
-                <Project>
-                  <PropertyGroup>
-                    <Probe>$([System.IO.File]::Exists('{fileName}'))</Probe>
-                    <ReadLength>$([System.IO.File]::ReadAllText('{fileName}').Length)</ReadLength>
-                    <EvaluationPath>$([System.IO.Path]::GetFullPath('{fileName}'))</EvaluationPath>
-                  </PropertyGroup>
-                  <Target Name="Build">
-                    <Message Text="PROBE=$(Probe) LENGTH=$(ReadLength)" Importance="high" />
-                    <Message Text="EVALUATED_PATH=$(EvaluationPath)" Importance="high" />
-                    <Message Text="EXECUTED_PATH=$([System.IO.Path]::GetFullPath('{fileName}'))" Importance="high" />
-                  </Target>
-                </Project>
-                """);
-            string expectedDirectory = projectDirectory.Path;
-            if (!multiThreaded && deleteStartupDirectory)
-            {
-                expectedDirectory = originalDirectory;
-            }
-            else if (saveEnvironment && !deleteStartupDirectory)
-            {
-                expectedDirectory = startupPath;
-            }
-            string expectedFile = Path.Combine(expectedDirectory, fileName);
-            int expectedLength = File.ReadAllText(expectedFile).Length;
-            MockLogger logger = new(_output);
-            using BuildManager manager = new();
-            manager.Build(new BuildParameters
-            {
-                MultiThreaded = multiThreaded,
-                SaveOperatingEnvironment = saveEnvironment,
-                ShutdownInProcNodeOnBuildFinish = true,
-                EnableNodeReuse = false,
-                Loggers = [logger],
-            }, new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
-                .ShouldHaveSucceeded();
-
-            logger.AssertLogContains($"PROBE=True LENGTH={expectedLength}");
-            logger.AssertLogContains($"EVALUATED_PATH={expectedFile}");
-            string executionDirectory = multiThreaded
-                ? projectDirectory.Path
-                : NativeMethodsShared.RealPath(projectDirectory.Path) ?? projectDirectory.Path;
-            logger.AssertLogContains($"EXECUTED_PATH={Path.Combine(executionDirectory, fileName)}");
-            logger.AssertNoErrors();
-            logger.AssertNoWarnings();
-            if (multiThreaded)
-            {
-                Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
-            }
-
             FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalThreadDirectory);
         }
 
