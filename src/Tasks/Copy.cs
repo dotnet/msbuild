@@ -77,30 +77,19 @@ namespace Microsoft.Build.Tasks
         public Copy()
         {
             RetryDelayMilliseconds = RetryDelayMillisecondsDefault;
-
-            if (DidNotCopyBecauseOfFileMatch == null)
-            {
-                CreatesDirectory = Log.GetResourceMessage("Copy.CreatesDirectory");
-                DidNotCopyBecauseOfFileMatch = Log.GetResourceMessage("Copy.DidNotCopyBecauseOfFileMatch");
-                FileComment = Log.GetResourceMessage("Copy.FileComment");
-                HardLinkComment = Log.GetResourceMessage("Copy.HardLinkComment");
-                RetryingAsFileCopy = Log.GetResourceMessage("Copy.RetryingAsFileCopy");
-                RetryingAsSymbolicLink = Log.GetResourceMessage("Copy.RetryingAsSymbolicLink");
-                RemovingReadOnlyAttribute = Log.GetResourceMessage("Copy.RemovingReadOnlyAttribute");
-                SymbolicLinkComment = Log.GetResourceMessage("Copy.SymbolicLinkComment");
-            }
-
             _signalCopyTasksCompleted = new AutoResetEvent(false);
         }
 
-        private static string CreatesDirectory;
-        private static string DidNotCopyBecauseOfFileMatch;
-        private static string FileComment;
-        private static string HardLinkComment;
-        private static string RetryingAsFileCopy;
-        private static string RetryingAsSymbolicLink;
-        private static string RemovingReadOnlyAttribute;
-        private static string SymbolicLinkComment;
+        // Initialized by the type initializer, which runs once and publishes these to all threads safely.
+        // Lazily initializing them per instance is racy when many Copy tasks are constructed concurrently (e.g. -mt).
+        private static readonly string CreatesDirectory = AssemblyResources.GetString("Copy.CreatesDirectory");
+        private static readonly string DidNotCopyBecauseOfFileMatch = AssemblyResources.GetString("Copy.DidNotCopyBecauseOfFileMatch");
+        private static readonly string FileComment = AssemblyResources.GetString("Copy.FileComment");
+        private static readonly string HardLinkComment = AssemblyResources.GetString("Copy.HardLinkComment");
+        private static readonly string RetryingAsFileCopy = AssemblyResources.GetString("Copy.RetryingAsFileCopy");
+        private static readonly string RetryingAsSymbolicLink = AssemblyResources.GetString("Copy.RetryingAsSymbolicLink");
+        private static readonly string RemovingReadOnlyAttribute = AssemblyResources.GetString("Copy.RemovingReadOnlyAttribute");
+        private static readonly string SymbolicLinkComment = AssemblyResources.GetString("Copy.SymbolicLinkComment");
 
         #region Properties
 

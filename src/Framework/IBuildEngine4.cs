@@ -44,15 +44,18 @@ namespace Microsoft.Build.Framework
         /// <param name="key">The key used to retrieve the object.</param>
         /// <param name="obj">The object to be held for later disposal.</param>
         /// <param name="lifetime">The lifetime of the object.</param>
-        /// <param name="allowEarlyCollection">The object may be disposed earlier than the requested time if
-        /// MSBuild needs to reclaim memory.</param>
+        /// <param name="allowEarlyCollection">This parameter is ignored. It is kept for compatibility.</param>
         /// <remarks>
         /// <para>
         /// This method may be called by tasks which need to maintain state across task invocations,
         /// such as to cache data which may be expensive to generate but which is known not to change during the
-        /// build.  It is strongly recommended that <paramref name="allowEarlyCollection"/> be set to true if the
-        /// object will retain any significant amount of data, as this gives MSBuild the most flexibility to
-        /// manage limited process memory resources.
+        /// build.
+        /// </para>
+        /// <para>
+        /// MSBuild does not collect registered objects early, whatever the value of
+        /// <paramref name="allowEarlyCollection"/>. A registered object is retained until it is unregistered or
+        /// its <paramref name="lifetime"/> ends. A task that registers an object holding a significant amount of
+        /// data should choose the shortest lifetime that meets its needs.
         /// </para>
         /// <para>
         /// In multithreaded builds, in-process tasks share registered objects across thread nodes.
@@ -65,8 +68,7 @@ namespace Microsoft.Build.Framework
         /// </para>
         /// <para>
         /// The thread on which the object is disposed may be arbitrary - however it is guaranteed not to
-        /// be disposed while the task is executing, even if <paramref name="allowEarlyCollection"/> is set
-        /// to true.
+        /// be disposed while the task is executing.
         /// </para>
         /// <para>
         /// If the object implements IDisposable, IDisposable.Dispose will be invoked on the object before
@@ -82,8 +84,7 @@ namespace Microsoft.Build.Framework
         /// <param name="key">The key used to retrieve the object.</param>
         /// <param name="lifetime">The lifetime of the object.</param>
         /// <returns>
-        /// The registered object, or null if there is no object registered under that key or the object
-        /// has been discarded through early collection.
+        /// The registered object, or null if there is no object registered under that key.
         /// </returns>
         object GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime);
 
@@ -93,8 +94,7 @@ namespace Microsoft.Build.Framework
         /// <param name="key">The key used to retrieve the object.</param>
         /// <param name="lifetime">The lifetime of the object.</param>
         /// <returns>
-        /// The registered object, or null if there is no object registered under that key or the object
-        /// has been discarded through early collection.
+        /// The registered object, or null if there is no object registered under that key.
         /// </returns>
         object UnregisterTaskObject(object key, RegisteredTaskObjectLifetime lifetime);
     }
