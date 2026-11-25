@@ -165,7 +165,11 @@ namespace Microsoft.Build.BackEnd
             {
                 return true;
             }
-            return ProjectFullPath.Equals(other.ProjectFullPath, StringComparison.OrdinalIgnoreCase) &&
+            bool samePath = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)
+                ? FileSystemPathComparer.Instance.Equals(ProjectFullPath, other.ProjectFullPath)
+                : ProjectFullPath.Equals(other.ProjectFullPath, StringComparison.OrdinalIgnoreCase);
+
+            return samePath &&
                 ToolsVersion.Equals(other.ToolsVersion, StringComparison.OrdinalIgnoreCase) &&
                 GlobalProperties.Equals(other.GlobalProperties);
         }

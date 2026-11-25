@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Framework;
 using Shouldly;
@@ -33,7 +32,7 @@ public class DirectoryCaseSensitivity_Tests(ITestOutputHelper output)
     public void DetectsCaseSensitiveDirectory(string fileName, string? flippedFileName)
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
-        TransientTestFolder folder = CreateCaseSensitiveFolder(env);
+        TransientTestFolder folder = env.CreateCaseSensitiveFolder();
         folder.CreateFile(fileName, string.Empty);
         if (flippedFileName is not null)
         {
@@ -71,47 +70,10 @@ public class DirectoryCaseSensitivity_Tests(ITestOutputHelper output)
         DirectoryCaseSensitivity.IsCaseSensitive(directory).ShouldBe(FileUtilities.IsFileSystemCaseSensitive);
 
         // The fallback is not cached, so the directory is detected once it exists.
-        TransientTestFolder caseSensitiveFolder = CreateCaseSensitiveFolder(env);
+        TransientTestFolder caseSensitiveFolder = env.CreateCaseSensitiveFolder();
         caseSensitiveFolder.CreateFile("Foo.txt", string.Empty);
         Directory.Move(caseSensitiveFolder.Path, directory);
 
         DirectoryCaseSensitivity.IsCaseSensitive(directory).ShouldBeTrue();
-    }
-
-    /// <summary>
-    /// Creates a folder in which lookups are case-sensitive, or skips the test if the machine cannot provide one.
-    /// </summary>
-    private static TransientTestFolder CreateCaseSensitiveFolder(TestEnvironment env)
-    {
-        TransientTestFolder folder = env.CreateFolder(createFolder: true);
-
-        if (NativeMethods.IsWindows)
-        {
-            // Needs Windows 10 version 1803 or later on NTFS. The directory must be empty.
-            using Process fsutil = Process.Start(new ProcessStartInfo("fsutil.exe", $"file setCaseSensitiveInfo \"{folder.Path}\" enable")
-            {
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-            })!;
-            string fsutilOutput = fsutil.StandardOutput.ReadToEnd() + fsutil.StandardError.ReadToEnd();
-            fsutil.WaitForExit();
-            if (fsutil.ExitCode != 0)
-            {
-                Assert.Skip($"Cannot enable per-directory case sensitivity: {fsutilOutput}");
-            }
-        }
-        else
-        {
-            TransientTestFile probe = folder.CreateFile("Case.probe", string.Empty);
-            bool caseSensitive = !File.Exists(Path.Combine(folder.Path, "cASE.PROBE"));
-            File.Delete(probe.Path);
-            if (!caseSensitive)
-            {
-                Assert.Skip("The temporary directory is on a case-insensitive file system.");
-            }
-        }
-
-        return folder;
     }
 }

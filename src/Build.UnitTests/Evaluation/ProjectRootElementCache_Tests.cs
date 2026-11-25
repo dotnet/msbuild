@@ -76,6 +76,43 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         }
 
         /// <summary>
+        /// Two files whose names differ only in case are separate projects in a case-sensitive directory.
+        /// With the change wave disabled, the cache treats them as one.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CaseVariantPathsInCaseSensitiveDirectoryAreSeparateEntries(bool changeWaveEnabled)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            if (!changeWaveEnabled)
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_14.ToString());
+            }
+
+            ChangeWaves.ResetStateForTests();
+
+            TransientTestFolder folder = env.CreateCaseSensitiveFolder();
+            string upperPath = folder.CreateFile("Foo.proj", "<Project><PropertyGroup><Name>Upper</Name></PropertyGroup></Project>").Path;
+            string lowerPath = folder.CreateFile("foo.proj", "<Project><PropertyGroup><Name>Lower</Name></PropertyGroup></Project>").Path;
+
+            using ProjectCollection collection = new();
+            ProjectRootElement upper = ProjectRootElement.Open(upperPath, collection);
+            ProjectRootElement lower = ProjectRootElement.Open(lowerPath, collection);
+
+            if (changeWaveEnabled)
+            {
+                Assert.NotSame(upper, lower);
+                Assert.Equal(lowerPath, lower.FullPath);
+                Assert.Equal("Lower", Assert.Single(lower.Properties).Value);
+            }
+            else
+            {
+                Assert.Same(upper, lower);
+            }
+        }
+
+        /// <summary>
         /// Tests that a strong reference is held to a single item
         /// </summary>
         [WindowsFullFrameworkOnlyFact(additionalMessage: "This test fails on .NET Core: https://github.com/dotnet/msbuild/issues/282")]

@@ -145,15 +145,21 @@ namespace Microsoft.Build.Evaluation
         private object _locker = new object();
 
         /// <summary>
+        /// Compares project paths the way the file system resolves them.
+        /// </summary>
+        private readonly IEqualityComparer<string> _pathComparer;
+
+        /// <summary>
         /// Creates an empty cache.
         /// </summary>
         internal ProjectRootElementCache(bool autoReloadFromDisk, bool loadProjectsReadOnly = false)
         {
             DebugTraceCache("Constructing with autoreload from disk: ", autoReloadFromDisk);
 
-            _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+            _pathComparer = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14) ? FileSystemPathComparer.Instance : StringComparer.OrdinalIgnoreCase;
+            _weakCache = new WeakValueDictionary<string, ProjectRootElement>(_pathComparer);
             _strongCache = new LinkedList<ProjectRootElement>();
-            _fileLoadLocks = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            _fileLoadLocks = new ConcurrentDictionary<string, object>(_pathComparer);
             _autoReloadFromDisk = autoReloadFromDisk;
             LoadProjectsReadOnly = loadProjectsReadOnly;
         }
@@ -342,7 +348,7 @@ namespace Microsoft.Build.Evaluation
             {
                 projectRootElement = loadProjectRootElement(projectFile, this);
                 Assumed.NotNull(projectRootElement);
-                Assumed.Equal(projectRootElement.FullPath, projectFile, StringComparison.OrdinalIgnoreCase, $"Got project back with incorrect path. Expected path: {projectFile}, received path: {projectRootElement.FullPath}.");
+                Assumed.True(_pathComparer.Equals(projectRootElement.FullPath, projectFile), $"Got project back with incorrect path. Expected path: {projectFile}, received path: {projectRootElement.FullPath}.");
 
                 // An implicit load will never reset the explicit flag.
                 if (isExplicitlyLoaded)
@@ -443,7 +449,7 @@ namespace Microsoft.Build.Evaluation
         {
             lock (_locker)
             {
-                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(_pathComparer);
                 _strongCache = new LinkedList<ProjectRootElement>();
             }
         }
@@ -482,7 +488,7 @@ namespace Microsoft.Build.Evaluation
                 // Make a new Weak cache only with items that have been explicitly loaded, this will be a small number, there will most likely
                 // be many items which were not explicitly loaded (ie p2p references).
                 WeakValueDictionary<string, ProjectRootElement> oldWeakCache = _weakCache;
-                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(_pathComparer);
 
                 LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
                 _strongCache = new LinkedList<ProjectRootElement>();

@@ -321,6 +321,44 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Creates a folder in which lookups are case-sensitive, or skips the test if the machine cannot provide one.
+        /// </summary>
+        public TransientTestFolder CreateCaseSensitiveFolder()
+        {
+            TransientTestFolder folder = CreateFolder(createFolder: true);
+
+            if (NativeMethods.IsWindows)
+            {
+                // Needs Windows 10 version 1803 or later on NTFS. The directory must be empty.
+                using Process fsutil = Process.Start(new ProcessStartInfo("fsutil.exe", $"file setCaseSensitiveInfo \"{folder.Path}\" enable")
+                {
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                });
+                string fsutilOutput = fsutil.StandardOutput.ReadToEnd() + fsutil.StandardError.ReadToEnd();
+                fsutil.WaitForExit();
+                if (fsutil.ExitCode != 0)
+                {
+                    Assert.Skip($"Cannot enable per-directory case sensitivity: {fsutilOutput}");
+                }
+            }
+            else
+            {
+                string probe = Path.Combine(folder.Path, "Case.probe");
+                File.WriteAllText(probe, string.Empty);
+                bool caseSensitive = !File.Exists(Path.Combine(folder.Path, "cASE.PROBE"));
+                File.Delete(probe);
+                if (!caseSensitive)
+                {
+                    Assert.Skip("The temporary directory is on a case-insensitive file system.");
+                }
+            }
+
+            return folder;
+        }
+
+        /// <summary>
         /// Creates a debugger which can be used to write to from anywhere in the msbuild code base
         /// It also enables logging in the out of proc nodes, but the given writer object would not be available in the nodes, set one in OutOfProcNode
         /// </summary>
