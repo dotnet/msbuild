@@ -283,11 +283,13 @@
 
   <Target Name="BootstrapNetCore" DependsOnTargets="AcquireSdk">
     <ItemGroup>
-      <!-- *.deps.json are excluded because the SDK rewrites these files for consistency with the rest of the SDK, so take their version. -->
+      <!-- Top-level *.deps.json (e.g. MSBuild.deps.json) are excluded because the SDK rewrites these files for consistency
+           with the rest of the SDK, so take their version. Nested ones (e.g. Roslyn\bincore\csc.deps.json) are copied
+           because they must match the DLLs copied next to them: .NET loads only the DLLs a deps.json lists. -->
       <!-- NuGet.Build.Tasks.Console.* is excluded because it belongs to the NuGet toolset family that the acquired SDK
            already ships (aligned with its restore/pack tooling). Overlaying our PackageReference version here would
            re-introduce the torn NuGet state this target deliberately avoids (see the note above the copy below). -->
-      <FreshlyBuiltNetBinaries Include="$(OutDir)**\*.*" Exclude="$(OutDir)**\*.deps.json;$(OutDir)**\NuGet.Build.Tasks.Console.*" />
+      <FreshlyBuiltNetBinaries Include="$(OutDir)**\*.*" Exclude="$(OutDir)*.deps.json;$(OutDir)**\NuGet.Build.Tasks.Console.*" />
 
       <FreshlyBuiltNetBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.dll" />
       <FreshlyBuiltNetBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.exe" />
