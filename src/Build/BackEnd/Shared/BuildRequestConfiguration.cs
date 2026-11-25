@@ -573,13 +573,9 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Match non-MT evaluation without changing process CWD or the request's execution directory.
-                // When SaveOperatingEnvironment is false, establish the project directory explicitly so callers
-                // without a TaskEnvironment (such as ProjectCacheService) do not fall through to the sentinel.
                 using EvaluationDirectoryScope evaluationDirectory = new(
                     componentHost.BuildParameters.MultiThreaded
-                        ? componentHost.BuildParameters.SaveOperatingEnvironment
-                            ? BuildParameters.StartupDirectory
-                            : Path.GetDirectoryName(ProjectFullPath)
+                        ? BuildParameters.StartupDirectory
                         : null);
 
                 return new ProjectInstance(

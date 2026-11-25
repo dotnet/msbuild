@@ -344,9 +344,6 @@ directory. For solution wrappers and static graphs they resolve against the dire
 started in. This applies with or without strict mode. MSBuild uses an async-local directory for this,
 not the process CWD, and restores it before targets and tasks run, which still use the project directory.
 
-When `SaveOperatingEnvironment` is false, project-file evaluation under `-mt` (including evaluation
-done by a project cache) stays project-relative rather than using the process current directory.
-
 ## Interaction with `DisableInProcNode`
 
 We need to ensure the support for multithreaded mode in Visual Studio builds. Currently, the entry node for MSBuild runs entirely within the devenv process, but the majority of the build operation are run in the MSBuild worker processes, because project systems set `BuildParameters.DisableInProcNode=true`. In multithreaded mode, all of the task execution must continue to be out of process. To address this, unlike the CLI scenario, we will move all thread nodes to the out-of-process MSBuild process, keeping only the scheduler in devenv.

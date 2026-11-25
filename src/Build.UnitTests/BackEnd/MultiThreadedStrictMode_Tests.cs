@@ -144,6 +144,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [InlineData(false, true, true, true)]
         [InlineData(false, true, false, true)]
         [InlineData(true, true, true, false)]
+        [InlineData(false, true, true, false)]
         public void EvaluationPreservesHostRelativePaths(bool graph, bool build, bool strict, bool saveEnvironment)
         {
             SetStrictMode(_env, enabled: strict);
@@ -343,16 +344,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData(true, true, true, "host payload")]
-        [InlineData(true, false, true, "host payload")]
-        [InlineData(true, true, false, "project payload")]
-        [InlineData(true, false, false, "project payload")]
-        [InlineData(false, false, true, "host payload")]
+        [InlineData(true, true, true)]
+        [InlineData(true, false, true)]
+        [InlineData(true, true, false)]
+        [InlineData(true, false, false)]
+        [InlineData(false, false, true)]
         public void CachedProjectEvaluationPreservesDirectoryContext(
             bool multiThreaded,
             bool strict,
-            bool saveEnvironment,
-            string expectedPayload)
+            bool saveEnvironment)
         {
             SetStrictMode(_env, enabled: strict);
             var hostDirectory = _env.CreateFolder();
@@ -390,24 +390,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }, new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
                 .ShouldHaveSucceeded();
 
-            string evaluationDirectory = expectedPayload is "host payload" ? originalDirectory : projectDirectory.Path;
             // Non-MT process CWD resolves symlinked temp-directory parents on macOS.
             string executionDirectory = multiThreaded
                 ? projectDirectory.Path
                 : NativeMethodsShared.RealPath(projectDirectory.Path) ?? projectDirectory.Path;
-            logger.AssertLogContains($"EVALUATED={expectedPayload}");
-            logger.AssertLogContains($"EVALUATION_PATH={Path.Combine(evaluationDirectory, "payload.txt")}");
+            logger.AssertLogContains("EVALUATED=host payload");
+            logger.AssertLogContains($"EVALUATION_PATH={Path.Combine(originalDirectory, "payload.txt")}");
             logger.AssertLogContains($"EXECUTION_PATH={Path.Combine(executionDirectory, "payload.txt")}");
-            cache.Requests.ShouldHaveSingleItem().ProjectInstance!.GetPropertyValue("Payload").ShouldBe(expectedPayload);
+            cache.Requests.ShouldHaveSingleItem().ProjectInstance!.GetPropertyValue("Payload").ShouldBe("host payload");
             logger.AssertNoErrors();
             logger.AssertNoWarnings();
             FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalThreadDirectory);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void EvaluationPreservesHostManagedProjectState(bool useProjectInstance)
+        [Fact]
+        public void SuppliedProjectInstanceIsNotReevaluated()
         {
             var hostDirectory = _env.CreateFolder();
             var projectDirectory = _env.CreateFolder();
@@ -425,30 +422,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   </Target>
                 </Project>
                 """);
-            BuildRequestData request;
-            if (useProjectInstance)
-            {
-                ProjectInstance instance = new(project.Path);
-                instance.SetProperty("Payload", "supplied payload");
-                request = new BuildRequestData(instance, ["Build"]);
-            }
-            else
-            {
-                request = new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null);
-            }
+            ProjectInstance instance = new(project.Path);
+            instance.SetProperty("Payload", "supplied payload");
+            BuildRequestData request = new(instance, ["Build"]);
 
             MockLogger logger = new(_output);
             using BuildManager manager = new();
             manager.Build(new BuildParameters
             {
                 MultiThreaded = true,
-                SaveOperatingEnvironment = useProjectInstance,
                 ShutdownInProcNodeOnBuildFinish = true,
                 EnableNodeReuse = false,
                 Loggers = [logger],
             }, request).ShouldHaveSucceeded();
 
-            logger.AssertLogContains(useProjectInstance ? "EVALUATED=supplied payload" : "EVALUATED=project payload");
+            logger.AssertLogContains("EVALUATED=supplied payload");
             logger.AssertLogContains("EXECUTED=project payload");
             logger.AssertNoErrors();
             logger.AssertNoWarnings();

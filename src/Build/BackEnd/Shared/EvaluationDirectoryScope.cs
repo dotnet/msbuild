@@ -13,7 +13,7 @@ internal readonly struct EvaluationDirectoryScope : IDisposable
 
     internal EvaluationDirectoryScope(string? directory)
     {
-        _enabled = directory is not null;
+        _enabled = !string.IsNullOrEmpty(directory);
         _previousDirectory = _enabled ? FileUtilities.CurrentThreadWorkingDirectory : null;
         if (_enabled)
         {
