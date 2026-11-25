@@ -192,15 +192,13 @@ public sealed partial class InvocationCache
         }
 
         result = new InvocationResult(-1);
+        string resolvedWorkingDirectory = ResolveWorkingDirectory(workingDirectory);
         if (validateOutputs)
         {
-            ValidateOutputs(invocation.Outputs);
+            ValidateOutputs(invocation.Outputs, invocation.Inputs, resolvedWorkingDirectory);
         }
 
         DateTime outputTimestampUtc = DateTime.UtcNow;
-        string resolvedWorkingDirectory = string.IsNullOrEmpty(workingDirectory)
-            ? workingDirectory
-            : _environment.GetAbsolutePath(workingDirectory).GetCanonicalForm().Value;
         if (!TryComputeKey(_log, _toolName, invocation, resolvedWorkingDirectory, out string key))
         {
             return false;
@@ -209,6 +207,11 @@ public sealed partial class InvocationCache
         result = ExecuteCached(outputTimestampUtc, new InvocationCacheRequest(key, invocation.Outputs), execute, validateOutputs: false);
         return true;
     }
+
+    private string ResolveWorkingDirectory(string workingDirectory) =>
+        string.IsNullOrEmpty(workingDirectory)
+            ? workingDirectory
+            : _environment.GetAbsolutePath(workingDirectory).GetCanonicalForm().Value;
 
     internal InvocationResult ExecuteCached(DateTime outputTimestampUtc, InvocationCacheRequest request,
         Func<InvocationResult> execute, bool validateOutputs = true)

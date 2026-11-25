@@ -1367,6 +1367,76 @@ public sealed class InvocationCache_Tests
     }
 
     [Fact]
+    public void RejectsOutputDirectoryContainingInputsOrWorkingDirectory()
+    {
+        using var env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        string cacheDir = Path.Combine(root, "cache");
+        string workDir = Path.Combine(root, "work");
+        string subWorkDir = Path.Combine(workDir, "sub");
+        string outDir = Path.Combine(workDir, "out");
+        string inputOutside = Path.Combine(root, "in.txt");
+        string inputInsideOut = Path.Combine(outDir, "nested", "in.txt");
+        Directory.CreateDirectory(subWorkDir);
+        Directory.CreateDirectory(Path.GetDirectoryName(inputInsideOut)!);
+        File.WriteAllText(inputOutside, "outside");
+        File.WriteAllText(inputInsideOut, "inside");
+
+        var cache = new InvocationCache(cacheDir, new TestTask { BuildEngine = new MockEngine() }.Log, "Test");
+
+        // Output directory containing a declared input must be rejected without deleting the input.
+        var inputOverlap = new InvocationDescription(
+            InvocationInputs.FromFiles([inputInsideOut]),
+            ["arg"],
+            InvocationOutputs.FromDirectory(outDir));
+        Should.Throw<ArgumentException>(() => cache.TryExecuteCached(inputOverlap, () => new InvocationResult(0), workDir, out _));
+        File.Exists(inputInsideOut).ShouldBeTrue();
+
+        // Output directory equal to or containing the working directory must be rejected.
+        var equalWorkDir = new InvocationDescription(
+            InvocationInputs.FromFiles([inputOutside]),
+            ["arg"],
+            InvocationOutputs.FromDirectory(workDir));
+        Should.Throw<ArgumentException>(() => cache.TryExecuteCached(equalWorkDir, () => new InvocationResult(0), workDir, out _));
+        Should.Throw<ArgumentException>(() => cache.TryExecuteCached(equalWorkDir, () => new InvocationResult(0), subWorkDir, out _));
+
+        // Output directory inside the working directory is normal and must be allowed.
+        string safeOutDir = Path.Combine(workDir, "safe-out");
+        var valid = new InvocationDescription(
+            InvocationInputs.FromFiles([inputOutside]),
+            ["arg"],
+            InvocationOutputs.FromDirectory(safeOutDir));
+        cache.TryExecuteCached(
+            valid,
+            () =>
+            {
+                Directory.CreateDirectory(safeOutDir);
+                File.WriteAllText(Path.Combine(safeOutDir, "result.txt"), "ok");
+                return new InvocationResult(0);
+            },
+            workDir,
+            out InvocationResult result).ShouldBeTrue();
+        result.ExitCode.ShouldBe(0);
+
+        // CachedToolTask should bypass cleanly without MSB6001 or deleting the overlapping input.
+        env.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, "true");
+        env.SetEnvironmentVariable(TestCachedToolTask.PathVariable, cacheDir);
+        var engine = new MockEngine();
+        var task = new TestCachedToolTask
+        {
+            BuildEngine = engine,
+            WorkingDirectoryOverride = workDir,
+            Description = inputOverlap,
+        };
+        task.Execute().ShouldBeTrue();
+        task.Executions.ShouldBe(1);
+        engine.Errors.ShouldBe(0);
+        engine.Log.ShouldNotContain("MSB6001");
+        engine.Log.ShouldContain("Test cache bypassed:");
+        File.Exists(inputInsideOut).ShouldBeTrue();
+    }
+
+    [Fact]
     public void TryRestoreOverwritesAndDeletesReadOnlyOutputs()
     {
         using var env = TestEnvironment.Create();

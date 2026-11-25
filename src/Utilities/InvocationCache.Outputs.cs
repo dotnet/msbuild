@@ -13,6 +13,38 @@ namespace Microsoft.Build.Utilities;
 
 public sealed partial class InvocationCache
 {
+    internal void ValidateOutputs(InvocationOutputs outputs, InvocationInputs inputs, string workingDirectory)
+    {
+        ValidateOutputs(outputs);
+
+        if (outputs.DirectoryPath is null)
+        {
+            return;
+        }
+
+        StringComparison comparison = FileUtilities.PathComparison;
+        string outputPrefix = outputs.DirectoryPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+
+        if (!string.IsNullOrEmpty(workingDirectory))
+        {
+            string resolvedWorkingDirectory = ResolveWorkingDirectory(workingDirectory);
+            string workingDirPrefix = resolvedWorkingDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            if (workingDirPrefix.StartsWith(outputPrefix, comparison))
+            {
+                throw new ArgumentException("The output directory must not contain the working directory.", nameof(outputs));
+            }
+        }
+
+        foreach (string input in inputs.Files)
+        {
+            string inputPrefix = input.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            if (inputPrefix.StartsWith(outputPrefix, comparison))
+            {
+                throw new ArgumentException("The output directory must not contain declared inputs.", nameof(outputs));
+            }
+        }
+    }
+
     internal void ValidateOutputs(InvocationOutputs outputs)
     {
         StringComparison comparison = FileUtilities.PathComparison;

@@ -88,9 +88,14 @@ public abstract class CachedToolTask : ToolTask
             return false;
         }
 
+        string workingDirectory = GetWorkingDirectory();
+        workingDirectory = string.IsNullOrEmpty(workingDirectory)
+            ? TaskEnvironment.ProjectDirectory.Value
+            : TaskEnvironment.GetAbsolutePath(workingDirectory).Value;
+
         try
         {
-            cache.ValidateOutputs(invocation.Outputs);
+            cache.ValidateOutputs(invocation.Outputs, invocation.Inputs, workingDirectory);
         }
         catch (ArgumentException ex)
         {
@@ -103,10 +108,6 @@ public abstract class CachedToolTask : ToolTask
         int? actualToolExitCode = null;
         try
         {
-            string workingDirectory = GetWorkingDirectory();
-            workingDirectory = string.IsNullOrEmpty(workingDirectory)
-                ? TaskEnvironment.ProjectDirectory.Value
-                : TaskEnvironment.GetAbsolutePath(workingDirectory).Value;
             if (!cache.TryExecuteCachedCore(invocation, ExecuteAndCapture, workingDirectory, validateOutputs: false, out result))
             {
                 return false;
