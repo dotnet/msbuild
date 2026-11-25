@@ -192,36 +192,40 @@ public sealed partial class InvocationCache
         }
 
         result = new InvocationResult(-1);
-        string resolvedWorkingDirectory = ResolveWorkingDirectory(workingDirectory);
+        AbsolutePath resolvedWorkingDirectory = ResolveWorkingDirectory(workingDirectory);
+        InvocationDescription resolvedInvocation = invocation.ResolvePaths(resolvedWorkingDirectory);
         if (validateOutputs)
         {
-            ValidateOutputs(invocation.Outputs, invocation.Inputs, resolvedWorkingDirectory);
+            ValidateOutputs(resolvedInvocation.Outputs, resolvedInvocation.Inputs, resolvedWorkingDirectory.Value);
         }
 
         DateTime outputTimestampUtc = DateTime.UtcNow;
-        if (!TryComputeKey(_log, _toolName, invocation, resolvedWorkingDirectory, out string key))
+        if (!TryComputeKey(_log, _toolName, resolvedInvocation, resolvedWorkingDirectory.Value, out string key))
         {
             return false;
         }
 
-        result = ExecuteCached(outputTimestampUtc, new InvocationCacheRequest(key, invocation.Outputs), execute, validateOutputs: false);
+        result = ExecuteCached(outputTimestampUtc, new InvocationCacheRequest(key, resolvedInvocation.Outputs), execute, validateOutputs: false);
         return true;
     }
 
-    private string ResolveWorkingDirectory(string workingDirectory) =>
+    internal AbsolutePath ResolveWorkingDirectory(string workingDirectory) =>
         string.IsNullOrEmpty(workingDirectory)
-            ? workingDirectory
-            : _environment.GetAbsolutePath(workingDirectory).GetCanonicalForm().Value;
+            ? _environment.ProjectDirectory.GetCanonicalForm()
+            : _environment.GetAbsolutePath(workingDirectory).GetCanonicalForm();
 
     internal InvocationResult ExecuteCached(DateTime outputTimestampUtc, InvocationCacheRequest request,
         Func<InvocationResult> execute, bool validateOutputs = true)
     {
+        InvocationOutputs outputs = validateOutputs
+            ? request.Outputs.ResolvePaths(_environment.ProjectDirectory.GetCanonicalForm())
+            : request.Outputs;
         if (validateOutputs)
         {
-            ValidateOutputs(request.Outputs);
+            ValidateOutputs(outputs);
         }
 
-        if (TryRestoreCore(request.Key, request.Outputs, outputTimestampUtc, out InvocationResult result))
+        if (TryRestoreCore(request.Key, outputs, outputTimestampUtc, out InvocationResult result))
         {
             return result;
         }
@@ -229,7 +233,7 @@ public sealed partial class InvocationCache
         result = execute();
         if (result.ExitCode == 0)
         {
-            StoreCore(request.Key, request.Outputs, result.StandardOutput, result.StandardError);
+            StoreCore(request.Key, outputs, result.StandardOutput, result.StandardError);
         }
 
         return result;
@@ -238,8 +242,9 @@ public sealed partial class InvocationCache
     internal bool TryRestore(string inputHash, InvocationOutputs outputs, DateTime outputTimestampUtc,
         out InvocationResult result)
     {
-        ValidateOutputs(outputs);
-        return TryRestoreCore(inputHash, outputs, outputTimestampUtc, out result);
+        InvocationOutputs resolvedOutputs = outputs.ResolvePaths(_environment.ProjectDirectory.GetCanonicalForm());
+        ValidateOutputs(resolvedOutputs);
+        return TryRestoreCore(inputHash, resolvedOutputs, outputTimestampUtc, out result);
     }
 
     private bool TryRestoreCore(string inputHash, InvocationOutputs outputs, DateTime outputTimestampUtc,
@@ -308,8 +313,9 @@ public sealed partial class InvocationCache
     internal void Store(string inputHash, InvocationOutputs outputs,
         IReadOnlyCollection<string>? standardOutput = null, IReadOnlyCollection<string>? standardError = null)
     {
-        ValidateOutputs(outputs);
-        StoreCore(inputHash, outputs, standardOutput, standardError);
+        InvocationOutputs resolvedOutputs = outputs.ResolvePaths(_environment.ProjectDirectory.GetCanonicalForm());
+        ValidateOutputs(resolvedOutputs);
+        StoreCore(inputHash, resolvedOutputs, standardOutput, standardError);
     }
 
     private void StoreCore(string inputHash, InvocationOutputs outputs,

@@ -888,7 +888,7 @@ public sealed class InvocationCache_Tests
         using var output = new StringWriter();
         using var error = new StringWriter();
 
-        InvocationCachePurge.Run(cache.CacheDirectory, "v1", "Test", cutoff, output, error).ShouldBe(0);
+        InvocationCachePurge.Run(cache.CacheDirectory, "Test", cutoff, output, error).ShouldBe(0);
 
         Directory.Exists(entry).ShouldBe(!expired);
         Directory.Exists(staging).ShouldBeTrue();
@@ -907,15 +907,13 @@ public sealed class InvocationCache_Tests
         string cacheDir = Path.Combine(projectDir, "cache");
         TaskEnvironment taskEnv = env.WithTransientTestState(new TransientTaskEnvironment(projectDir)).Environment;
 
-        InvocationInputs relativeInputs = InvocationInputs.FromFiles(["input.txt"], taskEnv);
-        InvocationOutputs relativeOutputs = InvocationOutputs.FromDirectory("out", taskEnv);
-        InvocationOutputs relativeFileOutputs = InvocationOutputs.FromFiles(["out/a.txt"], taskEnv);
+        InvocationInputs relativeInputs = InvocationInputs.FromFiles("input.txt");
+        InvocationOutputs relativeOutputs = InvocationOutputs.FromDirectory("out");
         var description = new InvocationDescription(relativeInputs, ["arg"], relativeOutputs);
 
         InvocationCache? cache = InvocationCache.TryCreate("cache", new TestTask { BuildEngine = new MockEngine() }.Log, "Test", taskEnv);
         cache.ShouldNotBeNull();
         cache.CacheDirectory.ShouldBe(Path.GetFullPath(cacheDir));
-        relativeFileOutputs.Files.ShouldBe([Path.GetFullPath(Path.Combine(outputDir, "a.txt"))]);
 
         int executions = 0;
         cache.TryExecuteCached(description, () =>
@@ -940,6 +938,46 @@ public sealed class InvocationCache_Tests
         }, projectDir, out InvocationResult second).ShouldBeTrue();
         second.ExitCode.ShouldBe(0);
         executions.ShouldBe(1);
+
+        // Relative inputs and outputs must also resolve against a custom working directory, not ProjectDirectory.
+        string customWorkDir = Path.Combine(projectDir, "subdir");
+        Directory.CreateDirectory(customWorkDir);
+        string subInput = Path.Combine(customWorkDir, "input.txt");
+        string subOutputFile = Path.Combine(customWorkDir, "out", "b.txt");
+        File.WriteAllText(subInput, "sub-hello");
+
+        var relativeFileDescription = new InvocationDescription(
+            InvocationInputs.FromFiles("input.txt"),
+            ["sub-arg"],
+            InvocationOutputs.FromFiles(Path.Combine("out", "b.txt")));
+
+        int subExecutions = 0;
+        cache.TryExecuteCached(relativeFileDescription, () =>
+        {
+            subExecutions++;
+            Directory.CreateDirectory(Path.GetDirectoryName(subOutputFile)!);
+            File.WriteAllText(subOutputFile, "sub-output");
+            return new InvocationResult(0);
+        }, "subdir", out InvocationResult subFirst).ShouldBeTrue();
+        subFirst.ExitCode.ShouldBe(0);
+        subExecutions.ShouldBe(1);
+
+        File.Delete(subOutputFile);
+        cache.TryExecuteCached(
+            new InvocationDescription(
+                InvocationInputs.FromFiles(subInput),
+                ["sub-arg"],
+                InvocationOutputs.FromFiles(subOutputFile)),
+            () =>
+            {
+                subExecutions++;
+                return new InvocationResult(0);
+            },
+            customWorkDir,
+            out InvocationResult subSecond).ShouldBeTrue();
+        subSecond.ExitCode.ShouldBe(0);
+        subExecutions.ShouldBe(1);
+        File.ReadAllText(subOutputFile).ShouldBe("sub-output");
 
         // GetDefaultCacheDirectory honors task-local LOCALAPPDATA (Windows) or HOME (Unix).
         string fakeHome = env.CreateFolder().Path;
@@ -1127,7 +1165,7 @@ public sealed class InvocationCache_Tests
         using var output = new StringWriter();
         using var error = new StringWriter();
 
-        InvocationCachePurge.Run(cache.CacheDirectory, "v1", "Test", cutoff, output, error).ShouldBe(0);
+        InvocationCachePurge.Run(cache.CacheDirectory, "Test", cutoff, output, error).ShouldBe(0);
 
         Directory.Exists(entry).ShouldBeFalse();
         error.ToString().ShouldContain("using directory creation time");
@@ -1142,7 +1180,7 @@ public sealed class InvocationCache_Tests
         using var output = new StringWriter();
         using var error = new StringWriter();
 
-        InvocationCachePurge.Run(Path.Combine(root, "missing-cache"), "v1", "Test", DateTimeOffset.UtcNow, output, error).ShouldBe(1);
+        InvocationCachePurge.Run(Path.Combine(root, "missing-cache"), "Test", DateTimeOffset.UtcNow, output, error).ShouldBe(1);
 
         error.ToString().ShouldContain("Could not enumerate Test cache");
         output.ToString().ShouldContain("Deleted: 0, Kept: 0, Errors: 1");
@@ -1195,17 +1233,13 @@ public sealed class InvocationCache_Tests
         Should.Throw<ArgumentNullException>(() => new InvocationDescription(validInputs, null!, validOutputs));
         Should.Throw<ArgumentNullException>(() => new InvocationDescription(validInputs, ["args"], null!));
         Should.Throw<ArgumentNullException>(() => InvocationInputs.FromFiles(null!));
-        Should.Throw<ArgumentNullException>(() => InvocationInputs.FromFiles([Path.Combine(root, "a.txt")], null!));
         Should.Throw<ArgumentNullException>(() => InvocationOutputs.FromDirectory(null!));
         Should.Throw<ArgumentException>(() => InvocationOutputs.FromDirectory("   "));
-        Should.Throw<ArgumentNullException>(() => InvocationOutputs.FromDirectory("out", null!));
         Should.Throw<ArgumentNullException>(() => InvocationOutputs.FromFiles(null!));
-        Should.Throw<ArgumentNullException>(() => InvocationOutputs.FromFiles([Path.Combine(root, "a.txt")], null!));
-        Should.Throw<ArgumentException>(() => InvocationCachePurge.Run(null!, "v1", "Test", DateTimeOffset.UtcNow, new StringWriter(), new StringWriter()));
-        Should.Throw<ArgumentException>(() => InvocationCachePurge.Run(root, null!, "Test", DateTimeOffset.UtcNow, new StringWriter(), new StringWriter()));
-        Should.Throw<ArgumentException>(() => InvocationCachePurge.Run(root, "v1", null!, DateTimeOffset.UtcNow, new StringWriter(), new StringWriter()));
-        Should.Throw<ArgumentNullException>(() => InvocationCachePurge.Run(root, "v1", "Test", DateTimeOffset.UtcNow, null!, new StringWriter()));
-        Should.Throw<ArgumentNullException>(() => InvocationCachePurge.Run(root, "v1", "Test", DateTimeOffset.UtcNow, new StringWriter(), null!));
+        Should.Throw<ArgumentException>(() => InvocationCachePurge.Run(null!, "Test", DateTimeOffset.UtcNow, new StringWriter(), new StringWriter()));
+        Should.Throw<ArgumentException>(() => InvocationCachePurge.Run(root, null!, DateTimeOffset.UtcNow, new StringWriter(), new StringWriter()));
+        Should.Throw<ArgumentNullException>(() => InvocationCachePurge.Run(root, "Test", DateTimeOffset.UtcNow, null!, new StringWriter()));
+        Should.Throw<ArgumentNullException>(() => InvocationCachePurge.Run(root, "Test", DateTimeOffset.UtcNow, new StringWriter(), null!));
     }
 
     [Fact]
@@ -1497,6 +1531,115 @@ public sealed class InvocationCache_Tests
                 }
             }
         }
+    }
+
+#if NET
+    [Fact]
+    public void DirectoryOutputContainingSymbolicLinkCycleBypassesCachingCleanly()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        string root = env.CreateFolder().Path;
+        string input = Path.Combine(root, "input.txt");
+        string outputDir = Path.Combine(root, "out");
+        File.WriteAllText(input, "content");
+
+        var cache = new InvocationCache(Path.Combine(root, "cache"), new TestTask { BuildEngine = new MockEngine() }.Log, "Test");
+        var invocation = new InvocationDescription(
+            InvocationInputs.FromFiles([input]),
+            [],
+            InvocationOutputs.FromDirectory(outputDir));
+
+        int runs = 0;
+        bool executed = cache.TryExecuteCached(invocation, () =>
+        {
+            runs++;
+            Directory.CreateDirectory(outputDir);
+            File.WriteAllText(Path.Combine(outputDir, "a.txt"), "payload");
+            Directory.CreateSymbolicLink(Path.Combine(outputDir, "loop"), outputDir);
+            return new InvocationResult(0, ["ok"], []);
+        }, out InvocationResult result);
+
+        executed.ShouldBeTrue();
+        runs.ShouldBe(1);
+        result.ExitCode.ShouldBe(0);
+        // Entry must not have been published because the output directory contained a symlink.
+        string versionDir = Path.Combine(cache.CacheDirectory, "v1");
+        if (Directory.Exists(versionDir))
+        {
+            Directory.GetDirectories(versionDir).ShouldBeEmpty();
+        }
+    }
+#endif
+
+    [Fact]
+    public void CachedToolTaskResolvesRelativeInputsAndOutputsAgainstCustomWorkingDirectory()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        string projectDir = env.CreateFolder().Path;
+        string workDir = Path.Combine(projectDir, "work");
+        Directory.CreateDirectory(workDir);
+        string inputPath = Path.Combine(workDir, "input.txt");
+        string outputDir = Path.Combine(workDir, "out");
+        string outputFile = Path.Combine(outputDir, "result.txt");
+        File.WriteAllText(inputPath, "v1");
+
+        TaskEnvironment taskEnv = env.WithTransientTestState(new TransientTaskEnvironment(projectDir)).Environment;
+        taskEnv.SetEnvironmentVariable(TestCachedToolTask.EnabledVariable, "true");
+        taskEnv.SetEnvironmentVariable(TestCachedToolTask.PathVariable, "cache");
+
+        var relativeDescription = new InvocationDescription(
+            InvocationInputs.FromFiles("input.txt"),
+            ["custom-workdir"],
+            InvocationOutputs.FromDirectory("out"));
+
+        var first = new TestCachedToolTask
+        {
+            BuildEngine = new MockEngine(),
+            TaskEnvironment = taskEnv,
+            WorkingDirectoryOverride = "work",
+            Description = relativeDescription,
+            Execution = () =>
+            {
+                Directory.CreateDirectory(outputDir);
+                File.WriteAllText(outputFile, "cached-from-work");
+                return 0;
+            },
+        };
+        first.Execute().ShouldBeTrue();
+        first.Executions.ShouldBe(1);
+
+        // Delete output and verify a second run with relative paths restores into work/out (not projectDir/out).
+        Directory.Delete(outputDir, recursive: true);
+        var second = new TestCachedToolTask
+        {
+            BuildEngine = new MockEngine(),
+            TaskEnvironment = taskEnv,
+            WorkingDirectoryOverride = "work",
+            Description = relativeDescription,
+        };
+        second.Execute().ShouldBeTrue();
+        second.Executions.ShouldBe(0);
+        File.ReadAllText(outputFile).ShouldBe("cached-from-work");
+        Directory.Exists(Path.Combine(projectDir, "out")).ShouldBeFalse();
+
+        // Changing work/input.txt must invalidate the cache entry.
+        File.WriteAllText(inputPath, "v2");
+        var third = new TestCachedToolTask
+        {
+            BuildEngine = new MockEngine(),
+            TaskEnvironment = taskEnv,
+            WorkingDirectoryOverride = "work",
+            Description = relativeDescription,
+            Execution = () =>
+            {
+                Directory.CreateDirectory(outputDir);
+                File.WriteAllText(outputFile, "updated");
+                return 0;
+            },
+        };
+        third.Execute().ShouldBeTrue();
+        third.Executions.ShouldBe(1);
+        File.ReadAllText(outputFile).ShouldBe("updated");
     }
 
     private sealed class CustomStartProcessCachedToolTask : CachedToolTask

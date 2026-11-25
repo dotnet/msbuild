@@ -18,13 +18,12 @@ public static class InvocationCachePurge
     /// Deletes entries whose last-used marker predates the cutoff.
     /// </summary>
     /// <param name="cacheDirectory">The cache root.</param>
-    /// <param name="versionDirectory">The format directory to purge, such as <c>v1</c>.</param>
     /// <param name="toolName">The tool name for diagnostics.</param>
     /// <param name="cutoff">The oldest last-use time to retain.</param>
     /// <param name="output">Receives the purge summary.</param>
     /// <param name="error">Receives failures and fallback diagnostics.</param>
     /// <returns>Zero on success, or one if an entry could not be purged or enumerated.</returns>
-    public static int Run(string cacheDirectory, string versionDirectory, string toolName,
+    public static int Run(string cacheDirectory, string toolName,
         DateTimeOffset cutoff, TextWriter output, TextWriter error)
     {
         if (cacheDirectory is null)
@@ -35,16 +34,6 @@ public static class InvocationCachePurge
         if (string.IsNullOrWhiteSpace(cacheDirectory))
         {
             throw new ArgumentException("The cache directory must not be empty or whitespace.", nameof(cacheDirectory));
-        }
-
-        if (versionDirectory is null)
-        {
-            throw new ArgumentNullException(nameof(versionDirectory));
-        }
-
-        if (string.IsNullOrWhiteSpace(versionDirectory))
-        {
-            throw new ArgumentException("The version directory must not be empty or whitespace.", nameof(versionDirectory));
         }
 
         if (toolName is null)
@@ -70,7 +59,7 @@ public static class InvocationCachePurge
         int deleted = 0;
         int kept = 0;
         int errors = 0;
-        string entriesDirectory = Path.Combine(cacheDirectory, versionDirectory);
+        string entriesDirectory = Path.Combine(cacheDirectory, InvocationCacheEntry.VersionDirectory);
         try
         {
             foreach (string entry in Directory.EnumerateDirectories(entriesDirectory))

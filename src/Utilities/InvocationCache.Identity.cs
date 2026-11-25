@@ -16,13 +16,13 @@ namespace Microsoft.Build.Utilities;
 
 public sealed partial class InvocationCache
 {
-    internal static bool TryComputeKey(TaskLoggingHelper log, string toolName, InvocationDescription invocation,
-        string workingDirectory, out string key)
+    internal static bool TryComputeKey(TaskLoggingHelper log, string toolName, InvocationDescription resolvedInvocation,
+        string resolvedWorkingDirectory, out string key)
     {
         key = string.Empty;
         try
         {
-            key = ComputeKey(invocation, workingDirectory);
+            key = ComputeKeyResolved(resolvedInvocation, resolvedWorkingDirectory);
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or (ArgumentException and not ArgumentNullException) or NotSupportedException or SecurityException)
@@ -37,35 +37,41 @@ public sealed partial class InvocationCache
 
     internal static string ComputeKey(InvocationDescription invocation, string workingDirectory)
     {
+        AbsolutePath baseDirectory = new AbsolutePath(Path.GetFullPath(workingDirectory)).GetCanonicalForm();
+        return ComputeKeyResolved(invocation.ResolvePaths(baseDirectory), baseDirectory.Value);
+    }
+
+    private static string ComputeKeyResolved(InvocationDescription resolved, string resolvedWorkingDirectory)
+    {
         using var sha256 = SHA256.Create();
         using var data = new MemoryStream();
         using var writer = new BinaryWriter(data, Encoding.UTF8, leaveOpen: true);
         writer.Write("invocation-cache-key-v1");
-        writer.Write(Path.GetFullPath(workingDirectory));
+        writer.Write(resolvedWorkingDirectory);
         writer.Write(RuntimeInformation.OSDescription);
         writer.Write(RuntimeInformation.ProcessArchitecture.ToString());
         writer.Write(CultureInfo.CurrentCulture.Name);
         writer.Write(CultureInfo.CurrentUICulture.Name);
-        writer.Write(invocation.Context.Length);
-        foreach (string value in invocation.Context)
+        writer.Write(resolved.Context.Length);
+        foreach (string value in resolved.Context)
         {
             writer.Write(value);
         }
 
-        writer.Write(invocation.Outputs.DirectoryPath is not null);
-        if (invocation.Outputs.DirectoryPath is not null)
+        writer.Write(resolved.Outputs.DirectoryPath is not null);
+        if (resolved.Outputs.DirectoryPath is not null)
         {
-            writer.Write(invocation.Outputs.DirectoryPath);
+            writer.Write(resolved.Outputs.DirectoryPath);
         }
 
-        writer.Write(invocation.Outputs.Files.Length);
-        foreach (string file in invocation.Outputs.Files)
+        writer.Write(resolved.Outputs.Files.Length);
+        foreach (string file in resolved.Outputs.Files)
         {
             writer.Write(file);
         }
 
-        writer.Write(invocation.Inputs.Files.Length);
-        foreach (string input in invocation.Inputs.Files)
+        writer.Write(resolved.Inputs.Files.Length);
+        foreach (string input in resolved.Inputs.Files)
         {
             writer.Write(input);
             try

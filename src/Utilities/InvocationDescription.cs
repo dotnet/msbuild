@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Build.Framework;
 
 #pragma warning disable MSBUILD001
 
@@ -64,4 +65,7 @@ public sealed class InvocationDescription
         Context = context;
         Outputs = outputs;
     }
+
+    internal InvocationDescription ResolvePaths(AbsolutePath baseDirectory)
+        => new(Inputs.ResolvePaths(baseDirectory), Context, Outputs.ResolvePaths(baseDirectory));
 }

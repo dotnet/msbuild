@@ -27,7 +27,7 @@ public sealed partial class InvocationCache
 
         if (!string.IsNullOrEmpty(workingDirectory))
         {
-            string resolvedWorkingDirectory = ResolveWorkingDirectory(workingDirectory);
+            string resolvedWorkingDirectory = ResolveWorkingDirectory(workingDirectory).Value;
             string workingDirPrefix = resolvedWorkingDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
             if (workingDirPrefix.StartsWith(outputPrefix, comparison))
             {
@@ -112,8 +112,14 @@ public sealed partial class InvocationCache
             foreach (string path in Directory.EnumerateFileSystemEntries(directory))
             {
                 string relativePath = Path.Combine(relativeDirectory, Path.GetFileName(path));
-                if (Directory.Exists(path))
+                FileAttributes attributes = File.GetAttributes(path);
+                if ((attributes & FileAttributes.Directory) != 0)
                 {
+                    if ((attributes & FileAttributes.ReparsePoint) != 0)
+                    {
+                        throw new IOException($"Cannot cache output directory containing symbolic link or reparse point: '{path}'.");
+                    }
+
                     Collect(path, relativePath);
                 }
                 else

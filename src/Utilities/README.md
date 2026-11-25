@@ -105,8 +105,8 @@ cross-worktree reuse is not promised. Inherited environment settings and install
 are not automatically fingerprinted. Consumers must bypass invocations whose dependencies or
 required side effects cannot be modeled.
 
-`InvocationCachePurge.Run` removes entries older than a last-use cutoff within the supplied
-format directory (currently `v1`). It falls back to directory creation time for missing or
+`InvocationCachePurge.Run` removes entries older than a last-use cutoff within the current
+format directory (`v1`). It falls back to directory creation time for missing or
 invalid markers. Do not purge or manually delete entries while the cache is in use.
 Corrupt entries are not repaired. Entries from the older storage-only `PersistentCache`
 prototype lack diagnostics and are rejected rather than treated as warning-free.
