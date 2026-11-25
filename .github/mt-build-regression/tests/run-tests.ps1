@@ -861,7 +861,8 @@ $agentWorkflowPath = Join-Path (Split-Path $featureRoot -Parent) 'workflows\mt-b
 $agentWorkflow = Get-Content -LiteralPath $agentWorkflowPath -Raw
 Assert-True ($agentWorkflow.Contains('-Repository "$env:GITHUB_REPOSITORY"')) 'The existing-work step must pass the repository through PowerShell environment syntax.'
 Assert-True (-not $agentWorkflow.Contains("-Repository '`${{ github.repository }}'")) 'The existing-work step must not embed a GitHub expression that gh-aw rewrites to incompatible shell syntax.'
-Assert-True ($agentWorkflow.Contains('model: gpt-6.1-sol')) 'The investigation engine must explicitly select the current Sol model.'
+Assert-True ($agentWorkflow.Contains('model: gpt-6.2-sol')) 'The investigation engine must explicitly select the current Sol model.'
+Assert-True ($agentWorkflow.Contains('args: ["--reasoning-effort", "max"]')) 'The investigation engine must explicitly select max reasoning.'
 
 $lockWorkflowPath = Join-Path (Split-Path $featureRoot -Parent) 'workflows\mt-build-regression.agent.lock.yml'
 if (Test-Path -LiteralPath $lockWorkflowPath)
@@ -869,7 +870,9 @@ if (Test-Path -LiteralPath $lockWorkflowPath)
     $lockWorkflow = Get-Content -LiteralPath $lockWorkflowPath -Raw
     Assert-True ($lockWorkflow.Contains('-Repository "$env:GITHUB_REPOSITORY"')) 'The compiled workflow must preserve PowerShell repository environment syntax.'
     Assert-True (-not $lockWorkflow.Contains('github.aw.import-inputs')) 'All shared workflow import inputs must resolve before GitHub Actions sees the lock.'
-    Assert-True ($lockWorkflow.Contains('"agent_model":"gpt-6.1-sol"')) 'The compiled workflow must preserve the explicit engine model.'
+    Assert-True ($lockWorkflow.Contains('"agent_model":"gpt-6.2-sol"')) 'The compiled workflow must preserve the explicit engine model.'
+    Assert-True ($lockWorkflow.Contains('COPILOT_MODEL: gpt-6.2-sol')) 'The compiled workflow must configure the selected model for the Copilot runtime.'
+    Assert-True ($lockWorkflow.Contains('--reasoning-effort max')) 'The compiled workflow must preserve max reasoning.'
 }
 
 if ($failures.Count -gt 0)

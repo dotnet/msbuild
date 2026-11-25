@@ -206,7 +206,7 @@ No Azure DevOps queue permission is required for the initial workflow.
 
 The workflow reuses the repository's existing `copilot-pat-pool` environment and PAT rotation
 mechanism used by the other Agentic Workflows.
-The engine explicitly selects `gpt-6.1-sol` with `xhigh` reasoning. The PAT-pool import accepts
+The engine explicitly selects `gpt-6.2-sol` with `max` reasoning. The PAT-pool import accepts
 the run ID as a string seed so its optional input resolves to a valid Actions expression.
 Regenerate the lock file with the repository-matching
 gh-aw compiler (v0.92.3, Copilot 1.0.98): `gh aw compile mt-build-regression.agent --validate`.
