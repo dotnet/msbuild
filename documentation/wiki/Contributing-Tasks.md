@@ -11,6 +11,8 @@ The following requirements are in place for contributed tasks:
 1. The task must not introduce the need to ship any third-party assemblies.
 2. The task should work on .NET Framework and .NET Core if possible.  It can be confusing to users if a task only works on certain platforms.
 3. The task must have unit tests in place to prevent regressions.
+4. New tasks must implement `IMultiThreadableTask`, declare `[MSBuildMultiThreadableTask]`,
+   and follow the [thread-safe task guidelines](../specs/multithreading/thread-safe-tasks.md).
 
 ## Developing a new Task
 Review the existing documentation on [Task Writing](https://learn.microsoft.com/visualstudio/msbuild/task-writing) to learn about the fundamentals.  You can also looking at existing tasks in the [Microsoft.Build.Tasks.Core assembly](https://github.com/dotnet/msbuild/tree/main/src/Tasks) for a great starting point.
@@ -19,6 +21,7 @@ Tasks are generally simple and should not require much effort to develop.  If yo
 
 ### Multithreaded task analysis
 
+Analyzers help identify potential violations of the thread-safety requirements above.
 The Tasks project enables the in-repository `Microsoft.Build.TaskAuthoring.Analyzer` by default.
 Review its diagnostics when migrating tasks, including warnings about transitive helper calls.
 The analyzer cannot prove that every helper is safe: audit shared state and path consumers against

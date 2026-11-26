@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if NETFRAMEWORK
-using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -147,21 +146,46 @@ public sealed class GenerateTrustInfo_Tests
     [InlineData("")]
     [InlineData(" ")]
     [InlineData("\t")]
-    public void InvalidOutputPathPreservesArgumentException(string outputPath)
+    public void InvalidOutputPathReportsFailure(string outputPath)
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         string projectDirectory = env.CreateFolder().Path;
+        var engine = new MockEngine(_output);
         var task = new GenerateTrustInfo
         {
-            BuildEngine = new MockEngine(_output),
+            BuildEngine = engine,
             TaskEnvironment = CreateTaskEnvironment(env, projectDirectory),
             TrustInfoFile = new TaskItem(outputPath),
             TargetZone = "Custom",
         };
 
-        Should.Throw<ArgumentException>(() => task.Execute());
+        task.Execute().ShouldBeFalse();
 
+        BuildErrorEventArgs error = engine.ErrorEvents.ShouldHaveSingleItem();
+        error.Code.ShouldBe("MSB3098");
+        error.Message.ShouldNotBeNull().ShouldContain(nameof(GenerateTrustInfo.TrustInfoFile));
         Directory.GetFileSystemEntries(projectDirectory).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void OutputPathWithLeadingSpaceIsAccepted()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string projectDirectory = env.CreateFolder().Path;
+        var engine = new MockEngine(_output);
+        var task = new GenerateTrustInfo
+        {
+            BuildEngine = engine,
+            TaskEnvironment = CreateTaskEnvironment(env, projectDirectory),
+            TrustInfoFile = new TaskItem(" app.trustinfo"),
+            TargetZone = "Custom",
+        };
+
+        task.Execute().ShouldBeTrue();
+
+        engine.Errors.ShouldBe(0);
+        File.Exists(Path.Combine(projectDirectory, " app.trustinfo")).ShouldBeTrue();
+        task.TrustInfoFile.ItemSpec.ShouldBe(" app.trustinfo");
     }
 
     private static TaskEnvironment CreateTaskEnvironment(TestEnvironment env, string projectDirectory)

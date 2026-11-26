@@ -140,6 +140,19 @@ namespace Microsoft.Build.Engine.UnitTests
             FileUtilitiesRegex.StartsWithDrivePattern(value).ShouldBeTrue();
         }
 
+        [WindowsOnlyTheory]
+        [InlineData("C:", true)]
+        [InlineData("C:app.trustinfo", true)]
+        [InlineData("C:\\app.trustinfo", false)]
+        [InlineData("C:/app.trustinfo", false)]
+        [InlineData("app.trustinfo", false)]
+        [InlineData("", false)]
+        public void DetectDriveRelativePaths(string path, bool expected)
+        {
+            FileUtilitiesRegex.TryGetDriveRelativePath(path, out string driveRelativePath).ShouldBe(expected);
+            driveRelativePath.ShouldBe(path);
+        }
+
         [Fact]
         public void UncPatternMultiFolderDirectory_LegacyRegex()
         {

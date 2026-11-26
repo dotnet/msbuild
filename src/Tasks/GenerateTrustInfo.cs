@@ -3,7 +3,6 @@
 
 #if NETFRAMEWORK
 using System;
-using System.IO;
 
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
@@ -109,10 +108,8 @@ namespace Microsoft.Build.Tasks
             // Write trust-info back to a stand-alone trust file
             if (string.IsNullOrWhiteSpace(TrustInfoFile.ItemSpec))
             {
-                // Preserve File.Open's rejection of whitespace-only paths before rooting the path.
-#pragma warning disable MSBuildTask0002 // Invalid paths throw without resolving against process state.
-                Path.GetFullPath(TrustInfoFile.ItemSpec);
-#pragma warning restore MSBuildTask0002
+                Log.LogErrorWithCodeFromResources("General.InvalidValue", nameof(TrustInfoFile), nameof(GenerateTrustInfo));
+                return false;
             }
 
             AbsolutePath trustInfoFilePath = TaskEnvironment.GetAbsolutePath(TrustInfoFile.ItemSpec);

@@ -15,6 +15,10 @@ namespace Microsoft.Build.UnitTests
 {
     public class TaskEnvironment_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public TaskEnvironment_Tests(ITestOutputHelper output) => _output = output;
+
         private const string StubEnvironmentName = "Stub";
         private const string MultithreadedEnvironmentName = "Multithreaded";
 
@@ -281,6 +285,9 @@ namespace Microsoft.Build.UnitTests
         [InlineData("app.trustinfo")]
         public void FallbackResolvesOtherDriveRelativePathsUsingProcessState(string relativePath)
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
             char currentDrive = char.ToUpperInvariant(Path.GetPathRoot(Directory.GetCurrentDirectory())![0]);
             string path = (currentDrive == 'C' ? "D:" : "C:") + relativePath;
 
@@ -289,6 +296,42 @@ namespace Microsoft.Build.UnitTests
             absolutePath.Value.ShouldBe(Path.GetFullPath(path));
             absolutePath.OriginalValue.ShouldBe(path);
         }
+
+        [WindowsOnlyTheory]
+        [InlineData("")]
+        [InlineData("app.trustinfo")]
+        public void FallbackDriveRelativeResolutionCanBeDisabled(string relativePath)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+            ChangeWaves.ResetStateForTests();
+            char currentDrive = char.ToUpperInvariant(Path.GetPathRoot(Directory.GetCurrentDirectory())![0]);
+            string path = (currentDrive == 'C' ? "D:" : "C:") + relativePath;
+
+            AbsolutePath absolutePath = TaskEnvironment.Fallback.GetAbsolutePath(path);
+
+            absolutePath.Value.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), relativePath));
+            absolutePath.OriginalValue.ShouldBe(path);
+        }
+
+#if NETFRAMEWORK
+        [WindowsOnlyTheory]
+        [InlineData(" ")]
+        [InlineData("  ")]
+        public void FallbackResolvesDriveRelativePathsWithLeadingSpaces(string leadingSpaces)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+            char currentDrive = char.ToUpperInvariant(Path.GetPathRoot(Directory.GetCurrentDirectory())![0]);
+            string path = leadingSpaces + (currentDrive == 'C' ? "D:" : "C:") + "app.trustinfo";
+
+            AbsolutePath absolutePath = TaskEnvironment.Fallback.GetAbsolutePath(path);
+
+            absolutePath.Value.ShouldBe(Path.GetFullPath(path));
+            absolutePath.OriginalValue.ShouldBe(path);
+        }
+#endif
 
         [WindowsOnlyFact]
         public void FallbackDriveRelativePathsDeferInvalidCharacterValidation()

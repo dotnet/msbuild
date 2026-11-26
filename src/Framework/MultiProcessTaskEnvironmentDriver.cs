@@ -43,12 +43,14 @@ namespace Microsoft.Build.Framework
         {
             ArgumentException.ThrowIfNullOrEmpty(path);
 
-            if (NativeMethods.IsWindows && FileUtilitiesRegex.StartsWithDrivePattern(path) &&
-                (path.Length == 2 || path[2] is not ('\\' or '/')))
+            if (NativeMethods.IsWindows &&
+                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11) &&
+                FileUtilitiesRegex.TryGetDriveRelativePath(path, out string driveRelativePath))
             {
                 // Preserve the per-drive current directory used by file APIs in multi-process mode.
-                AbsolutePath driveDirectory = new(Path.GetFullPath(path.Substring(0, 2)));
-                return new AbsolutePath(path, driveDirectory);
+                AbsolutePath driveDirectory = new(Path.GetFullPath(driveRelativePath.Substring(0, 2)));
+                AbsolutePath absolutePath = new(driveRelativePath, driveDirectory);
+                return new AbsolutePath(absolutePath.Value, path, ignoreRootedCheck: true);
             }
 
             return new AbsolutePath(path, ProjectDirectory);

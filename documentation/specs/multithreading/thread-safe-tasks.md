@@ -43,7 +43,7 @@ public abstract class MultiThreadableTask : Task, IMultiThreadableTask
 }
 ```
 
-Built-in MSBuild tasks initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. This ensures tasks have a usable `TaskEnvironment` even when explicitly instantiated outside the engine (e.g., `new Copy()`) or run in the out-of-proc task host. The engine's in-proc path (`TaskExecutionHost.InitializeForBatch`) overwrites the default with the appropriate driver before `Execute()` is called.
+Built-in MSBuild tasks initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. `TaskEnvironment.Fallback` provides access to the process working directory and environment for multiprocess execution and direct task construction (e.g., `new Copy()`). The engine's in-proc path (`TaskExecutionHost.InitializeForBatch`) overwrites the default with the appropriate driver before `Execute()` is called.
 
 #### Constructor Injection of `TaskEnvironment`
 
@@ -156,10 +156,6 @@ public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 ```
 
 `AbsolutePath` converts implicitly to string for seamless integration with existing File/Directory APIs.
-
-`TaskEnvironment.Fallback` preserves process-based resolution, including Windows per-drive
-current directories for drive-relative paths such as `D:manifest.xml`. Isolated task
-environments resolve paths against their project directory instead.
 
 ### API Usage Example
 

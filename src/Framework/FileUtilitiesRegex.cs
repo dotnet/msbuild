@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO;
 using System.Runtime.CompilerServices;
 
 
@@ -73,6 +74,30 @@ namespace Microsoft.Build.Shared
             return pattern.Length >= 3 &&
                 StartsWithDrivePattern(pattern) &&
                 (pattern[2] == _backSlash || pattern[2] == _forwardSlash);
+        }
+
+        /// <summary>
+        /// Detects a Windows drive-relative path, removing leading spaces accepted by .NET Framework.
+        /// </summary>
+        internal static bool TryGetDriveRelativePath(string path, out string driveRelativePath)
+        {
+            driveRelativePath = path;
+#if NETFRAMEWORK
+            int start = 0;
+            while (start < path.Length && path[start] == ' ')
+            {
+                start++;
+            }
+
+            if (start > 0)
+            {
+                driveRelativePath = path.Substring(start);
+            }
+#endif
+            return StartsWithDrivePattern(driveRelativePath) &&
+                (driveRelativePath.Length == 2 ||
+                 (driveRelativePath[2] != Path.DirectorySeparatorChar &&
+                  driveRelativePath[2] != Path.AltDirectorySeparatorChar));
         }
 
         /// <summary>
