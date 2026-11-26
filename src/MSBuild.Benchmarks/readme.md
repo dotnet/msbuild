@@ -6,7 +6,7 @@ This project contains performance benchmarks for MSBuild using [BenchmarkDotNet]
 
 ### Run Benchmarks Across Supported TFMs
 
-On Windows, `Run-Benchmarks.ps1` runs each selected benchmark on both `net472` and `net11.0`.
+On Windows, `Run-Benchmarks.ps1` runs each selected benchmark on both `net472` and `net10.0`.
 Artifacts are kept separate under `artifacts\BenchmarkDotNet\<TFM>`.
 
 ```powershell
@@ -56,7 +56,7 @@ Use `-All` to explicitly run every benchmark, or `-Framework` to override the ta
 
 ```powershell
 .\Run-Benchmarks.ps1 -All
-.\Run-Benchmarks.ps1 -Filter "*MetadataExpansionBenchmark*" -Framework net11.0
+.\Run-Benchmarks.ps1 -Filter "*MetadataExpansionBenchmark*" -Framework net10.0
 ```
 
 ### Choose a Run Mode
@@ -70,7 +70,7 @@ independent launches on the target framework:
 
 ```powershell
 .\Run-Benchmarks.ps1 -Filter "*MetadataExpansionBenchmark*" `
-    -Framework net11.0 -LaunchCount 3
+    -Framework net10.0 -LaunchCount 3
 ```
 
 Each launch performs a complete benchmark run, so this approximately triples execution time.
@@ -82,26 +82,26 @@ previous plan when the run completes. If the process terminates abruptly, the pl
 restored manually.
 
 Compare results only when the target framework, architecture, runtime, and machine environment
-match. In particular, absolute `net472` and `net11.0` results are not directly comparable.
+match. In particular, absolute `net472` and `net10.0` results are not directly comparable.
 
 ### Run Benchmarks on a Specific TFM
 
 ```
 cd src/MSBuild.Benchmarks
 dotnet run -c Release -f net472
-dotnet run -c Release -f net11.0
+dotnet run -c Release -f net10.0
 ```
 
 ### Filter to a Specific Benchmark Class
 
 ```
-dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark*"
+dotnet run -c Release -f net10.0 -- --filter "*ItemSpecModifiersBenchmark*"
 ```
 
 ### Filter to a Single Benchmark Method
 
 ```
-dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark.IncludeOnly"
+dotnet run -c Release -f net10.0 -- --filter "*ItemSpecModifiersBenchmark.IncludeOnly"
 ```
 ## Command-Line Options
 
@@ -115,5 +115,5 @@ dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark.Includ
 These custom options can be combined with any BenchmarkDotNet options:
 
 ```
-dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark*" --job short --disable-ngen
+dotnet run -c Release -f net10.0 -- --filter "*ItemSpecModifiersBenchmark*" --job short --disable-ngen
 ```

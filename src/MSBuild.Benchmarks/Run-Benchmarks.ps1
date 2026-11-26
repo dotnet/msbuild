@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Runs BenchmarkDotNet benchmarks selected by filter or named set sequentially for each requested
-    target framework. By default, the script runs net472 and net11.0 on Windows, and net11.0
+    target framework. By default, the script runs net472 and net10.0 on Windows, and net10.0
     elsewhere. The .NET SDK selected by the repository is used for the benchmark host and its child
     processes. Artifacts from each run are written to a separate target-framework directory.
 
@@ -19,7 +19,7 @@
     significant amount of time.
 
 .PARAMETER TargetFramework
-    Target frameworks to run. Defaults to net472 and net11.0 on Windows, and net11.0 elsewhere.
+    Target frameworks to run. Defaults to net472 and net10.0 on Windows, and net10.0 elsewhere.
 
 .PARAMETER Configuration
     The build configuration passed to dotnet run. Defaults to Release.
@@ -63,7 +63,7 @@
 
 .EXAMPLE
     .\Run-Benchmarks.ps1 -Filter '*PropertyExpansionBenchmark*' `
-        -Framework net11.0 -LaunchCount 3
+        -Framework net10.0 -LaunchCount 3
 
 .EXAMPLE
     .\Run-Benchmarks.ps1 -All
@@ -184,11 +184,11 @@ if (-not $TargetFramework)
 {
     $TargetFramework = if ($env:OS -eq 'Windows_NT')
     {
-        @('net472', 'net11.0')
+        @('net472', 'net10.0')
     }
     else
     {
-        @('net11.0')
+        @('net10.0')
     }
 }
 
