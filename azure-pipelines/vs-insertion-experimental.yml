@@ -41,14 +41,16 @@ variables:
   - name: MSBuild_CI_SourceVersion
     value: $(resources.pipeline.MSBuildExpPerf.sourceCommit)
   - name: ArtifactPackagesPath
-    value: $(Build.ArtifactStagingDirectory)/PackageArtifacts
+    value: $(Build.ArtifactStagingDirectory)/Windows_NT_Artifacts/packages
 
-  - name: MSBuildPackagePattern
-    value: '$(ArtifactPackagesPath)/Microsoft.Build.*.nupkg'
+  - name: MSBuildShippingPackagePattern
+    value: '$(ArtifactPackagesPath)/shipping/Microsoft.Build.*.nupkg'
+  - name: MSBuildNonShippingPackagePattern
+    value: '$(ArtifactPackagesPath)/nonshipping/Microsoft.Build.*.nupkg'
   - name: StringToolsPackagePattern
-    value: '$(ArtifactPackagesPath)/Microsoft.NET.StringTools*.nupkg'
+    value: '$(ArtifactPackagesPath)/shipping/Microsoft.NET.StringTools*.nupkg'
   - name: ExternalAPIsPackagePattern
-    value: '$(ArtifactPackagesPath)/VS.ExternalAPIs.*.nupkg'
+    value: '$(ArtifactPackagesPath)/nonshipping/VS.ExternalAPIs.*.nupkg'
 
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
@@ -84,12 +86,15 @@ extends:
             targetPath: '$(Pipeline.Workspace)/xsd'
           - input: pipelineArtifact
             pipeline: 'MSBuildExpPerf'
-            artifactName: 'PackageArtifacts'
-            targetPath: '$(Build.ArtifactStagingDirectory)/PackageArtifacts'
-            # the CI build creates a sourcebuild intermediate package that is not signed, remove it to avoid warning from Guardian
+            artifactName: 'Windows_NT_Artifacts'
+            targetPath: '$(Build.ArtifactStagingDirectory)/Windows_NT_Artifacts'
+            # Scope downloads to the V4 shipping/nonshipping package subdirectories only
+            # (Microsoft.Build.Localization is nonshipping; excludes symbols, PDBs, manifests, and intermediates).
             itemPattern: |
-              **
-              !**/Microsoft.SourceBuild.Intermediate*.nupkg
+              **/packages/shipping/Microsoft.Build.*.nupkg
+              **/packages/shipping/Microsoft.NET.StringTools*.nupkg
+              **/packages/nonshipping/Microsoft.Build.*.nupkg
+              **/packages/nonshipping/VS.ExternalAPIs.*.nupkg
         steps:
         - task: Powershell@2
           name: SetSourceBranch
@@ -149,8 +154,10 @@ extends:
           inputs:
             targetType: inline
             script: |
-              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/VS.ExternalAPIs.*.nupkg"
+              $ErrorActionPreference = 'Stop'
+              $folder = "$(ArtifactPackagesPath)/nonshipping/VS.ExternalAPIs.*.nupkg"
               $packageFile = Get-ChildItem -Path $folder -Filter VS.ExternalAPIs.*.nupkg | Select-Object -First 1
+              if (-not $packageFile) { throw "No package found matching '$folder'." }
               $packageVersion = $packageFile.BaseName.TrimStart("VS.ExternalAPIs.MSBuild")
               Write-Host "Setting MSBuild_PackageVersion to '$packageVersion'"
               Write-Host "##vso[task.setvariable variable=MSBuild_PackageVersion]$($packageVersion)"
@@ -159,7 +166,7 @@ extends:
           displayName: 'Push MSBuild CoreXT packages'
           inputs:
             packageParentPath: '$(Build.ArtifactStagingDirectory)'
-            packagesToPush: $(MSBuildPackagePattern);$(StringToolsPackagePattern);$(ExternalAPIsPackagePattern)
+            packagesToPush: $(MSBuildShippingPackagePattern);$(MSBuildNonShippingPackagePattern);$(StringToolsPackagePattern);$(ExternalAPIsPackagePattern)
             nuGetFeedType: internal
             publishVstsFeed: VS
             allowPackageConflicts: true
