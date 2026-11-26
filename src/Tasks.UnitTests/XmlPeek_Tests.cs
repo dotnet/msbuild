@@ -252,13 +252,13 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void PeekDtdShowsTaskSpecificErrorMessageByDefault()
+        public void PeekDtdShowsTaskSpecificErrorMessageWhenProhibited()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             var xmlInput = env.CreateFile("doc.xml", _xmlFileNoNsWithDtd);
             MockEngine engine = new(_output);
 
-            XmlPeek task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            XmlPeek task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest(), ProhibitDtd = true };
             task.BuildEngine = engine;
             task.XmlInputPath = new TaskItem(xmlInput.Path);
             task.Query = "//variable/@Name";
@@ -270,14 +270,28 @@ namespace Microsoft.Build.UnitTests
             engine.Log.ShouldContain(nameof(XmlPeek.ProhibitDtd));
         }
 
-        [Fact]
-        public void PeekAllowsDtdByDefaultWhenWave18_11IsDisabled()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("18.11")]
+        [InlineData("999.999")]
+        public void PeekIgnoresDtdByDefaultInServicing(string disabledWave)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
             ChangeWaves.ResetStateForTests();
 
-            new XmlPeek().ProhibitDtd.ShouldBeFalse();
+            MockEngine engine = new(_output);
+            XmlPeek task = new()
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = engine,
+                XmlContent = _xmlFileNoNsWithDtd,
+                Query = "//variable/@Name",
+            };
+
+            task.ProhibitDtd.ShouldBeFalse();
+            task.Execute().ShouldBeTrue();
+            task.Result.ShouldHaveSingleItem().ItemSpec.ShouldBe("a");
         }
 
         [Fact]
