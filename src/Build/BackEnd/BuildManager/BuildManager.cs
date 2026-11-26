@@ -322,6 +322,11 @@ namespace Microsoft.Build.Execution
             _nextUnnamedProjectId = 1;
             _componentFactories = new BuildComponentFactoryCollection(this);
             _componentFactories.RegisterDefaultFactories();
+            // Register override-capable cache wrappers as permanent singletons so that per-build input results
+            // caches (/irc) can attach and detach overrides across builds without invalidating cached references
+            // held by long-lived singletons such as Scheduler and FileAccessManager.
+            _componentFactories.ReplaceFactory(BuildComponentType.ConfigCache, ConfigCacheWithOverride.CreateComponent);
+            _componentFactories.ReplaceFactory(BuildComponentType.ResultsCache, ResultsCacheWithOverride.CreateComponent);
             SerializationContractInitializer.Initialize();
             _projectStartedEvents = new Dictionary<int, BuildEventArgs>();
 
@@ -776,6 +781,7 @@ namespace Microsoft.Build.Execution
 
                 if (_threadException != null)
                 {
+                    ClearCacheOverrides();
                     ShutdownLoggingService(loggingService);
 
                     _threadException.Throw();
@@ -888,32 +894,26 @@ namespace Microsoft.Build.Execution
             {
                 Debug.Assert(Monitor.IsEntered(_syncLock));
 
-                var usesInputCaches = _buildParameters.UsesInputCaches();
-
-                if (usesInputCaches)
-                {
-                    ReuseOldCaches(_buildParameters.InputResultsCacheFiles);
-                }
-
                 _configCache = ((IBuildComponentHost)this).GetComponent<IConfigCache>(BuildComponentType.ConfigCache);
                 _resultsCache = ((IBuildComponentHost)this).GetComponent<IResultsCache>(BuildComponentType.ResultsCache);
 
-                if (!usesInputCaches && (_buildParameters.ResetCaches || _configCache!.IsConfigCacheSizeLargerThanThreshold()))
+                ClearCacheOverrides();
+
+                var usesInputCaches = _buildParameters.UsesInputCaches();
+
+                if (usesInputCaches || _buildParameters.ResetCaches || _configCache!.IsConfigCacheSizeLargerThanThreshold())
                 {
                     ResetCaches();
                 }
                 else
                 {
-                    if (!usesInputCaches)
-                    {
-                        List<int> configurationsCleared = _configCache!.ClearNonExplicitlyLoadedConfigurations();
+                    List<int> configurationsCleared = _configCache!.ClearNonExplicitlyLoadedConfigurations();
 
-                        if (configurationsCleared != null)
+                    if (configurationsCleared != null)
+                    {
+                        foreach (int configurationId in configurationsCleared)
                         {
-                            foreach (int configurationId in configurationsCleared)
-                            {
-                                _resultsCache!.ClearResultsForConfiguration(configurationId);
-                            }
+                            _resultsCache!.ClearResultsForConfiguration(configurationId);
                         }
                     }
 
@@ -923,6 +923,11 @@ namespace Microsoft.Build.Execution
                     }
 
                     _buildParameters.ProjectRootElementCache.DiscardImplicitReferences();
+                }
+
+                if (usesInputCaches)
+                {
+                    ReuseOldCaches(_buildParameters.InputResultsCacheFiles);
                 }
             }
         }
@@ -1055,6 +1060,7 @@ namespace Microsoft.Build.Execution
 
                 _configCache = ((IBuildComponentHost)this).GetComponent<IConfigCache>(BuildComponentType.ConfigCache);
                 _resultsCache = ((IBuildComponentHost)this).GetComponent<IResultsCache>(BuildComponentType.ResultsCache);
+                ClearCacheOverrides();
                 _resultsCache!.ClearResults();
 
                 // This call clears out the directory.
@@ -2735,6 +2741,8 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+            ClearCacheOverrides();
+
             if (Environment.GetEnvironmentVariable("MSBUILDCLEARXMLCACHEONBUILDMANAGER") == "1")
             {
                 // Optionally clear out the cache. This has the advantage of releasing memory,
@@ -3800,13 +3808,26 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        private void ClearCacheOverrides()
+        {
+            if (_configCache is ConfigCacheWithOverride configCacheWithOverride)
+            {
+                configCacheWithOverride.ClearOverride();
+            }
+
+            if (_resultsCache is ResultsCacheWithOverride resultsCacheWithOverride)
+            {
+                resultsCacheWithOverride.ClearOverride();
+            }
+        }
+
         private bool ReuseOldCaches(string[] inputCacheFiles)
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
 
             Assumed.NotNull(inputCacheFiles);
-            Assumed.Null(_configCache, "caches must not be set at this point");
-            Assumed.Null(_resultsCache, "caches must not be set at this point");
+            Assumed.True(_configCache is ConfigCacheWithOverride, "config cache must support input cache overrides");
+            Assumed.True(_resultsCache is ResultsCacheWithOverride, "results cache must support input cache overrides");
 
             try
             {
@@ -3838,11 +3859,11 @@ namespace Microsoft.Build.Execution
 
                 var cacheAggregation = cacheAggregator.Aggregate();
 
-                // using caches with override (override queried first before current cache) based on the assumption that during single project cached builds
-                // there's many old results, but just one single actively building project.
-
-                _componentFactories.ReplaceFactory(BuildComponentType.ConfigCache, new ConfigCacheWithOverride(cacheAggregation.ConfigCache));
-                _componentFactories.ReplaceFactory(BuildComponentType.ResultsCache, new ResultsCacheWithOverride(cacheAggregation.ResultsCache));
+                // Attach the aggregated input caches as per-build overrides on the stable cache singletons
+                // (override queried first before current cache) so long-lived singletons such as Scheduler
+                // and FileAccessManager observe them without replacing component instances.
+                ((ConfigCacheWithOverride)_configCache!).SetOverride(cacheAggregation.ConfigCache);
+                ((ResultsCacheWithOverride)_resultsCache!).SetOverride(cacheAggregation.ResultsCache);
 
                 return true;
             }

@@ -9,13 +9,29 @@ namespace Microsoft.Build.Execution
 {
     internal class ResultsCacheWithOverride : IResultsCache
     {
-        private readonly IResultsCache _override;
+        private volatile IResultsCache? _override;
         public ResultsCache CurrentCache { get; }
 
-        public ResultsCacheWithOverride(IResultsCache @override)
+        public ResultsCacheWithOverride(IResultsCache? @override = null)
         {
             _override = @override;
             CurrentCache = new ResultsCache();
+        }
+
+        internal static IBuildComponent CreateComponent(BuildComponentType componentType)
+        {
+            Assumed.Equal(componentType, BuildComponentType.ResultsCache, $"Cannot create components of type {componentType}");
+            return new ResultsCacheWithOverride();
+        }
+
+        internal void SetOverride(IResultsCache? @override)
+        {
+            _override = @override;
+        }
+
+        internal void ClearOverride()
+        {
+            _override = null;
         }
 
         public void InitializeComponent(IBuildComponentHost host)
@@ -25,6 +41,7 @@ namespace Microsoft.Build.Execution
 
         public void ShutdownComponent()
         {
+            _override = null;
             CurrentCache.ShutdownComponent();
         }
 
@@ -43,8 +60,9 @@ namespace Microsoft.Build.Execution
 
         public BuildResult GetResultForRequest(BuildRequest request)
         {
-            var overrideResult = _override.GetResultForRequest(request);
-            if (overrideResult != null)
+            IResultsCache? overrideCache = _override;
+            BuildResult? overrideResult = overrideCache?.GetResultForRequest(request);
+            if (overrideResult is not null)
             {
 #if DEBUG
                 Assumed.Null(CurrentCache.GetResultForRequest(request), "caches should not overlap");
@@ -57,8 +75,9 @@ namespace Microsoft.Build.Execution
 
         public BuildResult GetResultsForConfiguration(int configurationId)
         {
-            var overrideResult = _override.GetResultsForConfiguration(configurationId);
-            if (overrideResult != null)
+            IResultsCache? overrideCache = _override;
+            BuildResult? overrideResult = overrideCache?.GetResultsForConfiguration(configurationId);
+            if (overrideResult is not null)
             {
 #if DEBUG
                 Assumed.Null(CurrentCache.GetResultsForConfiguration(configurationId), "caches should not overlap");
@@ -76,25 +95,29 @@ namespace Microsoft.Build.Execution
             bool skippedResultsDoNotCauseCacheMiss,
             IReadOnlyCollection<string>? allowedTopLevelTargets)
         {
-            var overrideRequest = _override.SatisfyRequest(
-                request,
-                configInitialTargets,
-                configDefaultTargets,
-                skippedResultsDoNotCauseCacheMiss,
-                allowedTopLevelTargets);
-
-            if (overrideRequest.Type == ResultsCacheResponseType.Satisfied)
+            IResultsCache? overrideCache = _override;
+            if (overrideCache is not null)
             {
+                ResultsCacheResponse overrideRequest = overrideCache.SatisfyRequest(
+                    request,
+                    configInitialTargets,
+                    configDefaultTargets,
+                    skippedResultsDoNotCauseCacheMiss,
+                    allowedTopLevelTargets);
+
+                if (overrideRequest.Type == ResultsCacheResponseType.Satisfied)
+                {
 #if DEBUG
-                Assumed.Equal(CurrentCache.SatisfyRequest(
-                        request,
-                        configInitialTargets,
-                        configDefaultTargets,
-                        skippedResultsDoNotCauseCacheMiss,
-                        allowedTopLevelTargets)
-                        .Type, ResultsCacheResponseType.NotSatisfied, "caches should not overlap");
+                    Assumed.Equal(CurrentCache.SatisfyRequest(
+                            request,
+                            configInitialTargets,
+                            configDefaultTargets,
+                            skippedResultsDoNotCauseCacheMiss,
+                            allowedTopLevelTargets)
+                            .Type, ResultsCacheResponseType.NotSatisfied, "caches should not overlap");
 #endif
-                return overrideRequest;
+                    return overrideRequest;
+                }
             }
 
             return CurrentCache.SatisfyRequest(
