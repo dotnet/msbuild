@@ -3490,6 +3490,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ExecuteAsTool="$(ResGenExecuteAsTool)"
         EnvironmentVariables="$(ResGenEnvironment)"
         WarnOnBinaryFormatterUse="$(GenerateResourceWarnOnBinaryFormatterUse)"
+        AllowProcessOfUntrustedResourceFiles="$(AllowProcessOfUntrustedResourceFiles)"
         MSBuildRuntime="$(GenerateResourceMSBuildRuntime)"
         MSBuildArchitecture="$(GenerateResourceMSBuildArchitecture)"
         >

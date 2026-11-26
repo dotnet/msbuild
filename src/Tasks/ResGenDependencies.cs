@@ -121,6 +121,11 @@ namespace Microsoft.Build.Tasks
             translator.Translate(ref baseLinkedFileDirectory);
         }
 
+        internal bool HasUpToDateResXFileInfo(string resxFile)
+        {
+            return resXFiles.TryGetValue(resxFile, out ResXFile retVal) && !retVal.HasFileChanged();
+        }
+
         internal ResXFile GetResXFileInfo(string resxFile, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
         {
             // First, try to retrieve the resx information from our hashtable.

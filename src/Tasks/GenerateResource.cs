@@ -43,8 +43,10 @@ using Microsoft.Build.Utilities;
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using Microsoft.Win32;
 #if FEATURE_WINDOWSINTEROP
+using Microsoft.Win32.SafeHandles;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.Storage.FileSystem;
 using Windows.Win32.System.Com;
 using Windows.Win32.System.Com.Urlmon;
 #endif
@@ -211,6 +213,12 @@ namespace Microsoft.Build.Tasks
         /// non-string resources with MSBuild running on .NET Core.
         /// </summary>
         public bool UsePreserializedResources { get; set; } = false;
+
+        /// <summary>
+        /// Indicates whether resource files marked as originating from an untrusted zone
+        /// (such as Mark of the Web) should still be processed when trusted by the user.
+        /// </summary>
+        public bool AllowProcessOfUntrustedResourceFiles { get; set; } = false;
 
         /// <summary>
         /// Additional inputs to the dependency checking done by this task. For example,
@@ -937,11 +945,51 @@ namespace Microsoft.Build.Tasks
         }
 
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
-        private static readonly bool AllowMOTW = !NativeMethodsShared.IsWindows || (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null) is string allowUntrustedFiles && allowUntrustedFiles.Equals("true", StringComparison.OrdinalIgnoreCase));
+        private const string UntrustedResourceFilesRegistrySubKey = @"SOFTWARE\Microsoft\.NETFramework\SDK";
+        private const string AllowUntrustedResourceFilesValueName = "AllowProcessOfUntrustedResourceFiles";
 
-        private const uint ZoneInternet = 3;
+        internal static readonly bool AllowMOTW = !NativeMethodsShared.IsWindows || IsUntrustedResourceProcessingAllowedByRegistry();
+
+        private Dictionary<string, bool> _dangerousFilesCache;
+
+        private static bool IsUntrustedResourceProcessingAllowedByRegistry()
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+                return IsRegistryOptOutEnabled(RegistryView.Registry64) || IsRegistryOptOutEnabled(RegistryView.Registry32);
+            }
+
+            return false;
+        }
+
+        private static bool IsRegistryOptOutEnabled(RegistryView view)
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+                try
+                {
+                    using RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view);
+                    using RegistryKey sdkKey = baseKey?.OpenSubKey(UntrustedResourceFilesRegistrySubKey);
+                    return sdkKey?.GetValue(AllowUntrustedResourceFilesValueName) is string value
+                        && value.Equals("true", StringComparison.OrdinalIgnoreCase);
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    return false;
+                }
+            }
+
+            return false;
+        }
 
 #if FEATURE_WINDOWSINTEROP
+        private const uint ZoneInternet = 3;
+
+        // urlmon.h MapUrlToZone flag (not present in Win32 metadata): bypass urlmon's in-process zone cache
+        // so persistent MSBuild worker nodes immediately observe Unblock-File changes.
+        private const uint MUTZ_DONTUSECACHE = 0x00001000;
+        private static readonly char[] s_directorySeparators = ['\\', '/'];
+
         // CLSID of the InternetSecurityManager coclass exported by urlmon.dll.
         // Not in the Win32 metadata, so it is hard-coded here.
         private static readonly Guid CLSID_InternetSecurityManager = new(0x7B8A2D94, 0x0AC9, 0x11D1, 0x89, 0x6C, 0x00, 0xC0, 0x4F, 0xB6, 0xBF, 0xC4);
@@ -958,22 +1006,147 @@ namespace Microsoft.Build.Tasks
 
         // Resources can have arbitrarily serialized objects in them which can execute arbitrary code
         // so check to see if we should trust them before analyzing them
-        private unsafe bool IsDangerous(String filename)
+        private bool IsDangerous(String filename)
         {
 #if !FEATURE_RESXREADER_LIVEDESERIALIZATION
             return false;
         }
 #else
-            // If they are opted out, there's no work to do
-            if (AllowMOTW)
+            // If they are opted out via registry or MSBuild property, there's no work to do
+            if (AllowMOTW || AllowProcessOfUntrustedResourceFiles)
             {
                 return false;
             }
 
+            if (_dangerousFilesCache != null && _dangerousFilesCache.TryGetValue(filename, out bool cachedDangerous))
+            {
+                return cachedDangerous;
+            }
+
+            bool dangerous = ComputeIsDangerous(filename);
+            (_dangerousFilesCache ??= new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase))[filename] = dangerous;
+            return dangerous;
+        }
+
+        private bool ComputeIsDangerous(string filename)
+        {
 #if FEATURE_WINDOWSINTEROP
-            // First check the zone, if they are not an untrusted zone, they aren't dangerous.
-            // CoCreate the InternetSecurityManager once per process and reuse via the GIT;
-            // double-checked lock around lazy init keeps that allocation single-shot.
+            if (!IsFileInUntrustedZone(filename))
+            {
+                return false;
+            }
+#endif
+
+            // By default all file types that get here are considered dangerous
+            bool dangerous = true;
+
+            string extension = Path.GetExtension(filename);
+            if (String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    string pathToRead = filename;
+#if FEATURE_WINDOWSINTEROP
+                    if (NativeMethodsShared.IsWindows)
+                    {
+                        NormalizeWindowsPaths(FileUtilities.NormalizePath(filename), out _, out pathToRead);
+                    }
+#endif
+                    // XML files are only dangerous if there are unrecognized objects in them
+                    using StreamReader streamReader = FileUtilities.OpenRead(pathToRead);
+                    dangerous = ResourceFileContentsAreDangerous(streamReader, usePreserializedResources: UsePreserializedResources && !ExecuteAsTool);
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    // If the file does not exist, let normal task execution report the missing-file error.
+                    if (!FileSystems.Default.FileExists(filename))
+                    {
+                        return false;
+                    }
+
+                    dangerous = true;
+                }
+            }
+
+            return dangerous;
+        }
+
+#if FEATURE_WINDOWSINTEROP
+        private static unsafe bool IsFileInUntrustedZone(string filename)
+        {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return false;
+            }
+
+            string normalizedPath;
+            try
+            {
+                normalizedPath = FileUtilities.NormalizePath(filename);
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                return true;
+            }
+
+            NormalizeWindowsPaths(normalizedPath, out string standardPath, out string extendedPath);
+
+            // 1. Check the file's own :Zone.Identifier alternate data stream directly using an
+            // extended-length path (\\?\...). Unlike urlmon's MapUrlToZone, this works for paths
+            // >= MAX_PATH, is unaffected by urlmon's in-process zone cache, and is unaffected by
+            // enterprise security-agent minifilters intercepting urlmon queries.
+            // Note: an explicit ZoneId < 3 in ADS never short-circuits to trusted, because a
+            // remote UNC/WebDAV server could attach ZoneId=0 to a file hosted in an untrusted zone.
+            if (HasUntrustedZoneIdentifier(extendedPath))
+            {
+                return true;
+            }
+
+            // 2. Files inside the Temporary Internet Files cache are untrusted even without ADS.
+            if (IsUnderInternetCache(standardPath))
+            {
+                return true;
+            }
+
+            // 3. Query urlmon with MUTZ_DONTUSECACHE so persistent MSBuild worker nodes immediately
+            // observe Unblock-File changes. Because urlmon's MapUrlToZone rejects \\?\ prefixes with
+            // E_INVALIDARG and internally truncates/fails on paths >= MAX_PATH (returning Zone 4 /
+            // URLZONE_UNTRUSTED even for clean local files or short junctions targeting long paths),
+            // probe within MAX_PATH and cross-check URLZONE_UNTRUSTED / HRESULT failures against the
+            // volume or UNC share root after Step 1 has verified no untrusted Zone.Identifier exists.
+            EnsureInternetSecurityManager();
+
+            using ComScope<IInternetSecurityManager> mgr = s_internetSecurityManager.GetInterface();
+            string probePath = GetProbePathWithinMaxPath(standardPath);
+            if (TryMapPathToZone(mgr.Pointer, probePath, out uint zone))
+            {
+                if (zone < ZoneInternet)
+                {
+                    return false;
+                }
+
+                if (zone == ZoneInternet)
+                {
+                    return true;
+                }
+            }
+
+            // MapUrlToZone either failed or returned Zone > 3 (URLZONE_UNTRUSTED = 4), which urlmon
+            // returns on >= MAX_PATH paths (including junctions whose resolved target exceeds MAX_PATH)
+            // and under certain endpoint minifilters. Check the drive or UNC share root to preserve
+            // Restricted Sites / untrusted network-share enforcement while avoiding local false positives.
+            string rootPath = GetPathRootForZoneCheck(standardPath);
+            if (string.IsNullOrEmpty(rootPath))
+            {
+                return true;
+            }
+
+            return !TryMapPathToZone(mgr.Pointer, rootPath, out uint rootZone) || rootZone >= ZoneInternet;
+        }
+
+        private static unsafe void EnsureInternetSecurityManager()
+        {
             if (s_internetSecurityManager is null)
             {
                 lock (s_internetSecurityManagerLock)
@@ -988,38 +1161,166 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
+        }
 
-            uint zone;
-            string fullPath = Path.GetFullPath(filename);
-            using (ComScope<IInternetSecurityManager> mgr = s_internetSecurityManager.GetInterface())
+        private static unsafe bool TryMapPathToZone(IInternetSecurityManager* securityManager, string path, out uint zone)
+        {
+            uint mappedZone = 0;
+            HRESULT hr;
+            fixed (char* pPath = path)
             {
-                fixed (char* pPath = fullPath)
-                {
-                    mgr.Pointer->MapUrlToZone(new PCWSTR(pPath), &zone, 0).ThrowOnFailure();
-                }
+                hr = securityManager->MapUrlToZone(new PCWSTR(pPath), &mappedZone, MUTZ_DONTUSECACHE);
             }
 
-            if (zone < ZoneInternet)
+            zone = mappedZone;
+            return hr.Succeeded;
+        }
+
+        private static unsafe bool HasUntrustedZoneIdentifier(string extendedFilePath)
+        {
+            if (!NativeMethodsShared.IsWindows)
             {
                 return false;
             }
-#endif
 
-            // By default all file types that get here are considered dangerous
-            bool dangerous = true;
+            HANDLE handle = PInvoke.CreateFile(
+                extendedFilePath + ":Zone.Identifier",
+                (uint)FILE_ACCESS_RIGHTS.FILE_GENERIC_READ,
+                FILE_SHARE_MODE.FILE_SHARE_READ | FILE_SHARE_MODE.FILE_SHARE_WRITE | FILE_SHARE_MODE.FILE_SHARE_DELETE,
+                null,
+                FILE_CREATION_DISPOSITION.OPEN_EXISTING,
+                FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_NORMAL,
+                HANDLE.Null);
 
-            string extension = Path.GetExtension(filename);
-            if (String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
+            if (handle == HANDLE.INVALID_HANDLE_VALUE)
             {
-                // XML files are only dangerous if there are unrecognized objects in them
-                using FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-                using StreamReader streamReader = new StreamReader(stream);
-                dangerous = ResourceFileContentsAreDangerous(streamReader);
+                WIN32_ERROR error = (WIN32_ERROR)Marshal.GetLastWin32Error();
+                // If the stream exists on disk but cannot be opened due to permissions or sharing locks,
+                // fail closed so we still inspect the resource contents.
+                return error is WIN32_ERROR.ERROR_ACCESS_DENIED
+                    or WIN32_ERROR.ERROR_SHARING_VIOLATION
+                    or WIN32_ERROR.ERROR_LOCK_VIOLATION;
             }
 
-            return dangerous;
+            using SafeFileHandle safeHandle = new((IntPtr)handle.Value, ownsHandle: true);
+            try
+            {
+                using FileStream stream = new(safeHandle, FileAccess.Read);
+                return TryParseZoneIdentifier(stream, out uint zoneId) && zoneId >= ZoneInternet;
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                return true;
+            }
         }
+
+        private static void NormalizeWindowsPaths(string fullPath, out string standardPath, out string extendedPath)
+        {
+            if (fullPath.StartsWith(@"\\?\UNC\", StringComparison.OrdinalIgnoreCase))
+            {
+                standardPath = @"\\" + fullPath.Substring(8);
+                extendedPath = fullPath;
+            }
+            else if (fullPath.StartsWith(@"\\?\", StringComparison.Ordinal) || fullPath.StartsWith(@"\\.\", StringComparison.Ordinal))
+            {
+                standardPath = fullPath.Substring(4);
+                extendedPath = @"\\?\" + standardPath;
+            }
+            else if (fullPath.StartsWith(@"\\", StringComparison.Ordinal))
+            {
+                standardPath = fullPath;
+                extendedPath = @"\\?\UNC\" + fullPath.Substring(2);
+            }
+            else
+            {
+                standardPath = fullPath;
+                extendedPath = @"\\?\" + fullPath;
+            }
+        }
+
+        private static bool IsUnderInternetCache(string standardPath)
+        {
+            try
+            {
+                string cacheFolder = Environment.GetFolderPath(Environment.SpecialFolder.InternetCache);
+                if (string.IsNullOrEmpty(cacheFolder))
+                {
+                    return false;
+                }
+
+                if (!standardPath.StartsWith(cacheFolder, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                if (standardPath.Length == cacheFolder.Length)
+                {
+                    return true;
+                }
+
+                char trailing = cacheFolder[cacheFolder.Length - 1];
+                if (trailing == '\\' || trailing == '/')
+                {
+                    return true;
+                }
+
+                char next = standardPath[cacheFolder.Length];
+                return next == '\\' || next == '/';
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                return false;
+            }
+        }
+
+        private static string GetProbePathWithinMaxPath(string standardPath)
+        {
+            if (standardPath.Length < (int)PInvoke.MAX_PATH)
+            {
+                return standardPath;
+            }
+
+            string root = GetPathRootForZoneCheck(standardPath);
+            // Win32 directory paths must be strictly shorter than 248 characters.
+            int searchStart = Math.Min(standardPath.Length - 1, 247);
+            int separatorIndex = standardPath.LastIndexOfAny(s_directorySeparators, searchStart);
+            if (separatorIndex < 0)
+            {
+                return root ?? standardPath;
+            }
+
+            if (root != null && separatorIndex < root.Length)
+            {
+                return root;
+            }
+
+            return standardPath.Substring(0, separatorIndex);
+        }
+
+        private static string GetPathRootForZoneCheck(string standardPath)
+        {
+            if (standardPath.Length >= 2 && standardPath[1] == ':')
+            {
+                return standardPath.Length >= 3 && (standardPath[2] == '\\' || standardPath[2] == '/')
+                    ? standardPath.Substring(0, 3)
+                    : standardPath.Substring(0, 2) + @"\";
+            }
+
+            if (standardPath.StartsWith(@"\\", StringComparison.Ordinal))
+            {
+                int serverEnd = standardPath.IndexOfAny(s_directorySeparators, 2);
+                if (serverEnd <= 2 || serverEnd + 1 >= standardPath.Length)
+                {
+                    return null;
+                }
+
+                int shareEnd = standardPath.IndexOfAny(s_directorySeparators, serverEnd + 1);
+                return shareEnd < 0 ? standardPath : standardPath.Substring(0, shareEnd);
+            }
+
+            return null;
+        }
+#endif
 
         /// <summary>
         /// For setting OutputResources and ensuring it can be read after the second AppDomain has been unloaded.
@@ -1053,24 +1354,93 @@ namespace Microsoft.Build.Tasks
 #endif // FEATURE_APPDOMAIN
 
         /// <summary>
+        /// Parses a Windows <c>:Zone.Identifier</c> alternate data stream for a <c>ZoneId</c> entry under <c>[ZoneTransfer]</c>.
+        /// </summary>
+        internal static bool TryParseZoneIdentifier(Stream stream, out uint zoneId)
+        {
+            zoneId = 0;
+            bool foundZoneId = false;
+            bool inZoneTransferSection = false;
+
+            using StreamReader reader = new(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                ReadOnlySpan<char> trimmed = line.AsSpan().Trim();
+                if (trimmed.IsEmpty || trimmed[0] == ';')
+                {
+                    continue;
+                }
+
+                if (trimmed[0] == '[' && trimmed[trimmed.Length - 1] == ']')
+                {
+                    ReadOnlySpan<char> sectionName = trimmed.Slice(1, trimmed.Length - 2).Trim();
+                    inZoneTransferSection = sectionName.Equals("ZoneTransfer".AsSpan(), StringComparison.OrdinalIgnoreCase);
+                    continue;
+                }
+
+                if (!inZoneTransferSection)
+                {
+                    continue;
+                }
+
+                int equalsIndex = trimmed.IndexOf('=');
+                if (equalsIndex <= 0)
+                {
+                    continue;
+                }
+
+                ReadOnlySpan<char> key = trimmed.Slice(0, equalsIndex).Trim();
+                if (!key.Equals("ZoneId".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                ReadOnlySpan<char> value = trimmed.Slice(equalsIndex + 1).Trim();
+                if (uint.TryParse(value.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out uint parsedZone))
+                {
+                    if (!foundZoneId || parsedZone > zoneId)
+                    {
+                        zoneId = parsedZone;
+                    }
+
+                    foundZoneId = true;
+                }
+                else
+                {
+                    // Treat a malformed ZoneId value conservatively as untrusted (URLZONE_UNTRUSTED = 4).
+                    zoneId = 4;
+                    return true;
+                }
+            }
+
+            return foundZoneId;
+        }
+
+        /// <summary>
+        /// Scans the contents of a <c>.resx</c>/<c>.resw</c> file and determines whether it contains any entry
+        /// that requires the file to be trusted before it is processed by <see cref="GenerateResource"/>.
+        /// </summary>
+        internal static bool ResourceFileContentsAreDangerous(TextReader textReader)
+            => ResourceFileContentsAreDangerous(textReader, usePreserializedResources: false);
+
+        /// <summary>
         /// Scans the contents of a <c>.resx</c>/<c>.resw</c> file and determines whether it contains any entry
         /// that requires the file to be trusted before it is processed by <see cref="GenerateResource"/>.
         /// </summary>
         /// <remarks>
-        /// This is the content-only portion of the Mark-of-the-Web trust check (see <c>IsDangerous</c>). It is kept
-        /// separate (and free of the zone/COM machinery) so it can be unit-tested on all target frameworks.
-        /// A resource is considered dangerous when a <c>data</c>/<c>metadata</c> element:
-        /// <list type="bullet">
-        /// <item>has a <c>mimetype</c> attribute (an arbitrary object will be deserialized), or</item>
-        /// <item>has a <c>type</c> attribute referencing <c>ResXFileRef</c> (an external linked file will be read), or</item>
-        /// <item>has any other <c>type</c> attribute - only when ChangeWave 18.9 is enabled - because resolving the
-        /// type eventually calls <c>Type.GetType</c>, which can probe for assemblies on disk.</item>
-        /// </list>
+        /// When <paramref name="usePreserializedResources"/> is <see langword="true"/>, <see cref="MSBuildResXReader"/>
+        /// parses the XML without instantiating <c>BinaryFormatter</c>, <c>TypeConverter</c>, or <c>Type.GetType</c>;
+        /// only <c>ResXFileRef</c> entries read external files from disk at build time.
+        /// When <paramref name="usePreserializedResources"/> is <see langword="false"/>, live <c>ResXResourceReader</c>
+        /// deserialization is used, so <c>mimetype</c>, <c>ResXFileRef</c>, and (under ChangeWave 18.9) non-allowlisted
+        /// <c>type</c> entries require trust.
         /// </remarks>
-        internal static bool ResourceFileContentsAreDangerous(TextReader textReader)
+        internal static bool ResourceFileContentsAreDangerous(TextReader textReader, bool usePreserializedResources)
         {
             // XML files are only dangerous if there are unrecognized objects in them.
             bool dangerous = false;
+            Dictionary<string, string> aliases = null;
 
             using XmlTextReader reader = new XmlTextReader(textReader);
             reader.DtdProcessing = DtdProcessing.Ignore;
@@ -1083,12 +1453,39 @@ namespace Microsoft.Build.Tasks
                     {
                         string localName = reader.LocalName;
 
-                        // We only want to parse data nodes,
-                        // the mimetype attribute gives the serializer
-                        // that's requested.
-                        if (localName.Equals("data") || localName.Equals("metadata"))
+                        if (!usePreserializedResources && localName.Equals("assembly", StringComparison.Ordinal))
                         {
-                            if (reader["mimetype"] != null)
+                            string assemblyName = reader["name"];
+                            if (string.IsNullOrWhiteSpace(assemblyName))
+                            {
+                                dangerous = true;
+                                break;
+                            }
+
+                            string alias = reader["alias"];
+                            if (string.IsNullOrWhiteSpace(alias))
+                            {
+                                ReadOnlySpan<char> nameSpan = assemblyName.AsSpan().Trim();
+                                int commaIndex = nameSpan.IndexOf(',');
+                                ReadOnlySpan<char> derivedAlias = (commaIndex >= 0 ? nameSpan.Slice(0, commaIndex) : nameSpan).Trim();
+                                if (derivedAlias.IsEmpty)
+                                {
+                                    dangerous = true;
+                                    break;
+                                }
+
+                                alias = derivedAlias.ToString();
+                            }
+                            else
+                            {
+                                alias = alias.Trim();
+                            }
+
+                            (aliases ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase))[alias] = assemblyName.Trim();
+                        }
+                        else if (localName.Equals("data", StringComparison.Ordinal) || (!usePreserializedResources && localName.Equals("metadata", StringComparison.Ordinal)))
+                        {
+                            if (!usePreserializedResources && reader["mimetype"] != null)
                             {
                                 dangerous = true;
                             }
@@ -1098,13 +1495,15 @@ namespace Microsoft.Build.Tasks
                                 string typeAttribute = reader["type"];
                                 if (typeAttribute != null)
                                 {
-                                    if (typeAttribute.IndexOf("ResXFileRef", StringComparison.Ordinal) >= 0)
+                                    if (typeAttribute.IndexOf("ResXFileRef", StringComparison.OrdinalIgnoreCase) >= 0)
                                     {
                                         dangerous = true;
                                     }
-                                    else if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9))
+                                    else if (!usePreserializedResources &&
+                                             ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9) &&
+                                             !IsSafeFrameworkValueType(typeAttribute, aliases))
                                     {
-                                        // Require any typed entry on a "Mark of the web" to be unblocked by user
+                                        // Require unrecognized or non-value typed entries on a Mark-of-the-Web file to be unblocked.
                                         dangerous = true;
                                     }
                                 }
@@ -1127,6 +1526,233 @@ namespace Microsoft.Build.Tasks
 
             return dangerous;
         }
+
+        private enum SafeFrameworkAssembly
+        {
+            Mscorlib,
+            SystemDrawing,
+            SystemWindowsForms,
+        }
+
+        private static bool IsSafeFrameworkValueType(string typeAttribute, Dictionary<string, string> aliases)
+        {
+            ReadOnlySpan<char> span = typeAttribute.AsSpan().Trim();
+            if (span.IsEmpty)
+            {
+                return false;
+            }
+
+            int commaIndex = span.IndexOf(',');
+            ReadOnlySpan<char> fullTypeName = (commaIndex >= 0 ? span.Slice(0, commaIndex) : span).Trim();
+            if (fullTypeName.IsEmpty)
+            {
+                return false;
+            }
+
+            // Reject generic, pointer, and byref type syntax (with the sole exception of System.Byte[]).
+            if (!fullTypeName.Equals("System.Byte[]".AsSpan(), StringComparison.Ordinal) &&
+                (fullTypeName.IndexOf('[') >= 0 || fullTypeName.IndexOf(']') >= 0 || fullTypeName.IndexOf('*') >= 0 || fullTypeName.IndexOf('&') >= 0))
+            {
+                return false;
+            }
+
+            if (commaIndex < 0)
+            {
+                // Unqualified type names resolve against mscorlib unless shadowed; only primitive mscorlib types are safe.
+                return IsSafeMscorlibType(fullTypeName);
+            }
+
+            ReadOnlySpan<char> assemblySpec = span.Slice(commaIndex + 1).Trim();
+            if (assemblySpec.IsEmpty)
+            {
+                return false;
+            }
+
+            if (aliases != null && aliases.TryGetValue(assemblySpec.ToString(), out string resolvedAssembly))
+            {
+                assemblySpec = resolvedAssembly.AsSpan().Trim();
+            }
+
+            if (!TryGetSafeFrameworkAssembly(assemblySpec, out SafeFrameworkAssembly frameworkAssembly))
+            {
+                return false;
+            }
+
+            return frameworkAssembly switch
+            {
+                SafeFrameworkAssembly.Mscorlib => IsSafeMscorlibType(fullTypeName),
+                SafeFrameworkAssembly.SystemDrawing => IsSafeSystemDrawingType(fullTypeName),
+                SafeFrameworkAssembly.SystemWindowsForms => IsSafeWindowsFormsType(fullTypeName),
+                _ => false,
+            };
+        }
+
+        private static bool TryGetSafeFrameworkAssembly(ReadOnlySpan<char> assemblySpec, out SafeFrameworkAssembly assemblyKind)
+        {
+            assemblyKind = default;
+
+            int firstComma = assemblySpec.IndexOf(',');
+            if (firstComma < 0)
+            {
+                // Partial assembly names other than mscorlib are rejected because AssemblyNamesTypeResolutionService
+                // falls back to scanning project references by simple type name when Type.GetType returns null.
+                if (assemblySpec.Equals("mscorlib".AsSpan(), StringComparison.Ordinal))
+                {
+                    assemblyKind = SafeFrameworkAssembly.Mscorlib;
+                    return true;
+                }
+
+                return false;
+            }
+
+            ReadOnlySpan<char> simpleName = assemblySpec.Slice(0, firstComma).Trim();
+            string expectedPublicKeyToken;
+            if (simpleName.Equals("mscorlib".AsSpan(), StringComparison.Ordinal))
+            {
+                assemblyKind = SafeFrameworkAssembly.Mscorlib;
+                expectedPublicKeyToken = "b77a5c561934e089";
+            }
+            else if (simpleName.Equals("System.Drawing".AsSpan(), StringComparison.Ordinal))
+            {
+                assemblyKind = SafeFrameworkAssembly.SystemDrawing;
+                expectedPublicKeyToken = "b03f5f7f11d50a3a";
+            }
+            else if (simpleName.Equals("System.Windows.Forms".AsSpan(), StringComparison.Ordinal))
+            {
+                assemblyKind = SafeFrameworkAssembly.SystemWindowsForms;
+                expectedPublicKeyToken = "b77a5c561934e089";
+            }
+            else
+            {
+                return false;
+            }
+
+            bool hasVersion = false;
+            bool hasCulture = false;
+            bool hasPublicKeyToken = false;
+
+            ReadOnlySpan<char> remaining = assemblySpec.Slice(firstComma + 1);
+            while (true)
+            {
+                int nextComma = remaining.IndexOf(',');
+                ReadOnlySpan<char> part = (nextComma >= 0 ? remaining.Slice(0, nextComma) : remaining).Trim();
+                int equalsIndex = part.IndexOf('=');
+                if (equalsIndex <= 0)
+                {
+                    return false;
+                }
+
+                ReadOnlySpan<char> key = part.Slice(0, equalsIndex).Trim();
+                ReadOnlySpan<char> value = part.Slice(equalsIndex + 1).Trim();
+
+                if (key.Equals("Version".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                {
+                    if (hasVersion || (!value.Equals("4.0.0.0".AsSpan(), StringComparison.Ordinal) && !value.Equals("2.0.0.0".AsSpan(), StringComparison.Ordinal)))
+                    {
+                        return false;
+                    }
+
+                    hasVersion = true;
+                }
+                else if (key.Equals("Culture".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                {
+                    if (hasCulture || !value.Equals("neutral".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        return false;
+                    }
+
+                    hasCulture = true;
+                }
+                else if (key.Equals("PublicKeyToken".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                {
+                    if (hasPublicKeyToken || !value.Equals(expectedPublicKeyToken.AsSpan(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        return false;
+                    }
+
+                    hasPublicKeyToken = true;
+                }
+                else
+                {
+                    // Reject unrecognized attributes such as CodeBase or Retargetable.
+                    return false;
+                }
+
+                if (nextComma < 0)
+                {
+                    break;
+                }
+
+                remaining = remaining.Slice(nextComma + 1);
+            }
+
+            return hasVersion && hasCulture && hasPublicKeyToken;
+        }
+
+        private static bool IsSafeMscorlibType(ReadOnlySpan<char> fullTypeName) => fullTypeName switch
+        {
+            "System.String" or
+            "System.Boolean" or
+            "System.Char" or
+            "System.Byte" or
+            "System.SByte" or
+            "System.Int16" or
+            "System.UInt16" or
+            "System.Int32" or
+            "System.UInt32" or
+            "System.Int64" or
+            "System.UInt64" or
+            "System.Single" or
+            "System.Double" or
+            "System.Decimal" or
+            "System.DateTime" or
+            "System.DateTimeOffset" or
+            "System.TimeSpan" or
+            "System.Guid" or
+            "System.Byte[]" => true,
+            _ => false,
+        };
+
+        private static bool IsSafeSystemDrawingType(ReadOnlySpan<char> fullTypeName) => fullTypeName switch
+        {
+            "System.Drawing.Point" or
+            "System.Drawing.PointF" or
+            "System.Drawing.Size" or
+            "System.Drawing.SizeF" or
+            "System.Drawing.Rectangle" or
+            "System.Drawing.RectangleF" or
+            "System.Drawing.Color" or
+            "System.Drawing.Font" or
+            "System.Drawing.FontStyle" or
+            "System.Drawing.GraphicsUnit" or
+            "System.Drawing.ContentAlignment" => true,
+            _ => false,
+        };
+
+        private static bool IsSafeWindowsFormsType(ReadOnlySpan<char> fullTypeName) => fullTypeName switch
+        {
+            "System.Resources.ResXNullRef" or
+            "System.Windows.Forms.Padding" or
+            "System.Windows.Forms.AnchorStyles" or
+            "System.Windows.Forms.DockStyle" or
+            "System.Windows.Forms.AutoSizeMode" or
+            "System.Windows.Forms.AutoScaleMode" or
+            "System.Windows.Forms.FlowDirection" or
+            "System.Windows.Forms.TableLayoutPanelGrowStyle" or
+            "System.Windows.Forms.ImeMode" or
+            "System.Windows.Forms.RightToLeft" or
+            "System.Windows.Forms.FlatStyle" or
+            "System.Windows.Forms.ScrollBars" or
+            "System.Windows.Forms.PictureBoxSizeMode" or
+            "System.Windows.Forms.FormStartPosition" or
+            "System.Windows.Forms.FormBorderStyle" or
+            "System.Windows.Forms.Orientation" or
+            "System.Windows.Forms.HorizontalAlignment" or
+            "System.Windows.Forms.ToolStripItemDisplayStyle" or
+            "System.Windows.Forms.ToolStripItemAlignment" or
+            "System.Windows.Forms.Keys" => true,
+            _ => false,
+        };
 
 
         /// <returns>True if the path is found (or it doesn't matter because we're executing in memory), false otherwise</returns>
@@ -1607,6 +2233,11 @@ namespace Microsoft.Build.Tasks
             }
 
             // OK, we have a .resx file
+            // Avoid cracking an uncached or modified .resx file via ResGenDependencies before its trust state is checked.
+            if (!_cache.HasUpToDateResXFileInfo(sourceFilePath) && IsDangerous(sourceFilePath))
+            {
+                return true;
+            }
 
             // PERF: Regardless of whether the outputFile exists, if the source file is a .resx
             // go ahead and retrieve it from the cache. This is because we want the cache
@@ -1835,8 +2466,11 @@ namespace Microsoft.Build.Tasks
                     return true;
                 }
 
-                if (String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) ||
-                    String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
+                // Preserialized resource handling uses MSBuildResXReader without loading referenced assemblies or
+                // instantiating types/BinaryFormatter, so it never needs a separate AppDomain for .resx/.resw inputs.
+                if (!UsePreserializedResources &&
+                    (String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) ||
+                     String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase)))
                 {
                     XmlReader reader = null;
                     string name = null;
