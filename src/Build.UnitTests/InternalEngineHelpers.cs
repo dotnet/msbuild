@@ -80,7 +80,7 @@ namespace Microsoft.Build.Unittest
             {
                 if (!sdkResult.Success)
                 {
-                    return new SdkResult(sdkResult.SdkReference, sdkResult.Warnings, sdkResult.Errors);
+                    return new SdkResult(sdkResult.SdkReference, sdkResult.Errors, sdkResult.Warnings);
                 }
 
                 IEnumerable<string> sdkResultPaths;
