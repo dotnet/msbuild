@@ -47,6 +47,12 @@ Then they can use in project file:
 
 This uses the AssemblyTaskFactory to load the task from the .dll and create an instance of it.
 
+## SDK Tasks on .NET Framework MSBuild
+
+Visual Studio / .NET Framework MSBuild registers `TarDirectory` and `Untar` from the selected .NET SDK when its version is 11 or later and `NetCoreSdkRoot` is available. These tasks run in the .NET TaskHost using `Runtime="NET"`, not in the .NET Framework process.
+
+The registrations live in `Microsoft.Common.CurrentVersion.targets` because they depend on per-project SDK properties. They are not enabled for SDK 10 or earlier, or for projects without a selected SDK.
+
 ## Diagram of task lifecycle
 
 ```mermaid
