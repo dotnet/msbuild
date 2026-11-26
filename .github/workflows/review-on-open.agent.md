@@ -39,10 +39,11 @@ checkout:
 features:
   dangerously-allow-pull-request-target-forks-all: true
 
-# The review reads PR data through the guarded GitHub MCP, not shell commands.
-# With the current public-repository integrity default, PR diffs are filtered,
-# so reviews report incomplete until the gateway supports trusted PR content:
-# https://github.com/github/gh-aw-mcpg/issues/15160
+# The review reads PR data through the GitHub MCP (`min-integrity: none` in
+# `shared/review-shared.md` because gh-aw-mcpg labels PR diffs as `none`
+# integrity — see github/gh-aw-mcpg#15160, closed as not planned). Keep shell
+# access and CLI proxy disabled so the agent cannot execute PR code or bypass
+# the firewall/MCP boundary.
 tools:
   bash: false
   cli-proxy: false
@@ -68,7 +69,7 @@ environment: copilot-pat-pool
 engine:
   id: copilot
   # Copilot can auto-approve read-only tools even without explicit grants.
-  args: ["--deny-tool", "shell", "--deny-tool", "github(get_commit)"]
+  args: ["--deny-tool", "shell"]
   env:
      COPILOT_GITHUB_TOKEN: "${{ case( needs.pat_pool.outputs.pat_number == '0', secrets.COPILOT_PAT_0, needs.pat_pool.outputs.pat_number == '1', secrets.COPILOT_PAT_1, needs.pat_pool.outputs.pat_number == '2', secrets.COPILOT_PAT_2, needs.pat_pool.outputs.pat_number == '3', secrets.COPILOT_PAT_3, needs.pat_pool.outputs.pat_number == '4', secrets.COPILOT_PAT_4, needs.pat_pool.outputs.pat_number == '5', secrets.COPILOT_PAT_5, needs.pat_pool.outputs.pat_number == '6', secrets.COPILOT_PAT_6, needs.pat_pool.outputs.pat_number == '7', secrets.COPILOT_PAT_7, needs.pat_pool.outputs.pat_number == '8', secrets.COPILOT_PAT_8, needs.pat_pool.outputs.pat_number == '9', secrets.COPILOT_PAT_9, 'NO COPILOT PAT AVAILABLE') }}"
 ---

@@ -15,8 +15,20 @@ permissions:
   pull-requests: read
 
 tools:
+  # Read PR data through the GitHub MCP, not shell commands.
+  bash: false
+  cli-proxy: false
   github:
     toolsets: [pull_requests, repos]
+    # Required so the MCP gateway allows pull_request_read (get_diff / get_files)
+    # and PR-head get_file_contents on a public repo: gh-aw-mcpg unconditionally
+    # labels pull-request-content as `none` integrity (github/gh-aw-mcpg#15160,
+    # closed as not planned). Exposure is bounded by the `roles: [admin, maintainer,
+    # write]` pre-activation gate, base-only checkout, bash/cli-proxy disabled,
+    # read-only GitHub MCP scoped to public repos, threat detection, and
+    # comment/review-only safe outputs (no APPROVE or push).
+    min-integrity: none
+    allowed-repos: public
 
 safe-outputs:
   create-pull-request-review-comment:
