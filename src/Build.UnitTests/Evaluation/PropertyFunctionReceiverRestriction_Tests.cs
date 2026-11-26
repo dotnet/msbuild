@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Versioning;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared.FileSystem;
@@ -43,6 +46,24 @@ public class PropertyFunctionReceiverRestriction_Tests
         return expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
     }
 
+    private static string EvaluateProjectModel(bool useProjectInstance, string expression, params (string name, string value)[] properties)
+    {
+        ProjectRootElement root = ProjectRootElement.Create();
+        foreach ((string name, string value) in properties)
+        {
+            root.AddProperty(name, value);
+        }
+
+        root.AddProperty("Result", expression);
+        if (useProjectInstance)
+        {
+            return new ProjectInstance(root).GetPropertyValue("Result");
+        }
+
+        using var collection = new ProjectCollection();
+        return new Project(root, globalProperties: null, toolsVersion: null, collection).GetPropertyValue("Result");
+    }
+
     private static IDisposable SetSwitch(string name, bool value)
     {
         AppContext.SetSwitch(name, value);
@@ -58,6 +79,53 @@ public class PropertyFunctionReceiverRestriction_Tests
         public SwitchReset(string name) => _name = name;
 
         public void Dispose() => AppContext.SetSwitch(_name, false);
+    }
+
+    private sealed class AppContextSwitchState : IDisposable
+    {
+        private readonly string _name;
+        private readonly bool _hadValue;
+        private readonly bool _value;
+
+        public AppContextSwitchState(string name)
+        {
+            _name = name;
+            _hadValue = AppContext.TryGetSwitch(name, out _value);
+        }
+
+        public void Set(bool value) => AppContext.SetSwitch(_name, value);
+
+        public void Unset() => UnsetAppContextSwitch(_name);
+
+        public void Dispose()
+        {
+            if (_hadValue)
+            {
+                AppContext.SetSwitch(_name, _value);
+            }
+            else
+            {
+                Unset();
+            }
+        }
+
+        private static void UnsetAppContextSwitch(string name)
+        {
+            foreach (FieldInfo field in typeof(AppContext).GetFields(BindingFlags.NonPublic | BindingFlags.Static))
+            {
+                if (field.GetValue(null) is IDictionary switches)
+                {
+                    lock (switches)
+                    {
+                        if (switches.Contains(name))
+                        {
+                            switches.Remove(name);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static (string folder, string file) CreateFolderWithFile(TestEnvironment env)
@@ -231,6 +299,83 @@ public class PropertyFunctionReceiverRestriction_Tests
             // the documented "anything goes" escape hatch.
             Evaluate("$(S.GetType().Name)", ("S", "HelloWorld")).ShouldBe("String");
         }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void InstancePolicyRemainsDynamicAcrossEnvironmentAndAppContext(bool useProjectInstance)
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        using var enableAllState = new AppContextSwitchState("Microsoft.Build.EnableAllPropertyFunctions");
+        using var restrictState = new AppContextSwitchState(RestrictSwitch);
+        (_, string file) = CreateFolderWithFile(env);
+
+        enableAllState.Unset();
+        restrictState.Set(false);
+        env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", null);
+
+        EvaluateProjectModel(useProjectInstance, "$(S.Substring(0,5))", ("S", "HelloWorld")).ShouldBe("Hello");
+        Should.Throw<InvalidProjectFileException>(
+            () => EvaluateProjectModel(useProjectInstance, "$(S.GetType().Name)", ("S", "HelloWorld")));
+
+        env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+        EvaluateProjectModel(useProjectInstance, "$(S.GetType().Name)", ("S", "HelloWorld")).ShouldBe("String");
+
+        env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "0");
+        Should.Throw<InvalidProjectFileException>(
+            () => EvaluateProjectModel(useProjectInstance, "$(S.GetType().Name)", ("S", "HelloWorld")));
+        EvaluateProjectModel(useProjectInstance, "$(S.Substring(0,5))", ("S", "HelloWorld")).ShouldBe("Hello");
+
+        enableAllState.Set(false);
+        env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+        Should.Throw<InvalidProjectFileException>(
+            () => EvaluateProjectModel(useProjectInstance, "$(S.GetType().Name)", ("S", "HelloWorld")));
+
+        enableAllState.Set(true);
+        env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "0");
+        EvaluateProjectModel(useProjectInstance, "$(S.GetType().Name)", ("S", "HelloWorld")).ShouldBe("String");
+
+        enableAllState.Unset();
+        restrictState.Set(true);
+        env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", null);
+        EvaluateProjectModel(useProjectInstance, "$(S.Substring(0,5))", ("S", "HelloWorld")).ShouldBe("Hello");
+        string restrictedExpression = "$([System.IO.Directory]::GetParent($(File)).GetFiles().Length)";
+        Should.Throw<InvalidProjectFileException>(
+            () => EvaluateProjectModel(useProjectInstance, restrictedExpression, ("File", file)));
+
+        env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+        EvaluateProjectModel(useProjectInstance, restrictedExpression, ("File", file)).ShouldBe("1");
+
+        env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "0");
+        Should.Throw<InvalidProjectFileException>(
+            () => EvaluateProjectModel(useProjectInstance, restrictedExpression, ("File", file)));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void StaticPolicyRemainsDynamicAcrossEnvironmentChanges(bool useProjectInstance)
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        using var enableAllState = new AppContextSwitchState("Microsoft.Build.EnableAllPropertyFunctions");
+        const string testVariable = "MSBUILD_PROPERTY_FUNCTION_GATE_TEST";
+        const string expression = "$([System.Environment]::SetEnvironmentVariable('MSBUILD_PROPERTY_FUNCTION_GATE_TEST', 'value'))";
+        env.SetEnvironmentVariable(testVariable, null);
+        enableAllState.Unset();
+        env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", null);
+
+        EvaluateProjectModel(useProjectInstance, "$([System.Math]::Max(1, 2))").ShouldBe("2");
+        Should.Throw<InvalidProjectFileException>(() => EvaluateProjectModel(useProjectInstance, expression))
+            .ErrorCode.ShouldBe("MSB4185");
+
+        env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+        EvaluateProjectModel(useProjectInstance, expression);
+        Environment.GetEnvironmentVariable(testVariable).ShouldBe("value");
+
+        env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "0");
+        Should.Throw<InvalidProjectFileException>(() => EvaluateProjectModel(useProjectInstance, expression))
+            .ErrorCode.ShouldBe("MSB4185");
     }
 
     // ---- Restricted: property setters and their special method names cannot run ----

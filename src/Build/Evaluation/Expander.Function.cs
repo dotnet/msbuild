@@ -1142,6 +1142,13 @@ internal partial class Expander<P, I>
                 return true;
             }
 
+#if !NETFRAMEWORK
+            if (AvailableStaticMethods.GetTypeInformationFromTypeCache(receiverType.FullName, methodName) != null)
+            {
+                return true;
+            }
+#endif
+
             // The escape hatch opens everything. The feature switch also preserves the legacy
             // MSBUILDENABLEALLPROPERTYFUNCTIONS environment-variable behavior in untrimmed builds; under
             // trimming it is substituted false, so this wide gate is removed.
@@ -1151,7 +1158,11 @@ internal partial class Expander<P, I>
                 return true;
             }
 
+#if NETFRAMEWORK
             return AvailableStaticMethods.GetTypeInformationFromTypeCache(receiverType.FullName, methodName) != null;
+#else
+            return false;
+#endif
         }
 
         /// <summary>
@@ -1165,10 +1176,20 @@ internal partial class Expander<P, I>
 
         private static bool IsInstanceMethodAvailable(Type receiverType, string methodName)
         {
+#if !NETFRAMEWORK
+            if (!string.Equals("GetType", methodName, StringComparison.OrdinalIgnoreCase)
+                && (!FeatureSwitches.RestrictPropertyFunctionReceivers || PropertyFunctionReceiver.IsAllowed(receiverType, methodName)))
+            {
+                return true;
+            }
+
+            return FeatureSwitches.EnableAllPropertyFunctions;
+#else
             // The escape hatch opens everything (this preserves the historical behavior, including
             // allowing GetType). The feature switch also preserves the legacy
             // MSBUILDENABLEALLPROPERTYFUNCTIONS environment-variable behavior in untrimmed builds; under
             // trimming it is substituted false, so this wide gate is removed.
+            // .NET Framework retains the read because environment access can throw SecurityException.
             if (FeatureSwitches.EnableAllPropertyFunctions)
             {
                 return true;
@@ -1192,6 +1213,7 @@ internal partial class Expander<P, I>
             }
 
             return true;
+#endif
         }
 
         /// <summary>
