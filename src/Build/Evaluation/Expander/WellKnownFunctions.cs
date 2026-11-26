@@ -29,16 +29,26 @@ namespace Microsoft.Build.Evaluation.Expander
             return true;
         }
 
+        private static readonly object s_logFunctionCallLock = new();
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void LogFunctionCall(Type receiverType, string methodName, string fileName, object? objectInstance, object[] args)
         {
-            var logFile = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+            // In -mt mode the process current directory is shared (and may be the sentinel directory), so use the project's thread working directory.
+            string currentDirectory = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)
+                ? FileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory()
+                : Directory.GetCurrentDirectory();
+            var logFile = Path.Combine(currentDirectory, fileName);
 
             var argSignature = args != null
                 ? string.Join(", ", args.Select(a => a?.GetType().Name ?? "null"))
                 : string.Empty;
 
-            File.AppendAllText(logFile, $"ReceiverType={receiverType?.FullName}; ObjectInstanceType={objectInstance?.GetType().FullName}; MethodName={methodName}({argSignature})\n");
+            // Serialize in case multiple threads try to log to the same file simultaneously (e.g., in -mt mode).
+            lock (s_logFunctionCallLock)
+            {
+                File.AppendAllText(logFile, $"ReceiverType={receiverType?.FullName}; ObjectInstanceType={objectInstance?.GetType().FullName}; MethodName={methodName}({argSignature})\n");
+            }
         }
 
         internal static bool TryExecutePathFunction(string methodName, out object? returnVal, object[] args)
@@ -102,9 +112,17 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = !string.IsNullOrEmpty(FileUtilities.CurrentThreadWorkingDirectory)
-                        ? Path.GetFullPath(Path.Combine(FileUtilities.CurrentThreadWorkingDirectory, arg0))
-                        : Path.GetFullPath(arg0);
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14))
+                    {
+                        returnVal = Path.GetFullPath(FileUtilities.MakeFullPathFromThreadWorkingDirectory(arg0)?.Value ?? arg0);
+                    }
+                    else
+                    {
+                        returnVal = !string.IsNullOrEmpty(FileUtilities.CurrentThreadWorkingDirectory)
+                            ? Path.GetFullPath(Path.Combine(FileUtilities.CurrentThreadWorkingDirectory, arg0))
+                            : Path.GetFullPath(arg0);
+                    }
+
                     return true;
                 }
             }

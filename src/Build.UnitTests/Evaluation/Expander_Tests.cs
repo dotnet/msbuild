@@ -5885,6 +5885,151 @@ $(
         }
 
         [Fact]
+        public void MakeRelative_RelativeBaseDirectory_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+            Directory.CreateDirectory(Path.Combine(correctDir.Path, "obj"));
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([MSBuild]::MakeRelative('obj', '{Path.Combine(correctDir.Path, "obj", "sub", "file.txt")}'))",
+                correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine("sub", "file.txt"));
+        }
+
+        [Fact]
+        public void MakeRelative_RelativeTarget_RemainsRelative()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([MSBuild]::MakeRelative('{wrongDir.Path}', 'sub/file.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe("sub/file.txt");
+        }
+
+        [Fact]
+        public void PathGetFullPath_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+            Directory.CreateDirectory(Path.Combine(correctDir.Path, "obj"));
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.Path]::GetFullPath('obj'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "obj"));
+        }
+
+#if NET
+        [Fact]
+        public void PathGetRelativePath_RelativeBasePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([System.IO.Path]::GetRelativePath('obj', '{Path.Combine(correctDir.Path, "bin", "file.txt")}'))",
+                correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine("..", "bin", "file.txt"));
+        }
+
+        [Fact]
+        public void PathGetRelativePath_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([System.IO.Path]::GetRelativePath('{correctDir.Path}', 'bin/file.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine("bin", "file.txt"));
+        }
+
+        [Fact]
+        public void PathExists_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+            Directory.CreateDirectory(Path.Combine(correctDir.Path, "obj"));
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.Path]::Exists('obj'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(bool.TrueString);
+        }
+#endif
+
+        [WindowsOnlyFact]
+        public void PathGetFullPath_DriveRelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+            string drive = Path.GetPathRoot(correctDir.Path).Substring(0, 2);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+
+            ChangeWaves.ResetStateForTests();
+            try
+            {
+                string result = ExpandWithThreadWorkingDirectory(env,
+                    $"$([System.IO.Path]::GetFullPath('{drive}obj'))", correctDir.Path, wrongDir.Path);
+
+                result.ShouldBe(Path.Combine(correctDir.Path, "obj"));
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        [WindowsOnlyFact]
+        public void PathGetFullPath_DriveRelativePath_UsesProcessWorkingDirectoryWhenWaveDisabled()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+            string drive = Path.GetPathRoot(correctDir.Path).Substring(0, 2);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_14.ToString());
+
+            ChangeWaves.ResetStateForTests();
+            try
+            {
+                string result = ExpandWithThreadWorkingDirectory(env,
+                    $"$([System.IO.Path]::GetFullPath('{drive}obj'))", correctDir.Path, wrongDir.Path);
+
+                result.ShouldBe(Path.Combine(wrongDir.Path, "obj"));
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        [Fact]
+        public void LogPropertyFunctionsRequiringReflection_WritesToThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+            env.SetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection", "1");
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.Convert]::ToString(5))", correctDir.Path, wrongDir.Path);
+
+            File.Exists(Path.Combine(correctDir.Path, "PropertyFunctionsRequiringReflection")).ShouldBeTrue();
+            File.Exists(Path.Combine(wrongDir.Path, "PropertyFunctionsRequiringReflection")).ShouldBeFalse();
+        }
+        [Fact]
         public void FileReadAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
