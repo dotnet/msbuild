@@ -1207,9 +1207,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 .FirstOrDefault(rl => rl.OriginalLogger == centralLogger);
 
             // Create the sink for events from this forwarding logger.
+            // The internal null logger consumes no events, so it must not force the legacy
+            // behavior of including properties and items in ProjectStarted events.
             EventSourceSink eventSourceSink = new EventSourceSink
             {
-                IgnoreInEvaluationDataNegotiation = centralLogger is TelemetryInfra.InternalTelemetryConsumingLogger,
+                IgnoreInEvaluationDataNegotiation = centralLogger is TelemetryInfra.InternalTelemetryConsumingLogger or Execution.BuildManager.NullLogger,
             };
 
             // Assign a unique logger Id to this distributed logger

@@ -320,6 +320,81 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
+        /// Determines whether a <see cref="ConfigurableForwardingLogger"/> created from the given description
+        /// would forward the <see cref="ProjectStartedEventArgs"/> and <see cref="ProjectFinishedEventArgs"/>
+        /// events, mirroring the decisions made by <see cref="Initialize(IEventSource)"/>,
+        /// <see cref="ParseParameters"/> and <see cref="SetForwardingBasedOnVerbosity"/>:
+        /// explicit event switches override the verbosity-based defaults, and a performance
+        /// summary requests the project events at any verbosity.
+        /// </summary>
+        /// <remarks>
+        /// Parameter names are matched case-insensitively, exactly like <see cref="ApplyParameter"/>.
+        /// </remarks>
+        internal static bool ForwardsProjectStartedAndFinishedEvents(LoggerDescription description)
+        {
+            bool sawEventForwardingParameter = false;
+            bool forwardsProjectStarted = false;
+            bool forwardsProjectFinished = false;
+            bool showPerformanceSummary = false;
+
+            string? loggerParameters = description.LoggerSwitchParameters;
+            if (loggerParameters != null)
+            {
+                string[] parameterComponents = loggerParameters.Split(s_parameterDelimiters);
+                for (int param = 0; param < parameterComponents.Length; param++)
+                {
+                    if (parameterComponents[param].Length == 0)
+                    {
+                        continue;
+                    }
+
+                    switch (parameterComponents[param].ToUpperInvariant())
+                    {
+                        case ProjectStartedEventDescription:
+                            sawEventForwardingParameter = true;
+                            forwardsProjectStarted = true;
+                            break;
+                        case ProjectFinishedEventDescription:
+                            sawEventForwardingParameter = true;
+                            forwardsProjectFinished = true;
+                            break;
+                        case BuildStartedEventDescription:
+                        case BuildFinishedEventDescription:
+                        case ProjectEvaluationStartedEventDescription:
+                        case ProjectEvaluationFinishedEventDescription:
+                        case ProjectEvaluationEventDescription:
+                        case TargetStartedEventDescription:
+                        case TargetFinishedEventDescription:
+                        case TaskStartedEventDescription:
+                        case TaskFinishedEventDescription:
+                        case ErrorEventDescription:
+                        case WarningEventDescription:
+                        case CustomEventDescription:
+                        case HighMessageEventDescription:
+                        case NormalMessageEventDescription:
+                        case LowMessageEventDescription:
+                        case CommandLineDescription:
+                            sawEventForwardingParameter = true;
+                            break;
+                        case PerformanceSummaryDescription:
+                            showPerformanceSummary = true;
+                            break;
+                    }
+                }
+            }
+
+            if (sawEventForwardingParameter)
+            {
+                // Explicitly selected events override verbosity-based forwarding.
+                return forwardsProjectStarted && forwardsProjectFinished;
+            }
+
+            // Without explicit event switches, the project events are forwarded based on
+            // the verbosity (from Normal up) or whenever a performance summary is requested.
+            return description.Verbosity >= LoggerVerbosity.Normal || showPerformanceSummary;
+        }
+
+        /// <summary>
         /// Called when Engine is done with this logger
         /// </summary>
         public virtual void Shutdown()

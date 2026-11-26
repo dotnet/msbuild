@@ -125,6 +125,18 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        /// <summary>
+        /// Returns the name of the assembly containing the logger, or null when the logger
+        /// was described by an assembly file path instead of an assembly name.
+        /// </summary>
+        internal string LoggerAssemblyName
+        {
+            get
+            {
+                return _loggerAssembly.AssemblyName;
+            }
+        }
+
         public bool IsOptional
         {
             get

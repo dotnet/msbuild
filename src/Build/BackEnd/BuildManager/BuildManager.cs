@@ -3587,75 +3587,87 @@ namespace Microsoft.Build.Execution
             }
 
             return loggingService;
+        }
 
-            // We need to register SOME logger if we don't have any. This ensures the out of proc nodes will still send us message,
-            // ensuring we receive project started and finished events.
-            static List<ForwardingLoggerRecord> ProcessForwardingLoggers(IEnumerable<ForwardingLoggerRecord>? forwarders)
+        /// <summary>
+        /// Ensures the given forwarding loggers contain at least one of the engine's own forwarding
+        /// loggers that forwards the <see cref="ProjectStartedEventArgs"/> and
+        /// <see cref="ProjectFinishedEventArgs"/> events this manager relies on to complete submissions.
+        /// If none does, a minimal forwarder carrying just those two events is appended.
+        /// </summary>
+        internal static List<ForwardingLoggerRecord> ProcessForwardingLoggers(IEnumerable<ForwardingLoggerRecord>? forwarders)
+        {
+            if (forwarders == null)
+            {
+                return [CreateMinimalForwarder()];
+            }
+
+            List<ForwardingLoggerRecord> result = forwarders.ToList();
+
+            // If none of the registered forwarding loggers is one of ours and is guaranteed to forward
+            // the project started and finished events we rely on to complete submissions, add our own
+            // minimal forwarder instead of adjusting the configuration of a caller-owned logger.
+            if (!result.Any(ForwardsProjectStartedAndFinishedEvents))
+            {
+                result.Add(CreateMinimalForwarder());
+            }
+
+            return result;
+
+            static ForwardingLoggerRecord CreateMinimalForwarder()
             {
                 Type configurableLoggerType = typeof(ConfigurableForwardingLogger);
-                string engineAssemblyName = configurableLoggerType.Assembly.GetName().FullName;
-                string configurableLoggerName = configurableLoggerType.FullName!;
 
-                if (forwarders == null)
-                {
-                    return [CreateMinimalForwarder()];
-                }
+                // We need to register SOME logger if we don't have any. This ensures the out of proc nodes will still send us message,
+                // ensuring we receive project started and finished events.
+                LoggerDescription forwardingLoggerDescription = new LoggerDescription(
+                    loggerClassName: configurableLoggerType.FullName!,
+                    loggerAssemblyName: configurableLoggerType.Assembly.GetName().FullName,
+                    loggerAssemblyFile: null,
+                    loggerSwitchParameters: "PROJECTSTARTEDEVENT;PROJECTFINISHEDEVENT",
+                    verbosity: LoggerVerbosity.Quiet);
 
-                List<ForwardingLoggerRecord> result = forwarders.ToList();
-
-                // The forwarding loggers that are registered are unknown to us - we cannot make any assumptions.
-                // So to be on a sure side - we need to add ours.
-                if (!result.Any(l => l.ForwardingLoggerDescription.Name.Contains(engineAssemblyName)))
-                {
-                    result.Add(CreateMinimalForwarder());
-                    return result;
-                }
-
-                // Those are the cases where we are sure that we have the forwarding setup as need.
-                if (result.Any(l =>
-                        l.ForwardingLoggerDescription.Name.Contains(typeof(CentralForwardingLogger).FullName!)
-                        ||
-                        (l.ForwardingLoggerDescription.Name.Contains(configurableLoggerName)
-                         &&
-                         l.ForwardingLoggerDescription.LoggerSwitchParameters.Contains("PROJECTSTARTEDEVENT")
-                         &&
-                         l.ForwardingLoggerDescription.LoggerSwitchParameters.Contains("PROJECTFINISHEDEVENT")
-                         &&
-                         l.ForwardingLoggerDescription.LoggerSwitchParameters.Contains("FORWARDPROJECTCONTEXTEVENTS")
-                        )))
-                {
-                    return result;
-                }
-
-                // In case there is a ConfigurableForwardingLogger, that is not configured as we'd need - we can adjust the config
-                ForwardingLoggerRecord? configurableLogger = result.FirstOrDefault(l =>
-                    l.ForwardingLoggerDescription.Name.Contains(configurableLoggerName));
-
-                // If there is not - we need to add our own.
-                if (configurableLogger == null)
-                {
-                    result.Add(CreateMinimalForwarder());
-                    return result;
-                }
-
-                configurableLogger.ForwardingLoggerDescription.LoggerSwitchParameters += ";PROJECTSTARTEDEVENT;PROJECTFINISHEDEVENT;FORWARDPROJECTCONTEXTEVENTS;RESPECTVERBOSITY";
-
-                return result;
-
-                ForwardingLoggerRecord CreateMinimalForwarder()
-                {
-                    // We need to register SOME logger if we don't have any. This ensures the out of proc nodes will still send us message,
-                    // ensuring we receive project started and finished events.
-                    LoggerDescription forwardingLoggerDescription = new LoggerDescription(
-                        loggerClassName: configurableLoggerName,
-                        loggerAssemblyName: engineAssemblyName,
-                        loggerAssemblyFile: null,
-                        loggerSwitchParameters: "PROJECTSTARTEDEVENT;PROJECTFINISHEDEVENT;FORWARDPROJECTCONTEXTEVENTS",
-                        verbosity: LoggerVerbosity.Quiet);
-
-                    return new ForwardingLoggerRecord(new NullLogger(), forwardingLoggerDescription);
-                }
+                return new ForwardingLoggerRecord(new NullLogger(), forwardingLoggerDescription);
             }
+        }
+
+        /// <summary>
+        /// Determines whether the given forwarding logger is one of the engine's own forwarding loggers
+        /// that is guaranteed to forward the <see cref="ProjectStartedEventArgs"/> and
+        /// <see cref="ProjectFinishedEventArgs"/> events this manager relies on to complete submissions.
+        /// </summary>
+        /// <remarks>
+        /// A forwarding logger is only known to forward those events when it belongs to the engine assembly
+        /// and is one of the built-in forwarding logger classes. Matching on the assembly alone is not
+        /// enough: the <see cref="DistributedFileLogger"/> lives in the engine assembly but forwards
+        /// nothing, and same-named loggers from other assemblies are not ours either.
+        /// </remarks>
+        internal static bool ForwardsProjectStartedAndFinishedEvents(ForwardingLoggerRecord record)
+        {
+            Type engineType = typeof(ConfigurableForwardingLogger);
+            LoggerDescription description = record.ForwardingLoggerDescription;
+
+            if (!string.Equals(description.LoggerAssemblyName, engineType.Assembly.GetName().FullName, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            // For a logger described by an assembly name (rather than a file path, which we have just
+            // ruled out) the description Name is the logger class name.
+            string loggerClassName = description.Name;
+
+            // These built-in forwarding loggers forward the project started and finished events
+            // unconditionally.
+            if (string.Equals(loggerClassName, typeof(CentralForwardingLogger).FullName, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(loggerClassName, typeof(ForwardingTerminalLogger).FullName, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(loggerClassName, typeof(BuildCheckForwardingLogger).FullName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            // A ConfigurableForwardingLogger forwards those events only when its parameters or verbosity say so.
+            return string.Equals(loggerClassName, engineType.FullName, StringComparison.OrdinalIgnoreCase)
+                && ConfigurableForwardingLogger.ForwardsProjectStartedAndFinishedEvents(description);
         }
 
         private static void LogDeferredMessages(ILoggingService loggingService, IEnumerable<DeferredBuildMessage>? deferredBuildMessages)
