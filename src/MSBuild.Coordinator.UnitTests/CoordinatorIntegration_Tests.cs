@@ -93,6 +93,19 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         buildOutput.ShouldContain("MaxNodeCount=2");
     }
 
+    [UnixOnlyFact]
+    public void BootstrapMSBuildCommand_UsesBootstrapDotnetHost()
+    {
+        string msbuildPath = Path.Combine(
+            RunnerUtilities.BootstrapMsBuildBinaryLocation,
+            "sdk",
+            RunnerUtilities.BootstrapSdkVersion,
+            "MSBuild.dll");
+        string dotnetPath = Path.Combine(RunnerUtilities.BootstrapMsBuildBinaryLocation, "dotnet");
+
+        RunnerUtilities.BootstrapMSBuildCommand.ShouldBe($"\"{dotnetPath}\" \"{msbuildPath}\"");
+    }
+
     [Fact]
     public async Task NestedBuild_InheritsCoordinatorGrant_DoesNotDeadlock()
     {

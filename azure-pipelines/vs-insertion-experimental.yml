@@ -26,6 +26,7 @@ parameters:
       - main
       - rel/insiders
       - rel/stable
+      - rel/d18.11-ltsc
   - name: InsertionReviewers
     type: string
     default: ''

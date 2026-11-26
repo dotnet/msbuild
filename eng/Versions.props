@@ -3,10 +3,13 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.11.2</VersionPrefix>
+    <VersionPrefix>18.11.3</VersionPrefix>
     <PreReleaseVersionLabel>1</PreReleaseVersionLabel>
     <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">$(PreReleaseVersionLabel)-test</PreReleaseVersionLabel>
-    <PackageValidationBaselineVersion>18.10.0-1.26378.2</PackageValidationBaselineVersion>
+    <!-- The .NET 10 SDK builds MSBuild from the VMR, which does not override this repo's version kind; ship stable versions there. -->
+    <DotNetFinalVersionKind Condition="'$(DotNetBuildFromVMR)' == 'true'">release</DotNetFinalVersionKind>
+    <!-- Baseline must have the net10.0 runtime TFM; validate against shipped 18.9.6. -->
+    <PackageValidationBaselineVersion>18.9.6</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
     <!--
@@ -71,7 +74,7 @@
     <MicrosoftCodeAnalysisContractsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisContractsVersion>
     <MicrosoftCodeAnalysisPooledObjectsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisPooledObjectsVersion>
 
-    <BootstrapSdkVersion>11.0.100-rc.1.26425.128</BootstrapSdkVersion>
+    <BootstrapSdkVersion>10.0.403</BootstrapSdkVersion>
   </PropertyGroup>
 
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">

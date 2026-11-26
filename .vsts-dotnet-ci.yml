@@ -42,11 +42,12 @@ jobs:
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
-    displayName: Build (with -mt in stage2)
+    displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
-      filename: 'build.cmd'
-      arguments: '-ci -test -stage2Argument /mt'
-    condition: eq(variables.onlyDocChanged, 0)
+      filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
+      arguments: '-onlyDocChanged $(onlyDocChanged) -stage2Properties /mt'
+    env:
+      ForceUseXCopyMSBuild: 1
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
 #     displayName: Process coverage reports
@@ -153,11 +154,10 @@ jobs:
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
-    displayName: Build (with -mt in stage2)
+    displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
-      filename: 'build.cmd'
-      arguments: '-msbuildEngine dotnet -ci -test -stage2Argument /mt'
-    condition: eq(variables.onlyDocChanged, 0)
+      filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
+      arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged) -stage2Properties /mt'
     env:
       MSBUILDUSESERVER: "1"
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
@@ -233,8 +233,8 @@ jobs:
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   # Intentionally not running tests
-  - bash: . 'build.sh' --ci --stage2Argument '/mt' --stage2Argument '/p:BuildAnalyzer=true'
-    displayName: Build (with -mt in stage2)
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --skipTests --stage2Properties '/mt /p:BuildAnalyzer=true'
+    displayName: 'Build with bootstrapped MSBuild and -mt mode'
     condition: eq(variables.onlyDocChanged, 0)
     env:
       MSBUILDUSESERVER: "1"
@@ -349,8 +349,8 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
-  - bash: . 'build.sh' --ci --test --stage2Argument '/mt'
-    displayName: Build (with -mt in stage2)
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --stage2Properties '/mt'
+    displayName: CI Build
     condition: eq(variables.onlyDocChanged, 0)
     env:
         MSBUILDUSESERVER: "1"
@@ -438,8 +438,8 @@ jobs:
         arguments: $(Build.SourcesDirectory)/NuGet.config $Token
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
-  - bash: . 'build.sh' --ci --test --stage2Argument '/mt'
-    displayName: Build (with -mt in stage2)
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --stage2Properties '/mt'
+    displayName: CI Build
     condition: eq(variables.onlyDocChanged, 0)
     env:
         MSBUILDUSESERVER: "1"

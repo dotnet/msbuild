@@ -53,10 +53,11 @@ variables:
       value: ${{ parameters.OptProfDropName }}
     - name: SourceBranch
       value: ''
-  # Set SkipApplyOptimizationDataArg when disabling OptProf data collection
-  - ${{ if eq(parameters.enableOptProf, false) }}:
-    - name: SkipApplyOptimizationDataArg
+  - name: SkipApplyOptimizationDataArg
+    ${{ if eq(parameters.enableOptProf, false) }}:
       value: '/p:EnableNgenOptimization=false'
+    ${{ else }}:
+      value: ''
   - name: EnableReleaseOneLocBuild
     value: false
   - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
