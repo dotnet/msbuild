@@ -562,6 +562,17 @@ Use this to prioritize dimensions based on changed files.
 
 ## Review Workflow
 
+### Finding Acceptance Gate
+
+Apply this gate to every candidate finding before posting it, regardless of which review dimension raised it:
+
+1. **Establish the counterfactual.** Identify the exact reviewed head and intended base. Compare the same scenario and configuration on both, isolating the PR change. A different SDK, verbosity, logger, or feature flag can demonstrate a mechanism but is only a proxy, not a reproduction of the PR regression. State whether evidence is an exact-revision execution, a source trace, or a proxy; do not imply execution that was not performed.
+2. **Name the affected consumer and prerequisites.** Distinguish an observable difference from a violated contract or material loss. State who is affected, the triggering configuration, and what worked before. Check whether existing opt-ins already cause the same behavior and whether the PR intentionally restores requested behavior. Rare scenarios can still be defects; scope and severity must reflect the evidence.
+3. **Recover existing intent.** Before recommending removal of a guard, cache, suppression, or fallback, inspect relevant comments, tests, blame/history, and linked design or optimization discussions. Explain which invariant or cost that mechanism protects, or explicitly state that its rationale remains unknown.
+4. **Review the remedy's blast radius.** Trace shared flags and their consumers. Check whether preserving a narrow behavior would change common paths, undo an optimization, duplicate work, or add allocations, IPC traffic, or log volume. Prefer a scoped remedy when justified; do not demand a broader change merely to eliminate every output difference. A ChangeWave limits rollout exposure, not the underlying cost or correctness risk.
+5. **Compare diagnostic content, not just event presence.** For logging changes, distinguish structured events from textual dumps, explicit inputs from defaults or derived values, and console filtering from custom logger subscriptions. Do not assume console verbosity bounds what every logger consumes. Identify unique information before claiming duplication or loss.
+6. **Keep claims proportional to evidence.** Label event counts and performance estimates as estimates unless measured; do not present them as benchmarks. A confirmed mechanism alone is insufficient: post an actionable finding only when its impact and requested action are justified. Otherwise omit it or present the unresolved tradeoff as a non-blocking question with its limitations.
+
 ### Wave 1: Find
 
 1. Map changed files to the [Folder Hotspot Mapping](#folder-hotspot-mapping).
@@ -570,7 +581,7 @@ Use this to prioritize dimensions based on changed files.
 
 2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`, `model: "gpt-5.6-sol"`). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
 
-   Each sub-agent receives: the PR diff, PR description, the single dimension's rules and checklist, and the folder context.
+   Each sub-agent receives: the PR diff, PR description, the single dimension's rules and checklist, the Finding Acceptance Gate, and the folder context.
 
    Include verbatim in every sub-agent prompt:
 
@@ -585,6 +596,7 @@ Use this to prioritize dimensions based on changed files.
    > **Concurrency**: identify every thread that reads/writes shared state. Map the timeline. Show overlapping unsynchronized access.
    > **Correctness**: construct the exact input that fails (e.g., "null projectFileNames → NRE at .Length").
    > **Compatibility**: name the specific behavioral change and who it breaks.
+   > Apply the **Finding Acceptance Gate**: include revision/configuration evidence, affected consumers, existing rationale, and the proposed remedy's blast radius. Do not treat a proxy reproduction as proof of a PR regression.
    >
    > ```
    > $DimensionName — LGTM
@@ -622,7 +634,7 @@ Use this to prioritize dimensions based on changed files.
    TEST_SNIPPET: <proof-of-concept code, if applicable>
    ```
 
-   Confirm only with concrete evidence. Dispute if a lock, blocking call, or control flow prevents the scenario. **Never validate against `main`.**
+   Confirm only with concrete evidence and the **Finding Acceptance Gate**. Dispute if a lock, blocking call, or control flow prevents the scenario. Validate the candidate against the exact PR head and compare with its intended base; current `main` or an installed SDK is not a substitute for either revision.
 
 4. For borderline findings, run the same validation on 3 models (`claude-opus-5`, `gpt-5.6-sol`, `gemini-3.6-flash`). Keep findings confirmed by ≥2/3.
 
@@ -630,7 +642,7 @@ Use this to prioritize dimensions based on changed files.
 
 > **Tool availability note**: Steps 5–7 reference gh-aw safe-output tools (`create_pull_request_review_comment`, `submit_pull_request_review`, `add_comment`). When running outside an agentic workflow (e.g. locally in VS Code), these tools are unavailable — use the closest GitHub MCP or CLI equivalents instead (e.g. `gh api` to create PR review comments, `gh pr review` to submit a review, `gh pr comment` to post general comments).
 
-5. **Deduplicate first.** Dimensions overlap, so the same defect can be reported by several of them. Group findings by `FILE` + `LINES` and post one comment per root cause, under the highest-severity dimension.
+5. **Apply the acceptance gate, then deduplicate.** Post only findings whose impact and requested action remain justified after validation. Dimensions overlap, so the same defect can be reported by several of them. Group findings by `FILE` + `LINES` and post one comment per root cause, under the highest-severity dimension.
 
    Post **inline review comments** on the exact diff lines using the `create_pull_request_review_comment` safe-output tool. Each comment must target a specific `path` and `line` in the PR diff. Format:
 
