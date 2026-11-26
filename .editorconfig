@@ -325,6 +325,9 @@ dotnet_diagnostic.IDE0061.severity = suggestion
 # Local function can be made static
 dotnet_diagnostic.IDE0062.severity = suggestion
 
+# IDE0320: Make anonymous function static. Kept silent, as it was before dotnet/roslyn#86568 made the category severity apply to it.
+dotnet_diagnostic.IDE0320.severity = silent
+
 # Using directives must be placed outside of a namespace declaration
 dotnet_diagnostic.IDE0065.severity = suggestion
 
