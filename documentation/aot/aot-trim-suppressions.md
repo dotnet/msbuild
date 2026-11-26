@@ -1,6 +1,7 @@
 # Trim / AOT suppression tracker
 
-**Status:** Living (suppression inventory).
+**Status:** Upstream 18.11 suppression inventory. This historical inventory does not describe the
+[.NET 10 servicing annotation contract](README.md#net-10-servicing-boundary).
 
 Tracks every `[UnconditionalSuppressMessage(...)]` for a trim/AOT analyzer rule
 (`IL2xxx`, `IL3xxx`) in `src/`, so we can drive the count down - ideally until only

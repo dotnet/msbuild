@@ -1418,24 +1418,41 @@ namespace Microsoft.Build.UnitTests
                 {
                     // Set env var to fail on drive enumerating wildcard detection
                     Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "1");
+                    env.SetEnvironmentVariable("MsBuildCacheFileEnumerations", null);
 
-                    (string[] fileList, FileMatcher.SearchAction action, string excludeFileSpec, _) = FileMatcher.Default.GetFiles(
-                        string.Empty,
-                        driveEnumeratingWildcard);
+                    FileMatcherImplementation[] implementations = [FileMatcherImplementation.Legacy, FileMatcherImplementation.Optimized];
+                    bool[] cacheModes = [false, true];
+                    foreach (FileMatcherImplementation implementation in implementations)
+                    {
+                        foreach (bool cacheResults in cacheModes)
+                        {
+                            ConcurrentDictionary<string, IReadOnlyList<string>> cache = cacheResults ? new() : null;
+                            FileMatcher fileMatcher = new(FileSystems.Default, cache, implementation);
+                            string projectDirectory = env.CreateFolder().Path;
 
-                    action.ShouldBe(FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard);
-                    fileList.ShouldBeEmpty();
-                    excludeFileSpec.ShouldBe(string.Empty);
+                            (string[] fileList, FileMatcher.SearchAction action, string excludeFileSpec, _) = fileMatcher.GetFiles(
+                                projectDirectory,
+                                driveEnumeratingWildcard);
 
-                    // Handle failing with drive enumerating exclude
-                    (fileList, action, excludeFileSpec, _) = FileMatcher.Default.GetFiles(
-                        string.Empty,
-                        @"/*/*.cs",
-                        new List<string> { driveEnumeratingWildcard });
+                            action.ShouldBe(FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard);
+                            fileList.ShouldBeEmpty();
+                            excludeFileSpec.ShouldBe(string.Empty);
+                            if (cacheResults)
+                            {
+                                cache.ShouldNotBeEmpty();
+                            }
 
-                    action.ShouldBe(FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard);
-                    fileList.ShouldBeEmpty();
-                    excludeFileSpec.ShouldBe(driveEnumeratingWildcard);
+                            // Handle failing with drive enumerating exclude
+                            (fileList, action, excludeFileSpec, _) = fileMatcher.GetFiles(
+                                projectDirectory,
+                                @"/*/*.cs",
+                                new List<string> { driveEnumeratingWildcard });
+
+                            action.ShouldBe(FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard);
+                            fileList.ShouldBeEmpty();
+                            excludeFileSpec.ShouldBe(driveEnumeratingWildcard);
+                        }
+                    }
                 }
                 finally
                 {

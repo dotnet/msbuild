@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -167,7 +168,10 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult allResults))
                 {
-                    if (AreBuildResultFlagsCompatible(request, allResults))
+                    bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
+                        ? AreBuildResultFlagsCompatible(request, allResults) : true;
+
+                    if (buildDataFlagsSatisfied)
                     {
                         // Check for targets explicitly specified.
                         bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, checkTargetsMissingResults: true, skippedResultsDoNotCauseCacheMiss);

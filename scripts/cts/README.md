@@ -108,7 +108,7 @@ a **non-blocking** PR-time step, and can also be run locally:
 
 * Baseline + logs live at `<repo>/.cts/` (gitignored).
 * The `.VSTest.csproj` wrappers output to
-  `artifacts/bin/<MSBuildProjectName>/Debug/net11.0/` — distinct from the
+  `artifacts/bin/<MSBuildProjectName>/Debug/net10.0/` — distinct from the
   default MTP variant.
 * Demos hardcode per-project demo files via `projects.json` →
   `DemoFiles.{Broad,Narrow,Unrelated}`. Projects without `DemoFiles` skip

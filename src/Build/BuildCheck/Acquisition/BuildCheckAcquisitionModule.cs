@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
@@ -26,7 +25,6 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
     /// <summary>
     /// Creates a list of factory delegates for building check rules instances from a given assembly path.
     /// </summary>
-    [RequiresUnreferencedCode("Loads custom build check assemblies from disk and reflects over their types, which is incompatible with trimming.")]
     public List<CheckFactory> CreateCheckFactories(
         CheckAcquisitionData checkAcquisitionData,
         ICheckContext checkContext)

@@ -51,8 +51,7 @@ steps:
   displayName: Install .NET runtime (testhost)
   inputs:
     packageType: runtime
-    version: 11.0.x
-    includePreviewVersions: true
+    version: 10.0.x
 
 - task: NuGetAuthenticate@1
   displayName: Authenticate to internal NuGet feeds

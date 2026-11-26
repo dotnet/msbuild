@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
 
-source="${BASH_SOURCE[0]}"
-
-# resolve $SOURCE until the file is no longer a symlink
-while [[ -h $source ]]; do
-  scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
-  source="$(readlink "$source")"
-
-  # if $source was a relative symlink, we need to resolve it relative to the path where the
-  # symlink file was located
-  [[ $source != /* ]] && source="$scriptroot/$source"
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$ScriptRoot/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
+ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
-"$scriptroot/eng/build.sh" --restore --build "$@"
+. "$ScriptRoot/eng/common/build.sh" --build --restore "$@"

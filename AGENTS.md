@@ -126,6 +126,7 @@ After building the whole repo, to use the just-built MSBuild to build things use
 
 ### Build Troubleshooting
 
+* When working around a local coordinator bug, unset `MSBUILDUSECOORDINATOR` before building (`Remove-Item Env:\MSBUILDUSECOORDINATOR -ErrorAction SilentlyContinue` in PowerShell)
 * If build fails with "Could not resolve SDK", run the bootstrap environment script
 * Verify `dotnet --version` shows the preview/internal version
 * Use repository sample projects for testing, not external projects

@@ -1,5 +1,7 @@
 # MSBuild object model - Native AOT validation harness
 
+> **.NET 10 servicing boundary:** the new engine-wide AOT promotion is not part of this servicing payload. Existing engine and task-factory APIs retain their baseline analysis contracts so unchanged trim-analyzed consumers continue to compile. Framework, Utilities, and Tasks retain their pre-existing AOT support. This experimental harness remains available for upstream development, but its Native AOT publish is not a servicing support or validation claim.
+
 A standalone **MSTest + Microsoft.Testing.Platform (MTP)** test project that runs **Native
 AOT-published** and validates that the MSBuild object-model scenarios the .NET SDK CLI relies on
 in-process actually work under AOT.
@@ -12,9 +14,8 @@ detection, `reference`/`solution` editing) - and now a **registered-task build**
 task registry (`Microsoft.Build.Utilities.Task.RegisterTask`), a project whose tasks are registered
 **builds** end to end under Native AOT (see [RegisteredTaskAotTests.cs](RegisteredTaskAotTests.cs)). The
 broader **execution engine** (`BuildManager`) remains the AOT-hard path a host falls back to a
-forwarded/JIT MSBuild for - its build entry points stay `[RequiresUnreferencedCode]` for reflective
-logger/plugin loading; an in-process host that passes pre-constructed `ILogger` instances and no
-project-cache plugins (as the harness does) does not hit that path.
+forwarded/JIT MSBuild for. The upstream engine-wide annotations and guarantee described by these
+scenarios are intentionally excluded from the .NET 10 servicing contract.
 
 > This project is **intentionally not part of the repository's Arcade build** (it is not in
 > `MSBuild.slnx`). The local empty `Directory.Build.props` / `Directory.Build.targets` /
@@ -28,11 +29,11 @@ From the repository root, using the repo's pinned SDK (`.dotnet\dotnet.exe`):
 ```powershell
 # Fast JIT pass (build + run the MTP test host)
 .\.dotnet\dotnet.exe build src\aot-validation\Microsoft.Build.AotValidation.csproj
-.\src\aot-validation\bin\Debug\net11.0\win-x64\Microsoft.Build.AotValidation.exe
+.\src\aot-validation\bin\Debug\net10.0\win-x64\Microsoft.Build.AotValidation.exe
 
 # Native AOT pass (the real validation): publish, then run the native exe
 .\.dotnet\dotnet.exe publish src\aot-validation\Microsoft.Build.AotValidation.csproj -r win-x64 -c Release
-.\src\aot-validation\bin\Release\net11.0\win-x64\publish\Microsoft.Build.AotValidation.exe
+.\src\aot-validation\bin\Release\net10.0\win-x64\publish\Microsoft.Build.AotValidation.exe
 ```
 
 Native AOT publishing requires the Visual Studio C++ toolchain (the MSVC linker). A run prints the
@@ -155,6 +156,8 @@ AOT surfaced three host responsibilities a real AOT MSBuild host must take on - 
   (`[MSBuild]::GetTargetFrameworkIdentifier` and friends). `Microsoft.Build` references `NuGet.Frameworks`
   with `PrivateAssets="all"` (in a real SDK it loads the copy next to `MSBuild.dll`), so it does not flow to
   the harness transitively; the harness adds its own reference to put it in the output and the AOT image.
+  Keep the harness's inline package version aligned with the NuGet toolset in `eng/Version.Details.xml`;
+  this project deliberately does not import the repository's central package versions.
 - **Root `Microsoft.Build.Utilities.Core`.** The SDK invokes
   `[Microsoft.Build.Utilities.ToolLocationHelper]::...` property functions, and the allowlist resolves such
   cross-assembly receivers by assembly-qualified name via `Type.GetType` - which under AOT only succeeds if

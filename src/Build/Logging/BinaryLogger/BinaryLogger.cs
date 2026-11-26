@@ -278,7 +278,7 @@ namespace Microsoft.Build.Logging
 
             parameter = parameter.Trim('"');
 
-            bool isWildcard = parameter.Contains("{}");
+            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
             bool hasProperExtension = parameter.EndsWith(BinlogFileExtension, StringComparison.OrdinalIgnoreCase);
 
             filePath = parameter;
@@ -787,7 +787,7 @@ namespace Microsoft.Build.Logging
 
             parameter = parameter.Trim('"');
 
-            bool isWildcard = parameter.Contains("{}");
+            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
             bool hasProperExtension = parameter.EndsWith(BinlogFileExtension, StringComparison.OrdinalIgnoreCase);
             filePath = parameter;
 

@@ -43,16 +43,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(CustomBeforeMicrosoftCommonTargets)" Condition="'$(CustomBeforeMicrosoftCommonTargets)' != '' and Exists('$(CustomBeforeMicrosoftCommonTargets)')"/>
 
   <!--
-       TarDirectory and Untar rely on System.Formats.Tar, which is only available on .NET (not .NET Framework), so they are
-       compiled only into the .NETCoreApp tasks assembly. On Core MSBuild they load in-proc and are registered in
-       Microsoft.Common.tasks. On .NET Framework MSBuild they are absent from the netfx tasks assembly, so under the .NET SDK
-       we point at the SDK's .NETCoreApp tasks assembly and dispatch them into the .NET TaskHost via Runtime="NET".
+       TarDirectory and Untar rely on System.Formats.Tar, which is only available on .NET (not .NET Framework).
+       On .NET Framework MSBuild, use the selected .NET SDK's tasks assembly and dispatch into the .NET TaskHost.
+       These tasks ship starting with SDK 11.
 
-       These registrations cannot live in Microsoft.Common.tasks: that is the *default tasks* file, which is evaluated once per
-       toolset and shared by every project in the build, so it only ever sees environment, reserved, toolset and global
-       properties (see Toolset.InitializeProperties). $(NetCoreSdkRoot) and $(NETCoreSdkVersion) are
-       per-project SDK properties and are empty there, which silently disables the registration. Here they are evaluated as part
-       of normal project evaluation, after the .NET SDK props have run, so they resolve correctly.
+       These registrations cannot live in Microsoft.Common.tasks: the default tasks file is evaluated once per toolset
+       and does not see the per-project NetCoreSdkRoot and NETCoreSdkVersion properties. Register here instead, after
+       the .NET SDK props have run.
   -->
   <UsingTask TaskName="Microsoft.Build.Tasks.TarDirectory" AssemblyFile="$(NetCoreSdkRoot)Microsoft.Build.Tasks.Core.dll" Runtime="NET" Condition="'$(MSBuildRuntimeType)' == 'Full' and '$(NetCoreSdkRoot)' != '' and '$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '11'))" />
   <UsingTask TaskName="Microsoft.Build.Tasks.Untar" AssemblyFile="$(NetCoreSdkRoot)Microsoft.Build.Tasks.Core.dll" Runtime="NET" Condition="'$(MSBuildRuntimeType)' == 'Full' and '$(NetCoreSdkRoot)' != '' and '$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '11'))" />
@@ -1402,11 +1399,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- RESOURCE ITEMS -->
     <AssignLinkMetadata Items="@(Resource)"
-                        Condition="'@(Resource)' != '' and '%(Resource.DefiningProjectFullPath)' != '$(MSBuildProjectFullPath)'">
+                        Condition="'@(Resource)' != '' and '%(Resource.DefiningProjectFullPath)' != '$(MSBuildProjectFullPath)' and $([MSBuild]::AreFeaturesEnabled('17.10'))">
       <Output TaskParameter="OutputItems" ItemName="_Temp" />
     </AssignLinkMetadata>
 
-    <ItemGroup>
+    <ItemGroup Condition="$([MSBuild]::AreFeaturesEnabled('17.10'))">
       <Resource Remove="@(_Temp)" />
       <Resource Include="@(_Temp)" />
       <_Temp Remove="@(_Temp)" />
