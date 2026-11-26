@@ -572,6 +572,12 @@ namespace Microsoft.Build.BackEnd
                     projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
                 }
 
+                // Match non-MT evaluation without changing process CWD or the request's execution directory.
+                using EvaluationDirectoryScope evaluationDirectory = new(
+                    componentHost.BuildParameters.MultiThreaded
+                        ? BuildParameters.StartupDirectory
+                        : null);
+
                 return new ProjectInstance(
                     ProjectFullPath,
                     globalProperties,
