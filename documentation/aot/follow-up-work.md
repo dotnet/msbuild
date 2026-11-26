@@ -1,6 +1,7 @@
 # MSBuild trim / Native AOT follow-up work
 
-**Status:** Living follow-up list.
+**Status:** Upstream 18.11 follow-up list, retained as design context rather than a statement of
+[.NET 10 servicing guarantees](README.md#net-10-servicing-boundary).
 
 This is the canonical list of known work that remains after the initial trim/AOT annotation and host-registration work. It intentionally does not repeat the full analysis from the strategy, suppression, or per-area documents; each item links to the owning implementation surface and the deeper note that explains the design.
 

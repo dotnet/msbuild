@@ -14,6 +14,19 @@ emit code at run time), **detect that and fall back** to a JIT MSBuild rather th
 The companion **host-registration API proposals** live one folder up in [`../specs/`](../specs/) (per the
 repo convention that API proposals belong under `specs/`); they are linked from the index below.
 
+## .NET 10 servicing boundary
+
+This servicing branch preserves the existing source-analysis contracts of legacy build and task-factory
+APIs. It does not include the new engine-wide `IsAotCompatible` opt-in or the new
+`RequiresUnreferencedCode` and `DynamicallyAccessedMembers` contracts on those legacy APIs: introducing
+them would break existing trim-analyzed callers and task-factory implementations.
+
+Pre-existing annotations and Framework, Utilities, and Tasks AOT producer settings remain, as do the
+additive host-registration APIs and their rooting annotations. The documents below record the upstream
+18.11 design and annotation inventories; their engine/factory counts and annotated examples are not the
+current servicing contract or a guarantee that this engine supports trimming or Native AOT. The source
+and project settings on this branch are authoritative.
+
 ## Evaluation and execution
 
 The trim/AOT effort is evaluation-first. Evaluation - reading a project's properties, items, imports, and
@@ -51,7 +64,7 @@ Pick the entry point that matches what you are doing:
   `[FeatureSwitchDefinition]`, `[FeatureGuard]`), the **analyzer-vs-trimmer** split, the `IL4000` gotcha, and
   feature-switch plumbing. Defines the **fail-observably** criterion the rest of the work obeys.
 
-### Living trackers (kept in sync with the code)
+### Upstream design trackers (see the servicing boundary above)
 
 - [aot-trim-suppressions.md](aot-trim-suppressions.md) - every `[UnconditionalSuppressMessage]` for a trim/AOT
   rule, each with a status (**Vetted** / **Investigate** / **Backlog**), plus the merged Backlog deep
