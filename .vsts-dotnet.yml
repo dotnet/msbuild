@@ -12,7 +12,7 @@ parameters:
   type: boolean
   default: true
 - name: enableSigningValidation
-  displayName: Enable Signing Validation
+  displayName: Enable Signing Validation (always enabled when Sign Type is real)
   type: boolean
   default: true
 - name: signTypeParameter
@@ -165,8 +165,8 @@ extends:
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
-        publishingInfraVersion: 3
+        publishingInfraVersion: 4
         enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
-        enableSigningValidation: ${{ parameters.enableSigningValidation }}
+        enableSigningValidation: ${{ or(eq(parameters.signTypeParameter, 'real'), parameters.enableSigningValidation) }}

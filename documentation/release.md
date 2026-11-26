@@ -51,6 +51,23 @@ VS handles the progression from `main` → `rel/insiders` → `rel/stable` on it
 
 In [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml), the `TargetBranch` parameter sets `InsertTargetBranch`. The default `auto` currently resolves to VS `main`; verify the branch-local pipeline when servicing an older release. For a one-off servicing insertion, select `rel/insiders` or `rel/stable` explicitly and select the intended official MSBuild resource build. Changes to automatic routing or OptProf routing require a separate reviewed pipeline change.
 
+## Official-build artifact contract
+
+[`.vsts-dotnet.yml`](../.vsts-dotnet.yml) and [`.vsts-dotnet-exp-perf.yml`](../azure-pipelines/.vsts-dotnet-exp-perf.yml) share [`azure-pipelines/.vsts-dotnet-build-jobs.yml`](../azure-pipelines/.vsts-dotnet-build-jobs.yml) and use Arcade Publishing V4 (`PublishingVersion=4` in [`eng/Publishing.props`](../eng/Publishing.props)).
+
+| Artifact | Producer | Contents / consumer |
+|---|---|---|
+| `Windows_NT_Artifacts` | `Windows_NT` (pipeline artifact) | Arcade V4 staged tree: `packages/shipping/*.nupkg`, `packages/nonshipping/*.nupkg`, `assets/assets/symbols/.../*.symbols.nupkg`, `pdbs/Windows_NT/**/*.pdb`, `manifests/Windows_NT.xml`. Consumed by `Asset_Registry_Publish`, post-build `Signing Validation`, Darc/Maestro promotion, and VS insertion (`vs-insertion.yml`, `vs-insertion-experimental.yml`). |
+| `AssetManifests` | `Asset_Registry_Publish` (pipeline artifact) | `MergedManifest.xml` (PublishingVersion 4), consumed by Maestro promotion. |
+| `ReleaseConfigs` | `Asset_Registry_Publish` (pipeline artifact) | `ReleaseConfigs.txt` (BAR build ID, default channels, stability) and symbol exclusions. |
+| `ReleasePackages` | `Windows_NT` (pipeline artifact; nonexperimental, real-signed builds on `main` and branches cut after this change) | Repacked signed final-version shipping `.nupkg` files for nuget.org release handoff. Not listed in the V4 manifest; validated in-job with Arcade `SigningValidation` and hashed to `logs/ReleasePackages.sha256` before staging. Requires `DotNetFinalVersionKind` to be empty (not supported on older final-branded branches). |
+| `logs` | `Windows_NT` (build artifact, `always()`) | Build logs and binlogs; on nonexperimental real-signed builds also includes `signcheck*.log` and `ReleasePackages.sha256`. Kept as a build artifact so job retries can append without name collisions. |
+| `xsd` | `Windows_NT` (pipeline artifact) | MSBuild schema files + `Update-MSBuildXsds.ps1` for VS insertion. |
+| `VSSetup` | `Windows_NT` (build artifact; OptProf or `publishVSSetup`) | VSIXes and VS insertion manifests (also uploaded to VSTS Drop). |
+| `MicroBuildOutputs` | `Windows_NT` (build artifact; OptProf only) | `BootstrapperInfo.json`. |
+
+Legacy `PackageArtifacts` (including nested `Shipping`, `NonShipping`, `Release`, and `PreRelease` copies) is removed on `main`; PR CI (`FullReleaseOnWindows`) still runs `-publish` to validate V4 local staging without uploading V3 package/manifest artifacts. Until the first V4 official build on `main` succeeds, `vs-insertion.yml` on `main` cannot insert older pre-V4 builds (which lack `Windows_NT_Artifacts`); for manual insertion of a pre-V4 build, run the insertion pipeline from a pre-V4 commit or release branch. Reverting the V4 migration commit restores V3 for subsequent builds, though builds already produced under V4 cannot be inserted by reverted V3 insertion YAML.
+
 ## OptProf inputs
 
 Official `main` builds use centrally collected VS `main` profiles. Before cutting a release branch, select a compatible `OptProfBaselineDrop` and ensure it remains retained for the release's support and rebuild lifetime. Release branches keep that fixed baseline during servicing. `OptProfDropName` can override either default.
