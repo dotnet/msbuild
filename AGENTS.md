@@ -29,6 +29,8 @@ Instructions for GitHub Copilot and other AI coding agents working with the MSBu
 
 Official builds treat all warnings as errors, so do not introduce new warnings.
 
+Before posting findings, apply the [review finding acceptance gate](.github/agents/expert-reviewer.agent.md#finding-acceptance-gate). Establish the PR-specific regression and affected consumers, check the rationale for existing behavior, and weigh the proposed remedy's compatibility and performance costs. Label proxy reproductions and unmeasured estimates explicitly; an observable difference alone does not establish an actionable defect.
+
 ### Performance Considerations
 
 When reviewing pull requests:
