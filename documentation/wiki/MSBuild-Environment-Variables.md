@@ -41,7 +41,7 @@ Some of the env variables listed here are unsupported, meaning there is no guara
 - `MSBUILDENABLEMULTITHREADED=1`
   - Enable multi-threaded mode by default while allowing an explicit `-multiThreaded:false` / `-mt:false` command-line switch to disable it.
 - `MSBUILD_CONSOLE_USE_DEFAULT_ENCODING`
-  - It opts out automatic console encoding UTF-8. Make Console use default encoding in the system.
+  - It opts out automatic console encoding UTF-8. Make Console use default encoding in the system. On .NET Framework, this does not disable stripping the BOM from a pre-existing UTF-8 console input encoding (set `MSBUILDDISABLEFEATURESFROMVERSION=18.15` to opt out).
 - `MSBUILD_TELEMETRY_OPTOUT=1`
   - Turns off telemetry for MSBuild on .NET Framework, both in `MSBuild.exe` and inside Visual Studio. `DOTNET_CLI_TELEMETRY_OPTOUT` also turns it off there, and is the only one of the two that applies to MSBuild running on .NET. See [Consent](../VS-Telemetry-Data.md#consent).
 - `MSBUILD_HOST_NAME`

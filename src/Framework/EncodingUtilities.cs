@@ -256,6 +256,53 @@ namespace Microsoft.Build.Shared
         }
 #nullable enable
         /// <summary>
+        /// Switches console output and input encodings to UTF-8 (code page 65001) when supported by the host console.
+        /// </summary>
+        internal static void TrySetConsoleUtf8Encoding()
+        {
+            try
+            {
+                // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
+                Console.OutputEncoding = Encoding.UTF8;
+                // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
+#if NETFRAMEWORK
+                // Avoid writing a BOM to redirected child stdin when .NET Framework starts a process.
+                Console.InputEncoding = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_15)
+                    ? Utf8WithoutBom
+                    : Encoding.UTF8;
+#else
+                Console.InputEncoding = Encoding.UTF8;
+#endif
+            }
+            catch (Exception ex) when (ex is IOException or SecurityException)
+            {
+                // The encoding is unavailable. Do nothing.
+            }
+        }
+
+#if NETFRAMEWORK
+        /// <summary>
+        /// Replaces a BOM-emitting UTF-8 console input encoding (such as <see cref="Encoding.GetEncoding(int)"/> for code page 65001
+        /// on .NET Framework) with <see cref="Utf8WithoutBom"/> without changing the console code page.
+        /// </summary>
+        internal static void TryNormalizeUtf8ConsoleInputEncoding()
+        {
+            try
+            {
+                if (Console.InputEncoding.CodePage == Encoding.UTF8.CodePage
+                    && Console.InputEncoding.GetPreamble().Length > 0)
+                {
+                    Console.InputEncoding = Utf8WithoutBom;
+                }
+            }
+            catch (Exception ex) when (ex is IOException or SecurityException or NotSupportedException)
+            {
+                // The encoding is unavailable. Do nothing.
+            }
+        }
+#endif
+
+        /// <summary>
         /// The .NET SDK and Visual Studio both have environment variables that set a custom language. MSBuild should respect the SDK variable.
         /// To use the corresponding UI culture, in certain cases the console encoding must be changed. This function will change the encoding in these cases.
         /// This code introduces a breaking change in .NET 8 due to the encoding of the console being changed.
@@ -272,17 +319,7 @@ namespace Microsoft.Build.Shared
             {
                 if (CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
                 {
-                    try
-                    {
-                        // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
-                        Console.OutputEncoding = Encoding.UTF8;
-                        // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
-                        Console.InputEncoding = Encoding.UTF8;
-                    }
-                    catch (Exception ex) when (ex is IOException || ex is SecurityException)
-                    {
-                        // The encoding is unavailable. Do nothing.
-                    }
+                    TrySetConsoleUtf8Encoding();
                     return externalLanguageSetting;
                 }
                 else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

@@ -36,6 +36,7 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.15
+- [On .NET Framework with an attached console, when MSBuild selects UTF-8 console input encoding or starts with a pre-existing BOM-emitting UTF-8 input encoding, use UTF-8 without a BOM so redirected child stdin does not receive an unintended preamble.](https://github.com/dotnet/msbuild/pull/15170) Set `MSBUILDDISABLEFEATURESFROMVERSION=18.15` to restore the previous BOM-emitting input encoding (`MSBUILD_CONSOLE_USE_DEFAULT_ENCODING` does not disable normalization of an already-UTF-8 input encoding). Output encoding and explicit input redirection are unchanged; processes without an attached console are unaffected.
 
 ### 18.14
 - [AssignTargetPath recognizes forward slashes in relative path specifiers and correctly handles relative paths outside the root folder cone on Windows.](https://github.com/dotnet/msbuild/pull/15267)
