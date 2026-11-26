@@ -24,9 +24,11 @@ tools:
     # and PR-head get_file_contents on a public repo: gh-aw-mcpg unconditionally
     # labels pull-request-content as `none` integrity (github/gh-aw-mcpg#15160,
     # closed as not planned). Exposure is bounded by the `roles: [admin, maintainer,
-    # write]` pre-activation gate, base-only checkout, bash/cli-proxy disabled,
-    # read-only GitHub MCP scoped to public repos, threat detection, and
-    # comment/review-only safe outputs (no APPROVE or push).
+    # write]` pre-activation gate, base-only checkout on `review-on-open` (the
+    # manual `/review` command checks out the PR branch while restoring agent
+    # config from base), bash/cli-proxy disabled, read-only GitHub MCP scoped to
+    # public repos, threat detection, and comment/review-only safe outputs (no
+    # APPROVE or push).
     min-integrity: none
     allowed-repos: public
 
