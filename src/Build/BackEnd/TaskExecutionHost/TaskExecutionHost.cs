@@ -1708,6 +1708,8 @@ namespace Microsoft.Build.BackEnd
             return success;
         }
 
+        private static readonly string TaskParameterFormatString = ItemGroupLoggingHelper.TaskParameterPrefix + "{0}={1}";
+
         /// <summary>
         /// Given an instantiated task, this helper method sets the specified parameter
         /// </summary>
@@ -1720,11 +1722,22 @@ namespace Microsoft.Build.BackEnd
             if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
             {
                 IList parameterValueAsList = parameterValue as IList;
+                bool legacyBehavior = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12);
+
+                // Legacy textual logging for parameters that are not lists.
+                if (legacyBehavior && parameterValueAsList == null)
+                {
+                    _taskLoggingContext.LogCommentFromText(
+                       MessageImportance.Low,
+                       TaskParameterFormatString,
+                       parameter.Name,
+                       ItemGroupLoggingHelper.GetStringFromParameterValue(parameterValue));
+                }
 
                 if (parameter.Log)
                 {
                     // Structured logging for all parameters that have logging enabled and are not empty lists.
-                    if (parameterValueAsList?.Count > 0 || parameterValueAsList == null)
+                    if (parameterValueAsList?.Count > 0 || (parameterValueAsList == null && !legacyBehavior))
                     {
                         // Note: We're setting TaskParameterEventArgs.ItemType to parameter name for backward compatibility with
                         // older loggers and binlog viewers.
@@ -1913,16 +1926,23 @@ namespace Microsoft.Build.BackEnd
                         var outputString = joinedOutputs.ToString();
                         if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
                         {
-                            // Note: We're setting TaskParameterEventArgs.ItemType to property name for backward compatibility with
-                            // older loggers and binlog viewers.
-                            ItemGroupLoggingHelper.LogTaskParameter(
-                                _taskLoggingContext,
-                                TaskParameterMessageKind.TaskOutput,
-                                parameterName: parameter.Name,
-                                propertyName: outputTargetName,
-                                itemType: outputTargetName,
-                                (object[])[outputString],
-                                parameter.LogItemMetadata);
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                            {
+                                // Note: We're setting TaskParameterEventArgs.ItemType to property name for backward compatibility with
+                                // older loggers and binlog viewers.
+                                ItemGroupLoggingHelper.LogTaskParameter(
+                                    _taskLoggingContext,
+                                    TaskParameterMessageKind.TaskOutput,
+                                    parameterName: parameter.Name,
+                                    propertyName: outputTargetName,
+                                    itemType: outputTargetName,
+                                    (object[])[outputString],
+                                    parameter.LogItemMetadata);
+                            }
+                            else
+                            {
+                                _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
+                            }
                         }
 
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));
@@ -1993,16 +2013,23 @@ namespace Microsoft.Build.BackEnd
                         var outputString = joinedOutputs.ToString();
                         if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
                         {
-                            // Note: We're setting TaskParameterEventArgs.ItemType to property name for backward compatibility with
-                            // older loggers and binlog viewers.
-                            ItemGroupLoggingHelper.LogTaskParameter(
-                                _taskLoggingContext,
-                                TaskParameterMessageKind.TaskOutput,
-                                parameterName: parameter.Name,
-                                propertyName: outputTargetName,
-                                itemType: outputTargetName,
-                                (object[])[outputString],
-                                parameter.LogItemMetadata);
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                            {
+                                // Note: We're setting TaskParameterEventArgs.ItemType to property name for backward compatibility with
+                                // older loggers and binlog viewers.
+                                ItemGroupLoggingHelper.LogTaskParameter(
+                                    _taskLoggingContext,
+                                    TaskParameterMessageKind.TaskOutput,
+                                    parameterName: parameter.Name,
+                                    propertyName: outputTargetName,
+                                    itemType: outputTargetName,
+                                    (object[])[outputString],
+                                    parameter.LogItemMetadata);
+                            }
+                            else
+                            {
+                                _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
+                            }
                         }
 
                         PropertyTrackingUtils.LogPropertyAssignment(

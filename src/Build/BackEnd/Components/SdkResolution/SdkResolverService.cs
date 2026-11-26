@@ -58,10 +58,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
         /// </summary>
         /// <remarks>
-        /// We use a singleton instance because the set of SDK resolvers is not expected to change
-        /// during the lifetime of the process.
+        /// Unless the 17.10 changewave is disabled, we use a singleton instance because the set of SDK resolvers
+        /// is not expected to change during the lifetime of the process.
         /// </remarks>
-        protected SdkResolverLoader _sdkResolverLoader = CachingSdkResolverLoader.Instance;
+        protected SdkResolverLoader _sdkResolverLoader = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
+            ? CachingSdkResolverLoader.Instance
+            : new SdkResolverLoader();
 
         public SdkResolverService()
         {
@@ -137,21 +139,24 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Overall, while Sdk resolvers look like a general plug-in system, there are good reasons why some of the logic is hard-coded.
             // It's not really meant to be modified outside of very special/internal scenarios.
 #if NET
-            if (TryResolveSdkUsingSpecifiedResolvers(
-                _sdkResolverLoader.GetDefaultResolvers(),
-                BuildEventContext.InvalidSubmissionId, // disables GetResolverState/SetResolverState
-                sdk,
-                loggingContext,
-                sdkReferenceLocation,
-                solutionPath,
-                projectPath,
-                interactive,
-                isRunningInVisualStudio,
-                out SdkResult sdkResult,
-                out _,
-                out _))
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
             {
-                return sdkResult;
+                if (TryResolveSdkUsingSpecifiedResolvers(
+                    _sdkResolverLoader.GetDefaultResolvers(),
+                    BuildEventContext.InvalidSubmissionId, // disables GetResolverState/SetResolverState
+                    sdk,
+                    loggingContext,
+                    sdkReferenceLocation,
+                    solutionPath,
+                    projectPath,
+                    interactive,
+                    isRunningInVisualStudio,
+                    out SdkResult sdkResult,
+                    out _,
+                    out _))
+                {
+                    return sdkResult;
+                }
             }
 #endif
 
@@ -501,15 +506,18 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
 
                 SdkResolverManifest sdkDefaultResolversManifest = null;
-#if !NET
-                // Load and add the manifest for the default resolvers, located directly in this dll.
-                IReadOnlyList<SdkResolver> defaultResolvers = _sdkResolverLoader.GetDefaultResolvers();
-                if (defaultResolvers.Count > 0)
-                {
-                    sdkDefaultResolversManifest = new SdkResolverManifest(DisplayName: "DefaultResolversManifest", Path: null, ResolvableSdkRegex: null);
-                    _manifestToResolvers[sdkDefaultResolversManifest] = defaultResolvers;
-                }
+#if NET
+                if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
 #endif
+                {
+                    // Load and add the manifest for the default resolvers, located directly in this dll.
+                    IReadOnlyList<SdkResolver> defaultResolvers = _sdkResolverLoader.GetDefaultResolvers();
+                    if (defaultResolvers.Count > 0)
+                    {
+                        sdkDefaultResolversManifest = new SdkResolverManifest(DisplayName: "DefaultResolversManifest", Path: null, ResolvableSdkRegex: null);
+                        _manifestToResolvers[sdkDefaultResolversManifest] = defaultResolvers;
+                    }
+                }
 
                 var specificResolversManifestsRegistry = new List<SdkResolverManifest>();
                 var generalResolversManifestsRegistry = new List<SdkResolverManifest>();
