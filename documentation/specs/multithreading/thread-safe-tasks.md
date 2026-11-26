@@ -216,6 +216,10 @@ public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 `AbsolutePath` converts implicitly to string for seamless integration with existing File/Directory APIs.
 `GetCanonicalForm()` applies `Path.GetFullPath()` canonicalization to an already fully qualified path, resolving `.` and `..` segments and normalizing directory separators. Use it when migrating code that previously relied on `Path.GetFullPath()`; `TaskEnvironment.GetAbsolutePath()` produces fully qualified paths but intentionally does not canonicalize them.
 
+`TaskEnvironment.Fallback` preserves process-based resolution, including Windows per-drive
+current directories for drive-relative paths such as `D:manifest.xml`. Isolated task
+environments resolve paths against their project directory instead.
+
 ### API Usage Example
 
 ```csharp
