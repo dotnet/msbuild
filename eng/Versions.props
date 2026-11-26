@@ -3,10 +3,10 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.14.0</VersionPrefix>
+    <VersionPrefix>18.15.0</VersionPrefix>
     <PreReleaseVersionLabel>1</PreReleaseVersionLabel>
     <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">$(PreReleaseVersionLabel)-test</PreReleaseVersionLabel>
-    <PackageValidationBaselineVersion>18.13.0-1.26527.7</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>18.14.0-1.26554.5</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
     <!--
