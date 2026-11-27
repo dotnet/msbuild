@@ -125,6 +125,20 @@ namespace Microsoft.Build.Utilities
         protected bool ExitCodeOverriddenToIndicateErrors { get; private set; }
 
         /// <summary>
+        /// Converts a zero exit code to -1 and records the override when the task has logged errors.
+        /// </summary>
+        internal int NormalizeExitCodeForLoggedErrors(int exitCode)
+        {
+            if (exitCode == 0 && HasLoggedErrors)
+            {
+                ExitCodeOverriddenToIndicateErrors = true;
+                return -1;
+            }
+
+            return exitCode;
+        }
+
+        /// <summary>
         /// When set to true, this task will yield the node when its task is executing.
         /// </summary>
         public bool YieldDuringToolExecution { get; set; }
@@ -770,6 +784,7 @@ namespace Microsoft.Build.Utilities
 
             _toolExited = new ManualResetEvent(false);
             _terminatedTool = false;
+            _eofWaitTimedOut = false;
             _toolTimeoutExpired = new ManualResetEvent(false);
 
             _eventsDisposed = false;
@@ -846,11 +861,7 @@ namespace Microsoft.Build.Utilities
                 }
 
                 // If the tool exited cleanly, but logged errors then assign a failing exit code (-1)
-                if (ExitCode == 0 && HasLoggedErrors)
-                {
-                    ExitCode = -1;
-                    ExitCodeOverriddenToIndicateErrors = true;
-                }
+                ExitCode = NormalizeExitCodeForLoggedErrors(ExitCode);
 
                 // release all the OS resources
                 // setting a bool to make sure tardy notification threads
@@ -1133,6 +1144,7 @@ namespace Microsoft.Build.Utilities
                 bool allEOFReceived = _eofCountdown.Wait(TimeSpan.FromSeconds(eofTimeoutSec));
                 if (!allEOFReceived)
                 {
+                    _eofWaitTimedOut = true;
                     // Timeout: a grandchild process likely still holds the pipe open.
                     // Drain whatever data has already arrived before returning.
                     LogMessagesFromStandardError();
@@ -1283,7 +1295,15 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.Diagnostics.DataReceivedEventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void ReceiveStandardErrorData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardErrorData, _standardErrorDataAvailable);
+        protected void ReceiveStandardErrorData(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data != null && TryCaptureStandardErrorData(e.Data))
+            {
+                return;
+            }
+
+            ReceiveStandardErrorOrOutputData(e, _standardErrorData, _standardErrorDataAvailable);
+        }
 
         /// <summary>
         /// Queues up the output from the stdout stream of the process executing
@@ -1294,7 +1314,27 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.Diagnostics.DataReceivedEventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void ReceiveStandardOutputData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardOutputData, _standardOutputDataAvailable);
+        protected void ReceiveStandardOutputData(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data != null && TryCaptureStandardOutputData(e.Data))
+            {
+                return;
+            }
+
+            ReceiveStandardErrorOrOutputData(e, _standardOutputData, _standardOutputDataAvailable);
+        }
+
+        /// <summary>
+        /// Allows derived tasks in this assembly (such as <see cref="CachedToolTask"/>) to capture
+        /// stdout lines without suppressing <see cref="ToolTask"/>'s EOF tracking.
+        /// </summary>
+        internal virtual bool TryCaptureStandardOutputData(string data) => false;
+
+        /// <summary>
+        /// Allows derived tasks in this assembly (such as <see cref="CachedToolTask"/>) to capture
+        /// stderr lines without suppressing <see cref="ToolTask"/>'s EOF tracking.
+        /// </summary>
+        internal virtual bool TryCaptureStandardErrorData(string data) => false;
 
         /// <summary>
         /// Queues up the output from either the stderr or stdout stream of the
@@ -1652,6 +1692,8 @@ namespace Microsoft.Build.Utilities
                 }
                 ExitCode = 0;
                 ExitCodeOverriddenToIndicateErrors = false;
+                _terminatedTool = false;
+                _eofWaitTimedOut = false;
 
                 if (nextAction == HostObjectInitializationStatus.UseHostObjectToExecute)
                 {
@@ -1831,6 +1873,15 @@ namespace Microsoft.Build.Utilities
         /// either because the timeout was reached or it was canceled.
         /// </summary>
         private bool _terminatedTool;
+
+        /// <summary>
+        /// Flag set to true if waiting for stdout/stderr pipe EOF timed out after the process exited.
+        /// </summary>
+        private bool _eofWaitTimedOut;
+
+        internal bool TerminatedTool => _terminatedTool;
+
+        internal virtual bool EofWaitTimedOut => _eofWaitTimedOut;
 
         /// <summary>
         /// Used for signalling when the tool times-out.
