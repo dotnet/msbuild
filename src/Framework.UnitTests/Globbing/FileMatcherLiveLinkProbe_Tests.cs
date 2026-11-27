@@ -328,6 +328,35 @@ public sealed class FileMatcherLiveLinkProbe_Tests
 
 #if FEATURE_SYMLINK_TARGET
     [RequiresSymbolicLinksFact]
+    public void LegacyGlobSkipsAncestorLinkButFollowsExternalLink()
+    {
+        using TestEnvironment environment = TestEnvironment.Create(_output);
+        TransientTestFolder root = environment.CreateFolder();
+        TransientTestFolder child = environment.CreateFolder(Path.Combine(root.Path, "child"));
+        TransientTestFolder external = environment.CreateFolder();
+        root.CreateFile("root.cs", "");
+        child.CreateFile("child.cs", "");
+        external.CreateFile("external.cs", "");
+        string ancestorLink = Path.Combine(child.Path, "ancestor");
+        string externalLink = Path.Combine(child.Path, "external");
+        environment.WithTransientTestState(new LinkCleanup(ancestorLink, externalLink));
+        Directory.CreateSymbolicLink(ancestorLink, root.Path);
+        Directory.CreateSymbolicLink(externalLink, external.Path);
+
+        FileMatcher[] matchers =
+        [
+            new(FileSystems.Default, implementation: FileMatcherImplementation.Legacy),
+            new(FileSystems.Default, new ConcurrentDictionary<string, IReadOnlyList<string>>(), FileMatcherImplementation.Legacy)
+        ];
+        string[] expected = ["root.cs", Path.Combine("child", "child.cs"), Path.Combine("child", "external", "external.cs")];
+        foreach (FileMatcher matcher in matchers)
+        {
+            string[] actual = matcher.GetFiles(root.Path, Path.Combine("**", "*.cs")).FileList;
+            actual.OrderBy(path => path, StringComparer.Ordinal).ShouldBe(expected.OrderBy(path => path, StringComparer.Ordinal));
+        }
+    }
+
+    [RequiresSymbolicLinksFact]
     public void LinkChainsAndPathSpellingsKeepFinalTargetSemantics()
     {
         using TestEnvironment environment = TestEnvironment.Create(_output);
