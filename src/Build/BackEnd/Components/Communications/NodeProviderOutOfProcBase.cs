@@ -495,6 +495,8 @@ namespace Microsoft.Build.BackEnd
                     {
                         CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node");
                     }
+
+                    msbuildProcess.Dispose();
                 }
 
                 return false;
@@ -1556,6 +1558,9 @@ namespace Microsoft.Build.BackEnd
                     CommunicationsUtilities.Trace($"Waiting for node with pid = {_process.Id} to exit");
 
 #if NET11_0_OR_GREATER
+                    // Do not enable this for older targets: there, NodeLauncher drains suppressed node output with
+                    // Begin*ReadLine, and Process.WaitForExitAsync would also wait for that output to reach EOF, which
+                    // descendants holding the pipe can delay. On .NET 11+, node standard streams use the null device.
                     if (await WaitForExitAsync(_process, TimeoutForWaitForExit).ConfigureAwait(false))
                     {
                         return;
@@ -1591,7 +1596,7 @@ namespace Microsoft.Build.BackEnd
                 CommunicationsUtilities.Trace($"Killing node with pid = {_process.Id}");
 
 #if NET11_0_OR_GREATER
-                // Keep tree termination and the bounded cleanup wait, not the single-child kill helper's unbounded wait.
+                // Same as KillTree(timeoutMilliseconds: 5000), but the bounded post-kill wait is asynchronous.
                 _process.Kill(entireProcessTree: true);
                 await WaitForExitAsync(_process, 5000).ConfigureAwait(false);
 #else

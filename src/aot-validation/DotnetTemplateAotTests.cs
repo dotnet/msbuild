@@ -25,10 +25,10 @@ namespace Microsoft.Build.AotValidation;
 public sealed class DotnetTemplateAotTests
 {
     [TestMethod]
-    public void DotnetNew_Console_EvaluatesAsExecutableProject()
+    public async Task DotnetNew_Console_EvaluatesAsExecutableProject()
     {
         using var temp = new TempDirectory();
-        CreateFromTemplate("console", "ConsoleApp", temp.Path);
+        await CreateFromTemplateAsync("console", "ConsoleApp", temp.Path);
 
         using var collection = new ProjectCollection();
         Project project = EvaluateSingleProject(temp.Path, collection);
@@ -39,10 +39,10 @@ public sealed class DotnetTemplateAotTests
     }
 
     [TestMethod]
-    public void DotnetNew_Classlib_EvaluatesAsLibraryProject()
+    public async Task DotnetNew_Classlib_EvaluatesAsLibraryProject()
     {
         using var temp = new TempDirectory();
-        CreateFromTemplate("classlib", "ClassLib", temp.Path);
+        await CreateFromTemplateAsync("classlib", "ClassLib", temp.Path);
 
         using var collection = new ProjectCollection();
         Project project = EvaluateSingleProject(temp.Path, collection);
@@ -53,12 +53,12 @@ public sealed class DotnetTemplateAotTests
     }
 
     [TestMethod]
-    public void DotnetNew_Console_BuildUnderAot_RunsRegisteredTasksThenFailsObservably()
-        => AssertTemplateBuildEngagesTasksThenFailsObservably("console", "ConsoleApp");
+    public Task DotnetNew_Console_BuildUnderAot_RunsRegisteredTasksThenFailsObservably()
+        => AssertTemplateBuildEngagesTasksThenFailsObservablyAsync("console", "ConsoleApp");
 
     [TestMethod]
-    public void DotnetNew_Classlib_BuildUnderAot_RunsRegisteredTasksThenFailsObservably()
-        => AssertTemplateBuildEngagesTasksThenFailsObservably("classlib", "ClassLib");
+    public Task DotnetNew_Classlib_BuildUnderAot_RunsRegisteredTasksThenFailsObservably()
+        => AssertTemplateBuildEngagesTasksThenFailsObservablyAsync("classlib", "ClassLib");
 
     /// <summary>
     /// Builds a real SDK template in-process under the AOT configuration and asserts the build engages task
@@ -72,14 +72,14 @@ public sealed class DotnetTemplateAotTests
     /// tasks still work, but reaching the first unregistered SDK task fails observably with a reported error.
     /// This pins the exact AOT boundary for a real SDK build: it degrades to a reported error, never a crash.
     /// </remarks>
-    private static void AssertTemplateBuildEngagesTasksThenFailsObservably(string template, string name)
+    private static async Task AssertTemplateBuildEngagesTasksThenFailsObservablyAsync(string template, string name)
     {
         // Pre-register the common built-in tasks so the failure is isolated to the SDK's own task assembly,
         // not the core tasks a build also uses.
         BuiltInTasks.RegisterAll();
 
         using var temp = new TempDirectory();
-        CreateFromTemplate(template, name, temp.Path);
+        await CreateFromTemplateAsync(template, name, temp.Path);
 
         string projectPath = Directory
             .GetFiles(temp.Path, "*.csproj", SearchOption.AllDirectories)
@@ -184,7 +184,7 @@ public sealed class DotnetTemplateAotTests
     /// Runs <c>dotnet new &lt;template&gt; --name &lt;name&gt; --output &lt;dir&gt;</c> with the bootstrap
     /// SDK and asserts it succeeded.
     /// </summary>
-    private static void CreateFromTemplate(string template, string name, string outputDirectory)
+    private static async Task CreateFromTemplateAsync(string template, string name, string outputDirectory)
     {
         var startInfo = new ProcessStartInfo(FindBootstrapDotnet())
         {
@@ -205,27 +205,36 @@ public sealed class DotnetTemplateAotTests
         startInfo.Environment["DOTNET_NOLOGO"] = "1";
         startInfo.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "1";
 
-        using var process = new Process { StartInfo = startInfo };
-        process.Start();
+        using Process process = Process.Start(startInfo)!;
+        using CancellationTokenSource timeout = new(TimeSpan.FromMinutes(2));
 
-        // Read both streams asynchronously to avoid a pipe-buffer deadlock.
-        Task<string> standardOutput = process.StandardOutput.ReadToEndAsync();
-        Task<string> standardError = process.StandardError.ReadToEndAsync();
+        // Drain both pipes concurrently (avoids a pipe-buffer deadlock), bounded by the same timeout.
+        Task<(string StandardOutput, string StandardError)> output = process.ReadAllTextAsync(timeout.Token);
 
-        if (!process.TryWaitForExitStatus(TimeSpan.FromMinutes(2), out _))
+        try
+        {
+            ProcessExitStatus status = await process.WaitForExitStatusAsync(timeout.Token);
+            if (status.ExitCode != 0)
+            {
+                (string standardOutput, string standardError) = await output;
+                Assert.Fail(
+                    $"`dotnet new {template}` failed (exit {status.ExitCode}).{Environment.NewLine}"
+                        + $"stdout:{Environment.NewLine}{standardOutput}{Environment.NewLine}"
+                        + $"stderr:{Environment.NewLine}{standardError}");
+            }
+        }
+        catch (OperationCanceledException) when (timeout.IsCancellationRequested)
         {
             process.Kill(entireProcessTree: true);
+            await process.WaitForExitStatusAsync();
             Assert.Fail($"`dotnet new {template}` did not complete within the timeout.");
         }
-
-        ProcessExitStatus status = process.WaitForExitStatus();
-
-        Assert.AreEqual(
-            0,
-            status.ExitCode,
-            $"`dotnet new {template}` failed (exit {status.ExitCode}).{Environment.NewLine}"
-                + $"stdout:{Environment.NewLine}{standardOutput.GetAwaiter().GetResult()}{Environment.NewLine}"
-                + $"stderr:{Environment.NewLine}{standardError.GetAwaiter().GetResult()}");
+        finally
+        {
+            // On success the output was not awaited; stop and observe the reads before disposal closes the pipes.
+            timeout.Cancel();
+            await ((Task)output).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        }
     }
 
     /// <summary>

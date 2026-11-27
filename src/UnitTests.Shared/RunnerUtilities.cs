@@ -305,18 +305,9 @@ namespace Microsoft.Build.UnitTests.Shared
                 Stopwatch sw = Stopwatch.StartNew();
                 if (Traits.Instance.DebugUnitTests)
                 {
-#if NET11_0_OR_GREATER
-                    p.WaitForExitStatus();
-#else
                     p.WaitForExit();
-#endif
                 }
-                else if (
-#if NET11_0_OR_GREATER
-                    !p.TryWaitForExitStatus(timeout, out _))
-#else
-                    !p.WaitForExit(timeoutMilliseconds))
-#endif
+                else if (!p.WaitForExit(timeoutMilliseconds))
                 {
                     // Let's not create a unit test for which we need more than requested timeout to execute.
                     // Please consider carefully if you would like to increase the timeout.
@@ -353,7 +344,7 @@ namespace Microsoft.Build.UnitTests.Shared
 
             if (attachProcessId)
             {
-                output.AppendLine($"Process ID is {pid}");
+                output.Append("Process ID is ").Append(pid).Append("\r\n");
                 WriteOutput("Process ID is " + pid + "\r\n");
                 WriteOutput("==============");
             }

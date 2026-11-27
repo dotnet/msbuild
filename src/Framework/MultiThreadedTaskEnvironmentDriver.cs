@@ -230,10 +230,10 @@ namespace Microsoft.Build.Framework
             };
 
             // This is the complete task-local environment, including variables removed from the parent snapshot.
-            startInfo.EnvironmentVariables.Clear();
+            startInfo.Environment.Clear();
             foreach (var kvp in _environmentVariables)
             {
-                startInfo.EnvironmentVariables[kvp.Key] = kvp.Value;
+                startInfo.Environment[kvp.Key] = kvp.Value;
             }
 
             return startInfo;

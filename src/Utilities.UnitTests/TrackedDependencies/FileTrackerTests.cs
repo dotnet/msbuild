@@ -2676,8 +2676,20 @@ namespace ConsoleApplication4
             StringBuilder standardError = new();
             if (printOutput)
             {
-                p.OutputDataReceived += (_, e) => standardOutput.AppendLine(e.Data);
-                p.ErrorDataReceived += (_, e) => standardError.AppendLine(e.Data);
+                p.OutputDataReceived += (_, e) =>
+                {
+                    if (e.Data is not null)
+                    {
+                        standardOutput.AppendLine(e.Data);
+                    }
+                };
+                p.ErrorDataReceived += (_, e) =>
+                {
+                    if (e.Data is not null)
+                    {
+                        standardError.AppendLine(e.Data);
+                    }
+                };
             }
 
             p.Start();

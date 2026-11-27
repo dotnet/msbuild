@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 #if NET11_0_OR_GREATER
 using Microsoft.Win32.SafeHandles;
 #endif
@@ -17,14 +19,15 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-#if FEATURE_WINDOWSINTEROP && !NET11_0_OR_GREATER
-using System.Globalization;
+#if FEATURE_WINDOWSINTEROP
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using Microsoft.Build.Utilities;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Threading;
+#endif
+#if FEATURE_WINDOWSINTEROP && !NET11_0_OR_GREATER
+using Microsoft.Build.Utilities;
 #endif
 
 #nullable disable
@@ -69,10 +72,6 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace($"Launching node from {nodeLaunchData.MSBuildLocation}");
 
-            // On .NET 11+ nodes are always started with Process.Start. The native CreateProcess path below is only needed for
-            // MSBUILDNODEWINDOW (CREATE_NEW_CONSOLE), which Process.Start cannot do, so it is not compiled for .NET 11+.
-            // To use MSBUILDNODEWINDOW for debugging, extend the "#if ... !NET11_0_OR_GREATER" conditions that guard
-            // the native path in this file (here, the usings, StartProcessWindows and its helpers) with "|| DEBUG".
 #if FEATURE_WINDOWSINTEROP && !NET11_0_OR_GREATER
             if (NativeMethodsShared.IsWindows)
             {
@@ -80,7 +79,7 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
             return NativeMethodsShared.IsUnixLike || NativeMethodsShared.IsWindows
-                ? StartProcess(nodeLaunchData, exeName, redirectStreams, isNativeAppHost)
+                ? StartProcess(nodeLaunchData, exeName, redirectStreams, showNodeWindow, isNativeAppHost)
                 : throw new PlatformNotSupportedException();
 
             static void ValidateMSBuildLocation(string msbuildLocation)
@@ -115,7 +114,7 @@ namespace Microsoft.Build.BackEnd
             return msbuildLocation;
         }
 
-        private Process StartProcess(NodeLaunchData nodeLaunchData, string exeName, bool redirectStreams, bool isNativeAppHost)
+        private Process StartProcess(NodeLaunchData nodeLaunchData, string exeName, bool redirectStreams, bool showNodeWindow, bool isNativeAppHost)
         {
             // Builds command line args for Unix Process.Start, which sets argv[0] from FileName
             // automatically. We must not duplicate the executable name in Arguments for native
@@ -149,7 +148,13 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
+#if FEATURE_WINDOWSINTEROP && NET11_0_OR_GREATER
+                Process process = showNodeWindow && NativeMethodsShared.IsWindows
+                    ? StartProcessWithNewConsole(processStartInfo)
+                    : Process.Start(processStartInfo);
+#else
                 Process process = Process.Start(processStartInfo);
+#endif
 #if !NET11_0_OR_GREATER
                 if (redirectStreams)
                 {
@@ -168,9 +173,57 @@ namespace Microsoft.Build.BackEnd
                 CommunicationsUtilities.Trace(
                     $"Failed to launch node from {nodeLaunchData.MSBuildLocation}. CommandLine: {commandLineArgs}{Environment.NewLine}{ex}");
 
-                throw new NodeFailedToLaunchException(ex);
+                throw ex is Win32Exception win32Exception
+                    ? new NodeFailedToLaunchException(win32Exception.NativeErrorCode.ToString(CultureInfo.InvariantCulture), win32Exception.Message)
+                    : new NodeFailedToLaunchException(ex);
             }
         }
+
+#if FEATURE_WINDOWSINTEROP && NET11_0_OR_GREATER
+        /// <summary>
+        /// Starts the node in its own console window (MSBUILDNODEWINDOW), which Process.Start cannot do.
+        /// WindowsProcessStartArguments.Start lets us call CreateProcess with CREATE_NEW_CONSOLE while the runtime
+        /// prepares the command line and environment block and holds its process-start lock, so the launch is
+        /// coordinated with other process starts.
+        /// </summary>
+        [SupportedOSPlatform("windows6.1")]
+        private static unsafe Process StartProcessWithNewConsole(ProcessStartInfo processStartInfo)
+        {
+            return WindowsProcessStartArguments.Start(processStartInfo, static args =>
+            {
+                PROCESS_CREATION_FLAGS creationFlags = PROCESS_CREATION_FLAGS.CREATE_NEW_CONSOLE;
+                if (args.EnvironmentVariables is not null)
+                {
+                    creationFlags |= PROCESS_CREATION_FLAGS.CREATE_UNICODE_ENVIRONMENT;
+                }
+
+                // The prepared standard handles are deliberately not used (no STARTF_USESTDHANDLES):
+                // the node must use the handles of its new console, not the parent's.
+                STARTUPINFOW startInfo = new() { cb = (uint)sizeof(STARTUPINFOW) };
+                PROCESS_INFORMATION processInfo;
+                fixed (char* pFileName = args.ProcessStartInfo.FileName)
+                {
+                    if (!PInvoke.CreateProcess(
+                        lpApplicationName: pFileName,
+                        lpCommandLine: args.Arguments,
+                        lpProcessAttributes: null,
+                        lpThreadAttributes: null,
+                        bInheritHandles: false,
+                        dwCreationFlags: creationFlags,
+                        lpEnvironment: args.EnvironmentVariables,
+                        lpCurrentDirectory: (PCWSTR)null,
+                        lpStartupInfo: &startInfo,
+                        lpProcessInformation: &processInfo))
+                    {
+                        throw new Win32Exception();
+                    }
+                }
+
+                PInvoke.CloseHandle(processInfo.hThread);
+                return (nint)processInfo.hProcess;
+            });
+        }
+#endif
 
 #if FEATURE_WINDOWSINTEROP && !NET11_0_OR_GREATER
         [SupportedOSPlatform("windows6.1")]
@@ -245,7 +298,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (!result)
                 {
-                    var e = new System.ComponentModel.Win32Exception();
+                    var e = new Win32Exception();
 
                     string commandLineForTrace = commandLine.ToString();
                     CommunicationsUtilities.Trace(

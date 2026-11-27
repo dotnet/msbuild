@@ -1858,6 +1858,38 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).Count().ShouldBeGreaterThanOrEqualTo(2);
     }
 
+    [Theory]
+    [InlineData("Process.StartAndForget(TaskEnvironment.GetProcessStartInfo())")]
+    [InlineData("Process.StartAndForget(\"cmd\", [])")]
+    [InlineData("Process.Run(TaskEnvironment.GetProcessStartInfo())")]
+    [InlineData("Process.Run(\"cmd\", [])")]
+    [InlineData("Process.RunAsync(TaskEnvironment.GetProcessStartInfo())")]
+    [InlineData("Process.RunAsync(\"cmd\", [])")]
+    [InlineData("Process.RunAndCaptureText(TaskEnvironment.GetProcessStartInfo())")]
+    [InlineData("Process.RunAndCaptureText(\"cmd\", [])")]
+    [InlineData("Process.RunAndCaptureTextAsync(TaskEnvironment.GetProcessStartInfo())")]
+    [InlineData("Process.RunAndCaptureTextAsync(\"cmd\", [])")]
+    [InlineData("Microsoft.Win32.SafeHandles.SafeProcessHandle.Start(TaskEnvironment.GetProcessStartInfo())")]
+    public async Task Net11ProcessStartApis_InMultiThreadable_ProduceWarning(string call)
+    {
+        var diags = await GetDiagnosticsAsync($$"""
+            using System.Diagnostics;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+                public override bool Execute()
+                {
+                    _ = {{call}};
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldHaveSingleItem().Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     // [MSBuildMultiThreadableTaskAnalyzed] attribute on helper classes
     // ═══════════════════════════════════════════════════════════════════════

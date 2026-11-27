@@ -42,7 +42,7 @@ MSBuild consist of nodes. First spun is so called **entrypoint node**. It runs a
 
 `NodeManager` is a build component (`IBuildComponent`) - so it can be retrieved from build engine (via `IBuildComponentHost.GetComponent`).
 
-On .NET 11, suppressed node standard streams use the null device rather than pipes, so output cannot block startup and standard input immediately reaches EOF. Node shutdown waits for process termination independently of output EOF, retaining the graceful-exit budget, process-tree termination, and bounded cleanup wait.
+On .NET 11, suppressed node standard streams use the null device rather than pipes, so output cannot block startup and standard input immediately reaches EOF. Because there is no redirected output, node shutdown uses `Process.WaitForExitAsync`, which then waits only for process termination (it also works for nodes reused from an earlier build, which are not children of the current process), retaining the graceful-exit budget, process-tree termination, and bounded cleanup wait.
 
 Node is described by [`NodeInfo`](https://github.com/dotnet/msbuild/blob/main/src/Build/BackEnd/Components/Communications/NodeInfo.cs).
 

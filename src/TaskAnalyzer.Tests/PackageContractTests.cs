@@ -419,9 +419,9 @@ public sealed class PackageContractTests(ITestOutputHelper output)
         }
 
         using Process process = Process.Start(startInfo)!;
-        Task<(string StandardOutput, string StandardError)> capturedOutput = process.ReadAllTextAsync();
-
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+        Task<(string StandardOutput, string StandardError)> capturedOutput = process.ReadAllTextAsync(timeout.Token);
+
         ProcessExitStatus status;
         try
         {
@@ -431,6 +431,9 @@ public sealed class PackageContractTests(ITestOutputHelper output)
         {
             process.Kill(entireProcessTree: true);
             await process.WaitForExitStatusAsync();
+
+            // Observe the canceled reads before disposal closes the pipes.
+            await ((Task)capturedOutput).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
             throw new TimeoutException($"dotnet {string.Join(' ', arguments)} exceeded five minutes.");
         }
 

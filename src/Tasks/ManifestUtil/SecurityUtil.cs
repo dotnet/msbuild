@@ -830,8 +830,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             try
             {
                 signTool = Process.Start(startInfo);
-                string standardError = ReadSignToolError(signTool);
-                switch (signTool.ExitCode)
+                (int exitCode, string standardError) = WaitForSignTool(signTool);
+                switch (exitCode)
                 {
                     case 0:
                         // everything was fine
@@ -853,20 +853,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-        internal static string ReadSignToolError(Process signTool)
+        private static (int ExitCode, string StandardError) WaitForSignTool(Process signTool)
         {
-            if (signTool.StartInfo.RedirectStandardOutput)
-            {
-                // Older targets discard stdout through a pipe, which must be drained alongside stderr.
-                signTool.BeginOutputReadLine();
-            }
-            string standardError = signTool.StandardError.ReadToEnd();
 #if NET11_0_OR_GREATER
-            signTool.WaitForExitStatus();
+            string standardError = signTool.StandardError.ReadToEnd();
+            return (signTool.WaitForExitStatus().ExitCode, standardError);
 #else
+            // Older targets discard stdout through a pipe, which must be drained alongside stderr.
+            signTool.BeginOutputReadLine();
+            string standardError = signTool.StandardError.ReadToEnd();
             signTool.WaitForExit();
+            return (signTool.ExitCode, standardError);
 #endif
-            return standardError;
         }
 
         internal static string GetCommandLineParameters(string certThumbprint, Uri timestampUrl, string path,
