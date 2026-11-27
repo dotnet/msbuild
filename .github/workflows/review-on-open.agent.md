@@ -52,6 +52,14 @@ timeout-minutes: 60
 max-ai-credits: 2000
 
 # ###############################################################
+# Disable the per-workflow daily AI Credits guardrail. Cost is
+# controlled via the `roles: [admin, maintainer, write]` gate,
+# per-run `max-ai-credits`, and the shared PAT pool budget.
+# See dotnet/msbuild#14312.
+# ###############################################################
+max-daily-ai-credits: -1
+
+# ###############################################################
 # Select a PAT from the pool and override COPILOT_GITHUB_TOKEN.
 # Run agentic jobs in an isolated `copilot-pat-pool` environment.
 #
@@ -69,7 +77,7 @@ environment: copilot-pat-pool
 engine:
   id: copilot
   # Copilot can auto-approve read-only tools even without explicit grants.
-  args: ["--deny-tool", "shell"]
+  args: ["--deny-tool", "shell", "--deny-tool", "github(get_commit)"]
   env:
      COPILOT_GITHUB_TOKEN: "${{ case( needs.pat_pool.outputs.pat_number == '0', secrets.COPILOT_PAT_0, needs.pat_pool.outputs.pat_number == '1', secrets.COPILOT_PAT_1, needs.pat_pool.outputs.pat_number == '2', secrets.COPILOT_PAT_2, needs.pat_pool.outputs.pat_number == '3', secrets.COPILOT_PAT_3, needs.pat_pool.outputs.pat_number == '4', secrets.COPILOT_PAT_4, needs.pat_pool.outputs.pat_number == '5', secrets.COPILOT_PAT_5, needs.pat_pool.outputs.pat_number == '6', secrets.COPILOT_PAT_6, needs.pat_pool.outputs.pat_number == '7', secrets.COPILOT_PAT_7, needs.pat_pool.outputs.pat_number == '8', secrets.COPILOT_PAT_8, needs.pat_pool.outputs.pat_number == '9', secrets.COPILOT_PAT_9, 'NO COPILOT PAT AVAILABLE') }}"
 ---
