@@ -1859,18 +1859,18 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Theory]
-    [InlineData("Process.StartAndForget(TaskEnvironment.GetProcessStartInfo())")]
-    [InlineData("Process.StartAndForget(\"cmd\", [])")]
-    [InlineData("Process.Run(TaskEnvironment.GetProcessStartInfo())")]
-    [InlineData("Process.Run(\"cmd\", [])")]
-    [InlineData("Process.RunAsync(TaskEnvironment.GetProcessStartInfo())")]
-    [InlineData("Process.RunAsync(\"cmd\", [])")]
-    [InlineData("Process.RunAndCaptureText(TaskEnvironment.GetProcessStartInfo())")]
-    [InlineData("Process.RunAndCaptureText(\"cmd\", [])")]
-    [InlineData("Process.RunAndCaptureTextAsync(TaskEnvironment.GetProcessStartInfo())")]
-    [InlineData("Process.RunAndCaptureTextAsync(\"cmd\", [])")]
-    [InlineData("Microsoft.Win32.SafeHandles.SafeProcessHandle.Start(TaskEnvironment.GetProcessStartInfo())")]
-    public async Task Net11ProcessStartApis_InMultiThreadable_ProduceWarning(string call)
+    [InlineData("Process.StartAndForget(\"cmd\", [])", true)]
+    [InlineData("Process.Run(\"cmd\", [])", true)]
+    [InlineData("Process.RunAsync(\"cmd\", [])", true)]
+    [InlineData("Process.RunAndCaptureText(\"cmd\", [])", true)]
+    [InlineData("Process.RunAndCaptureTextAsync(\"cmd\", [])", true)]
+    [InlineData("Process.StartAndForget(TaskEnvironment.GetProcessStartInfo())", false)]
+    [InlineData("Process.Run(TaskEnvironment.GetProcessStartInfo())", false)]
+    [InlineData("Process.RunAsync(TaskEnvironment.GetProcessStartInfo())", false)]
+    [InlineData("Process.RunAndCaptureText(TaskEnvironment.GetProcessStartInfo())", false)]
+    [InlineData("Process.RunAndCaptureTextAsync(TaskEnvironment.GetProcessStartInfo())", false)]
+    [InlineData("Microsoft.Win32.SafeHandles.SafeProcessHandle.Start(TaskEnvironment.GetProcessStartInfo())", false)]
+    public async Task Net11ProcessStartApis_InMultiThreadable_WarnOnlyForStringOverloads(string call, bool expectWarning)
     {
         var diags = await GetDiagnosticsAsync($$"""
             using System.Diagnostics;
@@ -1887,7 +1887,14 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldHaveSingleItem().Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
+        if (expectWarning)
+        {
+            diags.ShouldHaveSingleItem().Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
+        }
+        else
+        {
+            diags.ShouldBeEmpty();
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════

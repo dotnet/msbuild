@@ -513,10 +513,14 @@ internal sealed partial class CoordinatorClient : IDisposable
             output.WriteLine($"CoordinatorClient: Launching coordinator: {startInfo.FileName} {arguments}");
 
 #if NET11_0_OR_GREATER
-            // The coordinator is a long-lived daemon shared by builds. Detaching starts it in its own session/process group
-            // without a console and with null standard handles, so it neither keeps a redirected parent stdout/stderr open
-            // nor gets terminated by signals (e.g. Ctrl+C) sent to the build that launched it.
-            startInfo.StartDetached = true;
+            // The coordinator is a long-lived daemon shared by builds. It gets null standard handles so it does not keep
+            // a redirected parent stdout/stderr open.
+            using SafeFileHandle nullHandle = File.OpenNullHandle();
+            // Windows only: on Unix StartDetached calls setsid(), and the coordinator's mutexes are scoped to the POSIX session.
+            startInfo.StartDetached = OperatingSystem.IsWindows();
+            startInfo.StandardInputHandle = nullHandle;
+            startInfo.StandardOutputHandle = nullHandle;
+            startInfo.StandardErrorHandle = nullHandle;
 
             using SafeProcessHandle process = SafeProcessHandle.Start(startInfo);
             return true;

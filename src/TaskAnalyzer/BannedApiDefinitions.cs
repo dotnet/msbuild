@@ -143,28 +143,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 new BannedApi("M:System.Diagnostics.Process.Start(System.String,System.String,System.String,System.Security.SecureString,System.String)",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
 
-                // .NET 11+ process start APIs - use TaskEnvironment.GetProcessStartInfo
-                new BannedApi("M:System.Diagnostics.Process.StartAndForget(System.Diagnostics.ProcessStartInfo)",
-                    ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
+                // .NET 11+ process start APIs. The ProcessStartInfo overloads are allowed: they have no instance equivalent,
+                // so tasks pass TaskEnvironment.GetProcessStartInfo() to them.
                 new BannedApi("M:System.Diagnostics.Process.StartAndForget(System.String,System.Collections.Generic.IEnumerable{System.String})",
-                    ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
-                new BannedApi("M:System.Diagnostics.Process.Run(System.Diagnostics.ProcessStartInfo,System.Nullable{System.TimeSpan})",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
                 new BannedApi("M:System.Diagnostics.Process.Run(System.String,System.Collections.Generic.IEnumerable{System.String},System.Boolean,System.Nullable{System.TimeSpan})",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
-                new BannedApi("M:System.Diagnostics.Process.RunAsync(System.Diagnostics.ProcessStartInfo,System.Threading.CancellationToken)",
-                    ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
                 new BannedApi("M:System.Diagnostics.Process.RunAsync(System.String,System.Collections.Generic.IEnumerable{System.String},System.Boolean,System.Threading.CancellationToken)",
-                    ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
-                new BannedApi("M:System.Diagnostics.Process.RunAndCaptureText(System.Diagnostics.ProcessStartInfo,System.Nullable{System.TimeSpan})",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
                 new BannedApi("M:System.Diagnostics.Process.RunAndCaptureText(System.String,System.Collections.Generic.IEnumerable{System.String},System.Nullable{System.TimeSpan})",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
-                new BannedApi("M:System.Diagnostics.Process.RunAndCaptureTextAsync(System.Diagnostics.ProcessStartInfo,System.Threading.CancellationToken)",
-                    ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
                 new BannedApi("M:System.Diagnostics.Process.RunAndCaptureTextAsync(System.String,System.Collections.Generic.IEnumerable{System.String},System.Threading.CancellationToken)",
-                    ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
-                new BannedApi("M:Microsoft.Win32.SafeHandles.SafeProcessHandle.Start(System.Diagnostics.ProcessStartInfo)",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
 
                 // ProcessStartInfo constructors
