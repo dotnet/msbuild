@@ -146,6 +146,7 @@ These APIs access process-global state that varies per task in multithreaded mod
 | `Directory.CreateTempSubdirectory()` (with or without a prefix) | No supported equivalent. Suppress the diagnostic with a justification. |
 | `new TempFileCollection()` | Pass an explicit task-resolved temporary directory, or suppress with a justification. |
 | `Process.Start()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
+| `Process.StartAndForget()`, `Process.Run()`, `Process.RunAsync()`, `Process.RunAndCaptureText()`, `Process.RunAndCaptureTextAsync()` (.NET 11+, `string` overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 | `new ProcessStartInfo()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 
 In multithreaded mode, `TaskEnvironment.GetTempPath()` resolves the temporary folder from the isolated task environment. In multi-process mode, it matches `Path.GetTempPath()`.

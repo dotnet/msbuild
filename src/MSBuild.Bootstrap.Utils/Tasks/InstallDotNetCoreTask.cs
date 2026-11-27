@@ -81,8 +81,6 @@ namespace MSBuild.Bootstrap.Utils.Tasks
                 AsyncTasks.Task.Run(() => DownloadScriptAsync(executionSettings.ScriptName, executionSettings.ScriptsFullPath)).GetAwaiter().GetResult();
             }
 
-            MakeScriptExecutable(executionSettings.ScriptsFullPath);
-
             return RunScript(executionSettings);
         }
 
@@ -155,22 +153,6 @@ namespace MSBuild.Bootstrap.Utils.Tasks
             }
 
             return null!;
-        }
-
-        /// <summary>
-        /// Makes the installation script executable on non-Windows platforms.
-        /// </summary>
-        /// <param name="scriptPath">The path of the script to make executable.</param>
-        private void MakeScriptExecutable(string scriptPath)
-        {
-            if (!IsWindows)
-            {
-                int exitCode = ExecuteTool("/bin/chmod", string.Empty, $"+x \"{scriptPath}\"");
-                if (exitCode != 0)
-                {
-                    Log.LogError($"Install-scripts can not be made executable due to the errors reported above.");
-                }
-            }
         }
 
         /// <summary>

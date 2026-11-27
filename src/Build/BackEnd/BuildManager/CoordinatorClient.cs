@@ -14,6 +14,9 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Shared;
+#if NET11_0_OR_GREATER
+using Microsoft.Win32.SafeHandles;
+#endif
 using Constants = Microsoft.Build.Framework.Coordinator.Constants;
 
 namespace Microsoft.Build.BackEnd;
@@ -502,10 +505,29 @@ internal sealed partial class CoordinatorClient : IDisposable
                 return false;
             }
 
-            output.WriteLine($"CoordinatorClient: Launching coordinator: {startInfo.FileName} {startInfo.Arguments}");
+#if NET11_0_OR_GREATER
+            string arguments = startInfo.ArgumentList.Count == 0 ? startInfo.Arguments : $"\"{startInfo.ArgumentList[0]}\"";
+#else
+            string arguments = startInfo.Arguments;
+#endif
+            output.WriteLine($"CoordinatorClient: Launching coordinator: {startInfo.FileName} {arguments}");
 
-            Process? process = Process.Start(startInfo);
+#if NET11_0_OR_GREATER
+            // The coordinator is a long-lived daemon shared by builds. It gets null standard handles so it does not keep
+            // a redirected parent stdout/stderr open.
+            using SafeFileHandle nullHandle = File.OpenNullHandle();
+            // Windows only: on Unix StartDetached calls setsid(), and the coordinator's mutexes are scoped to the POSIX session.
+            startInfo.StartDetached = OperatingSystem.IsWindows();
+            startInfo.StandardInputHandle = nullHandle;
+            startInfo.StandardOutputHandle = nullHandle;
+            startInfo.StandardErrorHandle = nullHandle;
+
+            using SafeProcessHandle process = SafeProcessHandle.Start(startInfo);
+            return true;
+#else
+            using Process? process = Process.Start(startInfo);
             return process is not null;
+#endif
         }
         catch (Exception ex) when (!Debugger.IsAttached)
         {
@@ -529,8 +551,13 @@ internal sealed partial class CoordinatorClient : IDisposable
             return new ProcessStartInfo
             {
                 FileName = dotnetHost,
+#if NET11_0_OR_GREATER
+                ArgumentList = { coordinatorDll },
+                InheritedHandles = [],
+#else
                 Arguments = $"\"{coordinatorDll}\"",
                 UseShellExecute = false,
+#endif
                 CreateNoWindow = true,
             };
         }
@@ -541,7 +568,11 @@ internal sealed partial class CoordinatorClient : IDisposable
             return new ProcessStartInfo
             {
                 FileName = coordinatorExe,
+#if NET11_0_OR_GREATER
+                InheritedHandles = [],
+#else
                 UseShellExecute = false,
+#endif
                 CreateNoWindow = true,
             };
         }

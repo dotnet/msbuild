@@ -27,31 +27,23 @@ internal static class DotNetSdkLocator
         }
 
         string dotNetHostPath = FindDotNetHostPath();
-        var startInfo = new ProcessStartInfo
+        ProcessStartInfo startInfo = new(dotNetHostPath, ["--version"])
         {
-            FileName = dotNetHostPath,
-            Arguments = "--version",
             CreateNoWindow = true,
             RedirectStandardError = true,
             RedirectStandardOutput = true,
-            UseShellExecute = false,
             WorkingDirectory = Environment.CurrentDirectory,
+            InheritedHandles = [],
         };
 
-        using Process process = Process.Start(startInfo)
-            ?? throw new InvalidOperationException($"Could not start the dotnet host: {dotNetHostPath}");
-
-        string output = process.StandardOutput.ReadToEnd();
-        string error = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-
-        if (process.ExitCode != 0)
+        ProcessTextOutput result = Process.RunAndCaptureText(startInfo);
+        if (result.ExitStatus.ExitCode != 0)
         {
             throw new InvalidOperationException(
-                $"Could not determine the selected .NET SDK using '{dotNetHostPath} --version': {error.Trim()}");
+                $"Could not determine the selected .NET SDK using '{dotNetHostPath} --version': {result.StandardError.Trim()}");
         }
 
-        string sdkVersion = output.Trim();
+        string sdkVersion = result.StandardOutput.Trim();
         string dotNetRoot = Path.GetDirectoryName(dotNetHostPath)
             ?? throw new InvalidOperationException($"Could not determine the dotnet root from: {dotNetHostPath}");
         string sdkPath = Path.Combine(dotNetRoot, "sdk", sdkVersion);

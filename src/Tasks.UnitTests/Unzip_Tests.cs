@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
-using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -157,27 +156,12 @@ namespace Microsoft.Build.Tasks.UnitTests
             _mockEngine.Log.ShouldContain("MSB3931", customMessage: _mockEngine.Log);
         }
 
-        public static bool NotRunningAsRoot()
-        {
-            if (NativeMethodsShared.IsWindows)
-            {
-                return true;
-            }
-
-            var psi = new ProcessStartInfo
-            {
-                FileName = "id",
-                Arguments = "-u",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-            };
-
-            var process = Process.Start(psi);
-
-            process.WaitForExit((int)TimeSpan.FromSeconds(2).TotalMilliseconds).ShouldBeTrue();
-
-            return process.StandardOutput.ReadToEnd().Trim() != "0";
-        }
+        public static bool NotRunningAsRoot() =>
+#if NET
+            NativeMethodsShared.IsWindows || !Environment.IsPrivilegedProcess;
+#else
+            true;
+#endif
 
         [Fact]
         public void LogsErrorIfReadOnlyFileCannotBeOverwitten()
@@ -505,7 +489,9 @@ namespace Microsoft.Build.Tasks.UnitTests
             File.Exists(outsideFilePath).ShouldBeFalse();
         }
 
+#if NET
         [UnixOnlyFact]
+        [UnsupportedOSPlatform("windows")]
         public void CanKeepUnixFilePermissions()
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -513,13 +499,8 @@ namespace Microsoft.Build.Tasks.UnitTests
             string executableName = "myapp";
             var sourceFile = testEnvironment.CreateFile(source, executableName, "Dummy executable");
 
-            var ExecuteCommand = (string command, string filePath) =>
-            {
-                string output = RunnerUtilities.RunProcessAndGetOutput($"/bin/sh", $"-c \"{command} {sourceFile.Path}\"", out bool success);
-                return output;
-            };
-            ExecuteCommand("chmod +x", sourceFile.Path);
-            var permissions = ExecuteCommand("ls -l", sourceFile.Path).Substring(0, 10);
+            UnixFileMode permissions = File.GetUnixFileMode(sourceFile.Path) | UnixFileMode.UserExecute;
+            File.SetUnixFileMode(sourceFile.Path, permissions);
 
             TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
             TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
@@ -536,8 +517,9 @@ namespace Microsoft.Build.Tasks.UnitTests
             string unzippedFilePath = Path.Combine(destination.Path, executableName);
             _mockEngine.Log.ShouldContain(unzippedFilePath, customMessage: _mockEngine.Log);
             File.Exists(unzippedFilePath).ShouldBeTrue();
-            var unzippedFilePermissions = ExecuteCommand("ls -l", unzippedFilePath).Substring(0, 10);
+            UnixFileMode unzippedFilePermissions = File.GetUnixFileMode(unzippedFilePath);
             unzippedFilePermissions.ShouldBe(permissions);
         }
+#endif
     }
 }

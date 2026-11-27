@@ -1858,6 +1858,45 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).Count().ShouldBeGreaterThanOrEqualTo(2);
     }
 
+    [Theory]
+    [InlineData("Process.StartAndForget(\"cmd\", [])", true)]
+    [InlineData("Process.Run(\"cmd\", [])", true)]
+    [InlineData("Process.RunAsync(\"cmd\", [])", true)]
+    [InlineData("Process.RunAndCaptureText(\"cmd\", [])", true)]
+    [InlineData("Process.RunAndCaptureTextAsync(\"cmd\", [])", true)]
+    [InlineData("Process.StartAndForget(TaskEnvironment.GetProcessStartInfo())", false)]
+    [InlineData("Process.Run(TaskEnvironment.GetProcessStartInfo())", false)]
+    [InlineData("Process.RunAsync(TaskEnvironment.GetProcessStartInfo())", false)]
+    [InlineData("Process.RunAndCaptureText(TaskEnvironment.GetProcessStartInfo())", false)]
+    [InlineData("Process.RunAndCaptureTextAsync(TaskEnvironment.GetProcessStartInfo())", false)]
+    [InlineData("Microsoft.Win32.SafeHandles.SafeProcessHandle.Start(TaskEnvironment.GetProcessStartInfo())", false)]
+    public async Task Net11ProcessStartApis_InMultiThreadable_WarnOnlyForStringOverloads(string call, bool expectWarning)
+    {
+        var diags = await GetDiagnosticsAsync($$"""
+            using System.Diagnostics;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+                public override bool Execute()
+                {
+                    _ = {{call}};
+                    return true;
+                }
+            }
+            """);
+
+        if (expectWarning)
+        {
+            diags.ShouldHaveSingleItem().Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
+        }
+        else
+        {
+            diags.ShouldBeEmpty();
+        }
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     // [MSBuildMultiThreadableTaskAnalyzed] attribute on helper classes
     // ═══════════════════════════════════════════════════════════════════════

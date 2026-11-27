@@ -2,26 +2,32 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
+#if NET11_0_OR_GREATER
+using Microsoft.Win32.SafeHandles;
+#endif
 
 #if RUNTIME_TYPE_NETCORE
 using System.IO;
 #endif
 
-using System.Runtime.Versioning;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 #if FEATURE_WINDOWSINTEROP
-using System.Collections.Generic;
-using System.Globalization;
 using System.Runtime.InteropServices;
-using Microsoft.Build.Utilities;
+using System.Runtime.Versioning;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Threading;
+#endif
+#if FEATURE_WINDOWSINTEROP && !NET11_0_OR_GREATER
+using Microsoft.Build.Utilities;
 #endif
 
 #nullable disable
@@ -49,9 +55,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public Process Start(NodeLaunchData launchData, int nodeId)
         {
-            // Disable MSBuild server for a child process.
-            // In case of starting msbuild server it prevents an infinite recursion. In case of starting msbuild node we also do not want this variable to be set.
-            return DisableMSBuildServer(() => StartInternal(launchData));
+            return StartInternal(launchData);
         }
 
         /// <summary>
@@ -68,14 +72,14 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace($"Launching node from {nodeLaunchData.MSBuildLocation}");
 
-#if FEATURE_WINDOWSINTEROP
+#if FEATURE_WINDOWSINTEROP && !NET11_0_OR_GREATER
             if (NativeMethodsShared.IsWindows)
             {
                 return StartProcessWindows(nodeLaunchData, exeName, ensureStdOut, showNodeWindow, redirectStreams, isNativeAppHost);
             }
 #endif
-            return NativeMethodsShared.IsUnixLike
-                ? StartProcessUnix(nodeLaunchData, exeName, redirectStreams, isNativeAppHost)
+            return NativeMethodsShared.IsUnixLike || NativeMethodsShared.IsWindows
+                ? StartProcess(nodeLaunchData, exeName, redirectStreams, showNodeWindow, isNativeAppHost)
                 : throw new PlatformNotSupportedException();
 
             static void ValidateMSBuildLocation(string msbuildLocation)
@@ -110,8 +114,7 @@ namespace Microsoft.Build.BackEnd
             return msbuildLocation;
         }
 
-        [UnsupportedOSPlatform("windows")]
-        private Process StartProcessUnix(NodeLaunchData nodeLaunchData, string exeName, bool redirectStreams, bool isNativeAppHost)
+        private Process StartProcess(NodeLaunchData nodeLaunchData, string exeName, bool redirectStreams, bool showNodeWindow, bool isNativeAppHost)
         {
             // Builds command line args for Unix Process.Start, which sets argv[0] from FileName
             // automatically. We must not duplicate the executable name in Arguments for native
@@ -119,22 +122,49 @@ namespace Microsoft.Build.BackEnd
             // knows which assembly to run.
             string commandLineArgs = isNativeAppHost ? nodeLaunchData.CommandLineArgs : $"\"{nodeLaunchData.MSBuildLocation}\" {nodeLaunchData.CommandLineArgs}";
 
+#if NET11_0_OR_GREATER
+            using SafeFileHandle nullHandle = redirectStreams ? File.OpenNullHandle() : null;
+#endif
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = exeName,
                 Arguments = commandLineArgs,
+#if NET11_0_OR_GREATER
+                StandardInputHandle = nullHandle,
+                StandardOutputHandle = nullHandle,
+                StandardErrorHandle = nullHandle,
+                InheritedHandles = [],
+#else
                 UseShellExecute = false,
                 RedirectStandardInput = redirectStreams,
                 RedirectStandardOutput = redirectStreams,
                 RedirectStandardError = redirectStreams,
+#endif
                 CreateNoWindow = redirectStreams,
             };
 
+            DisableMSBuildServer(processStartInfo.Environment);
             DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(processStartInfo.Environment, nodeLaunchData.EnvironmentOverrides);
 
             try
             {
+#if FEATURE_WINDOWSINTEROP && NET11_0_OR_GREATER
+                Process process = showNodeWindow && NativeMethodsShared.IsWindows
+                    ? StartProcessWithNewConsole(processStartInfo)
+                    : Process.Start(processStartInfo);
+#else
                 Process process = Process.Start(processStartInfo);
+#endif
+#if !NET11_0_OR_GREATER
+                if (redirectStreams)
+                {
+                    // These streams are suppressed, not captured. Unread pipes can block node startup.
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+                    process.StandardInput.Dispose();
+                }
+#endif
+
                 CommunicationsUtilities.Trace($"Successfully launched {exeName} node with PID {process.Id}");
                 return process;
             }
@@ -143,11 +173,59 @@ namespace Microsoft.Build.BackEnd
                 CommunicationsUtilities.Trace(
                     $"Failed to launch node from {nodeLaunchData.MSBuildLocation}. CommandLine: {commandLineArgs}{Environment.NewLine}{ex}");
 
-                throw new NodeFailedToLaunchException(ex);
+                throw ex is Win32Exception win32Exception
+                    ? new NodeFailedToLaunchException(win32Exception.NativeErrorCode.ToString(CultureInfo.InvariantCulture), win32Exception.Message)
+                    : new NodeFailedToLaunchException(ex);
             }
         }
 
-#if FEATURE_WINDOWSINTEROP
+#if FEATURE_WINDOWSINTEROP && NET11_0_OR_GREATER
+        /// <summary>
+        /// Starts the node in its own console window (MSBUILDNODEWINDOW), which Process.Start cannot do.
+        /// WindowsProcessStartArguments.Start lets us call CreateProcess with CREATE_NEW_CONSOLE while the runtime
+        /// prepares the command line and environment block and holds its process-start lock, so the launch is
+        /// coordinated with other process starts.
+        /// </summary>
+        [SupportedOSPlatform("windows6.1")]
+        private static unsafe Process StartProcessWithNewConsole(ProcessStartInfo processStartInfo)
+        {
+            return WindowsProcessStartArguments.Start(processStartInfo, static args =>
+            {
+                PROCESS_CREATION_FLAGS creationFlags = PROCESS_CREATION_FLAGS.CREATE_NEW_CONSOLE;
+                if (args.EnvironmentVariables is not null)
+                {
+                    creationFlags |= PROCESS_CREATION_FLAGS.CREATE_UNICODE_ENVIRONMENT;
+                }
+
+                // The prepared standard handles are deliberately not used (no STARTF_USESTDHANDLES):
+                // the node must use the handles of its new console, not the parent's.
+                STARTUPINFOW startInfo = new() { cb = (uint)sizeof(STARTUPINFOW) };
+                PROCESS_INFORMATION processInfo;
+                fixed (char* pFileName = args.ProcessStartInfo.FileName)
+                {
+                    if (!PInvoke.CreateProcess(
+                        lpApplicationName: pFileName,
+                        lpCommandLine: args.Arguments,
+                        lpProcessAttributes: null,
+                        lpThreadAttributes: null,
+                        bInheritHandles: false,
+                        dwCreationFlags: creationFlags,
+                        lpEnvironment: args.EnvironmentVariables,
+                        lpCurrentDirectory: (PCWSTR)null,
+                        lpStartupInfo: &startInfo,
+                        lpProcessInformation: &processInfo))
+                    {
+                        throw new Win32Exception();
+                    }
+                }
+
+                PInvoke.CloseHandle(processInfo.hThread);
+                return (nint)processInfo.hProcess;
+            });
+        }
+#endif
+
+#if FEATURE_WINDOWSINTEROP && !NET11_0_OR_GREATER
         [SupportedOSPlatform("windows6.1")]
         private static unsafe Process StartProcessWindows(NodeLaunchData nodeLaunchData, string exeName, bool ensureStdOut, bool showNodeWindow, bool redirectStreams, bool isNativeAppHost)
         {
@@ -220,7 +298,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (!result)
                 {
-                    var e = new System.ComponentModel.Win32Exception();
+                    var e = new Win32Exception();
 
                     string commandLineForTrace = commandLine.ToString();
                     CommunicationsUtilities.Trace(
@@ -255,9 +333,7 @@ namespace Microsoft.Build.BackEnd
 #pragma warning restore CA1416
             }
         }
-#endif
 
-#if FEATURE_WINDOWSINTEROP
         [SupportedOSPlatform("windows6.1")]
         private static STARTUPINFOW CreateStartupInfo(bool redirectStreams)
         {
@@ -283,15 +359,16 @@ namespace Microsoft.Build.BackEnd
         /// <param name="builder">Builder that receives the null-separated, double-null-terminated environment block.</param>
         /// <param name="environmentOverrides">Environment variable overrides. Null values remove variables.</param>
         /// <returns>
-        /// <see langword="true"/> if a block was written; <see langword="false"/> when no overrides were supplied
-        /// (caller passes the inherited environment).
+        /// <see langword="true"/> if a block was written; <see langword="false"/> when no overrides or server
+        /// setting require changes (caller passes the inherited environment).
         /// </returns>
         [SupportedOSPlatform("windows")]
 #nullable enable annotations
         private static bool BuildEnvironmentBlock(ref ValueStringBuilder builder, IDictionary<string, string?>? environmentOverrides)
 #nullable disable annotations
         {
-            if (environmentOverrides == null || environmentOverrides.Count == 0)
+            if ((environmentOverrides is null || environmentOverrides.Count == 0) &&
+                Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) is null)
             {
                 return false;
             }
@@ -302,6 +379,7 @@ namespace Microsoft.Build.BackEnd
                 environment[(string)entry.Key] = (string)entry.Value;
             }
 
+            DisableMSBuildServer(environment);
             DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(environment, environmentOverrides);
 
             // Build the environment block: "key=value\0key=value\0\0"
@@ -323,23 +401,12 @@ namespace Microsoft.Build.BackEnd
         }
 #endif
 
-        private static Process DisableMSBuildServer(Func<Process> func)
+        private static void DisableMSBuildServer(IDictionary<string, string> environment)
         {
-            string useMSBuildServerEnvVarValue = Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName);
-            try
+            // Disable recursive server launches in the child, without changing the environment seen by other threads.
+            if (environment.ContainsKey(Traits.UseMSBuildServerEnvVarName))
             {
-                if (useMSBuildServerEnvVarValue is not null)
-                {
-                    Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "0");
-                }
-                return func();
-            }
-            finally
-            {
-                if (useMSBuildServerEnvVarValue is not null)
-                {
-                    Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, useMSBuildServerEnvVarValue);
-                }
+                environment[Traits.UseMSBuildServerEnvVarName] = "0";
             }
         }
     }

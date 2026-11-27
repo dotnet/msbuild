@@ -495,6 +495,8 @@ namespace Microsoft.Build.BackEnd
                     {
                         CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node");
                     }
+
+                    msbuildProcess.Dispose();
                 }
 
                 return false;
@@ -1555,6 +1557,15 @@ namespace Microsoft.Build.BackEnd
                 {
                     CommunicationsUtilities.Trace($"Waiting for node with pid = {_process.Id} to exit");
 
+#if NET11_0_OR_GREATER
+                    // Do not enable this for older targets: there, NodeLauncher drains suppressed node output with
+                    // Begin*ReadLine, and Process.WaitForExitAsync would also wait for that output to reach EOF, which
+                    // descendants holding the pipe can delay. On .NET 11+, node standard streams use the null device.
+                    if (await WaitForExitAsync(_process, TimeoutForWaitForExit).ConfigureAwait(false))
+                    {
+                        return;
+                    }
+#else
                     // .NET 5 introduces a real WaitForExitAsyc.
                     // This is a poor man's implementation that uses polling.
                     int timeout = TimeoutForWaitForExit;
@@ -1572,6 +1583,7 @@ namespace Microsoft.Build.BackEnd
                         // Double delay up to 500ms.
                         delay = Math.Min(delay * 2, 500);
                     }
+#endif
                 }
 
                 // Kill the child and do a blocking wait.
@@ -1583,8 +1595,34 @@ namespace Microsoft.Build.BackEnd
                     _process.Id);
                 CommunicationsUtilities.Trace($"Killing node with pid = {_process.Id}");
 
+#if NET11_0_OR_GREATER
+                // Same as KillTree(timeoutMilliseconds: 5000), but the bounded post-kill wait is asynchronous.
+                _process.Kill(entireProcessTree: true);
+                await WaitForExitAsync(_process, 5000).ConfigureAwait(false);
+#else
                 _process.KillTree(timeoutMilliseconds: 5000);
+#endif
             }
+
+#if NET11_0_OR_GREATER
+            /// <summary>
+            /// Waits up to <paramref name="timeoutMilliseconds"/> for the process to exit.
+            /// </summary>
+            /// <returns><see langword="true"/> if the process exited; <see langword="false"/> if the wait timed out.</returns>
+            private static async Task<bool> WaitForExitAsync(Process process, int timeoutMilliseconds)
+            {
+                using CancellationTokenSource timeout = new(timeoutMilliseconds);
+                try
+                {
+                    await process.WaitForExitAsync(timeout.Token).ConfigureAwait(false);
+                    return true;
+                }
+                catch (OperationCanceledException) when (timeout.IsCancellationRequested)
+                {
+                    return false;
+                }
+            }
+#endif
 
             private bool ProcessHeaderBytesRead(int bytesRead)
             {

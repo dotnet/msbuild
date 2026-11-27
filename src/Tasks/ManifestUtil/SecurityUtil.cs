@@ -3,6 +3,9 @@
 
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
+#if NET11_0_OR_GREATER
+using Microsoft.Win32.SafeHandles;
+#endif
 using System;
 #if !RUNTIME_TYPE_NETCORE
 using Microsoft.Build.Framework;
@@ -804,14 +807,22 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                                string path, System.Resources.ResourceManager resources,
                                                bool useSha256, bool useRFC3161Timestamp)
         {
+#if NET11_0_OR_GREATER
+            using SafeFileHandle nullOutput = File.OpenNullHandle();
+#endif
             var startInfo = new ProcessStartInfo(
                 GetPathToTool(resources),
                 GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256, useRFC3161Timestamp))
             {
                 CreateNoWindow = true,
+#if NET11_0_OR_GREATER
+                StandardOutputHandle = nullOutput,
+                InheritedHandles = [],
+#else
                 UseShellExecute = false,
+                RedirectStandardOutput = true,
+#endif
                 RedirectStandardError = true,
-                RedirectStandardOutput = true
             };
 
             Process signTool = null;
@@ -819,32 +830,41 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             try
             {
                 signTool = Process.Start(startInfo);
-                signTool.WaitForExit();
-
-                while (!signTool.HasExited)
-                {
-                    System.Threading.Thread.Sleep(50);
-                }
-                switch (signTool.ExitCode)
+                (int exitCode, string standardError) = WaitForSignTool(signTool);
+                switch (exitCode)
                 {
                     case 0:
                         // everything was fine
                         break;
                     case 1:
                         // error, report it
-                        throw new ApplicationException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolFail"), path, signTool.StandardError.ReadToEnd()));
+                        throw new ApplicationException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolFail"), path, standardError));
                     case 2:
                         // warning, report it
-                        throw new WarningException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolWarning"), path, signTool.StandardError.ReadToEnd()));
+                        throw new WarningException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolWarning"), path, standardError));
                     default:
                         // treat as error
-                        throw new ApplicationException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolFail"), path, signTool.StandardError.ReadToEnd()));
+                        throw new ApplicationException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SigntoolFail"), path, standardError));
                 }
             }
             finally
             {
                 signTool?.Close();
             }
+        }
+
+        private static (int ExitCode, string StandardError) WaitForSignTool(Process signTool)
+        {
+#if NET11_0_OR_GREATER
+            string standardError = signTool.StandardError.ReadToEnd();
+            return (signTool.WaitForExitStatus().ExitCode, standardError);
+#else
+            // Older targets discard stdout through a pipe, which must be drained alongside stderr.
+            signTool.BeginOutputReadLine();
+            string standardError = signTool.StandardError.ReadToEnd();
+            signTool.WaitForExit();
+            return (signTool.ExitCode, standardError);
+#endif
         }
 
         internal static string GetCommandLineParameters(string certThumbprint, Uri timestampUrl, string path,
