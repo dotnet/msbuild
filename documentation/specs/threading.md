@@ -15,3 +15,5 @@ When a project is _yielded_, the node is also yielded. The scheduler may then de
 The scheduler limits the amount of total work being done, including both executing and yielded nodes, to attempt to avoid starting too much parallel work and bogging down the operating system. As a result, it's rare for a single node to have more than two or three RequestBuilder threads, though there is no hard bound on the number of threads in a single node.
 
 If multiple RequestBuilder threads have been started and are idle in a single worker node, any of them may be used when a request is assigned to that node (or unblocked).
+
+Idle dedicated scheduler threads must release their last executed task before waiting for more work. The scheduler uses `BlockingCollection<Task>.TryTake`, which clears its output before waiting. It does not use `GetConsumingEnumerable`, whose iterator can retain the last task and its build state while the worker is idle.

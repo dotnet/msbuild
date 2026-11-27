@@ -3472,6 +3472,67 @@ EndGlobal
             exception.Message.ShouldContain("MSB1072");
         }
 
+        [Fact]
+        public void PrecomputeIsDisabledByDefault()
+        {
+            MSBuildApp.IsPrecomputeEnabled(new CommandLineSwitches()).ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData("/precompute", null, true)]
+        [InlineData("/precompute:true", null, true)]
+        [InlineData("/precompute:false", null, false)]
+        [InlineData("/precompute:false", "/precompute", true)]
+        [InlineData("/precompute", "/precompute:false", false)]
+        [InlineData("/precompute:false", "/precompute:true", true)]
+        [InlineData("/precompute:true", "/precompute:false", false)]
+        public void PrecomputeSwitchUsesLatestValue(string firstArgument, string secondArgument, bool expected)
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(
+                secondArgument is null ? [firstArgument] : [firstArgument, secondArgument],
+                switches);
+
+            switches.HaveErrors().ShouldBeFalse();
+            MSBuildApp.IsPrecomputeEnabled(switches).ShouldBe(expected);
+        }
+
+        [Theory]
+        [InlineData("/precompute", "/precompute:false", false)]
+        [InlineData("/precompute:true", "/precompute:false", false)]
+        [InlineData("/precompute:false", "/precompute", true)]
+        [InlineData("/precompute:false", "/precompute:true", true)]
+        public void PrecomputeSwitchFromCommandLineWinsOverResponseFile(string responseFileArgument, string commandLineArgument, bool expected)
+        {
+            CommandLineParser parser = new CommandLineParser();
+
+            CommandLineSwitches switchesFromAutoResponseFile = new CommandLineSwitches();
+            parser.GatherCommandLineSwitches([responseFileArgument], switchesFromAutoResponseFile);
+
+            CommandLineSwitches switchesNotFromAutoResponseFile = new CommandLineSwitches();
+            parser.GatherCommandLineSwitches([commandLineArgument], switchesNotFromAutoResponseFile);
+
+            CommandLineSwitches combined = MSBuildApp.CombineSwitchesRespectingPriority(
+                switchesFromAutoResponseFile,
+                switchesNotFromAutoResponseFile,
+                string.Empty);
+
+            MSBuildApp.IsPrecomputeEnabled(combined).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void PrecomputeSwitchRejectsInvalidBooleanValue()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(["/precompute:invalid"], switches);
+
+            CommandLineSwitchException exception = Should.Throw<CommandLineSwitchException>(
+                () => MSBuildApp.IsPrecomputeEnabled(switches));
+            exception.Message.ShouldContain("MSB1074");
+        }
+
 #if FEATURE_REPORTFILEACCESSES
         /// <summary>
         /// Regression coverage for https://github.com/dotnet/msbuild/issues/14825.

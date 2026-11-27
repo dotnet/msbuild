@@ -314,6 +314,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         /// </summary>
         public static IReadOnlyList<IResource> GetResourcesFromFile(string filename, bool pathsRelativeToBasePath, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
         {
+            // CodeQL [SM00414] False positive: filename is a trusted project .resx resource file path.
             using (var x = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 return ReadResources(x, filename, pathsRelativeToBasePath, log, logWarningForBinaryFormatter);

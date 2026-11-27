@@ -1,18 +1,34 @@
 ---
 name: authoring-errors-and-warnings
-description: 'Guides authoring of MSBuild errors, warnings, and diagnostic messages. Consult when adding new MSBxxxx codes, writing or modifying user-facing diagnostic text, deciding between error/warning/message severity, working with Strings.resx resource files, formatting paths in error output, or evaluating whether a new warning could break WarnAsError builds.'
-argument-hint: 'Describe the error/warning being added or modified.'
+description: 'Guides authoring of MSBuild errors, warnings, diagnostic messages, and internal assertions. Consult when adding new MSBxxxx codes, writing or modifying user-facing diagnostic text, using Assumed for internal invariants, deciding between error/warning/message severity, working with Strings.resx resource files, formatting paths in error output, or evaluating whether a new warning could break WarnAsError builds.'
+argument-hint: 'Describe the error/warning or internal assertion being added or modified.'
 ---
 
-# Error and Warning Authoring in MSBuild
+# Error, Warning, and Assertion Authoring in MSBuild
 
-Error messages are MSBuild's primary user interface. They must help developers fix problems without reading source code.
+User-facing error messages are MSBuild's primary user interface. They must help developers fix problems without reading source code.
 
 For the mechanics of error code assignment, see [assigning-msb-error-code.md](../../../documentation/assigning-msb-error-code.md).
 
+## Internal Assertions
+
+Use [`Assumed`](../../../src/Framework/Assumed.cs) to check internal invariants whose violation indicates an MSBuild bug, not invalid user input.
+
+- `Assumed.True`, `Assumed.False`, `Assumed.NotNull`, and related helpers throw `InternalErrorException` on failure in both Debug and Release builds.
+- Assertion messages are non-localized developer diagnostics. Do not assign an `MSBxxxx` code or add `Strings.resx` or `.xlf` entries for these checks.
+- Do not replace project, command-line, or public API input validation with `Assumed`; preserve the appropriate user-facing diagnostic or argument exception.
+
+```csharp
+Assumed.True(_initialized, "State must be initialized before use.");
+```
+
+Pass interpolated assertion messages directly to the helper so its conditional interpolated string handler can avoid formatting when the assertion succeeds.
+
+The quality, severity, resource, and localization rules below apply to user-facing diagnostics.
+
 ## Error Message Quality Rules
 
-Every error message must answer three questions:
+Every user-facing error message must answer three questions:
 
 1. **What happened?** — State the problem clearly
 2. **Why?** — Provide context (file, property, expected value)
@@ -29,7 +45,7 @@ Every error message must answer three questions:
 ## Severity Decision Framework
 
 ```
-Is the condition always wrong (invalid input, impossible state)?
+Is the condition always wrong (for example, invalid project input)?
 ├── Yes → ERROR (build should fail)
 └── No
     ├── Could this cause subtle build correctness issues?
@@ -107,12 +123,12 @@ ProjectErrorUtilities.ThrowInvalidProject(
     arg1, arg2);
 ```
 
-**Never** construct error messages by string concatenation — always use resource strings for localization support.
+**Never** construct user-facing error messages by string concatenation — always use resource strings for localization support.
 
 ## Localization Requirements
 
 - Error **codes** (`MSBxxxx`) are never localized
-- Error **text** is localized into all supported languages
+- User-facing error **text** is localized into all supported languages
 - After adding/modifying resource strings, run a full build to generate `.xlf` placeholder translations
 - Use `<comment>` elements to help translators understand context
 - See [Localization.md](../../../documentation/wiki/Localization.md) for the full localization process

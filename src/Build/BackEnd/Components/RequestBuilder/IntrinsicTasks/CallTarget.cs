@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 
 // This CallTarget intrinsic task replaces the one on Microsoft.Build.Tasks, which is now deprecated.
 
@@ -22,13 +23,6 @@ namespace Microsoft.Build.BackEnd
     [MSBuildMultiThreadableTask]
     internal class CallTarget : ITask
     {
-        /// <summary>
-        /// The task logging helper
-        /// </summary>
-        private TaskLoggingHelper _logHelper;
-
-        #region Properties
-
         // outputs of all built targets
         private readonly List<ITaskItem> _targetOutputs = new List<ITaskItem>();
 
@@ -58,10 +52,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool UseResultsCache { get; set; } = false;
 
-        #endregion
-
-        #region ITask Members
-
         public IBuildEngine BuildEngine { get; set; }
 
         public IBuildEngine2 BuildEngine2 => (IBuildEngine2)BuildEngine;
@@ -73,7 +63,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ITaskHost HostObject { get; set; }
 
-        public TaskLoggingHelper Log => _logHelper ?? (_logHelper = new TaskLoggingHelper(this));
+        public TaskLoggingHelper Log => field ??= new TaskLoggingHelper(this);
 
         public bool Execute()
         {
@@ -116,7 +106,5 @@ namespace Microsoft.Build.BackEnd
                 toolsVersion: null,
                 skipNonexistentTargets: false);
         }
-
-        #endregion
     }
 }

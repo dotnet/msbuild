@@ -180,6 +180,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     AbsolutePath destinationFolderPath = TaskEnvironment.GetAbsolutePath(DestinationFolder.ItemSpec);
+                    // CodeQL [SM00414] False positive: DestinationFolder is a trusted task input path in the project file.
                     DirectoryInfo destinationDirectory = Directory.CreateDirectory(destinationFolderPath);
 
                     var destinationFile = new FileInfo(Path.Combine(destinationDirectory.FullName, filename));

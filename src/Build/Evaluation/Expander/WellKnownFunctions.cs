@@ -8,11 +8,8 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-
 using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
-
 
 namespace Microsoft.Build.Evaluation.Expander
 {
@@ -984,6 +981,22 @@ namespace Microsoft.Build.Evaluation.Expander
                 {
                     returnVal = arg0;
                     return true;
+                }
+            }
+            else if (receiverType == typeof(FileInfo) || receiverType == typeof(DirectoryInfo))
+            {
+                if (ParseArgs.TryGetArg(args, out string? path) && !string.IsNullOrEmpty(path))
+                {
+                    try
+                    {
+                        returnVal = receiverType == typeof(FileInfo) ? new FileInfo(path) : new DirectoryInfo(path);
+                        return true;
+                    }
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    {
+                        // Fall back to the binder, which reports the failure as a property function error.
+                        // Execute does not guard this call, so an escaping exception would be misreported as MSB4186.
+                    }
                 }
             }
             return false;

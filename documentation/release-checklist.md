@@ -15,6 +15,7 @@ Artifacts produced over the course of the release. Record each URL here as the c
 | Phase 3.6 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
 | Phase 4.4 — VS insertion PR | {{URL_OF_VS_INSERTION}} |
 | Phase 5.1b — official build that produced `{{THIS_RELEASE_EXACT_VERSION}}` | {{URL_OF_SHIPPED_OFFICIAL_BUILD}} |
+| Phase 5.1d — `msbuild-nuget-release` publish run | {{URL_OF_NUGET_PUBLISH_RUN}} |
 | Phase 4.7 — Change Waves Learn page sync PR (visualstudio-docs-pr) | {{URL_OF_CHANGE_WAVES_DOCS_PR}} |
 | Phase 5.3 — GitHub release tag | https://github.com/dotnet/msbuild/releases/tag/v{{THIS_RELEASE_EXACT_VERSION}} |
 
@@ -99,7 +100,7 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
     - **SDK lifecycle.** The band ↔ VS version ↔ EOL mapping is the [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions). It states which VS version each SDK band pairs with and when that band's support ends. \
     Use the published lifecycle for support decisions and Maestro channels for dependency routing.
     - **VS lifecycle — a separate source; the SDK table does not answer it.** Use [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs). \
-    **VS 2026 and later: one month of support after Stable release.** Non-LTSC releases are serviced through Insiders and Stable; promoting a new release to Stable ends VS support for the previous release. LTSC baselines are supported for one year after release; identify them from the published LTSC table.
+    **VS 2026 and later: one month of support after Stable release.** Non-LTSC releases are serviced through Insiders and Stable; promoting a new release to Stable ends VS support for the previous release. LTSC baselines are supported for two years from their LTSC release; identify them from the published LTSC table.
 
     **At branch snap, before Stable promotion:** the current release plus two preceding releases is a useful audit window, so `vs{{THIS_RELEASE_VERSION}} - 3` is worth checking. Use actual Stable promotions and SDK/VS deadlines for retirement decisions.
 
@@ -256,7 +257,7 @@ Steps are **mostly parallel** unless noted.
 
 - [ ] **5.1** Push packages to nuget.org.
 
-  > **How publishing works:** We don't push packages ourselves. We hand a link to the **Release** artifacts of the official build to the _.NET Release Team_, and they push to nuget.org. Search past mail for the subject _"Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org"_ for the template.
+  > **How publishing works:** Run the [`msbuild-nuget-release`](https://dev.azure.com/dnceng/internal/_build?definitionId=1700) pipeline (dnceng/internal) with the official build id. It reads the build's `ReleasePackages` pipeline artifact and pushes it to nuget.org through the isolated NuGet publishing pipeline. Do not email the .NET Release Team. Example: [build 3132822](https://dev.azure.com/dnceng/internal/_build/results?buildId=3132822) published `18.12.2`.
 
   - [ ] **5.1a** Determine the exact MSBuild version that actually shipped to customers. \
   ⚠️ **VS and the SDK might ship _different_ patch versions off the same `vs{{THIS_RELEASE_VERSION}}` branch during servicing — so this must be looked up, never inferred from `eng/Versions.props` at branch HEAD or from the Phase 4.4 insertion PR.**
@@ -265,8 +266,8 @@ Steps are **mostly parallel** unless noted.
     If that returns a source-enabled subscription from a `.NET <X.Y.Zxx> SDK` channel, the release **is** SDK-coupled.
     - **If SDK-coupled: the SDK is the source of truth** — look up the MSBuild version baked into the shipped SDK build of that band. It wins over VS `rel/stable`.
     - **Otherwise**, read the **authoritative GA'd value from VS `rel/stable`**: the `Microsoft.Build` component version in [`.corext/Configs/msbuild-components.json`](https://devdiv.visualstudio.com/DevDiv/_git/VS?path=/.corext/Configs/msbuild-components.json&version=GBrel/stable) (e.g. `18.7.1-servicing-NNNNN-NN+<sha>`). Extract just the **numeric `VersionPrefix`** from that string — drop the `-servicing-NNNNN-NN+<sha>` suffix — and use it as `{{THIS_RELEASE_EXACT_VERSION}}` (e.g. `18.7.1`). **Do not** rely solely on the VS insertion PR — that PR targets VS `main` and can be superseded by a later servicing insertion before GA, whereas `rel/stable` reflects what actually shipped.
-  - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`). Take the latest build that produced the matching versioned artifacts.
-  - [ ] **5.1c** From that build, open the **Publish Artifacts** step and grab the link to the **`PackageArtifacts/Release`** drop. Verify the **Release** folder contains all of:
+  - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`). Take the latest build that produced the matching versioned artifacts **and** has a `ReleasePackages` pipeline artifact. Builds before [#15407](https://github.com/dotnet/msbuild/pull/15407) or its branch backport (e.g. [#15302](https://github.com/dotnet/msbuild/pull/15302) for `vs18.12`) lack it. If the SDK/VS-shipped commit predates the backport, use a later build with the same `VersionPrefix` whose diff from the shipped commit is infra-only (Arcade, `global.json`, pipeline YAML). Record that build's source SHA for 5.3b.
+  - [ ] **5.1c** Open `https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=<BUILD_ID>&view=artifacts&type=publishedArtifacts` and verify `ReleasePackages` contains all of:
     - `Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.Framework.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
@@ -274,7 +275,9 @@ Steps are **mostly parallel** unless noted.
     - `Microsoft.Build.Tasks.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.NET.StringTools.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.Templates.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
-  - [ ] **5.1d** Email the _.NET Release Team_ with the `Release` link from 5.1c and ask them to publish to nuget.org.
+    Every filename must end in exactly `{{THIS_RELEASE_EXACT_VERSION}}.nupkg`. A suffix such as `-1.NNNNN.N` or `-1.final` marks a prerelease; nuget.org packages cannot be deleted.
+  - [ ] **5.1d** Queue [`msbuild-nuget-release`](https://dev.azure.com/dnceng/internal/_build?definitionId=1700) with `msbuildBuildId` = the build id from 5.1b. Set `validateOnly` to `true` for a dry run, then `false` to publish. Retrying a failed run is rejected; queue a new run instead.
+  - [ ] **5.1e** Verify all seven packages list `{{THIS_RELEASE_EXACT_VERSION}}` on nuget.org, e.g. `https://api.nuget.org/v3-flatcontainer/microsoft.build/index.json`. Record the publish run in **Release Output**.
 
 - [ ] **5.2** Publish docs
 

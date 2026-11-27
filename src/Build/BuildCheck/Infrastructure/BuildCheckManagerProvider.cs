@@ -105,7 +105,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             ICheckContext checkContext)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            if (IsInProcNode)
+            // The central logger and replay can acquire checks before build execution starts.
+            if (_enabledDataSources[(int)BuildCheckDataSource.EventArgs])
             {
                 var checksFactories = _acquisitionModule.CreateCheckFactories(acquisitionData, checkContext);
                 if (checksFactories.Count != 0)
@@ -217,29 +218,33 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     var instance = factory();
                     if (instance != null && instance.SupportedRules.Any())
                     {
-                        var checkFactoryContext = new CheckFactoryContext(
-                            factory,
-                            instance.SupportedRules.Select(r => r.Id).ToArray(),
-                            instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true));
-
-                        if (checkFactoryContext != null)
+                        Type checkType = instance.GetType();
+                        CheckFactoryContext? checkFactoryContext = _checkRegistry.FirstOrDefault(c => c.CustomCheckType == checkType);
+                        if (checkFactoryContext is null)
                         {
+                            checkFactoryContext = new CheckFactoryContext(
+                                factory,
+                                instance.SupportedRules.Select(r => r.Id).ToArray(),
+                                instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true),
+                                checkType);
                             _checkRegistry.Add(checkFactoryContext);
-                            try
-                            {
-                                SetupSingleCheck(checkFactoryContext, projectPath);
-                                checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckSuccessfulAcquisition", instance.FriendlyName);
-                            }
-                            catch (BuildCheckConfigurationException e)
-                            {
-                                checkContext.DispatchAsWarningFromText(
-                                    DiagnosticSubcategory.None,
-                                    warningCode: null,
-                                    helpKeyword: null,
-                                    ElementLocation.Create(projectPath),
-                                    e.Message);
-                                invalidChecksToRemove.Add(checkFactoryContext);
-                            }
+                        }
+
+                        // Reuse the registration, but still apply this project's configuration.
+                        try
+                        {
+                            SetupSingleCheck(checkFactoryContext, projectPath);
+                            checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckSuccessfulAcquisition", instance.FriendlyName);
+                        }
+                        catch (BuildCheckConfigurationException e)
+                        {
+                            checkContext.DispatchAsWarningFromText(
+                                DiagnosticSubcategory.None,
+                                warningCode: null,
+                                helpKeyword: null,
+                                ElementLocation.Create(projectPath),
+                                e.Message);
+                            invalidChecksToRemove.Add(checkFactoryContext);
                         }
                     }
                     RemoveInvalidChecks(invalidChecksToRemove, checkContext);
@@ -753,8 +758,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private class CheckFactoryContext(
             CheckFactory factory,
             string[] ruleIds,
-            bool isEnabledByDefault)
+            bool isEnabledByDefault,
+            Type? customCheckType = null)
         {
+            public Type? CustomCheckType { get; } = customCheckType;
+
             public Check Factory()
             {
                 Check ba = factory();

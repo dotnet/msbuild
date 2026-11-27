@@ -9,7 +9,8 @@
       "src\\Package\\Localization\\Localization.csproj",
       "src\\Tasks\\Microsoft.Build.Tasks.csproj",
       "src\\Utilities\\Microsoft.Build.Utilities.csproj",
-      "src\\StringTools\\StringTools.csproj"
+      "src\\StringTools\\StringTools.csproj",
+      "src\\TaskAnalyzer\\TaskAnalyzer.csproj"
     ]
   }
 }

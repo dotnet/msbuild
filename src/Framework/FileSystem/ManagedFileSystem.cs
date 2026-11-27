@@ -46,6 +46,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public string ReadFileAllText(string path)
         {
+            // CodeQL [SM00414] False positive: MSBuild file system abstraction operates on trusted build/SDK paths.
             return File.ReadAllText(path);
         }
 

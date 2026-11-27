@@ -76,6 +76,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [RequiresDynamicCode("Writes a ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         public static void WriteManifest(Manifest manifest, string path, string targetframeWorkVersion)
         {
+            // CodeQL [SM00414] False positive: path is a trusted ClickOnce manifest output file path.
             using (Stream s = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.Write))
             {
                 WriteManifest(manifest, s, targetframeWorkVersion);

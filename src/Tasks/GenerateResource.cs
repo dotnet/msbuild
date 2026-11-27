@@ -2960,6 +2960,7 @@ namespace Microsoft.Build.Tasks
             _logger.LogMessageFromResources("GenerateResource.CorruptOutput", FileUtilities.GetFullPathNoThrow(filename));
             try
             {
+                // CodeQL [SM00414] False positive: filename is a trusted build output resource file path.
                 File.Delete(filename);
             }
             catch (Exception deleteException)
@@ -3421,12 +3422,14 @@ namespace Microsoft.Build.Tasks
         {
             if (_usePreserializedResources && HaveSystemResourcesExtensionsReference)
             {
+                // CodeQL [SM00414] False positive: filename is a trusted build output resource file path.
                 WriteResources(reader, new PreserializedResourceWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))); // closes writer for us
                 return;
             }
 
             try
             {
+                // CodeQL [SM00414] False positive: filename is a trusted build output resource file path.
                 WriteResources(reader, new ResourceWriter(new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))); // closes writer for us
             }
             catch (PreserializedResourceWriterRequiredException)
@@ -3646,6 +3649,7 @@ namespace Microsoft.Build.Tasks
         {
             // Check for byte order marks in the beginning of the input file, but
             // default to UTF-8.
+            // CodeQL [SM00414] False positive: fileName is a trusted project resource input file path.
             using var fs = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
             using (LineNumberStreamReader sr = new LineNumberStreamReader(fs, new UTF8Encoding(true), true))
             {
@@ -4058,6 +4062,7 @@ namespace Microsoft.Build.Tasks
         /// from ReadTextResources
         /// </summary>
         [Serializable]
+        // CodeQL [SM02227] False positive: static call-graph over-approximation via virtual ToString/Flush in VMR build; deserialization only reads primitive fields.
         internal sealed class TextFileException : Exception
         {
             private String fileName;

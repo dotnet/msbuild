@@ -12,6 +12,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <IsShipping>true</IsShipping>
     <IsTestProject>false</IsTestProject>
+    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
     <!-- Suppress RS2001: our analyzer rules use custom severities -->
     <NoWarn>$(NoWarn);NU5128;RS1038;RS2001</NoWarn>
   </PropertyGroup>

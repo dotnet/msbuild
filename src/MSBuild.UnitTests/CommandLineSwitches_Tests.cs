@@ -159,6 +159,29 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("precompute")]
+        [InlineData("PRECOMPUTE")]
+        [InlineData("Precompute")]
+        public void PrecomputeSwitchIdentificationTests(string switchName)
+        {
+            CommandLineSwitches.IsParameterizedSwitch(
+                switchName,
+                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
+                out string duplicateSwitchErrorMessage,
+                out bool multipleParametersAllowed,
+                out string missingParametersErrorMessage,
+                out bool unquoteParameters,
+                out bool emptyParametersAllowed).ShouldBeTrue();
+
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.Precompute);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeTrue();
+            emptyParametersAllowed.ShouldBeFalse();
+        }
+
+        [Theory]
         [InlineData("ll")]
         [InlineData("LL")]
         [InlineData("livelogger")]
@@ -1181,6 +1204,7 @@ namespace Microsoft.Build.UnitTests
                                         null,
 #endif
                                         1,
+                                        false,
                                         false,
                                         true,
                                         new StringWriter(),

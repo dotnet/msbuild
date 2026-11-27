@@ -130,6 +130,7 @@ namespace Microsoft.Build.Tasks
 
                 FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(outputFilePath));
 
+                // CodeQL [SM00414] False positive: outputFilePath is a trusted build output path for generated code fragments.
                 File.WriteAllText(outputFilePath, code); // Overwrites file if it already exists (and can be overwritten)
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))

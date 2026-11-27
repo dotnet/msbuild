@@ -613,15 +613,6 @@ namespace Microsoft.Build.Evaluation
             return NativeMethodsShared.IsUnixLike;
         }
 
-        /// <summary>
-        /// True if current OS is a BSD system.
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsOsBsdLike()
-        {
-            return NativeMethodsShared.IsBSD;
-        }
-
         public static bool VersionEquals(string a, string b)
         {
             return SimpleVersion.Parse(a) == SimpleVersion.Parse(b);

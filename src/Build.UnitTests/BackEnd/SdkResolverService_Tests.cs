@@ -520,6 +520,21 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
+        public void ConfigurableMockSdkResolverPreservesDiagnosticKinds()
+        {
+            var sdk = new SdkReference("notfound", null, null);
+            var original = new SdkResultImpl(sdk, errors: ["Resolution failed"], warnings: ["Resolution warning"]);
+            var resolver = new SdkUtilities.ConfigurableMockSdkResolver(original);
+
+            var result = (SdkResultImpl)resolver.Resolve(sdk, null, null);
+
+            result.ShouldNotBeSameAs(original);
+            result.Success.ShouldBeFalse();
+            result.Errors.ShouldBe(original.Errors);
+            result.Warnings.ShouldBe(original.Warnings);
+        }
+
+        [Fact]
         public void CachingWrapperShouldWarnWhenMultipleVersionsAreReferenced()
         {
             var sdk = new SdkReference("foo", "1.0.0", null);

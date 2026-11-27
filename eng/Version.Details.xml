@@ -1,114 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="1ec061ee82223a1fff7f84bd78726d18914ebf87" BarId="329383" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="3b9c48580fa3db04e6d2c36e896b1f9d14d71af2" BarId="343199" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.CodeDom" Version="10.0.14">
+    <Dependency Name="System.CodeDom" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Collections.Immutable" Version="10.0.14">
+    <Dependency Name="System.Collections.Immutable" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Configuration.ConfigurationManager" Version="10.0.14">
+    <Dependency Name="System.Configuration.ConfigurationManager" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Diagnostics.DiagnosticSource" Version="10.0.14">
+    <Dependency Name="System.Diagnostics.DiagnosticSource" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Diagnostics.EventLog" Version="10.0.14">
+    <Dependency Name="System.Diagnostics.EventLog" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Formats.Asn1" Version="10.0.14">
+    <Dependency Name="System.Formats.Asn1" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Formats.Nrbf" Version="10.0.14">
+    <Dependency Name="System.Formats.Nrbf" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Reflection.Metadata" Version="10.0.14">
+    <Dependency Name="System.Reflection.Metadata" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Reflection.MetadataLoadContext" Version="10.0.14">
+    <Dependency Name="System.Reflection.MetadataLoadContext" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Resources.Extensions" Version="10.0.14">
+    <Dependency Name="System.Resources.Extensions" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="10.0.14">
+    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Pkcs" Version="10.0.14">
+    <Dependency Name="System.Security.Cryptography.Pkcs" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Xml" Version="10.0.14">
+    <Dependency Name="System.Security.Cryptography.Xml" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Text.Encoding.CodePages" Version="10.0.14">
+    <Dependency Name="System.Text.Encoding.CodePages" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Text.Json" Version="10.0.14">
+    <Dependency Name="System.Text.Json" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Threading.Channels" Version="10.0.14">
+    <Dependency Name="System.Threading.Channels" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Threading.Tasks.Dataflow" Version="10.0.14">
+    <Dependency Name="System.Threading.Tasks.Dataflow" Version="10.0.15">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.CSharp" Version="4.12.0-3.24574.8" Pinned="true">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha>dfa7fc6bdea31a858a402168384192b633c811fa</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0-3.24574.8" Pinned="true">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha>dfa7fc6bdea31a858a402168384192b633c811fa</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="12.0.0-beta.26505.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="12.0.0-beta.26569.6">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>5a63d054ea793bdbdb6aa9f4558558e3a8f41529</Sha>
+      <Sha>c27ac90fa251c0460888a432a4fb41f22643a64f</Sha>
     </Dependency>
     <!-- This is the NuGet.* package family. NuGet.Frameworks is also pulled in via this
          version on .NET Core, where Microsoft.Build takes a direct compile-time PackageReference
@@ -120,13 +128,13 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>3dca69bf4ad1f03fa4738e0f3e99506c24135340</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.13.0-1.26525.3">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.15.0-1.26570.9">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>e3c31f15b79e226656e3b082a921d4d60127b1fa</Sha>
+      <Sha>da9878a16b492563fdcefc4259f2692fc07ddb24</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="12.0.0-beta.26505.2">
+    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="12.0.0-beta.26569.6">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>5a63d054ea793bdbdb6aa9f4558558e3a8f41529</Sha>
+      <Sha>c27ac90fa251c0460888a432a4fb41f22643a64f</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

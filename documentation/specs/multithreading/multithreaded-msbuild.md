@@ -336,6 +336,14 @@ absolute path from project or engine code. When constructing a nested task, pass
 `TaskEnvironment` to it. Child MSBuild processes also use strict checks when they run
 multi-threaded and change wave 18.12 is enabled. A change-wave setting does not itself enable MT.
 
+## Evaluation working directory
+
+Under `-mt`, relative paths that evaluation resolves against the current directory, for example in
+property functions, resolve as in a non-MT build. For project files they resolve against the startup
+directory. For solution wrappers and static graphs they resolve against the directory the build
+started in. This applies with or without strict mode. MSBuild uses an async-local directory for this,
+not the process CWD, and restores it before targets and tasks run, which still use the project directory.
+
 ## Interaction with `DisableInProcNode`
 
 We need to ensure the support for multithreaded mode in Visual Studio builds. Currently, the entry node for MSBuild runs entirely within the devenv process, but the majority of the build operation are run in the MSBuild worker processes, because project systems set `BuildParameters.DisableInProcNode=true`. In multithreaded mode, all of the task execution must continue to be out of process. To address this, unlike the CLI scenario, we will move all thread nodes to the out-of-process MSBuild process, keeping only the scheduler in devenv.

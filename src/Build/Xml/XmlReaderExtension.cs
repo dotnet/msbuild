@@ -39,6 +39,7 @@ namespace Microsoft.Build.Internal
                 // Encoding correctly (detectEncodingFromByteOrderMarks = true). The default is to use UTF8 (with BOM)
                 // which will cause the BOM to be added when we re-save the file in cases where it was not present on
                 // load.
+                // CodeQL [SM00414] False positive: XmlReaderExtension opens trusted project/props/targets XML files during evaluation.
                 _stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
                 _streamReader = new StreamReader(_stream, s_utf8NoBom, detectEncodingFromByteOrderMarks: true);
                 Encoding detectedEncoding;

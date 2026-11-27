@@ -62,10 +62,9 @@ public class PropertyFunctionReceiverRestriction_Tests
 
     private static (string folder, string file) CreateFolderWithFile(TestEnvironment env)
     {
-        string folder = env.CreateFolder().Path;
-        string file = Path.Combine(folder, "data.txt");
-        File.WriteAllText(file, "content");
-        return (folder, file);
+        TransientTestFolder folder = env.CreateFolder();
+        TransientTestFile file = env.CreateFile(folder, "data.txt", "content");
+        return (folder.Path, file.Path);
     }
 
     // ---- Restricted: side-effect-free receivers remain callable ----
@@ -116,6 +115,21 @@ public class PropertyFunctionReceiverRestriction_Tests
     }
 
     // ---- Restricted: chains to non-listed receivers are not permitted ----
+
+    [Fact]
+    public void Restricted_FileInfoConstructor_AllowsOnlyReadOnlyMembers()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        (_, string file) = CreateFolderWithFile(env);
+
+        using (SetSwitch(RestrictSwitch, true))
+        {
+            Evaluate("$([System.IO.FileInfo]::new($(File)).Length)", ("File", file)).ShouldBe("7");
+            Assert.Throws<InvalidProjectFileException>(() =>
+                Evaluate("$([System.IO.FileInfo]::new($(File)).Delete())", ("File", file)));
+            File.Exists(file).ShouldBeTrue();
+        }
+    }
 
     [Fact]
     public void Restricted_DirectoryInfoMutation_IsBlocked()

@@ -699,6 +699,7 @@ namespace Microsoft.Build.Execution
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
                 var loggingService = InitializeLoggingService();
+                _buildParameters.LogTaskInputs |= loggingService.IncludeTaskInputs;
 
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
@@ -870,13 +871,13 @@ namespace Microsoft.Build.Execution
             // VS builds discard many msbuild events so attach a binlogger to capture them all.
             IEnumerable<ILogger> AppendDebuggingLoggers(IEnumerable<ILogger> loggers)
             {
-                if (FrameworkDebugUtils.ShouldDebugCurrentProcess is false ||
+                if (DebugUtils.ShouldDebugCurrentProcess is false ||
                     Traits.Instance.DebugEngine is false)
                 {
                     return loggers;
                 }
 
-                var binlogPath = DebugUtils.FindNextAvailableDebugFilePath($"{FrameworkDebugUtils.ProcessInfoString}_BuildManager_{_hostName}.binlog");
+                var binlogPath = DebugUtils.FindNextAvailableDebugFilePath($"{DebugUtils.ProcessInfoString}_BuildManager_{_hostName}.binlog");
 
                 var logger = new BinaryLogger { Parameters = binlogPath };
 
@@ -957,7 +958,7 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            if (!FrameworkDebugUtils.ShouldDebugCurrentProcess)
+            if (!DebugUtils.ShouldDebugCurrentProcess)
             {
                 return;
             }
@@ -2023,17 +2024,21 @@ namespace Microsoft.Build.Execution
                 buildEventContext = new BuildEventContext(request.SubmissionId, 0, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
             }
 
-            var instances = ProjectInstance.LoadSolutionForBuild(
-                config.ProjectFullPath,
-                config.GlobalProperties,
-                config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null,
-                _buildParameters,
-                ((IBuildComponentHost)this).LoggingService,
-                buildEventContext,
-                false /* loaded by solution parser*/,
-                config.RequestedTargets,
-                SdkResolverService,
-                request.SubmissionId);
+            ProjectInstance[] instances;
+            using (new EvaluationDirectoryScope(_multiThreadedStrictModeScope?.BuildEntryDirectory))
+            {
+                instances = ProjectInstance.LoadSolutionForBuild(
+                    config.ProjectFullPath,
+                    config.GlobalProperties,
+                    config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null,
+                    _buildParameters,
+                    ((IBuildComponentHost)this).LoggingService,
+                    buildEventContext,
+                    false /* loaded by solution parser*/,
+                    config.RequestedTargets,
+                    SdkResolverService,
+                    request.SubmissionId);
+            }
 
             // The first instance is the traversal project, which goes into this configuration
             config.Project = instances[0];
@@ -2449,6 +2454,8 @@ namespace Microsoft.Build.Execution
             var projectGraph = submission.BuildRequestData.ProjectGraph;
             if (projectGraph == null)
             {
+                // Graph workers inherit the host evaluation directory before request environments exist.
+                using EvaluationDirectoryScope evaluationDirectory = new(_multiThreadedStrictModeScope?.BuildEntryDirectory);
                 projectGraph = new ProjectGraph(
                     submission.BuildRequestData.ProjectGraphEntryPoints,
                     ProjectCollection.GlobalProjectCollection,
@@ -2532,7 +2539,7 @@ namespace Microsoft.Build.Execution
                     return;
                 }
 
-                var logPath = DebugUtils.FindNextAvailableDebugFilePath($"{FrameworkDebugUtils.ProcessInfoString}_ProjectGraph.dot");
+                var logPath = DebugUtils.FindNextAvailableDebugFilePath($"{DebugUtils.ProcessInfoString}_ProjectGraph.dot");
 
                 File.WriteAllText(logPath, graph.ToDot(targetList));
             }

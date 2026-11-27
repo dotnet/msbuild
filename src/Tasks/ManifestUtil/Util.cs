@@ -450,6 +450,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static void WriteFile(string path, string s)
         {
+            // CodeQL [SM00414] False positive: path is a trusted manifest utility output file path.
             using (StreamWriter w = new StreamWriter(path))
             {
                 w.Write(s);

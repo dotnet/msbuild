@@ -638,7 +638,9 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             else
             {
-                var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>().ToList();
+                var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>()
+                    .Where(sink => !sink.IgnoreInEvaluationDataNegotiation)
+                    .ToList();
 
                 // If any logger requested the data - we need to emit them
                 IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
@@ -1205,7 +1207,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 .FirstOrDefault(rl => rl.OriginalLogger == centralLogger);
 
             // Create the sink for events from this forwarding logger.
-            EventSourceSink eventSourceSink = new EventSourceSink();
+            EventSourceSink eventSourceSink = new EventSourceSink
+            {
+                IgnoreInEvaluationDataNegotiation = centralLogger is TelemetryInfra.InternalTelemetryConsumingLogger,
+            };
 
             // Assign a unique logger Id to this distributed logger
             int sinkId = _nextSinkId++;
