@@ -1352,6 +1352,11 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
     <xs:element name="AdditionalFileItemNames" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="AllowProcessOfUntrustedResourceFiles" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="AllowProcessOfUntrustedResourceFiles" _locComment="" -->Indicates whether resource files from untrusted zones (such as Mark of the Web) should be processed when trusted (boolean).</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="AllowUnsafeBlocks" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AnalysisMode" substitutionGroup="msb:Property">
       <xs:annotation>
@@ -3179,6 +3184,7 @@ elementFormDefault="qualified">
             <xs:complexContent>
                 <xs:extension base="msb:TaskType">
                     <xs:attribute name="AdditionalInputs" />
+                    <xs:attribute name="AllowProcessOfUntrustedResourceFiles" type="msb:boolean" />
                     <xs:attribute name="ExcludedInputPaths" />
                     <xs:attribute name="ExecuteAsTool" type="msb:boolean" />
                     <xs:attribute name="MinimalRebuildFromTracking" type="msb:boolean" />

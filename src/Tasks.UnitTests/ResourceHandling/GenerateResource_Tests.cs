@@ -12,6 +12,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION && FEATURE_WINDOWSINTEROP
+using Microsoft.Win32.SafeHandles;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.Storage.FileSystem;
+#endif
 using Shouldly;
 using Xunit;
 
@@ -4622,15 +4628,21 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
     }
 
     /// <summary>
-    /// Tests for the content-only portion of the Mark-of-the-Web trust check
-    /// (<see cref="GenerateResource.ResourceFileContentsAreDangerous(System.IO.TextReader)"/>).
-    /// These exercise the danger classification independently of the platform-specific zone/COM check,
-    /// so they run on all target frameworks.
+    /// Tests for the Mark-of-the-Web resource trust checks in <see cref="GenerateResource"/>.
     /// </summary>
     public sealed class ResourceFileTrustTests
     {
-        private static bool IsDangerous(string resxContents)
-            => GenerateResource.ResourceFileContentsAreDangerous(new StringReader(resxContents));
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION && FEATURE_WINDOWSINTEROP
+        private readonly ITestOutputHelper _output;
+
+        public ResourceFileTrustTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+#endif
+
+        private static bool IsDangerous(string resxContents, bool usePreserializedResources = false)
+            => GenerateResource.ResourceFileContentsAreDangerous(new StringReader(resxContents), usePreserializedResources);
 
         [Fact]
         public void PlainStringEntryIsNotDangerous()
@@ -4643,50 +4655,55 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         }
 
         [Fact]
-        public void MimetypeEntryIsDangerous()
+        public void MimetypeEntryIsDangerousInLiveModeOnly()
         {
             string resx = @"<root>
   <data name=""Blob"" mimetype=""application/x-microsoft.net.object.bytearray.base64""><value>AAAA</value></data>
 </root>";
 
-            IsDangerous(resx).ShouldBeTrue();
+            IsDangerous(resx, usePreserializedResources: false).ShouldBeTrue();
+            IsDangerous(resx, usePreserializedResources: true).ShouldBeFalse();
         }
 
-        [Fact]
-        public void ResXFileRefEntryIsDangerousEvenWhenWave18_9Disabled()
+        [Theory]
+        [InlineData("System.Resources.ResXFileRef, System.Windows.Forms")]
+        [InlineData("system.resources.resxfileref, System.Windows.Forms")]
+        public void ResXFileRefEntryIsAlwaysDangerous(string resxFileRefType)
         {
-            string resx = @"<root>
-  <data name=""Logo"" type=""System.Resources.ResXFileRef, System.Windows.Forms""><value>logo.txt;System.String, mscorlib</value></data>
+            string resx = $@"<root>
+  <data name=""Logo"" type=""{resxFileRefType}""><value>logo.txt;System.String, mscorlib</value></data>
 </root>";
 
-            // ResXFileRef detection is intentionally unconditional - it is not gated behind a ChangeWave -
-            // because it can trigger reading of an external linked file. Disable Wave18_9 to prove it still fires.
+            // ResXFileRef detection is intentionally unconditional across ChangeWaves and preserialized mode
+            // because it triggers reading of an external linked file from disk at build time.
             using TestEnvironment env = TestEnvironment.Create();
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_9.ToString());
             ChangeWaves.ResetStateForTests();
 
-            IsDangerous(resx).ShouldBeTrue();
+            IsDangerous(resx, usePreserializedResources: false).ShouldBeTrue();
+            IsDangerous(resx, usePreserializedResources: true).ShouldBeTrue();
         }
 
         [Fact]
-        public void TypedEntryIsDangerousWhenWave18_9Enabled()
+        public void CustomTypedEntryIsDangerousWhenWave18_9Enabled()
         {
             string resx = @"<root>
-  <data name=""Count"" type=""System.Int32, mscorlib""><value>42</value></data>
+  <data name=""Custom"" type=""Contoso.CustomWidget, Contoso.Controls""><value>test</value></data>
 </root>";
 
             using TestEnvironment env = TestEnvironment.Create();
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", string.Empty);
             ChangeWaves.ResetStateForTests();
 
-            IsDangerous(resx).ShouldBeTrue();
+            IsDangerous(resx, usePreserializedResources: false).ShouldBeTrue();
+            IsDangerous(resx, usePreserializedResources: true).ShouldBeFalse();
         }
 
         [Fact]
-        public void TypedEntryIsNotDangerousWhenWave18_9Disabled()
+        public void CustomTypedEntryIsNotDangerousWhenWave18_9Disabled()
         {
             string resx = @"<root>
-  <data name=""Count"" type=""System.Int32, mscorlib""><value>42</value></data>
+  <data name=""Custom"" type=""Contoso.CustomWidget, Contoso.Controls""><value>test</value></data>
 </root>";
 
             using TestEnvironment env = TestEnvironment.Create();
@@ -4695,5 +4712,386 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             IsDangerous(resx).ShouldBeFalse();
         }
+
+        [Theory]
+        [InlineData("System.Int32, mscorlib", "42")]
+        [InlineData("System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "True")]
+        [InlineData("System.Byte[], mscorlib", "AQID")]
+        [InlineData("System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "10, 20")]
+        [InlineData("System.Drawing.Font, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "Segoe UI, 9pt")]
+        [InlineData("System.Drawing.Color, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "ControlText")]
+        [InlineData("System.Resources.ResXNullRef, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "")]
+        [InlineData("System.Windows.Forms.Padding, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "3, 3, 3, 3")]
+        public void SafeFrameworkValueTypesAreNotDangerousWhenWave18_9Enabled(string typeName, string value)
+        {
+            string resx = $@"<root>
+  <data name=""Item"" type=""{typeName}""><value>{value}</value></data>
+</root>";
+
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", string.Empty);
+            ChangeWaves.ResetStateForTests();
+
+            IsDangerous(resx).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void WinFormsAliasedStrongNamedTypesAreNotDangerous()
+        {
+            string resx = @"<root>
+  <assembly alias=""System.Drawing"" name=""System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
+  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
+  <metadata name=""$this.TrayHeight"" type=""System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089""><value>40</value></metadata>
+  <data name=""button1.Location"" type=""System.Drawing.Point, System.Drawing""><value>12, 34</value></data>
+  <data name=""button1.Size"" type=""System.Drawing.Size, System.Drawing""><value>75, 23</value></data>
+  <data name=""button1.Margin"" type=""System.Windows.Forms.Padding, System.Windows.Forms""><value>3, 3, 3, 3</value></data>
+</root>";
+
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", string.Empty);
+            ChangeWaves.ResetStateForTests();
+
+            IsDangerous(resx).ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData(@"<root><data name=""P"" type=""System.Drawing.Point, System.Drawing""><value>1, 2</value></data></root>")]
+        [InlineData(@"<root><data name=""Bmp"" type=""System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a""><value>test.bmp</value></data></root>")]
+        [InlineData(@"<root><data name=""Ico"" type=""System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a""><value>test.ico</value></data></root>")]
+        [InlineData(@"<root><assembly alias=""mscorlib"" name=""EvilAssembly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0000000000000000"" /><data name=""Count"" type=""System.Int32, mscorlib""><value>1</value></data></root>")]
+        [InlineData(@"<root><assembly name=""mscorlib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0000000000000000"" /><data name=""Count"" type=""System.Int32, mscorlib""><value>1</value></data></root>")]
+        [InlineData(@"<root><data name=""P"" type=""System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, CodeBase=file:///evil.dll""><value>1, 2</value></data></root>")]
+        [InlineData(@"<root><data name=""G"" type=""System.Nullable`1[[Evil.Type, Evil]], mscorlib""><value>1</value></data></root>")]
+        public void SpoofedOrUnsafeTypesAreDangerousWhenWave18_9Enabled(string resx)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", string.Empty);
+            ChangeWaves.ResetStateForTests();
+
+            IsDangerous(resx).ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData("[ZoneTransfer]\r\nZoneId=3\r\n", "utf-8", true, 3u)]
+        [InlineData("; comment\n[zonetransfer]\nZoneId = 4\nHostUrl=https://example.com\n", "utf-8", true, 4u)]
+        [InlineData("[ZoneTransfer]\r\nZoneId=0\r\n", "utf-16", true, 0u)]
+        [InlineData("[OtherSection]\r\nZoneId=3\r\n[ZoneTransfer]\r\nZoneId=1\r\n", "utf-8", true, 1u)]
+        [InlineData("[ZoneTransfer]\r\nZoneId=invalid\r\n", "utf-8", true, 4u)]
+        [InlineData("[ZoneTransfer]\r\nHostUrl=https://example.com\r\n", "utf-8", false, 0u)]
+        public void TryParseZoneIdentifierParsesExpectedZone(string content, string encodingName, bool expectedFound, uint expectedZone)
+        {
+            Encoding encoding = Encoding.GetEncoding(encodingName);
+            byte[] preamble = encoding.GetPreamble();
+            byte[] body = encoding.GetBytes(content);
+            using MemoryStream stream = new();
+            stream.Write(preamble, 0, preamble.Length);
+            stream.Write(body, 0, body.Length);
+            stream.Position = 0;
+
+            bool found = GenerateResource.TryParseZoneIdentifier(stream, out uint zoneId);
+            found.ShouldBe(expectedFound);
+            zoneId.ShouldBe(expectedZone);
+        }
+
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION && FEATURE_WINDOWSINTEROP
+        private static unsafe void WriteZoneIdentifier(string filePath, string content)
+        {
+            string fullPath = FileUtilities.NormalizePath(filePath);
+            string extendedAdsPath = (fullPath.StartsWith(@"\\?\", StringComparison.Ordinal) ? fullPath : @"\\?\" + fullPath) + ":Zone.Identifier";
+            HANDLE handle = PInvoke.CreateFile(
+                extendedAdsPath,
+                (uint)FILE_ACCESS_RIGHTS.FILE_GENERIC_WRITE,
+                FILE_SHARE_MODE.FILE_SHARE_READ,
+                null,
+                FILE_CREATION_DISPOSITION.CREATE_ALWAYS,
+                FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_NORMAL,
+                HANDLE.Null);
+            using SafeFileHandle safeHandle = new((IntPtr)handle.Value, ownsHandle: true);
+            safeHandle.IsInvalid.ShouldBeFalse();
+            using FileStream stream = new(safeHandle, FileAccess.Write);
+            byte[] bytes = Encoding.UTF8.GetBytes(content);
+            stream.Write(bytes, 0, bytes.Length);
+        }
+
+        private static unsafe void DeleteZoneIdentifier(string filePath)
+        {
+            string fullPath = FileUtilities.NormalizePath(filePath);
+            string extendedAdsPath = (fullPath.StartsWith(@"\\?\", StringComparison.Ordinal) ? fullPath : @"\\?\" + fullPath) + ":Zone.Identifier";
+            HANDLE handle = PInvoke.CreateFile(
+                extendedAdsPath,
+                (uint)FILE_ACCESS_RIGHTS.DELETE,
+                FILE_SHARE_MODE.FILE_SHARE_READ | FILE_SHARE_MODE.FILE_SHARE_WRITE | FILE_SHARE_MODE.FILE_SHARE_DELETE,
+                null,
+                FILE_CREATION_DISPOSITION.OPEN_EXISTING,
+                FILE_FLAGS_AND_ATTRIBUTES.FILE_FLAG_DELETE_ON_CLOSE,
+                HANDLE.Null);
+            if (handle != HANDLE.INVALID_HANDLE_VALUE)
+            {
+                using SafeFileHandle safeHandle = new((IntPtr)handle.Value, ownsHandle: true);
+            }
+        }
+
+        private const string ResxHeaderXml = @"  <resheader name=""resmimetype""><value>text/microsoft-resx</value></resheader>
+  <resheader name=""version""><value>2.0</value></resheader>
+  <resheader name=""reader""><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name=""writer""><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>";
+
+        [WindowsFullFrameworkOnlyFact]
+        public void BlockedResxFailsWithoutPreReadingLinkedFileAndSucceedsAfterUnblockOrOptOut()
+        {
+            if (GenerateResource.AllowMOTW)
+            {
+                return;
+            }
+
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", string.Empty);
+            ChangeWaves.ResetStateForTests();
+
+            TransientTestFolder folder = env.CreateFolder();
+            string resxPath = Path.Combine(folder.Path, "Blocked.resx");
+            string linkedTxtPath = Path.Combine(folder.Path, "secret.txt");
+            File.WriteAllText(linkedTxtPath, "LinkedValue");
+            File.WriteAllText(
+                resxPath,
+                $@"<root>
+{ResxHeaderXml}
+  <data name=""Linked"" type=""System.Resources.ResXFileRef, System.Windows.Forms""><value>secret.txt;System.String, mscorlib</value></data>
+</root>");
+            WriteZoneIdentifier(resxPath, "[ZoneTransfer]\r\nZoneId=3\r\n");
+
+            // Hold an exclusive lock on secret.txt while MSB3821 runs to prove ResGenDependencies
+            // does NOT open linked files on an untrusted .resx before IsDangerous rejects it.
+            using (FileStream exclusiveLock = new(linkedTxtPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            {
+                GenerateResource blockedTask = Utilities.CreateTask(_output);
+                blockedTask.StateFile = new TaskItem(Path.Combine(folder.Path, "resgen.cache"));
+                blockedTask.Sources = [new TaskItem(resxPath)];
+                blockedTask.UseSourcePath = true;
+
+                blockedTask.Execute().ShouldBeFalse();
+                ((MockEngine)blockedTask.BuildEngine).AssertLogContains("MSB3821");
+            }
+
+            // Opting in via AllowProcessOfUntrustedResourceFiles succeeds even while ZoneId=3 remains.
+            GenerateResource optInTask = Utilities.CreateTask(_output);
+            optInTask.Sources = [new TaskItem(resxPath)];
+            optInTask.OutputResources = [new TaskItem(Path.Combine(folder.Path, "OptIn.resources"))];
+            optInTask.UseSourcePath = true;
+            optInTask.AllowProcessOfUntrustedResourceFiles = true;
+            optInTask.Execute().ShouldBeTrue();
+
+            // Removing :Zone.Identifier succeeds immediately in the same process (verifying MUTZ_DONTUSECACHE).
+            DeleteZoneIdentifier(resxPath);
+
+            GenerateResource unblockedTask = Utilities.CreateTask(_output);
+            unblockedTask.Sources = [new TaskItem(resxPath)];
+            unblockedTask.OutputResources = [new TaskItem(Path.Combine(folder.Path, "Unblocked.resources"))];
+            unblockedTask.UseSourcePath = true;
+            unblockedTask.Execute().ShouldBeTrue();
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void BlockedResxWithSafeWinFormsTypesOrPreserializedResourcesSucceeds()
+        {
+            if (GenerateResource.AllowMOTW)
+            {
+                return;
+            }
+
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", string.Empty);
+            ChangeWaves.ResetStateForTests();
+
+            TransientTestFolder folder = env.CreateFolder();
+            string winFormsResx = Path.Combine(folder.Path, "Form1.resx");
+            File.WriteAllText(
+                winFormsResx,
+                $@"<root>
+{ResxHeaderXml}
+  <assembly alias=""System.Drawing"" name=""System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
+  <data name=""Count"" type=""System.Int32, mscorlib""><value>7</value></data>
+  <data name=""Location"" type=""System.Drawing.Point, System.Drawing""><value>10, 20</value></data>
+</root>");
+            WriteZoneIdentifier(winFormsResx, "[ZoneTransfer]\r\nZoneId=3\r\n");
+
+            GenerateResource winFormsTask = Utilities.CreateTask(_output);
+            winFormsTask.Sources = [new TaskItem(winFormsResx)];
+            winFormsTask.Execute().ShouldBeTrue();
+
+            // Preserialized mode does not deserialize objects at build time, so non-ResXFileRef entries succeed.
+            string preserializedResx = Path.Combine(folder.Path, "Preserialized.resx");
+            File.WriteAllText(
+                preserializedResx,
+                $@"<root>
+{ResxHeaderXml}
+  <data name=""Custom"" type=""Contoso.Widget, Contoso""><value>abc</value></data>
+</root>");
+            WriteZoneIdentifier(preserializedResx, "[ZoneTransfer]\r\nZoneId=3\r\n");
+
+            GenerateResource preserializedTask = Utilities.CreateTask(_output, usePreserialized: true, env);
+            preserializedTask.UsePreserializedResources = true;
+            preserializedTask.Sources = [new TaskItem(preserializedResx)];
+            preserializedTask.Execute().ShouldBeTrue();
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void LongPathsAndExtendedPrefixPathsDoNotTriggerFalsePositiveMsb3821()
+        {
+            if (GenerateResource.AllowMOTW)
+            {
+                return;
+            }
+
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", string.Empty);
+            ChangeWaves.ResetStateForTests();
+
+            TransientTestFolder baseFolder = env.CreateFolder();
+            string junctionDir = Path.Combine(baseFolder.Path, "junc");
+            try
+            {
+                string deepDir = baseFolder.Path;
+                while (deepDir.Length < 265)
+                {
+                    deepDir = Path.Combine(deepDir, "deep_subdir_segment_0123456789");
+                }
+
+                Directory.CreateDirectory(@"\\?\" + deepDir);
+                string longResxPath = Path.Combine(deepDir, "LongForm.resx");
+                string extendedLongResxPath = @"\\?\" + longResxPath;
+                string resxWithTypedData = $@"<root>
+{ResxHeaderXml}
+  <data name=""Bytes"" type=""System.IO.MemoryStream, mscorlib"" mimetype=""application/x-microsoft.net.object.bytearray.base64"">
+    <value>AAECAw==</value>
+  </data>
+</root>";
+                File.WriteAllText(extendedLongResxPath, resxWithTypedData);
+
+                // 1. Clean local file with >= 260 characters (via \\?\ or directly when OS LongPathsEnabled=1)
+                // succeeds without E_INVALIDARG / MSB4018 or false-positive MSB3821.
+                GenerateResource longTask = Utilities.CreateTask(_output);
+                longTask.Sources = [new TaskItem(File.Exists(longResxPath) ? longResxPath : extendedLongResxPath)];
+                longTask.OutputResources = [new TaskItem(Path.Combine(baseFolder.Path, "LongOut.resources"))];
+                longTask.Execute().ShouldBeTrue();
+
+                // 2. Clean local short path via directory junction targeting >= 260 chars (where urlmon returns
+                // URLZONE_UNTRUSTED = 4) succeeds without false-positive MSB3821.
+                using (System.Diagnostics.Process mklink = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c mklink /J \"{junctionDir}\" \"\\\\?\\{deepDir}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }))
+                {
+                    mklink?.WaitForExit();
+                }
+
+                if (Directory.Exists(junctionDir))
+                {
+                    GenerateResource junctionTask = Utilities.CreateTask(_output);
+                    junctionTask.Sources = [new TaskItem(Path.Combine(junctionDir, "LongForm.resx"))];
+                    junctionTask.OutputResources = [new TaskItem(Path.Combine(baseFolder.Path, "JunctionOut.resources"))];
+                    junctionTask.Execute().ShouldBeTrue();
+                }
+
+                // 3. Clean local short file passed with \\?\ extended-length prefix succeeds without E_INVALIDARG / MSB4018.
+                string shortResxPath = Path.Combine(baseFolder.Path, "ExtendedPrefix.resx");
+                File.WriteAllText(shortResxPath, resxWithTypedData);
+
+                GenerateResource extendedPrefixTask = Utilities.CreateTask(_output);
+                extendedPrefixTask.Sources = [new TaskItem(@"\\?\" + shortResxPath)];
+                extendedPrefixTask.OutputResources = [new TaskItem(Path.Combine(baseFolder.Path, "ExtendedPrefix.resources"))];
+                extendedPrefixTask.Execute().ShouldBeTrue();
+
+                // 4. Long-path file that genuinely HAS :Zone.Identifier (ZoneId=3) is still blocked with MSB3821.
+                WriteZoneIdentifier(longResxPath, "[ZoneTransfer]\r\nZoneId=3\r\n");
+
+                GenerateResource blockedLongTask = Utilities.CreateTask(_output);
+                blockedLongTask.Sources = [new TaskItem(extendedLongResxPath)];
+                blockedLongTask.OutputResources = [new TaskItem(Path.Combine(baseFolder.Path, "BlockedLongOut.resources"))];
+                blockedLongTask.Execute().ShouldBeFalse();
+                ((MockEngine)blockedLongTask.BuildEngine).AssertLogContains("MSB3821");
+            }
+            finally
+            {
+                if (Directory.Exists(junctionDir))
+                {
+                    Directory.Delete(junctionDir, recursive: false);
+                }
+
+                if (Directory.Exists(@"\\?\" + baseFolder.Path))
+                {
+                    Directory.Delete(@"\\?\" + baseFolder.Path, recursive: true);
+                }
+            }
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void CoreResGenHonorsAllowProcessOfUntrustedResourceFilesProperty()
+        {
+            if (GenerateResource.AllowMOTW)
+            {
+                return;
+            }
+
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", string.Empty);
+            ChangeWaves.ResetStateForTests();
+
+            TransientTestFolder folder = env.CreateFolder();
+            string resxPath = Path.Combine(folder.Path, "Blocked.resx");
+            File.WriteAllText(Path.Combine(folder.Path, "linked.txt"), "Hello");
+            File.WriteAllText(
+                resxPath,
+                $@"<root>
+{ResxHeaderXml}
+  <data name=""Linked"" type=""System.Resources.ResXFileRef, System.Windows.Forms""><value>linked.txt;System.String, mscorlib</value></data>
+</root>");
+            WriteZoneIdentifier(resxPath, "[ZoneTransfer]\r\nZoneId=3\r\n");
+
+            string projPath = Path.Combine(folder.Path, "test.csproj");
+            File.WriteAllText(
+                projPath,
+                $@"<Project DefaultTargets=""CoreResGen"">
+  <PropertyGroup>
+    <Configuration>Debug</Configuration>
+    <Platform>AnyCPU</Platform>
+    <AssemblyName>TestLib</AssemblyName>
+    <OutputType>Library</OutputType>
+    <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
+    <OutputPath>bin\Debug\</OutputPath>
+    <IntermediateOutputPath>obj\Debug\</IntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include=""Blocked.resx"" />
+  </ItemGroup>
+  <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
+</Project>");
+
+            using Microsoft.Build.Evaluation.ProjectCollection collection = new();
+            MockLogger failLogger = new(_output);
+            Microsoft.Build.Evaluation.Project blockedProject = new(
+                projPath,
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                MSBuildConstants.CurrentToolsVersion,
+                collection);
+            blockedProject.Build("PrepareResources", [failLogger]).ShouldBeFalse();
+            failLogger.AssertLogContains("MSB3821");
+            failLogger.AssertLogContains("AllowProcessOfUntrustedResourceFiles");
+
+            MockLogger passLogger = new(_output);
+            Microsoft.Build.Evaluation.Project allowedProject = new(
+                projPath,
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["AllowProcessOfUntrustedResourceFiles"] = "true",
+                },
+                MSBuildConstants.CurrentToolsVersion,
+                collection);
+            allowedProject.Build("PrepareResources", [passLogger]).ShouldBeTrue();
+        }
+#endif
     }
 }
