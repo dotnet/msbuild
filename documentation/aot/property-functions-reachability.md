@@ -218,14 +218,21 @@ the overload silently fail to bind.
 - **`Equals` / `CompareTo`**: the single argument is `Convert.ChangeType`-d to the
   receiver's runtime type so comparisons line up
   ([Expander.cs#L4162](../../src/Build/Evaluation/Expander.cs#L4162)).
-- **`File` / `Directory` / `Path` receivers**: string args run through
-  `FileUtilities.FixFilePath`, and `File`/`Directory` path args are made absolute
+- **`File` / `Directory` / `Path` receivers and `FileInfo` / `DirectoryInfo`
+  constructors**: string args run through `FileUtilities.FixFilePath`, and
+  `File`/`Directory` path args and the constructor path arg are made absolute
   against the thread working directory in `-mt` mode
   ([Expander.cs#L4128](../../src/Build/Evaluation/Expander.cs#L4128)).
 - **`new`**: routed to a constructor (`TryExecuteWellKnownConstructorNoThrow` or
   `LateBindExecute` as a constructor). Only public constructors on the resolved
   receiver type are eligible, so object construction is limited to allowlisted
   types (e.g. `[System.Globalization.CultureInfo]::new('en-US')`).
+  `[System.IO.FileInfo]::new(path)` and `[System.IO.DirectoryInfo]::new(path)` are
+  allowlisted as `::new` entries in `AvailableStaticMethods` (like `CultureInfo::new`)
+  and constructed directly by
+  `TryExecuteWellKnownConstructorNoThrow`; members on the result follow the
+  normal instance-receiver rules (the read-only `FileSystemInfo` allowlist when
+  receivers are restricted).
 - **`out _`**: out-parameters are defaulted and passed through `GetMethodResult`.
 
 ### 5.4 Binding is public-only
@@ -366,6 +373,9 @@ What shipped:
   `DirectoryName`) that excludes every state-mutating member (`Open*`, `Create*`, `CopyTo`, `MoveTo`,
   `Delete`, ...), so the common `$([System.IO.Directory]::GetParent($(X)).Parent.FullName)` idiom keeps
   working while `FileInfo.OpenWrite`/`Delete` become unreachable.
+- `DynamicDependency` entries in [`Constants.cs`](../../src/Build/Resources/Constants.cs) preserve
+  the public reflection surface of `FileInfo` and `DirectoryInfo`, including members reached through
+  their constructors and `Directory.GetParent`, in trimmed and Native AOT hosts.
 
 **Why a feature switch (not a `Trait` or a `ChangeWave`):** a `Trait` is a runtime environment read the
 trimmer keeps, so it could not satisfy "no runtime re-enablement under trimming"; a

@@ -8,13 +8,17 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
+using Microsoft.Build.Engine.UnitTests.ProjectCache;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Logging;
 using Shouldly;
@@ -131,6 +135,311 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION",
                     enabled ? ChangeWaves.Wave18_12.ToString() : null);
             }
+        }
+
+        [Theory]
+        [InlineData(true, true, true, true)]
+        [InlineData(true, false, true, true)]
+        [InlineData(true, true, false, true)]
+        [InlineData(false, true, true, true)]
+        [InlineData(false, true, false, true)]
+        [InlineData(true, true, true, false)]
+        [InlineData(false, true, true, false)]
+        public void EvaluationPreservesHostRelativePaths(bool graph, bool build, bool strict, bool saveEnvironment)
+        {
+            SetStrictMode(_env, enabled: strict);
+            var hostDirectory = _env.CreateFolder();
+            var projectDirectory = _env.CreateFolder();
+            var leftDirectory = _env.CreateFolder(Path.Combine(projectDirectory.Path, "left"));
+            var rightDirectory = _env.CreateFolder(Path.Combine(projectDirectory.Path, "right"));
+            _env.CreateFile(hostDirectory, "payload.txt", "host payload");
+            _env.SetCurrentDirectory(hostDirectory.Path);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            _env.WithTransientTestState(new TransientStartupDirectory(originalDirectory));
+            string? originalThreadDirectory = FileUtilities.CurrentThreadWorkingDirectory;
+            string expectedPath = Path.Combine(originalDirectory, "payload.txt");
+            string projectXml = $"""
+                <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <PayloadExists>$([System.IO.File]::Exists('payload.txt'))</PayloadExists>
+                    <Payload Condition="'$(PayloadExists)' == 'True'">$([System.IO.File]::ReadAllText('payload.txt'))</Payload>
+                    <FullPath>$([System.IO.Path]::GetFullPath('payload.txt'))</FullPath>
+                    <NormalizedPath>$([MSBuild]::NormalizePath('payload.txt'))</NormalizedPath>
+                    <AbsolutePayload>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)payload.txt'))</AbsolutePayload>
+                  </PropertyGroup>
+                  <ItemGroup Condition="'$(MSBuildProjectName)' == 'root'">
+                    <ProjectReference Include="{Path.Combine("left", "left.proj")};{Path.Combine("right", "right.proj")}"
+                                      Condition="'$(PayloadExists)' == 'True'" />
+                    <ProjectReferenceTargets Include="Build" Targets="Build" />
+                  </ItemGroup>
+                  <Target Name="Build">
+                    <Message Text="EXECUTION_PATH=$(MSBuildProjectName):$([System.IO.Path]::GetFullPath('payload.txt'))" Importance="high" />
+                    <ReadLinesFromFile File="payload.txt">
+                      <Output TaskParameter="Lines" PropertyName="ExecutionPayload" />
+                    </ReadLinesFromFile>
+                    <Message Text="EXECUTION_PAYLOAD=$(MSBuildProjectName):$(ExecutionPayload)" Importance="high" />
+                    <MSBuild Projects="@(ProjectReference)" Targets="Build" BuildInParallel="true" />
+                  </Target>
+                </Project>
+                """;
+            (TransientTestFolder Directory, string Name)[] projects =
+                [(projectDirectory, "root"), (leftDirectory, "left"), (rightDirectory, "right")];
+            foreach (var (directory, name) in projects)
+            {
+                _env.CreateFile(directory, "payload.txt", "project payload");
+                _env.CreateFile(directory, $"{name}.proj", projectXml);
+            }
+
+            MockLogger logger = new(_output);
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                SaveOperatingEnvironment = saveEnvironment,
+                MaxNodeCount = 2,
+                DefaultToolsVersion = MSBuildConstants.CurrentToolsVersion,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            };
+            string projectPath = Path.Combine(projectDirectory.Path, "root.proj");
+            using BuildManager manager = new();
+            manager.BeginBuild(parameters);
+            try
+            {
+                string processDirectory = Directory.GetCurrentDirectory();
+                if (strict)
+                {
+                    Path.GetFileName(processDirectory).ShouldBe(MultiThreadedStrictModeScope.SentinelDirectoryName);
+                }
+
+                if (graph)
+                {
+                    GraphBuildResult result = manager.BuildRequest(new GraphBuildRequestData(
+                        [new ProjectGraphEntryPoint(projectPath, new Dictionary<string, string>())],
+                        ["Build"], null, BuildRequestDataFlags.None, new GraphBuildOptions { Build = build }));
+                    result.OverallResult.ShouldBe(BuildResultCode.Success);
+                    result.Exception.ShouldBeNull();
+                    result.ResultsByNode.Count.ShouldBe(build ? 3 : 0);
+                }
+                else
+                {
+                    manager.BuildRequest(new BuildRequestData(
+                        projectPath, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
+                }
+
+                if (strict)
+                {
+                    Directory.GetCurrentDirectory().ShouldBe(processDirectory);
+                }
+
+                FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalThreadDirectory);
+            }
+            finally
+            {
+                manager.EndBuild();
+            }
+
+            logger.EvaluationFinishedEvents.Count.ShouldBe(3);
+            foreach (var evaluation in logger.EvaluationFinishedEvents)
+            {
+                Dictionary<string, string> properties = new(MSBuildNameIgnoreCaseComparer.Default);
+                Internal.Utilities.EnumerateProperties(evaluation.Properties, properties,
+                    static (dictionary, property) => dictionary.Add(property.Key, property.Value));
+                properties["PayloadExists"].ShouldBe("True");
+                properties["Payload"].ShouldBe("host payload");
+                properties["FullPath"].ShouldBe(expectedPath);
+                properties["NormalizedPath"].ShouldBe(expectedPath);
+                properties["AbsolutePayload"].ShouldBe("project payload");
+            }
+
+            if (build)
+            {
+                foreach (var (directory, name) in projects)
+                {
+                    logger.AssertLogContains($"EXECUTION_PATH={name}:{Path.Combine(directory.Path, "payload.txt")}");
+                    logger.AssertLogContains($"EXECUTION_PAYLOAD={name}:project payload");
+                }
+            }
+
+            logger.AssertNoErrors();
+            logger.AssertNoWarnings();
+            if (strict)
+            {
+                Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+            }
+
+            FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalThreadDirectory);
+        }
+
+        [Theory]
+        [InlineData("Directory.Solution.props", true, true)]
+        [InlineData("before.test.sln.targets", true, true)]
+        [InlineData("Directory.Solution.props", false, true)]
+        [InlineData("Directory.Solution.props", true, false)]
+        public void SolutionEvaluationPreservesHostRelativePaths(string importName, bool saveEnvironment, bool strict)
+        {
+            SetStrictMode(_env, enabled: strict);
+            var hostDirectory = _env.CreateFolder();
+            var solutionDirectory = _env.CreateFolder();
+            _env.CreateFile(hostDirectory, "payload.txt", "host payload");
+            _env.CreateFile(solutionDirectory, "payload.txt", "solution payload");
+            _env.SetCurrentDirectory(hostDirectory.Path);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            string? originalThreadDirectory = FileUtilities.CurrentThreadWorkingDirectory;
+            _env.WithTransientTestState(new TransientStartupDirectory(originalDirectory));
+            var solution = _env.CreateFile(solutionDirectory, "test.sln",
+                "Microsoft Visual Studio Solution File, Format Version 12.00");
+            _env.CreateFile(solutionDirectory, importName, """
+                <Project>
+                  <PropertyGroup>
+                    <Payload>$([System.IO.File]::ReadAllText('payload.txt'))</Payload>
+                    <PayloadPath>$([System.IO.Path]::GetFullPath('payload.txt'))</PayloadPath>
+                  </PropertyGroup>
+                  <Target Name="CheckSolution">
+                    <Message Text="SOLUTION_PAYLOAD=$(Payload)" Importance="high" />
+                    <Message Text="SOLUTION_EVALUATION_PATH=$(PayloadPath)" Importance="high" />
+                    <Message Text="SOLUTION_EXECUTION_PATH=$([System.IO.Path]::GetFullPath('payload.txt'))" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+            manager.Build(new BuildParameters
+            {
+                MultiThreaded = true,
+                SaveOperatingEnvironment = saveEnvironment,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            }, new BuildRequestData(solution.Path, new Dictionary<string, string?>(), null, ["CheckSolution"], null))
+                .ShouldHaveSucceeded();
+
+            logger.AssertLogContains("SOLUTION_PAYLOAD=host payload");
+            logger.AssertLogContains($"SOLUTION_EVALUATION_PATH={Path.Combine(originalDirectory, "payload.txt")}");
+            logger.AssertLogContains($"SOLUTION_EXECUTION_PATH={Path.Combine(solutionDirectory.Path, "payload.txt")}");
+            logger.AssertNoErrors();
+            logger.AssertNoWarnings();
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+            FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalThreadDirectory);
+        }
+
+        [Fact]
+        public void EvaluationDirectoryScopeRestoresContextAfterFailure()
+        {
+            string? originalDirectory = FileUtilities.CurrentThreadWorkingDirectory;
+            string processDirectory = Directory.GetCurrentDirectory();
+            string evaluationDirectory = _env.CreateFolder().Path;
+
+            Should.Throw<InvalidOperationException>(() =>
+            {
+                using EvaluationDirectoryScope scope = new(evaluationDirectory);
+                using EvaluationDirectoryScope disabled = new(null);
+                FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(evaluationDirectory);
+                throw new InvalidOperationException("evaluation failed");
+            });
+
+            FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalDirectory);
+            Directory.GetCurrentDirectory().ShouldBe(processDirectory);
+        }
+
+        [Theory]
+        [InlineData(true, true, true)]
+        [InlineData(true, false, true)]
+        [InlineData(true, true, false)]
+        [InlineData(true, false, false)]
+        [InlineData(false, false, true)]
+        public void CachedProjectEvaluationPreservesDirectoryContext(
+            bool multiThreaded,
+            bool strict,
+            bool saveEnvironment)
+        {
+            SetStrictMode(_env, enabled: strict);
+            var hostDirectory = _env.CreateFolder();
+            var projectDirectory = _env.CreateFolder();
+            _env.CreateFile(hostDirectory, "payload.txt", "host payload");
+            _env.CreateFile(projectDirectory, "payload.txt", "project payload");
+            _env.SetCurrentDirectory(hostDirectory.Path);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            string? originalThreadDirectory = FileUtilities.CurrentThreadWorkingDirectory;
+            _env.WithTransientTestState(new TransientStartupDirectory(originalDirectory));
+            var project = _env.CreateFile(projectDirectory, "build.proj", """
+                <Project>
+                  <PropertyGroup>
+                    <Payload>$([System.IO.File]::ReadAllText('payload.txt'))</Payload>
+                    <EvaluationPath>$([System.IO.Path]::GetFullPath('payload.txt'))</EvaluationPath>
+                  </PropertyGroup>
+                  <Target Name="Build">
+                    <Message Text="EVALUATED=$(Payload)" Importance="high" />
+                    <Message Text="EVALUATION_PATH=$(EvaluationPath)" Importance="high" />
+                    <Message Text="EXECUTION_PATH=$([System.IO.Path]::GetFullPath('payload.txt'))" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+            var cache = new ProjectCacheTests.InstanceMockCache();
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+            manager.Build(new BuildParameters
+            {
+                MultiThreaded = multiThreaded,
+                SaveOperatingEnvironment = saveEnvironment,
+                ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(cache),
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            }, new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
+                .ShouldHaveSucceeded();
+
+            // Non-MT process CWD resolves symlinked temp-directory parents on macOS.
+            string executionDirectory = multiThreaded
+                ? projectDirectory.Path
+                : NativeMethodsShared.RealPath(projectDirectory.Path) ?? projectDirectory.Path;
+            logger.AssertLogContains("EVALUATED=host payload");
+            logger.AssertLogContains($"EVALUATION_PATH={Path.Combine(originalDirectory, "payload.txt")}");
+            logger.AssertLogContains($"EXECUTION_PATH={Path.Combine(executionDirectory, "payload.txt")}");
+            cache.Requests.ShouldHaveSingleItem().ProjectInstance!.GetPropertyValue("Payload").ShouldBe("host payload");
+            logger.AssertNoErrors();
+            logger.AssertNoWarnings();
+            FileUtilities.CurrentThreadWorkingDirectory.ShouldBe(originalThreadDirectory);
+        }
+
+        [Fact]
+        public void SuppliedProjectInstanceIsNotReevaluated()
+        {
+            var hostDirectory = _env.CreateFolder();
+            var projectDirectory = _env.CreateFolder();
+            _env.CreateFile(hostDirectory, "payload.txt", "host payload");
+            _env.CreateFile(projectDirectory, "payload.txt", "project payload");
+            _env.SetCurrentDirectory(hostDirectory.Path);
+            var project = _env.CreateFile(projectDirectory, "build.proj", """
+                <Project>
+                  <PropertyGroup>
+                    <Payload>$([System.IO.File]::ReadAllText('payload.txt'))</Payload>
+                  </PropertyGroup>
+                  <Target Name="Build">
+                    <Message Text="EVALUATED=$(Payload)" Importance="high" />
+                    <Message Text="EXECUTED=$([System.IO.File]::ReadAllText('payload.txt'))" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+            ProjectInstance instance = new(project.Path);
+            instance.SetProperty("Payload", "supplied payload");
+            BuildRequestData request = new(instance, ["Build"]);
+
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+            manager.Build(new BuildParameters
+            {
+                MultiThreaded = true,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            }, request).ShouldHaveSucceeded();
+
+            logger.AssertLogContains("EVALUATED=supplied payload");
+            logger.AssertLogContains("EXECUTED=project payload");
+            logger.AssertNoErrors();
+            logger.AssertNoWarnings();
         }
 
         [Fact]
@@ -2035,6 +2344,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION",
                 enabled ? null : ChangeWaves.Wave18_12.ToString());
             ChangeWaves.ResetStateForTests();
+        }
+
+        private sealed class TransientStartupDirectory : TransientTestState
+        {
+            private readonly string _originalDirectory = BuildParameters.StartupDirectory;
+
+            internal TransientStartupDirectory(string directory) => BuildParameters.StartupDirectory = directory;
+
+            public override void Revert() => BuildParameters.StartupDirectory = _originalDirectory;
         }
 
         private static BuildParameters CreateStrictWarningParameters(MockLogger logger, string policy, string code = "MSB4287")

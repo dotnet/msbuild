@@ -178,6 +178,8 @@ namespace Microsoft.Build.BackEnd.Logging
             private set;
         }
 
+        internal bool IgnoreInEvaluationDataNegotiation { get; set; }
+
         #endregion
 
         #region Methods

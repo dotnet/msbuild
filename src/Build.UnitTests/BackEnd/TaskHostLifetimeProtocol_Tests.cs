@@ -403,6 +403,21 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         }
     }
 
+    [Fact]
+    public void LogMessageAfterTaskHandlerIsDetachedIsDropped()
+    {
+        NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(
+            BuildComponentType.OutOfProcTaskHostNodeProvider);
+        provider.InitializeComponent(new MockHost());
+
+        provider.PacketReceived(
+            1,
+            new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(
+                1,
+                new BuildMessageEventArgs("late message", null, "LateLogger", MessageImportance.Low))));
+        provider.TaskHandlerRegistrationCount.ShouldBe(0);
+    }
+
     private sealed class PacketRecordingHandler : INodePacketHandler
     {
         internal List<INodePacket> Packets { get; } = [];

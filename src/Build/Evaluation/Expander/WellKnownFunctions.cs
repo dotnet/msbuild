@@ -1001,6 +1001,22 @@ namespace Microsoft.Build.Evaluation.Expander
                     return true;
                 }
             }
+            else if (receiverType == typeof(FileInfo) || receiverType == typeof(DirectoryInfo))
+            {
+                if (ParseArgs.TryGetArg(args, out string? path) && !string.IsNullOrEmpty(path))
+                {
+                    try
+                    {
+                        returnVal = receiverType == typeof(FileInfo) ? new FileInfo(path) : new DirectoryInfo(path);
+                        return true;
+                    }
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    {
+                        // Fall back to the binder, which reports the failure as a property function error.
+                        // Execute does not guard this call, so an escaping exception would be misreported as MSB4186.
+                    }
+                }
+            }
             return false;
         }
     }

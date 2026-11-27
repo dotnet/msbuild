@@ -8,18 +8,5 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal abstract class OperandExpressionNode : GenericExpressionNode
     {
-        #region REMOVE_COMPAT_WARNING
-
-        internal override bool DetectAnd()
-        {
-            return false;
-        }
-
-        internal override bool DetectOr()
-        {
-            return false;
-        }
-        #endregion
-
     }
 }

@@ -4022,6 +4022,32 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// FileInfo and DirectoryInfo constructors are available without MSBUILDENABLEALLPROPERTYFUNCTIONS,
+        /// and their path argument is unescaped before the constructor is called.
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionFileSystemInfoConstructors()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var folder = env.CreateFolder(createFolder: true);
+            var emptyFile = folder.CreateFile("empty;file.txt", contents: string.Empty);
+            var file = folder.CreateFile("data.txt", "content");
+
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            pg.Set(ProjectPropertyInstance.Create("EmptyFile", EscapingUtilities.Escape(emptyFile.Path)));
+            pg.Set(ProjectPropertyInstance.Create("File", file.Path));
+            pg.Set(ProjectPropertyInstance.Create("Folder", folder.Path));
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            string Expand(string expression) => expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Expand("$([System.IO.FileInfo]::new('$(EmptyFile)').Length)").ShouldBe("0");
+            Expand("$([System.IO.FileInfo]::NEW('$(File)').Length)").ShouldBe("7");
+            Expand("$([System.IO.DirectoryInfo]::new('$(Folder)').Exists)").ShouldBe("True");
+            Expand("$([System.IO.FileInfo]::new('$(File)').Directory.FullName)").ShouldBe(folder.Path);
+        }
+
+        /// <summary>
         /// Expand intrinsic property function calls a static arithmetic method
         /// </summary>
         [Fact]
@@ -6029,6 +6055,23 @@ $(
             File.Exists(Path.Combine(correctDir.Path, "PropertyFunctionsRequiringReflection")).ShouldBeTrue();
             File.Exists(Path.Combine(wrongDir.Path, "PropertyFunctionsRequiringReflection")).ShouldBeFalse();
         }
+
+        [Fact]
+        public void FileSystemInfoConstructors_RelativePath_ResolveFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            correctDir.CreateFile("notes.txt", "correct");
+            wrongDir.CreateFile("notes.txt", "wrong content");
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.FileInfo]::new('notes.txt').Length)", correctDir.Path, wrongDir.Path).ShouldBe("7");
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.DirectoryInfo]::new('.').FullName)", correctDir.Path, wrongDir.Path).ShouldBe(correctDir.Path);
+        }
+
         [Fact]
         public void FileReadAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
         {

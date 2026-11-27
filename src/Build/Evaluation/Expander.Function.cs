@@ -329,7 +329,7 @@ internal partial class Expander<P, I>
 
         /// <summary>
         /// Determines whether the argument at <paramref name="argIndex"/> for a System.IO.File
-        /// or System.IO.Directory method is a file/directory path that should be resolved
+        /// or System.IO.Directory method, or a FileInfo/DirectoryInfo constructor, is a file/directory path that should be resolved
         /// against the thread-local working directory.
         /// </summary>
         private static bool IsFileOrDirectoryPathArgument(string methodName, int argIndex)
@@ -422,6 +422,8 @@ internal partial class Expander<P, I>
                     }
                 }
 
+                bool isFileSystemInfoConstructor = objectInstance is null && IsFileSystemInfoConstructor(_receiverType, _methodMethodName);
+
                 // We have a methodinfo match, need to plug in the arguments
                 args = new object[_arguments.Length];
 
@@ -444,22 +446,23 @@ internal partial class Expander<P, I>
                         // Directory and Path to Microsoft.IO.* in this file, but _receiverType
                         // from AvailableStaticMethods is always System.IO.*.
                         if (_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory)
-                            || _receiverType == typeof(System.IO.Path))
+                            || _receiverType == typeof(System.IO.Path) || isFileSystemInfoConstructor)
                         {
                             argumentValue = FileUtilities.FixFilePath(argumentValue);
                         }
 
                         args[n] = EscapingUtilities.UnescapeAll(argumentValue);
 
-                        // In -mt mode, resolve relative path arguments for File/Directory methods (and the
-                        // current-directory-dependent Path methods) against the thread-local working directory
-                        // instead of the process-global Environment.CurrentDirectory which may point to a
-                        // different project's directory.
+                        // In -mt mode, resolve relative path arguments for File/Directory methods,
+                        // FileInfo/DirectoryInfo constructors, and current-directory-dependent Path methods
+                        // against the thread-local working directory instead of the process-global
+                        // Environment.CurrentDirectory which may point to a different project's directory.
                         // In multiprocess mode, CurrentThreadWorkingDirectory is null and
                         // MakeFullPathFromThreadWorkingDirectory returns null — this is a no-op.
                         // This must happen AFTER UnescapeAll so that the working directory path
                         // (a real filesystem path) is not corrupted by MSBuild unescape processing.
-                        if (((_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory))
+                        if (((_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory)
+                                || isFileSystemInfoConstructor)
                                 && IsFileOrDirectoryPathArgument(_methodMethodName, n))
                             || (_receiverType == typeof(System.IO.Path)
                                 && IsSystemIOPathPathArgument(_methodMethodName, n)
@@ -1171,6 +1174,15 @@ internal partial class Expander<P, I>
 
             return AvailableStaticMethods.GetTypeInformationFromTypeCache(receiverType.FullName, methodName) != null;
         }
+
+        /// <summary>
+        /// Returns <see langword="true"/> for <c>[System.IO.FileInfo]::new(...)</c> and
+        /// <c>[System.IO.DirectoryInfo]::new(...)</c>, whose path argument is resolved like
+        /// <c>System.IO.File</c> and <c>System.IO.Directory</c> path arguments.
+        /// </summary>
+        private static bool IsFileSystemInfoConstructor(Type receiverType, string methodName)
+            => (receiverType == typeof(System.IO.FileInfo) || receiverType == typeof(System.IO.DirectoryInfo))
+                && string.Equals("new", methodName, StringComparison.OrdinalIgnoreCase);
 
         private static bool IsInstanceMethodAvailable(Type receiverType, string methodName)
         {

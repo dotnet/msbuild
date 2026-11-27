@@ -11,3 +11,13 @@ updates:
       - dependency-name: "github/gh-aw-actions/*" # Managed by gh aw compile. Version-locked to the gh-aw compiler; do not bump.
     schedule:
       interval: "weekly"
+  - package-ecosystem: "dotnet-sdk"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    ignore:
+      - dependency-name: "*"
+        update-types: 
+          - "version-update:semver-major"
+          - "version-update:semver-minor"

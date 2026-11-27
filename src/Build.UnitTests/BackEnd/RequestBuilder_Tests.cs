@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -82,6 +83,44 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // requests, but we call it in odd ways here so restore it manually
             // to keep the overall test invariant happy.
             Directory.SetCurrentDirectory(_originalWorkingDirectory);
+        }
+
+        [Fact]
+        public void IdleDedicatedWorkerDoesNotRetainCompletedTask()
+        {
+            // The scheduler is shared process-wide and may already have multiple workers.
+            // The task returns its executing thread so we can identify the worker to check.
+            (WeakReference task, Thread worker) = ExecuteTaskOnScheduler(RequestBuilder.DedicatedScheduler);
+
+            // Task completion is signaled before TryExecuteTask returns. Wait for the worker
+            // to increment its availability count and block while waiting for more work.
+            SpinWait.SpinUntil(() => (worker.ThreadState & ThreadState.WaitSleepJoin) != 0, 10_000)
+                .ShouldBeTrue("the worker must be idle before checking its GC roots");
+
+            // The worker may first report a wait during task completion, before reaching
+            // TryTake. Retry briefly, but still fail if the parked worker retains the task.
+            for (int attempt = 0; attempt < 10 && task.IsAlive; attempt++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+                Thread.Sleep(10);
+            }
+
+            // A live worker confirms collection did not merely happen because the thread exited.
+            worker.IsAlive.ShouldBeTrue();
+            task.IsAlive.ShouldBeFalse("an idle worker must release its last completed task without another task being queued");
+        }
+
+        // Keep the strong task reference in a separate frame that is gone before collection,
+        // even when the JIT extends local lifetimes in Debug builds.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static (WeakReference task, Thread worker) ExecuteTaskOnScheduler(TaskScheduler scheduler)
+        {
+            Task<Thread> task = Task.Factory.StartNew(
+                static () => Thread.CurrentThread, CancellationToken.None, TaskCreationOptions.None, scheduler);
+            task.Wait(10_000).ShouldBeTrue();
+            return (new WeakReference(task), task.Result);
         }
 
         [Fact]

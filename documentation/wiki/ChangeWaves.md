@@ -35,6 +35,8 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
+### 18.15
+
 ### 18.14
 - [In `-mt` builds, property functions resolve current-directory-dependent relative paths against the project's thread working directory.](https://github.com/dotnet/msbuild/pull/15694)
 - [AssignTargetPath recognizes forward slashes in relative path specifiers and correctly handles relative paths outside the root folder cone on Windows.](https://github.com/dotnet/msbuild/pull/15267)

@@ -9,9 +9,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.Build.UnitTests;
@@ -32,6 +34,263 @@ namespace Microsoft.Build.Engine.UnitTests
         public Telemetry_Tests(ITestOutputHelper output)
         {
             _output = output;
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(true, true)]
+        public void EvaluationDataNegotiation_PreservesLoggerPreferences(bool telemetryEnabled, bool hasLegacyLogger)
+        {
+            using TestEnvironment env = CreateEvaluationDataEnvironment();
+            MockLogger logger = new(_output);
+            MockLogger legacyOutput = new(_output);
+            string binlogPath = env.ExpectFile(".binlog").Path;
+            BuildParameters parameters = new()
+            {
+                IsTelemetryEnabled = telemetryEnabled,
+                Loggers = [logger, new BinaryLogger { Parameters = binlogPath }],
+                MaxNodeCount = 1,
+                MultiThreaded = false,
+                EnableNodeReuse = false,
+                UseSynchronousLogging = true,
+            };
+            if (hasLegacyLogger)
+            {
+                parameters.ForwardingLoggers =
+                [
+                    CreateForwarder(new EvaluationDataLogger(legacyOutput), typeof(CentralForwardingLogger)),
+                ];
+            }
+
+            Helpers.BuildProjectFileUsingBuildManager(CreateEvaluationDataProject(env), parameters: parameters)
+                .OverallResult.ShouldBe(BuildResultCode.Success);
+
+            AssertProjectStartedData(logger.ProjectStartedEvents.ShouldHaveSingleItem(), hasLegacyLogger);
+            AssertEvaluationFinishedData(logger);
+            MockLogger replayed = new(_output);
+            BinaryLogReplayEventSource replay = new();
+            replayed.Initialize(replay);
+            replay.Replay(binlogPath);
+            replayed.Shutdown();
+            AssertProjectStartedData(replayed.ProjectStartedEvents.ShouldHaveSingleItem(), hasLegacyLogger);
+            AssertEvaluationFinishedData(replayed);
+            if (hasLegacyLogger)
+            {
+                AssertProjectStartedData(legacyOutput.ProjectStartedEvents.ShouldHaveSingleItem(), expected: true);
+            }
+
+            if (telemetryEnabled)
+            {
+                logger.TelemetryEvents.ShouldContain(e => e.EventName == TasksDetailsEventName);
+            }
+            else
+            {
+                logger.TelemetryEvents.ShouldNotContain(e => e.EventName == TasksDetailsEventName);
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EvaluationDataNegotiation_PreservesLateOptIn(bool telemetryEnabled)
+        {
+            using TestEnvironment env = CreateEvaluationDataEnvironment();
+            MockLogger logger = new(_output);
+            BuildParameters parameters = new()
+            {
+                IsTelemetryEnabled = telemetryEnabled,
+                Loggers = [new EvaluationDataLogger(logger, requestAtBuildStart: true)],
+                MaxNodeCount = 1,
+                MultiThreaded = false,
+                EnableNodeReuse = false,
+                UseSynchronousLogging = true,
+            };
+
+            Helpers.BuildProjectFileUsingBuildManager(CreateEvaluationDataProject(env), parameters: parameters)
+                .OverallResult.ShouldBe(BuildResultCode.Success);
+
+            AssertProjectStartedData(logger.ProjectStartedEvents.ShouldHaveSingleItem(), expected: false);
+            AssertEvaluationFinishedData(logger);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EvaluationDataNegotiation_PreservesCustomForwarderOptIn(bool telemetryEnabled)
+        {
+            using TestEnvironment env = CreateEvaluationDataEnvironment();
+            MockLogger logger = new(_output);
+            MockLogger forwardedLogger = new(_output);
+            BuildParameters parameters = new()
+            {
+                IsTelemetryEnabled = telemetryEnabled,
+                Loggers = [logger],
+                ForwardingLoggers = [CreateForwarder(forwardedLogger, typeof(EvaluationDataForwardingLogger))],
+                MaxNodeCount = 1,
+                MultiThreaded = false,
+                EnableNodeReuse = false,
+            };
+
+            Helpers.BuildProjectFileUsingBuildManager(CreateEvaluationDataProject(env), parameters: parameters)
+                .OverallResult.ShouldBe(BuildResultCode.Success);
+
+            AssertProjectStartedData(logger.ProjectStartedEvents.ShouldHaveSingleItem(), expected: false);
+            AssertProjectStartedData(forwardedLogger.ProjectStartedEvents.ShouldHaveSingleItem(), expected: false);
+            AssertEvaluationFinishedData(forwardedLogger);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EvaluationDataNegotiation_PreservesProjectCollectionForwarders(bool telemetryEnabled)
+        {
+            using TestEnvironment env = CreateEvaluationDataEnvironment();
+            MockLogger logger = new(_output);
+            MockLogger legacyOutput = new(_output);
+            using ProjectCollection collection = new();
+            collection.RegisterLogger(logger);
+            collection.RegisterForwardingLoggers(
+                [CreateForwarder(new EvaluationDataLogger(legacyOutput), typeof(CentralForwardingLogger))]);
+            BuildParameters parameters = new(collection)
+            {
+                IsTelemetryEnabled = telemetryEnabled,
+                Loggers = collection.Loggers,
+                MaxNodeCount = 1,
+                MultiThreaded = false,
+                EnableNodeReuse = false,
+                UseSynchronousLogging = true,
+            };
+
+            Helpers.BuildProjectFileUsingBuildManager(CreateEvaluationDataProject(env), parameters: parameters)
+                .OverallResult.ShouldBe(BuildResultCode.Success);
+
+            AssertProjectStartedData(logger.ProjectStartedEvents.ShouldHaveSingleItem(), expected: false);
+            legacyOutput.ProjectStartedEvents.ShouldNotBeEmpty();
+            foreach (ProjectStartedEventArgs started in legacyOutput.ProjectStartedEvents)
+            {
+                AssertProjectStartedData(started, expected: false);
+            }
+            AssertEvaluationFinishedData(logger);
+        }
+
+        [Fact]
+        public void EvaluationDataNegotiation_RemoteNodePreservesTelemetry()
+        {
+            using TestEnvironment env = CreateEvaluationDataEnvironment();
+            var telemetry = env.WithTransientTestState(new WorkerTelemetryCapture());
+            MockLogger logger = new(_output);
+            BuildParameters parameters = new()
+            {
+                IsTelemetryEnabled = true,
+                Loggers = [logger],
+                MaxNodeCount = 2,
+                DisableInProcNode = true,
+                LogInitialPropertiesAndItems = true,
+                MultiThreaded = false,
+                EnableNodeReuse = false,
+            };
+
+            Helpers.BuildProjectFileUsingBuildManager(CreateEvaluationDataProject(env), parameters: parameters)
+                .OverallResult.ShouldBe(BuildResultCode.Success);
+
+            ProjectStartedEventArgs started = logger.ProjectStartedEvents.ShouldHaveSingleItem();
+            started.BuildEventContext.ShouldNotBeNull().NodeId.ShouldBeGreaterThan(1);
+            AssertProjectStartedData(started, expected: false);
+            AssertEvaluationFinishedData(logger);
+            telemetry.Data.ShouldNotBeNull();
+            telemetry.Data!.TargetsExecutionData[new TaskOrTargetTelemetryKey("Build", true, false)].WasExecuted.ShouldBeTrue();
+            telemetry.Data.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].ExecutionsCount.ShouldBe(1);
+        }
+
+        private TestEnvironment CreateEvaluationDataEnvironment()
+        {
+            TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTOUT", "1");
+            env.SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "1");
+            env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", null);
+            env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", null);
+            env.SetEnvironmentVariable("MSBUILDTELEMETRYEXCLUDETASKSDETAILS", null);
+            return env;
+        }
+
+        private static string CreateEvaluationDataProject(TestEnvironment env) => env.CreateFile("test.proj", """
+            <Project>
+              <PropertyGroup>
+                <EvaluatedProperty>property-value</EvaluatedProperty>
+              </PropertyGroup>
+              <ItemGroup>
+                <EvaluatedItem Include="input.txt" />
+              </ItemGroup>
+              <Target Name="Build">
+                <Message Text="built-with-telemetry" Importance="High" />
+              </Target>
+            </Project>
+            """).Path;
+
+        private static ForwardingLoggerRecord CreateForwarder(ILogger centralLogger, Type forwarderType) =>
+            new(centralLogger, new LoggerDescription(
+                forwarderType.FullName, forwarderType.Assembly.FullName, null, null, LoggerVerbosity.Diagnostic));
+
+        private static void AssertProjectStartedData(ProjectStartedEventArgs started, bool expected)
+        {
+            if (expected)
+            {
+                started.EnumerateProperties().ShouldContain(new PropertyData("EvaluatedProperty", "property-value"));
+                started.EnumerateItems().ShouldContain(item => item.Type == "EvaluatedItem" && item.EvaluatedInclude == "input.txt");
+            }
+            else
+            {
+                started.EnumerateProperties().ShouldBeEmpty();
+                started.EnumerateItems().ShouldBeEmpty();
+            }
+        }
+
+        private static void AssertEvaluationFinishedData(MockLogger logger)
+        {
+            ProjectEvaluationFinishedEventArgs evaluated = logger.EvaluationFinishedEvents.ShouldHaveSingleItem();
+            evaluated.EnumerateProperties().ShouldContain(new PropertyData("EvaluatedProperty", "property-value"));
+            evaluated.EnumerateItems().ShouldContain(item => item.Type == "EvaluatedItem" && item.EvaluatedInclude == "input.txt");
+        }
+
+        public sealed class EvaluationDataForwardingLogger : ConfigurableForwardingLogger
+        {
+            public override void Initialize(IEventSource eventSource)
+            {
+                ((IEventSource4)eventSource).IncludeEvaluationPropertiesAndItems();
+                base.Initialize(eventSource);
+            }
+        }
+
+        private sealed class EvaluationDataLogger(MockLogger logger, bool requestAtBuildStart = false) : ILogger
+        {
+            public LoggerVerbosity Verbosity { get; set; }
+
+            public string? Parameters { get; set; }
+
+            public void Initialize(IEventSource eventSource)
+            {
+                if (requestAtBuildStart)
+                {
+                    eventSource.BuildStarted += (_, _) => ((IEventSource4)eventSource).IncludeEvaluationPropertiesAndItems();
+                }
+
+                eventSource.AnyEventRaised += logger.LoggerEventHandler;
+            }
+
+            public void Shutdown() { }
+        }
+
+        private sealed class WorkerTelemetryCapture : TransientTestState
+        {
+            public WorkerNodeTelemetryData? Data { get; private set; }
+
+            public WorkerTelemetryCapture() => InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += Capture;
+
+            private void Capture(WorkerNodeTelemetryData data) => Data = data;
+
+            public override void Revert() => InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted -= Capture;
         }
 
         [Fact]

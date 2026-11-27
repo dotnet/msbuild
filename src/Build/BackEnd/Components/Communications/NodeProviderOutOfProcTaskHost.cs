@@ -633,6 +633,12 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            if (packet.Type == NodePacketType.LogMessage)
+            {
+                CommunicationsUtilities.Trace($"PacketReceived: dropping LogMessage from node {node} that arrived after its task completed.");
+                return;
+            }
+
             Assumed.Unreachable($"PacketReceived: no handler for node {node}, unexpected packet type {packet.Type}");
         }
 
