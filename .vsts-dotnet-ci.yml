@@ -103,7 +103,7 @@ jobs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'FullOnWindows build logs'
     continueOnError: true
-    condition: always()
+    condition: and(always(), eq(variables.onlyDocChanged, 0))
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
@@ -205,7 +205,7 @@ jobs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnWindows build logs'
     continueOnError: true
-    condition: always()
+    condition: and(always(), eq(variables.onlyDocChanged, 0))
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
@@ -288,7 +288,7 @@ jobs:
       PathtoPublish: 'artifacts/Log/Release'
       ArtifactName: 'FullOnWindows Release build logs'
     continueOnError: true
-    condition: always()
+    condition: and(always(), eq(variables.onlyDocChanged, 0))
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
@@ -325,18 +325,30 @@ jobs:
   - task: Bash@3
     displayName: Process coverage reports
     continueOnError: false
-    condition: eq(variables.onlyDocChanged, 0)
+    condition: and(succeeded(), eq(variables.onlyDocChanged, 0))
     inputs:
       filePath: $(Build.SourcesDirectory)/eng/process-coverage.sh
       arguments: --repoRoot $(Build.SourcesDirectory)
-  - task: PublishPipelineArtifact@1
-    displayName: Publish Code Coverage Results
-    continueOnError: true
-    condition: eq(variables.onlyDocChanged, 0)
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact $(Build.BuildNumber) Coverage
     inputs:
-      targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
-      artifact: 'LinuxCoreCoverage_Attempt$(System.JobAttempt)'
-      publishLocation: 'pipeline'
+      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
+      ArtifactName: '$(Build.BuildNumber) Coverage'
+    continueOnError: true
+    condition: and(succeeded(), eq(variables.onlyDocChanged, 0))
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact $(Build.BuildNumber) Cobertura
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml'
+      ArtifactName: '$(Build.BuildNumber) Cobertura'
+    continueOnError: true
+    condition: and(succeeded(), eq(variables.onlyDocChanged, 0))
+  - task: PublishCodeCoverageResults@2
+    inputs:
+      summaryFileLocation: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
+      pathToSources: $(Build.SourcesDirectory)
+    continueOnError: true
+    condition: and(succeeded(), eq(variables.onlyDocChanged, 0))
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -366,7 +378,7 @@ jobs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnLinux build logs'
     continueOnError: true
-    condition: always()
+    condition: and(always(), eq(variables.onlyDocChanged, 0))
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
@@ -411,21 +423,6 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     env:
         MSBUILDUSESERVER: "1"
-  - task: Bash@3
-    displayName: Process coverage reports
-    continueOnError: false
-    condition: eq(variables.onlyDocChanged, 0)
-    inputs:
-      filePath: $(Build.SourcesDirectory)/eng/process-coverage.sh
-      arguments: --repoRoot $(Build.SourcesDirectory)
-  - task: PublishPipelineArtifact@1
-    displayName: Publish Code Coverage Results
-    continueOnError: true
-    condition: eq(variables.onlyDocChanged, 0)
-    inputs:
-      targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
-      artifact: 'MacCoreCoverage_Attempt$(System.JobAttempt)'
-      publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -455,7 +452,7 @@ jobs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnMac build logs'
     continueOnError: true
-    condition: always()
+    condition: and(always(), eq(variables.onlyDocChanged, 0))
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: TestResults'
     inputs:
@@ -481,109 +478,4 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/Verify'
       ArtifactName: 'macOS Verify $(System.JobAttempt)'
 
-- job: CodeCoverage
-  displayName: "Code Coverage"
-  dependsOn:
-  - BootstrapMSBuildOnFullFrameworkWindows
-  - BootstrapMSBuildOnCoreWindows
-  - FullReleaseOnWindows
-  - CoreBootstrappedOnLinux
-  - CoreOnMac
-  variables:
-    onlyDocChanged: $[ dependencies.BootstrapMSBuildOnFullFrameworkWindows.outputs['CheckDocumentationOnlyChange.onlyDocChanged'] ]
-  pool:
-    ${{ if eq(variables['System.TeamProject'], 'public') }}:
-      name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
-    ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      name: VSEng-MicroBuildVSStable
-      demands: agent.os -equals Windows_NT
-  steps:
-# Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
-#   - task: DownloadPipelineArtifact@2
-#     inputs:
-#       buildType: 'current'
-#       artifactName: 'WindowsFullFrameworkCoverage'
-#       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/WindowsFullFramework'
-#   - task: DownloadPipelineArtifact@2
-#     inputs:
-#       buildType: 'current'
-#       artifactName: 'WindowsCoreCoverage'
-#       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/WindowsCore'
-#   - task: DownloadPipelineArtifact@2
-#     inputs:
-#       buildType: 'current'
-#       artifactName: 'WindowsFullReleaseCoverage'
-#       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/WindowsFullRelease'
-  - task: PowerShell@2
-    displayName: Select latest coverage artifacts
-    inputs:
-      targetType: inline
-      pwsh: true
-      script: |
-        $headers = @{ Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN" }
-        $uri = "$(System.CollectionUri)$(System.TeamProjectId)/_apis/build/builds/$(Build.BuildId)/artifacts?api-version=7.1"
-        $artifacts = (Invoke-RestMethod -Uri $uri -Headers $headers).value
-
-        foreach ($coverage in @(
-          @{ Prefix = 'LinuxCoreCoverage'; Variable = 'LinuxCoreCoverageArtifact' },
-          @{ Prefix = 'MacCoreCoverage'; Variable = 'MacCoreCoverageArtifact' }
-        )) {
-          $pattern = "^$([regex]::Escape($coverage.Prefix))_Attempt(?<attempt>\d+)$"
-          $artifact = $artifacts |
-            ForEach-Object {
-              if ($_.name -match $pattern) {
-                [pscustomobject]@{ Name = $_.name; Attempt = [int]$Matches.attempt }
-              }
-            } |
-            Sort-Object Attempt -Descending |
-            Select-Object -First 1
-
-          if ($null -eq $artifact) {
-            throw "No $($coverage.Prefix) artifact found for build $(Build.BuildId)."
-          }
-
-          Write-Host "Using $($artifact.Name)."
-          Write-Host "##vso[task.setvariable variable=$($coverage.Variable)]$($artifact.Name)"
-        }
-    env:
-      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-    condition: eq(variables.onlyDocChanged, 0)
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      buildType: 'current'
-      artifactName: '$(LinuxCoreCoverageArtifact)'
-      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/LinuxCore'
-    condition: eq(variables.onlyDocChanged, 0)
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      buildType: 'current'
-      artifactName: '$(MacCoreCoverageArtifact)'
-      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/MacCore'
-    condition: eq(variables.onlyDocChanged, 0)
-
-  - task: PowerShell@2
-    displayName: Process coverage reports
-    inputs:
-      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
-      arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(Build.SourcesDirectory)/artifacts/CoverageResults
-      pwsh: true
-    condition: eq(variables.onlyDocChanged, 0)
-  - task: PublishBuildArtifacts@1
-    displayName: Publish Artifact $(Build.BuildNumber) Coverage
-    inputs:
-      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
-      ArtifactName: '$(Build.BuildNumber) Coverage'
-    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
-  - task: PublishBuildArtifacts@1
-    displayName: Publish Artifact $(Build.BuildNumber) Cobertura
-    inputs:
-      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml'
-      ArtifactName: '$(Build.BuildNumber) Cobertura'
-    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
-  - task: PublishCodeCoverageResults@2
-    inputs:
-      summaryFileLocation: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
-      pathToSources: $(Build.SourcesDirectory)
-    condition: eq(variables.onlyDocChanged, 0)
 - template: /eng/common/templates/jobs/source-build.yml

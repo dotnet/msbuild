@@ -814,10 +814,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(@"/*$(empty)*/*.log")]
         public void ProjectGetterResultsInUnixDriveEnumerationWarning(string unevaluatedInclude)
         {
-            ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
+            ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude, suppressRootEnumeration: true);
         }
 
-        private static void ProjectGetterResultsInDriveEnumerationWarning(string unevaluatedInclude)
+        private static void ProjectGetterResultsInDriveEnumerationWarning(string unevaluatedInclude, bool suppressRootEnumeration = false)
         {
             using (var env = TestEnvironment.Create())
             {
@@ -825,6 +825,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     // Reset state
                     Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
+
+                    if (suppressRootEnumeration)
+                    {
+                        Helpers.SuppressRootDirectoryEnumeration(env);
+                    }
 
                     // Setup
                     using ProjectCollection projectCollection = new ProjectCollection();

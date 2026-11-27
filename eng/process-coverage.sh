@@ -43,7 +43,7 @@ mergedCobertura=$artifacts_dir/CoverageResults/merged.cobertura.xml
 
 mkdir -p $coverageResultsDir
 
-$dotnetCoverageTool merge -o $mergedCoverage $artifacts_dir/TestResults/**/*.coverage
-$dotnetCoverageTool merge -o $mergedCobertura -f cobertura $mergedCoverage
+"$dotnetCoverageTool" merge -o "$mergedCoverage" "$artifacts_dir/TestResults/**/*.coverage" || exit $?
+"$dotnetCoverageTool" merge -o "$mergedCobertura" -f cobertura "$mergedCoverage" || exit $?
 
 cd $repoRoot

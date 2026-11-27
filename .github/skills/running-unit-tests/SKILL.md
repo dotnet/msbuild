@@ -24,7 +24,7 @@ These are configured in `Directory.Build.props` (repo root), `src/Directory.Buil
 - **Multi-targeting**: test projects target .NETFramework and .NETCoreApp on Windows (.NETCoreApp only on Linux/macOS). `dotnet test` runs the suite **once per TFM**.
 - **Single-threaded by default**: `xunit.runner.json` sets `maxParallelThreads: 1` and `parallelizeTestCollections: false`. Many tests mutate process-global state (env vars, cwd, SDK resolvers), so this is intentional.
 - **Auto trait filters**: platform/TFM-inappropriate tests are filtered out via `--filter-not-trait Category=...` (e.g., `nonwindowstests`, `failing`, `nonnetcoreapptests`). Don't try to "fix" tests that appear skipped because of these.
-- **Coverage on non-Windows**: `--coverage --coverage-settings Coverage.config` is appended unconditionally to `XunitOptions` in `src/Directory.Build.targets`. There is no MSBuild property switch to disable it from `dotnet test` — to skip coverage, run the test exe directly without `--coverage`.
+- **Coverage on Linux**: `--coverage --coverage-settings Coverage.config` is appended unconditionally to `XunitOptions` on Linux in `src/Directory.Build.targets`. There is no MSBuild property switch to disable it from `dotnet test` — to skip coverage, run the test exe directly without `--coverage`.
 - **Test runner**: `TestRunnerName=XUnitV3`, MTP `1.9.1`, xUnit v3 `3.2.2` (set in repo-root `Directory.Build.props`).
 - **DOTNET_HOST_PATH**: `RunnerUtilities.GetMSBuildEnvironmentVariables` (in `src/UnitTests.Shared/RunnerUtilities.cs`) sets `DOTNET_HOST_PATH` to the bootstrap dotnet when tests launch MSBuild as a child process, so tasks like `RoslynCodeTaskFactory` resolve the right host. Don't override `DOTNET_HOST_PATH` from a test.
 
@@ -75,7 +75,7 @@ These trade safety for speed — use during iteration, **revert before final val
 - **Skip bootstrap packaging** for non-bootstrap test projects:
   `dotnet build ... -p:CreateBootstrap=false` (useful when the local bootstrap SDK payload is missing).
 - **Narrow with traits**: `--filter-trait Category=mytraitduringdev` if you've tagged a focused subset.
-- **Skip code coverage on Linux/macOS**: run the test exe directly without `--coverage`. This repo does not expose a supported `dotnet test` property switch to disable the auto-added coverage arguments.
+- **Skip code coverage on Linux**: run the test exe directly without `--coverage`. This repo does not expose a supported `dotnet test` property switch to disable the auto-added coverage arguments.
 
 ## Final validation pass
 

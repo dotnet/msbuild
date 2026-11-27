@@ -1063,7 +1063,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     content,
                     "0",
                     "TestTarget",
-                    Helpers.ExpectedBuildResult.SucceedWithWarning);
+                    Helpers.ExpectedBuildResult.SucceedWithWarning,
+                    suppressRootEnumeration: true);
         }
 
         /// <summary>
