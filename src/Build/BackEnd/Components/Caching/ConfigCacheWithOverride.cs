@@ -11,13 +11,29 @@ namespace Microsoft.Build.Execution
 {
     internal class ConfigCacheWithOverride : IConfigCache
     {
-        private readonly IConfigCache _override;
+        private volatile IConfigCache _override;
         public ConfigCache CurrentCache { get; }
 
-        public ConfigCacheWithOverride(IConfigCache @override)
+        public ConfigCacheWithOverride(IConfigCache @override = null)
         {
             _override = @override;
             CurrentCache = new ConfigCache();
+        }
+
+        internal static IBuildComponent CreateComponent(BuildComponentType componentType)
+        {
+            Assumed.Equal(componentType, BuildComponentType.ConfigCache, $"Cannot create components of type {componentType}");
+            return new ConfigCacheWithOverride();
+        }
+
+        internal void SetOverride(IConfigCache @override)
+        {
+            _override = @override;
+        }
+
+        internal void ClearOverride()
+        {
+            _override = null;
         }
 
         public void InitializeComponent(IBuildComponentHost host)
@@ -27,6 +43,7 @@ namespace Microsoft.Build.Execution
 
         public void ShutdownComponent()
         {
+            _override = null;
             CurrentCache.ShutdownComponent();
         }
 
@@ -47,12 +64,13 @@ namespace Microsoft.Build.Execution
         {
             get
             {
-                if (HasConfigurationInOverrideCache(configId))
+                IConfigCache overrideCache = _override;
+                if (overrideCache is not null && overrideCache.HasConfiguration(configId))
                 {
 #if DEBUG
                     Assumed.False(CurrentCache.HasConfiguration(configId), "caches should not overlap");
 #endif
-                    return _override[configId];
+                    return overrideCache[configId];
                 }
                 else
                 {
@@ -68,9 +86,10 @@ namespace Microsoft.Build.Execution
 
         public BuildRequestConfiguration GetMatchingConfiguration(BuildRequestConfiguration config)
         {
-            var overrideConfig = _override.GetMatchingConfiguration(config);
+            IConfigCache overrideCache = _override;
+            BuildRequestConfiguration overrideConfig = overrideCache?.GetMatchingConfiguration(config);
 
-            if (overrideConfig != null)
+            if (overrideConfig is not null)
             {
 #if DEBUG
                 Assumed.Null(CurrentCache.GetMatchingConfiguration(config), "caches should not overlap");
@@ -85,9 +104,10 @@ namespace Microsoft.Build.Execution
 
         public BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata)
         {
-            var overrideConfig = _override.GetMatchingConfiguration(configMetadata);
+            IConfigCache overrideCache = _override;
+            BuildRequestConfiguration overrideConfig = overrideCache?.GetMatchingConfiguration(configMetadata);
 
-            if (overrideConfig != null)
+            if (overrideConfig is not null)
             {
 #if DEBUG
                 Assumed.Null(CurrentCache.GetMatchingConfiguration(configMetadata), "caches should not overlap");
@@ -102,27 +122,32 @@ namespace Microsoft.Build.Execution
 
         public BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata, ConfigCreateCallback callback, bool loadProject)
         {
-            return _override.GetMatchingConfiguration(configMetadata, callback, loadProject) ?? CurrentCache.GetMatchingConfiguration(configMetadata, callback, loadProject);
+            IConfigCache overrideCache = _override;
+            if (overrideCache?.GetMatchingConfiguration(configMetadata) is not null)
+            {
+                return overrideCache.GetMatchingConfiguration(configMetadata, callback, loadProject);
+            }
+
+            return CurrentCache.GetMatchingConfiguration(configMetadata, callback, loadProject);
         }
 
         public bool HasConfiguration(int configId)
         {
-            bool overrideHasConfiguration = HasConfigurationInOverrideCache(configId);
-
-            if (overrideHasConfiguration)
+            IConfigCache overrideCache = _override;
+            if (overrideCache is not null && overrideCache.HasConfiguration(configId))
             {
 #if DEBUG
                 Assumed.False(CurrentCache.HasConfiguration(configId), "caches should not overlap");
 #endif
-                return overrideHasConfiguration;
+                return true;
             }
 
-            return overrideHasConfiguration || CurrentCache.HasConfiguration(configId);
+            return CurrentCache.HasConfiguration(configId);
         }
 
         public bool HasConfigurationInOverrideCache(int configId)
         {
-            return _override.HasConfiguration(configId);
+            return _override?.HasConfiguration(configId) == true;
         }
 
         public void ClearConfigurations()

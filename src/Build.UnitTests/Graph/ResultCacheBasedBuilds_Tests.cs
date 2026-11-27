@@ -570,5 +570,179 @@ namespace Microsoft.Build.Graph.UnitTests
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist2");
             _logger.ErrorCount.ShouldBe(1);
         }
+
+        [Fact]
+        public void ReusedBuildManagerLoadsInputResultsCachesAndClearsOverridesBetweenBuilds()
+        {
+            string projectFile = CreateProjectFileWithBuildTargetAndItems(_env, 1).Path;
+            TransientTestFolder cacheDir = _env.CreateFolder(createFolder: true);
+            string cache1 = Path.Combine(cacheDir.Path, "cache1");
+            string cache2 = Path.Combine(cacheDir.Path, "cache2");
+
+            using var buildManager = new BuildManager();
+
+            // Build 1: regular output-cache build initializes the BuildManager's ConfigCache, ResultsCache, and Scheduler.
+            BuildResult build1Result = BuildOnManager(
+                buildManager,
+                projectFile,
+                new BuildParameters
+                {
+                    OutputResultsCacheFile = cache1,
+                    Loggers = [_logger]
+                });
+
+            build1Result.ShouldHaveSucceeded();
+            build1Result.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ShouldBe(["1"]);
+            File.Exists(cache1).ShouldBeTrue();
+
+            // Update the project on disk to return "2".
+            File.WriteAllText(projectFile, """
+                <Project>
+                  <ItemGroup>
+                    <i Include="2" />
+                  </ItemGroup>
+                  <Target Name="Build" Returns="@(i)" />
+                </Project>
+                """);
+
+            // Build 2: reusing the same BuildManager with InputResultsCacheFiles must succeed and serve the cached result ("1").
+            BuildResult build2Result = BuildOnManager(
+                buildManager,
+                projectFile,
+                new BuildParameters
+                {
+                    InputResultsCacheFiles = [cache1],
+                    Loggers = [_logger]
+                });
+
+            build2Result.ShouldHaveSucceeded();
+            build2Result.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ShouldBe(["1"]);
+
+            // Build 3: subsequent build without InputResultsCacheFiles must NOT observe Build 2's override; it should build "2" and write cache2.
+            BuildResult build3Result = BuildOnManager(
+                buildManager,
+                projectFile,
+                new BuildParameters
+                {
+                    OutputResultsCacheFile = cache2,
+                    Loggers = [_logger]
+                });
+
+            build3Result.ShouldHaveSucceeded();
+            build3Result.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ShouldBe(["2"]);
+            File.Exists(cache2).ShouldBeTrue();
+
+            // Update the project on disk to return "3".
+            File.WriteAllText(projectFile, """
+                <Project>
+                  <ItemGroup>
+                    <i Include="3" />
+                  </ItemGroup>
+                  <Target Name="Build" Returns="@(i)" />
+                </Project>
+                """);
+
+            // Build 4: loading a different input cache on the same BuildManager must serve cache2 ("2"), not cache1 ("1") or disk ("3").
+            BuildResult build4Result = BuildOnManager(
+                buildManager,
+                projectFile,
+                new BuildParameters
+                {
+                    InputResultsCacheFiles = [cache2],
+                    Loggers = [_logger]
+                });
+
+            build4Result.ShouldHaveSucceeded();
+            build4Result.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ShouldBe(["2"]);
+            _logger.ErrorCount.ShouldBe(0);
+        }
+
+        [Fact]
+        public void ReusedBuildManagerGraphBuildWithEmptyAndNonEmptyInputCaches()
+        {
+            ProjectGraphNode[] topoSortedNodes = CreateProjectGraph(
+                env: _env,
+                dependencyEdges: new Dictionary<int, int[]>
+                {
+                    { 1, [2] },
+                    { 3, null },
+                },
+                globalProperties: null,
+                createProjectFile: CreateProjectFileWrapper)
+                .ProjectNodesTopologicallySorted.ToArray();
+
+            ProjectGraphNode node1 = topoSortedNodes.Single(n => ProjectNumber(n) == "1");
+            ProjectGraphNode node2 = topoSortedNodes.Single(n => ProjectNumber(n) == "2");
+            ProjectGraphNode node3 = topoSortedNodes.Single(n => ProjectNumber(n) == "3");
+
+            TransientTestFolder cacheDir = _env.CreateFolder(createFolder: true);
+            string cache1 = Path.Combine(cacheDir.Path, "cache1");
+            string cache2 = Path.Combine(cacheDir.Path, "cache2");
+            string cache3 = Path.Combine(cacheDir.Path, "cache3");
+
+            using var buildManager = new BuildManager();
+
+            // Build leaf project 2 with empty InputResultsCacheFiles.
+            BuildResult result2 = BuildOnManager(
+                buildManager,
+                node2.ProjectInstance.FullPath,
+                new BuildParameters
+                {
+                    InputResultsCacheFiles = [],
+                    OutputResultsCacheFile = cache2,
+                    Loggers = [_logger]
+                });
+            result2.ShouldHaveSucceeded();
+            result2.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ShouldBe(["2"]);
+
+            // Build root project 1 using cache2 as input and writing cache1.
+            BuildResult result1 = BuildOnManager(
+                buildManager,
+                node1.ProjectInstance.FullPath,
+                new BuildParameters
+                {
+                    InputResultsCacheFiles = [cache2],
+                    OutputResultsCacheFile = cache1,
+                    Loggers = [_logger]
+                });
+            result1.ShouldHaveSucceeded();
+            result1.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ShouldBe(["1", "2"]);
+
+            // cache1 must contain only project 1 (not project 2 from override or prior build).
+            var deserialized1 = CacheSerialization.DeserializeCaches(cache1);
+            deserialized1.exception.ShouldBeNull();
+            deserialized1.ConfigCache.Select(c => c.ProjectFullPath).ShouldBe([node1.ProjectInstance.FullPath]);
+
+            // Build independent leaf project 3 with empty InputResultsCacheFiles on the same BuildManager:
+            // CurrentCache must be reset so cache3 serializes only project 3 (not project 1 from the previous build).
+            BuildResult result3 = BuildOnManager(
+                buildManager,
+                node3.ProjectInstance.FullPath,
+                new BuildParameters
+                {
+                    InputResultsCacheFiles = [],
+                    OutputResultsCacheFile = cache3,
+                    Loggers = [_logger]
+                });
+            result3.ShouldHaveSucceeded();
+            result3.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ShouldBe(["3"]);
+
+            var deserialized3 = CacheSerialization.DeserializeCaches(cache3);
+            deserialized3.exception.ShouldBeNull();
+            deserialized3.ConfigCache.Select(c => c.ProjectFullPath).ShouldBe([node3.ProjectInstance.FullPath]);
+            _logger.ErrorCount.ShouldBe(0);
+        }
+
+        private static BuildResult BuildOnManager(BuildManager buildManager, string projectFile, BuildParameters parameters)
+        {
+            var requestData = new BuildRequestData(
+                projectFile,
+                new Dictionary<string, string>(),
+                null,
+                ["Build"],
+                null);
+
+            return buildManager.Build(parameters, requestData);
+        }
     }
 }

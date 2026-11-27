@@ -227,6 +227,79 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfServerProcess.ShouldNotBe(newServerProcessId, "Node used by both the first and second build should not be the same.");
         }
 
+        [Fact]
+        public void ReusedServerLoadsInputResultsCacheAndDoesNotLeakOverride()
+        {
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            _env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
+            _env.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "0");
+
+            TransientTestFolder folder = _env.CreateFolder(createFolder: true);
+            string cachePath = Path.Combine(folder.Path, "result.cache");
+            string projectTemplate = $$"""
+                <Project>
+                  <UsingTask TaskName="ProcessIdTask" AssemblyFile="{{Assembly.GetExecutingAssembly().Location}}" />
+                  <Target Name="Build">
+                    <ProcessIdTask>
+                      <Output PropertyName="PID" TaskParameter="Pid" />
+                    </ProcessIdTask>
+                    <Message Text="Server ID is $(PID)" Importance="high" />
+                    <Message Text="Marker: {0}" Importance="high" />
+                  </Target>
+                </Project>
+                """;
+
+            TransientTestFile project = _env.CreateFile(folder, "repro.proj", string.Format(CultureInfo.InvariantCulture, projectTemplate, "V1"));
+
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            try
+            {
+                // Build 1: populate output results cache on the server.
+                string output1 = RunnerUtilities.ExecMSBuild(
+                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                    $"\"{project.Path}\" -t:Build -orc:\"{cachePath}\" -nr:true",
+                    out bool success1,
+                    false,
+                    _output);
+                success1.ShouldBeTrue(output1);
+                int serverPid = ParseNumber(output1, "Server ID is ");
+                _env.WithTransientProcess(serverPid);
+                ParseNumber(output1, "Process ID is ").ShouldNotBe(serverPid, "Build 1 should run on the MSBuild Server.");
+                output1.ShouldContain("Marker: V1");
+
+                // Modify project so re-executing the target produces a distinct marker.
+                File.WriteAllText(project.Path, string.Format(CultureInfo.InvariantCulture, projectTemplate, "V2"));
+
+                // Build 2: load input results cache on the SAME reused server (issue #15574).
+                string output2 = RunnerUtilities.ExecMSBuild(
+                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                    $"\"{project.Path}\" -t:Build -irc:\"{cachePath}\" -nr:true -v:diag",
+                    out bool success2,
+                    false,
+                    _output);
+                success2.ShouldBeTrue(output2);
+                output2.ShouldNotContain("Marker: V2", customMessage: "Build 2 should be satisfied from the input results cache.");
+                output2.ShouldContain(GetServerStatusMessage("MSBuildServerNodeReused", serverPid));
+
+                // Build 3: build without -irc on the SAME reused server; Build 2's override must not leak.
+                string output3 = RunnerUtilities.ExecMSBuild(
+                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                    $"\"{project.Path}\" -t:Build -nr:true",
+                    out bool success3,
+                    false,
+                    _output);
+                success3.ShouldBeTrue(output3);
+                ParseNumber(output3, "Server ID is ").ShouldBe(serverPid, "Build 3 should reuse the same server.");
+                output3.ShouldContain("Marker: V2", customMessage: "Build 3 without -irc must rebuild the updated project instead of reading Build 2's override cache.");
+            }
+            finally
+            {
+                MSBuildClient.ShutdownServer(CancellationToken.None);
+            }
+        }
+
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/14540")]
         [Fact]
         public void ServerSpawnAndReuseAreLoggedToBuildLog()
