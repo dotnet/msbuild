@@ -159,3 +159,10 @@ Tasks that load assemblies dynamically in the task host may cause version confli
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
 | `[DllImport]` attribute | WARNING | Not covered by analyzers | Review for thread safety, use absolute paths |
+
+Loading a DLL by an absolute path is not sufficient if its dependencies still rely on
+the current directory. Use per-load dependency search flags rather than
+`SetDllDirectory`, which changes DLL resolution for every thread in the host process.
+Keep the acquired module reference alive through all native calls and release only
+the reference owned by that invocation. Concurrent loads of the same module must not
+change another invocation's search path or unload its native code.

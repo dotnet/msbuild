@@ -620,10 +620,11 @@ Add the analyzer package as a private package reference:
 
 ### MSBuild Tasks Build
 
-To enable the analyzer in the MSBuild Tasks project build, pass `/p:BuildAnalyzer=true`:
+The MSBuild Tasks project enables the in-repository analyzer by default. No package reference
+or additional build property is needed:
 
 ```
-dotnet build src/Tasks/Microsoft.Build.Tasks.csproj /p:BuildAnalyzer=true
+dotnet build src\Tasks\Microsoft.Build.Tasks.csproj -bl:{}
 ```
 
 ## Example

@@ -229,7 +229,8 @@ namespace Microsoft.Build.Framework
                 WorkingDirectory = ProjectDirectory.Value
             };
 
-            // Set environment variables
+            // Do not reintroduce variables removed from the task snapshot.
+            startInfo.EnvironmentVariables.Clear();
             foreach (var kvp in _environmentVariables)
             {
                 startInfo.EnvironmentVariables[kvp.Key] = kvp.Value;
