@@ -192,6 +192,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set { _requestBuilder = value; }
         }
 
+        internal IBuildCheckManagerProvider BuildCheckManagerProvider
+        {
+            get { return _buildCheckManagerProvider; }
+            set { _buildCheckManagerProvider = value; }
+        }
+
         /// <summary>
         /// Get the a component based on the request component type
         /// </summary>

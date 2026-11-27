@@ -28,6 +28,10 @@ internal class CheckDispatchingContext : ICheckContext
 
     public BuildEventContext BuildEventContext => _eventContext;
 
+    // Replay dispatches events without a logging service to query;
+    // keep warnings on the existing deferred-reporting path.
+    public bool ShouldTreatWarningAsError(string? warningCode) => false;
+
     public void DispatchBuildEvent(BuildEventArgs buildEvent)
     {
         Assumed.NotNull(buildEvent);
@@ -55,13 +59,6 @@ internal class CheckDispatchingContext : ICheckContext
     public void DispatchAsErrorFromText(DiagnosticSubcategory subcategory, string? errorCode, string? helpKeyword, IElementLocation location, string message)
     {
         BuildErrorEventArgs buildEvent = EventsCreatorHelper.CreateErrorEventFromText(_eventContext, subcategory, errorCode, helpKeyword, location, message);
-
-        _eventDispatcher.Dispatch(buildEvent);
-    }
-
-    public void DispatchAsWarningFromText(DiagnosticSubcategory subcategory, string? warningCode, string? helpKeyword, IElementLocation location, string message)
-    {
-        BuildWarningEventArgs buildEvent = EventsCreatorHelper.CreateWarningEventFromText(_eventContext, subcategory, warningCode, helpKeyword, location, message);
 
         _eventDispatcher.Dispatch(buildEvent);
     }

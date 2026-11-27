@@ -1179,7 +1179,13 @@ namespace Microsoft.Build.BackEnd
                 {
                     buildCheckManager?.ProjectFirstEncountered(
                         BuildCheckDataSource.BuildExecution,
-                        new CheckLoggingContext(_nodeLoggingContext.LoggingService, _requestEntry.Request.BuildEventContext),
+                        new CheckLoggingContext(_nodeLoggingContext.LoggingService, new BuildEventContext(
+                            _requestEntry.Request.SubmissionId,
+                            _nodeLoggingContext.BuildEventContext.NodeId,
+                            _requestEntry.RequestConfiguration.ConfigurationId,
+                            BuildEventContext.InvalidProjectContextId,
+                            BuildEventContext.InvalidTargetId,
+                            BuildEventContext.InvalidTaskId)),
                         _requestEntry.RequestConfiguration.ProjectFullPath);
 
                     _requestEntry.RequestConfiguration.LoadProjectIntoConfiguration(

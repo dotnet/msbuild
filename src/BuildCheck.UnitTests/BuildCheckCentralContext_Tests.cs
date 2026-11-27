@@ -239,11 +239,15 @@ public class BuildCheckCentralContext_Tests
     private sealed class NullResultReporter : IResultReporter
     {
         public void ReportResult(BuildEventArgs result, ICheckContext checkContext) { }
+
+        public void ReportFailure(BuildWarningEventArgs warning, ICheckContext checkContext) { }
     }
 
     private sealed class NullCheckContext : ICheckContext
     {
         public BuildEventContext BuildEventContext => BuildEventContext.Invalid;
+
+        public bool ShouldTreatWarningAsError(string? warningCode) => false;
 
         public void DispatchAsComment(MessageImportance importance, string messageResourceName, params object?[] messageArgs) { }
 
@@ -258,14 +262,6 @@ public class BuildCheckCentralContext_Tests
         { }
 
         public void DispatchAsCommentFromText(MessageImportance importance, string message) { }
-
-        public void DispatchAsWarningFromText(
-            DiagnosticSubcategory subcategory,
-            string? warningCode,
-            string? helpKeyword,
-            IElementLocation location,
-            string message)
-        { }
 
         public void DispatchFailedAcquisitionTelemetry(string assemblyName, Exception exception) { }
 

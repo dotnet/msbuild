@@ -175,6 +175,9 @@ internal sealed class CheckWrapper
         }
     }
 
+    internal void ReportFailure(BuildWarningEventArgs warning, ICheckContext checkContext)
+        => _resultReporter.ReportFailure(warning, checkContext);
+
     // to be used on eval node (BuildCheckDataSource.check)
     internal void UninitializeStats()
     {

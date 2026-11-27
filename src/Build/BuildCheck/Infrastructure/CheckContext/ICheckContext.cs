@@ -19,6 +19,13 @@ internal interface ICheckContext
     BuildEventContext BuildEventContext { get; }
 
     /// <summary>
+    /// Whether MSBuild logging currently treats this warning code as an error
+    /// in the originating context. Uses the warning settings currently available;
+    /// logging determines final severity when it processes the warning.
+    /// </summary>
+    bool ShouldTreatWarningAsError(string? warningCode);
+
+    /// <summary>
     /// Dispatch the instance of <see cref="BuildEventContext"/> as a comment.
     /// </summary>
     void DispatchAsComment(MessageImportance importance, string messageResourceName, params object?[] messageArgs);
@@ -42,16 +49,6 @@ internal interface ICheckContext
     /// Dispatch the instance of <see cref="BuildEventContext"/> as a comment with provided text for the message.
     /// </summary>
     void DispatchAsCommentFromText(MessageImportance importance, string message);
-
-    /// <summary>
-    /// Dispatch the instance of <see cref="BuildEventContext"/> as a warning message.
-    /// </summary>
-    /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
-    /// <param name="warningCode">The warning code, or <see langword="null"/>.</param>
-    /// <param name="helpKeyword">The help keyword, or <see langword="null"/>.</param>
-    /// <param name="location">The location associated with the warning.</param>
-    /// <param name="message">The warning message.</param>
-    void DispatchAsWarningFromText(DiagnosticSubcategory subcategory, string? warningCode, string? helpKeyword, IElementLocation location, string message);
 
     /// <summary>
     /// Dispatch the telemetry data for a failed acquisition.

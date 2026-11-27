@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Microsoft.Build.BackEnd.Shared;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Internal;
@@ -302,12 +303,13 @@ internal sealed class BuildCheckCentralContext
             }
             catch (Exception e)
             {
-                checkContext.DispatchAsWarningFromText(
+                checkCallback.Item1.ReportFailure(EventsCreatorHelper.CreateWarningEventFromText(
+                    checkContext.BuildEventContext,
                     DiagnosticSubcategory.None,
                     warningCode: null,
                     helpKeyword: null,
                     ElementLocation.Create(projectFullPath),
-                    $"The check '{checkCallback.Item1.Check.FriendlyName}' threw an exception while executing a registered action with message: {e.Message}");
+                    $"The check '{checkCallback.Item1.Check.FriendlyName}' threw an exception while executing a registered action with message: {e.Message}"), checkContext);
 
                 checksToRemove = checksToRemove ?? new List<CheckWrapper>();
                 checksToRemove.Add(checkCallback.Item1);

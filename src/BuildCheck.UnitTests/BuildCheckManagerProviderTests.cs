@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
@@ -147,28 +149,236 @@ public class BuildCheckManagerTests : IDisposable
         _testedInstance.SetDataSource(BuildCheckDataSource.EventArgs);
         _testedInstance.SetDataSource(BuildCheckDataSource.BuildExecution);
 
-        _logger.Warnings.Where(w => w.Code == "X01235").ShouldBeEmpty();
-        _logger.Errors.Where(e => e.Code == "X01235").ShouldBeEmpty();
+        var dispatcher = new EventArgsDispatcher();
+        var logger = new MockLogger(_output);
+        logger.Initialize(dispatcher);
+
+        logger.Warnings.Where(w => w.Code == "X01235").ShouldBeEmpty();
+        logger.Errors.Where(e => e.Code == "X01235").ShouldBeEmpty();
 
         AcquireAndEvaluate(first, 1);
-        _logger.Warnings.Count(w => w.Code == "X01235").ShouldBe(firstSeverity == "warning" ? 1 : 0);
-        _logger.Errors.Where(e => e.Code == "X01235").ShouldBeEmpty();
+        logger.Warnings.Count(w => w.Code == "X01235").ShouldBe(firstSeverity == "warning" ? 1 : 0);
+        logger.Errors.Where(e => e.Code == "X01235").ShouldBeEmpty();
 
         AcquireAndEvaluate(second, 2);
-        _logger.Warnings.Count(w => w.Code == "X01235").ShouldBe(expectedWarnings);
-        _logger.Errors.Count(e => e.Code == "X01235").ShouldBe(expectedErrors);
+        logger.Warnings.Count(w => w.Code == "X01235").ShouldBe(expectedWarnings);
+        logger.Errors.Count(e => e.Code == "X01235").ShouldBe(expectedErrors);
 
         void AcquireAndEvaluate(string projectPath, int evaluationId)
         {
-            var context = new CheckLoggingContext(_loggingService, new BuildEventContext(1, 2, evaluationId, evaluationId, BuildEventContext.InvalidProjectContextId, 6, 7));
+            var context = new CheckDispatchingContext(dispatcher,
+                new BuildEventContext(1, 2, evaluationId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, 6, 7));
             _testedInstance.ProcessCheckAcquisition(new CheckAcquisitionData(Path.Combine(AppContext.BaseDirectory, "CustomCheck.dll"), projectPath), context);
             _testedInstance.ProcessEvaluationFinishedEventArgs(context, new ProjectEvaluationFinishedEventArgs
             {
                 ProjectFile = projectPath,
                 BuildEventContext = context.BuildEventContext,
             });
+            var projectContext = new BuildEventContext(1, 2, evaluationId, evaluationId, evaluationId, 6, 7);
+            _testedInstance.StartProjectRequest(new CheckDispatchingContext(dispatcher, projectContext), projectPath);
         }
     }
+
+    [Theory]
+    [InlineData(10, BuildEventContext.InvalidProjectInstanceId)]
+    [InlineData(BuildEventContext.InvalidEvaluationId, 20)]
+    public void ProjectStartDispatchesOnlyMatchingDeferredWarnings(int evaluationId, int projectInstanceId)
+    {
+        var reporter = (IResultReporter)_testedInstance;
+        var projectContext = new BuildEventContext(1, 2, 10, 20, 30, 6, 7);
+        var dispatcher = new EventArgsDispatcher();
+        var logger = new MockLogger(_output);
+        logger.Initialize(dispatcher);
+        var checkContext = new CheckDispatchingContext(dispatcher, projectContext);
+        BuildWarningEventArgs matching = CreateDeferredWarning(evaluationId, projectInstanceId, "matching");
+        BuildWarningEventArgs unrelated = CreateDeferredWarning(11, 21, "unrelated");
+        logger.Warnings.ShouldBeEmpty();
+
+        reporter.ReportResult(matching, checkContext);
+        reporter.ReportResult(unrelated, checkContext);
+        logger.Warnings.ShouldBeEmpty();
+
+        _testedInstance.StartProjectRequest(checkContext, "matching.proj");
+
+        logger.Warnings.ShouldHaveSingleItem().ShouldBeSameAs(matching);
+        matching.BuildEventContext.ShouldNotBeNull().ProjectInstanceId.ShouldBe(projectContext.ProjectInstanceId);
+        matching.BuildEventContext.ProjectContextId.ShouldBe(projectContext.ProjectContextId);
+        unrelated.BuildEventContext.ShouldNotBeNull().ProjectContextId.ShouldBe(BuildEventContext.InvalidProjectContextId);
+
+        _testedInstance.StartProjectRequest(checkContext, "matching.proj");
+        logger.Warnings.ShouldHaveSingleItem();
+        _testedInstance.FinalizeProcessing(checkContext);
+        logger.Warnings.ShouldBe([matching, unrelated]);
+        _testedInstance.FinalizeProcessing(checkContext);
+        logger.Warnings.Count.ShouldBe(2);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DeferredWarningDispatchCanEnqueueAnotherWarning(bool projectStarts)
+    {
+        var reporter = (IResultReporter)_testedInstance;
+        var dispatcher = new EventArgsDispatcher();
+        var checkContext = new CheckDispatchingContext(dispatcher, new BuildEventContext(1, 2, 10, 20, 30, 6, 7));
+        BuildWarningEventArgs first = CreateDeferredWarning(10, BuildEventContext.InvalidProjectInstanceId, "first");
+        BuildWarningEventArgs second = CreateDeferredWarning(10, BuildEventContext.InvalidProjectInstanceId, "second");
+        List<BuildEventArgs> dispatched = [];
+        dispatcher.AnyEventRaised += (_, e) =>
+        {
+            dispatched.Add(e);
+            if (ReferenceEquals(e, first))
+            {
+                reporter.ReportResult(second, checkContext);
+            }
+        };
+        dispatched.ShouldBeEmpty();
+        reporter.ReportResult(first, checkContext);
+        dispatched.ShouldBeEmpty();
+
+        Drain();
+        dispatched.ShouldBe([first]);
+        Drain();
+        dispatched.ShouldBe([first, second]);
+        Drain();
+        dispatched.Count.ShouldBe(2);
+
+        void Drain()
+        {
+            if (projectStarts)
+            {
+                _testedInstance.StartProjectRequest(checkContext, "test.proj");
+            }
+            else
+            {
+                _testedInstance.FinalizeProcessing(checkContext);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task ConcurrentDeferredWarningDrainsPreserveEveryWarningOnce()
+    {
+        const int warningCount = 512;
+        var reporter = (IResultReporter)_testedInstance;
+        var dispatcher = new EventArgsDispatcher();
+        var checkContext = new CheckDispatchingContext(dispatcher, new BuildEventContext(1, 2, 10, 20, 30, 6, 7));
+        ConcurrentBag<BuildEventArgs> dispatched = [];
+        dispatcher.AnyEventRaised += (_, e) => dispatched.Add(e);
+        var start = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        List<Task> operations = [];
+        dispatched.ShouldBeEmpty();
+
+        for (int producer = 0; producer < 4; producer++)
+        {
+            int first = producer * warningCount / 4;
+            operations.Add(Task.Run(async () =>
+            {
+                await start.Task;
+                for (int i = first; i < first + warningCount / 4; i++)
+                {
+                    reporter.ReportResult(CreateDeferredWarning(10, BuildEventContext.InvalidProjectInstanceId, i.ToString()), checkContext);
+                }
+            }));
+        }
+        operations.Add(Task.Run(async () =>
+        {
+            await start.Task;
+            for (int i = 0; i < warningCount; i++)
+            {
+                _testedInstance.StartProjectRequest(checkContext, "test.proj");
+            }
+        }));
+        operations.Add(Task.Run(async () =>
+        {
+            await start.Task;
+            for (int i = 0; i < warningCount; i++)
+            {
+                _testedInstance.FinalizeProcessing(checkContext);
+            }
+        }));
+
+        start.SetResult(true);
+        await Task.WhenAll(operations);
+        _testedInstance.FinalizeProcessing(checkContext);
+
+        dispatched.Count.ShouldBe(warningCount);
+        dispatched.Select(e => int.Parse(e.Message.ShouldNotBeNull())).OrderBy(i => i).ShouldBe(Enumerable.Range(0, warningCount));
+        _testedInstance.FinalizeProcessing(checkContext);
+        dispatched.Count.ShouldBe(warningCount);
+    }
+
+    [Theory]
+    [InlineData("global", true, false)]
+    [InlineData("origin-project", true, false)]
+    [InlineData("unrelated-project", false, false)]
+    [InlineData("excluded", false, false)]
+    [InlineData("message", false, true)]
+    [InlineData("default", false, false)]
+    public void FailureWarningsUseMSBuildPolicyInTheirOriginatingContext(string policy, bool promotes, bool demotes)
+    {
+        const string code = "POL001";
+        var origin = new BuildEventContext(1, 2, 10, 20, BuildEventContext.InvalidProjectContextId, 6, 7);
+        var unrelated = new BuildEventContext(1, 2, 11, 21, 31, 6, 7);
+        var context = new CheckLoggingContext(_loggingService, origin);
+        _loggingService.ShouldTreatWarningAsError(origin, code).ShouldBeFalse();
+        _logger.AllBuildEvents.ShouldBeEmpty();
+        if (policy is "global" or "excluded" or "message")
+        {
+            _loggingService.WarningsAsErrors = new HashSet<string>();
+        }
+        if (policy is "origin-project" or "unrelated-project")
+        {
+            _loggingService.AddWarningsAsErrors(policy == "origin-project" ? origin : unrelated, new HashSet<string>());
+        }
+        if (policy == "excluded")
+        {
+            _loggingService.WarningsNotAsErrors = new HashSet<string> { code };
+        }
+        if (policy == "message")
+        {
+            _loggingService.WarningsAsMessages = new HashSet<string> { code };
+        }
+        var warning = new BuildWarningEventArgs(null, code, "test.proj", 3, 4, 3, 9, "infrastructure warning", null, "BuildCheck")
+        {
+            BuildEventContext = origin,
+        };
+        context.ShouldTreatWarningAsError(code).ShouldBe(promotes);
+
+        ((IResultReporter)_testedInstance).ReportFailure(warning, context);
+
+        _logger.Errors.Count.ShouldBe(promotes ? 1 : 0);
+        _logger.Warnings.ShouldBeEmpty();
+        if (!promotes)
+        {
+            _logger.AllBuildEvents.ShouldBeEmpty("MSBuild warning exclusions and message demotion retain the existing deferred path");
+        }
+        _testedInstance.FinalizeProcessing(context);
+
+        BuildEventArgs diagnostic = _logger.AllBuildEvents.ShouldHaveSingleItem();
+        diagnostic.BuildEventContext.ShouldBeSameAs(origin);
+        diagnostic.Message.ShouldBe(warning.Message);
+        if (demotes)
+        {
+            diagnostic.ShouldBeOfType<BuildMessageEventArgs>();
+        }
+        else if (promotes)
+        {
+            diagnostic.ShouldBeOfType<BuildErrorEventArgs>().Code.ShouldBe(code);
+        }
+        else
+        {
+            diagnostic.ShouldBeSameAs(warning);
+        }
+        _testedInstance.FinalizeProcessing(context);
+        _logger.AllBuildEvents.ShouldHaveSingleItem();
+    }
+
+    private static BuildWarningEventArgs CreateDeferredWarning(int evaluationId, int projectInstanceId, string message)
+        => new(null, "DEFER001", "test.proj", 0, 0, 0, 0, message, null, "BuildCheck")
+        {
+            BuildEventContext = new BuildEventContext(1, 2, evaluationId, projectInstanceId, BuildEventContext.InvalidProjectContextId, 6, 7),
+        };
 
     private void MockBuildCheckAcquisition(bool isCheckRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isCheckRuleExist));
 

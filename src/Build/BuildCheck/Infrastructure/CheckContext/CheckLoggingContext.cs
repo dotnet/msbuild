@@ -23,6 +23,9 @@ internal readonly struct CheckLoggingContext(ILoggingService loggingService, Bui
 {
     public BuildEventContext BuildEventContext => eventContext;
 
+    public bool ShouldTreatWarningAsError(string? warningCode)
+        => loggingService.ShouldTreatWarningAsError(eventContext, warningCode);
+
     public void DispatchBuildEvent(BuildEventArgs buildEvent)
         => loggingService
             .LogBuildEvent(buildEvent);
@@ -38,10 +41,6 @@ internal readonly struct CheckLoggingContext(ILoggingService loggingService, Bui
     public void DispatchAsErrorFromText(DiagnosticSubcategory subcategory, string? errorCode, string? helpKeyword, IElementLocation location, string message)
         => loggingService
             .LogErrorFromText(eventContext, subcategory, errorCode, helpKeyword, location, message);
-
-    public void DispatchAsWarningFromText(DiagnosticSubcategory subcategory, string? warningCode, string? helpKeyword, IElementLocation location, string message)
-        => loggingService
-            .LogWarningFromText(eventContext, subcategory, warningCode, helpKeyword, location, message);
 
     public void DispatchFailedAcquisitionTelemetry(string assemblyName, Exception exception)
     {
