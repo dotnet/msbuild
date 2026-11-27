@@ -356,8 +356,9 @@ namespace Microsoft.Build.Collections
         /// <param name="item">item to check for containment</param>
         /// <param name="index">The position of the substring within <paramref name="item"/>.</param>
         /// <param name="length">The maximum number of characters in the <paramref name="item"/> to lookup.</param>
-        /// <returns>true if item contained; false if not</returns>
-        private T GetCore(string item, int index, int length)
+        /// <param name="matchStoredHash">Whether the full stored hash must match, even for an unconstrained comparison.</param>
+        /// <returns>The matching entry, if present.</returns>
+        private T GetCore(string item, int index, int length, bool matchStoredHash = false)
         {
             if (_buckets != null)
             {
@@ -365,6 +366,11 @@ namespace Microsoft.Build.Collections
                 // see note at "HashSet" level describing why "- 1" appears in for loop
                 for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].next)
                 {
+                    if (matchStoredHash && _slots[i].hashCode != hashCode)
+                    {
+                        continue;
+                    }
+
                     if (_slots[i].hashCode == hashCode && _constrainedComparer != null ? _constrainedComparer.Equals(_slots[i].value.Key, item, index, length) : _comparer.Equals(_slots[i].value.Key, item))
                     {
                         return _slots[i].value;
@@ -374,6 +380,8 @@ namespace Microsoft.Build.Collections
             // either m_buckets is null or wasn't found
             return default(T);
         }
+
+        internal T GetWithMatchingHash(string key) => GetCore(key, 0, key?.Length ?? 0, matchStoredHash: true);
 
         /// <summary>
         /// Copy items in this hashset to array, starting at arrayIndex
@@ -806,7 +814,10 @@ namespace Microsoft.Build.Collections
         /// </summary>
         /// <param name="value">value to find</param>
         /// <returns></returns>
-        private bool AddEvenIfPresent(T value)
+        private bool AddEvenIfPresent(T value) => AddWithHashCode(value, InternalGetHashCode(value.Key));
+
+        // Preserve the original indexed hash when moving entries whose live key might have changed.
+        internal bool AddWithHashCode(T value, int hashCode)
         {
             if (_readOnly)
             {
@@ -819,7 +830,7 @@ namespace Microsoft.Build.Collections
             }
 
             string key = value.Key;
-            int hashCode = InternalGetHashCode(key);
+            hashCode &= Lower31BitMask;
             int bucket = hashCode % _buckets.Length;
             for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].next)
             {
