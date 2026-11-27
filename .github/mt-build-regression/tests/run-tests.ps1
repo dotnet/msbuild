@@ -105,11 +105,11 @@ function New-TestExistingWorkItem
     param(
         [string]$Author = 'github-actions[bot]',
         [string]$State = 'open',
-        [string]$Title = "[PerfStar MT Regression] 2 possible MT build-time regressions [$candidateKey]",
+        [string]$Title = "[AW] [PerfStar MT Regression] 2 possible MT build-time regressions [$candidateKey]",
         [string]$Body = "<!-- gh-aw-workflow-id: mt-build-regression.agent -->`nperfstar-mt-regression-key: $candidateKey",
         [int]$Number = 42,
         [string]$Url = 'https://github.com/dotnet/msbuild/issues/42',
-        [string[]]$Labels = @('Area: PerfStar', 'Area: Performance', 'automation'),
+        [string[]]$Labels = @('Area: PerfStar', 'Area: Performance', 'automation', 'agentic-workflows'),
         [bool]$PullRequest
     )
 
@@ -140,9 +140,11 @@ $trustedIssue = New-TestExistingWorkItem
 $trustedPullRequest = New-TestExistingWorkItem -Number 43 -PullRequest $true
 Assert-True (Test-TrustedExistingWorkItem -Item $trustedIssue -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild') 'A bot-authored issue with both exact markers must be trusted.'
 Assert-True (Test-TrustedExistingWorkItem -Item $trustedPullRequest -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild') 'A bot-authored pull request with both exact markers must be trusted.'
+Assert-True (Test-TrustedExistingWorkItem -Item (New-TestExistingWorkItem -Labels @('Area: PerfStar', 'Area: Performance', 'automation')) -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild') 'Removing the categorization label must not cause duplicate tracking items.'
 Assert-True (-not (Test-TrustedExistingWorkItem -Item (New-TestExistingWorkItem -Author 'untrusted-user') -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild')) 'A copied marker from an untrusted author must be rejected.'
-Assert-True (-not (Test-TrustedExistingWorkItem -Item (New-TestExistingWorkItem -Title '[Flaky Test] forged markers') -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild')) 'Markers emitted through another bot workflow must be rejected by title prefix.'
-Assert-True (-not (Test-TrustedExistingWorkItem -Item (New-TestExistingWorkItem -Labels @('Area: PerfStar', 'automation')) -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild')) 'An item without every workflow-applied label must be rejected.'
+Assert-True (-not (Test-TrustedExistingWorkItem -Item (New-TestExistingWorkItem -Title '[AW] [Flaky Test] forged markers') -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild')) 'Markers emitted through another agentic workflow must be rejected by title prefix.'
+Assert-True (-not (Test-TrustedExistingWorkItem -Item (New-TestExistingWorkItem -Title "[PerfStar MT Regression] 2 possible MT build-time regressions [$candidateKey]") -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild')) 'An item without the complete agentic-workflow title prefix must be rejected.'
+Assert-True (-not (Test-TrustedExistingWorkItem -Item (New-TestExistingWorkItem -Labels @('Area: PerfStar', 'automation')) -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild')) 'An item without all three routing labels must be rejected.'
 Assert-True (-not (Test-TrustedExistingWorkItem -Item (New-TestExistingWorkItem -Body "perfstar-mt-regression-key: $candidateKey") -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild')) 'An item without the hidden workflow marker must be rejected.'
 Assert-True (-not (Test-TrustedExistingWorkItem -Item (New-TestExistingWorkItem -Body "<!-- gh-aw-workflow-id: mt-build-regression.agent -->`nperfstar-mt-regression-key: 0000000000000000") -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild')) 'An item for another candidate set must be rejected.'
 Assert-True (-not (Test-TrustedExistingWorkItem -Item (New-TestExistingWorkItem -Body "<!-- gh-aw-workflow-id: mt-build-regression.agent -->`nprefix perfstar-mt-regression-key: $candidateKey suffix") -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild')) 'A marker embedded in arbitrary prose must be rejected.'
@@ -865,6 +867,7 @@ Assert-True ($agentWorkflow.Contains('model: gpt-6.2-sol')) 'The investigation e
 Assert-True ($agentWorkflow.Contains('args: ["--reasoning-effort", "max"]')) 'The investigation engine must explicitly select max reasoning.'
 
 $lockWorkflowPath = Join-Path (Split-Path $featureRoot -Parent) 'workflows\mt-build-regression.agent.lock.yml'
+Assert-True (Test-Path -LiteralPath $lockWorkflowPath) 'The generated workflow must exist so its publishing contract can be validated.'
 if (Test-Path -LiteralPath $lockWorkflowPath)
 {
     $lockWorkflow = Get-Content -LiteralPath $lockWorkflowPath -Raw
@@ -873,6 +876,45 @@ if (Test-Path -LiteralPath $lockWorkflowPath)
     Assert-True ($lockWorkflow.Contains('"agent_model":"gpt-6.2-sol"')) 'The compiled workflow must preserve the explicit engine model.'
     Assert-True ($lockWorkflow.Contains('COPILOT_MODEL: gpt-6.2-sol')) 'The compiled workflow must configure the selected model for the Copilot runtime.'
     Assert-True ($lockWorkflow.Contains('--reasoning-effort max')) 'The compiled workflow must preserve max reasoning.'
+
+    foreach ($configName in @('GH_AW_SAFE_OUTPUTS_CONFIG', 'GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG'))
+    {
+        $configMatch = [regex]::Match($lockWorkflow, "(?m)^ +${configName}: (`".*`")`r?$")
+        Assert-True $configMatch.Success "The compiled workflow must include $configName."
+        if (-not $configMatch.Success)
+        {
+            continue
+        }
+
+        $config = $configMatch.Groups[1].Value | ConvertFrom-Json | ConvertFrom-Json -AsHashtable
+        foreach ($outputName in @('create_issue', 'create_pull_request'))
+        {
+            $output = $config[$outputName]
+            Assert-True ($null -ne $output) "$configName must configure $outputName."
+            if ($null -eq $output)
+            {
+                continue
+            }
+
+            Assert-Equal '[AW] [PerfStar MT Regression] ' $output.title_prefix "$outputName must identify agentic PerfStar output."
+            Assert-Equal 4 @($output.labels).Count "$outputName must preserve the routing labels and add the agentic-workflows label."
+            foreach ($label in @('Area: PerfStar', 'Area: Performance', 'automation', 'agentic-workflows'))
+            {
+                Assert-True ($label -cin $output.labels) "$outputName must apply '$label'."
+            }
+
+            $publishedItem = New-TestExistingWorkItem `
+                -Title "$($output.title_prefix)2 possible MT build-time regressions [$candidateKey]" `
+                -Labels $output.labels `
+                -PullRequest ($outputName -eq 'create_pull_request')
+            Assert-True (Test-TrustedExistingWorkItem -Item $publishedItem -CandidateSetKey $candidateKey -Repository 'dotnet/msbuild') "Existing-work discovery must recognize the compiled $outputName publishing contract."
+
+            if ($configName -eq 'GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG')
+            {
+                Assert-Equal '> This content was generated by an AI agent and requires human review.' $output.body_footer "$outputName must append the AI disclosure independently of the agent's response."
+            }
+        }
+    }
 }
 
 if ($failures.Count -gt 0)

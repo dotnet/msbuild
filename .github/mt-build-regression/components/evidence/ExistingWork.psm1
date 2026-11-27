@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 
 $script:TrustedAuthor = 'github-actions[bot]'
 $script:WorkflowMarker = '<!-- gh-aw-workflow-id: mt-build-regression.agent -->'
-$script:TitlePrefix = '[PerfStar MT Regression] '
+$script:TitlePrefix = '[AW] [PerfStar MT Regression] '
 $script:RequiredLabels = @('Area: PerfStar', 'Area: Performance', 'automation')
 
 function Get-ExistingWorkProperty
