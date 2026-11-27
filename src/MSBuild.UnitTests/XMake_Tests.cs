@@ -1071,6 +1071,138 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+#if NETFRAMEWORK
+        // Unlike MSBuild.exe, the .NET Framework test host has no Windows 10 manifest, so its OSVersion can report Windows 8.
+        public static bool SupportsUtf8ConsoleEncoding
+        {
+            get
+            {
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    string buildNumber = Microsoft.Win32.Registry.GetValue(
+                        @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentBuildNumber", null) as string;
+                    if (int.TryParse(buildNumber, out int parsedBuildNumber) && parsedBuildNumber >= 18363)
+                    {
+                        return true;
+                    }
+                }
+                catch (System.Security.SecurityException)
+                {
+                }
+
+                return string.Equals(Environment.GetEnvironmentVariable("DOTNET_CLI_FORCE_UTF8_ENCODING"), "true", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        private const string ReadStdinPowerShellScript = """
+            param([string]$Scenario)
+            $bytes = [System.IO.MemoryStream]::new()
+            try
+            {
+                [Console]::OpenStandardInput().CopyTo($bytes)
+                Write-Output "$Scenario stdin bytes: [$([BitConverter]::ToString($bytes.ToArray()))]"
+            }
+            finally
+            {
+                $bytes.Dispose()
+            }
+            """;
+
+        [Theory(Skip = "Requires Windows with UTF-8 console support.", SkipUnless = nameof(SupportsUtf8ConsoleEncoding))]
+        [InlineData("en-US", false)]
+        [InlineData("ja", false)]
+        [InlineData("en-US", true)]
+        public void Exec_Utf8ConsoleEncoding_AvoidsBomInStandardInput(string language, bool disableWave)
+        {
+            _env.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", language);
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableWave ? ChangeWaves.Wave18_15.ToString() : null);
+            _env.SetEnvironmentVariable("MSBUILD_CONSOLE_USE_DEFAULT_ENCODING", null);
+            _env.SetEnvironmentVariable("DOTNET_CLI_CONSOLE_USE_DEFAULT_ENCODING", null);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+
+            _env.CreateFile("Read-Stdin.ps1", ReadStdinPowerShellScript);
+            TransientTestFile project = _env.CreateFile("StdinBom.proj", """
+                <Project>
+                  <Target Name="Build">
+                    <Exec Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Read-Stdin.ps1&quot; default" />
+                  </Target>
+                </Project>
+                """);
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{project.Path}\" -nologo -v:minimal -nr:false", out bool success, _output);
+
+            success.ShouldBeTrue(output);
+            string expectedDefaultInput = disableWave ? "EF-BB-BF" : string.Empty;
+            output.ShouldContain($"default stdin bytes: [{expectedDefaultInput}]");
+        }
+
+        [Fact(Skip = "Requires Windows with UTF-8 console support.", SkipUnless = nameof(SupportsUtf8ConsoleEncoding))]
+        public void Exec_Utf8ConsoleEncoding_PreservesExplicitInputRedirection()
+        {
+            _env.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en-US");
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            _env.SetEnvironmentVariable("MSBUILD_CONSOLE_USE_DEFAULT_ENCODING", null);
+            _env.SetEnvironmentVariable("DOTNET_CLI_CONSOLE_USE_DEFAULT_ENCODING", null);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+
+            _env.CreateFile("Read-Stdin.ps1", ReadStdinPowerShellScript);
+            _env.CreateFile("input.txt", "input");
+            TransientTestFile project = _env.CreateFile("StdinRedirection.proj", """
+                <Project>
+                  <PropertyGroup>
+                    <ReadStdin>powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$(MSBuildThisFileDirectory)Read-Stdin.ps1"</ReadStdin>
+                  </PropertyGroup>
+                  <Target Name="Build">
+                    <Exec Command="$(ReadStdin) nul &lt;NUL" />
+                    <Exec Command="$(ReadStdin) file &lt;&quot;$(MSBuildThisFileDirectory)input.txt&quot;" />
+                    <Exec Command="echo input|$(ReadStdin) pipeline" />
+                  </Target>
+                </Project>
+                """);
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{project.Path}\" -nologo -v:minimal -nr:false", out bool success, _output);
+
+            success.ShouldBeTrue(output);
+            output.ShouldContain("nul stdin bytes: []");
+            output.ShouldContain("file stdin bytes: [69-6E-70-75-74]");
+            output.ShouldContain("pipeline stdin bytes: [69-6E-70-75-74-0D-0A]");
+        }
+
+        [Theory(Skip = "Requires Windows with UTF-8 console support.", SkipUnless = nameof(SupportsUtf8ConsoleEncoding))]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void Exec_PreExistingUtf8Console_AvoidsBomInStandardInput(bool disableWave)
+        {
+            _env.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", null);
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableWave ? ChangeWaves.Wave18_15.ToString() : null);
+            _env.SetEnvironmentVariable("MSBUILD_CONSOLE_USE_DEFAULT_ENCODING", "1");
+            _env.SetEnvironmentVariable("DOTNET_CLI_CONSOLE_USE_DEFAULT_ENCODING", null);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+
+            _env.CreateFile("Read-Stdin.ps1", ReadStdinPowerShellScript);
+            TransientTestFile project = _env.CreateFile("StdinPreExistingUtf8.proj", """
+                <Project>
+                  <Target Name="Build">
+                    <Exec Command="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)Read-Stdin.ps1&quot; default" />
+                  </Target>
+                </Project>
+                """);
+
+            string comSpec = Environment.GetEnvironmentVariable("ComSpec") ?? "cmd.exe";
+            string command = $"/D /C \"chcp 65001 >nul && \"{RunnerUtilities.PathToCurrentlyRunningMsBuildExe}\" \"{project.Path}\" -nologo -v:minimal -nr:false\"";
+            string output = RunnerUtilities.RunProcessAndGetOutput(comSpec, command, out bool success, outputHelper: _output);
+
+            success.ShouldBeTrue(output);
+            string expectedDefaultInput = disableWave ? "EF-BB-BF" : string.Empty;
+            output.ShouldContain($"default stdin bytes: [{expectedDefaultInput}]");
+        }
+#endif
+
         /// <summary>
         /// We shouldn't change the UI culture if the current UI culture is invariant.
         /// In other cases, we can get an exception on CultureInfo creation when System.Globalization.Invariant enabled.
