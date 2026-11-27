@@ -360,6 +360,23 @@ internal partial class Expander<P, I>
         }
 
         /// <summary>
+        /// Determines whether the argument at <paramref name="argIndex"/> for <see cref="System.IO.Path"/> method 
+        /// is a file/directory path that should be resolved against the thread-local working directory.
+        /// </summary>
+        /// <remarks>
+        /// Most Path methods only manipulate strings, so their arguments should not be
+        /// made absolute. GetFullPath(string) is handled separately by the fast path; its two-argument
+        /// overload uses the supplied base path, so only these are listed.
+        /// </remarks>
+        private static bool IsSystemIOPathPathArgument(string methodName, int argIndex) => argIndex switch
+        {
+            0 => string.Equals(methodName, "Exists", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(methodName, "GetRelativePath", StringComparison.OrdinalIgnoreCase),
+            1 => string.Equals(methodName, "GetRelativePath", StringComparison.OrdinalIgnoreCase),
+            _ => false,
+        };
+
+        /// <summary>
         /// Execute the function on the given instance.
         /// </summary>
         [UnconditionalSuppressMessage("Trimming", "IL2074:UnrecognizedReflectionPattern",
@@ -436,16 +453,20 @@ internal partial class Expander<P, I>
 
                         args[n] = EscapingUtilities.UnescapeAll(argumentValue);
 
-                        // In -mt mode, resolve relative path arguments for File/Directory methods
+                        // In -mt mode, resolve relative path arguments for File/Directory methods,
+                        // FileInfo/DirectoryInfo constructors, and current-directory-dependent Path methods
                         // against the thread-local working directory instead of the process-global
                         // Environment.CurrentDirectory which may point to a different project's directory.
                         // In multiprocess mode, CurrentThreadWorkingDirectory is null and
                         // MakeFullPathFromThreadWorkingDirectory returns null — this is a no-op.
                         // This must happen AFTER UnescapeAll so that the working directory path
                         // (a real filesystem path) is not corrupted by MSBuild unescape processing.
-                        if ((_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory)
+                        if (((_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory)
                                 || isFileSystemInfoConstructor)
-                            && IsFileOrDirectoryPathArgument(_methodMethodName, n))
+                                && IsFileOrDirectoryPathArgument(_methodMethodName, n))
+                            || (_receiverType == typeof(System.IO.Path)
+                                && IsSystemIOPathPathArgument(_methodMethodName, n)
+                                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)))
                         {
                             AbsolutePath? resolved = FileUtilities.MakeFullPathFromThreadWorkingDirectory((string)args[n]);
                             if (resolved.HasValue)

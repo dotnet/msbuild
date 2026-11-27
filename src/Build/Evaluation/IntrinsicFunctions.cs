@@ -343,7 +343,13 @@ namespace Microsoft.Build.Evaluation
         /// <returns>relative path (can be the full path)</returns>
         public static string MakeRelative(string basePath, string path)
         {
-            string result = FileUtilities.MakeRelative(basePath, path);
+            // Resolve "basePath" against the thread working directory. 
+            string resolvedBasePath = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)
+                ? ResolveAgainstThreadWorkingDirectory(basePath)
+                : basePath;
+            // A relative "path" is considered being relative to basePath, not the thread working directory.
+            // Resolving "path" against the thread working directory is hence wrong and could point to a completely different location.
+            string result = FileUtilities.MakeRelative(resolvedBasePath, path);
 
             return result;
         }
