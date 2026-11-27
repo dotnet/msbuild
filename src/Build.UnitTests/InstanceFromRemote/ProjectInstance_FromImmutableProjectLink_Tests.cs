@@ -3,18 +3,53 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.ObjectModelRemoting;
+using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.BackEnd;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
     public class ProjectInstance_FromImmutableProjectLink_Tests
     {
+        [Theory]
+        [InlineData("12", "34")]
+        [InlineData("12", "0")]
+        [InlineData("", "")]
+        public void CachedItemSourceMetadataDoesNotRequireXmlLocation(string line, string column)
+        {
+            using ProjectCollection collection = new();
+            string projectFile = Path.Combine(Path.GetTempPath(), "project.proj");
+            string definingFile = Path.Combine(Path.GetTempPath(), "import%3B.props");
+            var items = new Dictionary<string, ProjectItemLink[]>(StringComparer.OrdinalIgnoreCase);
+            var link = new FakeProjectLink(projectFile, itemDefinitions: new EmptyItemTypeDefinitionDictionary(), items: new FakeProjectItemDictionary(items));
+            Project project = new(collection, link);
+            items.Add("Compile", [new FakeProjectItemLink(project, "Compile", "file.cs", definingFile, new Dictionary<string, string>
+            {
+                [ItemSpecModifiers.DefiningProjectLineNumber] = line,
+                [ItemSpecModifiers.DefiningProjectColumnNumber] = column,
+            }, directMetadata: [])]);
+
+            ProjectInstance instance = ProjectInstance.FromImmutableProjectSource(project, ProjectInstanceSettings.ImmutableWithFastItemLookup);
+            var taskItem = new ProjectItemInstance.TaskItem(instance.GetItems("Compile").Single());
+            TranslationHelpers.GetWriteTranslator().Translate(ref taskItem, ProjectItemInstance.TaskItem.FactoryForDeserialization);
+            ProjectItemInstance.TaskItem deserialized = null!;
+            TranslationHelpers.GetReadTranslator().Translate(ref deserialized, ProjectItemInstance.TaskItem.FactoryForDeserialization);
+
+            deserialized.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(definingFile);
+            deserialized.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(line);
+            deserialized.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(column);
+        }
+
         /// <summary>
         /// Ensures that a ProjectInstance can be created without accessing lazy properties from an immutable project link.
         /// </summary>

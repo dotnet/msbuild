@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
+using Shouldly;
 using Xunit;
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
 
@@ -33,7 +35,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.Single(Helpers.MakeList(item2.Metadata));
             Assert.Equal(String.Empty, item2.GetMetadataValue("n"));
-            Assert.Equal(1 + 15 /* built-in metadata */, item2.MetadataCount);
+            item2.MetadataCount.ShouldBe(1 + ItemSpecModifiers.All.Length);
 
             // Should still point at the same XML items
             Assert.True(Object.ReferenceEquals(item1.DirectMetadata.First().Xml, item2.DirectMetadata.First().Xml));

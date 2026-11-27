@@ -849,9 +849,19 @@ namespace Microsoft.Build.Evaluation
         /// the specified name, if any.
         /// </summary>
         private string GetBuiltInMetadataEscaped(string name)
-            => ItemSpecModifiers.TryGetModifierKind(name, out ItemSpecModifierKind modifierKind)
-                ? BuiltInMetadata.GetMetadataValueEscaped(_project.DirectoryPath, _evaluatedIncludeBeforeWildcardExpansionEscaped, _evaluatedIncludeEscaped, Xml.ContainingProject.FullPath, modifierKind, ref _cachedModifiers)
+        {
+            if (!ItemSpecModifiers.TryGetModifierKind(name, out ItemSpecModifierKind modifierKind))
+            {
+                return null;
+            }
+
+            ElementLocation location = modifierKind is ItemSpecModifierKind.DefiningProjectLineNumber or ItemSpecModifierKind.DefiningProjectColumnNumber
+                ? Xml.Location
                 : null;
+
+            return BuiltInMetadata.GetMetadataValueEscaped(_project.DirectoryPath, _evaluatedIncludeBeforeWildcardExpansionEscaped, _evaluatedIncludeEscaped,
+                Xml.ContainingProject.EscapedFullPath, modifierKind, ref _cachedModifiers, location?.Line ?? 0, location?.Column ?? 0);
+        }
 
         /// <summary>
         /// Retrieves the named metadata from the item definition, if any.

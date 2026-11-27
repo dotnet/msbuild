@@ -6,10 +6,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Microsoft.Build.Utilities;
 using Shouldly;
@@ -27,6 +29,13 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     public class TaskParameter_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public TaskParameter_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         /// Verifies that construction and serialization with a null parameter is OK.
         /// </summary>
@@ -837,7 +846,9 @@ namespace Microsoft.Build.UnitTests
                 itemDefinitions: [definition],
                 projectDirectory: Directory.GetCurrentDirectory(),
                 immutable: false,
-                definingFileEscaped: "test.proj");
+                definingFileEscaped: "test.proj",
+                sourceLineNumber: 12,
+                sourceColumnNumber: 34);
 
             string expected = item.GetMetadata("NameMeta");
 
@@ -926,6 +937,85 @@ namespace Microsoft.Build.UnitTests
             return (ITaskItem)TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator()).WrappedParameter;
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SourceLocationMetadataSurvivesTaskParameterSerialization(bool optOut)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", optOut ? ChangeWaves.Wave18_14.ToString() : null);
+            ChangeWaves.ResetStateForTests();
+            string definingFile = Path.Combine(Directory.GetCurrentDirectory(), "import%3B;$(literal).targets");
+            ProjectItemInstanceTaskItem item = new(
+                includeEscaped: "item%3Bname.txt",
+                includeBeforeWildcardExpansionEscaped: "item%3Bname.txt",
+                directMetadata: null,
+                itemDefinitions: null,
+                projectDirectory: Directory.GetCurrentDirectory(),
+                immutable: false,
+                definingFileEscaped: EscapingUtilities.Escape(definingFile),
+                sourceLineNumber: 12,
+                sourceColumnNumber: 0);
+            if (optOut)
+            {
+                item.SetMetadata(ItemSpecModifiers.DefiningProjectLineNumber, "legacy%253B");
+                item.SetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber, "legacy-column");
+            }
+
+            ITaskItem copy = item;
+            for (int hop = 0; hop < 2; hop++)
+            {
+                copy = RoundTrip(copy);
+
+                copy.ItemSpec.ShouldBe("item;name.txt");
+                copy.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(definingFile);
+                ((ITaskItem2)copy).GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(EscapingUtilities.Escape(definingFile));
+                copy.GetMetadata("definingprojectlinenumber").ShouldBe(optOut ? "legacy%3B" : "12");
+                copy.GetMetadata("definingprojectcolumnnumber").ShouldBe(optOut ? "legacy-column" : "0");
+                copy.MetadataCount.ShouldBe(item.MetadataCount);
+                copy.MetadataNames.Cast<string>().ShouldBeSetEquivalentTo(item.MetadataNames.Cast<string>());
+                copy.CloneCustomMetadata().Contains(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(optOut);
+                copy.CloneCustomMetadata().Contains(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(optOut);
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SourceLocationMetadataWritesRespectChangeWave(bool optOut)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", optOut ? ChangeWaves.Wave18_14.ToString() : null);
+            ChangeWaves.ResetStateForTests();
+            ITaskItem2 item = (ITaskItem2)RoundTrip(new TaskItem("hello.txt"));
+            string[] metadataNames = ["definingprojectlinenumber", "definingprojectcolumnnumber"];
+
+            foreach (string metadataName in metadataNames)
+            {
+                item.GetMetadata(metadataName).ShouldBeEmpty();
+                if (optOut)
+                {
+                    item.SetMetadata(metadataName, "custom%3B");
+                    item.GetMetadata(metadataName).ShouldBe("custom;");
+                    item.SetMetadataValueLiteral(metadataName, "literal%3B");
+                    item.GetMetadata(metadataName).ShouldBe("literal%3B");
+                    item.RemoveMetadata(metadataName);
+                    item.GetMetadata(metadataName).ShouldBeEmpty();
+                    item.MetadataNames.Cast<string>().ShouldNotContain(metadataName);
+                }
+                else
+                {
+                    Should.Throw<ArgumentException>(() => item.SetMetadata(metadataName, "custom"));
+                    Should.Throw<ArgumentException>(() => item.SetMetadataValueLiteral(metadataName, "custom"));
+                    Should.Throw<ArgumentException>(() => item.RemoveMetadata(metadataName));
+                }
+            }
+
+            Should.Throw<ArgumentException>(() => item.SetMetadata(ItemSpecModifiers.FullPath, "custom"));
+            item.SetMetadata(ItemSpecModifiers.RecursiveDir, "sub%3B");
+            item.GetMetadata(ItemSpecModifiers.RecursiveDir).ShouldBe("sub;");
+        }
+
         /// <summary>
         /// Regression test for https://github.com/dotnet/msbuild/issues/13140
         /// RecursiveDir (built-in, non-derivable metadata) must survive TaskParameter
@@ -948,7 +1038,9 @@ namespace Microsoft.Build.UnitTests
                 itemDefinitions: null,
                 projectDirectory: Directory.GetCurrentDirectory(),
                 immutable: false,
-                definingFileEscaped: "test.proj");
+                definingFileEscaped: "import%253B.targets",
+                sourceLineNumber: 12,
+                sourceColumnNumber: 0);
 
             item.GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
             ((ITaskItem2)item).CloneCustomMetadataEscaped().Contains("RecursiveDir").ShouldBeFalse();
@@ -962,6 +1054,12 @@ namespace Microsoft.Build.UnitTests
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             (t2.WrappedParameter as ITaskItem).GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
+            ITaskItem roundTripped = (ITaskItem)t2.WrappedParameter;
+            roundTripped.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath));
+            roundTripped.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("12");
+            roundTripped.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("0");
+            roundTripped.CloneCustomMetadata().Contains(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeFalse();
+            new Microsoft.Build.Utilities.TaskItem(roundTripped).GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("12");
         }
 
         /// <summary>

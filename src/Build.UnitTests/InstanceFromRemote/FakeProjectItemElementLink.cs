@@ -45,7 +45,7 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 
         public override ProjectElement NextSibling => throw new NotImplementedException();
 
-        public override ElementLocation Location => throw new NotImplementedException();
+        public override ElementLocation Location => throw new NotSupportedException("Cached items do not expose XML locations.");
 
         public override IReadOnlyCollection<XmlAttributeLink> Attributes => throw new NotImplementedException();
 
