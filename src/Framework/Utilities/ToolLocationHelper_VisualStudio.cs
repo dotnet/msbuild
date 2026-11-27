@@ -38,7 +38,12 @@ public static partial class ToolLocationHelper
 
             if (!s_vsInstallFolders.TryGetValue(versionRange, out vsInstallFolders))
             {
+#if NETFRAMEWORK
                 IList<VisualStudioInstance> vsInstances = VisualStudioLocationHelper.GetInstances();
+#else
+                // .NET MSBuild has never reported Visual Studio installations here, including from property functions.
+                IList<VisualStudioInstance> vsInstances = [];
+#endif
 
                 var vsInstancePaths = vsInstances
                     .Where(i => (minVersion == null || i.Version >= minVersion) && (maxVersion == null || i.Version < maxVersion))

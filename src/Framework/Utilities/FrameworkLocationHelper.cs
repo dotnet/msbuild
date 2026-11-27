@@ -9,7 +9,7 @@ using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 
-#if FEATURE_WIN32_REGISTRY
+#if FEATURE_WIN32_REGISTRY || FEATURE_NET35_TASKHOST
 using Microsoft.Win32;
 #endif
 
@@ -756,7 +756,22 @@ namespace Microsoft.Build.Shared
             return GetDotNetFrameworkSpec(version).GetPathToDotNetFramework(architecture);
         }
 
-#if FEATURE_INSTALLED_MSBUILD
+#if FEATURE_WIN32_REGISTRY || FEATURE_NET35_TASKHOST
+        internal static bool IsDotNetFrameworkV35AvailableForTaskHost()
+        {
+#if FEATURE_WIN32_REGISTRY
+            return GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) is not null;
+#else
+            return NativeMethods.IsWindows
+                && Equals(Registry.GetValue(
+                    "HKEY_LOCAL_MACHINE\\" + s_dotNetFrameworkRegistryKeyV35,
+                    dotNetFrameworkSetupRegistryInstalledName,
+                    null), 1);
+#endif
+        }
+#endif
+
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Check the registry key and value to see if the .net Framework is installed on the machine.
         /// </summary>
@@ -1322,7 +1337,9 @@ namespace Microsoft.Build.Shared
             /// The name in registry to indicate that this .net framework is installed, i.e. "Install" for .net v4.5.
             /// </summary>
             private readonly string _dotNetFrameworkSetupRegistryInstalledName;
+#endif
 
+#if FEATURE_WIN32_REGISTRY
             /// <summary>
             /// /// Cached path of the corresponding windows sdk.
             /// </summary>
@@ -1360,6 +1377,9 @@ namespace Microsoft.Build.Shared
 #if FEATURE_WIN32_REGISTRY
                 this._dotNetFrameworkRegistryKey = dotNetFrameworkRegistryKey;
                 this._dotNetFrameworkSetupRegistryInstalledName = dotNetFrameworkSetupRegistryInstalledName;
+#endif
+
+#if FEATURE_WIN32_REGISTRY
                 this._visualStudioVersion = visualStudioVersion;
 #endif
             }

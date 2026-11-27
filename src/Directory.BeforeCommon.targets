@@ -58,7 +58,6 @@
     <FeatureXamlTypes>true</FeatureXamlTypes>
     <DefineConstants>$(DefineConstants);FEATURE_XML_SCHEMA_VALIDATION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_WIN32_REGISTRY</DefineConstants>
-    <DefineConstants Condition="'$(TargetFrameworkVersion)' != 'v3.5' and '$(DotNetBuildSourceOnly)' != 'true'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_MSCOREE</DefineConstants>
   </PropertyGroup>
 
@@ -66,6 +65,11 @@
   <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
     <DefineConstants>$(DefineConstants);FEATURE_WINDOWSINTEROP</DefineConstants>
     <FeatureWindowsInterop>true</FeatureWindowsInterop>
+    <!-- The Visual Studio setup API locates Visual Studio installations: .NET Framework MSBuild uses it to find its build environment,
+         and .NET MSBuild uses it to find a .NET Framework task host. -->
+    <DefineConstants Condition="'$(TargetFrameworkVersion)' != 'v3.5' and $([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) != '.NETStandard'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
+    <!-- .NET MSBuild runs CLR2 tasks in the .NET Framework 3.5 task host (MSBuildTaskHost.exe) of a Visual Studio installation. -->
+    <DefineConstants Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp'">$(DefineConstants);FEATURE_NET35_TASKHOST</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

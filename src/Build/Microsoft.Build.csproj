@@ -319,6 +319,7 @@
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProc.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcBase.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcTaskHost.cs" />
+    <Compile Include="CompilerServices\UnionPolyfills.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\BatchingEngine.cs" />
     <Compile Include="BackEnd\BuildManager\BuildRequestData.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTask.cs" />
