@@ -15,8 +15,22 @@ permissions:
   pull-requests: read
 
 tools:
+  # Read PR data through the GitHub MCP, not shell commands.
+  bash: false
+  cli-proxy: false
   github:
     toolsets: [pull_requests, repos]
+    # Required so the MCP gateway allows pull_request_read (get_diff / get_files)
+    # and PR-head get_file_contents on a public repo: gh-aw-mcpg unconditionally
+    # labels pull-request-content as `none` integrity (github/gh-aw-mcpg#15160,
+    # closed as not planned). Exposure is bounded by the `roles: [admin, maintainer,
+    # write]` pre-activation gate, base-only checkout on `review-on-open` (the
+    # manual `/review` command checks out the PR branch while restoring agent
+    # config from base), bash/cli-proxy disabled, read-only GitHub MCP scoped to
+    # public repos, threat detection, and comment/review-only safe outputs (no
+    # APPROVE or push).
+    min-integrity: none
+    allowed-repos: public
 
 safe-outputs:
   create-pull-request-review-comment:
@@ -35,7 +49,7 @@ Review pull request #${{ github.event.pull_request.number || github.event.issue.
 ## Instructions
 
 1. Fetch the full diff for the pull request.
-2. Call the `expert-reviewer` agent. Make sure to call it as subagent (`task` tool, `agent_type: "general-purpose"`, `model: "gpt-5.6-sol"`). And make sure to follow the guidance on subagent calls from within the `expert-reviewer` agent. We expect 2+ levels of agents to be called.
+2. Call the `expert-reviewer` agent. Make sure to call it as subagent (`task` tool, `agent_type: "general-purpose"`, selecting a recent available frontier model rather than hardcoding a model ID). And make sure to follow the guidance on subagent calls from within the `expert-reviewer` agent. We expect 2+ levels of agents to be called.
 3. Do **not** post comments or reviews yourself, except for the fallback in step 4 if the subagent posts nothing. The subagent will post its own comments using the available safe-output tools:
    - **Inline review comments** on specific diff lines via `create_pull_request_review_comment`
    - **Design-level concerns** (not tied to a line) via `add_comment`

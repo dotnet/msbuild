@@ -579,7 +579,7 @@ Apply this gate to every candidate finding before posting it, regardless of whic
 
 1b. **Historical context** (for bug fix and follow-up PRs): Read the linked issue and the original feature PR discussions. Identify design intent, constraints, and reviewer-established principles. Feed this context to every dimension agent so they can evaluate whether the fix aligns with the original design, not just whether the code compiles.
 
-2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`, `model: "gpt-5.6-sol"`). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
+2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`). Select recent available frontier models from multiple companies/providers (choosing from the models available in the current environment rather than hardcoding specific model IDs). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
 
    Each sub-agent receives: the PR diff, PR description, the single dimension's rules and checklist, the Finding Acceptance Gate, and the folder context.
 
@@ -636,7 +636,7 @@ Apply this gate to every candidate finding before posting it, regardless of whic
 
    Confirm only with concrete evidence and the **Finding Acceptance Gate**. Dispute if a lock, blocking call, or control flow prevents the scenario. Validate the candidate against the exact PR head and compare with its intended base; current `main` or an installed SDK is not a substitute for either revision.
 
-4. For borderline findings, run the same validation on 3 models (`claude-opus-5`, `gpt-5.6-sol`, `gemini-3.6-flash`). Keep findings confirmed by ≥2/3.
+4. For borderline findings, run the same validation on 3 distinct recent available frontier models from different companies/providers (choosing from the models available in the current environment — e.g., one each from Anthropic, OpenAI, and Google). Keep findings confirmed by ≥2/3.
 
 ### Wave 3: Post
 

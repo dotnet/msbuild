@@ -39,16 +39,25 @@ checkout:
 features:
   dangerously-allow-pull-request-target-forks-all: true
 
-# The review reads PR data through the guarded GitHub MCP, not shell commands.
-# With the current public-repository integrity default, PR diffs are filtered,
-# so reviews report incomplete until the gateway supports trusted PR content:
-# https://github.com/github/gh-aw-mcpg/issues/15160
+# The review reads PR data through the GitHub MCP (`min-integrity: none` in
+# `shared/review-shared.md` because gh-aw-mcpg labels PR diffs as `none`
+# integrity — see github/gh-aw-mcpg#15160, closed as not planned). Keep shell
+# access and CLI proxy disabled so the agent cannot execute PR code or bypass
+# the firewall/MCP boundary.
 tools:
   bash: false
   cli-proxy: false
 
 timeout-minutes: 60
 max-ai-credits: 2000
+
+# ###############################################################
+# Disable the per-workflow daily AI Credits guardrail. Cost is
+# controlled via the `roles: [admin, maintainer, write]` gate,
+# per-run `max-ai-credits`, and the shared PAT pool budget.
+# See dotnet/msbuild#14312.
+# ###############################################################
+max-daily-ai-credits: -1
 
 # ###############################################################
 # Select a PAT from the pool and override COPILOT_GITHUB_TOKEN.
