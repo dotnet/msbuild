@@ -92,6 +92,14 @@ public sealed class PropertyFunctionAotTests
         Assert.AreEqual(directory.Path, EvaluateToValue($"$([System.IO.Directory]::GetParent('{file}').FullName)"));
     }
 
+    [TestMethod]
+    public void InstanceFunctions_AllowStringsButRejectGetType()
+    {
+        Assert.AreEqual("AB", EvaluateToValue("$([System.String]::Concat('a', 'b').ToUpperInvariant())"));
+        InvalidProjectFileException ex = EvaluateExpectingFailure("$([System.String]::Concat('a', 'b').GetType())");
+        Assert.AreEqual("MSB4185", ex.ErrorCode);
+    }
+
     /// <summary>
     /// Evaluates a single property-function expression as a project property and returns the resolved value.
     /// </summary>
