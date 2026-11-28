@@ -46,8 +46,10 @@ jobs:
     - output: buildArtifacts
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\MicroBuild\Output'
       ArtifactName: MicroBuildOutputs
+      condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
-    # RAINES TODO: switch to pipeline?
+    # Keep logs as a buildArtifact so rerunning a failed Windows_NT attempt can append
+    # without hitting pipeline-artifact duplicate-name failures.
     - output: buildArtifacts
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\log\$(BuildConfiguration)'
       ArtifactName: logs
@@ -60,29 +62,30 @@ jobs:
       ArtifactName: VSSetup
       condition: and(succeeded(), ${{ or(parameters.enableOptProf, parameters.publishVSSetup) }})
 
-    # Archive NuGet packages to DevOps.
-    # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the
-    # arcade templates depend on the name.
-    - output: buildArtifacts
-      PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\packages\$(BuildConfiguration)'
-      ArtifactName: PackageArtifacts
+    # Publish Arcade V4 staged artifacts (per-build packages, symbols, PDBs, asset manifests).
+    # The artifact name must match Arcade's FutureArtifactName ($(System.PhaseName)_Artifacts),
+    # which is recorded in the asset manifest for downstream publishing and validation.
+    - output: pipelineArtifact
+      displayName: 'Publish V4 pipeline artifacts'
+      targetPath: '$(Build.SourcesDirectory)\artifacts\official\v4'
+      artifactName: '$(System.PhaseName)_Artifacts'
+      condition: succeeded()
+      retryCountOnTaskFailure: 10
 
-    # Also publish the existing final release packages without changing PackageArtifacts.
+    # Publish the signed final release packages for nuget.org handoff (not part of the V4 manifest).
     - ${{ if and(eq(parameters.isExperimental, false), eq(parameters.signTypeParameter, 'real')) }}:
       - output: pipelineArtifact
         targetPath: '$(Build.SourcesDirectory)\artifacts\official\packages\$(BuildConfiguration)\Release'
         artifactName: ReleasePackages
+        condition: succeeded()
+        retryCountOnTaskFailure: 10
 
     # Publish "IntelliSense" XSD files to their own artifact
     # so it can be consumed by the insertion-to-VS job
     - output: pipelineArtifact
       targetPath: '$(Build.SourcesDirectory)\artifacts\official\xsd'
       artifactName: xsd
-
-    # Publish Asset Manifests for Build Asset Registry job
-    - output: buildArtifacts
-      PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\log\$(BuildConfiguration)\AssetManifest'
-      ArtifactName: AssetManifests
+      retryCountOnTaskFailure: 10
 
   variables:
   - name: TeamName
@@ -179,7 +182,6 @@ jobs:
               /p:VisualStudioDropName=$(VisualStudio.DropName)
               /p:DotNetSignType=${{ parameters.signTypeParameter }}
               /p:TeamName=MSBuild
-              /p:DotNetPublishUsingPipelines=true
               /p:VisualStudioIbcDrop=$(OptProfDrop)
               /p:GenerateSbom=true
               /p:SuppressFinalPackageVersion=${{ parameters.isExperimental }}
@@ -187,6 +189,85 @@ jobs:
 
     displayName: Build
     condition: succeeded()
+
+  - ${{ if and(eq(parameters.isExperimental, false), eq(parameters.signTypeParameter, 'real')) }}:
+    - pwsh: |
+        $ErrorActionPreference = 'Stop'
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+        function Get-NupkgIdentity([string] $nupkgPath) {
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($nupkgPath)
+          try {
+            $nuspecEntry = $zip.Entries | Where-Object { $_.FullName -like '*.nuspec' -and $_.FullName -notlike '*/*' } | Select-Object -First 1
+            if (-not $nuspecEntry) {
+              throw "No root .nuspec found in '$nupkgPath'."
+            }
+            $reader = New-Object System.IO.StreamReader($nuspecEntry.Open())
+            try {
+              [xml] $nuspec = $reader.ReadToEnd()
+            }
+            finally {
+              $reader.Dispose()
+            }
+            $meta = $nuspec.package.metadata
+            return [pscustomobject]@{
+              Id = [string]$meta.id
+              Version = [string]$meta.version
+            }
+          }
+          finally {
+            $zip.Dispose()
+          }
+        }
+
+        $packageRoot = '$(Build.SourcesDirectory)\artifacts\packages\$(BuildConfiguration)\Release'
+        $shippingRoot = '$(Build.SourcesDirectory)\artifacts\packages\$(BuildConfiguration)\Shipping'
+        if (-not (Test-Path -LiteralPath $packageRoot -PathType Container)) {
+          throw "Expected final release package directory '$packageRoot' does not exist. ReleasePackages requires DotNetFinalVersionKind to be empty so Arcade BuildReleasePackages.targets repacks shipping packages."
+        }
+
+        $packages = @(Get-ChildItem -LiteralPath $packageRoot -Filter '*.nupkg' -File -Recurse -ErrorAction Stop)
+        if ($packages.Count -eq 0) {
+          throw 'The final release package folder contains no NuGet packages.'
+        }
+
+        $shippingPackages = @(Get-ChildItem -LiteralPath $shippingRoot -Filter '*.nupkg' -File -Recurse -ErrorAction Stop | Where-Object { $_.Name -notlike '*.symbols.nupkg' })
+        $expectedIds = @($shippingPackages | ForEach-Object { (Get-NupkgIdentity $_.FullName).Id } | Sort-Object -Unique)
+        $releaseEntries = @($packages | Sort-Object FullName | ForEach-Object {
+          $idVer = Get-NupkgIdentity $_.FullName
+          if ([string]::IsNullOrWhiteSpace($idVer.Version) -or $idVer.Version.Contains('-')) {
+            throw "Final release package '$($_.Name)' has a prerelease or empty version '$($idVer.Version)'."
+          }
+          [pscustomobject]@{
+            File = $_
+            Id = $idVer.Id
+            Version = $idVer.Version
+          }
+        })
+
+        $actualIds = @($releaseEntries | ForEach-Object { $_.Id } | Sort-Object -Unique)
+        $missingIds = @($expectedIds | Where-Object { $_ -notin $actualIds })
+        $unexpectedIds = @($actualIds | Where-Object { $_ -notin $expectedIds })
+        if ($missingIds.Count -gt 0 -or $unexpectedIds.Count -gt 0) {
+          throw "ReleasePackages ID mismatch vs Shipping packages. Missing: [$($missingIds -join ', ')]; Unexpected: [$($unexpectedIds -join ', ')]."
+        }
+
+        $hashes = foreach ($entry in $releaseEntries) {
+          $relativePath = [System.IO.Path]::GetRelativePath($packageRoot, $entry.File.FullName).Replace('\', '/')
+          $hash = (Get-FileHash -LiteralPath $entry.File.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $relativePath"
+        }
+        $hashPath = '$(Build.SourcesDirectory)\artifacts\log\$(BuildConfiguration)\ReleasePackages.sha256'
+        [System.IO.File]::WriteAllText($hashPath, ($hashes -join "`n") + "`n", (New-Object System.Text.UTF8Encoding $false))
+      displayName: Verify and hash final release package payload
+
+    - task: PowerShell@2
+      displayName: Validate final release package signing
+      inputs:
+        filePath: eng\common\sdk-task.ps1
+        arguments: -task SigningValidation -restore -msbuildEngine dotnet
+          -configuration $(BuildConfiguration)
+          /p:PackageBasePath='$(Build.SourcesDirectory)\artifacts\packages\$(BuildConfiguration)\Release'
 
   # Compute the .vsman manifest list (generated by the Build step above) consumed by MicroBuildBuildVSBootstrapper below.
   - pwsh: |
@@ -241,18 +322,23 @@ jobs:
       $sourceRoot = Join-Path '$(Build.SourcesDirectory)' 'artifacts'
       $targetRoot = Join-Path $sourceRoot 'official'
 
-      if (-not (Test-Path $targetRoot)) {
-        New-Item -Path $targetRoot -ItemType Directory | Out-Null
+      if (Test-Path -LiteralPath $targetRoot) {
+        Remove-Item -LiteralPath $targetRoot -Recurse -Force
       }
+      New-Item -Path $targetRoot -ItemType Directory -Force | Out-Null
 
       $paths = @(
         "log/$(BuildConfiguration)",
-        "$(Build.StagingDirectory)/MicroBuild/Output",
-        "packages/$(BuildConfiguration)",
+        "$(Build.ArtifactStagingDirectory)/artifacts",
         "xsd"
       )
 
+      if ("${{ parameters.isExperimental }}" -eq "false" -and "${{ parameters.signTypeParameter }}" -eq "real") {
+        $paths += "packages/$(BuildConfiguration)/Release"
+      }
+
       if ("${{ parameters.enableOptProf }}" -eq "true") {
+        $paths += "$(Build.StagingDirectory)/MicroBuild/Output"
         $paths += "OptProf/$(BuildConfiguration)/Data"
       }
 
@@ -268,6 +354,8 @@ jobs:
 
         $destinationSubPath = if ($path -eq "$(Build.StagingDirectory)/MicroBuild/Output") {
           "MicroBuild/Output"
+        } elseif ($path -eq "$(Build.ArtifactStagingDirectory)/artifacts") {
+          "v4"
         } else {
           $path
         }
@@ -326,7 +414,7 @@ jobs:
 - template: /eng/common/templates-official/job/publish-build-assets.yml@self
   parameters:
     enablePublishBuildArtifacts: true
-    publishUsingPipelines: true
+    publishingVersion: 4
     dependsOn:
       - Windows_NT
       - Source_Build_Managed
