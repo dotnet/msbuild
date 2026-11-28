@@ -1464,9 +1464,75 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Prevents drive-enumeration warning tests from recursively traversing a real filesystem root (e.g. <c>/</c> on Unix).
+        /// Delegates all filesystem operations to the original <see cref="FileSystems.Default"/> except enumeration of a
+        /// filesystem root directory, which returns empty. Also replaces <see cref="FileMatcher.Default"/> so callers using
+        /// the cached default matcher observe the scoped filesystem, and restores both on dispose.
+        /// </summary>
+        public static TransientTestState SuppressRootDirectoryEnumeration(TestEnvironment env)
+        {
+            return env.WithTransientTestState(new EmptyRootEnumerationFileSystemScope());
+        }
+
+        private sealed class EmptyRootEnumerationFileSystemScope : TransientTestState, IFileSystem
+        {
+            private readonly IFileSystem _originalFileSystem = FileSystems.Default;
+            private readonly FileMatcher _originalFileMatcher = FileMatcher.Default;
+
+            public EmptyRootEnumerationFileSystemScope()
+            {
+                FileSystems.Default = this;
+                FileMatcher.Default = new FileMatcher(this, fileEntryExpansionCache: null);
+            }
+
+            public override void Revert()
+            {
+                FileMatcher.Default = _originalFileMatcher;
+                FileSystems.Default = _originalFileSystem;
+            }
+
+            private static bool IsFileSystemRoot(string path)
+            {
+                if (string.IsNullOrEmpty(path) || (!FileUtilities.IsAnySlash(path[0]) && !Path.IsPathRooted(path)))
+                {
+                    return false;
+                }
+
+                string fixedPath = FileUtilities.FixFilePath(path);
+                if (!NativeMethodsShared.IsWindows && fixedPath.All(static c => c == '/'))
+                {
+                    return true;
+                }
+
+                string root = Path.GetPathRoot(fixedPath);
+                return !string.IsNullOrEmpty(root)
+                    && string.Equals(fixedPath, root, FileUtilities.PathComparison);
+            }
+
+            public IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+                => IsFileSystemRoot(path) ? [] : _originalFileSystem.EnumerateFiles(path, searchPattern, searchOption);
+
+            public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+                => IsFileSystemRoot(path) ? [] : _originalFileSystem.EnumerateDirectories(path, searchPattern, searchOption);
+
+            public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+                => IsFileSystemRoot(path) ? [] : _originalFileSystem.EnumerateFileSystemEntries(path, searchPattern, searchOption);
+
+            public TextReader ReadFile(string path) => _originalFileSystem.ReadFile(path);
+            public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) => _originalFileSystem.GetFileStream(path, mode, access, share);
+            public string ReadFileAllText(string path) => _originalFileSystem.ReadFileAllText(path);
+            public byte[] ReadFileAllBytes(string path) => _originalFileSystem.ReadFileAllBytes(path);
+            public FileAttributes GetAttributes(string path) => _originalFileSystem.GetAttributes(path);
+            public DateTime GetLastWriteTimeUtc(string path) => _originalFileSystem.GetLastWriteTimeUtc(path);
+            public bool DirectoryExists(string path) => _originalFileSystem.DirectoryExists(path);
+            public bool FileExists(string path) => _originalFileSystem.FileExists(path);
+            public bool FileOrDirectoryExists(string path) => _originalFileSystem.FileOrDirectoryExists(path);
+        }
+
+        /// <summary>
         /// Verify that a drive enumerating wildcard warning is logged or exception is thrown.
         /// </summary>
-        public static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard([StringSyntax(StringSyntaxAttribute.Xml)] string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
+        public static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard([StringSyntax(StringSyntaxAttribute.Xml)] string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null, bool suppressRootEnumeration = false)
         {
             using (var env = TestEnvironment.Create(testOutput))
             {
@@ -1476,6 +1542,11 @@ namespace Microsoft.Build.UnitTests
 
                 // Reset state
                 ResetStateForDriveEnumeratingWildcardTests(env, failOnDriveEnumerationEnvVar);
+
+                if (suppressRootEnumeration)
+                {
+                    SuppressRootDirectoryEnumeration(env);
+                }
 
                 // Setup and build test target
                 BuildTargetWithDriveEnumeratingWildcardUsingBuildManager(env, testProject.ProjectFile, targetName, expectedBuildResult, testOutput);

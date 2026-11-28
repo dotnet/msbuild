@@ -335,14 +335,19 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@"\**\*.log")]
         public void LogUnixWarningUponCreateItemExecution(string itemSpec)
         {
-            VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(itemSpec);
+            VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(itemSpec, suppressRootEnumeration: true);
         }
 
-        private static void VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(string itemSpec)
+        private static void VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(string itemSpec, bool suppressRootEnumeration = false)
         {
             using (var env = TestEnvironment.Create())
             {
                 Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
+
+                if (suppressRootEnumeration)
+                {
+                    Helpers.SuppressRootDirectoryEnumeration(env);
+                }
 
                 try
                 {
@@ -441,7 +446,8 @@ namespace Microsoft.Build.UnitTests
                     "0",
                     "TestTarget",
                     Helpers.ExpectedBuildResult.SucceedWithWarning,
-                    _testOutput);
+                    _testOutput,
+                    suppressRootEnumeration: true);
         }
     }
 }

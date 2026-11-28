@@ -44,14 +44,13 @@
          split the command and the trailing "2" + remaining arguments fragment fails with code 127). -->
     <XunitOptions Condition="'$(RunQuarantinedTests)' == 'true'">$(XunitOptions) --filter-trait Category=failing --ignore-exit-code "8;2"</XunitOptions>
     
-    <!-- Enable code coverage -->
-    <!-- There are separate runsettings files for Windows and non-Windows. -->
-    <!-- Some test projects hang on windows and hence coverage is disabled for these projects. -->
+    <!-- Enable code coverage on Linux only. Windows coverage is disabled because some test projects hang,
+         and macOS is excluded to avoid instrumentation overhead on the slowest CI leg. -->
     <!-- Quarantined-only runs (RunQuarantinedTests=true, the scheduled quarantine pipeline) skip
          coverage: those runs only collect flaky pass/fail signal via repeated execution, and coverage
          instrumentation adds overhead and can perturb timing-sensitive flakes. -->
     <!-- <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) - -coverage - -coverage-settings $(RepoRoot)CoverageWindowsFull.config</XunitOptions> -->
-    <XunitOptions Condition="!$([MSBuild]::IsOSPlatform('windows')) and '$(RunQuarantinedTests)' != 'true'">$(XunitOptions) --coverage --coverage-settings $(RepoRoot)Coverage.config</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux')) and '$(RunQuarantinedTests)' != 'true'">$(XunitOptions) --coverage --coverage-settings $(RepoRoot)Coverage.config</XunitOptions>
 
     <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
 
