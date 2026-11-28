@@ -721,7 +721,8 @@ namespace Microsoft.Build.Framework
             // have no slashes.
             if (NativeMethods.IsWindows || string.IsNullOrEmpty(value)
                 || value.StartsWith("$(", comparisonType) || value.StartsWith("@(", comparisonType)
-                || value.StartsWith("\\\\", comparisonType))
+                || value.StartsWith("\\\\", comparisonType)
+                || value.IndexOf('\\') < 0)
             {
                 return value;
             }
@@ -740,7 +741,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         internal static ReadOnlyMemory<char> MaybeAdjustFilePath(ReadOnlyMemory<char> value, string baseDirectory = "")
         {
-            if (NativeMethods.IsWindows || value.IsEmpty)
+            if (NativeMethods.IsWindows || value.IsEmpty || value.Span.IndexOf('\\') < 0)
             {
                 return value;
             }
