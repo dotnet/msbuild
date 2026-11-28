@@ -941,6 +941,31 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(@"LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
 
+        [Fact]
+        public void FileMatch_ShortNamesAreScopedToProjectDirectory()
+        {
+            TransientTestFolder firstDirectory = _env.CreateFolder();
+            TransientTestFolder secondDirectory = _env.CreateFolder();
+            List<string> lookupDirectories = [];
+            FileMatcher matcher = new(FileSystems.Default, (entity, path, pattern, projectDirectory, stripProjectDirectory) =>
+            {
+                lookupDirectories.Add(path);
+                string longName = Path.GetFullPath(path) == firstDirectory.Path ? "LongDirectoryOne" : "LongDirectoryTwo";
+                return [Path.Combine(path, longName)];
+            });
+            string pattern = Path.Combine("LONGDI~1", "**", "*.txt");
+
+            FileMatcher.Result first = matcher.FileMatch(pattern, Path.Combine("LongDirectoryOne", "nested", "first.txt"), firstDirectory.Path);
+            FileMatcher.Result second = matcher.FileMatch(pattern, Path.Combine("LongDirectoryTwo", "nested", "second.txt"), secondDirectory.Path);
+
+            first.isMatch.ShouldBeTrue();
+            second.isMatch.ShouldBeTrue();
+            first.wildcardDirectoryPart.ShouldBe("nested" + Path.DirectorySeparatorChar);
+            second.wildcardDirectoryPart.ShouldBe("nested" + Path.DirectorySeparatorChar);
+            lookupDirectories.ShouldNotBeEmpty();
+            lookupDirectories.ShouldAllBe(path => Path.IsPathRooted(path));
+        }
+
         /*
         * Method:  GetLongFileNameForRelativePathPreservesTrailingSlash
         *
