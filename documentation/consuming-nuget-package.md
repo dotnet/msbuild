@@ -50,3 +50,58 @@ compilers) into an application directory.
 evaluate or build projects, you will generally not need this package. Instead,
 use [MSBuildLocator](https://aka.ms/msbuild/locator) to use a complete toolset
 provided by the .NET SDK or Visual Studio.
+
+## Target framework support and reference-only assets
+
+The MSBuild packages are the build engine that ships **inside** the .NET SDK and
+Visual Studio. They are not general-purpose libraries meant to be redistributed
+and run on an arbitrary runtime. This shapes how the packages are laid out and
+which target frameworks they "support."
+
+### One .NET runtime per band, plus .NET Framework
+
+Each MSBuild release band ships a runtime (`lib/`) assembly for exactly one .NET
+(Core) target framework — the one the matching SDK runs on — plus `net472` for
+Visual Studio. For example:
+
+| MSBuild version | .NET runtime asset | .NET Framework runtime asset |
+| --------------- | ------------------ | ---------------------------- |
+| 17.11           | `lib/net8.0`       | `lib/net472`                 |
+| 17.14           | `lib/net9.0`       | `lib/net472`                 |
+| 18.x            | `lib/net10.0`      | `lib/net472`                 |
+
+A newer band advancing its .NET target framework (for example `net9.0` →
+`net10.0`) is expected, not a regression. If you need to *run* against a specific
+.NET runtime, choose the MSBuild band whose SDK ships that runtime.
+
+### The `netstandard2.0` asset is compile-only (`ref/`, no `lib/`)
+
+The packages also include a `netstandard2.0` **reference assembly** under
+`ref/netstandard2.0`, but no `lib/netstandard2.0` runtime assembly. This is
+intentional: it is a compile-time surface, not a redistributable runtime.
+
+It exists so that a single MSBuild extension — a task, logger, analyzer, or SDK
+resolver — can be compiled once (typically as `netstandard2.0`) and then loaded
+into either .NET Framework MSBuild or .NET MSBuild, with the **host** supplying
+the matching runtime implementation. Binding to the host's copy guarantees your
+extension talks to the exact engine that is running the build, rather than a
+mismatched copy shipped alongside it.
+
+Because NuGet computes compile compatibility from the `ref/` folder, a project
+targeting a framework compatible with `netstandard2.0` (for example `net8.0`)
+will **compile** successfully against these packages even when there is no
+matching runtime asset. At run time the assembly will not be found unless an
+MSBuild host provides it, and the packages emit a build warning to that effect.
+
+If you are authoring an MSBuild extension that runs inside an MSBuild host,
+reference the package with compile-only assets:
+
+```xml
+<PackageReference Include="Microsoft.Build.Utilities.Core" Version="..."
+                  PrivateAssets="all" ExcludeAssets="runtime" />
+```
+
+If your code instead runs standalone (outside an MSBuild host), target a
+framework for which the package ships a runtime assembly (see the table above).
+Do not simply suppress the warning — suppressing it only converts a build
+failure into a load-time failure.
