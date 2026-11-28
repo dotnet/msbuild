@@ -35,7 +35,7 @@ namespace Microsoft.Build.Shared
         // This field stores the list of dependency project guids by depending project guid
         private readonly Dictionary<string, List<string>> _cachedDependencyProjectGuidsByDependingProjectGuid;
 
-        public SolutionConfiguration(string xmlString)
+        public SolutionConfiguration(string xmlString, AbsolutePath? projectDirectory = null)
         {
             // Example:
             //
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Shared
                     // we do NOT want to throw -- chances are extremely high that that's information that will never actually be used.  So resolve the full path
                     // but just swallow any IO-related exceptions that result.  If the path is bogus, the method will return null, so we'll just quietly fail
                     // to cache it below.
-                    projectAbsolutePath = FileUtilities.GetFullPathNoThrow(projectAbsolutePath);
+                    projectAbsolutePath = FileUtilities.GetFullPathNoThrow(projectAbsolutePath, projectDirectory);
 
                     if (!string.IsNullOrEmpty(projectGuid))
                     {

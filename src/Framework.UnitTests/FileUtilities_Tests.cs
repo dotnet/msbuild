@@ -485,6 +485,26 @@ public class FileUtilities_Tests
         });
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("invalid\0path")]
+    public void GetFullPathNoThrowWithBaseDirectoryPreservesInvalidPaths(string path)
+    {
+        FileUtilities.GetFullPathNoThrow(path, new AbsolutePath(AppContext.BaseDirectory)).ShouldBe(path);
+    }
+
+    [Fact]
+    public void GetFullPathNoThrowWithBaseDirectoryPreservesNullException()
+    {
+        Should.Throw<ArgumentNullException>(() => FileUtilities.GetFullPathNoThrow(null, new AbsolutePath(AppContext.BaseDirectory)));
+    }
+
+    [WindowsOnlyFact]
+    public void GetFullPathNoThrowWithBaseDirectoryPreservesBlankWindowsPath()
+    {
+        FileUtilities.GetFullPathNoThrow("   ", new AbsolutePath(AppContext.BaseDirectory)).ShouldBe("   ");
+    }
+
     [WindowsOnlyFact]
     public void NormalizePathGoodUNC()
     {
