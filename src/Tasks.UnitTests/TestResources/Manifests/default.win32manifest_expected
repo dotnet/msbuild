@@ -9,8 +9,8 @@
     </security>
   </trustInfo>
   <asmv3:application xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
-    <asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2024/WindowsSettings">
-      <supportedArchitectures>amd64 arm64</supportedArchitectures>
+    <asmv3:windowsSettings>
+      <supportedArchitectures xmlns="http://schemas.microsoft.com/SMI/2024/WindowsSettings">amd64 arm64</supportedArchitectures>
     </asmv3:windowsSettings>
   </asmv3:application>
 </assembly>

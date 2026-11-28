@@ -7,7 +7,6 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
@@ -242,11 +241,6 @@ namespace Microsoft.Build.Tasks
             XmlNode? assemblyNode = document.SelectSingleNode(XPaths.assemblyElement, xmlNamespaceManager);
             XmlElement appNode = GetOrCreateXmlElement(document, xmlNamespaceManager, application, asmv3Prefix, XmlNamespaces.asmv3);
             XmlElement winSettingsNode = GetOrCreateXmlElement(document, xmlNamespaceManager, windowsSettings, asmv3Prefix, XmlNamespaces.asmv3);
-            if (string.IsNullOrEmpty(winSettingsNode.GetAttribute(XMakeAttributes.xmlns)))
-            {
-                winSettingsNode.SetAttribute(XMakeAttributes.xmlns, WindowsSettingsNamespace);
-            }
-
             XmlElement supportedArchitecturesNode = GetOrCreateXmlElement(document, xmlNamespaceManager, supportedArchitectures, namespaceURI: WindowsSettingsNamespace);
             supportedArchitecturesNode.InnerText = SupportedArchitectures;
             winSettingsNode.AppendChild(supportedArchitecturesNode);
