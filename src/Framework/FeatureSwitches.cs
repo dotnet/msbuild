@@ -83,8 +83,8 @@ internal static class FeatureSwitches
     /// <para>
     /// When enabled, instance "dotting in" is restricted to a curated set of receiver types (the engine's
     /// <c>PropertyFunctionReceiver</c>), so the members reachable by reflection are predictable and
-    /// statically known. When disabled, any public instance member except <c>GetType</c> is callable,
-    /// preserving the historical behavior.
+    /// statically known. When disabled, the engine's change wave controls the restriction.
+    /// Disabling both permits any public instance member except <c>GetType</c>, preserving the historical behavior.
     /// </para>
     /// <para>
     /// The untrimmed default is <see langword="false"/>; under trimming the constant is substituted

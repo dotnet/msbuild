@@ -1181,12 +1181,11 @@ internal partial class Expander<P, I>
                 return false;
             }
 
-            // When restriction is on - the default under trimming, opt-in otherwise - instance
-            // "dotting in" is limited to a curated set of receiver types so the members reachable by
-            // reflection are predictable and statically known. Under trimming
-            // RestrictPropertyFunctionReceivers is substituted true, so the unrestricted 'return true'
-            // below is removed, keeping the property-function path trim compatible.
-            if (FeatureSwitches.RestrictPropertyFunctionReceivers)
+            // The wave provides a temporary compatibility opt-out for untrimmed hosts. The feature
+            // switch remains independently sufficient: trimming substitutes true and removes the
+            // unrestricted branch even when the wave is disabled at runtime.
+            if (FeatureSwitches.RestrictPropertyFunctionReceivers
+                || ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14))
             {
                 return PropertyFunctionReceiver.IsAllowed(receiverType, methodName);
             }
