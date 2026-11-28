@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -145,13 +146,45 @@ namespace Microsoft.Build.Tasks.UnitTests
             Assert.Equal(mixedcaseHash, lowercaseHash);
         }
 
-        private string ExecuteHashTask(ITaskItem[] items, bool ignoreCase = false)
+        [Fact]
+        public void HashTaskPathMapMakesHashLocationIndependent()
+        {
+            // Paths use the host's native separator: TaskItem normalizes item specs to native
+            // separators (backslashes become forward slashes on Unix), and a real build derives both
+            // $(PathMap) and @(Compile) on the same OS, so the path map prefixes match the items.
+            string sep = Path.DirectorySeparatorChar.ToString();
+            string rootA = Path.DirectorySeparatorChar == '\\' ? @"C:\rootA" : "/rootA";
+            string rootB = Path.DirectorySeparatorChar == '\\' ? @"C:\rootB" : "/rootB";
+
+            ITaskItem[] underRootA = [new TaskItem($"{rootA}{sep}src{sep}a.cs"), new TaskItem($"{rootA}{sep}obj{sep}ref.dll")];
+            ITaskItem[] underRootB = [new TaskItem($"{rootB}{sep}src{sep}a.cs"), new TaskItem($"{rootB}{sep}obj{sep}ref.dll")];
+
+            // Identical inputs built under two different roots hash differently without a path map...
+            Assert.NotEqual(ExecuteHashTask(underRootA), ExecuteHashTask(underRootB));
+
+            // ...but converge once each root is mapped to the same deterministic prefix.
+            string hashA = ExecuteHashTask(underRootA, pathMap: $"{rootA}{sep}=/_/");
+            string hashB = ExecuteHashTask(underRootB, pathMap: $"{rootB}{sep}=/_/");
+            Assert.Equal(hashA, hashB);
+        }
+
+        [Fact]
+        public void HashTaskEmptyPathMapIsUnchanged()
+        {
+            // An empty path map must not alter the legacy hash, so enabling the feature is opt-in.
+            ITaskItem[] items = [new TaskItem("Item1"), new TaskItem("Item2")];
+            Assert.Equal(ExecuteHashTask(items), ExecuteHashTask(items, pathMap: ""));
+            Assert.Equal(ExecuteHashTask(items), ExecuteHashTask(items, pathMap: null));
+        }
+
+        private string ExecuteHashTask(ITaskItem[] items, bool ignoreCase = false, string pathMap = null)
         {
             var hashTask = new Hash
             {
                 BuildEngine = new MockEngine(),
                 ItemsToHash = items,
-                IgnoreCase = ignoreCase
+                IgnoreCase = ignoreCase,
+                PathMap = pathMap
             };
 
             Assert.True(hashTask.Execute());
