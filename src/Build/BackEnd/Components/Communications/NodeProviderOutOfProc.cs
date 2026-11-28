@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -102,16 +103,30 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace($"Starting to acquire {numberOfNodesToCreate} new or existing node(s) to establish nodes from ID {nextNodeId} to {nextNodeId + numberOfNodesToCreate - 1}...");
      
-            IList<NodeContext> nodeContexts = GetNodes(nodeLaunchData, nextNodeId, factory, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate);
+            IList<NodeContext> nodeContexts = GetNodes(nodeLaunchData, nextNodeId, factory, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate, out string lastConnectionFailure);
 
-            if (nodeContexts.Count > 0)
+            if (nodeContexts.Count < numberOfNodesToCreate)
             {
-                return nodeContexts
-                    .Select(nc => new NodeInfo(nc.NodeId, ProviderType))
-                    .ToList();
+                // Log the reason here: the callers do not know it. If no node connected, stop the build.
+                // If only some nodes connected, the caller also stops the build, with a more general error.
+                string nodeExeLocation = ComponentHost.BuildParameters.NodeExeLocation;
+                lastConnectionFailure ??= string.Empty;
+                ComponentHost.LoggingService.LogError(
+                    new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId),
+                    ElementLocation.Empty,
+                    "CouldNotConnectToMSBuildExe",
+                    nodeExeLocation,
+                    lastConnectionFailure);
+
+                if (nodeContexts.Count == 0)
+                {
+                    throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotConnectToMSBuildExe", nodeExeLocation, lastConnectionFailure));
+                }
             }
 
-            throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotConnectToMSBuildExe", ComponentHost.BuildParameters.NodeExeLocation));
+            return nodeContexts
+                .Select(nc => new NodeInfo(nc.NodeId, ProviderType))
+                .ToList();
 
             void NodeContextCreated(NodeContext context)
             {
