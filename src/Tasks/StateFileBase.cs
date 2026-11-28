@@ -24,7 +24,8 @@ namespace Microsoft.Build.Tasks
         // Version 4/5 - VS2017.7:
         //   Unify .NET Core + Full Framework. Custom serialization on some types that are no
         //   longer [Serializable].
-        internal const byte CurrentSerializationVersion = 6;
+        // Version 7: GenerateResource dependency filenames must be absolute.
+        internal const byte CurrentSerializationVersion = 7;
 
         // Version this instance is serialized with.
         private byte _serializedVersion = CurrentSerializationVersion;
