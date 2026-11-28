@@ -579,9 +579,9 @@ Apply this gate to every candidate finding before posting it, regardless of whic
 
 1b. **Historical context** (for bug fix and follow-up PRs): Read the linked issue and the original feature PR discussions. Identify design intent, constraints, and reviewer-established principles. Feed this context to every dimension agent so they can evaluate whether the fix aligns with the original design, not just whether the code compiles.
 
-2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`). Select recent available frontier models from multiple companies/providers (choosing from the models available in the current environment rather than hardcoding specific model IDs). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
+2. Launch **one sub-agent per dimension** directly via the `task` tool (`agent_type: "general-purpose"`) — never via dynamic workflows or factories. Select recent available frontier models from multiple companies/providers (choosing from the models available in the current environment rather than hardcoding specific model IDs). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
 
-   Each sub-agent receives: the PR diff, PR description, the single dimension's rules and checklist, the Finding Acceptance Gate, and the folder context.
+   Each sub-agent receives: the full PR diff (either verbatim inline when small, or the exact saved diff file path to read in full via `view` — never a summary), PR description, the single dimension's rules and checklist, the Finding Acceptance Gate, and the folder context.
 
    Include verbatim in every sub-agent prompt:
 

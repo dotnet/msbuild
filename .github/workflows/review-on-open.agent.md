@@ -77,7 +77,8 @@ environment: copilot-pat-pool
 engine:
   id: copilot
   # Copilot can auto-approve read-only tools even without explicit grants.
-  args: ["--deny-tool", "shell", "--deny-tool", "github(get_commit)"]
+  # Deny dynamic workflow tools because extensions are not configured in headless CI sessions.
+  args: ["--deny-tool", "shell", "--deny-tool", "github(get_commit)", "--deny-tool", "dynamic_workflows_manage", "--deny-tool", "run_dynamic_workflow"]
   env:
      COPILOT_GITHUB_TOKEN: "${{ case( needs.pat_pool.outputs.pat_number == '0', secrets.COPILOT_PAT_0, needs.pat_pool.outputs.pat_number == '1', secrets.COPILOT_PAT_1, needs.pat_pool.outputs.pat_number == '2', secrets.COPILOT_PAT_2, needs.pat_pool.outputs.pat_number == '3', secrets.COPILOT_PAT_3, needs.pat_pool.outputs.pat_number == '4', secrets.COPILOT_PAT_4, needs.pat_pool.outputs.pat_number == '5', secrets.COPILOT_PAT_5, needs.pat_pool.outputs.pat_number == '6', secrets.COPILOT_PAT_6, needs.pat_pool.outputs.pat_number == '7', secrets.COPILOT_PAT_7, needs.pat_pool.outputs.pat_number == '8', secrets.COPILOT_PAT_8, needs.pat_pool.outputs.pat_number == '9', secrets.COPILOT_PAT_9, 'NO COPILOT PAT AVAILABLE') }}"
 ---
@@ -87,5 +88,5 @@ engine:
 These safeguards take precedence over the shared review instructions:
 
 - Fetch the pull request metadata and complete diff through the GitHub MCP. If required content is denied or filtered, including from a partial response, do not retrieve it through another tool, shell command, or direct network request. If the complete diff cannot be verified, call `report_incomplete` with the reason and stop without submitting a review.
-- Include the complete diff verbatim in the `expert-reviewer` subagent's prompt and require it to include the same complete diff, not a summary, in every dimension subagent's prompt. Require the expert reviewer to defer all review outputs until every dimension and required validation is complete, and to return an explicit completion status.
-- If the complete diff cannot be passed to every reviewer, any dimension cannot be evaluated, or completion cannot be confirmed, call `report_incomplete` rather than posting a review or inline comments. Use the shared fallback review only when the subagent explicitly confirms that all dimensions are complete.
+- Invoke `expert-reviewer` directly with the `task` tool and require it to launch every dimension and validation subagent directly with the `task` tool (never via dynamic workflows or factory extensions). Provide the complete verified diff — either verbatim inline when small, or by passing the exact local path of the saved GitHub MCP diff output file and requiring every dimension subagent to read the complete diff from that file via `view` (never a summary). Require the expert reviewer to defer all review outputs until every dimension and required validation is complete, and to return an explicit completion status.
+- If the complete diff cannot be provided to every reviewer, any dimension cannot be evaluated, or completion cannot be confirmed, call `report_incomplete` rather than posting a review or inline comments. Use the shared fallback review only when the subagent explicitly confirms that all dimensions are complete.
