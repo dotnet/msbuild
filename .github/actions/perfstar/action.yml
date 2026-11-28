@@ -1,0 +1,9 @@
+name: Queue PerfStar evaluation
+description: Reconcile the PerfStar branch for a pull request
+inputs:
+  github-token:
+    description: Token with contents, issues, and pull requests write permissions
+    required: true
+runs:
+  using: node24
+  main: dist/index.js
