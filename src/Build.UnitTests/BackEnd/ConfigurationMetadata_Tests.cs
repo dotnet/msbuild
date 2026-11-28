@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
 
@@ -117,6 +119,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestConfiguration config3 = new BuildRequestConfiguration(1, data, "3.0");
             ConfigurationMetadata metadata4 = new ConfigurationMetadata(config3);
             Assert.False(metadata1.Equals(metadata4));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CaseVariantPathsInCaseSensitiveDirectoryAreNotEqual(bool changeWaveEnabled)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            if (!changeWaveEnabled)
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_14.ToString());
+            }
+
+            ChangeWaves.ResetStateForTests();
+
+            TransientTestFolder folder = env.CreateCaseSensitiveFolder();
+            var upper = new ConfigurationMetadata(Path.Combine(folder.Path, "Foo.proj"), new PropertyDictionary<ProjectPropertyInstance>());
+            var lower = new ConfigurationMetadata(Path.Combine(folder.Path, "foo.proj"), new PropertyDictionary<ProjectPropertyInstance>());
+
+            upper.Equals(lower).ShouldBe(!changeWaveEnabled);
+            upper.GetHashCode().ShouldBe(lower.GetHashCode());
         }
 
         [Fact]

@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -27,9 +29,12 @@ namespace Microsoft.Build.Evaluation
     {
         private readonly ConcurrentDictionary<string, ProjectRootElement> _cache;
 
+        private readonly IEqualityComparer<string> _pathComparer;
+
         internal SimpleProjectRootElementCache()
         {
-            _cache = new ConcurrentDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+            _pathComparer = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14) ? FileSystemPathComparer.Instance : StringComparer.OrdinalIgnoreCase;
+            _cache = new ConcurrentDictionary<string, ProjectRootElement>(_pathComparer);
             LoadProjectsReadOnly = true;
         }
 
@@ -63,7 +68,7 @@ namespace Microsoft.Build.Evaluation
             {
                 ProjectRootElement rootElement = loadFunc(key, this);
                 Assumed.NotNull(rootElement);
-                Assumed.Equal(rootElement.FullPath, key, StringComparison.OrdinalIgnoreCase, $"Got project back with incorrect path. Expected path: {key}, received path: {rootElement.FullPath}.");
+                Assumed.True(_pathComparer.Equals(rootElement.FullPath, key), $"Got project back with incorrect path. Expected path: {key}, received path: {rootElement.FullPath}.");
 
                 AddEntry(rootElement);
 

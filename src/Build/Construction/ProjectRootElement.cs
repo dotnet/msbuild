@@ -430,7 +430,11 @@ namespace Microsoft.Build.Construction
                 // passed a relative path, the caller assumes we will prepend the current directory.
                 string newFullPath = FileUtilities.NormalizePath(value);
 
-                if (String.Equals(oldFullPath, newFullPath, StringComparison.OrdinalIgnoreCase))
+                bool unchanged = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_14)
+                    ? FileSystemPathComparer.Instance.Equals(oldFullPath, newFullPath)
+                    : String.Equals(oldFullPath, newFullPath, StringComparison.OrdinalIgnoreCase);
+
+                if (unchanged)
                 {
                     return;
                 }
