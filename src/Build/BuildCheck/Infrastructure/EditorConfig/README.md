@@ -63,7 +63,7 @@ Currently EditorConfigParser is used by [ConfigurationProvider](https://github.c
 
 #### Cache lifetime
 The lifetime of the cached configuration is defined by the usage of the instance of ConfigurationProvider. The instance of the ConfigurationProvider is created per BuildCheckManager.
-Lifecycle of BuildCheckManager could be found [here](https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#handling-the-distributed-model)
+Lifecycle of BuildCheckManager could be found [here](https://github.com/dotnet/msbuild/blob/main/documentation/specs/BuildCheck/BuildCheck-Architecture.md#handling-the-distributed-model)
 
 
 #### Custom configuration data
