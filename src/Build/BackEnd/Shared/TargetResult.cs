@@ -202,6 +202,32 @@ namespace Microsoft.Build.Execution
         internal BuildEventContext OriginalBuildEventContext => _originalBuildEventContext;
 
         /// <summary>
+        /// Whether this target was successfully skipped after its condition evaluated to false.
+        /// </summary>
+        /// <remarks>
+        /// A newly evaluated false condition starts with <see cref="TargetSkipReason.ConditionWasFalse"/>.
+        /// If a pre-requisite target fails (e.g.: BeforeTargets), the result remains condition-false but
+        /// its action becomes <see cref="WorkUnitActionCode.Stop"/>.
+        /// This property helps identify when a skip is safe to re-use or cache as we do not want to cache/reuse if
+        /// something failed as a part of skipping the target.
+        /// </remarks>
+        internal bool IsSuccessfulConditionFalse =>
+            ResultCode == TargetResultCode.Skipped &&
+            WorkUnitResult.ActionCode == WorkUnitActionCode.Continue &&
+            SkipReason == TargetSkipReason.ConditionWasFalse;
+
+        /// <summary>
+        /// Whether this result represents reuse of a previously successful condition-false skip.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="TargetSkipReason.PreviouslyConditionWasFalse"/> is assigned only after
+        /// <see cref="IsSuccessfulConditionFalse"/> was used to determine if it was already skipped.
+        /// </remarks>
+        internal bool IsPreviouslyConditionFalse =>
+            ResultCode == TargetResultCode.Skipped &&
+            SkipReason == TargetSkipReason.PreviouslyConditionWasFalse;
+
+        /// <summary>
         /// Sets or gets a flag indicating whether or not a failure results should cause the build to fail.
         /// </summary>
         internal bool TargetFailureDoesntCauseBuildFailure

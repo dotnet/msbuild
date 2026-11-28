@@ -180,13 +180,143 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.AddResultsForTarget("testTarget2", BuildResultUtilities.GetEmptySucceedingTargetResult());
             cache.AddResult(result);
 
-            ResultsCacheResponse response = cache.SatisfyRequest(request, new List<string>(), new List<string>(new string[] { "testTarget2" }), skippedResultsDoNotCauseCacheMiss: false, allowedTopLevelTargets: null);
+            ResultsCacheResponse response = cache.SatisfyRequest(request, new List<string>(), new List<string>(new string[] { "testTarget2" }), skippedResultsDoNotCauseCacheMiss: false, cacheConditionFalseTargets: false, allowedTopLevelTargets: null);
 
             Assert.Equal(ResultsCacheResponseType.Satisfied, response.Type);
 
             Assert.True(AreResultsIdenticalForTarget(result, response.Results, "testTarget2"));
             Assert.False(response.Results.HasResultsForTarget("testTarget"));
             Assert.Equal(BuildResultCode.Success, response.Results.OverallResult);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, true)]
+        public void ConditionFalseSkippedTargetRoundTripsThroughResultsCache(bool cacheConditionFalseTargets, bool expectSatisfied)
+        {
+            const string target = "Conditional";
+            BuildRequest request = new BuildRequest(1, 0, 1, new string[] { target }, null, BuildEventContext.Invalid, null);
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget(target, BuildResultUtilities.GetEmptyConditionFalseSkippedTargetResult());
+            ResultsCache cache = new ResultsCache();
+            cache.AddResult(result);
+
+            cache.Translate(TranslationHelpers.GetWriteTranslator());
+            ResultsCache restoredCache = new ResultsCache(TranslationHelpers.GetReadTranslator());
+            TargetResult restoredTargetResult = (TargetResult)restoredCache.GetResultsForConfiguration(request.ConfigurationId)[target];
+
+            Assert.Equal(TargetResultCode.Skipped, restoredTargetResult.ResultCode);
+            Assert.True(restoredTargetResult.IsSuccessfulConditionFalse);
+            Assert.False(restoredTargetResult.IsPreviouslyConditionFalse);
+            Assert.Equal(WorkUnitActionCode.Continue, restoredTargetResult.WorkUnitResult.ActionCode);
+            Assert.Equal(TargetSkipReason.ConditionWasFalse, restoredTargetResult.SkipReason);
+
+            ResultsCacheResponse response = restoredCache.SatisfyRequest(
+                request,
+                new List<string>(),
+                new List<string>(),
+                skippedResultsDoNotCauseCacheMiss: false,
+                cacheConditionFalseTargets,
+                allowedTopLevelTargets: null);
+
+            Assert.Equal(expectSatisfied ? ResultsCacheResponseType.Satisfied : ResultsCacheResponseType.NotSatisfied, response.Type);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, true)]
+        public void ConditionFalseSkippedInitialTargetCanSatisfyRequest(bool cacheConditionFalseTargets, bool expectSatisfied)
+        {
+            const string initialTarget = "Initial";
+            const string requestedTarget = "Build";
+            BuildRequest request = new BuildRequest(1, 0, 1, new string[] { requestedTarget }, null, BuildEventContext.Invalid, null);
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget(initialTarget, BuildResultUtilities.GetEmptyConditionFalseSkippedTargetResult());
+            result.AddResultsForTarget(requestedTarget, BuildResultUtilities.GetEmptySucceedingTargetResult());
+            ResultsCache cache = new ResultsCache();
+            cache.AddResult(result);
+
+            ResultsCacheResponse response = cache.SatisfyRequest(
+                request,
+                new List<string>(new string[] { initialTarget }),
+                new List<string>(),
+                skippedResultsDoNotCauseCacheMiss: false,
+                cacheConditionFalseTargets,
+                allowedTopLevelTargets: null);
+
+            Assert.Equal(expectSatisfied ? ResultsCacheResponseType.Satisfied : ResultsCacheResponseType.NotSatisfied, response.Type);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, true)]
+        public void ConditionFalseSkippedDefaultTargetCanSatisfyRequest(bool cacheConditionFalseTargets, bool expectSatisfied)
+        {
+            const string defaultTarget = "Build";
+            BuildRequest request = new BuildRequest(1, 0, 1, Array.Empty<string>(), null, BuildEventContext.Invalid, null);
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget(defaultTarget, BuildResultUtilities.GetEmptyConditionFalseSkippedTargetResult());
+            ResultsCache cache = new ResultsCache();
+            cache.AddResult(result);
+
+            ResultsCacheResponse response = cache.SatisfyRequest(
+                request,
+                new List<string>(),
+                new List<string>(new string[] { defaultTarget }),
+                skippedResultsDoNotCauseCacheMiss: false,
+                cacheConditionFalseTargets,
+                allowedTopLevelTargets: null);
+
+            Assert.Equal(expectSatisfied ? ResultsCacheResponseType.Satisfied : ResultsCacheResponseType.NotSatisfied, response.Type);
+        }
+
+        [Fact]
+        public void ConditionFalseCachingDoesNotReuseOtherSkippedTargets()
+        {
+            const string target = "SyntheticSkip";
+            BuildRequest request = new BuildRequest(1, 0, 1, new string[] { target }, null, BuildEventContext.Invalid, null);
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget(target, new TargetResult(Array.Empty<ProjectItemInstance.TaskItem>(), BuildResultUtilities.GetSkippedResult()));
+            ResultsCache cache = new ResultsCache();
+            cache.AddResult(result);
+
+            ResultsCacheResponse response = cache.SatisfyRequest(
+                request,
+                new List<string>(),
+                new List<string>(),
+                skippedResultsDoNotCauseCacheMiss: false,
+                cacheConditionFalseTargets: true,
+                allowedTopLevelTargets: null);
+
+            Assert.Equal(ResultsCacheResponseType.NotSatisfied, response.Type);
+        }
+
+        [Fact]
+        public void StoppedConditionFalseTargetDoesNotSatisfyRequest()
+        {
+            const string target = "Conditional";
+            BuildRequest request = new BuildRequest(1, 0, 1, new string[] { target }, null, BuildEventContext.Invalid, null);
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget(
+                target,
+                new TargetResult(
+                    Array.Empty<ProjectItemInstance.TaskItem>(),
+                    new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Stop, null),
+                    skipReason: TargetSkipReason.ConditionWasFalse));
+            Assert.False(((TargetResult)result[target]).IsSuccessfulConditionFalse);
+            Assert.False(((TargetResult)result[target]).IsPreviouslyConditionFalse);
+            ResultsCache cache = new ResultsCache();
+            cache.AddResult(result);
+
+            ResultsCacheResponse response = cache.SatisfyRequest(
+                request,
+                new List<string>(),
+                new List<string>(),
+                skippedResultsDoNotCauseCacheMiss: false,
+                cacheConditionFalseTargets: true,
+                allowedTopLevelTargets: null);
+
+            Assert.Equal(ResultsCacheResponseType.NotSatisfied, response.Type);
         }
 
         [Fact]
@@ -237,6 +367,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                new List<string>(),
                new List<string>(new string[] { targetName }),
                skippedResultsDoNotCauseCacheMiss: false,
+               cacheConditionFalseTargets: false,
                allowedTopLevelTargets: null);
 
             ResultsCacheResponse cachedResponseForProjectState = cache.SatisfyRequest(
@@ -244,6 +375,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                new List<string>(),
                new List<string>(new string[] { targetName }),
                skippedResultsDoNotCauseCacheMiss: false,
+               cacheConditionFalseTargets: false,
                allowedTopLevelTargets: null);
 
             ResultsCacheResponse cacheResponseForNoBuildDataFlags2 = cache.SatisfyRequest(
@@ -251,6 +383,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                new List<string>(),
                new List<string>(new string[] { targetName }),
                skippedResultsDoNotCauseCacheMiss: false,
+               cacheConditionFalseTargets: false,
                allowedTopLevelTargets: null);
 
             Assert.Equal(ResultsCacheResponseType.Satisfied, cacheResponseForRequestWithNoBuildDataFlags.Type);
@@ -321,6 +454,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new List<string>(),
                 new List<string>(new string[] { targetName }),
                 skippedResultsDoNotCauseCacheMiss: false,
+                cacheConditionFalseTargets: false,
                 allowedTopLevelTargets: null);
 
             ResultsCacheResponse cachedResponseWithSubsetFlag2 = cache.SatisfyRequest(
@@ -328,6 +462,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new List<string>(),
                 new List<string>(new string[] { targetName }),
                 skippedResultsDoNotCauseCacheMiss: false,
+                cacheConditionFalseTargets: false,
                 allowedTopLevelTargets: null);
 
             // We used the same filter that was used for the ProjectInstance in the cache -> cache hit.
