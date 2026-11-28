@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.FileSystem;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -56,19 +57,25 @@ namespace Microsoft.Build.Evaluation.Context
         internal FileMatcher FileMatcher { get; }
 
         /// <summary>
-        /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
+        /// Caches glob results and directory expansions when shared listing reuse is not used.
         /// </summary>
         private ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
 
+        private DirectoryListingCache SharedDirectoryListingCache { get; }
+
         private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem, ISdkResolverService sdkResolverService = null,
-            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null)
+            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null,
+            DirectoryListingCache directoryListingCache = null)
         {
             Policy = policy;
 
             SdkResolverService = sdkResolverService ?? new CachingSdkResolverService();
             FileEntryExpansionCache = fileEntryExpansionCache ?? new ConcurrentDictionary<string, IReadOnlyList<string>>();
-            FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default);
-            FileMatcher = new FileMatcher(FileSystem, FileEntryExpansionCache);
+            SharedDirectoryListingCache = directoryListingCache?.Shared;
+            DirectoryListingCache evaluationCache = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+                ? SharedDirectoryListingCache?.CreateEvaluationCache() : null;
+            FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default, evaluationCache);
+            FileMatcher = new FileMatcher(FileSystem, FileEntryExpansionCache, directoryListingCache: evaluationCache);
         }
 
         /// <summary>
@@ -122,7 +129,11 @@ namespace Microsoft.Build.Evaluation.Context
                         return this;
                     }
                     // Create a copy if this context has already been used. Mark it used.
-                    EvaluationContext context = new EvaluationContext(Policy, fileSystem: null, sdkResolverService: Policy == SharingPolicy.SharedSDKCache ? SdkResolverService : null)
+                    EvaluationContext context = new EvaluationContext(
+                        Policy,
+                        fileSystem: null,
+                        sdkResolverService: Policy == SharingPolicy.SharedSDKCache ? SdkResolverService : null,
+                        directoryListingCache: SharedDirectoryListingCache)
                     {
                         _used = 1,
                     };
@@ -132,6 +143,13 @@ namespace Microsoft.Build.Evaluation.Context
                 default:
                     return Assumed.Unreachable<EvaluationContext>();
             }
+        }
+
+        internal static EvaluationContext CreateForBuild(DirectoryListingCache directoryListingCache)
+        {
+            EvaluationContext context = new(SharingPolicy.Isolated, fileSystem: null, directoryListingCache: directoryListingCache);
+            TestOnlyHookOnCreate?.Invoke(context);
+            return context;
         }
 
         /// <summary>

@@ -317,6 +317,7 @@ namespace Microsoft.Build.Execution
             DetailedSummary = other.DetailedSummary;
             _shutdownInProcNodeOnBuildFinish = other._shutdownInProcNodeOnBuildFinish;
             ProjectRootElementCache = other.ProjectRootElementCache;
+            DirectoryListingCache = other.DirectoryListingCache;
             ResetCaches = other.ResetCaches;
             LegacyThreadingSemantics = other.LegacyThreadingSemantics;
             SaveOperatingEnvironment = other.SaveOperatingEnvironment;
@@ -829,6 +830,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectRootElementCacheBase ProjectRootElementCache { get; set; }
 
+        internal DirectoryListingCache DirectoryListingCache { get; set; }
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// Information for configuring child AppDomains.
@@ -1035,6 +1038,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _ParserIgnoreConfiguration, ParserIgnoreConfiguration.FactoryForDeserialization);
 
             // ProjectRootElementCache is not transmitted.
+            // DirectoryListingCache is process-local and supplied by the build manager or worker.
             // ResetCaches is not transmitted.
             // LegacyThreadingSemantics is not transmitted.
             // InputResultsCacheFiles and OutputResultsCacheFile are not transmitted, as they are only used by the BuildManager

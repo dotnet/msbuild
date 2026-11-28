@@ -159,6 +159,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private BuildParameters? _buildParameters;
 
+        private DirectoryListingCache? _directoryListingCache;
+
         /// <summary>
         /// The current pending and active submissions.
         /// </summary>
@@ -642,6 +644,9 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
+                _buildParameters.DirectoryListingCache = !CacheAttribution.DisableShared && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+                    ? _directoryListingCache ??= new DirectoryListingCache()
+                    : null;
                 bool strictMode = _buildParameters.MultiThreaded
                     && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12);
                 var buildEntryDirectory = strictMode
@@ -900,7 +905,7 @@ namespace Microsoft.Build.Execution
 
                 if (!usesInputCaches && (_buildParameters.ResetCaches || _configCache!.IsConfigCacheSizeLargerThanThreshold()))
                 {
-                    ResetCaches();
+                    ResetCaches(clearDirectoryListings: false);
                 }
                 else
                 {
@@ -1047,11 +1052,19 @@ namespace Microsoft.Build.Execution
         /// Clears out all of the cached information.
         /// </summary>
         public void ResetCaches()
+            => ResetCaches(clearDirectoryListings: true);
+
+        private void ResetCaches(bool clearDirectoryListings)
         {
             lock (_syncLock)
             {
                 ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
                 ErrorIfState(BuildManagerState.Building, "BuildInProgress");
+
+                if (clearDirectoryListings)
+                {
+                    _directoryListingCache?.Clear();
+                }
 
                 _configCache = ((IBuildComponentHost)this).GetComponent<IConfigCache>(BuildComponentType.ConfigCache);
                 _resultsCache = ((IBuildComponentHost)this).GetComponent<IResultsCache>(BuildComponentType.ResultsCache);
@@ -2727,6 +2740,8 @@ namespace Microsoft.Build.Execution
             _nodeIdToKnownConfigurations.Clear();
             _nextUnnamedProjectId = 1;
 
+            _buildParameters?.DirectoryListingCache = null;
+
             if (_configCache != null)
             {
                 foreach (BuildRequestConfiguration config in _configCache)
@@ -3758,6 +3773,9 @@ namespace Microsoft.Build.Execution
 
                     // We should always have finished cleaning up before calling Dispose.
                     RequireState(BuildManagerState.Idle, "ShouldNotDisposeWhenBuildManagerActive");
+
+                    _directoryListingCache?.Clear();
+                    _directoryListingCache = null;
 
                     _componentFactories?.ShutdownComponents();
 

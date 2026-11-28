@@ -749,7 +749,9 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0))
                 {
-                    returnVal = IntrinsicFunctions.FileExists(arg0);
+                    returnVal = IntrinsicFunctions.FileExists(arg0,
+                        fileSystem is CachingFileSystemWrapper && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+                            ? fileSystem : null);
                     return true;
                 }
             }
@@ -757,7 +759,9 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0))
                 {
-                    returnVal = IntrinsicFunctions.DirectoryExists(arg0);
+                    returnVal = IntrinsicFunctions.DirectoryExists(arg0,
+                        fileSystem is CachingFileSystemWrapper && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+                            ? fileSystem : null);
                     return true;
                 }
             }
@@ -853,6 +857,30 @@ namespace Microsoft.Build.Evaluation.Expander
                 else if (receiverType == typeof(Path))
                 {
                     return TryExecutePathFunction(methodName, out returnVal, args);
+                }
+                else if ((receiverType == typeof(File) || receiverType == typeof(Directory))
+                    && fileSystem is CachingFileSystemWrapper
+                    && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+                    && string.Equals(methodName, nameof(File.Exists), StringComparison.OrdinalIgnoreCase)
+                    && ParseArgs.TryGetArg(args, out string? path))
+                {
+                    try
+                    {
+                        if (path is not null)
+                        {
+                            path = Path.GetFullPath(path);
+                            // Native probes need not recognize long paths that the BCL can resolve.
+                            if (NativeMethods.IsWindows && path.Length >= NativeMethods.MAX_PATH) { return false; }
+                        }
+
+                        returnVal = path is not null && (receiverType == typeof(File)
+                            ? fileSystem.FileExists(path) : fileSystem.DirectoryExists(path));
+                        return true;
+                    }
+                    catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+                    {
+                        return false;
+                    }
                 }
                 else if (receiverType == typeof(Version))
                 {

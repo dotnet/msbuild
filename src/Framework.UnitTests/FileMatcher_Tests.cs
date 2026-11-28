@@ -35,6 +35,19 @@ namespace Microsoft.Build.UnitTests
             _mappedDrive.Value?.Dispose();
         }
 
+        [Fact]
+        public void VirtualFileSystemsCannotInheritNativeDirectoryCacheSupport()
+        {
+            var fileSystem = new VirtualFileSystem();
+            FileSystems.SupportsDirectoryCache(fileSystem).ShouldBeFalse();
+            FileSystems.SupportsDirectoryCache(new CachingFileSystemWrapper(new CachingFileSystemWrapper(fileSystem))).ShouldBeFalse();
+            FileSystems.SupportsDirectoryCache(ManagedFileSystem.Singleton()).ShouldBeTrue();
+        }
+
+        private sealed class VirtualFileSystem : ManagedFileSystem
+        {
+        }
+
         [Theory]
         [InlineData("*.txt", 5)]
         [InlineData("???.cs", 1)]

@@ -706,6 +706,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void Evaluate()
         {
+            using var cacheAttributionEvaluation = CacheAttribution.Phase(0);
             string projectFile = string.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
             using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
             {
@@ -728,6 +729,7 @@ namespace Microsoft.Build.Evaluation
                 int globalPropertiesCount;
 
                 long pass0MeasurementStart = 0;
+                using (CacheAttribution.Phase(1))
                 using (_evaluationProfiler.TrackPass(EvaluationPass.InitialProperties))
                 {
                     // Pass0: load initial properties
@@ -753,6 +755,7 @@ namespace Microsoft.Build.Evaluation
                 // Pass1: evaluate properties, load imports, and gather everything else
                 MSBuildEventSource.Log.EvaluatePass1Start(projectFile);
                 long pass1MeasurementStart = EvaluationInstrumentation.StartMeasurement();
+                using (CacheAttribution.Phase(2))
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
                 {
                     PerformDepthFirstPass(_projectRootElement);
@@ -781,6 +784,7 @@ namespace Microsoft.Build.Evaluation
                 // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
                 MSBuildEventSource.Log.EvaluatePass2Start(projectFile);
                 long pass2MeasurementStart = EvaluationInstrumentation.StartMeasurement();
+                using (CacheAttribution.Phase(3))
                 using (_evaluationProfiler.TrackPass(EvaluationPass.ItemDefinitionGroups))
                 {
                     foreach (var itemDefinitionGroupElement in _itemDefinitionGroupElements)
@@ -803,6 +807,7 @@ namespace Microsoft.Build.Evaluation
 
                 LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
                 long pass3MeasurementStart = 0;
+                using (CacheAttribution.Phase(4))
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
                     // comment next line to turn off lazy Evaluation
@@ -825,6 +830,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
+                using (CacheAttribution.Phase(4))
                 using (_evaluationProfiler.TrackPass(EvaluationPass.LazyItems))
                 {
                     // Tell the lazy evaluator to compute the items and add them to _data
@@ -865,6 +871,7 @@ namespace Microsoft.Build.Evaluation
                 // Pass4: evaluate using-tasks
                 MSBuildEventSource.Log.EvaluatePass4Start(projectFile);
                 long pass4MeasurementStart = EvaluationInstrumentation.StartMeasurement();
+                using (CacheAttribution.Phase(5))
                 using (_evaluationProfiler.TrackPass(EvaluationPass.UsingTasks))
                 {
                     // Evaluate the usingtask and add the result into the data passed in
@@ -906,6 +913,7 @@ namespace Microsoft.Build.Evaluation
                 LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder = new LinkedList<ProjectTargetElement>();
                 Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(StringComparer.OrdinalIgnoreCase);
 
+                using (CacheAttribution.Phase(6))
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Targets))
                 {
                     // Pass5: read targets (but don't evaluate them: that happens during build)

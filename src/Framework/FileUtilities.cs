@@ -1654,6 +1654,12 @@ namespace Microsoft.Build.Framework
 
             // Canonicalize our starting location
             string? lookInDirectory = NewPath.GetFullPath(startingDirectory);
+            string searchDirectory = lookInDirectory;
+            var cache = fileSystem as CachingFileSystemWrapper;
+            if (cache is not null && cache.TryGetUpwardSearch(searchDirectory, fileName, out string? cached))
+            {
+                return cached;
+            }
 
             do
             {
@@ -1666,7 +1672,7 @@ namespace Microsoft.Build.Framework
                 if (fileSystem.FileExists(possibleFileDirectory))
                 {
                     // We've found the file, return the directory we found it in
-                    return lookInDirectory;
+                    return cache?.CacheUpwardSearch(searchDirectory, fileName, lookInDirectory) ?? lookInDirectory;
                 }
                 else
                 {
@@ -1678,7 +1684,7 @@ namespace Microsoft.Build.Framework
             while (lookInDirectory != null);
 
             // When we didn't find the location, then return an empty string
-            return string.Empty;
+            return cache?.CacheUpwardSearch(searchDirectory, fileName, string.Empty) ?? string.Empty;
         }
 
         /// <summary>
