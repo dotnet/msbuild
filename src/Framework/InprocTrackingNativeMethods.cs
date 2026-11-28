@@ -4,7 +4,6 @@
 #if FEATURE_FILE_TRACKER
 
 using System;
-using System.Buffers;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -244,7 +243,7 @@ internal static unsafe class InprocTrackingNativeMethods
         {
             // GetProcAddress takes a system-default-code-page (ANSI) string. Encode through
             // the real encoder so DBCS / multi-byte characters in an unusual export name
-            // are handled correctly. Rent from ArrayPool to avoid a per-call allocation.
+            // are handled correctly. Rent from BufferPool to avoid a per-call allocation.
             //
             // Encoding.Default returns the system ANSI code page on .NET Framework
             // (correct for GetProcAddress) but UTF-8 on .NET (Core). FEATURE_FILE_TRACKER
@@ -253,29 +252,22 @@ internal static unsafe class InprocTrackingNativeMethods
             // ANSI encoding instead.
             Encoding ansi = Encoding.Default;
             int maxByteCount = ansi.GetMaxByteCount(entryPointName.Length) + 1;
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(maxByteCount);
-            try
+            using var _ = BufferPool<byte>.Shared.Rent(maxByteCount, out byte[] buffer);
+            int written = ansi.GetBytes(entryPointName, 0, entryPointName.Length, buffer, 0);
+            buffer[written] = 0;
+
+            FARPROC entryPoint;
+            fixed (byte* pName = buffer)
             {
-                int written = ansi.GetBytes(entryPointName, 0, entryPointName.Length, buffer, 0);
-                buffer[written] = 0;
-
-                FARPROC entryPoint;
-                fixed (byte* pName = buffer)
-                {
-                    entryPoint = PInvoke.GetProcAddress(s_fileTrackerDllHandle, new PCSTR(pName));
-                }
-
-                if (entryPoint.IsNull)
-                {
-                    throw new EntryPointNotFoundException(s_fileTrackerDllName.Value + "!" + entryPointName);
-                }
-
-                return (void*)entryPoint.Value;
+                entryPoint = PInvoke.GetProcAddress(s_fileTrackerDllHandle, new PCSTR(pName));
             }
-            finally
+
+            if (entryPoint.IsNull)
             {
-                ArrayPool<byte>.Shared.Return(buffer);
+                throw new EntryPointNotFoundException(s_fileTrackerDllName.Value + "!" + entryPointName);
             }
+
+            return (void*)entryPoint.Value;
         }
 
         /// <summary>

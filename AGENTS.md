@@ -54,6 +54,7 @@ When reviewing pull requests:
 * Insert a newline before the opening curly brace of any code block.
 * Use pattern matching and switch expressions wherever possible.
 * Use `nameof` instead of string literals when referring to member names.
+* Prefer exception `Throw*` helpers over equivalent manual checks and throws, including in test helpers: `ArgumentNullException.ThrowIfNull`, `ArgumentException.ThrowIfNullOrEmpty`, `ArgumentOutOfRangeException.ThrowIfGreaterThan`, and `ObjectDisposedException.ThrowIf`. MSBuild provides .NET Framework polyfills in `src/Framework/Polyfills/ArgumentExceptionExtensions.cs`.
 
 ### Nullable Reference Types
 
@@ -83,6 +84,17 @@ return errorNumber switch
 * Use `char.ToUpperInvariant()` for single-character comparisons
 * Use `ReadOnlySpan<char>` and `Slice()` to avoid string allocations
 * Use `int.TryParse(span, out var result)` on .NET Core+ for allocation-free parsing
+
+### Pooled Arrays
+
+* Use `BufferPool<T>.Shared` instead of `ArrayPool<T>.Shared`. On .NET Framework, `ArrayPool<T>.Shared` is slow to rent from, so `BufferPool<T>` adds a per-thread cache in front of it. `src/BannedSymbols.txt` bans the `ArrayPool<T>` entry points.
+* Use `BufferPool<T>.Create(...)` only when a component needs a dedicated pool that other code cannot drain or evict, as `Scheduler` does.
+* Prefer `BufferScope<T>` for short-lived buffers that can start on the stack, and `RefArrayBuilder<T>` for building a variable number of items.
+* For direct rents, use `pool.Rent(minimumLength, out array)` or `pool.RentSpan(length, out span)` in a `using` statement when that matches the buffer's lifetime and allocation behavior. Prefer `RentSpan` when the caller only needs a fixed-length span; its `out` span is limited to that range, but the returned `PooledBuffer<T>.Array` property still exposes the full rented array.
+* Arrays rented from `ArrayPool<T>`, including through `BufferPool<T>` and the `Rent` or `RentSpan` helpers, are not guaranteed to be zero-initialized. Initialize every element before reading it. On disposal, `PooledBuffer<T>` clears only reference-containing element types: `RentSpan` clears the requested range by default, while `Rent` clears the entire array. Value-type buffers such as `byte[]` and `char[]` are not cleared automatically.
+* Use the overloads with `clearLength` before the `out` parameter to clear a shorter prefix only when every slot the caller may populate with references lies within it. When the populated range isn't known up front, keep the default clear length until filling succeeds, then call `SetClearLength` before the `using` scope ends to reduce clearing. If filling can fail, ensure the clear length still covers all slots that may have been written.
+* Do not force scoped rentals onto lazy, growing, or longer-lived buffers if doing so changes allocation behavior or ownership. Prefer existing abstractions such as `BufferScope<T>` and `RefArrayBuilder<T>` when they fit the buffer's use.
+* Do not copy the returned `PooledBuffer<T>` or use the rented array or span after its `using` scope ends.
 
 ### Inlining Hot Paths
 

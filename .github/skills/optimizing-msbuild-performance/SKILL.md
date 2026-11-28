@@ -39,6 +39,12 @@ The evaluation and execution engines process millions of operations per build. U
 
 4. **Cache computed values.** If a value is computed in a loop but doesn't change, hoist it out. If it's expensive and reused across calls, use a field or `Lazy<T>`.
 
+5. **Rent pooled arrays from `BufferPool<T>`, not `ArrayPool<T>.Shared`.** Use `BufferPool<T>.Shared`; use `BufferPool<T>.Create(...)` only when a component needs its own isolated pool. On .NET Framework, `ArrayPool<T>.Shared` is slow to rent from, so `BufferPool<T>` adds a per-thread cache in front of it. For short-lived buffers that can start on the stack, use `BufferScope<T>`, and use `RefArrayBuilder<T>` when building a variable number of items. For local, fixed-lifetime rentals, use `pool.Rent(minimumLength, out array)` or `pool.RentSpan(length, out span)` in a `using` statement when that preserves allocation behavior and ownership. Do not mechanically convert lazy, growing, or longer-lived buffer ownership to a scoped rental.
+
+   Prefer `RentSpan` when possible: its `out` span exposes only the requested range, but the returned `PooledBuffer<T>.Array` still exposes the full rented array. Arrays rented from `ArrayPool<T>`, including through `BufferPool<T>` and the `Rent` or `RentSpan` helpers, are not guaranteed to be zero-initialized; initialize every element before reading it. Disposal clears reference-containing element types only: `RentSpan` clears the requested range by default, while `Rent` clears the entire array. Value-type buffers such as `byte[]` and `char[]` are not cleared automatically.
+
+   Use the overloads with `clearLength` before the `out` parameter to clear a shorter prefix only when every slot the caller may populate with references lies within it. When the populated range isn't known up front, retain the default clear length until filling succeeds, then call `SetClearLength` before the `using` scope ends to reduce clearing. If filling can fail, ensure the clear length still covers all slots that may have been written. Do not copy the returned scope or use its array or span after the `using` scope ends.
+
 ## String Comparison Rules
 
 MSBuild property, item, and target names are **case-insensitive**. Getting this wrong causes subtle bugs and perf issues.

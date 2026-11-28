@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
 
 #if NET
 using System.Runtime.CompilerServices;
@@ -10,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 #endif
 using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd.Logging;
 
@@ -104,7 +104,7 @@ internal static class OptimizedStringIndenter
 
         if (pooledArray is not null)
         {
-            ArrayPool<StringSegment>.Shared.Return(pooledArray);
+            BufferPool<StringSegment>.Shared.Return(pooledArray);
         }
 
         return result;
@@ -136,7 +136,7 @@ internal static class OptimizedStringIndenter
         }
         else
         {
-            pooledArray = ArrayPool<StringSegment>.Shared.Rent(segmentCount);
+            pooledArray = BufferPool<StringSegment>.Shared.Rent(segmentCount);
             segments = pooledArray.AsSpan(0, segmentCount);
         }
 

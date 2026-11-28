@@ -15,7 +15,8 @@ namespace MSBuild.Benchmarks;
 /// </summary>
 /// <remarks>
 ///  Global setup primes every condition so the measured cache state does not depend on the
-///  BenchmarkDotNet job's warmup configuration.
+///  BenchmarkDotNet job's warmup configuration. A deterministic in-memory file system keeps
+///  existence checks independent of the host file system.
 /// </remarks>
 [BenchmarkCategory("Conditions", "ConditionEvaluation")]
 [MemoryDiagnoser]
@@ -25,18 +26,18 @@ public class ConditionEvaluationBenchmark
     private ExpanderBenchmarkFixture _fixture = null!;
     private ElementLocation _elementLocation = null!;
     private string _evaluationDirectory = null!;
-    private TemporaryDirectory _temporaryDirectory = null!;
+    private IFileSystem _fileSystem = null!;
 
     [GlobalSetup]
     public void GlobalSetup()
     {
-        _temporaryDirectory = new TemporaryDirectory(nameof(ConditionEvaluationBenchmark));
-        _evaluationDirectory = _temporaryDirectory.DirectoryPath;
+        _evaluationDirectory = Path.Combine(Path.GetTempPath(), nameof(ConditionEvaluationBenchmark));
+        _fileSystem = new FakeFileSystem(directories: [_evaluationDirectory]);
 
         string existingDirectoryRoot = Path.GetDirectoryName(_evaluationDirectory)!;
         string existingDirectoryLeaf = Path.GetFileName(_evaluationDirectory);
 
-        using ExpanderBuilder builder = new(_temporaryDirectory.GetPath("benchmark.proj"));
+        using ExpanderBuilder builder = new(Path.Combine(_evaluationDirectory, "benchmark.proj"));
         builder.AddProperty("Configuration", "Debug");
         builder.AddProperty("Platform", "AnyCPU");
         builder.AddProperty("TargetFramework", "net11.0");
@@ -62,7 +63,7 @@ public class ConditionEvaluationBenchmark
         builder.AddItem("Compile", "Program.cs");
         builder.AddMetadata("Extension", ".cs");
 
-        _fixture = builder.Build();
+        _fixture = builder.Build(_fileSystem);
         _expander = _fixture.Expander;
         _elementLocation = ElementLocation.Empty;
 
@@ -74,10 +75,7 @@ public class ConditionEvaluationBenchmark
 
     [GlobalCleanup]
     public void GlobalCleanup()
-    {
-        _fixture.Dispose();
-        _temporaryDirectory.Dispose();
-    }
+        => _fixture.Dispose();
 
     [Benchmark(Baseline = true)]
     public bool SimpleEquality_Evaluate()
@@ -187,6 +185,6 @@ public class ConditionEvaluationBenchmark
             ExpanderOptions.ExpandAll,
             _evaluationDirectory,
             _elementLocation,
-            FileSystems.Default,
+            _fileSystem,
             loggingContext: null);
 }

@@ -94,13 +94,17 @@ internal sealed class ExpanderBuilder : IDisposable
     /// <summary>
     ///  Builds an expander and transfers project ownership to the returned fixture.
     /// </summary>
+    /// <param name="fileSystem">
+    ///  The file system used by the expander, or <see langword="null"/> to use the default file system.
+    /// </param>
     /// <returns>
     ///  A fixture containing the configured expander.
     /// </returns>
-    public ExpanderBenchmarkFixture Build()
+    public ExpanderBenchmarkFixture Build(IFileSystem? fileSystem = null)
     {
         VerifyNotComplete();
         _isComplete = true;
+        fileSystem ??= FileSystems.Default;
 
         Expander<ProjectPropertyInstance, ProjectItemInstance> expander;
 
@@ -110,21 +114,21 @@ internal sealed class ExpanderBuilder : IDisposable
                 _properties,
                 _items,
                 new StringMetadataTable(_metadata),
-                FileSystems.Default);
+                fileSystem);
         }
         else if (_items.Count > 0)
         {
             expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
                 _properties,
                 _items,
-                FileSystems.Default,
+                fileSystem,
                 loggingContext: null);
         }
         else
         {
             expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
                 _properties,
-                FileSystems.Default);
+                fileSystem);
         }
 
         BenchmarkProject? benchmarkProject = _benchmarkProject;

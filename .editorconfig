@@ -18,6 +18,12 @@ indent_size = 2
 [*.txt]
 insert_final_newline = false
 
+# Enable banned API checks for repository source files. Common.globalconfig disables RS0030
+# by default so source-generated code, which does not use .editorconfig, can call banned APIs
+# such as ArrayPool<T>.Shared.
+[*.{cs,vb}]
+dotnet_diagnostic.RS0030.severity = warning
+
 # C# files
 [*.cs]
 # New line preferences
