@@ -34,7 +34,7 @@ Console logger refers to the logger that outputs to the console in VS or the ter
 
 The console logger is a 1:1 textual representation of the data that are emitted during the build. It attempts small amounts of formatting, but it writes received messages from all of the worker nodes in an unbuffered format so can be difficult to follow the chain of execution.
 
-The console logger defaults to normal verbosity, and can be overriden by passing the `-verbosity` attribute, or passing the `verbosity` property to the console logger `clp:verbosity={verbosity level}`.
+The console logger defaults to normal verbosity, and can be overridden by passing the `-verbosity` attribute, or passing the `verbosity` property to the console logger `clp:verbosity={verbosity level}`.
 
 | Verbosity                  | Quiet | Minimal | Normal | Detailed | Diagnostic |
 | ---------                  | ----- | ------- | ------ | -------- | ---------- |
