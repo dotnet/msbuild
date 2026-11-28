@@ -1069,6 +1069,53 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         }
 
         [Fact]
+        public void GraphBuildInitializesThePluginWithTheGraph()
+        {
+            // 2 is built first, with other targets than the graph build's.
+            // Its cache query must not be what initializes the plugin: it has no graph and only knows its own targets.
+            ProjectGraph graph = Helpers.CreateProjectGraph(
+                _env,
+                new Dictionary<int, int[]?>
+                {
+                    { 1, new[] { 2 } },
+                },
+                extraContentForAllNodes: @"
+<ItemGroup>
+   <ProjectReferenceTargets Include='Build' Targets='GetInfo' />
+</ItemGroup>
+<Target Name='GetInfo' />
+");
+
+            ConcurrentQueue<CacheContext> cacheContexts = new();
+            var mockCache = new ConfigurableMockCache
+            {
+                BeginBuildImplementation = (context, _, _) =>
+                {
+                    cacheContexts.Enqueue(context);
+                    return Task.CompletedTask;
+                },
+            };
+
+            var buildParameters = new BuildParameters
+            {
+                ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(mockCache),
+            };
+
+            GraphBuildResult graphResult;
+            using (var buildSession = new Helpers.BuildManagerSession(_env, buildParameters))
+            {
+                graphResult = buildSession.BuildGraph(graph, new[] { "Build" });
+            }
+
+            graphResult.ShouldHaveSucceeded();
+
+            CacheContext cacheContext = cacheContexts.ShouldHaveSingleItem();
+            cacheContext.Graph.ShouldBeSameAs(graph);
+            cacheContext.GraphEntryPoints.ShouldBeNull();
+            cacheContext.RequestedTargets.ShouldBe(new[] { "Build" });
+        }
+
+        [Fact]
         public void NotAllNodesDefineAPlugin()
         {
             var graph = Helpers.CreateProjectGraph(
