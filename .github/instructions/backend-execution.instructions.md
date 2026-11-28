@@ -16,6 +16,7 @@ MSBuild's multi-process execution engine: `BuildManager`, node communication, sc
 ## Node Communication & IPC
 
 * Never change the IPC packet format without versioning — old nodes must communicate with new ones during rolling updates.
+* Derive remote capabilities from the connection's negotiated packet version, not process startup or runtime assumptions; validate task host protocol changes on both .NET and .NET Framework.
 * IPC message ordering matters — race conditions cause intermittent, hard-to-reproduce failures.
 * Task host node (`NodeProviderOutOfProcTaskHost.cs`) has additional isolation constraints for type loading.
 
